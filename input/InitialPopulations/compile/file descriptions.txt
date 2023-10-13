@@ -1,0 +1,29 @@
+FILES DESCRIPTION
+
+UKHLS Data Management.sas
+Data processing file originally written in SAS to generate input data for model - generates UK_Mcrsmltn_w_hrs.dta
+
+UKHLS Data Management Replication.do
+First attempt to replicate "UKHLS Data Management.sas" in Stata
+
+00 master input data.do
+Manager file to augment UK_Mcrsmltn_w_hrs.do and repackage data for importing into model
+
+01 ukhls compile.do
+Called by "00 master input data.do", primary file to extract data from UKHLS for merging with UK_Mcrsmltn_w_hrs.dta, and then re-packaging for importing to model
+
+01b Rscript.R
+Called by "01 ukhls compile.do", R script used for some supplementary data processing 
+
+02 ukhls wealth imputation.do
+Called by "00 master input data.do", to impute wealth data from WAS into sample derived from UKHLS
+
+02b was wealth data.do
+Called by "02 ukhls wealth imputation.do", packages WAS data for matching to UKHLS sample
+
+03 ukhls social care.do
+Called by "00 master input data.do", to merge in data from the UKHLS Social Care module
+
+ukhls preprocessing.do
+Working file in second attempt to replicate "UKHLS Data Management.sas" in Stata
+
