@@ -442,6 +442,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a; //Capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b; //Capital income if not in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3c; //Pension income for those aged over 50 who are not in continuous education
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4a, coeffCovarianceIncomeI4b; // Pension income for those moving from employment to retirement (I4a) and those already retired (I4b)
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a_selection; //Probability of receiving capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b_selection; //Probability of receiving capital income if not in continuous education
 
@@ -642,6 +643,10 @@ public class Parameters {
     private static LinearRegression regIncomeI3a;
     private static LinearRegression regIncomeI3b;
     private static LinearRegression regIncomeI3c;
+
+    private static LinearRegression regIncomeI4a;
+
+    private static LinearRegression regIncomeI4b;
     private static LogitRegression regIncomeI3a_selection;
     private static LogitRegression regIncomeI3b_selection;
 
@@ -929,6 +934,8 @@ public class Parameters {
         int columnsIncomeI3a = -1;
         int columnsIncomeI3b = -1;
         int columnsIncomeI3c = -1;
+        int columnsIncomeI4a = -1;
+        int columnsIncomeI4b = -1;
         int columnsIncomeI3a_selection = -1;
         int columnsIncomeI3b_selection = -1;
         int columnsLeaveHomeP1a = -1;
@@ -1063,6 +1070,8 @@ public class Parameters {
             columnsIncomeI3a = 19;
             columnsIncomeI3b = 28;
             columnsIncomeI3c = 28;
+            columnsIncomeI4a = 24;
+            columnsIncomeI4b = 25;
             columnsIncomeI3a_selection = 19;
             columnsIncomeI3b_selection = 28;
             columnsLeaveHomeP1a = 26;
@@ -1247,6 +1256,8 @@ public class Parameters {
         coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a", 1, columnsIncomeI3a);
         coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b", 1, columnsIncomeI3b);
         coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
+        coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
+        coeffCovarianceIncomeI4b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4b", 1, columnsIncomeI4b);
         coeffCovarianceIncomeI3a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a_selection", 1, columnsIncomeI3a_selection);
         coeffCovarianceIncomeI3b_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b_selection", 1, columnsIncomeI3b_selection);
 
@@ -1329,6 +1340,8 @@ public class Parameters {
             coeffCovarianceIncomeI3a = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a);
             coeffCovarianceIncomeI3b = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b);
             coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
+            coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
+            coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
             coeffCovarianceIncomeI3a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a_selection);
             coeffCovarianceIncomeI3b_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b_selection);
 
@@ -1421,6 +1434,8 @@ public class Parameters {
         regIncomeI3a = new LinearRegression(coeffCovarianceIncomeI3a);
         regIncomeI3b = new LinearRegression(coeffCovarianceIncomeI3b);
         regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
+        regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
+        regIncomeI4b = new LinearRegression(coeffCovarianceIncomeI4b);
         regIncomeI3a_selection = new LogitRegression(coeffCovarianceIncomeI3a_selection);
         regIncomeI3b_selection = new LogitRegression(coeffCovarianceIncomeI3b_selection);
 
@@ -1932,6 +1947,14 @@ public class Parameters {
     public static LinearRegression getRegIncomeI3b() { return regIncomeI3b; }
 
     public static LinearRegression getRegIncomeI3c() { return regIncomeI3c; }
+
+    public static LinearRegression getRegIncomeI4a() {
+        return regIncomeI4a;
+    }
+
+    public static LinearRegression getRegIncomeI4b() {
+        return regIncomeI4b;
+    }
 
     public static LogitRegression getRegIncomeI3a_selection() { return regIncomeI3a_selection; }
 
