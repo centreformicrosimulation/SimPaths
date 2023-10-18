@@ -33,7 +33,7 @@ If you have a need for the data, please contact the repository maintainers throu
 
 ### Contributing
 
-1. Create a new branch for your contributions. Please see branch naming convention below.
+1. Create a new branch for your contributions. This will likely be based on either the `main` branch of this repository (if you seek to modify the stable version of the model) or `develop` (if you seek to modify the most recent version of the model).  Please see branch naming convention below.
 2. Make your changes, add your code, and write tests if applicable.
 3. Commit your changes.
 4. Push your changes to your fork.
