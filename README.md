@@ -24,7 +24,8 @@ If you have a need for the data, please contact the repository maintainers throu
 ### Forking the Repository
 
 1. Click the "Fork" button at the top-right corner of this repository.
-2. This will create a copy of the repository in your own GitHub account.
+2. Untick the `Copy only the main branch` box.
+3. This will create a copy of the repository in your own GitHub account.
 
 ### Setting up your development environment
 1. **Java Development Kit (JDK):** Ensure you have a JDK (Java Development Kit) installed on your system. You can download and install the latest version of OpenJDK from [Adoptium](https://adoptium.net/).
