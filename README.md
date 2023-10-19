@@ -29,7 +29,7 @@ If you have a need for the data, please contact the repository maintainers throu
 
 ### Setting up your development environment
 1. **Java Development Kit (JDK):** Ensure you have a JDK (Java Development Kit) installed on your system. You can download and install the latest version of OpenJDK from [Adoptium](https://adoptium.net/).
-2. **Download IntelliJ IDEA:** Go to the [IntelliJ IDEA download page](https://www.jetbrains.com/idea/download/) and download the Community (free) or Ultimate (paid) edition, depending on your needs.
+2. **Download an IDE** (integrated development environment) of your choice - we recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/download/); download the Community (free) or Ultimate (paid) edition, depending on your needs.
 3. Clone your forked repository to your local machine. Import the cloned repository into IntelliJ as a Maven project 
 
 ### Contributing
