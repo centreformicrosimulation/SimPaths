@@ -82,8 +82,6 @@ public class FormattedDialogBoxNonStatic {
 			}
 		});
 
-
-
 		// add content to dialog box
 		JPanel dialogPanel = new JPanel();
 		if (component != null) dialogPanel.add(component);

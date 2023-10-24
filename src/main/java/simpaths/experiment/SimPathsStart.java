@@ -48,7 +48,6 @@ import microsim.gui.shell.MicrosimShell;
 import simpaths.model.enums.Country;
 import simpaths.data.*;
 import simpaths.model.HibernateUtil;
-import simpaths.model.enums.TimeSeriesVariable;
 import simpaths.model.taxes.*;
 
 
@@ -62,8 +61,6 @@ public class SimPathsStart implements ExperimentBuilder {
 	// default simulation parameters
 	private static Country country = Country.UK;
 	private static int startYear = Parameters.getMaxStartYear();
-	private static int maxStartYear = Parameters.getMaxStartYear();
-	private static int minStartYear = Parameters.getMinStartYear();
 
 
 	/**
@@ -141,8 +138,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		startUpOptionsStringsMap.put("Run SimPaths GUI", count++); //Option 0
 	//	startUpOptionsStringsMap.put("SimPaths GUI, create Input Database", count++);
 		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies", count++); //Option 1
-		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Modify policies", count++); //Option 2
-		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Modify policies <= Rebuild all database tables", count++); //Option 3
+		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Load input data", count++); //Option 2
+		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Modify policies", count++); //Option 3
+		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Modify policies <= Load input data", count++); //Option 4
 	    StartUpRadioButtons startUpOptions = new StartUpRadioButtons(startUpOptionsStringsMap);
 
 	    // combine button groups into a single form component
@@ -162,7 +160,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		String text = "<html><h2 style=\"text-align: center; font-size:120%;\">Choose the start-up processes for the simulation</h2>";
 
 		// sizing for GUI
-		int height = 250, width = 550;
+		int height = 280, width = 550;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		if (screenSize.width < 850) {
 			width = (int) (screenSize.width * 0.95);
@@ -177,7 +175,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		// run through requested pre-processing steps
 		boolean skip = false;
 
-		if (choice_policy >= 2) {
+		if (choice_policy >= 3) {
 			// call to modify policies
 
 			// run EUROMOD
@@ -188,15 +186,16 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		if (choice_policy > 0) {
-			// call to select policies
-
 			// choose the country and the simulation start year
 			// this information can be used when constructing a new donor population
 			// and referenced when adjusting the EUROMOD policy schedule (scenario plan).
+			Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
+			if (testList.size()==0)
+				Parameters.setTrainingFlag(true);
 			chooseCountryAndStartYear();
 		}
-		String inputFilename = "population_" + country;
-		Parameters.setInputFileName(inputFilename);
+		String taxDonorInputFilename = "tax_donor_population_" + country;
+		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
 		// load uprating factors
 		Parameters.loadTimeSeriesFactorMaps(country); // TODO: Check if this can be moved inside of Parameters.loadParameters() method and remove from here and SimPathsMultirun if possible
@@ -206,7 +205,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 			// load previously stored values for policy description and initiation year
 			MultiKeyCoefficientMap previousEUROMODfileInfo = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1, 3);
-			Collection<File> euromodOutputTextFiles = FileUtils.listFiles(new File(Parameters.EUROMOD_OUTPUT_DIRECTORY), new String[]{"txt"}, true);
+			Collection<File> euromodOutputTextFiles = FileUtils.listFiles(new File(Parameters.getEuromodOutputDirectory()), new String[]{"txt"}, false);
 			Iterator<File> fIter = euromodOutputTextFiles.iterator();
 			while (fIter.hasNext()) {
 				File file = fIter.next();
@@ -258,7 +257,7 @@ public class SimPathsStart implements ExperimentBuilder {
 	        // pass content to display
 			FormattedDialogBoxNonStatic policyScheduleBox;
 
-			if (choice_policy == 3) { // If full rebuild of the database is required, disabled the "Keep existing policy schedule" button by overriding the display box
+			if (choice_policy==2 || choice_policy==4) { // If full rebuild of the database is required, disabled the "Keep existing policy schedule" button by overriding the display box
 				policyScheduleBox = new FormattedDialogBoxNonStatic(titleEUROMODtable, null, 900, 300 + euromodOutputTextFiles.size()*11, tableEUROMODscenarios, true, false);
 			}
 			else {
@@ -270,34 +269,21 @@ public class SimPathsStart implements ExperimentBuilder {
 	        if (!skip) {
 				//Store a copy in the input directory so that we have a record of the policy schedule for reference
 		        XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
-		    	constructAggregatePopulationCSVfile(country);
+		    	constructAggregateTaxDonorPopulationCSVfile(country);
 	        }
 		}
 
-		if(choice_policy == 3) {
-			// call for full rebuild of databases
+		if (choice_policy==2 || choice_policy==4) {
+			// rebuild databases for population cross-section used to initialise simulated population
 
-			createDatabaseTables(true); // Create initial and donor population database tables
+			createPopulationCrossSectionDatabaseTables(country); // Initial database tables
 		}
-		else if(choice_policy > 0 && !skip) {
+		if(choice_policy > 0 && !skip) {
 			// call to select policies
 
-			createDatabaseTables(false); // Create donor population database tables
+			SQLDonorDataParser.run(country, startYear); // Donor database tables
+			populateDonorTaxUnitTables(country); // Populate tax unit donor tables from person data
 		}
-	}
-
-	/**
-	 * Call this method to create database tables. Set createInitialPopulationTables == true to create
-	 * initial population database tables and donor population database tables.
-	 * Set createInitialPopulationTables == false to create only donor population tables.
-	 * @param createInitialPopulationTables
-	 */
-	private static void createDatabaseTables(boolean createInitialPopulationTables) {
-		if (createInitialPopulationTables) {
-			createInitialDatabaseTablesFromCSVfile(country); // Initial database tables
-		}
-		SQLDonorDataParser.run(country, startYear); // Donor database tables
-		populateDonorTaxUnitTables(country); // Populate tax unit donor tables from person data
 	}
 
 
@@ -366,7 +352,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 	/**
 	 *
-	 * Constructs the donor population based on the data stored in .txt files produced by EUROMOD.
+	 * Constructs the tax donor population based on the data stored in .txt files produced by EUROMOD.
 	 * Note that in order to store this information in an efficient way, we make the important
 	 * assumption that all EUROMOD output for a particular country is derived from the same
 	 * input population (this is plausible, given that EUROMOD is a static microsimulation).
@@ -380,13 +366,12 @@ public class SimPathsStart implements ExperimentBuilder {
 	 * @return The name of the created CSV file (without the .csv extension)
 	 *
 	 */
-	private static void constructAggregatePopulationCSVfile(Country country) {
+	private static void constructAggregateTaxDonorPopulationCSVfile(Country country) {
 
 		// display a dialog box to let the user know what is happening
-		String title = "Creating population_" + country.toString() + ".csv file";
+		String title = "Creating " + Parameters.getTaxDonorInputFileName() + ".csv file";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
-				+ "Constructing population_" + country.toString() + ".csv file containing the aggregate input data "
-				+ "for " + country.getCountryName() + "</h2>";
+				+ "Compiling single working file to facilitate construction of relational database for imputing transfer payments</h2>";
 		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
 
 		// fields for exporting tables to output .csv files
@@ -395,7 +380,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		// prepare file and buffer to write data
 		Map<Integer, String> euromodPolicySchedule = Parameters.calculateEUROMODpolicySchedule(country);
-		Path target = FileSystems.getDefault().getPath(Parameters.INPUT_DIRECTORY, Parameters.getInputFileName() + ".csv");
+		Path target = FileSystems.getDefault().getPath(Parameters.INPUT_DIRECTORY, Parameters.getTaxDonorInputFileName() + ".csv");
 		if (target.toFile().exists()) {
 			target.toFile().delete();		// delete previous version of the file to allow the new one to be constructed
 		}
@@ -418,7 +403,8 @@ public class SimPathsStart implements ExperimentBuilder {
 			int numRows = -1;
 			for (String policyName: euromodPolicySchedule.values()) {
 
-				Path source = FileSystems.getDefault().getPath(Parameters.EUROMOD_OUTPUT_DIRECTORY, policyName + ".txt");
+				Path source;
+				source = FileSystems.getDefault().getPath(Parameters.getEuromodOutputDirectory(), policyName + ".txt");
 				List<String> fileContentByLine = Files.readAllLines(source);
 
 				// Get indices of required vars. The first file should include Input & Output vars, the rest only Output vars.
@@ -530,17 +516,17 @@ public class SimPathsStart implements ExperimentBuilder {
 
 	/**
 	 *
-	 * GENERATE DATABASE TABLES FROM CSV FILES
+	 * GENERATE DATABASE TABLES TO INITIALISE SIMULATED POPULATION CROSS-SECTION FROM CSV FILES
 	 * @param country
 	 *
 	 */
-	private static void createInitialDatabaseTablesFromCSVfile(Country country) {
+	private static void createPopulationCrossSectionDatabaseTables(Country country) {
 
 		// display a dialog box to let the user know what is happening
 		String title = "Building all database tables";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
-				+ "Building initial population database tables "
-				+ "for " + country.getCountryName() + "</h2></html>";
+				+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
+				+ "</h2></html>";
 		JFrame databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
 
 		// start work
@@ -550,13 +536,10 @@ public class SimPathsStart implements ExperimentBuilder {
         	Class.forName("org.h2.Driver");
 	        conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;CACHE_SIZE=2097152;AUTO_SERVER=TRUE", "sa", "");
 
-			Parameters.setCountryBenefitUnitName(); //Specify names of benefit unit variables
-	    //  Parameters.setInitialInputFileName("population_" + country.toString() + "_initial");
-			Parameters.setInitialInputFileName("population_initial_" + country.toString());
-//	        Parameters.setInputFileName("population_UK");
+			Parameters.setPopulationInitialisationInputFileName("population_initial_" + country.toString());
 
 	        //This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
-	        SQLdataParser.createInitialDatabaseTablesFromCSVfile(country, Parameters.getInputFileName(), Parameters.getInitialInputFileName(), minStartYear, maxStartYear, conn);
+	        SQLdataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
 
 	        conn.close();
         }

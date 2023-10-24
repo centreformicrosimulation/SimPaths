@@ -265,6 +265,8 @@ public class Parameters {
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
     private static final int MAX_START_YEAR = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static final int MIN_START_YEAR_TRAINING = 2017;
+    private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
 
@@ -291,8 +293,10 @@ public class Parameters {
     //For use with EUROMOD and h2 input database construction
     public static final String WORKING_DIRECTORY = System.getProperty("user.dir");
     public static final String INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
+    public static boolean trainingFlag = false;
     public static final String INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
     public static final String EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
+    public static final String EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
     public static final String EUROMODpolicyScheduleFilename = "EUROMODpolicySchedule";
     public static final String DatabaseCountryYearFilename = "DatabaseCountryYear";
 
@@ -318,8 +322,8 @@ public class Parameters {
     public static final double MIN_PERSONAL_PENSION_PER_MONTH = 0.0;
     public static final double MAX_PERSONAL_PENSION_PER_MONTH = 30000.0;
 
-    private static String inputFileName;
-    private static String initialInputFileName;
+    private static String taxDonorInputFileName;
+    private static String populationInitialisationInputFileName;
     private static MultiKeyMap<Object, Double> populationGrowthRatiosByRegionYear;
 
 
@@ -735,8 +739,8 @@ public class Parameters {
         System.out.flush();
 
         EUROMODpolicySchedule = calculateEUROMODpolicySchedule(country);
-        inputFileName = "population_" + country;
-        initialInputFileName = "population_initial_" + country;
+        taxDonorInputFileName = "population_" + country;
+        populationInitialisationInputFileName = "population_initial_" + country;
         setCountryRegions(country);
         setEnableIntertemporalOptimisations(enableIntertemporalOptimisations);
         String countryString = country.toString();
@@ -1804,7 +1808,6 @@ public class Parameters {
 
         //Benefit unit variable has different name in each country. This method loads the correct name of the benefit unit variable from Excel file system_bu_names.xlsx in the input folder.
         benefitUnitVariableNames = ExcelAssistant.loadCoefficientMap("input/system_bu_names.xlsx", "Names", 1, 1);
-
     }
 
     //-----------------------------------------------------------------------------------------------------
@@ -1980,20 +1983,23 @@ public class Parameters {
         return regWagesFemales;
     }
 
-    public static String getInputFileName() {
-        return inputFileName;
+    public static String getTaxDonorInputFileName() {
+        return taxDonorInputFileName;
     }
 
-    public static void setInputFileName(String inputFileName) {
-        Parameters.inputFileName = inputFileName;
+    public static void setTaxDonorInputFileName(String taxDonorInputFileName) {
+        Parameters.taxDonorInputFileName = taxDonorInputFileName;
     }
 
-    public static String getInitialInputFileName() {
-        return initialInputFileName;
+    public static String getPopulationInitialisationInputFileName() {
+        return populationInitialisationInputFileName;
+    }
+    public static String getPopulationInitialisationFilePath() {
+        return getInputDirectoryInitialPopulations() + populationInitialisationInputFileName;
     }
 
-    public static void setInitialInputFileName(String initialInputFileName) {
-        Parameters.initialInputFileName = initialInputFileName;
+    public static void setPopulationInitialisationInputFileName(String name) {
+        populationInitialisationInputFileName = name;
     }
 
     public static LinearRegression getRegLabourSupplyUtilityCouples() {
@@ -2042,11 +2048,15 @@ public class Parameters {
     }
 
     public static int getMaxStartYear() {
-        return MAX_START_YEAR;
+        return (trainingFlag) ? MAX_START_YEAR_TRAINING : MAX_START_YEAR;
     }
 
     public static int getMinStartYear() {
-        return MIN_START_YEAR;
+        return (trainingFlag) ? MIN_START_YEAR_TRAINING : MIN_START_YEAR;
+    }
+
+    public static String getEuromodOutputDirectory() {
+        return (trainingFlag) ? EUROMOD_TRAINING_DIRECTORY : EUROMOD_OUTPUT_DIRECTORY;
     }
 
     public static String getEUROMODpolicyForThisYear(int year) {
@@ -2671,5 +2681,11 @@ public class Parameters {
         if (priceYear != BASE_PRICE_YEAR)
             infAdj = getTimeSeriesValue(BASE_PRICE_YEAR, TimeSeriesVariable.Inflation) / getTimeSeriesValue(priceYear, TimeSeriesVariable.Inflation);
         return Parameters.asinh(monthlyFinancial * infAdj);
+    }
+    public static void setTrainingFlag(boolean flag) {
+        trainingFlag = flag;
+    }
+    public static String getInputDirectoryInitialPopulations() {
+        return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
     }
 }
