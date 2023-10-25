@@ -26,6 +26,7 @@ If you have a need for the data, please contact the repository maintainers throu
 1. Click the "Fork" button at the top-right corner of this repository.
 2. Untick the `Copy only the main branch` box.
 3. This will create a copy of the repository in your own GitHub account.
+4. Follow [instructions here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to periodically synchronize your fork with the most recent version of this ("upstream") repository. This will ensure you use an up-to-date version of the model.
 
 ### Setting up your development environment
 1. **Java Development Kit (JDK):** Ensure you have a JDK (Java Development Kit) installed on your system. You can download and install the latest version of OpenJDK from [Adoptium](https://adoptium.net/).
