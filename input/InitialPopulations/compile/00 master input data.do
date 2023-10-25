@@ -91,6 +91,7 @@ global seedAdjust = 0
 
 * year to impute wealth for
 global yearWealth = 2016
+global imputeWealthToDataset "population_initial_UK_$yearWealth"
 
 * youngest age for someone to be independent in the model
 global ageMaturity 18

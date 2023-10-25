@@ -20,11 +20,14 @@ global seedAdjust = 0
 global workingDir "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\data"
 
 * year to impute wealth for
-global year_wealth = 2017
+global yearWealth = 2017
 
 * prepare was data
-global wasdata_dofile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\02 was wealth data.do"
+global WASDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\02b was wealth data.do"
 
+* dataset to impute wealth to *
+global imputeWealthToDataset "population_initial_UK_$yearWealth"
+global imputeWealthToDataset "preWealthTraining"
 */
 
 
@@ -34,7 +37,7 @@ global wasdata_dofile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAM
 cd "$workingDir"
 disp "imputing wealth to UKHLS data"
 //import delimited "$workingDir\\population_initial_UK_$yearWealth.csv", clear
-use population_initial_UK_$yearWealth, clear
+use $imputeWealthToDataset, clear
 sort idperson
 drop liquid_wealth
 
@@ -414,18 +417,17 @@ label var rnk "matching level: 1 = most fine, 2, 3 = most coarse, 4=no match"
 label var smp "matching sample - number of matched candidates to choose from"
 label var mtc "benefit unit id (bu) of matched observation"
 label var liquid_wealth "total wealth including housing, business and private (personal and occupational) pensions" 
-save "$workingDir\\population_initial_UK_$yearWealth.dta", replace
+save "$workingDir\\$imputeWealthToDataset", replace
 
 drop rnk smp mtc
 sort idperson
-export delimited using "$workingDir/input data/population_initial_UK_$yearWealth.csv", nolabel replace
+export delimited using "$workingDir/input data\\$imputeWealthToDataset.csv", nolabel replace
 
 
 /**************************************************************************************
 *	clean-up
 **************************************************************************************/
 rm "tempWAS.dta"
-rm "tempWAS2.dta"
 rm "ukhls_wealthtemp.dta"
 rm "ukhls_wealthtemp2.dta"
 rm "ukhls_wealthtemp3.dta"

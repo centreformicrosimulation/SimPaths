@@ -2173,9 +2173,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 			//New set of regressors for LS models from Zhechun: Couples:
 			case IncomeDiv100:                             //Disposable monthly income from donor household divided by 100
-				return getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * 1.e-2;
 			case IncomeSqDiv10000:                        //Income squared divided by 10000
-				return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-4;
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+							getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) *
+						(getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+							getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * 1.e-4;
 			case IncomeDiv100_MeanPartnersAgeDiv100:        //Income divided by 100 interacted with mean age of male and female in the household divided by 100
 				if(female == null) {        //Single so no need for mean age
 					return getDisposableIncomeMonthlyUpratedToBasePriceYear() * male.getDag() * 1.e-4;
@@ -3448,6 +3452,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	// Uprate disposable income from level of prices in any given year to 2017, as utility function was estimated on 2017 data
 	public double getDisposableIncomeMonthlyUpratedToBasePriceYear() {
 		return disposableIncomeMonthly / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
+	}
+
+	public double getAdjustedDisposableIncomeMonthlyUpratedToBasePriceYear() {
+		return disposableIncomeMonthly / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
+	}
+
+	public double getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear() {
+		double cost = 0.0;
+		if (Parameters.flagFormalChildcare)
+			cost += childcareCostPerWeek;
+		if (Parameters.flagSocialCare)
+			cost += socialCareCostPerWeek;
+		if (Math.abs(cost) > 0.01)
+			cost *= Parameters.WEEKS_PER_MONTH / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
+		return cost;
 	}
 
 	public boolean isDecreaseInYearlyEquivalisedDisposableIncome() {

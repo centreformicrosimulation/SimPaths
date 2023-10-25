@@ -186,8 +186,9 @@ input/~$reg_socialcare.xlsx
 input/InitialPopulations/compile/data/pool_indall.dta
 input/~$scenario_uprating_factor.xlsx
 .idea/dataSources.local.xml
-/input/EUROMODoutput/
+/input/EUROMODoutput/*.txt
 /input/InitialPopulations/*.csv
 /input/population_IT.csv
 /input/population_UK.csv
 /input/*.db
+input/tax_donor_population_UK.csv
