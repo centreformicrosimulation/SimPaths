@@ -1411,8 +1411,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     else ypncp = 0.; //If no capital income, set amount to 0
                 }
                 if (Les_c4.Retired.equals(les_c4)) { // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
-                    double score = Parameters.getRegIncomeI3c().getScore(this, Person.DoublesVariables.class);
-                    double rmse = Parameters.getRMSEForRegression("I3c");
+
+                    double score, rmse;
+                    if (Les_c4.Retired.equals(les_c4_lag1)) { // If person was retired in the previous period, use process I4b
+                        score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
+                        rmse = Parameters.getRMSEForRegression("I4b");
+                    } else { // For individuals in the first year of retirement, use process I4a
+                        score = Parameters.getRegIncomeI4a().getScore(this, Person.DoublesVariables.class);
+                        rmse = Parameters.getRMSEForRegression("I4a");
+                    }
+
                     double pensioninclevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension);
                     ypnoab = Parameters.asinh(pensioninclevel);
                     if (ypnoab < 0 ) {
@@ -1983,6 +1991,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Age81to82,
         Age83to84,
         Age85plus,
+        StatePensionAge,
         Cohort,
         Constant, 						// For the constant (intercept) term of the regression
         D_children_2under,				// Indicator (dummy variables for presence of children of certain ages in the benefitUnit)
@@ -2140,6 +2149,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Pt,
         L1_log_hourly_wage,
         L1_log_hourly_wage_sq,
+        L1_hourly_wage,
         Deh_c3_Medium_Dag,
         Deh_c3_Low_Dag,
 
@@ -2188,6 +2198,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dgn_baseline,
         Dhmghq_L1,
         RealWageGrowth,
+        RealGDPGrowth,
         Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
         Cut2,
         Cut3,
@@ -2273,6 +2284,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (dag>=83 && dag<=84) ? 1. : 0.;
         case Age85plus:
             return (dag>=85) ? 1. : 0.;
+        case StatePensionAge:
+            return (dag >= 68) ? 1. : 0.;
         case NeedCare_L1:
             return (Indicator.True.equals(needSocialCare_lag1)) ? 1. : 0.;
         case ReceiveCare_L1:
@@ -2722,6 +2735,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             } else {
                 throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
             }
+        case L1_hourly_wage:
+            if (L1_fullTimeHourlyEarningsPotential > 0) {
+                return L1_fullTimeHourlyEarningsPotential;
+            } else {
+                throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
+            }
         case Deh_c3_Low_Dag:
             return (Education.Low.equals(deh_c3)) ? dag : 0.0;
         case Deh_c3_Medium_Dag:
@@ -2806,6 +2825,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return 0.;
         case RealWageGrowth: // Note: the values provided to the wage regression must be rebased to 2015, the default BASE_PRICE_YEAR.
             return Parameters.getTimeSeriesIndex(getYear(), UpratingCase.Earnings);
+        case RealGDPGrowth:
+            return Parameters.getTimeSeriesIndex(getYear(), UpratingCase.Capital);
         case Cut1:
             // ordered probit/logit cut points ignored when calculating score
             return 0.;

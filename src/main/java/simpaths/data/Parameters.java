@@ -234,7 +234,7 @@ public class Parameters {
     //Is it possible for people to start going to the labour module (e.g. age 17) while they are living with parents (until age 18)?
     //Cannot see how its possible if it is the household that decides how much labour to supply.  If someone finishes school at 17, they need to leave home before they can enter the labour market.  So set age for finishing school and leaving home to 18.
     public static final int MAX_LABOUR_HOURS_IN_WEEK = 50;
-    public static final boolean USE_CONTINUOUS_LABOUR_SUPPLY_HOURS = false; // If true, a random number of hours of weekly labour supply within each bracket will be generated. Otherwise, each discrete choice of labour supply corresponds to a fixed number of hours of labour supply, which is the same for all persons
+    public static final boolean USE_CONTINUOUS_LABOUR_SUPPLY_HOURS = true; // If true, a random number of hours of weekly labour supply within each bracket will be generated. Otherwise, each discrete choice of labour supply corresponds to a fixed number of hours of labour supply, which is the same for all persons
     public static int maxAge;										// maximum age possible in simulation
     public static final int AGE_TO_BECOME_RESPONSIBLE = 18;			// Age become reference person of own benefit unit
     public static final int MIN_AGE_TO_LEAVE_EDUCATION = 16;		// Minimum age for a person to leave (full-time) education
@@ -265,6 +265,8 @@ public class Parameters {
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
     private static final int MAX_START_YEAR = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static final int MIN_START_YEAR_TRAINING = 2017;
+    private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
 
@@ -291,8 +293,10 @@ public class Parameters {
     //For use with EUROMOD and h2 input database construction
     public static final String WORKING_DIRECTORY = System.getProperty("user.dir");
     public static final String INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
+    public static boolean trainingFlag = false;
     public static final String INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
     public static final String EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
+    public static final String EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
     public static final String EUROMODpolicyScheduleFilename = "EUROMODpolicySchedule";
     public static final String DatabaseCountryYearFilename = "DatabaseCountryYear";
 
@@ -318,8 +322,8 @@ public class Parameters {
     public static final double MIN_PERSONAL_PENSION_PER_MONTH = 0.0;
     public static final double MAX_PERSONAL_PENSION_PER_MONTH = 30000.0;
 
-    private static String inputFileName;
-    private static String initialInputFileName;
+    private static String taxDonorInputFileName;
+    private static String populationInitialisationInputFileName;
     private static MultiKeyMap<Object, Double> populationGrowthRatiosByRegionYear;
 
 
@@ -442,6 +446,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a; //Capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b; //Capital income if not in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3c; //Pension income for those aged over 50 who are not in continuous education
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4a, coeffCovarianceIncomeI4b; // Pension income for those moving from employment to retirement (I4a) and those already retired (I4b)
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a_selection; //Probability of receiving capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b_selection; //Probability of receiving capital income if not in continuous education
 
@@ -642,6 +647,10 @@ public class Parameters {
     private static LinearRegression regIncomeI3a;
     private static LinearRegression regIncomeI3b;
     private static LinearRegression regIncomeI3c;
+
+    private static LinearRegression regIncomeI4a;
+
+    private static LinearRegression regIncomeI4b;
     private static LogitRegression regIncomeI3a_selection;
     private static LogitRegression regIncomeI3b_selection;
 
@@ -730,8 +739,8 @@ public class Parameters {
         System.out.flush();
 
         EUROMODpolicySchedule = calculateEUROMODpolicySchedule(country);
-        inputFileName = "population_" + country;
-        initialInputFileName = "population_initial_" + country;
+        taxDonorInputFileName = "population_" + country;
+        populationInitialisationInputFileName = "population_initial_" + country;
         setCountryRegions(country);
         setEnableIntertemporalOptimisations(enableIntertemporalOptimisations);
         String countryString = country.toString();
@@ -929,6 +938,8 @@ public class Parameters {
         int columnsIncomeI3a = -1;
         int columnsIncomeI3b = -1;
         int columnsIncomeI3c = -1;
+        int columnsIncomeI4a = -1;
+        int columnsIncomeI4b = -1;
         int columnsIncomeI3a_selection = -1;
         int columnsIncomeI3b_selection = -1;
         int columnsLeaveHomeP1a = -1;
@@ -1063,6 +1074,8 @@ public class Parameters {
             columnsIncomeI3a = 19;
             columnsIncomeI3b = 28;
             columnsIncomeI3c = 28;
+            columnsIncomeI4a = 24;
+            columnsIncomeI4b = 25;
             columnsIncomeI3a_selection = 19;
             columnsIncomeI3b_selection = 28;
             columnsLeaveHomeP1a = 26;
@@ -1247,6 +1260,8 @@ public class Parameters {
         coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a", 1, columnsIncomeI3a);
         coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b", 1, columnsIncomeI3b);
         coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
+        coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
+        coeffCovarianceIncomeI4b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4b", 1, columnsIncomeI4b);
         coeffCovarianceIncomeI3a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a_selection", 1, columnsIncomeI3a_selection);
         coeffCovarianceIncomeI3b_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b_selection", 1, columnsIncomeI3b_selection);
 
@@ -1329,6 +1344,8 @@ public class Parameters {
             coeffCovarianceIncomeI3a = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a);
             coeffCovarianceIncomeI3b = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b);
             coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
+            coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
+            coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
             coeffCovarianceIncomeI3a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a_selection);
             coeffCovarianceIncomeI3b_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b_selection);
 
@@ -1421,6 +1438,8 @@ public class Parameters {
         regIncomeI3a = new LinearRegression(coeffCovarianceIncomeI3a);
         regIncomeI3b = new LinearRegression(coeffCovarianceIncomeI3b);
         regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
+        regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
+        regIncomeI4b = new LinearRegression(coeffCovarianceIncomeI4b);
         regIncomeI3a_selection = new LogitRegression(coeffCovarianceIncomeI3a_selection);
         regIncomeI3b_selection = new LogitRegression(coeffCovarianceIncomeI3b_selection);
 
@@ -1789,7 +1808,6 @@ public class Parameters {
 
         //Benefit unit variable has different name in each country. This method loads the correct name of the benefit unit variable from Excel file system_bu_names.xlsx in the input folder.
         benefitUnitVariableNames = ExcelAssistant.loadCoefficientMap("input/system_bu_names.xlsx", "Names", 1, 1);
-
     }
 
     //-----------------------------------------------------------------------------------------------------
@@ -1933,6 +1951,14 @@ public class Parameters {
 
     public static LinearRegression getRegIncomeI3c() { return regIncomeI3c; }
 
+    public static LinearRegression getRegIncomeI4a() {
+        return regIncomeI4a;
+    }
+
+    public static LinearRegression getRegIncomeI4b() {
+        return regIncomeI4b;
+    }
+
     public static LogitRegression getRegIncomeI3a_selection() { return regIncomeI3a_selection; }
 
     public static LogitRegression getRegIncomeI3b_selection() { return regIncomeI3b_selection; }
@@ -1957,20 +1983,23 @@ public class Parameters {
         return regWagesFemales;
     }
 
-    public static String getInputFileName() {
-        return inputFileName;
+    public static String getTaxDonorInputFileName() {
+        return taxDonorInputFileName;
     }
 
-    public static void setInputFileName(String inputFileName) {
-        Parameters.inputFileName = inputFileName;
+    public static void setTaxDonorInputFileName(String taxDonorInputFileName) {
+        Parameters.taxDonorInputFileName = taxDonorInputFileName;
     }
 
-    public static String getInitialInputFileName() {
-        return initialInputFileName;
+    public static String getPopulationInitialisationInputFileName() {
+        return populationInitialisationInputFileName;
+    }
+    public static String getPopulationInitialisationFilePath() {
+        return getInputDirectoryInitialPopulations() + populationInitialisationInputFileName;
     }
 
-    public static void setInitialInputFileName(String initialInputFileName) {
-        Parameters.initialInputFileName = initialInputFileName;
+    public static void setPopulationInitialisationInputFileName(String name) {
+        populationInitialisationInputFileName = name;
     }
 
     public static LinearRegression getRegLabourSupplyUtilityCouples() {
@@ -2019,11 +2048,15 @@ public class Parameters {
     }
 
     public static int getMaxStartYear() {
-        return MAX_START_YEAR;
+        return (trainingFlag) ? MAX_START_YEAR_TRAINING : MAX_START_YEAR;
     }
 
     public static int getMinStartYear() {
-        return MIN_START_YEAR;
+        return (trainingFlag) ? MIN_START_YEAR_TRAINING : MIN_START_YEAR;
+    }
+
+    public static String getEuromodOutputDirectory() {
+        return (trainingFlag) ? EUROMOD_TRAINING_DIRECTORY : EUROMOD_OUTPUT_DIRECTORY;
     }
 
     public static String getEUROMODpolicyForThisYear(int year) {
@@ -2648,5 +2681,11 @@ public class Parameters {
         if (priceYear != BASE_PRICE_YEAR)
             infAdj = getTimeSeriesValue(BASE_PRICE_YEAR, TimeSeriesVariable.Inflation) / getTimeSeriesValue(priceYear, TimeSeriesVariable.Inflation);
         return Parameters.asinh(monthlyFinancial * infAdj);
+    }
+    public static void setTrainingFlag(boolean flag) {
+        trainingFlag = flag;
+    }
+    public static String getInputDirectoryInitialPopulations() {
+        return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
     }
 }

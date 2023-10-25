@@ -14,11 +14,11 @@ import simpaths.model.enums.Region;
 
 public class SQLdataParser {
 
-	public static void createInitialDatabaseTablesFromCSVfile(Country country, String inputFilename, String initialInputFilename, int startYear, int endYear, Connection conn) {
+	public static void createDatabaseForPopulationInitialisationByYearFromCSV(Country country, String initialInputFilename, int startYear, int endYear, Connection conn) {
 
 		//Construct tables for Simulated Persons & Households (initial population)
 		for (int year = startYear; year <= endYear; year++) {
-			SQLdataParser.parse(Parameters.INPUT_DIRECTORY_INITIAL_POPULATIONS + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+			SQLdataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
 		}
 	}
 

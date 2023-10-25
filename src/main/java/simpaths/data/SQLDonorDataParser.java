@@ -40,6 +40,9 @@ public class SQLDonorDataParser {
                 + "Constructing donor database tables for imputing tax and benefit payments</h2></html>";
         JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
 
+        // initialise tax database
+        Parameters.setCountryBenefitUnitName(); //Specify names of benefit unit variables in EUROMOD
+
         // establish database connection
         Connection conn = null;
         try {
@@ -91,8 +94,8 @@ public class SQLDonorDataParser {
     private static void createDonorPersonTables(Connection conn, Country country, int startYear) {
 
         // file for importing csv data
-        String inputFileName = Parameters.getInputFileName();
-        String inputFileLocation = Parameters.INPUT_DIRECTORY + inputFileName + ".csv";
+        String taxDonorInputFileName = Parameters.getTaxDonorInputFileName();
+        String donorInputFileLocation = Parameters.INPUT_DIRECTORY + taxDonorInputFileName + ".csv";
 
         // create temporary table for manipulating data
         Statement stat = null;
@@ -101,10 +104,10 @@ public class SQLDonorDataParser {
             stat.execute(
 
                 //Refresh table
-                "DROP TABLE IF EXISTS " + inputFileName + ";"
+                "DROP TABLE IF EXISTS " + taxDonorInputFileName + ";"
 
                 //Create new database table by reading in from population_country.csv file
-                + "CREATE TABLE " + inputFileName + " AS SELECT * FROM CSVREAD('" + inputFileLocation + "');"
+                + "CREATE TABLE " + taxDonorInputFileName + " AS SELECT * FROM CSVREAD('" + donorInputFileLocation + "');"
             );
 
             //---------------------------------------------------------------------------
@@ -120,7 +123,7 @@ public class SQLDonorDataParser {
             stat.execute(
 
                 "DROP TABLE IF EXISTS " + tableName + " CASCADE;"
-                + "CREATE TABLE " + tableName + " AS (SELECT " + stringAppender(inputPersonStaticColumnNames) + " FROM " + inputFileName + ");"
+                + "CREATE TABLE " + tableName + " AS (SELECT " + stringAppender(inputPersonStaticColumnNames) + " FROM " + taxDonorInputFileName + ");"
 
                 //Add id column
                 + "ALTER TABLE " + tableName + " ALTER COLUMN IDPERSON RENAME TO ID;"
@@ -260,7 +263,7 @@ public class SQLDonorDataParser {
 
                 stat.execute(
                     "INSERT INTO " + tableName + " (" + varList2 + ")"
-                    + " SELECT " + stringAppender(inputPersonDynamicColumnNames) + " FROM " + inputFileName + ";"
+                    + " SELECT " + stringAppender(inputPersonDynamicColumnNames) + " FROM " + taxDonorInputFileName + ";"
                 );
                 stat.execute(
                     "UPDATE " + tableName + " SET SYSTEM_YEAR = " + systemYear + " WHERE SYSTEM_YEAR IS NULL;"
@@ -275,7 +278,7 @@ public class SQLDonorDataParser {
             }
 
             //Clean-up
-            stat.execute( "DROP TABLE IF EXISTS " + inputFileName + ";");
+            stat.execute( "DROP TABLE IF EXISTS " + taxDonorInputFileName + ";");
 
         }
         catch(SQLException e) {
