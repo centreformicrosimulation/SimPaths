@@ -17,7 +17,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 	public static boolean executeWithGui = true;
 
-	private static int maxNumberOfRuns = 3;
+	private static int maxNumberOfRuns = 10;
 
 	private static String countryString;
 	private static int startYear;

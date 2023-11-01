@@ -232,7 +232,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
     @Column(name="hours_worked_weekly")
-    private Integer hoursWorkedWeekly;			//Only for initialisation of labourSupplyWeekly (for aggregate supply / demand / total cost statistics at the start of the simulation). This is set to null after initialization.
+    private Integer hoursWorkedWeekly;
 
 //	Potential earnings is the gross hourly wage an individual can earn while working
 //	and is estimated, for each individual, on the basis of observable characteristics as
@@ -1357,7 +1357,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getPensionIncomeAnnual() {
         return Math.sinh(ypnoab)*12.0;
     }
-    private double setIncomeBySource(double score, double rmse, IncomeSource source) {
+    private double setIncomeBySource(double score, double rmse, IncomeSource source, RegressionScoreType scoreType) {
 
         double income = 0.0, gauss, minInc, maxInc;
         boolean redraw = true;
@@ -1371,10 +1371,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             throw new RuntimeException("source not recognised for setting income");
         }
         while (redraw) {
-
             gauss = capitalInnov.nextGaussian();
-            income = Math.max(minInc, Math.sinh( score + rmse * gauss ));
-//                                * Parameters.getYearUpratingIndex(model.getYear(), UpratingCase.Capital);
+            double incomeVal = 0.;
+
+            if (RegressionScoreType.Asinh.equals(scoreType)) {
+                incomeVal = Math.sinh( score + rmse * gauss );
+
+            } else if (RegressionScoreType.Level.equals(scoreType)) {
+                incomeVal = score + rmse * gauss;
+            }
+
+            income = Math.max(minInc, incomeVal);
+
             if (income < maxInc) {
                 redraw = false;
             }
@@ -1396,7 +1404,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     if (hasCapitalIncome) {
                         double score = Parameters.getRegIncomeI3a().getScore(this, Person.DoublesVariables.class);
                         double rmse = Parameters.getRMSEForRegression("I3a");
-                        double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome);
+                        double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome, RegressionScoreType.Asinh);
                         ypncp = Parameters.asinh(capinclevel); //Capital income amount
                     }
                     else ypncp = 0.; //If no capital income, set amount to 0
@@ -1405,27 +1413,45 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     if (hasCapitalIncome) {
                         double score = Parameters.getRegIncomeI3b().getScore(this, Person.DoublesVariables.class);
                         double rmse = Parameters.getRMSEForRegression("I3b");
-                        double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome);
+                        double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome, RegressionScoreType.Asinh);
                         ypncp = Parameters.asinh(capinclevel); //Capital income amount
                     }
                     else ypncp = 0.; //If no capital income, set amount to 0
                 }
                 if (Les_c4.Retired.equals(les_c4)) { // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
 
-                    double score, rmse;
-                    if (Les_c4.Retired.equals(les_c4_lag1)) { // If person was retired in the previous period, use process I4b
-                        score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I4b");
-                    } else { // For individuals in the first year of retirement, use process I4a
-                        score = Parameters.getRegIncomeI4a().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I4a");
-                    }
+                    /* Private pension income when individual moves from non-retirement to retirement is modelled using:
+                        i) process I5a_selection, to determine who receives private pension income
+                        ii) process I5b_amount, for those who are determined to receive private pension income by process I5a_selection. I5b_amount is modelled in levels using linear regression.
+                    */
 
-                    double pensioninclevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension);
-                    ypnoab = Parameters.asinh(pensioninclevel);
-                    if (ypnoab < 0 ) {
-                        ypnoab = 0.;
+                    double score, rmse, pensionIncLevel = 0.;
+                    if (Les_c4.Retired.equals(les_c4_lag1)) {
+
+                        if (model.getYear() == model.getStartYear()) {
+                            // In the initial year of the simulation, estimate probability of receiving pension income and the amount for the stock of pensioners
+                            boolean hasPrivatePensionIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI6a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives private pension income. Amount modelled in the next step.
+                            if (hasPrivatePensionIncome) {
+                                score = Parameters.getRegIncomeI6b_amount().getScore(this, Person.DoublesVariables.class);
+                                rmse = Parameters.getRMSEForRegression("I6b");
+                                pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
+                            }
+                        } else {
+                            // If person was retired in the previous period (and the simulation is not in its initial year), use process I4b
+                            score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
+                            rmse = Parameters.getRMSEForRegression("I4b");
+                            pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
+                        }
+                    } else {
+                        // For individuals in the first year of retirement, use processes I5a_selection and I5b_amount
+                        boolean hasPrivatePensionIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives private pension income. Amount modelled in the next step.
+                        if (hasPrivatePensionIncome) {
+                            score = Parameters.getRegIncomeI5b_amount().getScore(this, Person.DoublesVariables.class);
+                            rmse = Parameters.getRMSEForRegression("I5b");
+                            pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
+                        }
                     }
+                    ypnoab = Parameters.asinh(pensionIncLevel);
                 }
 
                 double capital_income_multiplier = model.getSavingRate()/Parameters.SAVINGS_RATE;
@@ -3231,6 +3257,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setLabourSupplyWeekly(Labour labourSupply) {
         labourSupplyWeekly = labourSupply;
+        hoursWorkedWeekly = getLabourSupplyHoursWeekly(); // Update number of hours worked weekly
     }
 
     public double getLabourSupplyYearly() {
