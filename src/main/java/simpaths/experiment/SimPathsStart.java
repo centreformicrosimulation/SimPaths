@@ -197,9 +197,6 @@ public class SimPathsStart implements ExperimentBuilder {
 		String taxDonorInputFilename = "tax_donor_population_" + country;
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
-		// load uprating factors
-		Parameters.loadTimeSeriesFactorMaps(country); // TODO: Check if this can be moved inside of Parameters.loadParameters() method and remove from here and SimPathsMultirun if possible
-
 		if (choice_policy > 0) {
 			// call to select policies
 
@@ -282,6 +279,7 @@ public class SimPathsStart implements ExperimentBuilder {
 			// call to select policies
 
 			SQLDonorDataParser.run(country, startYear); // Donor database tables
+			Parameters.loadTimeSeriesFactorForTaxDonor(country);
 			populateDonorTaxUnitTables(country); // Populate tax unit donor tables from person data
 		}
 	}

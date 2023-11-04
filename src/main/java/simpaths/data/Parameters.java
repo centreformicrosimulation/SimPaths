@@ -156,7 +156,9 @@ public class Parameters {
         "partner_socare_hrs",   //number of hours of informal care received from partner
         "daughter_socare_hrs",  //number of hours of informal care received from daughter
         "son_socare_hrs",       //number of hours of informal care received from son
-        "other_socare_hrs"      //number of hours of informal care received from other
+        "other_socare_hrs",     //number of hours of informal care received from other
+        "aidhrs",               //number of hours of informal care provided (total)
+        "careWho"               //indicator for whom informal care is provided
 		//"yem", 					//employment income
 		//"yse", 					//self-employment income
 
@@ -187,6 +189,7 @@ public class Parameters {
     public static final double RateOfConvergenceFactor = 0.9;
 
     // parameters to manage simulation of optimised decisions
+    public static boolean projectWealth = false;
     public static boolean enableIntertemporalOptimisations = false;
     public static Grids grids = null;
 
@@ -265,6 +268,8 @@ public class Parameters {
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
     private static final int MAX_START_YEAR = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static int startYear;
+    private static int endYear;
     private static final int MIN_START_YEAR_TRAINING = 2017;
     private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
@@ -343,7 +348,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coefficientMapRMSE;
 
     //Uprating factor
-    private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation,
+    private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
             upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
             wageRateFormalSocialCare, socialCarePolicy;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
@@ -405,9 +410,15 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2i;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2j;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2k;
+    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3a;
+    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3b;
+    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3c;
+    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3d;
+    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3e;
     private static Map<SocialCareMarket, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2cMap;
     private static Map<PartnerSupplementaryCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2eMap;
     private static Map<NotPartnerInformalCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2fMap;
+    private static Map<SocialCareProvidedTo, MultiKeyCoefficientMap> coeffCovarianceSocialCareS3dMap;
 
 
     //Mental health
@@ -611,6 +622,11 @@ public class Parameters {
     private static LinearRegression regSonCareHoursS2i;
     private static LinearRegression regOtherCareHoursS2j;
     private static LinearRegression regFormalCareHoursS2k;
+    private static ProbitRegression regCarePartnerProvCareToOtherS3a;
+    private static ProbitRegression regNoCarePartnerProvCareToOtherS3b;
+    private static ProbitRegression regNoPartnerProvCareToOtherS3c;
+    private static MultiLogitRegression<SocialCareProvidedTo> regInformalCareToS3d;
+    private static LinearRegression regCareHoursProvS3e;
 
 
     //Health mental
@@ -732,20 +748,24 @@ public class Parameters {
      * @param country
      *
      */
-    public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations, boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1, boolean fixTimeTrend, Integer timeTrendStops) {
+    public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations, boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1, boolean fixTimeTrend, Integer timeTrendStops, int startYearModel, int endYearModel) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
         System.out.flush();
+
+        maxAge = maxAgeModel;
+        startYear = startYearModel;
+        endYear = endYearModel;
 
         EUROMODpolicySchedule = calculateEUROMODpolicySchedule(country);
         taxDonorInputFileName = "population_" + country;
         populationInitialisationInputFileName = "population_initial_" + country;
         setCountryRegions(country);
         setEnableIntertemporalOptimisations(enableIntertemporalOptimisations);
+        setProjectWealth();
         String countryString = country.toString();
-
-        maxAge = maxAgeModel;
+        loadTimeSeriesFactorMaps(country);
 
         // scenario parameters
         if (country.equals(Country.IT)) {
@@ -922,6 +942,11 @@ public class Parameters {
         int columnsSocialCareS2i = -1;
         int columnsSocialCareS2j = -1;
         int columnsSocialCareS2k = -1;
+        int columnsSocialCareS3a = -1;
+        int columnsSocialCareS3b = -1;
+        int columnsSocialCareS3c = -1;
+        int columnsSocialCareS3d = -1;
+        int columnsSocialCareS3e = -1;
         int columnsEducationE1a = -1;
         int columnsEducationE1b = -1;
         int columnsEducationE2a = -1;
@@ -1061,6 +1086,11 @@ public class Parameters {
             columnsSocialCareS2i = 21;
             columnsSocialCareS2j = 21;
             columnsSocialCareS2k = 18;
+            columnsSocialCareS3a = 36;
+            columnsSocialCareS3b = 38;
+            columnsSocialCareS3c = 37;
+            columnsSocialCareS3d = 79;
+            columnsSocialCareS3e = 40;
             columnsEducationE1a = 21;
             columnsEducationE1b = 27;
             columnsEducationE2a = 22;
@@ -1217,6 +1247,11 @@ public class Parameters {
         coeffCovarianceSocialCareS2i = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S2i", 1, columnsSocialCareS2i);
         coeffCovarianceSocialCareS2j = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S2j", 1, columnsSocialCareS2j);
         coeffCovarianceSocialCareS2k = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S2k", 1, columnsSocialCareS2k);
+        coeffCovarianceSocialCareS3a = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3a", 1, columnsSocialCareS3a);
+        coeffCovarianceSocialCareS3b = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3b", 1, columnsSocialCareS3b);
+        coeffCovarianceSocialCareS3c = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3c", 1, columnsSocialCareS3c);
+        coeffCovarianceSocialCareS3d = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3d", 1, columnsSocialCareS3d);
+        coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3e", 1, columnsSocialCareS3e);
 
         //Health mental: level and case-based
         coeffCovarianceHM1Level = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM1_L", 1, columnsHealthHM1);
@@ -1337,6 +1372,11 @@ public class Parameters {
             coeffCovarianceSocialCareS2i = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2i);
             coeffCovarianceSocialCareS2j = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2j);
             coeffCovarianceSocialCareS2k = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2k);
+            coeffCovarianceSocialCareS3a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3a);
+            coeffCovarianceSocialCareS3b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3b);
+            coeffCovarianceSocialCareS3c = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3c);
+            coeffCovarianceSocialCareS3d = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3d);
+            coeffCovarianceSocialCareS3e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3e);
 
             //Non-labour income
             // coeffCovarianceIncomeI1a = RegressionUtils.bootstrap(coeffCovarianceIncomeI1a); // Commented out as not used any more since income is split.
@@ -1386,6 +1426,7 @@ public class Parameters {
         coeffCovarianceSocialCareS2cMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareMarket.class, coeffCovarianceSocialCareS2c);
         coeffCovarianceSocialCareS2eMap = MultiLogitRegression.populateMultinomialCoefficientMap(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2e);
         coeffCovarianceSocialCareS2fMap = MultiLogitRegression.populateMultinomialCoefficientMap(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f);
+        coeffCovarianceSocialCareS3dMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareProvidedTo.class, coeffCovarianceSocialCareS3d);
         regReceiveCareS1a = new ProbitRegression(coeffCovarianceSocialCareS1a);
         regCareHoursS1b = new ProbitRegression(coeffCovarianceSocialCareS1b);
         regNeedCareS2a = new ProbitRegression(coeffCovarianceSocialCareS2a);
@@ -1399,6 +1440,11 @@ public class Parameters {
         regSonCareHoursS2i = new LinearRegression(coeffCovarianceSocialCareS2i);
         regOtherCareHoursS2j = new LinearRegression(coeffCovarianceSocialCareS2j);
         regFormalCareHoursS2k = new LinearRegression(coeffCovarianceSocialCareS2k);
+        regCarePartnerProvCareToOtherS3a = new ProbitRegression(coeffCovarianceSocialCareS3a);
+        regNoCarePartnerProvCareToOtherS3b = new ProbitRegression(coeffCovarianceSocialCareS3b);
+        regNoPartnerProvCareToOtherS3c = new ProbitRegression(coeffCovarianceSocialCareS3c);
+        regInformalCareToS3d = new MultiLogitRegression<>(coeffCovarianceSocialCareS3dMap);
+        regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
 
         //Health mental
         regHealthHM1Level = new LinearRegression(coeffCovarianceHM1Level);
@@ -1671,9 +1717,6 @@ public class Parameters {
 
     private static void calculateFertilityRatesFromProjections() {
 
-        int endYear = ((SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName())).getEndYear();
-        int startYear = ((SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName())).getStartYear();
-
         fertilityRateByRegionYear = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
         for(int year = startYear; year <= endYear; year++) {
@@ -1703,11 +1746,7 @@ public class Parameters {
 
     private static void calculatePopulationGrowthRatiosFromProjections() {
 
-        int endYear = ((SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName())).getEndYear();
-        int startYear = ((SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName())).getStartYear();
-
         populationGrowthRatiosByRegionYear = MultiKeyMap.multiKeyMap(new LinkedMap<>());
-
         for(int year = startYear+1; year <= endYear; year++) {		//Year is the latter year, i.e. growth ratio for year t is Pop(t)/Pop(t-1)
             for(Region region : countryRegions) {
                 double numberOfPeopleInRegionThisYear = 0.;
@@ -1879,6 +1918,11 @@ public class Parameters {
     public static LinearRegression getRegSonCareHoursS2i() { return regSonCareHoursS2i; }
     public static LinearRegression getRegOtherCareHoursS2j() { return regOtherCareHoursS2j; }
     public static LinearRegression getRegFormalCareHoursS2k() { return regFormalCareHoursS2k; }
+    public static ProbitRegression getRegCarePartnerProvCareToOtherS3a() { return regCarePartnerProvCareToOtherS3a; }
+    public static ProbitRegression getRegNoCarePartnerProvCareToOtherS3b() { return regNoCarePartnerProvCareToOtherS3b; }
+    public static ProbitRegression getRegNoPartnerProvCareToOtherS3c() { return regNoPartnerProvCareToOtherS3c; }
+    public static MultiLogitRegression getRegInformalCareToS3d() { return regInformalCareToS3d; }
+    public static LinearRegression getRegCareHoursProvS3e() { return regCareHoursProvS3e; }
 
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
@@ -2354,24 +2398,53 @@ public class Parameters {
         upratingIndexMapGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
         upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
         upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
+        socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
         rebaseIndexMap(TimeSeriesVariable.GDP);
         rebaseIndexMap(TimeSeriesVariable.Inflation);
         rebaseIndexMap(TimeSeriesVariable.WageGrowth);
+        rebaseIndexMap(TimeSeriesVariable.CareProvisionAdjustment, startYear, false);
 
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
     }
 
+    public static void loadTimeSeriesFactorForTaxDonor(Country country) {
+
+        TimeSeriesVariable index = getTimeSeriesVariable(UpratingCase.TaxDonor);
+        switch (index) {
+            case GDP:
+                upratingIndexMapGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
+                rebaseIndexMap(TimeSeriesVariable.GDP);
+                break;
+            case WageGrowth:
+                upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
+                rebaseIndexMap(TimeSeriesVariable.WageGrowth);
+                break;
+            case Inflation:
+                upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
+                rebaseIndexMap(TimeSeriesVariable.Inflation);
+                break;
+        }
+    }
+
     private static void rebaseIndexMap(TimeSeriesVariable indexType) {
+        rebaseIndexMap(indexType, BASE_PRICE_YEAR, true);
+    }
+
+    private static void rebaseIndexMap(TimeSeriesVariable indexType, int baseYear, boolean ratioAdjust) {
 
         MultiKeyCoefficientMap map = getTimeSeriesValueMap(indexType);
-        double valueBase = getTimeSeriesValue(BASE_PRICE_YEAR, indexType);
+        double valueBase = getTimeSeriesValue(baseYear, indexType);
         for (Object key: map.keySet()) {
 
             double valueHere = ((Number) map.getValue(key)).doubleValue();
-            map.replace(key, valueHere/valueBase);
+            if (ratioAdjust) {
+                map.replace(key, valueHere/valueBase);
+            } else {
+                map.replace(key, valueHere - valueBase);
+            }
         }
     }
 
@@ -2391,12 +2464,20 @@ public class Parameters {
             case CarerWageRate:
                 map = wageRateFormalSocialCare;
                 break;
+            case CareProvisionAdjustment:
+                map = socialCareProvisionTimeAdjustment;
         }
 
         return map;
     }
 
     public static Double getTimeSeriesIndex(int year, UpratingCase upratingCase ) {
+
+        TimeSeriesVariable indexType = getTimeSeriesVariable(upratingCase);
+        return getTimeSeriesValue(year, indexType);
+    }
+
+    private static TimeSeriesVariable getTimeSeriesVariable(UpratingCase upratingCase ) {
 
         TimeSeriesVariable indexType = null;
         switch (upratingCase) {
@@ -2416,7 +2497,7 @@ public class Parameters {
                 indexType = TimeSeriesVariable.Inflation;
                 break;
         }
-        return getTimeSeriesValue(year, indexType);
+        return indexType;
     }
 
     public static double getTimeSeriesValue(int year, TimeSeriesVariable variableType) {
@@ -2426,6 +2507,17 @@ public class Parameters {
         if (val == null)
             val = extendValueTimeSeries(year, valueMap);
         return ((Number) val).doubleValue();
+    }
+
+    public static void putTimeSeriesValue(int year, Object valPut, TimeSeriesVariable variableType) {
+
+        MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(variableType);
+        Object val = valueMap.getValue(year);
+        if (val == null) {
+            valueMap.putValue(year, valPut);
+        } else {
+            valueMap.replaceValue(year, valPut);
+        }
     }
 
     private synchronized static Object extendValueTimeSeries(int year, MultiKeyCoefficientMap mapToExtend) {
@@ -2563,6 +2655,12 @@ public class Parameters {
 
     public static void setEnableIntertemporalOptimisations(boolean val) {
         enableIntertemporalOptimisations = val;
+    }
+    public static void setProjectWealth() {
+        setProjectWealth(enableIntertemporalOptimisations);
+    }
+    public static void setProjectWealth(boolean val) {
+        projectWealth = val;
     }
 
     public static double getSocialCarePolicyValue(int year, String param) {

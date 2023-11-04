@@ -3,7 +3,7 @@
 *	FILE TO EXTRACT UKHLS DATA FOR INITIALISING LABSIM POPULATION 
 *
 *	AUTH: Patryk Bronka (PB), Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 ********************************************************************************/
 

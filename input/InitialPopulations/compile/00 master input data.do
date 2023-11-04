@@ -90,6 +90,7 @@ global seedBase = 3141592
 global seedAdjust = 0
 
 * year to impute wealth for
+global flagDoWASFile = 1
 global yearWealth = 2016
 global imputeWealthToDataset "population_initial_UK_$yearWealth"
 
@@ -101,6 +102,9 @@ global UKHLSWaves "a b c d e f g h i j k l"
 
 * waves reporting social care module in ukhls
 global socCareWaves "g i k"
+
+* waves reporting social care provided in ukhls
+global SCProvWaves "f g h i j k l"
 
 * sample window for input data
 global firstSimYear = 2010

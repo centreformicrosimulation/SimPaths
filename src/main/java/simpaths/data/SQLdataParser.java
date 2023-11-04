@@ -252,6 +252,15 @@ public class SQLdataParser {
 				+ "ALTER TABLE " + personTable + " DROP COLUMN dhh_owned;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN dhh_owned_add RENAME TO dhh_owned;"
 
+				//Social care
+				+ "ALTER TABLE " + personTable + " ADD socare_provided_to VARCHAR_IGNORECASE;"
+				+ "UPDATE " + personTable + " SET socare_provided_to = 'None' WHERE careWho = 0;"
+				+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyPartner' WHERE careWho = 1;"
+				+ "UPDATE " + personTable + " SET socare_provided_to = 'PartnerAndOther' WHERE careWho = 2;"
+				+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyOther' WHERE careWho = 3;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN careWho;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN aidhrs RENAME TO socare_provided_hrs;"
+
 				//SYSTEM : Year
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN stm RENAME TO system_year;"
 

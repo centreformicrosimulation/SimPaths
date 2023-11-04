@@ -1,5 +1,7 @@
 package simpaths.model.decisions;
 
+import simpaths.data.IEvaluation;
+
 import java.security.InvalidParameterException;
 
 

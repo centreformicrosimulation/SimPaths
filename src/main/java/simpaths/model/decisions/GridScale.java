@@ -75,6 +75,7 @@ public class GridScale {
          *      retirement status (o)
          *      health status (h)
          *      disability status (d)
+         *      social care (sc)
          *      region (r) based on (12) Government Office Regions in UK
          *      student status (s)
          *      highest education attainment (e) (integers for education categories, with higher number reflecting higher education)

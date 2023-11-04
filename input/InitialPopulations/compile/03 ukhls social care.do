@@ -1,9 +1,9 @@
 /********************************************************************************
 *
-*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE TO INCLUDE IN SIMPATHS INITIAL POPULATION
+*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN SIMPATHS INITIAL POPULATION
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 ********************************************************************************/
 
@@ -51,7 +51,7 @@ matrix careHourlyWageRates = (9.04 \ ///	2010
 *	start analysis
 **********************************************************************/
 cd "$workingDir"
-disp "identifying social care data"
+disp "identifying social care receipt"
 
 
 /**************************************************************************************
