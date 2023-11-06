@@ -2238,6 +2238,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         ITH,
         ITI,
         LactiveIT,
+        L1_hourly_wage,
         L1_log_hourly_wage,
         L1_log_hourly_wage_sq,
         Ld_children_3under,
@@ -2880,6 +2881,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case L1_log_hourly_wage_sq:
             if (L1_fullTimeHourlyEarningsPotential > 0) {
                 return Math.pow(Math.log(L1_fullTimeHourlyEarningsPotential), 2);
+            } else {
+                throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
+            }
+        case L1_hourly_wage:
+            if (L1_fullTimeHourlyEarningsPotential > 0) {
+                return L1_fullTimeHourlyEarningsPotential;
             } else {
                 throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
             }
