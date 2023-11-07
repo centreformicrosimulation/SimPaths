@@ -1,9 +1,9 @@
 /********************************************************************************
 *
-*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE TO INCLUDE IN SIMPATHS INITIAL POPULATION
+*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN SIMPATHS INITIAL POPULATION
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 ********************************************************************************/
 
@@ -51,7 +51,7 @@ matrix careHourlyWageRates = (9.04 \ ///	2010
 *	start analysis
 **********************************************************************/
 cd "$workingDir"
-disp "identifying social care data"
+disp "identifying social care receipt"
 
 
 /**************************************************************************************
@@ -250,7 +250,7 @@ qui{
 			replace `var' = -9 if (missing(`var'))
 		}
 		gen formal_socare_cost = -9
-		replace formal_socare_cost = $careHourlyWageRates[`year' - $careWageRate_minyear + 1] * formal_socare_hrs if (formal_socare_hrs>0)
+		replace formal_socare_cost = careHourlyWageRates[`year' - $careWageRate_minyear + 1,1] * formal_socare_hrs if (formal_socare_hrs>0)
 		save population_initial_uk_`year', replace
 		if (`year'==$yearWealth) {
 			drop rnk smp mtc

@@ -3,7 +3,7 @@
 *	FILE TO EXTRACT UKHLS DATA FOR INITIALISING LABSIM POPULATION 
 *
 *	AUTH: Patryk Bronka (PB), Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 ********************************************************************************/
 
@@ -50,7 +50,7 @@ global lastSimYear = 2017
 * inflation adjustments
 global cpi_minyear = 2009
 global cpi_maxyear = 2019
-global matrix cpi = (0.866 \ /// 2009
+matrix cpi = (0.866 \ /// 2009
 0.894 \ /// 2010
 0.934 \ /// 2011
 0.961 \ /// 2012
@@ -165,7 +165,7 @@ la var lhw "Hours worked per week"
 *Income CPI from ONS:
 gen CPI = .
 forval yy = $cpi_minyear/$cpi_maxyear {
-	replace CPI = $cpi[`yy' - $cpi_minyear + 1] if stm == `yy'
+	replace CPI = cpi[`yy' - $cpi_minyear + 1,1] if stm == `yy'
 }
 
 *Income variables
@@ -618,6 +618,19 @@ forvalues yy = $firstSimYear/$lastSimYear {
 
 	*If any person in the household has missing values, drop the whole household (32.97%):
 	bys idhh: egen dropHH = max(dropObs)
+	
+	/*==========================================================================
+	WEIGHT ADJUSTMENT : ACCOUNTS FOR DROPPING HOUSEHOLDS WITH MISSING VALUES
+	==========================================================================*/
+	preserve
+	do "$ukhlsWeightDoFile"
+	restore
+	
+	* Merge in adjusted weights for complete households, which correct for the selection
+	drop dwt
+	merge m:1 idhh using temp_adjusted_dwt, nogen
+	/*========================================================================*/
+	
 	*tab dropHH, mis
 	drop if dropHH == 1 
 	*drop if dropObs == 1
@@ -691,24 +704,24 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	*Convert hours to integer:
 	replace lhw = ceil(lhw)
 
-	*Try to create frequency weights from HH weights?
-	if $year == 2010 gen uk_pop = 26240000
-	if $year == 2011 gen uk_pop = 26409000
-	if $year == 2012 gen uk_pop = 26620000
-	if $year == 2013 gen uk_pop = 26663000
-	if $year == 2014 gen uk_pop = 26734000
-	if $year == 2015 gen uk_pop = 27046000
-	if $year == 2016 gen uk_pop = 27109000
-	if $year == 2017 gen uk_pop = 27226000
-	gen surv_pop = _N
-	gen multiplier = uk_pop / surv_pop 
-	gen dwtfq = round(dwt * multiplier)
+	*Create frequency weights from HH weights
+	gen nat_pop=62759500
+	replace nat_pop=63285100 if $year==2011
+	replace nat_pop=63705000 if $year==2012
+	replace nat_pop=64105700 if $year==2013
+	replace nat_pop=64596800 if $year==2014
+	replace nat_pop=65110000 if $year==2015
+	replace nat_pop=65648100 if $year==2016
+	replace nat_pop=66040200 if $year==2017
+	replace nat_pop=66435600 if $year==2018
+	replace nat_pop=66796800 if $year==2019
+	replace nat_pop=67081000 if $year==2020
 
-	*Drop those with 0 weight? 
-	drop if dwtfq == 0
-
-	rename dwt dwt_sampling
-	rename dwtfq dwt
+	egen tot_hholds = sum(dwt)
+	tab tot_hholds
+	replace dwt=round(dwt*(nat_pop/tot_hholds))  // produces household weight which can be used to totals 
+	recode dwt .=0 //have about 425 hholds who have a missing value 
+	drop if dwt == 0
 	
 	*potential hourly earnings
 	gen potential_earnings_hourly = 0
@@ -748,3 +761,5 @@ rm "temp2_here.dta"
 rm "uk_temp_dehf.dta"
 rm "uk_temp_dehm.dta"
 rm "uk_temp_dehsp.dta"
+rm "population_UK_initial.csv"
+rm "population_UK_initial_check.csv"

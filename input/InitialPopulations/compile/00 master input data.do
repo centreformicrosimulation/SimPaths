@@ -5,7 +5,7 @@
 *	data drawn from the UKLHS, with wealth data (optionally) imputed from the WAS
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 **********************************************************************/
 
@@ -28,6 +28,9 @@ global workingDir "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETER
 * ukhls compiler file
 global ukhlsDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\01 ukhls compile.do"
 
+* weight adjustment file
+global ukhlsWeightDoFile "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations\compile\01b ukhls compile weight adjustment.do"
+
 * R script
 * NOTE THAT WORKING DATA PATH ALSO NEEDS TO BE ADDED TO R SCRIPT
 global rScript "C:/MyFiles/00 CURRENT/03 PROJECTS/Essex/SimPaths/02 PARAMETERISE/STARTING DATA/progs/01b Rscript.R"
@@ -39,7 +42,8 @@ global wealthDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMET
 global WASDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\02b was wealth data.do"
 
 * social care data
-global socareDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\03 ukhls social care.do"
+global socareDoFile1 "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\03 ukhls social care.do"
+global socareDoFile2 "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\03b ukhls social care.do"
 
 //////////////////////////////////////////////////////////////
 // SURVEY DATA REFERENCES
@@ -90,6 +94,7 @@ global seedBase = 3141592
 global seedAdjust = 0
 
 * year to impute wealth for
+global flagDoWASFile = 1
 global yearWealth = 2016
 global imputeWealthToDataset "population_initial_UK_$yearWealth"
 
@@ -102,6 +107,9 @@ global UKHLSWaves "a b c d e f g h i j k l"
 * waves reporting social care module in ukhls
 global socCareWaves "g i k"
 
+* waves reporting social care provided in ukhls
+global SCProvWaves "f g h i j k l"
+
 * sample window for input data
 global firstSimYear = 2010
 global lastSimYear = 2017
@@ -109,7 +117,7 @@ global lastSimYear = 2017
 * inflation adjustments
 global cpi_minyear = 2009
 global cpi_maxyear = 2019
-global matrix cpi = (0.866 \ /// 2009
+matrix cpi = (0.866 \ /// 2009
 0.894 \ /// 2010
 0.934 \ /// 2011
 0.961 \ /// 2012
@@ -123,7 +131,7 @@ global matrix cpi = (0.866 \ /// 2009
 
 * social care wage rates (real 2015 prices for consistency with inflation figures)
 global careWageRate_minyear = 2010
-global matrix careHourlyWageRates = (9.04 \ ///	2010
+matrix careHourlyWageRates = (9.04 \ ///	2010
 9.12 \ ///	2011
 8.91 \ ///	2012
 8.71 \ ///	2013
@@ -143,7 +151,8 @@ global matrix careHourlyWageRates = (9.04 \ ///	2010
 ********************************************************************************/
 do "$ukhlsDoFile"
 do "$wealthDoFile"
-do "$socareDoFile"
+do "$socareDoFile1"
+do "$socareDoFile2"
 
 
 /********************************************************************************
