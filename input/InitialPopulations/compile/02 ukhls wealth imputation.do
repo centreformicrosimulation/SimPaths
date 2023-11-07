@@ -3,7 +3,7 @@
 *	MANAGES IMPUTATION OF WEALTH DATA FROM WAS TO UKHLS FOR SIMPATHS INPUT DATA
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 **********************************************************************/
 
@@ -148,7 +148,7 @@ drop pct1
 /**********************************************************************
 *	save working data
 **********************************************************************/
-save "$workingDir\\ukhls_wealthtemp.dta", replace
+save "$workingDir\\ukhls_wealthtemp0.dta", replace
 
 
 /**********************************************************************
@@ -192,7 +192,9 @@ sum ypnbihs_dv [fweight=dwt] if (dag>17)
 /**********************************************************************
 *	prepare was data
 **********************************************************************/
-do "$WASDoFile"
+if ($flagDoWASFile==1) {
+	do "$WASDoFile"
+}
 
 
 /**********************************************************************
@@ -200,25 +202,24 @@ do "$WASDoFile"
 **********************************************************************/
 
 * identify non-reference population and save for retrieval
-use "$workingDir\\ukhls_wealthtemp.dta", clear
+use "$workingDir\\ukhls_wealthtemp0.dta", clear
 gen treat = (single_woman + single_man + couple_ref)
 gsort bu -treat
 by bu: egen chk = sum(treat)
 tab chk
+drop chk
 replace treat = 0 if (bu==bu[_n-1])
+save "$workingDir\\ukhls_wealthtemp1.dta", replace
 keep if (treat==0)
 save "$workingDir\\ukhls_wealthtemp2.dta", replace
 
 * identify reference population and append WAS data
-use "$workingDir\\ukhls_wealthtemp.dta", clear
-gen treat = (single_woman + single_man + couple_ref)
-gsort bu -treat
-replace treat = 0 if (bu==bu[_n-1])
+use "$workingDir\\ukhls_wealthtemp1.dta", clear
 keep if (treat == 1)
 append using "$workingDir/tempWAS2.dta"
 gen chk = 0
 sort bu
-replace chk = 1 if (bu==bu[_n-1])
+replace chk = 1 if (bu==bu[_n-1] & treat==0)
 keep if (chk == 0)
 drop chk
 recode treat dlltsdsp gradsp empsp (mis=0)
@@ -427,8 +428,8 @@ export delimited using "$workingDir/input data\\$imputeWealthToDataset.csv", nol
 /**************************************************************************************
 *	clean-up
 **************************************************************************************/
-rm "tempWAS.dta"
-rm "ukhls_wealthtemp.dta"
+rm "ukhls_wealthtemp0.dta"
+rm "ukhls_wealthtemp1.dta"
 rm "ukhls_wealthtemp2.dta"
 rm "ukhls_wealthtemp3.dta"
 
