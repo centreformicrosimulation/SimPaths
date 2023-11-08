@@ -49,7 +49,7 @@ public class TaxEvaluation {
         if (Parameters.flagSocialCare) {
             // consider social care costs
             if (liquidWealth==null)
-                throw new RuntimeException("projecting social care support requires liquid wealth to be explicit");
+                throw new RuntimeException("problem identifying wealth in evaluation of social care costs after transfer payments");
             boolean flagCouple = (numberMembersOver17 > 1) ? true : false;
             boolean flagSPA = (keyFunction.getStatePensionAge() <= age) ? true : false;
             socialCareSupportPerMonth = new SocialCareSupport(year, flagCouple, flagSPA, socialCareCostPerMonth, imputedTransfers.getDisposableIncomePerMonth(), liquidWealth).getSupportPerMonth();

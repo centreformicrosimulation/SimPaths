@@ -112,8 +112,6 @@ public class SimPathsMultiRun extends MultiRun {
 
 		model.setCollector(collector);
 
-		Parameters.loadTimeSeriesFactorMaps(model.getCountry());
-
 //		SimPathsObserver observer = new SimPathsObserver(model, collector);		//Not needed for MultiRun?
 //		engine.addSimulationManager(observer);
 

@@ -17,6 +17,7 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.ArrayUtils;
 import simpaths.data.MahalanobisDistance;
+import simpaths.data.RootSearch;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
 import microsim.alignment.outcome.ResamplingAlignment;
@@ -51,7 +52,6 @@ import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
-import simpaths.model.taxes.TestTaxRoutine;
 
 
 /**
@@ -304,7 +304,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		popAlignInnov = new Random(SimulationEngine.getRnd().nextLong());
 
 		// load model parameters
-		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn);
+		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear);
 		if (enableIntertemporalOptimisations) {
 
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
@@ -467,7 +467,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// Social care
 		if (projectSocialCare) {
 			yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareIncidence);
-			addEventToAllYears(Processes.SocialCareMarketClearing);
+			yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
 		}
 
 		// UPDATE REFERENCES FOR OPTIMISING BEHAVIOUR (IF NECESSARY)
@@ -482,7 +482,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
 		//8 - UPDATE CONSUMPTION FOR THE SECURITY INDEX
-		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
+		if (Parameters.projectWealth)
+			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
 		addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
 
 		//8B - UPDATE EQUIVALISED DISPOSABLE INCOME AND CALCULATE CHANGE SINCE LAST YEAR
@@ -1776,24 +1777,17 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	}
 
 	private void socialCareMarketClearning() {
-		// THIS STILL NEEDS TO BE FINISHED
 
-		// informal caring for disabled people under age threshold
-		for (Person person : persons) {
-
-			if ((person.getDag() < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(person.getDlltsd())) {
-				// under 65 years old with disability
-
-				double probRecCare = Parameters.getRegReceiveCareS1a().getProbability(person, Person.DoublesVariables.class);
-				if (person.getSocialCareInnov().nextDouble() < probRecCare) {
-					// receive social care
-
-					double score = Parameters.getRegCareHoursS1b().getScore(person,Person.DoublesVariables.class);
-					double rmse = Parameters.getRMSEForRegression("S1b");
-					double hours = Math.min(150.0, Math.exp(score + rmse * person.getSocialCareInnov().nextGaussian()));
-					hours = hours;
-				}
-			}
+		// adjust provision so that aggregate provision broadly matches aggregate receipt
+		double careProvisionAdjustment = Parameters.getTimeSeriesValue(getYear(),TimeSeriesVariable.CareProvisionAdjustment);
+		SocialCareAlignment socialCareAlignment = new SocialCareAlignment(persons, careProvisionAdjustment);
+		double[] startVal = new double[] {careProvisionAdjustment};
+		double[] lowerBound = new double[] {careProvisionAdjustment - 1.5};
+		double[] upperBound = new double[] {careProvisionAdjustment + 1.5};
+		RootSearch search = new RootSearch(lowerBound, upperBound, startVal, socialCareAlignment, 1.0E-2, 0.1);
+		search.evaluate();
+		if (search.isTargetAltered()) {
+			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.CareProvisionAdjustment);
 		}
 	}
 

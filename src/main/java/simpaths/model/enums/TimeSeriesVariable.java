@@ -4,5 +4,6 @@ public enum TimeSeriesVariable {
     GDP,
     Inflation,
     WageGrowth,
-    CarerWageRate;
+    CarerWageRate,
+    CareProvisionAdjustment;
 }
