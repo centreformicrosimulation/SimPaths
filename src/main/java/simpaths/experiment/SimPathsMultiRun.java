@@ -11,7 +11,7 @@ import microsim.engine.SimulationEngine;
 import microsim.gui.shell.MultiRunFrame;
 import simpaths.model.enums.Country;
 
-import java.io.File;
+import java.io.*;
 
 public class SimPathsMultiRun extends MultiRun {
 
@@ -81,6 +81,13 @@ public class SimPathsMultiRun extends MultiRun {
 			else if (args[i].equals("-p")){				//Set population size
 				popSize = Integer.parseInt(args[i+1]);
 				i++;
+			}
+			else if (args[i].equals("-f")){             //Output to file
+				try {
+					System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output/logs/run_" + randomSeed + ".txt")), true));
+				} catch (FileNotFoundException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		
