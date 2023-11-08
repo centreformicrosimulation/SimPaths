@@ -35,6 +35,28 @@ If you have a need for the data, please contact the repository maintainers throu
 2. **Download an IDE** (integrated development environment) of your choice - we recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/download/); download the Community (free) or Ultimate (paid) edition, depending on your needs.
 3. Clone your forked repository to your local machine. Import the cloned repository into IntelliJ as a Maven project 
 
+### Compiling and running SimPaths with Maven in the CLI
+
+SimPaths can also be compiled by Maven ([installation instructions here](https://maven.apache.org/install.html)) and run from the command line without an IDE. After cloning the repository and setting up the JDK, in the root directory you can run:
+```
+$ mvn clean package
+```
+... to create two runnable jars for single- and multi-run SimPaths:
+```
+.
+SimPaths/
+      ...
+      |-- multirun.jar
+      |-- singlerun.jar
+      `-- src
+```
+
+These can be run with the command line (with arguments) e.g.:
+```
+$ java -jar singlerun.jar
+$ java -jar multirun.jar -r 100 -p 50000 -n 20 -s 2017 -e 2020 -g false -f
+```
+
 ### Contributing
 
 1. Create a new branch for your contributions. This will likely be based on either the `main` branch of this repository (if you seek to modify the stable version of the model) or `develop` (if you seek to modify the most recent version of the model).  Please see branch naming convention below.
