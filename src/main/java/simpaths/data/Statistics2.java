@@ -8,6 +8,7 @@ import microsim.data.db.PanelEntityKey;
 import simpaths.model.Person;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Indicator;
+import simpaths.model.enums.TimeSeriesVariable;
 
 @Entity
 public class Statistics2 {
@@ -143,6 +144,12 @@ public class Statistics2 {
 
     @Column(name= "population_65to84")
     private double population65to84;
+
+    @Column(name= "social_care_adj_factor")
+    private double socialCareAdjustmentFactor;
+
+    public double getSocialCareAdjustmentFactor() { return socialCareAdjustmentFactor; }
+    public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
 
     public double getPopulation20to44() {
         return population20to44;
@@ -572,5 +579,7 @@ public class Statistics2 {
         setPopulation20to44(popula[0]);
         setPopulation45to64(popula[1]);
         setPopulation65to84(popula[2]);
+
+        setSocialCareAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.CareProvisionAdjustment));
     }
 }

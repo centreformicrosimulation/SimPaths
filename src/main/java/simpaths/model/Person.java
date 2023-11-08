@@ -119,9 +119,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="formal_socare_hrs")
     private Double careHoursFromFormalWeekly = 0.0;
     @Column(name="formal_socare_cost")      // cost of formal care gross of public subsidies
-    private Double careFormalCostWeekly = 0.0;
+    private Double careFormalExpenditureWeekly = 0.0;
     @Column(name="partner_socare_hrs")
     private Double careHoursFromPartnerWeekly = 0.0;
+    @Column(name="parent_socare_hrs")
+    private Double careHoursFromParentWeekly = 0.0;
     @Column(name="daughter_socare_hrs")
     private Double careHoursFromDaughterWeekly = 0.0;
     @Column(name="son_socare_hrs")
@@ -140,6 +142,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     boolean careFromSon;
     @Transient
     boolean careFromOther;
+    @Column(name="socare_provided_hrs")
+    private Double careHoursProvidedWeekly = 0.0;
+    @Enumerated(EnumType.STRING)
+    @Column(name="socare_provided_to")
+    private SocialCareProvidedTo careProvidedTo;
+    @Enumerated(EnumType.STRING)
+    private SocialCareProvidedTo careProvidedTo_lag1;
     @Enumerated(EnumType.STRING)
     @Transient
     private Indicator needSocialCare_lag1;
@@ -148,11 +157,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private Double careHoursFromPartnerWeekly_lag1;
     @Transient
+    private Double careHoursFromParentWeekly_lag1;
+    @Transient
     private Double careHoursFromDaughterWeekly_lag1;
     @Transient
     private Double careHoursFromSonWeekly_lag1;
     @Transient
     private Double careHoursFromOtherWeekly_lag1;
+    @Transient
+    private double drawProvCareIncidence;
+    @Transient
+    private double drawProvCareHours;
 
     //Sedex is an indicator for leaving education in that year
     @Enumerated(EnumType.STRING)
@@ -459,18 +474,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dlltsd = Indicator.False;
         this.dlltsd_lag1 = Indicator.False;
         this.needSocialCare = Indicator.False;
-        this.needSocialCare_lag1 = Indicator.False;
         this.careHoursFromFormalWeekly = -9.0;
-        this.careFormalCostWeekly = -9.0;
-        this.careHoursFromFormalWeekly_lag1 = -9.0;
+        this.careFormalExpenditureWeekly = -9.0;
         this.careHoursFromPartnerWeekly = -9.0;
-        this.careHoursFromPartnerWeekly_lag1 = -9.0;
+        this.careHoursFromParentWeekly = -9.0;
         this.careHoursFromDaughterWeekly = -9.0;
-        this.careHoursFromDaughterWeekly_lag1 = -9.0;
         this.careHoursFromSonWeekly = -9.0;
-        this.careHoursFromSonWeekly_lag1 = -9.0;
         this.careHoursFromOtherWeekly = -9.0;
+        this.socialCareMarketAll = SocialCareMarketAll.None;
+        this.careFromFormal = false;
+        this.careFromPartner = false;
+        this.careFromDaughter = false;
+        this.careFromSon = false;
+        this.careFromOther = false;
+        this.careHoursProvidedWeekly = -9.0;
+        this.careProvidedTo = SocialCareProvidedTo.None;
+        this.needSocialCare_lag1 = Indicator.False;
+        this.careHoursFromFormalWeekly_lag1 = -9.0;
+        this.careHoursFromPartnerWeekly_lag1 = -9.0;
+        this.careHoursFromDaughterWeekly_lag1 = -9.0;
+        this.careHoursFromSonWeekly_lag1 = -9.0;
         this.careHoursFromOtherWeekly_lag1 = -9.0;
+        this.careProvidedTo_lag1 = SocialCareProvidedTo.None;
         this.women_fertility = Indicator.False;
         this.idBenefitUnit = mother.getIdBenefitUnit();
         this.benefitUnit = mother.benefitUnit;
@@ -593,18 +618,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.liwwh = originalPerson.liwwh;
         this.dlltsd_lag1 = originalPerson.dlltsd_lag1;
         this.needSocialCare = originalPerson.needSocialCare;
-        this.needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
         this.careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
-        this.careFormalCostWeekly = originalPerson.careFormalCostWeekly;
-        this.careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
+        this.careFormalExpenditureWeekly = originalPerson.careFormalExpenditureWeekly;
         this.careHoursFromPartnerWeekly = originalPerson.careHoursFromPartnerWeekly;
-        this.careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
+        this.careHoursFromParentWeekly = originalPerson.careHoursFromParentWeekly;
         this.careHoursFromDaughterWeekly = originalPerson.careHoursFromDaughterWeekly;
-        this.careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
         this.careHoursFromSonWeekly = originalPerson.careHoursFromSonWeekly;
-        this.careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
         this.careHoursFromOtherWeekly = originalPerson.careHoursFromOtherWeekly;
+        this.socialCareMarketAll = originalPerson.socialCareMarketAll;
+        this.careFromFormal = originalPerson.careFromFormal;
+        this.careFromPartner = originalPerson.careFromPartner;
+        this.careFromDaughter = originalPerson.careFromDaughter;
+        this.careFromSon = originalPerson.careFromSon;
+        this.careFromOther = originalPerson.careFromOther;
+        this.careHoursProvidedWeekly = originalPerson.careHoursProvidedWeekly;
+        this.careProvidedTo = originalPerson.careProvidedTo;
+        this.needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
+        this.careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
+        this.careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
+        this.careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
+        this.careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
         this.careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
+        this.careProvidedTo_lag1 = originalPerson.careProvidedTo_lag1;
         this.sedex = originalPerson.sedex;
         this.partnership_samesex = originalPerson.partnership_samesex;
         this.women_fertility = originalPerson.women_fertility;
@@ -793,8 +828,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 			health();
 			break;
         case SocialCareIncidence:
-            evaluateSocialCareDemand();
-            evaluateSocialCareSupply();
+            evaluateSocialCareReceipt();
+            evaluateSocialCareProvide();
             break;
 		case HealthMentalHM1:
 			healthMentalHM1Level();
@@ -1018,21 +1053,38 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void evaluateSocialCareDemand() {
+    protected void evaluateSocialCareReceipt() {
 
         needSocialCare = Indicator.False;
-        socialCareMarketAll = SocialCareMarketAll.None;
         careHoursFromFormalWeekly = 0.0;
-        careFormalCostWeekly = 0.0;
+        careFormalExpenditureWeekly = 0.0;
         careHoursFromPartnerWeekly = 0.0;
+        careHoursFromParentWeekly = 0.0;
         careHoursFromDaughterWeekly = 0.0;
         careHoursFromSonWeekly = 0.0;
         careHoursFromOtherWeekly = 0.0;
+        socialCareMarketAll = SocialCareMarketAll.None;
         careFromFormal = false;
         careFromPartner = false;
         careFromDaughter = false;
         careFromSon = false;
         careFromOther = false;
+        drawProvCareIncidence = -9.;
+        drawProvCareHours = -9.;
+
+        if ((dag < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(dlltsd)) {
+            // under 65 years old with disability
+
+            double probRecCare = Parameters.getRegReceiveCareS1a().getProbability(this, Person.DoublesVariables.class);
+            if (socialCareInnov.nextDouble() < probRecCare) {
+                // receive social care
+
+                double score = Parameters.getRegCareHoursS1b().getScore(this,Person.DoublesVariables.class);
+                double rmse = Parameters.getRMSEForRegression("S1b");
+                careHoursFromParentWeekly = Math.min(150.0, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+            }
+        }
+
         if (dag >= Parameters.MIN_AGE_FORMAL_SOCARE) {
             // need care only projected for 65 and over due to limitations of data used for parameterisation
 
@@ -1112,7 +1164,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegFormalCareHoursS2k().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2k");
                     careHoursFromFormalWeekly = Math.min(150.0, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
-                    careFormalCostWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
+                    careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
                 }
             }
             if (Indicator.False.equals(needSocialCare)) {
@@ -1122,12 +1174,66 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-
-    protected void evaluateSocialCareSupply() {
-
+    protected void evaluateSocialCareProvide() {
+        evaluateSocialCareProvide(Parameters.getTimeSeriesValue(model.getYear(),TimeSeriesVariable.CareProvisionAdjustment));
     }
 
-    
+    public void evaluateSocialCareProvide(double probitAdjustment) {
+
+        careHoursProvidedWeekly = 0.0;
+        careProvidedTo = SocialCareProvidedTo.None;
+        boolean careToPartner = false;
+        boolean careToOther = false;
+        double careHoursToPartner = 0.0;
+        if (drawProvCareIncidence < 0.) {
+            drawProvCareIncidence = socialCareInnov.nextDouble();
+            drawProvCareHours = socialCareInnov.nextGaussian();
+        }
+        if (dag >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+
+            // check if care provided to partner
+            // identified in method evaluateSocialCareReceipt
+            if (partner!=null) {
+                if (partner.careFromPartner) {
+                    careToPartner = true;
+                    careHoursToPartner = partner.getCareHoursFromPartnerWeekly();
+                }
+            }
+
+            // check if care provided to "other"
+            if (careToPartner) {
+                double score = Parameters.getRegCarePartnerProvCareToOtherS3a().getScore(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegCarePartnerProvCareToOtherS3a().getProbability(score + probitAdjustment);
+                if (drawProvCareIncidence < prob)
+                    careToOther = true;
+            } else {
+                double score = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getScore(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getProbability(score + probitAdjustment);
+                if (drawProvCareIncidence < prob)
+                    careToOther = true;
+            }
+
+            // update care provision states
+            if (careToPartner || careToOther) {
+
+                if (careToPartner && careToOther) {
+                    careProvidedTo = SocialCareProvidedTo.PartnerAndOther;
+                } else if (careToPartner) {
+                    careProvidedTo = SocialCareProvidedTo.OnlyPartner;
+                } else {
+                    careProvidedTo = SocialCareProvidedTo.OnlyOther;
+                }
+                if (SocialCareProvidedTo.OnlyPartner.equals(careProvidedTo)) {
+                    careHoursProvidedWeekly = careHoursToPartner;
+                } else {
+                    double score = Parameters.getRegCareHoursProvS3e().getScore(this,Person.DoublesVariables.class);
+                    double rmse = Parameters.getRMSEForRegression("S3e");
+                    careHoursProvidedWeekly = Math.max(careHoursToPartner + 1.0, Math.min(150.0, Math.exp(score + rmse * drawProvCareHours)));
+                }
+            }
+        }
+    }
+
     protected void inSchool() {
 
         //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
@@ -1383,60 +1489,58 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
     protected void updateNonLabourIncome() {
 
-        if (Parameters.enableIntertemporalOptimisations) {
-            throw new RuntimeException("request to update non-labour income in person object when wealth is explicit");
-        } else {
-            // ypncp: inverse hyperbolic sine of capital income per month
-            // ypnoab: inverse hyperbolic sine of pension income per month
-            // yptciihs_dv: inverse hyperbolic sine of capital and pension income per month
-            // variables updated with labour supply when enableIntertemporalOptimisations (as retirement can affect wealth and pension income)
-            if (dag >= Parameters.MIN_AGE_TO_HAVE_INCOME) {
-                if (dag <= 29 && Les_c4.Student.equals(les_c4) && leftEducation == false) {
-                    boolean hasCapitalIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI3a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
-                    if (hasCapitalIncome) {
-                        double score = Parameters.getRegIncomeI3a().getScore(this, Person.DoublesVariables.class);
-                        double rmse = Parameters.getRMSEForRegression("I3a");
-                        double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome);
-                        ypncp = Parameters.asinh(capinclevel); //Capital income amount
-                    }
-                    else ypncp = 0.; //If no capital income, set amount to 0
-                } else if ((Les_c4.Student.equals(les_c4) && leftEducation == true) || !les_c4.equals(Les_c4.Student)) {
-                    boolean hasCapitalIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI3b_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
-                    if (hasCapitalIncome) {
-                        double score = Parameters.getRegIncomeI3b().getScore(this, Person.DoublesVariables.class);
-                        double rmse = Parameters.getRMSEForRegression("I3b");
-                        double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome);
-                        ypncp = Parameters.asinh(capinclevel); //Capital income amount
-                    }
-                    else ypncp = 0.; //If no capital income, set amount to 0
+        // ypncp: inverse hyperbolic sine of capital income per month
+        // ypnoab: inverse hyperbolic sine of pension income per month
+        // yptciihs_dv: inverse hyperbolic sine of capital and pension income per month
+        // variables updated with labour supply when enableIntertemporalOptimisations (as retirement can affect wealth and pension income)
+        if (dag >= Parameters.MIN_AGE_TO_HAVE_INCOME) {
+            if (dag <= 29 && Les_c4.Student.equals(les_c4) && leftEducation == false) {
+                boolean hasCapitalIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI3a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
+                if (hasCapitalIncome) {
+                    double score = Parameters.getRegIncomeI3a().getScore(this, Person.DoublesVariables.class);
+                    double rmse = Parameters.getRMSEForRegression("I3a");
+                    double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome);
+                    ypncp = Parameters.asinh(capinclevel); //Capital income amount
                 }
-                if (Les_c4.Retired.equals(les_c4)) { // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
+                else ypncp = 0.; //If no capital income, set amount to 0
+            } else if ((Les_c4.Student.equals(les_c4) && leftEducation == true) || !les_c4.equals(Les_c4.Student)) {
+                boolean hasCapitalIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI3b_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
+                if (hasCapitalIncome) {
+                    double score = Parameters.getRegIncomeI3b().getScore(this, Person.DoublesVariables.class);
+                    double rmse = Parameters.getRMSEForRegression("I3b");
+                    double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome);
+                    ypncp = Parameters.asinh(capinclevel); //Capital income amount
+                }
+                else ypncp = 0.; //If no capital income, set amount to 0
+            }
+            if (Les_c4.Retired.equals(les_c4)) { // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
 
-                    double score, rmse;
-                    if (Les_c4.Retired.equals(les_c4_lag1)) { // If person was retired in the previous period, use process I4b
-                        score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I4b");
-                    } else { // For individuals in the first year of retirement, use process I4a
-                        score = Parameters.getRegIncomeI4a().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I4a");
-                    }
-
-                    double pensioninclevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension);
-                    ypnoab = Parameters.asinh(pensioninclevel);
-                    if (ypnoab < 0 ) {
-                        ypnoab = 0.;
-                    }
+                double score, rmse;
+                if (Les_c4.Retired.equals(les_c4_lag1)) { // If person was retired in the previous period, use process I4b
+                    score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
+                    rmse = Parameters.getRMSEForRegression("I4b");
+                } else { // For individuals in the first year of retirement, use process I4a
+                    score = Parameters.getRegIncomeI4a().getScore(this, Person.DoublesVariables.class);
+                    rmse = Parameters.getRMSEForRegression("I4a");
                 }
 
-                double capital_income_multiplier = model.getSavingRate()/Parameters.SAVINGS_RATE;
-                double yptciihs_dv_tmp_level = capital_income_multiplier*(Math.sinh(ypncp) + Math.sinh(ypnoab)); //Multiplied by the capital income multiplier, defined as chosen savings rate divided by the long-term average (specified in Parameters class)
-                yptciihs_dv = Parameters.asinh(yptciihs_dv_tmp_level); //Non-employment non-benefit income is the sum of capital income and, for retired individuals, pension income.
-
-                if (yptciihs_dv > 13.0) {
-                    yptciihs_dv = 13.5;
+                double pensioninclevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension);
+                ypnoab = Parameters.asinh(pensioninclevel);
+                if (ypnoab < 0 ) {
+                    ypnoab = 0.;
                 }
             }
+
+            double capital_income_multiplier = model.getSavingRate()/Parameters.SAVINGS_RATE;
+            double yptciihs_dv_tmp_level = capital_income_multiplier*(Math.sinh(ypncp) + Math.sinh(ypnoab)); //Multiplied by the capital income multiplier, defined as chosen savings rate divided by the long-term average (specified in Parameters class)
+            yptciihs_dv = Parameters.asinh(yptciihs_dv_tmp_level); //Non-employment non-benefit income is the sum of capital income and, for retired individuals, pension income.
+
+            if (yptciihs_dv > 13.0) {
+                yptciihs_dv = 13.5;
+            }
         }
+        if (Parameters.enableIntertemporalOptimisations)
+            throw new RuntimeException("request to update non-labour income in person object when wealth is explicit");
     }
 
 
@@ -1598,9 +1702,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         needSocialCare_lag1 = needSocialCare;
         careHoursFromFormalWeekly_lag1 = careHoursFromFormalWeekly;
         careHoursFromPartnerWeekly_lag1 = careHoursFromPartnerWeekly;
+        careHoursFromParentWeekly_lag1 = careHoursFromParentWeekly;
         careHoursFromDaughterWeekly_lag1 = careHoursFromDaughterWeekly;
         careHoursFromSonWeekly_lag1 = careHoursFromSonWeekly;
         careHoursFromOtherWeekly_lag1 = careHoursFromOtherWeekly;
+        careProvidedTo_lag1 = careProvidedTo;
         deh_c3_lag1 = deh_c3; //Update lag(1) of education level
         ypnbihs_dv_lag1 = getYpnbihs_dv(); //Update lag(1) of gross personal non-benefit income
         dehsp_c3_lag1 = dehsp_c3; //Update lag(1) of partner's education status
@@ -1964,209 +2070,232 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // ---------------------------------------------------------------------
 
     public enum DoublesVariables {
+        // ORGANISED ALPHABETICALLY TO ASSIST IDENTIFICATION
 
-        //Variables:
         GrossEarningsYearly,
         GrossLabourIncomeMonthly,
 
-        //Regressors:
         Age,
         AgeSquared,
         AgeCubed,
-        LnAge,
-        Age23to25,						// Indicator for whether the person is in the Age category (see below for definition)
-        Age26to30,						// Indicator for whether the person is in the Age category (see below for definition)
+        Age20to24,
         Age21to27,						// Indicator for whether the person is in the Age category (see below for definition)
-        Age28to30,						// Indicator for whether the person is in the Age category (see below for definition)
-        AgeUnder25,
+        Age23to25,						// Indicator for whether the person is in the Age category (see below for definition)
+        Age25to29,
         Age25to39,
-        AgeOver39,
+        Age26to30,						// Indicator for whether the person is in the Age category (see below for definition)
+        Age28to30,						// Indicator for whether the person is in the Age category (see below for definition)
+        Age30to34,
+        Age35to39,
+        Age35to44,
+        Age40to44,
+        Age45to49,
+        Age45to54,
+        Age50to54,
+        Age55to59,
+        Age55to64,
+        Age60to64,
+        Age65plus,
+        Age65to69,
         Age67to68,
         Age69to70,
+        Age70to74,
         Age71to72,
         Age73to74,
         Age75to76,
+        Age75to79,
         Age77to78,
         Age79to80,
+        Age80to84,
         Age81to82,
         Age83to84,
         Age85plus,
-        StatePensionAge,
+        AgeOver39,
+        AgeUnder25,
+        Blpay_Q2,
+        Blpay_Q3,
+        Blpay_Q4,
+        Blpay_Q5,
+        CareFromDaughter,
+        CareFromDaughter_L1,
+        CareFromDaughterOther_L1,
+        CareFromDaughterSon_L1,
+        CareFromFormal,
+        CareFromInformal,
+        CareFromOther_L1,
+        CareFromOtherOnly_L1,
+        CareFromPartner,
+        CareFromPartner_L1,
+        CareFromSon,
+        CareFromSon_L1,
+        CareFromSonOnly_L1,
+        CareFromOther,
+        CareFromSonOther_L1,
+        CareMarketFormal_L1,
+        CareMarketMixed_L1,
+        CareToOtherOnly,
+        CareToOtherOnly_L1,
+        CareToPartnerAndOther,
+        CareToPartnerAndOther_L1,
+        CareToPartnerOnly,
+        CareToPartnerOnly_L1,
         Cohort,
         Constant, 						// For the constant (intercept) term of the regression
+        Covid_2020_D,
+        Covid_2021_D,
+        Covid19GrossPayMonthly_L1,
+        Covid19ReceivesSEISS_L1,
+        CovidTransitionsMonth,
+        Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
+        Cut2,
+        Cut3,
+        Cut4,
+        Cut5,
+        Cut6,
+        Cut7,
+        Cut8,
+        Cut9,
+        Cut10,
+        D_children,
         D_children_2under,				// Indicator (dummy variables for presence of children of certain ages in the benefitUnit)
         D_children_3_6,
         D_children_7_12,
         D_children_13_17,
         D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
-        D_children,
-        Dnc_L1, 						//Lag(1) of number of children of all ages in the benefitUnit
-        Dnc02_L1, 						//Lag(1) of number of children aged 0-2 in the benefitUnit
-        Dnc017, 						//Number of children aged 0-17 in the benefitUnit
-        Dcrisis,
-        Dgn,							//Gender: returns 1 if male
+        D_Econ_benefits,
+        D_Home_owner,
         Dag,
         Dag_sq,
-        Dcpyy_L1, 						//Lag(1) number of years in partnership
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
-        Dcpst_Single,					//Single never married
+        Dcpyy_L1, 						//Lag(1) number of years in partnership
         Dcpst_Partnered,				//Partnered
         Dcpst_PreviouslyPartnered,		//Previously partnered
-        Dcpst_Single_L1, 				//Lag(1) of partnership status is Single
         Dcpst_PreviouslyPartnered_L1,   //Lag(1) of partnership status is previously partnered
+        Dcpst_Single,					//Single never married
+        Dcpst_Single_L1, 				//Lag(1) of partnership status is Single
+        Dcrisis,
+        Ded,
+        Deh_c3_High,
+        Deh_c3_Low,
+        Deh_c3_Low_Dag,
+        Deh_c3_Low_L1,					//Education level lag(1) equals low
+        Deh_c3_Medium,
+        Deh_c3_Medium_Dag,
+        Deh_c3_Medium_L1, 				//Education level lag(1) equals medium
+        Dehf_c3_High,					//Father's education == High indicator
+        Dehf_c3_Low,					//Father's education == Low indicator
+        Dehf_c3_Medium,					//Father's education == Medium indicator
+        Dehm_c3_High,					//Mother's education == High indicator
+        Dehm_c3_Low,					//Mother's education == Low indicator
+        Dehm_c3_Medium,					//Mother's education == Medium indicator
+        Dehsp_c3_Low_L1,				//Partner's education == Low at lag(1)
+        Dehsp_c3_Medium_L1,				//Partner's education == Medium at lag(1)
+        Dgn,							//Gender: returns 1 if male
+        Dgn_baseline,
+        Dgn_Dag,
+        Dgn_Lhw_L1,
         Dhe,							//Health status
-        Dhe_L1, 						//Health status lag(1)
         Dhe_2,
         Dhe_3,
         Dhe_4,
         Dhe_5,
-        NeedCare_L1,
-        ReceiveCare_L1,
-        CareMarketMixed_L1,
-        CareMarketFormal_L1,
-        CareFromPartner_L1,
-        CareFromDaughter_L1,
-        CareFromSon_L1,
-        CareFromOther_L1,
-        CareFromDaughterSon_L1,
-        CareFromDaughterOther_L1,
-        CareFromSonOnly_L1,
-        CareFromSonOther_L1,
-        CareFromOtherOnly_L1,
-        CareFromFormal,
-        CareFromInformal,
-        CareFromPartner,
-        CareFromDaughter,
-        CareFromSon,
-        CareFromOther,
-        Dhe_VeryGood,
-        Dhe_Good,
-        Dhe_Fair,
-        Dhe_Poor,
         Dhe_c5_1_L1,
         Dhe_c5_2_L1,
         Dhe_c5_3_L1,
         Dhe_c5_4_L1,
         Dhe_c5_5_L1,
-        Dhm,							//Mental health status
-        Dhm_L1,							//Mental health status lag(1)
+        Dhe_Fair,
+        Dhe_Good,
+        Dhe_L1, 						//Health status lag(1)
+        Dhe_Poor,
+        Dhe_VeryGood,
         Dhesp_L1, 						//Lag(1) of partner's health status
-        Ded,
-        Deh_c3_High,
-        Deh_c3_Medium,
-        Deh_c3_Medium_L1, 				//Education level lag(1) equals medium
-        Deh_c3_Low,
-        Deh_c3_Low_L1,					//Education level lag(1) equals low
-        Dehm_c3_High,					//Mother's education == High indicator
-        Dehm_c3_Medium,					//Mother's education == Medium indicator
-        Dehm_c3_Low,					//Mother's education == Low indicator
-        Dehf_c3_High,					//Father's education == High indicator
-        Dehf_c3_Medium,					//Father's education == Medium indicator
-        Dehf_c3_Low,					//Father's education == Low indicator
-        Dehsp_c3_Medium_L1,				//Partner's education == Medium at lag(1)
-        Dehsp_c3_Low_L1,				//Partner's education == Low at lag(1)
         Dhhtp_c4_CoupleChildren_L1,
         Dhhtp_c4_CoupleNoChildren_L1,
-        Dhhtp_c4_SingleNoChildren_L1,
         Dhhtp_c4_SingleChildren_L1,
+        Dhhtp_c4_SingleNoChildren_L1,
+        Dhm,							//Mental health status
+        Dhm_L1,							//Mental health status lag(1)
+        Dhmghq_L1,
         Dlltsd,							//Long-term sick or disabled
         Dlltsd_L1,						//Long-term sick or disabled lag(1)
-        FertilityRate,
-        Female,
-        InverseMillsRatio,
-        Ld_children_3under,
-        Ld_children_4_12,
-        Lemployed,
-        Lnonwork,
-        Lstudent,
-        Lunion,
-        Les_c3_Student_L1,
-        Les_c3_NotEmployed_L1,
-        Les_c3_Employed_L1,
-        Les_c3_Sick_L1,					//This is based on dlltsd
-        Lessp_c3_Student_L1,			//Partner variables
-        Lessp_c3_NotEmployed_L1,
-        Lessp_c3_Sick_L1,
-        Retired,
-        Lesdf_c4_EmployedSpouseNotEmployed_L1, 					//Own and partner's activity status lag(1)
-        Lesdf_c4_NotEmployedSpouseEmployed_L1,
-        Lesdf_c4_BothNotEmployed_L1,
-        Liwwh,									//Work history in months
-        NumberChildren,
-        NumberChildren_2under,
-        OnleaveBenefits,
-        OtherIncome,
-        Parents,
-        PartTimeRate,
-        PartTime_AND_Ld_children_3under,			//Interaction term conditional on if the person had a child under 3 at the previous time-step
-        ResStanDev,
-        Single,
-        Single_kids,
-        Sfr, 										//Scenario : fertility rate This retrieves the fertility rate by region and year to use in fertility regression
-        Union,
-        Union_kids,
-        Year,										//Year as in the simulation, e.g. 2009
-        Year_transformed,							//Year - 2000
-        Year_transformed_monetary,					//Year-2000 that stops in 2017, for use with monetary processes
-        Ydses_c5_Q2_L1, 							//HH Income Lag(1) 2nd Quantile
-        Ydses_c5_Q3_L1,								//HH Income Lag(1) 3rd Quantile
-        Ydses_c5_Q4_L1,								//HH Income Lag(1) 4th Quantile
-        Ydses_c5_Q5_L1,								//HH Income Lag(1) 5th Quantile
-        Ypnbihs_dv_L1,								//Gross personal non-benefit income lag(1)
-        Ypnbihs_dv_L1_sq,							//Square of gross personal non-benefit income lag(1)
-        Ynbcpdf_dv_L1, 								//Lag(1) of difference between own and partner's gross personal non-benefit income
-        Yptciihs_dv_L1,								//Lag(1) of gross personal non-employment non-benefit income
-        Yptciihs_dv_L2,								//Lag(2) of gross personal non-employment non-benefit income
-        Yptciihs_dv_L3,								//Lag(3) of gross personal non-employment non-benefit income
-        Ypncp_L1,									//Lag(1) of capital income
-        Ypncp_L2,									//Lag(2) of capital income
-        Ypnoab_L1,									//Lag(1) of pension income
-        Ypnoab_L2,									//Lag(2) of pension income
-        Yplgrs_dv_L1,								//Lag(1) of gross personal employment income
-        Yplgrs_dv_L2,								//Lag(2) of gross personal employment income
-        Yplgrs_dv_L3,								//Lag(3) of gross personal employment income
-        Reached_Retirement_Age,						//Indicator whether individual is at or above retirement age
-        Reached_Retirement_Age_Sp,					//Indicator whether spouse is at or above retirement age
-        Reached_Retirement_Age_Les_c3_NotEmployed_L1, //Interaction term for being at or above retirement age and not employed in the previous year
-        EquivalisedIncomeYearly, 							//Equivalised income for use with the security index
-        EquivalisedConsumptionYearly,
-        sIndex,
-        sIndexNormalised,
-
-        //New enums for the mental health Step 1 and 2:
-        EmployedToUnemployed,
-        UnemployedToEmployed,
-        PersistentUnemployed,
-        NonPovertyToPoverty,
-        PovertyToNonPoverty,
-        PersistentPoverty,
-        RealIncomeChange, //Note: the above return a 0 or 1 value, but income variables will return the change in income or 0
-        RealIncomeDecrease_D,
-        D_Econ_benefits,
-        D_Home_owner,
-        Covid_2020_D,
-        Covid_2021_D,
-        Pt,
-        L1_log_hourly_wage,
-        L1_log_hourly_wage_sq,
-        L1_hourly_wage,
-        Deh_c3_Medium_Dag,
-        Deh_c3_Low_Dag,
-
-        //New enums to handle the covariance matrices
-        Ld_children_3underIT,
-        Ld_children_4_12IT,
-        LactiveIT,
+        Dnc_L1, 						//Lag(1) of number of children of all ages in the benefitUnit
+        Dnc02_L1, 						//Lag(1) of number of children aged 0-2 in the benefitUnit
+        Dnc017, 						//Number of children aged 0-17 in the benefitUnit
         EduHighIT,
-        LunionIT,
         EduMediumIT,
-
+        EmployedToUnemployed,
+        Employmentsonflexiblefurlough,
+        Employmentsonfullfurlough,
+        EquivalisedConsumptionYearly,
+        EquivalisedIncomeYearly, 							//Equivalised income for use with the security index
+        Female,
+        FertilityRate,
+        InverseMillsRatio,
         ITC,			//Italy
         ITF,
         ITG,
         ITH,
         ITI,
-
+        LactiveIT,
+        L1_hourly_wage,
+        L1_log_hourly_wage,
+        L1_log_hourly_wage_sq,
+        Ld_children_3under,
+        Ld_children_3underIT,
+        Ld_children_4_12,
+        Ld_children_4_12IT,
+        Lemployed,
+        Lhw_L1,
+        Les_c3_Employed_L1,
+        Les_c3_NotEmployed_L1,
+        Les_c3_Sick_L1,					//This is based on dlltsd
+        Les_c3_Student_L1,
+        Les_c7_Covid_Furlough_L1,
+        Lesdf_c4_BothNotEmployed_L1,
+        Lesdf_c4_EmployedSpouseNotEmployed_L1, 					//Own and partner's activity status lag(1)
+        Lesdf_c4_NotEmployedSpouseEmployed_L1,
+        Lessp_c3_NotEmployed_L1,
+        Lessp_c3_Sick_L1,
+        Lessp_c3_Student_L1,			//Partner variables
+        Liwwh,									//Work history in months
+        LnAge,
+        Lnonwork,
+        Lstudent,
+        Lunion,
+        LunionIT,
+        NeedCare_L1,
+        NonPovertyToPoverty,
+        NumberChildren,
+        NumberChildren_2under,
+        OnleaveBenefits,
+        OtherIncome,
+        Parents,
+        PartTime_AND_Ld_children_3under,			//Interaction term conditional on if the person had a child under 3 at the previous time-step
+        PartTimeRate,
+        PersistentPoverty,
+        PersistentUnemployed,
+        PovertyToNonPoverty,
+        Pt,
+        Reached_Retirement_Age,						//Indicator whether individual is at or above retirement age
+        Reached_Retirement_Age_Les_c3_NotEmployed_L1, //Interaction term for being at or above retirement age and not employed in the previous year
+        Reached_Retirement_Age_Sp,					//Indicator whether spouse is at or above retirement age
+        RealGDPGrowth,
+        RealIncomeChange, //Note: the above return a 0 or 1 value, but income variables will return the change in income or 0
+        RealIncomeDecrease_D,
+        RealWageGrowth,
+        ReceiveCare_L1,
+        ResStanDev,
+        Retired,
+        Sfr, 										//Scenario : fertility rate This retrieves the fertility rate by region and year to use in fertility regression
+        sIndex,
+        sIndexNormalised,
+        Single,
+        Single_kids,
+        StatePensionAge,
+        UnemployedToEmployed,
+        Union,
+        Union_kids,
         UKC,				//UK
         UKD,
         UKE,
@@ -2178,38 +2307,29 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         UKK,
         UKL,
         UKM,
-        UKN,
         UKmissing,
-
-        // Covid-19 labour market module regressors below:
-        Dgn_Dag,
-        Employmentsonfullfurlough,
-        Employmentsonflexiblefurlough,
-        CovidTransitionsMonth,
-        Lhw_L1,
-        Dgn_Lhw_L1,
-        Covid19GrossPayMonthly_L1,
-        Covid19ReceivesSEISS_L1,
-        Les_c7_Covid_Furlough_L1,
-        Blpay_Q2,
-        Blpay_Q3,
-        Blpay_Q4,
-        Blpay_Q5,
-        Dgn_baseline,
-        Dhmghq_L1,
-        RealWageGrowth,
-        RealGDPGrowth,
-        Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
-        Cut2,
-        Cut3,
-        Cut4,
-        Cut5,
-        Cut6,
-        Cut7,
-        Cut8,
-        Cut9,
-        Cut10,
-        }
+        UKN,
+        Year,										//Year as in the simulation, e.g. 2009
+        Ydses_c5_Q2_L1, 							//HH Income Lag(1) 2nd Quantile
+        Ydses_c5_Q3_L1,								//HH Income Lag(1) 3rd Quantile
+        Ydses_c5_Q4_L1,								//HH Income Lag(1) 4th Quantile
+        Ydses_c5_Q5_L1,								//HH Income Lag(1) 5th Quantile
+        Year_transformed,							//Year - 2000
+        Year_transformed_monetary,					//Year-2000 that stops in 2017, for use with monetary processes
+        Ynbcpdf_dv_L1, 								//Lag(1) of difference between own and partner's gross personal non-benefit income
+        Yplgrs_dv_L1,								//Lag(1) of gross personal employment income
+        Yplgrs_dv_L2,								//Lag(2) of gross personal employment income
+        Yplgrs_dv_L3,								//Lag(3) of gross personal employment income
+        Ypnbihs_dv_L1,								//Gross personal non-benefit income lag(1)
+        Ypnbihs_dv_L1_sq,							//Square of gross personal non-benefit income lag(1)
+        Ypncp_L1,									//Lag(1) of capital income
+        Ypncp_L2,									//Lag(2) of capital income
+        Ypnoab_L1,									//Lag(1) of pension income
+        Ypnoab_L2,									//Lag(2) of pension income
+        Yptciihs_dv_L1,								//Lag(1) of gross personal non-employment non-benefit income
+        Yptciihs_dv_L2,								//Lag(2) of gross personal non-employment non-benefit income
+        Yptciihs_dv_L3,								//Lag(3) of gross personal non-employment non-benefit income
+    }
 
     public double getDoubleValue(Enum<?> variableID) {
 
@@ -2219,7 +2339,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return getGrossEarningsYearly();
         case GrossLabourIncomeMonthly:
             return getCovidModuleGrossLabourIncome_Baseline();
-        //Regressors
+        case CareToPartnerOnly:
+            return (SocialCareProvidedTo.OnlyPartner.equals(careProvidedTo)) ? 1. : 0.;
+        case CareToPartnerAndOther:
+            return (SocialCareProvidedTo.PartnerAndOther.equals(careProvidedTo)) ? 1. : 0.;
+        case CareToOtherOnly:
+            return (SocialCareProvidedTo.OnlyOther.equals(careProvidedTo)) ? 1. : 0.;
+        case CareToPartnerOnly_L1:
+            return (SocialCareProvidedTo.OnlyPartner.equals(careProvidedTo_lag1)) ? 1. : 0.;
+        case CareToPartnerAndOther_L1:
+            return (SocialCareProvidedTo.PartnerAndOther.equals(careProvidedTo_lag1)) ? 1. : 0.;
+        case CareToOtherOnly_L1:
+            return (SocialCareProvidedTo.OnlyOther.equals(careProvidedTo_lag1)) ? 1. : 0.;
         case Age:
             return (double) dag;
         case Dag:
@@ -2234,30 +2365,48 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (double) dag * dag * dag;
         case LnAge:
             return Math.log(dag);
+        case Age20to24:
+            return (dag >= 20 && dag <= 24) ? 1. : 0.;
+        case Age25to29:
+            return (dag >= 25 && dag <= 29) ? 1. : 0.;
+        case Age30to34:
+            return (dag >= 30 && dag <= 34) ? 1. : 0.;
+        case Age35to39:
+            return (dag >= 35 && dag <= 39) ? 1. : 0.;
+        case Age40to44:
+            return (dag >= 40 && dag <= 44) ? 1. : 0.;
+        case Age45to49:
+            return (dag >= 45 && dag <= 49) ? 1. : 0.;
+        case Age50to54:
+            return (dag >= 50 && dag <= 54) ? 1. : 0.;
+        case Age55to59:
+            return (dag >= 55 && dag <= 59) ? 1. : 0.;
+        case Age60to64:
+            return (dag >= 60 && dag <= 64) ? 1. : 0.;
+        case Age65to69:
+            return (dag >= 65 && dag <= 69) ? 1. : 0.;
+        case Age70to74:
+            return (dag >= 70 && dag <= 74) ? 1. : 0.;
+        case Age75to79:
+            return (dag >= 75 && dag <= 79) ? 1. : 0.;
+        case Age80to84:
+            return (dag >= 80 && dag <= 84) ? 1. : 0.;
+        case Age35to44:
+            return (dag >= 35 && dag <= 44) ? 1. : 0.;
+        case Age45to54:
+            return (dag >= 45 && dag <= 54) ? 1. : 0.;
+        case Age55to64:
+            return (dag >= 55 && dag <= 64) ? 1. : 0.;
+        case Age65plus:
+            return (dag >= 65) ? 1. : 0.;
         case Age23to25:
-//			log.debug("age 23 to 25");
-            if(dag >= 23 && dag <= 25) {
-                 return 1.;
-             }
-             else return 0.;
+            return (dag >= 23 && dag <= 25) ? 1. : 0.;
         case Age26to30:
-//			log.debug("age 26 to 30");
-             if(dag >= 26 && dag <= 30) {
-                 return 1.;
-             }
-             else return 0.;
+             return (dag >= 26 && dag <= 30) ? 1. : 0.;
         case Age21to27:
-//			log.debug("age 21 to 27");
-             if(dag >= 21 && dag <= 27) {
-                 return 1.;
-             }
-             else return 0.;
+             return (dag >= 21 && dag <= 27) ? 1. : 0.;
         case Age28to30:
-//			log.debug("age 28 to 30");
-             if(dag >= 28 && dag <= 30) {
-                 return 1.;
-             }
-             else return 0.;
+             return (dag >= 28 && dag <= 30) ? 1. : 0.;
         case AgeUnder25:
             return (dag<25) ? 1. : 0.;
         case Age25to39:
@@ -4126,11 +4275,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getHoursInformalSocialCare() {
         return getCareHoursFromPartnerWeekly() + getCareHoursFromDaughterWeekly() + getCareHoursFromSonWeekly() + getCareHoursFromOtherWeekly();
     }
+
     public double getCareHoursFromPartnerWeekly() {
         double hours = 0.0;
         if (careHoursFromPartnerWeekly !=null)
             if (careHoursFromPartnerWeekly >0.0)
                 hours = careHoursFromPartnerWeekly;
+        return hours;
+    }
+
+    public double getCareHoursFromParentWeekly() {
+        double hours = 0.0;
+        if (careHoursFromParentWeekly !=null)
+            if (careHoursFromParentWeekly >0.0)
+                hours = careHoursFromParentWeekly;
         return hours;
     }
 
@@ -4155,6 +4313,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (careHoursFromOtherWeekly !=null)
             if (careHoursFromOtherWeekly >0.0)
                 hours = careHoursFromOtherWeekly;
+        return hours;
+    }
+
+    public double getCareHoursProvidedWeekly() {
+        double hours = 0.0;
+        if (careHoursProvidedWeekly !=null)
+            if (careHoursProvidedWeekly >0.0)
+                hours = careHoursProvidedWeekly;
         return hours;
     }
 
@@ -4200,9 +4366,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getSocialCareCostWeekly() {
         double cost = 0.0;
-        if (careFormalCostWeekly !=null)
-            if (careFormalCostWeekly >0.0)
-                cost = careFormalCostWeekly;
+        if (careFormalExpenditureWeekly !=null)
+            if (careFormalExpenditureWeekly >0.0)
+                cost = careFormalExpenditureWeekly;
         return cost;
     }
 

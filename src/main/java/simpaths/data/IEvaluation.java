@@ -1,4 +1,4 @@
-package simpaths.model.decisions;
+package simpaths.data;
 
 /**
  * INTERFACE TO FACILITATE SWAPPING OF FUNCTIONS FOR NUMERICAL MINIMISATION ROUTINES

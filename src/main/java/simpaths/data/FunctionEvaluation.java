@@ -1,4 +1,4 @@
-package simpaths.model.decisions;
+package simpaths.data;
 
 
 /**
