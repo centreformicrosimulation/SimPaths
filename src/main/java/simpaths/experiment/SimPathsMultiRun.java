@@ -84,7 +84,11 @@ public class SimPathsMultiRun extends MultiRun {
 			}
 			else if (args[i].equals("-f")){             //Output to file
 				try {
-					System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("output/logs/run_" + randomSeed + ".txt")), true));
+					File logDir = new File("output/logs");
+					if (!logDir.exists()) {
+						logDir.mkdirs();
+					}
+					System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(logDir.getPath() + "/run_" + randomSeed + ".txt")), true));
 				} catch (FileNotFoundException e) {
 					throw new RuntimeException(e);
 				}
