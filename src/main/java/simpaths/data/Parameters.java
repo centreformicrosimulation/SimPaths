@@ -316,7 +316,7 @@ public class Parameters {
     public static final double MIN_CAPITAL_INCOME_PER_MONTH = 0.0;
     public static final double MAX_CAPITAL_INCOME_PER_MONTH = 4000.0;
     public static final double MIN_PERSONAL_PENSION_PER_MONTH = 0.0;
-    public static final double MAX_PERSONAL_PENSION_PER_MONTH = 30000.0;
+    public static final double MAX_PERSONAL_PENSION_PER_MONTH = 15000.0;
 
     private static String inputFileName;
     private static String initialInputFileName;

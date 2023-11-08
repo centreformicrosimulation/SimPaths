@@ -1420,28 +1420,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
                 if (Les_c4.Retired.equals(les_c4)) { // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
 
-                    /* Private pension income when individual moves from non-retirement to retirement is modelled using:
+                    /*
+                        Private pension income when individual was retired in the previous period is modelled using process I4b.
+
+                        Private pension income when individual moves from non-retirement to retirement is modelled using:
                         i) process I5a_selection, to determine who receives private pension income
                         ii) process I5b_amount, for those who are determined to receive private pension income by process I5a_selection. I5b_amount is modelled in levels using linear regression.
                     */
 
                     double score, rmse, pensionIncLevel = 0.;
                     if (Les_c4.Retired.equals(les_c4_lag1)) {
-
-                        if (model.getYear() == model.getStartYear()) {
-                            // In the initial year of the simulation, estimate probability of receiving pension income and the amount for the stock of pensioners
-                            boolean hasPrivatePensionIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI6a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives private pension income. Amount modelled in the next step.
-                            if (hasPrivatePensionIncome) {
-                                score = Parameters.getRegIncomeI6b_amount().getScore(this, Person.DoublesVariables.class);
-                                rmse = Parameters.getRMSEForRegression("I6b");
-                                pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
-                            }
-                        } else {
                             // If person was retired in the previous period (and the simulation is not in its initial year), use process I4b
                             score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
                             rmse = Parameters.getRMSEForRegression("I4b");
                             pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
-                        }
                     } else {
                         // For individuals in the first year of retirement, use processes I5a_selection and I5b_amount
                         boolean hasPrivatePensionIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives private pension income. Amount modelled in the next step.
@@ -1451,6 +1443,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                             pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
                         }
                     }
+
                     ypnoab = Parameters.asinh(pensionIncLevel);
                 }
 
