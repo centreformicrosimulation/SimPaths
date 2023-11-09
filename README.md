@@ -51,9 +51,22 @@ SimPaths/
       `-- src
 ```
 
-These can be run with the command line (with arguments) e.g.:
+To run a single SimPaths run (with GUI) and set up a population for subsequent multiruns:
 ```
 $ java -jar singlerun.jar
+```
+For multiple runs, `multirun.jar` takes the following options:
+
+- `-r` random seed for first run (incremented by +1 for subsequent runs)
+- `-p` simulated population size
+- `-n` number of runs
+- `-s` start year of runs
+- `-e` end year of runs
+- `-g` [true/false] show/hide gui
+- `-f` write console output to file (in 'output/logs/run_[seed].txt')
+
+e.g.
+```
 $ java -jar multirun.jar -r 100 -p 50000 -n 20 -s 2017 -e 2020 -g false -f
 ```
 
