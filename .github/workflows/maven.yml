@@ -9,6 +9,9 @@
 name: Java CI with Maven
 
 on:
+  push: 
+    branches:
+      - 'experimental/enhanced_actions'
   pull_request:
     branches: [ "main", "develop" ]
 
