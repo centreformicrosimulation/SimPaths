@@ -11,6 +11,11 @@ import microsim.engine.SimulationEngine;
 import microsim.gui.shell.MultiRunFrame;
 import simpaths.model.enums.Country;
 
+// Logging and file writing
+import simpaths.model.SimPathsModel;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import java.io.*;
 
 public class SimPathsMultiRun extends MultiRun {
@@ -35,6 +40,9 @@ public class SimPathsMultiRun extends MultiRun {
 	 *
 	 */
 	public static void main(String[] args) {
+
+
+		public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
@@ -88,7 +96,17 @@ public class SimPathsMultiRun extends MultiRun {
 					if (!logDir.exists()) {
 						logDir.mkdirs();
 					}
+					// Writing console outputs to `run_[seed].txt
 					System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(logDir.getPath() + "/run_" + randomSeed + ".txt")), true));
+
+					// Writing logs to `run_[seed].log`
+					FileAppender appender = new FileAppender();
+					appender.setName("Run logging");
+					appender.setFile(logDir.getPath() + "/run_" + randomSeed + ".log");
+					appender.setAppend(false);
+					appender.setLayout(new PatternLayout("%d{yyyy MMM dd HH:mm:ss} - %m%n"));
+					appender.activateOptions();
+					Logger.getRootLogger().addAppender(appender);
 				} catch (FileNotFoundException e) {
 					throw new RuntimeException(e);
 				}
