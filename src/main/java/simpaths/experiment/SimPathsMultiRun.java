@@ -34,6 +34,7 @@ public class SimPathsMultiRun extends MultiRun {
 	
 	private static Long randomSeed = 615L;
 
+	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -42,7 +43,6 @@ public class SimPathsMultiRun extends MultiRun {
 	public static void main(String[] args) {
 
 
-		public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
