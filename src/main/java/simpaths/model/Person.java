@@ -191,6 +191,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private boolean toBePartnered;
     @Transient
+    private boolean hasTestPartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    @Transient
     private Person partner;
     @Column(name="idpartner")
     private Long idPartner;		//Note, must not use primitive long, as long cannot hold 'null' value, i.e. if the person has no partner
@@ -1234,6 +1236,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    public void evaluatePartnership(double probitAdjustment) {
+        toBePartnered = false;
+
+        if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION && partner == null) {
+            if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
+                double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
+                toBePartnered = cohabitInnov.nextDouble() < prob;
+            } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
+                double score = Parameters.getRegPartnershipU1b().getProbability(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
+                toBePartnered = cohabitInnov.nextDouble() < prob;
+            }
+
+            if (toBePartnered) {
+                model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+            }
+        }
+    }
+
+
     protected void inSchool() {
 
         //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
@@ -1292,78 +1315,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
 
     protected void considerCohabitation() {
-
         toBePartnered = false;
-        if (model.getCountry().equals(Country.UK)) {
 
-            //Apply only to individuals above age defined in MIN_AGE_MARRIAGE
-            if (dag >= Parameters.MIN_AGE_COHABITATION) {
-
-                //If not in partnership, follow U1a or U1b to determine probability of entering partnership
-                if (partner == null) {
-
-                    //Follow process U1a for individuals aged MIN_AGE_MARRIAGE-29 who are in continuous education:
-                    if (dag <= 29 && les_c4.equals(Les_c4.Student) && leftEducation == false) {
-
-                        toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU1a().getProbability(this, Person.DoublesVariables.class));
-                        if (toBePartnered) { //If true, look for a partner
-                            model.getPersonsToMatch().get(dgn).get(getRegion()).add(this); //Will look for partner in model's unionMatching process
-                        }
-                    }
-                    //Follow process U1b for individuals who are not in continuous education:
-                    else if ((les_c4.equals(Les_c4.Student) && leftEducation == true) || !les_c4.equals(Les_c4.Student)) {
-
-                        toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU1b().getProbability(this, Person.DoublesVariables.class));
-                        if (toBePartnered) {
-                            model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
-                        }
-                    }
+        if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION) {
+            if (partner == null) {
+                if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
+                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU1a().getProbability(this, Person.DoublesVariables.class));
+                } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
+                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU1b().getProbability(this, Person.DoublesVariables.class));
                 }
-
-                //If in partnership, follow U2b to determine the probability of exiting partnership by female member of the couple not in education
-                //Note: this implies a 0 probability of splitting for couples in which female is in continuous education
-                else if (partner != null) {
-
-                    if (dgn.equals(Gender.Female) && ((les_c4.equals(Les_c4.Student) && leftEducation == true) || !les_c4.equals(Les_c4.Student))) {
-
-                        if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) { //If true, leave partner
-
-                            leavePartner();
-                        }
-                    }
-                }
+                if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
+                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) leavePartner();
             }
-        }
-        else if (model.getCountry().equals(Country.IT)) {
-
-            if (dag >= Parameters.MIN_AGE_COHABITATION) {
-
-                //If not in partnership, follow U1a or U1b to determine probability of entering partnership
-                if (partner == null) {
-
-                    //Follow process U1 for individuals who are not in continuous education:
-                    if ((les_c4.equals(Les_c4.Student) && leftEducation == true) || !les_c4.equals(Les_c4.Student)) {
-
-                        toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class));
-                        if (toBePartnered) {
-
-                            model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
-                        }
-                    }
+        } else if (model.getCountry() == Country.IT && dag >= Parameters.MIN_AGE_COHABITATION) {
+            if (partner == null) {
+                if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
+                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class));
+                    if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
                 }
-
-                //If in partnership, follow U2 to determine the probability of exiting partnership by female member of the couple not in education
-                //Note: this implies a 0 probability of splitting for couples in which female is in continuous education
-                else if (partner != null) {
-
-                    if (dgn.equals(Gender.Female) && ((les_c4.equals(Les_c4.Student) && leftEducation == true) || !les_c4.equals(Les_c4.Student))) {
-
-                        if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class)) { //If true, leave partner
-
-                            leavePartner();
-                        }
-                    }
-                }
+            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
+                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class)) leavePartner();
             }
         }
     }
@@ -4374,6 +4346,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public RandomGenerator getSocialCareInnov() {
         return socialCareInnov;
+    }
+
+    public boolean hasTestPartner() {
+        return hasTestPartner;
+    }
+
+    public void setHasTestPartner(boolean hasTestPartner) {
+        this.hasTestPartner = hasTestPartner;
     }
 
 }
