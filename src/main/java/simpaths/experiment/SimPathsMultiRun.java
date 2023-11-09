@@ -2,6 +2,7 @@
 package simpaths.experiment;
 
 // import Java packages
+import org.apache.log4j.Level;
 import simpaths.data.Parameters;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
@@ -106,6 +107,7 @@ public class SimPathsMultiRun extends MultiRun {
 					appender.setAppend(false);
 					appender.setLayout(new PatternLayout("%d{yyyy MMM dd HH:mm:ss} - %m%n"));
 					appender.activateOptions();
+					Logger.getRootLogger().setLevel(Level.TRACE);
 					Logger.getRootLogger().addAppender(appender);
 				} catch (FileNotFoundException e) {
 					throw new RuntimeException(e);
