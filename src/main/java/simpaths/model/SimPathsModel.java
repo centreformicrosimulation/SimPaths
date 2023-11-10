@@ -2237,7 +2237,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				Class.forName("org.h2.Driver");
 				System.out.print("Reading from database at " + DatabaseUtils.databaseInputUrl);
 				try {
-					conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=TRUE", "sa", "");
+					conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=FALSE", "sa", "");
 				}
 				catch (SQLException e) {
 					log.info(e.getMessage());
