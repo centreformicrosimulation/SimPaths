@@ -159,7 +159,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	public boolean donorFinderCommentsOn = true;
 
 	@GUIparameter(description = "If checked, will use Covid-19 labour supply module")
-	public boolean labourMarketCovid19On = true; // Set to true to use reduced-form labour market module for years affected by Covid-19 (2020, 2021)
+	public boolean labourMarketCovid19On = false; // Set to true to use reduced-form labour market module for years affected by Covid-19 (2020, 2021)
 
 	@GUIparameter(description = "Simulate formal childcare costs")
 	public boolean projectFormalChildcare = true;
@@ -220,16 +220,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	EventGroup yearlySchedule = new EventGroup();
 
 	@GUIparameter(description = "tick to project social care")
-	private boolean projectSocialCare = false;
+	private boolean projectSocialCare = true;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
-	private boolean enableIntertemporalOptimisations = false;
+	private boolean enableIntertemporalOptimisations = true;
 
 	@GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
 	private boolean useSavedBehaviour = false;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
-	private String readGrid = "simulation name";
+	private String readGrid = "old";
 
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;
@@ -247,10 +247,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean responsesToRetirement = false;
 
 	@GUIparameter(description = "whether to include health in state space for IO behavioural solutions")
-	private boolean responsesToHealth = false;
+	private boolean responsesToHealth = true;
 
 	@GUIparameter(description = "whether to include disability in state space for IO behavioural solutions")
-	private boolean responsesToDisability = false;
+	private boolean responsesToDisability = true;
 
 	@GUIparameter(description = "minimum age for expecting less than perfect health in IO solutions")
 	private Integer minAgeForPoorHealth = 50;
@@ -276,6 +276,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		super();
 		this.country = country;
 		this.startYear = startYear;
+		this.startYear = 2016;
 	}
 
 	public SimPathsModel(Country country) {

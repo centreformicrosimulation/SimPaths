@@ -494,15 +494,19 @@ public class SimPathsStart implements ExperimentBuilder {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (Throwable e) {
+			e.printStackTrace();
+			throw e;
 		}
-		finally
-		{
+		finally {
 			try {
 				bufferWriter.flush();
 				bufferWriter.close();
-
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (Throwable e) {
+				e.printStackTrace();
+				throw e;
 			}
 		}
 
@@ -611,7 +615,7 @@ public class SimPathsStart implements ExperimentBuilder {
 				// loop through tax units
 
 				int age = 0, numberMembersOver17 = 0, numberChildrenUnder5 = 0, numberChildren5To9 = 0;
-				int numberChildren10To17 = 0, dlltsd1 = -1, dlltsd2 = -1;
+				int numberChildren10To17 = 0, dlltsd1 = -1, dlltsd2 = -1, careProvision = -1;
 				double hoursWorkedPerWeek1 = 0.0, hoursWorkedPerWeek2 = 0.0;
 				boolean flagInitialiseDemographics = true;
 				for (int fromYear : Parameters.EUROMODpolicyScheduleSystemYearMap.keySet()) {
@@ -672,6 +676,9 @@ public class SimPathsStart implements ExperimentBuilder {
 									dlltsd2 = dlltsd;
 								}
 							}
+							int cphere = person.getCarer();
+							if (cphere>careProvision)
+								careProvision = cphere;
 						} else {
 							ageTest = Math.max(ageTest, agePerson);
 						}
@@ -692,7 +699,7 @@ public class SimPathsStart implements ExperimentBuilder {
 						DonorKeys keys = new DonorKeys();
 						KeyFunction keyFunction = new KeyFunction(systemYear, systemYear, age, numberMembersOver17, numberChildrenUnder5,
 								numberChildren5To9, numberChildren10To17, hoursWorkedPerWeek1, hoursWorkedPerWeek2, dlltsd1, dlltsd2,
-								originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek);
+								careProvision, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek);
 						keys.evaluate(keyFunction);
 
 						// set all taxUnitPolicy attributes

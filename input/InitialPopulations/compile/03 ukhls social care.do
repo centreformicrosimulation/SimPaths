@@ -250,7 +250,7 @@ qui{
 			replace `var' = -9 if (missing(`var'))
 		}
 		gen formal_socare_cost = -9
-		replace formal_socare_cost = $careHourlyWageRates[`year' - $careWageRate_minyear + 1] * formal_socare_hrs if (formal_socare_hrs>0)
+		replace formal_socare_cost = careHourlyWageRates[`year' - $careWageRate_minyear + 1,1] * formal_socare_hrs if (formal_socare_hrs>0)
 		save population_initial_uk_`year', replace
 		if (`year'==$yearWealth) {
 			drop rnk smp mtc

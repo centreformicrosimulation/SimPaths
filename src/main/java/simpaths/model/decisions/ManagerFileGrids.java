@@ -37,6 +37,9 @@ public class ManagerFileGrids {
             readwrite(grids.valueFunction, "read", DecisionParams.gridsInputDirectory, "value_function.uft");
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
         }
 
         // read in consumption
@@ -44,6 +47,9 @@ public class ManagerFileGrids {
             readwrite(grids.consumption, "read", DecisionParams.gridsInputDirectory, "consumption.uft");
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
         }
 
         if (grids.employment1!=null) {
@@ -52,6 +58,9 @@ public class ManagerFileGrids {
                 readwrite(grids.employment1, "read", DecisionParams.gridsInputDirectory, "employment1.uft");
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw e;
             }
         }
 
@@ -61,6 +70,9 @@ public class ManagerFileGrids {
                 readwrite(grids.employment2, "read", DecisionParams.gridsInputDirectory, "employment2.uft");
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw e;
             }
         }
     }
@@ -74,6 +86,9 @@ public class ManagerFileGrids {
      * THE MANAGER IS ACCESSED FROM ManagerPopulateGrids
      */
     public static void write(Grids grids) {
+        write(grids, false);
+    }
+    public static void write(Grids grids, boolean flagIntermediate) {
 
         System.out.println("Saving optimised decisions");
 
@@ -85,30 +100,45 @@ public class ManagerFileGrids {
             readwrite(grids.valueFunction, "write", DecisionParams.gridsOutputDirectory, "value_function.uft");
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        // write consumption
-        try {
-            readwrite(grids.consumption, "write", DecisionParams.gridsOutputDirectory, "consumption.uft");
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
+            throw e;
         }
 
-        if (grids.employment1!=null) {
-            // write employment 1
+        if (!flagIntermediate) {
+
+            // write consumption
             try {
-                readwrite(grids.employment1, "write", DecisionParams.gridsOutputDirectory, "employment1.uft");
+                readwrite(grids.consumption, "write", DecisionParams.gridsOutputDirectory, "consumption.uft");
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw e;
             }
-        }
 
-        if (grids.employment2!=null) {
-            // write employment 2
-            try {
-                readwrite(grids.employment2, "write", DecisionParams.gridsOutputDirectory, "employment2.uft");
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (grids.employment1!=null) {
+                // write employment 1
+                try {
+                    readwrite(grids.employment1, "write", DecisionParams.gridsOutputDirectory, "employment1.uft");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+
+            if (grids.employment2!=null) {
+                // write employment 2
+                try {
+                    readwrite(grids.employment2, "write", DecisionParams.gridsOutputDirectory, "employment2.uft");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    throw e;
+                }
             }
         }
     }
@@ -182,8 +212,13 @@ public class ManagerFileGrids {
      */
     private static void safeDelete(String file_path) {
         File file = new File(file_path);
-        try { Files.deleteIfExists(file.toPath());
-        } catch (IOException ignored) {
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 

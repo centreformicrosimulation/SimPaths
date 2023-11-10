@@ -9,7 +9,7 @@ import simpaths.model.decisions.DecisionParams;
 
 public class AnnuityRates {
 
-    private double[][][] annuityRates;
+    private double[][][] annuityRates;      // first dim: single women / single men / couples; second dim: birth years; third dim: age
 
     public AnnuityRates() {
 
@@ -76,14 +76,18 @@ public class AnnuityRates {
         annuityRates[ii][birthYear-DecisionParams.minBirthYear][age-Parameters.MIN_AGE_TO_RETIRE] = annuityRate;
     }
     public double getAnnuityRate(Occupancy occupancy, int birthYear, int age) {
+        double rate;
         int bb = Math.min( Math.max( birthYear, DecisionParams.minBirthYear), DecisionParams.maxBirthYear) - DecisionParams.minBirthYear;
         int aa = Math.min( Math.max(age, Parameters.MIN_AGE_TO_RETIRE), Parameters.maxAge) - Parameters.MIN_AGE_TO_RETIRE;
         if (Occupancy.Couple.equals(occupancy)) {
-            return annuityRates[2][bb][aa];
+            rate = annuityRates[2][bb][aa];
         } else if (Occupancy.Single_Male.equals(occupancy)) {
-            return annuityRates[1][bb][aa];
+            rate = annuityRates[1][bb][aa];
         } else {
-            return annuityRates[0][bb][aa];
+            rate = annuityRates[0][bb][aa];
         }
+        if (rate<1.01 && age<100)
+            throw new RuntimeException("annuity rate lower than expected: " + rate);
+        return rate;
     }
 }

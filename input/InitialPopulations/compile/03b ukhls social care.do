@@ -160,6 +160,7 @@ qui{
 /**************************************************************************************
 *	clean-up
 **************************************************************************************/
+rm "$workingDir/int_temp.dta"
 rm "$workingDir/ukhls_scprov_pooled0.dta"
 rm "$workingDir/ukhls_scprov_pooled1.dta"
 foreach waveid in $SCProvWaves {

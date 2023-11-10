@@ -5,7 +5,7 @@
 *	data drawn from the UKLHS, with wealth data (optionally) imputed from the WAS
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 09/09/2023 (JV)
+*	LAST EDIT: 01/11/2023 (JV)
 *
 **********************************************************************/
 
@@ -39,7 +39,8 @@ global wealthDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMET
 global WASDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\02b was wealth data.do"
 
 * social care data
-global socareDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\03 ukhls social care.do"
+global socareDoFile1 "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\03 ukhls social care.do"
+global socareDoFile2 "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\03b ukhls social care.do"
 
 //////////////////////////////////////////////////////////////
 // SURVEY DATA REFERENCES
@@ -113,7 +114,7 @@ global lastSimYear = 2017
 * inflation adjustments
 global cpi_minyear = 2009
 global cpi_maxyear = 2019
-global matrix cpi = (0.866 \ /// 2009
+matrix cpi = (0.866 \ /// 2009
 0.894 \ /// 2010
 0.934 \ /// 2011
 0.961 \ /// 2012
@@ -127,7 +128,7 @@ global matrix cpi = (0.866 \ /// 2009
 
 * social care wage rates (real 2015 prices for consistency with inflation figures)
 global careWageRate_minyear = 2010
-global matrix careHourlyWageRates = (9.04 \ ///	2010
+matrix careHourlyWageRates = (9.04 \ ///	2010
 9.12 \ ///	2011
 8.91 \ ///	2012
 8.71 \ ///	2013
@@ -147,7 +148,8 @@ global matrix careHourlyWageRates = (9.04 \ ///	2010
 ********************************************************************************/
 do "$ukhlsDoFile"
 do "$wealthDoFile"
-do "$socareDoFile"
+do "$socareDoFile1"
+do "$socareDoFile2"
 
 
 /********************************************************************************

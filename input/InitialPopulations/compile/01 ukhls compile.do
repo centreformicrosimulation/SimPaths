@@ -50,7 +50,7 @@ global lastSimYear = 2017
 * inflation adjustments
 global cpi_minyear = 2009
 global cpi_maxyear = 2019
-global matrix cpi = (0.866 \ /// 2009
+matrix cpi = (0.866 \ /// 2009
 0.894 \ /// 2010
 0.934 \ /// 2011
 0.961 \ /// 2012
@@ -165,7 +165,7 @@ la var lhw "Hours worked per week"
 *Income CPI from ONS:
 gen CPI = .
 forval yy = $cpi_minyear/$cpi_maxyear {
-	replace CPI = $cpi[`yy' - $cpi_minyear + 1] if stm == `yy'
+	replace CPI = cpi[`yy' - $cpi_minyear + 1,1] if stm == `yy'
 }
 
 *Income variables
@@ -748,3 +748,5 @@ rm "temp2_here.dta"
 rm "uk_temp_dehf.dta"
 rm "uk_temp_dehm.dta"
 rm "uk_temp_dehsp.dta"
+rm "population_UK_initial.csv"
+rm "population_UK_initial_check.csv"

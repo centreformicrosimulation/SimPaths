@@ -1,6 +1,6 @@
 package simpaths.model.enums;
 
-public enum Region {		
+public enum Region implements IntegerValuedEnum {
 	
 	//Uses NUTS Level 1 system for each country
 	
@@ -51,23 +51,21 @@ public enum Region {
 
 	
 	private final String name;
-	private final int drgn1EUROMODvariable;
+	private final int value;
 
-    private Region(String name, int drgn1EUROMODvariable)
+    Region(String name, int drgn1EUROMODvariable)
     {
         this.name = name;
-        this.drgn1EUROMODvariable = drgn1EUROMODvariable;
+        this.value = drgn1EUROMODvariable;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
-    
-    public int getDrgn1EUROMODvariable()
-    {
-        return drgn1EUROMODvariable;
-    }
 
-	
+	@Override
+    public int getValue()
+    {
+        return value;
+    }
 }

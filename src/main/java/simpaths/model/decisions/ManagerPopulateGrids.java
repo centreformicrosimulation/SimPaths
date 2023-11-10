@@ -31,10 +31,14 @@ public class ManagerPopulateGrids {
 
         // populate the decision grids
         if (useSavedGrids) {
-            // use saved intertemporal optimisations
-
             ManagerFileGrids.read(grids);
         } else {
+            if (DecisionParams.SOLVE_FROM_INTERMEDIATE)
+                throw new RuntimeException("cannot solve from intermediate solutions without loading intermediate solutions");
+        }
+        if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
+            ManagerFileGrids.write(grids);
+        if (!useSavedGrids || DecisionParams.SOLVE_FROM_INTERMEDIATE) {
             // need to solve for intertemporal optimisations
 
             model.addRegressionStochasticComponent = false;
@@ -43,7 +47,8 @@ public class ManagerPopulateGrids {
         }
 
         // save populated grids if necessary
-        if (saveGrids) ManagerFileGrids.write(grids);
+        if (saveGrids || DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
+            ManagerFileGrids.write(grids);
 
         // reporting
         Instant afterTotal = Instant.now();

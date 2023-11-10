@@ -13,6 +13,9 @@ public class DecisionParams {
 
     // CONTROLS FOR USER OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
+    public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = true;
+    public static final boolean SOLVE_FROM_INTERMEDIATE = false;
+    public static final int SOLVE_FROM_AGE = 56;
     public static boolean flagRetirement;                             // model retirement state
     public static boolean enableIntertemporalOptimisations = false;   // intertemporal optimisations initialised to false
     public static int optionsEmployment1;                             // number of discrete employment alternatives to consider for principal earner
@@ -57,9 +60,9 @@ public class DecisionParams {
     public static final int PTS_LIQUID_WEALTH = 5;
     public static final int AGE_DEBT_DRAWDOWN = 55;                   // max debt limit reduced to zero in linear progression to max_age_debt
     public static final int MAX_AGE_DEBT = 65;                        // age at which all debt must be repaid
-    public static final double MIN_LIQUID_WEALTH = -30000.0;          // lower bound of state-space
-    public static final double MAX_LIQUID_WEALTH = 4000000.0;         // upper bound of state-space
-    public static final double C_LIQUID_WEALTH = 40000.0;             // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
+    public static final double MIN_LIQUID_WEALTH = -25000.0;          // lower bound of state-space (set to omit +/- 0.5% of benefit units)
+    public static final double MAX_LIQUID_WEALTH = 4500000.0;         // upper bound of state-space
+    public static final double C_LIQUID_WEALTH = 30000.0;             // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
     public static double rDebtHi;                                     // interest charge on net debt
@@ -101,7 +104,7 @@ public class DecisionParams {
     public static final Indicator DEFAULT_DISABILITY = Indicator.False;     // assumed for formulating expectations in absence of explicit value
 
     // FORMAL SOCIAL CARE STATE
-    public static int minAgeFormalSocialCare;
+    public static int minAgeReceiveFormalCare;
 
     // MAXIMUM AGE FOR COHABITATION
     public static final int MAX_AGE_COHABITATION = 100;
@@ -166,7 +169,7 @@ public class DecisionParams {
         maxAgeFlexibleLabourSupply = Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY;
         maxAge = Parameters.maxAge;
         minAgeToRetire = Parameters.MIN_AGE_TO_RETIRE;
-        minAgeFormalSocialCare = Parameters.MIN_AGE_FORMAL_SOCARE;
+        minAgeReceiveFormalCare = Parameters.MIN_AGE_FORMAL_SOCARE;
         if (MIN_LIQUID_WEALTH+C_LIQUID_WEALTH < 0.0) {
             throw new RuntimeException("minimum liquid wealth must be greater than -" + C_LIQUID_WEALTH);
         }

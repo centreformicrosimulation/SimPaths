@@ -28,7 +28,7 @@ public class States {
         // initialise object attributes
         this.scale = scale;
         this.ageYears = ageYears;
-        ageIndex = ageYears - simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE;
+        ageIndex = ageYears - Parameters.AGE_TO_BECOME_RESPONSIBLE;
         if (ageIndex == scale.simLifeSpan) {
             states = new double[1];
         } else {
@@ -44,7 +44,7 @@ public class States {
         // initialise state vector and working variables
         Person refPerson = benefitUnit.getRefPersonForDecisions();
         ageYears = Math.min(refPerson.getDag(), DecisionParams.maxAge);
-        ageIndex = ageYears - simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE;
+        ageIndex = ageYears - Parameters.AGE_TO_BECOME_RESPONSIBLE;
         if (ageIndex == scale.simLifeSpan) {
             states = new double[1];
         } else {
@@ -91,8 +91,11 @@ public class States {
         // disability
         if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) populate(Axis.Disability, (double)refPerson.getDisability());
 
-        // market social care
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeFormalSocialCare) populate(Axis.SocialCareMarket, (double)refPerson.getSocialCareMarketAll().getValue());
+        // social care receipt
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptAll().getValue());
+
+        // social care provision
+        if (Parameters.flagSocialCare) populate(Axis.SocialCareProvision, refPerson.getSocialCareProvision().getValue());
 
         // region
         if ( DecisionParams.flagRegion ) populate(Axis.Region, benefitUnit.getRegionIndex());
@@ -311,9 +314,10 @@ public class States {
 
         // check if prior to simulated period
         int year = getYear();
-        if (year < DecisionParams.startYear) loopConsider = false;
+        if (year < DecisionParams.startYear)
+            loopConsider = false;
 
-        // evaluate return
+        // check wage offer
         int wageOffer = getWageOffer();
         if (wageOffer == 0) {
 
@@ -321,6 +325,12 @@ public class States {
             // one of the labour options in the respective state combination where a wage offer is received
             loopConsider = false;
         }
+
+        // check care provision
+        if (!getCohabitation() &&
+                ( SocialCareProvision.OnlyPartner.equals(getSocialCareProvisionCode()) ||
+                        SocialCareProvision.PartnerAndOther.equals(getSocialCareProvisionCode()) ))
+            loopConsider = false;
 
         // return result
         return loopConsider;
@@ -413,7 +423,7 @@ public class States {
         int dimIndex = states.length - 3;
         for (int ii = DecisionParams.NUMBER_BIRTH_AGES - 1; ii >= 0; ii--) {
             children[ii][0] = ageYears - DecisionParams.BIRTH_AGE[ii];
-            if ((ageYears >= DecisionParams.BIRTH_AGE[ii]) && (ageYears < (DecisionParams.BIRTH_AGE[ii] + simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE))) {
+            if ((ageYears >= DecisionParams.BIRTH_AGE[ii]) && (ageYears < (DecisionParams.BIRTH_AGE[ii] + Parameters.AGE_TO_BECOME_RESPONSIBLE))) {
                 children[ii][1] = (int) Math.round(states[dimIndex]);
                 dimIndex--;
             } else {
@@ -445,10 +455,10 @@ public class States {
         for (int ii = DecisionParams.NUMBER_BIRTH_AGES - 1; ii >= 0; ii--) {
 
             int childAge = ageYears - DecisionParams.BIRTH_AGE[ii];
-            if ((childAge >= 0) && (childAge < simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
+            if ((childAge >= 0) && (childAge < Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
 
                 int childNbr = (int) Math.round(states[dimIndex]);
-                if (childNbr > 0 && childAge <= simpaths.data.Parameters.MAX_CHILD_AGE_FOR_FORMAL_CARE) {
+                if (childNbr > 0 && childAge <= Parameters.MAX_CHILD_AGE_FOR_FORMAL_CARE) {
                     return true;
                 }
                 dimIndex--;
@@ -593,12 +603,24 @@ public class States {
     }
 
     /**
-     * METHOD TO RETURN MARKET FOR SOCIAL CARE (USED TO MEET CARE NEEDS)
+     * METHOD TO RETURN SOCIAL CARE RECEIPT
      * @return integer (0 no care, 1 only informal, 2 formal and informal, 3 only formal
      */
-    int getSocialCareMarket() {
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeFormalSocialCare) {
-            return (int)states[scale.getIndex(Axis.SocialCareMarket, ageYears)];
+    int getSocialCareReceipt() {
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+            return (int)states[scale.getIndex(Axis.SocialCareReceipt, ageYears)];
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * METHOD TO RETURN SOCIAL CARE PROVISION
+     * @return integer (0 no care, 1 only to partner, 2 to partner and other, 3 only to other
+     */
+    int getSocialCareProvision() {
+        if (Parameters.flagSocialCare) {
+            return (int)states[scale.getIndex(Axis.SocialCareProvision, ageYears)];
         } else {
             return 0;
         }
@@ -685,7 +707,7 @@ public class States {
         if (DecisionParams.flagRegion) {
             int regionId = getRegion();
             for (Region code : Region.values()) {
-                if (code.getDrgn1EUROMODvariable()==regionId) {
+                if (code.getValue()==regionId) {
                     regionCode = code;
                 }
             }
@@ -803,24 +825,34 @@ public class States {
      */
     Dhe getHealthCode() {
         Dhe code;
-        if (DecisionParams.flagHealth && ageYears >= DecisionParams.minAgeForPoorHealth) {
+        if (DecisionParams.flagHealth && ageYears >= DecisionParams.minAgeForPoorHealth)
             code = Dhe.getCode(getVal(Axis.Health));
-        } else {
+        else
             code = DecisionParams.DEFAULT_HEALTH;
-        }
         return code;
     }
 
     /**
-     * METHOD TO IDENTIFY SOCIAL CARE MARKET CODE IMPLIED BY STATE COMBINATION
+     * METHOD TO IDENTIFY SOCIAL CARE RECEIPT CODE IMPLIED BY STATE COMBINATION
      */
-    SocialCareMarketAll getSocialCareMarketCode() {
-        SocialCareMarketAll code;
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeFormalSocialCare) {
-            code = SocialCareMarketAll.getCode((int)getVal(Axis.SocialCareMarket));
-        } else {
-            code = SocialCareMarketAll.None;
-        }
+    SocialCareReceiptAll getSocialCareReceiptCode() {
+        SocialCareReceiptAll code;
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+            code = SocialCareReceiptAll.getCode((int)getVal(Axis.SocialCareReceipt));
+        else
+            code = SocialCareReceiptAll.None;
+        return code;
+    }
+
+    /**
+     * METHOD TO IDENTIFY SOCIAL CARE PROVISION CODE IMPLIED BY STATE COMBINATION
+     */
+    SocialCareProvision getSocialCareProvisionCode() {
+        SocialCareProvision code;
+        if (Parameters.flagSocialCare)
+            code = SocialCareProvision.getCode((int)getVal(Axis.SocialCareProvision));
+        else
+            code = SocialCareProvision.None;
         return code;
     }
 
@@ -926,11 +958,19 @@ public class States {
             System.out.println(msg);
         }
 
-        // market social care
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeFormalSocialCare) {
-            stateIndex = scale.getIndex(Axis.SocialCareMarket, ageYears);
+        // social care receipt
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+            stateIndex = scale.getIndex(Axis.SocialCareReceipt, ageYears);
             printOutOfBounds(stateIndex);
-            msg = "market social care: " + String.format(fmtIndicator,states[stateIndex]);
+            msg = "social care receipt: " + String.format(fmtIndicator,states[stateIndex]);
+            System.out.println(msg);
+        }
+
+        // social care provision
+        if (Parameters.flagSocialCare) {
+            stateIndex = scale.getIndex(Axis.SocialCareProvision, ageYears);
+            printOutOfBounds(stateIndex);
+            msg = "social care provision: " + String.format(fmtIndicator,states[stateIndex]);
             System.out.println(msg);
         }
 
@@ -961,7 +1001,7 @@ public class States {
         // children
         for (int jj = 0; jj < DecisionParams.NUMBER_BIRTH_AGES; jj++) {
 
-            if (ageYears >= DecisionParams.BIRTH_AGE[jj] && ageYears < (DecisionParams.BIRTH_AGE[jj] + simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
+            if (ageYears >= DecisionParams.BIRTH_AGE[jj] && ageYears < (DecisionParams.BIRTH_AGE[jj] + Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
 
                 stateIndex = scale.getIndex(Axis.Child, ageYears, jj);
                 printOutOfBounds(stateIndex);

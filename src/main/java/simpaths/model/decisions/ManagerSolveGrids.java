@@ -1,5 +1,6 @@
 package simpaths.model.decisions;
 
+import simpaths.data.Parameters;
 import simpaths.model.SimPathsModel;
 
 import java.time.Duration;
@@ -45,10 +46,15 @@ public class ManagerSolveGrids {
 
         // solve grids using backward-induction, working from the last potential period in life
         Instant beforeTotal = null, afterTotal = null;
-        for (int aa = grids.scale.simLifeSpan -1; aa>=0; aa--) {
+        int solveFromAgeIndex;
+        if (DecisionParams.SOLVE_FROM_INTERMEDIATE)
+            solveFromAgeIndex = DecisionParams.SOLVE_FROM_AGE - Parameters.AGE_TO_BECOME_RESPONSIBLE;
+        else
+            solveFromAgeIndex = grids.scale.simLifeSpan - 1;
+        for (int aa=solveFromAgeIndex; aa>=0; aa--) {
 
             Instant before = Instant.now();
-            if ( aa == grids.scale.simLifeSpan -1) beforeTotal = before;
+            if (aa==solveFromAgeIndex) beforeTotal = before;
 
             // set age specific working variables
             int innerDimension = (int)grids.scale.gridDimensions[aa][0];
@@ -58,7 +64,7 @@ public class ManagerSolveGrids {
             for (int iiOuter=0; iiOuter<outerDimension; iiOuter++) {
 
                 // identify current state combination for outer states
-                int ageYears = aa + simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE;
+                int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
                 States outerStates = new States(grids.scale, ageYears);
                 outerStates.populateOuterGridStates(iiOuter);
                 boolean loopConsider = outerStates.checkOuterStateCombination();
@@ -91,10 +97,12 @@ public class ManagerSolveGrids {
                     }
                 }
             }
+            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
+                ManagerFileGrids.write(grids, true);
             Instant after = Instant.now();
             if (aa == 0) afterTotal = after;
             Duration duration = Duration.between(before, after);
-            int ageHere = simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
+            int ageHere = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
             System.out.println("Calculations for age " + ageHere + " completed in " + String.format("%.3f", (double)duration.toMillis()/1000.0) + " seconds");
         }
         if (beforeTotal != null && afterTotal != null) {

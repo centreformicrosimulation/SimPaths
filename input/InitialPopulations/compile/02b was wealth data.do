@@ -719,9 +719,9 @@ gen single = (na==1)
 
 /* wealth, omitting value of state pension rights */
 gen wealth = w + isa_fam + bus_assets + tot_open + tot_pp
-replace wealth = wealth / $cpi[2016 - 2008] if (year==2016 | ((year==2017)&(month<4)))
-replace wealth = wealth / $cpi[2017 - 2008] if (((year==2017)&(month>3)) | ((year==2018)&(month<4)))
-replace wealth = wealth / $cpi[2018 - 2008] if (((year==2018)&(month>3)) | ((year==2019)&(month<4)))
+replace wealth = wealth / cpi[2016 - $cpi_minyear + 1,1] if (year==2016 | ((year==2017)&(month<4)))
+replace wealth = wealth / cpi[2017 - $cpi_minyear + 1,1] if (((year==2017)&(month>3)) | ((year==2018)&(month<4)))
+replace wealth = wealth / cpi[2018 - $cpi_minyear + 1,1] if (((year==2018)&(month>3)) | ((year==2019)&(month<4)))
 gen wealth1 = asinh(wealth)
 
 /* regression variables */

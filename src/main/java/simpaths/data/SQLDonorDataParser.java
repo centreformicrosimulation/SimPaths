@@ -183,6 +183,10 @@ public class SQLDonorDataParser {
                 + "ALTER TABLE " + tableName + " ALTER COLUMN DDI int;"
                 + "ALTER TABLE " + tableName + " ALTER COLUMN DDI RENAME TO DLLTSD;"
 
+                //social care provision
+                + "ALTER TABLE " + tableName + " ALTER COLUMN LCR01 int;"
+                + "ALTER TABLE " + tableName + " ALTER COLUMN LCR01 RENAME TO CARER;"
+
                 //Labour hours
                 //XXX: Could set " + Parameters.HOURS_WORKED_WEEKLY + ", earnings, labour cost etc. to 0 if retired.
                 // However, the data does not conform - see idperson 101, who is retired pensioner aged 80, but who declares lhw = 40
@@ -202,7 +206,7 @@ public class SQLDonorDataParser {
             Parameters.setCountryRegions(country);
             for(Region region: Parameters.getCountryRegions()) {
                 stat.execute(
-                    "UPDATE " + tableName + " SET REGION = '" + region + "' WHERE DRGN1 = " + region.getDrgn1EUROMODvariable() + ";"
+                    "UPDATE " + tableName + " SET REGION = '" + region + "' WHERE DRGN1 = " + region.getValue() + ";"
                 );
             }
             stat.execute( "ALTER TABLE " + tableName + " DROP COLUMN DRGN1;");
