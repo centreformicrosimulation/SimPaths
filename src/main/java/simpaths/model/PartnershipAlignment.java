@@ -47,9 +47,8 @@ public class PartnershipAlignment implements IEvaluation {
      */
     @Override
     public double evaluate(double[] args) {
-        if (Math.abs(args[0] - partnershipAdjustment) > 1.0E-5) {
-            adjustPartnerships(args[0]);
-        }
+
+        adjustPartnerships(args[0]);
 
         double error = targetAggregateShareOfPartneredPersons - evalAggregateShareOfPartneredPersons();
         return error;
@@ -80,12 +79,12 @@ public class PartnershipAlignment implements IEvaluation {
 
     /**
      * Adjusts the probit regression used for partnership evaluation and re-evaluates the score for all eligible persons.
-     * Then, creates "test" unions between individuals. 
+     * Then, creates "test" unions between individuals.
      *
      * This method performs the following steps:
      * 1. Runs the cohabitation probit model.
      * 2. Matches individuals within this method.
-     *
+     * TODO: the loops over persons calculating cohabitation probability should be paralellised
      * @param newPartnershipAdjustment The new adjustment value for the partnership probit regression.
      */
     private void adjustPartnerships(double newPartnershipAdjustment) {

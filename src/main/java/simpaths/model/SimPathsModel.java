@@ -16,6 +16,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
+import simpaths.data.IEvaluation;
 import simpaths.data.MahalanobisDistance;
 import simpaths.data.RootSearch;
 import simpaths.experiment.SimPathsCollector;
@@ -451,6 +453,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.UpdatePotentialHourlyEarnings);
 
 		// B: Consider whether in consensual union (cohabiting)
+		yearlySchedule.addEvent(this, Processes.CohabitationRegressionAlignment);
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderCohabitation);
 
 		// TODO: new partnership alignment routine should be here. It will adjust the number of people who want to cohabit, perform test union matching, and repeat until satisfactory number of unions has been created.
@@ -561,7 +564,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//Alignment Processes
 		FertilityAlignment,
 		PopulationAlignment,
-		ConsiderCohabitationAlignment,
+		CohabitationRegressionAlignment,
 		// HealthAlignment,
 		InSchoolAlignment,
 		EducationLevelAlignment,
@@ -603,9 +606,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					if (commentsOn) log.info("Population alignment skipped as simulated year exceeds period covered by population projections.");
 				}
 				break;
-			case ConsiderCohabitationAlignment:
-				if (alignCohabitation && year == getStartYear()) {
-					considerCohabitationAlignment();
+			case CohabitationRegressionAlignment:
+				if (alignCohabitation) {
+					partnershipAlignment();
 				}
 				if (commentsOn) log.info("Cohabitation alignment complete.");
 				break;
@@ -1553,6 +1556,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
 			unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
 			unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
+			ageDiffBound = Parameters.AGE_DIFFERENCE_INITIAL_BOUND;
+			potentialHourlyEarningsDiffBound = Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
 
 			// System.out.println("There are " + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the start");
 			Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
@@ -1645,7 +1650,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				);
 
 				// Relax differential bounds for next iteration (in the case where there has not been a high enough proportion of matches)
-				ageDiffBound *= Parameters.RELAXATION_FACTOR; //TODO: Should the bounds be relaxed permanently as it is the case now? Or only for the current year or year-region for example?
+				ageDiffBound *= Parameters.RELAXATION_FACTOR;
 				potentialHourlyEarningsDiffBound *= Parameters.RELAXATION_FACTOR;
 				countAttempts++;
 				// System.out.println("unmatched males proportion " + unmatchedMales.size() / (double) initialMalesSize);
@@ -1802,6 +1807,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		if (!alignmentRun) {
 			allMatches += matches.size();
+		} else {
+			// Clear set if used within the matching procedure
+			for (Gender gender : Gender.values()) {
+				for (Region region : Region.values()) {
+					personsToMatch.get(gender).get(region).clear();
+				}
+			}
 		}
 //		System.out.println("There are " + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made " + matches.size() + " and total number of matches in all years is " + allMatches);
 	}
@@ -1821,7 +1833,25 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		}
 	}
 
+	private void partnershipAlignment() {
+		double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment); // Initial values of adjustment to be applied to considerCohabitation probit
+		PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
+		RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 5.0E-2, 5.0E-2); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+		if (search.isTargetAltered()) {
+			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
+			System.out.println("Adjustment value was " + search.getTarget()[0]);
+		}
+	}
 
+	@NotNull
+	private static RootSearch getRootSearch(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction) {
+		double[] startVal = new double[] {initialAdjustment}; // Starting values for the adjustment
+		double[] lowerBound = new double[] {initialAdjustment - 4};
+		double[] upperBound = new double[] {initialAdjustment + 4};
+		RootSearch search = new RootSearch(lowerBound, upperBound, startVal, alignmentClass, epsOrdinates, epsFunction);
+		search.evaluate();
+		return search;
+	}
 
 
 	/**

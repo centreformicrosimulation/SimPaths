@@ -168,6 +168,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private double drawProvCareIncidence;
     @Transient
     private double drawProvCareHours;
+    @Transient
+    private double drawPartnership; // Used with the partnership alignment process
 
     //Sedex is an indicator for leaving education in that year
     @Enumerated(EnumType.STRING)
@@ -459,6 +461,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         educationInnov = new Random(SimulationEngine.getRnd().nextLong());
         labourSupplyInnov = new Random(SimulationEngine.getRnd().nextLong());
         labourSupplySingleDraw = labourSupplyInnov.nextDouble();
+        drawPartnership = -9;
     }
 
     //For use with creating new people at the minimum Age who enter the simulation during UpdateMaternityStatus after fertility has been aligned
@@ -1238,16 +1241,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void evaluatePartnership(double probitAdjustment) {
         toBePartnered = false;
+        if (drawPartnership < 0.) {
+            drawPartnership = cohabitInnov.nextDouble();
+        }
 
         if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION && partner == null) {
             if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
                 double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
-                toBePartnered = cohabitInnov.nextDouble() < prob;
+                toBePartnered = drawPartnership < prob;
             } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
                 double score = Parameters.getRegPartnershipU1b().getProbability(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
-                toBePartnered = cohabitInnov.nextDouble() < prob;
+                toBePartnered = drawPartnership < prob;
             }
 
             if (toBePartnered) {
