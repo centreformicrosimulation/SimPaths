@@ -107,7 +107,7 @@ public class SimPathsMultiRun extends MultiRun {
 					appender.setAppend(false);
 					appender.setLayout(new PatternLayout("%d{yyyy MMM dd HH:mm:ss} - %m%n"));
 					appender.activateOptions();
-					Logger.getRootLogger().setLevel(Level.TRACE);
+					Logger.getRootLogger().setLevel(Level.INFO);
 					Logger.getRootLogger().addAppender(appender);
 				} catch (FileNotFoundException e) {
 					throw new RuntimeException(e);
