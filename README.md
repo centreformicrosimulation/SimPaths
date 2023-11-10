@@ -24,16 +24,18 @@ If you have a need for the data, please contact the repository maintainers throu
 ### Forking the Repository
 
 1. Click the "Fork" button at the top-right corner of this repository.
-2. This will create a copy of the repository in your own GitHub account.
+2. Untick the `Copy only the main branch` box.
+3. This will create a copy of the repository in your own GitHub account.
+4. Follow [instructions here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to periodically synchronize your fork with the most recent version of this ("upstream") repository. This will ensure you use an up-to-date version of the model.
 
 ### Setting up your development environment
 1. **Java Development Kit (JDK):** Ensure you have a JDK (Java Development Kit) installed on your system. You can download and install the latest version of OpenJDK from [Adoptium](https://adoptium.net/).
-2. **Download IntelliJ IDEA:** Go to the [IntelliJ IDEA download page](https://www.jetbrains.com/idea/download/) and download the Community (free) or Ultimate (paid) edition, depending on your needs.
+2. **Download an IDE** (integrated development environment) of your choice - we recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/download/); download the Community (free) or Ultimate (paid) edition, depending on your needs.
 3. Clone your forked repository to your local machine. Import the cloned repository into IntelliJ as a Maven project 
 
 ### Contributing
 
-1. Create a new branch for your contributions. Please see branch naming convention below.
+1. Create a new branch for your contributions. This will likely be based on either the `main` branch of this repository (if you seek to modify the stable version of the model) or `develop` (if you seek to modify the most recent version of the model).  Please see branch naming convention below.
 2. Make your changes, add your code, and write tests if applicable.
 3. Commit your changes.
 4. Push your changes to your fork.
