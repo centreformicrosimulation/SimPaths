@@ -456,9 +456,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		yearlySchedule.addEvent(this, Processes.CohabitationRegressionAlignment);
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderCohabitation);
 
-		// TODO: new partnership alignment routine should be here. It will adjust the number of people who want to cohabit, perform test union matching, and repeat until satisfactory number of unions has been created.
-		//  Final adjusted probit will be then used to run consider cohabitation for the final time and perform union matching
-
 		// C: Union matching
 		yearlySchedule.addEvent(this, Processes.UnionMatching);
 		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateOccupancy);
@@ -1836,7 +1833,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private void partnershipAlignment() {
 		double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment); // Initial values of adjustment to be applied to considerCohabitation probit
 		PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
-		RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 5.0E-2, 5.0E-2); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+		RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
 		if (search.isTargetAltered()) {
 			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
 			System.out.println("Adjustment value was " + search.getTarget()[0]);
@@ -3224,6 +3221,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		this.collector = collector;
 	}
 
+	public boolean isAlignCohabitation() {
+		return alignCohabitation;
+	}
+
 
 	/**
 	 *
@@ -3342,7 +3343,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		}
 	}
 
-	private void clearPersonsToMatch() {
+	public void clearPersonsToMatch() {
 
 		for (Gender gender: Gender.values()) {
 			for (Region region: Region.values()) {

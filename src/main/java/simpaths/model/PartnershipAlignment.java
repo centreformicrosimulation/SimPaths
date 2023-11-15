@@ -3,6 +3,7 @@ package simpaths.model;
 import microsim.engine.SimulationEngine;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
+import simpaths.model.enums.Dcpst;
 
 import java.util.Set;
 
@@ -30,7 +31,7 @@ public class PartnershipAlignment implements IEvaluation {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         this.persons = persons;
         this.partnershipAdjustment = partnershipAdjustment;
-        targetAggregateShareOfPartneredPersons = 0.38; // TODO: List of targets by year should be provided through Excel file policy parameters.xlsx
+        targetAggregateShareOfPartneredPersons = Parameters.getPartnershipShare(model.getYear());
     }
 
     /**
@@ -47,6 +48,11 @@ public class PartnershipAlignment implements IEvaluation {
      */
     @Override
     public double evaluate(double[] args) {
+
+        model.clearPersonsToMatch();
+        persons.stream()
+                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
+                .forEach(person -> person.evaluatePartnershipDissolution());
 
         adjustPartnerships(args[0]);
 
@@ -69,7 +75,7 @@ public class PartnershipAlignment implements IEvaluation {
                 .count();
 
         long numPersonsPartnered = persons.stream()
-                .filter(Person::hasTestPartner)
+                .filter(person -> (person.hasTestPartner() || (person.getDcpst().equals(Dcpst.Partnered)) && !person.hasLeftPartnerTest()))
                 .count();
 
         return numPersonsWhoCanHavePartner > 0
@@ -90,7 +96,7 @@ public class PartnershipAlignment implements IEvaluation {
     private void adjustPartnerships(double newPartnershipAdjustment) {
         persons.stream()
                 .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
-                .forEach(person -> person.evaluatePartnership(newPartnershipAdjustment));
+                .forEach(person -> person.evaluatePartnershipFormation(newPartnershipAdjustment));
 
         // "Fake" union matching (not modifying household structure) here
         model.unionMatching(true);

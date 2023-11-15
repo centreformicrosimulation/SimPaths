@@ -169,7 +169,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private double drawProvCareHours;
     @Transient
-    private double drawPartnership; // Used with the partnership alignment process
+    private double drawPartnershipFormation, drawPartnershipDissolution; // Used with the partnership alignment process
 
     //Sedex is an indicator for leaving education in that year
     @Enumerated(EnumType.STRING)
@@ -193,7 +193,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private boolean toBePartnered;
     @Transient
-    private boolean hasTestPartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    private boolean hasTestPartner;
+    @Transient
+    private boolean leftPartnerTest; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Transient
     private Person partner;
     @Column(name="idpartner")
@@ -461,7 +463,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         educationInnov = new Random(SimulationEngine.getRnd().nextLong());
         labourSupplyInnov = new Random(SimulationEngine.getRnd().nextLong());
         labourSupplySingleDraw = labourSupplyInnov.nextDouble();
-        drawPartnership = -9;
+        drawPartnershipFormation = -9;
+        drawPartnershipDissolution = -9;
     }
 
     //For use with creating new people at the minimum Age who enter the simulation during UpdateMaternityStatus after fertility has been aligned
@@ -1239,25 +1242,75 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void evaluatePartnership(double probitAdjustment) {
+    protected void considerCohabitation() {
         toBePartnered = false;
-        if (drawPartnership < 0.) {
-            drawPartnership = cohabitInnov.nextDouble();
+        double probitAdjustment = 0.;
+        if (drawPartnershipFormation < 0.) {
+            drawPartnershipFormation = cohabitInnov.nextDouble();
+        }
+        if (model.isAlignCohabitation()) {
+            probitAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
+        }
+
+        if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION) {
+            if (partner == null) {
+                if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
+                    double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
+                    double prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
+                    toBePartnered = drawPartnershipFormation < prob;
+                } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
+                    double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
+                    double prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
+                    toBePartnered = drawPartnershipFormation < prob;
+                }
+                if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
+                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) leavePartner();
+            }
+        } else if (model.getCountry() == Country.IT && dag >= Parameters.MIN_AGE_COHABITATION) {
+            if (partner == null) {
+                if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
+                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class));
+                    if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+                }
+            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
+                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class)) leavePartner();
+            }
+        }
+    }
+
+    public void evaluatePartnershipFormation(double probitAdjustment) {
+        toBePartnered = false; // Reset variable indicating if individual wants to find a partner
+        hasTestPartner = false; // Reset variable indicating if individual has partner for the purpose of matching
+        if (drawPartnershipFormation < 0.) {
+            drawPartnershipFormation = cohabitInnov.nextDouble();
         }
 
         if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION && partner == null) {
             if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
                 double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
-                toBePartnered = drawPartnership < prob;
+                toBePartnered = drawPartnershipFormation < prob;
             } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
-                double score = Parameters.getRegPartnershipU1b().getProbability(this, Person.DoublesVariables.class);
+                double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
-                toBePartnered = drawPartnership < prob;
+                toBePartnered = drawPartnershipFormation < prob;
             }
+        }
 
-            if (toBePartnered) {
-                model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+        if (toBePartnered) {
+            model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+        }
+    }
+
+    public void evaluatePartnershipDissolution() {
+        leftPartnerTest = false;
+        if (drawPartnershipDissolution < 0.) {
+            drawPartnershipDissolution = cohabitInnov.nextDouble();
+        }
+        if ((partner != null) && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
+            if (drawPartnershipDissolution < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) {
+                setLeftPartnerTest(true);
             }
         }
     }
@@ -1316,33 +1369,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             setDed(Indicator.False); //Set variable in education (ded) to false if leaving school
             setLeftEducation(true); //This is not reset and indicates if individual has ever left school - used with health process
             setLes_c4(Les_c4.NotEmployed); //Set activity status to NotEmployed when leaving school to remove Student status
-        }
-    }
-
-
-    protected void considerCohabitation() {
-        toBePartnered = false;
-
-        if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION) {
-            if (partner == null) {
-                if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
-                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU1a().getProbability(this, Person.DoublesVariables.class));
-                } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
-                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU1b().getProbability(this, Person.DoublesVariables.class));
-                }
-                if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
-            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
-                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) leavePartner();
-            }
-        } else if (model.getCountry() == Country.IT && dag >= Parameters.MIN_AGE_COHABITATION) {
-            if (partner == null) {
-                if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
-                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class));
-                    if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
-                }
-            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
-                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class)) leavePartner();
-            }
         }
     }
 
@@ -4360,6 +4386,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setHasTestPartner(boolean hasTestPartner) {
         this.hasTestPartner = hasTestPartner;
+    }
+
+    public boolean hasLeftPartnerTest() {
+        return leftPartnerTest;
+    }
+
+    public void setLeftPartnerTest(boolean leftPartnerTest) {
+        this.leftPartnerTest = leftPartnerTest;
     }
 
 }

@@ -348,7 +348,7 @@ public class Parameters {
     //Uprating factor
     private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
             partnershipTimeAdjustment,upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
-            wageRateFormalSocialCare, socialCarePolicy;
+            wageRateFormalSocialCare, socialCarePolicy, partneredShare;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
     //Education level projections
@@ -2408,6 +2408,8 @@ public class Parameters {
 
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
+        partneredShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "partnership", 1, 1);
+
     }
 
     public static void loadTimeSeriesFactorForTaxDonor(Country country) {
@@ -2665,6 +2667,15 @@ public class Parameters {
     }
     public static void setProjectWealth(boolean val) {
         projectWealth = val;
+    }
+
+    public static double getPartnershipShare(int year) {
+
+        MultiKeyCoefficientMap map = partneredShare;
+        Object val = map.getValue(year);
+        if (val == null)
+            val = extendRateTimeSeries(year, map);
+        return ((Number) val).doubleValue();
     }
 
     public static double getSocialCarePolicyValue(int year, String param) {
