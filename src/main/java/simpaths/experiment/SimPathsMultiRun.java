@@ -112,6 +112,7 @@ public class SimPathsMultiRun extends MultiRun {
 	public void buildExperiment(SimulationEngine engine) {
 		SimPathsModel model = new SimPathsModel(Country.IT.getCountryFromNameString(countryString), startYear);
 		model.setEndYear(endYear);
+		model.setFirstRun(counter == 0);
 //		SimPathsModel model = new SimPathsModel();
 		setCountry(model);		//Set country based on input arguments.
 		model.setPopSize(popSize);
