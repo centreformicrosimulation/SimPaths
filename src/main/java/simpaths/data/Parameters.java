@@ -7,7 +7,6 @@ import java.util.*;
 
 // import plug-in packages
 import simpaths.model.AnnuityRates;
-import simpaths.model.SimPathsModel;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -21,7 +20,6 @@ import org.apache.commons.math3.util.Pair;
 import microsim.data.excel.ExcelAssistant;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.statistics.regression.*;
-import microsim.engine.SimulationEngine;
 
 // import LABOURsim packages
 import simpaths.model.taxes.DonorTaxUnit;
@@ -349,8 +347,8 @@ public class Parameters {
 
     //Uprating factor
     private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
-            wageRateFormalSocialCare, socialCarePolicy;
+            partnershipTimeAdjustment,upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
+            wageRateFormalSocialCare, socialCarePolicy, partneredShare;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
     //Education level projections
@@ -2433,15 +2431,19 @@ public class Parameters {
         upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
         upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
         socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
+        partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
         rebaseIndexMap(TimeSeriesVariable.GDP);
         rebaseIndexMap(TimeSeriesVariable.Inflation);
         rebaseIndexMap(TimeSeriesVariable.WageGrowth);
         rebaseIndexMap(TimeSeriesVariable.CareProvisionAdjustment, startYear, false);
+        rebaseIndexMap(TimeSeriesVariable.PartnershipAdjustment, startYear, false);
 
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
+        partneredShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "partnership", 1, 1);
+
     }
 
     public static void loadTimeSeriesFactorForTaxDonor(Country country) {
@@ -2500,6 +2502,10 @@ public class Parameters {
                 break;
             case CareProvisionAdjustment:
                 map = socialCareProvisionTimeAdjustment;
+                break;
+            case PartnershipAdjustment:
+                map = partnershipTimeAdjustment;
+                break;
         }
 
         return map;
@@ -2695,6 +2701,15 @@ public class Parameters {
     }
     public static void setProjectWealth(boolean val) {
         projectWealth = val;
+    }
+
+    public static double getPartnershipShare(int year) {
+
+        MultiKeyCoefficientMap map = partneredShare;
+        Object val = map.getValue(year);
+        if (val == null)
+            val = extendRateTimeSeries(year, map);
+        return ((Number) val).doubleValue();
     }
 
     public static double getSocialCarePolicyValue(int year, String param) {

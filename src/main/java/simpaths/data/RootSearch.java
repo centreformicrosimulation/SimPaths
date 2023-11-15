@@ -33,11 +33,11 @@ public class RootSearch {
         final int ITMAX = 200;
 
         double[] xg, xs, xn=null, xp=null;
-        double fg, fs;
+        double fg, fs, fn, fp;
 
-        xg = target;
-        fg = function.evaluate(xg);
-        if (Math.abs(fg) > epsFunction) {
+        xg = target; // Start with initial values provided
+        fg = function.evaluate(xg); // Calculate the error using initial values and a provided alignment function, e.g. SocialCareAlignment or PartnershipAlignment
+        if (Math.abs(fg) > epsFunction) { // If error is larger than allowed threshold, conduct search for a better adjustment
             // need to conduct search
 
             targetAltered = true;
@@ -47,8 +47,10 @@ public class RootSearch {
             fs = function.evaluate(xs);
             if (fs < 0.0) {
                 xn = xs;
+                fn = fs;
             } else {
                 xp = xs;
+                fp = fs;
             }
             xs = upperBounds;
             fs = function.evaluate(xs);
@@ -56,10 +58,12 @@ public class RootSearch {
                 if (xn!=null)
                     throw new RuntimeException("Root search supplied boundaries that are both negative");
                 xn = xs;
+                fn = fs;
             } else {
                 if (xp!=null)
                     throw new RuntimeException("Root search supplied boundaries that are both positive");
                 xp = xs;
+                fp = fs;
             }
 
             // start search
@@ -68,8 +72,10 @@ public class RootSearch {
 
                 if (fg < 0.0) {
                     xn = xg;
+                    fn = fg;
                 } else {
                     xp = xg;
+                    fp = fg;
                 }
                 xg = midPoint(xn, xp);
                 fg = function.evaluate(xg);

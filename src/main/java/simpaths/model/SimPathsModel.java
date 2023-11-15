@@ -16,6 +16,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
+import simpaths.data.IEvaluation;
 import simpaths.data.MahalanobisDistance;
 import simpaths.data.RootSearch;
 import simpaths.experiment.SimPathsCollector;
@@ -451,10 +453,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.UpdatePotentialHourlyEarnings);
 
 		// B: Consider whether in consensual union (cohabiting)
+		yearlySchedule.addEvent(this, Processes.CohabitationRegressionAlignment);
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderCohabitation);
-		yearlySchedule.addEvent(this, Processes.ConsiderCohabitationAlignment);
 
-		// C: Marriage
+		// C: Union matching
 		yearlySchedule.addEvent(this, Processes.UnionMatching);
 		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateOccupancy);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
@@ -559,7 +561,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//Alignment Processes
 		FertilityAlignment,
 		PopulationAlignment,
-		ConsiderCohabitationAlignment,
+		CohabitationRegressionAlignment,
 		// HealthAlignment,
 		InSchoolAlignment,
 		EducationLevelAlignment,
@@ -601,9 +603,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					if (commentsOn) log.info("Population alignment skipped as simulated year exceeds period covered by population projections.");
 				}
 				break;
-			case ConsiderCohabitationAlignment:
-				if (alignCohabitation && year == getStartYear()) {
-					considerCohabitationAlignment();
+			case CohabitationRegressionAlignment:
+				if (alignCohabitation) {
+					partnershipAlignment();
 				}
 				if (commentsOn) log.info("Cohabitation alignment complete.");
 				break;
@@ -615,10 +617,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				if(unionMatchingMethod.equals(UnionMatchingMethod.SBAM)) {
 					unionMatchingSBAM();
 				} else if (unionMatchingMethod.equals(UnionMatchingMethod.Parametric)) {
-					unionMatching();
+					unionMatching(false);
 				} else {
-					unionMatching();
-					unionMatchingNoRegion(); //Run matching again relaxing regions this time
+					unionMatching(false);
+					unionMatchingNoRegion(false); //Run matching again relaxing regions this time
 				}
 				if (commentsOn) log.info("Union matching complete.");
 				break;
@@ -1531,7 +1533,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	int yearMatches = 0;
 	int unmatchedSize = 0;
 
-	private void unionMatching() {
+	/**
+	 *
+	 * @param alignmentRun If true, real unions will not be formed. Instead, flags will be set for individual to indicate those who would have formed a union.
+	 */
+	protected void unionMatching(boolean alignmentRun) {
 
 		Set<Person> matches = new LinkedHashSet<Person>();
 
@@ -1547,6 +1553,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
 			unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
 			unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
+			ageDiffBound = Parameters.AGE_DIFFERENCE_INITIAL_BOUND;
+			potentialHourlyEarningsDiffBound = Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
 
 			// System.out.println("There are " + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the start");
 			Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
@@ -1596,40 +1604,50 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 							@Override
 							public void match(Person p1, Person p2) {        //The SimpleMatching.getInstance().matching() assumes the first collection in the argument (males in this case) is also the collection that the first argument of the MatchingClosure.match() is sampled from.
 
-								// log.debug("Person " + p1.getKey().getId() + " marries person " + p2.getKey().getId());
-								if (!p1.getRegion().equals(p2.getRegion())) { //If persons to match have different regions, move female to male
-
-									p2.setRegion(p1.getRegion());
-								}
-								if (p1.getDgn().equals(p2.getDgn())) {
-
-									throw new RuntimeException("Error - both parties to match have the same gender!");
-								} else {
-
-									p1.setPartner(p2);
-									p2.setPartner(p1);
-									p1.setHousehold_status(Household_status.Couple);
-									p2.setHousehold_status(Household_status.Couple);
-									p1.setDcpyy(0); //Set years in partnership to 0
-									p2.setDcpyy(0);
-									p1.setDcpst(Dcpst.Partnered);
-									p2.setDcpst(Dcpst.Partnered);
-
-									//Update household
-									p1.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both p1 and p2.  Note need to have partner reference before calling setupNewHome!
-
-									unmatchedMales.remove(p1); //Remove matched people from unmatched sets (but keep those who were not matched so they can try next year)
+								if (alignmentRun) {
+									p1.setHasTestPartner(true);
+									p2.setHasTestPartner(true);
+									unmatchedMales.remove(p1);
 									unmatchedFemales.remove(p2);
 									personsToMatch.get(p1.getDgn()).get(region).remove(p1);
 									personsToMatch.get(p2.getDgn()).get(region).remove(p2);
 									matches.add(p1);
+								} else {
+
+									if (!p1.getRegion().equals(p2.getRegion())) { //If persons to match have different regions, move female to male
+
+										p2.setRegion(p1.getRegion());
+									}
+									if (p1.getDgn().equals(p2.getDgn())) {
+
+										throw new RuntimeException("Error - both parties to match have the same gender!");
+									} else {
+
+										p1.setPartner(p2);
+										p2.setPartner(p1);
+										p1.setHousehold_status(Household_status.Couple);
+										p2.setHousehold_status(Household_status.Couple);
+										p1.setDcpyy(0); //Set years in partnership to 0
+										p2.setDcpyy(0);
+										p1.setDcpst(Dcpst.Partnered);
+										p2.setDcpst(Dcpst.Partnered);
+
+										//Update household
+										p1.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both p1 and p2.  Note need to have partner reference before calling setupNewHome!
+
+										unmatchedMales.remove(p1); //Remove matched people from unmatched sets (but keep those who were not matched so they can try next year)
+										unmatchedFemales.remove(p2);
+										personsToMatch.get(p1.getDgn()).get(region).remove(p1);
+										personsToMatch.get(p2.getDgn()).get(region).remove(p2);
+										matches.add(p1);
+									}
 								}
 							}
 						}
 				);
 
 				// Relax differential bounds for next iteration (in the case where there has not been a high enough proportion of matches)
-				ageDiffBound *= Parameters.RELAXATION_FACTOR; //TODO: Should the bounds be relaxed permanently as it is the case now? Or only for the current year or year-region for example?
+				ageDiffBound *= Parameters.RELAXATION_FACTOR;
 				potentialHourlyEarningsDiffBound *= Parameters.RELAXATION_FACTOR;
 				countAttempts++;
 				// System.out.println("unmatched males proportion " + unmatchedMales.size() / (double) initialMalesSize);
@@ -1640,21 +1658,22 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 							(countAttempts < Parameters.MAXIMUM_ATTEMPTS_MATCHING));
 
 			// System.out.println("There are (overall stock of)" + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made for " + region + " is " + matches.size());
-			for (Gender gender : Gender.values()) {
+			if (!alignmentRun) {
+				for (Gender gender : Gender.values()) {
 
-				// Turned off to allow unmatched people try again next year without the need to go through considerCohabitation process
-				// personsToMatch.get(gender).get(region).clear();		//Nothing happens to unmatched people.  The next time they considerCohabitation, they will (probabilistically) have the opportunity to enter the matching pool again.
-				unmatchedSize += personsToMatch.get(gender).get(region).size();
+					// Turned off to allow unmatched people try again next year without the need to go through considerCohabitation process
+					// personsToMatch.get(gender).get(region).clear();		//Nothing happens to unmatched people.  The next time they considerCohabitation, they will (probabilistically) have the opportunity to enter the matching pool again.
+					unmatchedSize += personsToMatch.get(gender).get(region).size();
+				}
+
+				yearMatches = matches.size();
+				allMatches += matches.size();
+				// System.out.println("Total number of matches made in the year " + matches.size() + " and total number of matches in all years is " + allMatches);
+				if (commentsOn) log.debug("Marriage matched.");
+				for (BenefitUnit benefitUnit : benefitUnits) {
+					benefitUnit.updateOccupancy();
+				}
 			}
-		}
-
-		yearMatches = matches.size();
-		allMatches += matches.size();
-		// System.out.println("Total number of matches made in the year " + matches.size() + " and total number of matches in all years is " + allMatches);
-		if (commentsOn) log.debug("Marriage matched.");
-		for (BenefitUnit benefitUnit : benefitUnits) {
-
-			benefitUnit.updateOccupancy();
 		}
 	}
 
@@ -1662,7 +1681,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	 * PROCESS - UNION MATCHING WITH REGION RELAXED
 	 *
 	 */
-	private void unionMatchingNoRegion() {
+	protected void unionMatchingNoRegion(boolean alignmentRun) {
 		int countAttempts = 0;
 
 		double initialMalesSize = 0.;
@@ -1731,33 +1750,45 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 						public void match(Person p1, Person p2) {        //The SimpleMatching.getInstance().matching() assumes the first collection in the argument (males in this case) is also the collection that the first argument of the MatchingClosure.match() is sampled from.
 							//						log.debug("Person " + p1.getKey().getId() + " marries person " + p2.getKey().getId());
 							Region originalRegionP2 = p2.getRegion();
-							if (!p1.getRegion().equals(p2.getRegion())) { //If persons to match have different regions, move female to male
 
-								p2.setRegion(p1.getRegion());
-//								System.out.println("Region changed");
-							}
-							if (p1.getDgn().equals(p2.getDgn())) {
-
-								throw new RuntimeException("Error - both parties to match have the same gender!");
-							} else {
-
-								p1.setPartner(p2);
-								p2.setPartner(p1);
-								p1.setHousehold_status(Household_status.Couple);
-								p2.setHousehold_status(Household_status.Couple);
-								p1.setDcpyy(0); //Set years in partnership to 0
-								p2.setDcpyy(0);
-								p1.setDcpst(Dcpst.Partnered);
-								p2.setDcpst(Dcpst.Partnered);
-
-								//Update household
-								p1.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both p1 and p2.  Note need to have partner reference before calling setupNewHome!
-
+							if (alignmentRun) {
+								p1.setHasTestPartner(true);
+								p2.setHasTestPartner(true);
 								unmatchedMales.remove(p1); //Remove matched people from unmatched sets (but keep those who were not matched so they can try next year)
 								unmatchedFemales.remove(p2);
 								personsToMatch.get(p1.getDgn()).get(p1.getRegion()).remove(p1);
 								personsToMatch.get(p2.getDgn()).get(originalRegionP2).remove(p2);
 								matches.add(p1);
+							} else {
+
+								if (!p1.getRegion().equals(p2.getRegion())) { //If persons to match have different regions, move female to male
+
+									p2.setRegion(p1.getRegion());
+	//								System.out.println("Region changed");
+								}
+								if (p1.getDgn().equals(p2.getDgn())) {
+
+									throw new RuntimeException("Error - both parties to match have the same gender!");
+								} else {
+
+									p1.setPartner(p2);
+									p2.setPartner(p1);
+									p1.setHousehold_status(Household_status.Couple);
+									p2.setHousehold_status(Household_status.Couple);
+									p1.setDcpyy(0); //Set years in partnership to 0
+									p2.setDcpyy(0);
+									p1.setDcpst(Dcpst.Partnered);
+									p2.setDcpst(Dcpst.Partnered);
+
+									//Update household
+									p1.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both p1 and p2.  Note need to have partner reference before calling setupNewHome!
+
+									unmatchedMales.remove(p1); //Remove matched people from unmatched sets (but keep those who were not matched so they can try next year)
+									unmatchedFemales.remove(p2);
+									personsToMatch.get(p1.getDgn()).get(p1.getRegion()).remove(p1);
+									personsToMatch.get(p2.getDgn()).get(originalRegionP2).remove(p2);
+									matches.add(p1);
+								}
 							}
 						}
 					}
@@ -1771,8 +1802,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 //			System.out.println("unmatched females proportion " + unmatchedFemales.size() / (double) initialFemalesSize);
 		} while ((Math.min((unmatchedMales.size() / (double) initialMalesSize), (unmatchedFemales.size() / (double) initialFemalesSize)) > Parameters.UNMATCHED_TOLERANCE_THRESHOLD) && (countAttempts < Parameters.MAXIMUM_ATTEMPTS_MATCHING));
 
-
-		allMatches += matches.size();
+		if (!alignmentRun) {
+			allMatches += matches.size();
+		} else {
+			// Clear set if used within the matching procedure
+			for (Gender gender : Gender.values()) {
+				for (Region region : Region.values()) {
+					personsToMatch.get(gender).get(region).clear();
+				}
+			}
+		}
 //		System.out.println("There are " + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made " + matches.size() + " and total number of matches in all years is " + allMatches);
 	}
 
@@ -1789,6 +1828,26 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		if (search.isTargetAltered()) {
 			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.CareProvisionAdjustment);
 		}
+	}
+
+	private void partnershipAlignment() {
+		double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment); // Initial values of adjustment to be applied to considerCohabitation probit
+		PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
+		RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+		if (search.isTargetAltered()) {
+			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
+			System.out.println("Adjustment value was " + search.getTarget()[0]);
+		}
+	}
+
+	@NotNull
+	private static RootSearch getRootSearch(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction) {
+		double[] startVal = new double[] {initialAdjustment}; // Starting values for the adjustment
+		double[] lowerBound = new double[] {initialAdjustment - 4};
+		double[] upperBound = new double[] {initialAdjustment + 4};
+		RootSearch search = new RootSearch(lowerBound, upperBound, startVal, alignmentClass, epsOrdinates, epsFunction);
+		search.evaluate();
+		return search;
 	}
 
 
@@ -3162,6 +3221,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		this.collector = collector;
 	}
 
+	public boolean isAlignCohabitation() {
+		return alignCohabitation;
+	}
+
 
 	/**
 	 *
@@ -3280,7 +3343,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		}
 	}
 
-	private void clearPersonsToMatch() {
+	public void clearPersonsToMatch() {
 
 		for (Gender gender: Gender.values()) {
 			for (Region region: Region.values()) {

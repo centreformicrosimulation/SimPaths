@@ -16,9 +16,7 @@ import java.io.*;
 public class SimPathsMultiRun extends MultiRun {
 
 	public static boolean executeWithGui = true;
-
 	private static int maxNumberOfRuns = 10;
-
 	private static String countryString;
 	private static int startYear;
 	private static int endYear = 2020;
