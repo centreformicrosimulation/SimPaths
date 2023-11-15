@@ -71,10 +71,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private Integer popSize = 25000;
 
 	@GUIparameter(description = "Simulation first year [valid range 2011-2017]")
-	private Integer startYear = 2017;
+	private Integer startYear = 2011;
 
 	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
-	private Integer endYear = 2025;
+	private Integer endYear = 2020;
 
 	@GUIparameter(description = "Maximum simulated age")
 	private Integer maxAge = 130;
@@ -117,7 +117,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Value of discount factor (delta)")
 	private Double sIndexDelta = 0.98;
 
-	//TODO: This should take a different value for each country, but not sure how to set it. The data comes from here: https://data.oecd.org/hha/household-savings.htm
+	//The data comes from here: https://data.oecd.org/hha/household-savings.htm
 	@GUIparameter(description = "Value of saving rate (s). The default value is based on average % of household disposable income saved between 2000 - 2019 reported by the OECD")
 	private Double savingRate = 0.056;
 
