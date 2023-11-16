@@ -4,6 +4,7 @@ import microsim.engine.SimulationEngine;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Dcpst;
+import simpaths.model.enums.TargetShares;
 
 import java.util.Set;
 
@@ -20,7 +21,6 @@ import java.util.Set;
 
 public class PartnershipAlignment implements IEvaluation {
 
-    private double aggregateShareOfPartneredPersons;
     private double targetAggregateShareOfPartneredPersons;
     private double partnershipAdjustment;
     boolean partnershipAdjustmentChanged;
@@ -31,7 +31,7 @@ public class PartnershipAlignment implements IEvaluation {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         this.persons = persons;
         this.partnershipAdjustment = partnershipAdjustment;
-        targetAggregateShareOfPartneredPersons = Parameters.getPartnershipShare(model.getYear());
+        targetAggregateShareOfPartneredPersons = Parameters.getTargetShare(model.getYear(), TargetShares.Partnership);
     }
 
     /**

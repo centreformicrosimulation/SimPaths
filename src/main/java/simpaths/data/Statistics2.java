@@ -151,6 +151,9 @@ public class Statistics2 {
     @Column(name = "partnership_adj_factor")
     private double partnershipAdjustmentFactor;
 
+    @Column(name = "utility_adj_factor")
+    private double utilityAdjustmentFactor;
+
     public double getPartnershipAdjustmentFactor() {
         return partnershipAdjustmentFactor;
     }
@@ -158,6 +161,15 @@ public class Statistics2 {
     public void setPartnershipAdjustmentFactor(double partnershipAdjustmentFactor) {
         this.partnershipAdjustmentFactor = partnershipAdjustmentFactor;
     }
+
+    public double getUtilityAdjustmentFactor() {
+        return utilityAdjustmentFactor;
+    }
+
+    public void setUtilityAdjustmentFactor(double utilityAdjustmentFactor) {
+        this.utilityAdjustmentFactor = utilityAdjustmentFactor;
+    }
+
     public double getSocialCareAdjustmentFactor() { return socialCareAdjustmentFactor; }
     public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
 
@@ -592,5 +604,6 @@ public class Statistics2 {
 
         setSocialCareAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.CareProvisionAdjustment));
         setPartnershipAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.PartnershipAdjustment));
+        setUtilityAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustment));
     }
 }

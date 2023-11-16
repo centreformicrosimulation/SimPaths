@@ -347,8 +347,8 @@ public class Parameters {
 
     //Uprating factor
     private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            partnershipTimeAdjustment,upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
-            wageRateFormalSocialCare, socialCarePolicy, partneredShare;
+            partnershipTimeAdjustment, utilityTimeAdjustment, upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
+            wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShare;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
     //Education level projections
@@ -2432,6 +2432,7 @@ public class Parameters {
         upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
         socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
+        utilityTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adjustment", 1, 1);
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
         rebaseIndexMap(TimeSeriesVariable.GDP);
@@ -2443,6 +2444,7 @@ public class Parameters {
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
         partneredShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "partnership", 1, 1);
+        employedShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment", 1, 1);
 
     }
 
@@ -2505,6 +2507,24 @@ public class Parameters {
                 break;
             case PartnershipAdjustment:
                 map = partnershipTimeAdjustment;
+                break;
+            case UtilityAdjustment:
+                map = utilityTimeAdjustment;
+                break;
+        }
+
+        return map;
+    }
+
+    private static MultiKeyCoefficientMap getTargetShareMap(TargetShares targetShareType) {
+
+        MultiKeyCoefficientMap map = null;
+        switch (targetShareType) {
+            case Partnership:
+                map = partneredShare;
+                break;
+            case Employment:
+                map = employedShare;
                 break;
         }
 
@@ -2703,9 +2723,9 @@ public class Parameters {
         projectWealth = val;
     }
 
-    public static double getPartnershipShare(int year) {
+    public static double getTargetShare(int year, TargetShares targetShareType) {
 
-        MultiKeyCoefficientMap map = partneredShare;
+        MultiKeyCoefficientMap map = getTargetShareMap(targetShareType);
         Object val = map.getValue(year);
         if (val == null)
             val = extendRateTimeSeries(year, map);

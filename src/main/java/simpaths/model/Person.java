@@ -3126,6 +3126,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.les_c4 = les_c4;
     }
 
+
     public void setLes_c7_covid(Les_c7_covid les_c7_covid) { this.les_c7_covid = les_c7_covid; }
 
     public Les_c7_covid getLes_c7_covid() { return les_c7_covid; }

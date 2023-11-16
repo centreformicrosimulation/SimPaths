@@ -252,7 +252,13 @@ public class LabourMarket {
 			for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
 				//Given current wage equation coefficients, benefitUnits update their supply of labour
 
-				benefitUnit.updateLabourSupplyAndIncome();
+				if (model.isAlignEmployment()) {
+					model.activityAlignment();
+					benefitUnit.updateLabourSupplyAndIncome(Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.UtilityAdjustment));
+				} else {
+					benefitUnit.updateLabourSupplyAndIncome(0);
+				}
+
 			}
 
 			Map<Education, Double> potentialHourlyEarningsByEdu = new LinkedHashMap<Education, Double>();
@@ -289,32 +295,11 @@ public class LabourMarket {
 					}
 				}
 			}
-			for (BenefitUnit benefitUnit : benefitUnits) {
 
-				if (benefitUnit.getMale() != null) {
+			// Update activity status of persons residing within the benefit unit
+			benefitUnits.stream()
+					.forEach(BenefitUnit::updateActivityOfPersonsWithinBenefitUnit);
 
-					Person person = benefitUnit.getMale();
-					if (person.getLabourSupplyHoursWeekly() > 0) {
-
-						person.setLes_c4(Les_c4.EmployedOrSelfEmployed);
-					} else if (!person.getLes_c4().equals(Les_c4.Student) && !person.getLes_c4().equals(Les_c4.Retired)) {
-						//No need to reset Retiree status
-
-						person.setLes_c4(Les_c4.NotEmployed);
-					}
-				}
-				if (benefitUnit.getFemale() != null) {
-
-					Person female = benefitUnit.getFemale();
-					if (female.getLabourSupplyHoursWeekly() > 0) {
-
-						female.setLes_c4(Les_c4.EmployedOrSelfEmployed);
-					} else if (!female.getLes_c4().equals(Les_c4.Student) && !female.getLes_c4().equals(Les_c4.Retired)) { //No need to reset Retiree status
-
-						female.setLes_c4(Les_c4.NotEmployed);
-					}
-				}
-			}
 		}
 	}
 	

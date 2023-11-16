@@ -1382,7 +1382,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		} else return workHoursConverted;
 	}
 
-	protected void updateLabourSupplyAndIncome() {
+	protected void updateLabourSupplyAndIncome(double utilityAdjustmentValue) {
 
 		//Update potential earnings
 		updateFullTimeHourlyEarnings();
@@ -1578,7 +1578,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						if (male.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for male adult children
 							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class));
 						} else {
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class));
+							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class) - utilityAdjustmentValue*labourKey.getKey(0).getHours(male));
 						}
 						if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
 							throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
@@ -1622,7 +1622,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						if (female.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for female adult children
 							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class));
 						} else {
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class));
+							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class) + utilityAdjustmentValue*labourKey.getKey(1).getHours(female));
 						}
 						if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
 							throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
@@ -1835,6 +1835,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		weight = weight / (double) size;
 		if (household != null) household.updateSizeAndWeight();
+	}
+
+	public void updateActivityOfPersonsWithinBenefitUnit() {
+		updateActivity(getMale());
+		updateActivity(getFemale());
+	}
+
+	private void updateActivity(Person person) {
+		if (person != null && person.getLabourSupplyHoursWeekly() > 0) {
+			person.setLes_c4(Les_c4.EmployedOrSelfEmployed);
+		} else if (person != null && !person.getLes_c4().equals(Les_c4.Student) && !person.getLes_c4().equals(Les_c4.Retired)) {
+			// No need to reset Retiree status
+			person.setLes_c4(Les_c4.NotEmployed);
+		}
 	}
 
 	public void addResponsiblePerson(Person person) {

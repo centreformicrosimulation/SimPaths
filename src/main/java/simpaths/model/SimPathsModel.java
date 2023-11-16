@@ -148,7 +148,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
-	private boolean alignEmployment = false; //Set to true to align employment share
+	private boolean alignEmployment = true; //Set to true to align employment share
 
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
@@ -650,9 +650,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				break;
 			case LabourMarketAndIncomeUpdate:
 				labourMarket.update(year);
-				if (alignEmployment) {
-					employmentAlignment(); //Align employment share
-				}
 				if (commentsOn) log.info("Labour market update complete.");
 				break;
 			case Timer:
@@ -1830,21 +1827,31 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		}
 	}
 
+	public void activityAlignment() {
+		double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustment);
+		ActivityAlignment activityAlignment = new ActivityAlignment(persons, benefitUnits, utilityAdjustment);
+		RootSearch search = getRootSearch(utilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 0.5); // epsOrdinates and epsFunction determine the stopping condition for the search.
+		if (search.isTargetAltered()) {
+			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustment); // If adjustment is altered from the initial value, update the map
+			System.out.println("Utility adjustment value was " + search.getTarget()[0]);
+		}
+	}
+
 	private void partnershipAlignment() {
 		double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment); // Initial values of adjustment to be applied to considerCohabitation probit
 		PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
-		RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+		RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2, 4); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
 		if (search.isTargetAltered()) {
 			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
-			System.out.println("Adjustment value was " + search.getTarget()[0]);
+			System.out.println("Partnership adjustment value was " + search.getTarget()[0]);
 		}
 	}
 
 	@NotNull
-	private static RootSearch getRootSearch(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction) {
+	private static RootSearch getRootSearch(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction, double modifier) {
 		double[] startVal = new double[] {initialAdjustment}; // Starting values for the adjustment
-		double[] lowerBound = new double[] {initialAdjustment - 4};
-		double[] upperBound = new double[] {initialAdjustment + 4};
+		double[] lowerBound = new double[] {initialAdjustment - modifier};
+		double[] upperBound = new double[] {initialAdjustment + modifier};
 		RootSearch search = new RootSearch(lowerBound, upperBound, startVal, alignmentClass, epsOrdinates, epsFunction);
 		search.evaluate();
 		return search;
@@ -3223,6 +3230,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	public boolean isAlignCohabitation() {
 		return alignCohabitation;
+	}
+
+	public boolean isAlignEmployment() {
+		return alignEmployment;
 	}
 
 
