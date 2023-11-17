@@ -248,18 +248,15 @@ public class LabourMarket {
 				}
 			}
 
-			//Update Labour Supply
-			for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
-				//Given current wage equation coefficients, benefitUnits update their supply of labour
-
-				if (model.isAlignEmployment()) {
-					model.activityAlignment();
-					benefitUnit.updateLabourSupplyAndIncome(Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.UtilityAdjustment));
-				} else {
-					benefitUnit.updateLabourSupplyAndIncome(0);
-				}
-
+			if (model.isAlignEmployment()) {
+				model.activityAlignmentSingleMales();
+				model.activityAlignmentSingleFemales();
+				model.activityAlignmentCouples();
 			}
+
+			//Update Labour Supply
+			benefitUnitsAllRegions.parallelStream()
+					.forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
 			Map<Education, Double> potentialHourlyEarningsByEdu = new LinkedHashMap<Education, Double>();
 			Map<Education, Integer> countByEdu = new LinkedHashMap<Education, Integer>();

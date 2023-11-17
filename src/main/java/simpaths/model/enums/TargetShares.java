@@ -2,5 +2,7 @@ package simpaths.model.enums;
 
 public enum TargetShares {
     Partnership,
-    Employment;
+    EmploymentSingleMales,
+    EmploymentSingleFemales,
+    EmploymentCouples;
 }

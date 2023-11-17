@@ -1,9 +1,9 @@
 package simpaths.model;
 
+import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
-import simpaths.model.enums.Les_c4;
 import simpaths.model.enums.Occupancy;
 import simpaths.model.enums.TargetShares;
 
@@ -22,19 +22,43 @@ import java.util.Set;
 
 public class ActivityAlignment implements IEvaluation {
 
-    private double targetAggregateShareOfEmployedPersons;
+    private double targetAggregateShareOfEmployedBU;
     private double utilityAdjustment;
     boolean utilityAdjustmentChanged;
+    MultiKeyCoefficientMap regressionCoefficientsMap;
+    double originalRegressionCoefficient;
+    double originalRegressionCoefficient2;
+    String regressorToModify;
+    String regressor2ToModify;
+    Occupancy benefitUnitType;
     private Set<Person> persons;
     private Set<BenefitUnit> benefitUnits;
     private SimPathsModel model;
 
-    public ActivityAlignment(Set<Person> persons, Set<BenefitUnit> benefitUnits, double utilityAdjustment) {
+    public ActivityAlignment(Set<Person> persons, Set<BenefitUnit> benefitUnits, MultiKeyCoefficientMap originalRegressionCoefficientsMap, String[] regressorsToModify, Occupancy benefitUnitType, double utilityAdjustment) {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         this.persons = persons;
         this.benefitUnits = benefitUnits;
         this.utilityAdjustment = utilityAdjustment;
-        targetAggregateShareOfEmployedPersons = Parameters.getTargetShare(model.getYear(), TargetShares.Employment);
+        this.regressorToModify = regressorsToModify[0];
+        this.regressor2ToModify = null;
+        this.originalRegressionCoefficient2 = 0;
+        this.regressionCoefficientsMap = originalRegressionCoefficientsMap;
+        Object[] valuesOriginalCopy = (Object[]) originalRegressionCoefficientsMap.getValue(regressorToModify);
+        this.originalRegressionCoefficient = ((Number) valuesOriginalCopy[0]).doubleValue();
+        this.benefitUnitType = benefitUnitType;
+
+        // Share of employed benefit unit of a particular type (Single man / single woman / couple). Couple BU counts as employed if either of the responsible persons works.
+        switch (benefitUnitType) {
+            case Single_Male -> targetAggregateShareOfEmployedBU = Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentSingleMales);
+            case Single_Female -> targetAggregateShareOfEmployedBU = Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentSingleFemales);
+            case Couple -> {
+                targetAggregateShareOfEmployedBU = Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentCouples);
+                regressor2ToModify = regressorsToModify[1];
+                Object[] valuesOriginalCopy2 = (Object[]) originalRegressionCoefficientsMap.getValue(regressor2ToModify);
+                this.originalRegressionCoefficient2 = ((Number) valuesOriginalCopy2[0]).doubleValue();
+            }
+        }
     }
 
     /**
@@ -52,7 +76,7 @@ public class ActivityAlignment implements IEvaluation {
 
         adjustEmployment(args[0]);
 
-        double error = targetAggregateShareOfEmployedPersons - evalAggregateShareOfEmployedPersons();
+        double error = targetAggregateShareOfEmployedBU - evalAggregateShareOfEmployedBU();
         return error;
     }
 
@@ -61,18 +85,18 @@ public class ActivityAlignment implements IEvaluation {
      *
      * @return The aggregate share of employed persons among those eligible, or 0.0 if no eligible persons are found.
      */
-    private double evalAggregateShareOfEmployedPersons() {
-        long numPersons = persons.stream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY)
+    private double evalAggregateShareOfEmployedBU() {
+        long numBU = benefitUnits.stream()
+                .filter(benefitUnit -> benefitUnit.getOccupancy().equals(benefitUnitType))
                 .count();
 
-        long numPersonsEmployed = persons.stream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY)
-                .filter(person -> person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed))
+        long numBUEmployed = benefitUnits.stream()
+                .filter(benefitUnit -> benefitUnit.getOccupancy().equals(benefitUnitType))
+                .filter(BenefitUnit::isEmployed)
                 .count();
 
-        return numPersons > 0
-                ? (double) numPersonsEmployed / numPersons
+        return numBU > 0
+                ? (double) numBUEmployed / numBU
                 : 0.0;
     }
 
@@ -82,13 +106,30 @@ public class ActivityAlignment implements IEvaluation {
      * @param newUtilityAdjustment The new adjustment value for the utility function.
      */
     private void adjustEmployment(double newUtilityAdjustment) {
-        benefitUnits.stream()
+
+        String regressionCoefficientKey = regressorToModify; // Name of the regressor to modify
+        MultiKeyCoefficientMap map = regressionCoefficientsMap; // Map of regressors and estimated coefficients
+        Object[] currentValues = (Object[]) map.getValue(regressionCoefficientKey);
+        double newValue = originalRegressionCoefficient + newUtilityAdjustment; // Adjust regression coefficient
+        currentValues[0] = newValue;
+        map.replaceValue(regressionCoefficientKey, currentValues); // Put adjusted value back in the map
+
+        if (regressor2ToModify != null) {
+            String regressionCoefficientKey2 = regressor2ToModify; // Name of the regressor to modify
+            Object[] currentValues2 = (Object[]) map.getValue(regressionCoefficientKey2);
+            double newValue2 = originalRegressionCoefficient2 + newUtilityAdjustment; // Adjust regression coefficient
+            currentValues2[0] = newValue2;
+            map.replaceValue(regressionCoefficientKey2, currentValues2); // Put adjusted value back in the map
+        }
+
+        benefitUnits.parallelStream()
                 .filter(BenefitUnit::getAtRiskOfWork)
-                .filter(benefitUnit -> !benefitUnit.occupancy.equals(Occupancy.Couple))
-                .forEach(benefitUnit -> benefitUnit.updateLabourSupplyAndIncome(newUtilityAdjustment));
+                .filter(benefitUnit -> benefitUnit.occupancy.equals(benefitUnitType))
+                .forEach(benefitUnit -> benefitUnit.updateLabourSupplyAndIncome()); // Update labour supply and income
 
         // Update les_c4 variable before (re)calculating share of employed persons
-        benefitUnits.stream()
+        benefitUnits.parallelStream()
+                .filter(benefitUnit -> benefitUnit.occupancy.equals(benefitUnitType))
                 .forEach(BenefitUnit::updateActivityOfPersonsWithinBenefitUnit);
 
         utilityAdjustment = newUtilityAdjustment;

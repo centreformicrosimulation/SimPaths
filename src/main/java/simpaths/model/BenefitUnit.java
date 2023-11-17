@@ -328,6 +328,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Transient
 	private Integer labourHoursWeekly2Local;
 
+	@Transient
+	double randomDrawLabourSupply = -9;
+
 
 
 	/*********************************************************************
@@ -394,6 +397,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		labourInnov = new Random(SimulationEngine.getRnd().nextLong());
 		homeOwnerInnov = new Random(SimulationEngine.getRnd().nextLong());
 		taxInnov = new Random(SimulationEngine.getRnd().nextLong());
+		randomDrawLabourSupply = -9;
 
 		this.d_children_3under = Indicator.False;
 		this.d_children_4_12 = Indicator.False;
@@ -1382,7 +1386,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		} else return workHoursConverted;
 	}
 
-	protected void updateLabourSupplyAndIncome(double utilityAdjustmentValue) {
+	protected void updateLabourSupplyAndIncome() {
+
+		if (randomDrawLabourSupply < 0) {
+			randomDrawLabourSupply = labourInnov.nextDouble();
+		}
 
 		//Update potential earnings
 		updateFullTimeHourlyEarnings();
@@ -1578,7 +1586,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						if (male.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for male adult children
 							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class));
 						} else {
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class) - utilityAdjustmentValue*labourKey.getKey(0).getHours(male));
+							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class));
 						}
 						if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
 							throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
@@ -1622,7 +1630,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						if (female.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for female adult children
 							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class));
 						} else {
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class) + utilityAdjustmentValue*labourKey.getKey(1).getHours(female));
+							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class));
 						}
 						if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
 							throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
@@ -1648,7 +1656,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 
 			//Sample labour supply from possible labour (pairs of) values
-			labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityExponentialRegressionScoresByLabourPairs, labourInnov.nextDouble());
+			labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityExponentialRegressionScoresByLabourPairs, randomDrawLabourSupply);
 
 			// populate labour supply
 			if(model.debugCommentsOn && labourSupplyChoice!=null) {
@@ -2868,6 +2876,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			atRiskOfWork = male.atRiskOfWork();
 		}
 		return atRiskOfWork;
+	}
+
+	public boolean isEmployed() {
+		boolean isEmployed = false;
+		if(female != null) {
+			isEmployed = female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed);
+		}
+		if(!isEmployed  && male != null) {        //Can skip checking if atRiskOfWork is true already
+			isEmployed = male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed);
+		}
+		return isEmployed;
 	}
 
 	protected void homeownership() {

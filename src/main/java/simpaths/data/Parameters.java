@@ -347,8 +347,8 @@ public class Parameters {
 
     //Uprating factor
     private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            partnershipTimeAdjustment, utilityTimeAdjustment, upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
-            wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShare;
+            partnershipTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentCouples, upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
+            wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
     //Education level projections
@@ -471,7 +471,6 @@ public class Parameters {
     //Labour Market
     private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionMales, coeffCovarianceEmploymentSelectionMalesNE, coeffCovarianceEmploymentSelectionMalesE;
     private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionFemales, coeffCovarianceEmploymentSelectionFemalesNE, coeffCovarianceEmploymentSelectionFemalesE;
-
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMalesWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
@@ -2432,7 +2431,9 @@ public class Parameters {
         upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
         socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
-        utilityTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adjustment", 1, 1);
+        utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_smales", 1, 1);
+        utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_sfemales", 1, 1);
+        utilityTimeAdjustmentCouples = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_couples", 1, 1);
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
         rebaseIndexMap(TimeSeriesVariable.GDP);
@@ -2444,7 +2445,9 @@ public class Parameters {
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
         partneredShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "partnership", 1, 1);
-        employedShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment", 1, 1);
+        employedShareSingleMales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_smales", 1, 1);
+        employedShareSingleFemales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_sfemales", 1, 1);
+        employedShareCouples = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_couples", 1, 1);
 
     }
 
@@ -2508,8 +2511,14 @@ public class Parameters {
             case PartnershipAdjustment:
                 map = partnershipTimeAdjustment;
                 break;
-            case UtilityAdjustment:
-                map = utilityTimeAdjustment;
+            case UtilityAdjustmentSingleMales:
+                map = utilityTimeAdjustmentSingleMales;
+                break;
+            case UtilityAdjustmentSingleFemales:
+                map = utilityTimeAdjustmentSingleFemales;
+                break;
+            case UtilityAdjustmentCouples:
+                map = utilityTimeAdjustmentCouples;
                 break;
         }
 
@@ -2523,8 +2532,14 @@ public class Parameters {
             case Partnership:
                 map = partneredShare;
                 break;
-            case Employment:
-                map = employedShare;
+            case EmploymentSingleMales:
+                map = employedShareSingleMales;
+                break;
+            case EmploymentSingleFemales:
+                map = employedShareSingleFemales;
+                break;
+            case EmploymentCouples:
+                map = employedShareCouples;
                 break;
         }
 
@@ -2855,4 +2870,29 @@ public class Parameters {
     public static String getInputDirectoryInitialPopulations() {
         return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
     }
+
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityMales() {
+        return coeffLabourSupplyUtilityMales;
+    }
+
+    public static void setCoeffLabourSupplyUtilityMales(MultiKeyCoefficientMap coeffLabourSupplyUtilityMales) {
+        Parameters.coeffLabourSupplyUtilityMales = coeffLabourSupplyUtilityMales;
+    }
+
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityFemales() {
+        return coeffLabourSupplyUtilityFemales;
+    }
+
+    public static void setCoeffLabourSupplyUtilityFemales(MultiKeyCoefficientMap coeffLabourSupplyUtilityFemales) {
+        Parameters.coeffLabourSupplyUtilityFemales = coeffLabourSupplyUtilityFemales;
+    }
+
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityCouples() {
+        return coeffLabourSupplyUtilityCouples;
+    }
+
+    public static void setCoeffLabourSupplyUtilityCouples(MultiKeyCoefficientMap coeffLabourSupplyUtilityCouples) {
+        Parameters.coeffLabourSupplyUtilityCouples = coeffLabourSupplyUtilityCouples;
+    }
+
 }

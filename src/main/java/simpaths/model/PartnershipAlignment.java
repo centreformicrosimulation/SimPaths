@@ -94,7 +94,7 @@ public class PartnershipAlignment implements IEvaluation {
      * @param newPartnershipAdjustment The new adjustment value for the partnership probit regression.
      */
     private void adjustPartnerships(double newPartnershipAdjustment) {
-        persons.stream()
+        persons.parallelStream()
                 .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
                 .forEach(person -> person.evaluatePartnershipFormation(newPartnershipAdjustment));
 
