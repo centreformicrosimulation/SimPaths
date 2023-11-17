@@ -2,7 +2,6 @@ package simpaths.model;
 
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
-import simpaths.model.enums.Indicator;
 
 import java.util.Set;
 
@@ -58,7 +57,7 @@ public class SocialCareAlignment implements IEvaluation {
 
     private void adjustCareProvision(double newCareProvisionAdjustment) {
         for (Person person : persons) {
-            person.evaluateSocialCareProvide(newCareProvisionAdjustment);
+            person.evaluateSocialCareProvision(newCareProvisionAdjustment);
         }
         careProvisionAdjustment = newCareProvisionAdjustment;
         careProvisionAdjustmentChanged = true;

@@ -3,6 +3,7 @@ package simpaths.data;
 
 import microsim.statistics.IDoubleSource;
 import simpaths.model.Person;
+import simpaths.model.enums.DoubleValuedEnum;
 
 import java.security.InvalidParameterException;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class ManagerRegressions {
             case WagesFemalesNE:
                 code = "Wages_FemalesNE";
                 break;
-            case ChildcareValue:
+            case ChildcareC1b:
                 code = "C1b";
                 break;
             default:
@@ -76,33 +77,44 @@ public class ManagerRegressions {
         return getRegressionCoeff(RegressionNames.RMSE, code);
     }
 
-    public static double getProbability(IDoubleSource person, Enum<?> regression) {
+    public static double getProbability(IDoubleSource obj, RegressionNames regression) {
 
+        if (regression.getValue()!=1)
+            throw new RuntimeException("probability requested from non-binary regression equation");
         double probability;
-        switch ((RegressionNames) regression) {
+        switch (regression) {
             case EducationE1a:
-                probability = Parameters.getRegEducationE1a().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegEducationE1a().getProbability(obj, Person.DoublesVariables.class);
+                break;
+            case EducationE1b:
+                probability = Parameters.getRegEducationE1b().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case HealthH2b:
-                probability = Parameters.getRegHealthH2b().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegHealthH2b().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case SocialCareS2a:
-                probability = Parameters.getRegNeedCareS2a().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegNeedCareS2a().getProbability(obj, Person.DoublesVariables.class);
+                break;
+            case SocialCareS2b:
+                probability = Parameters.getRegReceiveCareS2b().getProbability(obj, Person.DoublesVariables.class);
+                break;
+            case SocialCareS3c:
+                probability = Parameters.getRegNoPartnerProvCareToOtherS3c().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case PartnershipU1a:
-                probability = Parameters.getRegPartnershipU1a().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegPartnershipU1a().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case PartnershipU1b:
-                probability = Parameters.getRegPartnershipU1b().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegPartnershipU1b().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case PartnershipU2b:
-                probability = Parameters.getRegPartnershipU2b().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegPartnershipU2b().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case FertilityF1a:
-                probability = Parameters.getRegFertilityF1a().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegFertilityF1a().getProbability(obj, Person.DoublesVariables.class);
                 break;
             case FertilityF1b:
-                probability = Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
+                probability = Parameters.getRegFertilityF1b().getProbability(obj, Person.DoublesVariables.class);
                 break;
             default:
                 throw new InvalidParameterException("Probability requested for unrecognised probit regression equation");
@@ -111,6 +123,26 @@ public class ManagerRegressions {
             throw new InvalidParameterException("Problem evaluating probability from probit regression equation");
         }
         return probability;
+    }
+
+    public static <E extends Enum<E> & DoubleValuedEnum> Map<E, Double> getMultinomialProbabilities(IDoubleSource obj, RegressionNames regression) {
+
+        if (regression.getValue()!=2)
+            throw new RuntimeException("probabilities requested from non multinomial equation");
+        switch (regression) {
+            case EducationE2a:
+                return Parameters.getRegEducationE2a().getProbabilities(obj, Person.DoublesVariables.class);
+            case HealthH1a:
+                return Parameters.getRegHealthH1a().getProbabilities(obj, Person.DoublesVariables.class);
+            case HealthH1b:
+                return Parameters.getRegHealthH1b().getProbabilities(obj, Person.DoublesVariables.class);
+            case SocialCareS2c:
+                return Parameters.getRegSocialCareMarketS2c().getProbabilites(obj, Person.DoublesVariables.class);
+            case SocialCareS3d:
+                return Parameters.getRegInformalCareToS3d().getProbabilites(obj, Person.DoublesVariables.class);
+            default:
+                throw new InvalidParameterException("Probability requested for unrecognised multinomial regression equation");
+        }
     }
 
     public static double getRegressionCoeff(Enum<?> regression, String coeff) {

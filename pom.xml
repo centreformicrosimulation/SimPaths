@@ -83,8 +83,9 @@
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-core</artifactId>
-			<version>4.3.4</version>
-        </dependency>
+			<version>4.3.5</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-gui</artifactId>

@@ -86,7 +86,13 @@ public class CESUtility implements IEvaluation {
         }
 
         // evaluate expected utility
-        double expectedUtility = 0;
+        double sumProb = 0.0;
+        double probThreshold;
+        if (DecisionParams.FILTER_LOCAL_EXPECTATIONS)
+            probThreshold = DecisionParams.MIN_FACTOR_PROBABILITY / (double) expectations.probability.length;
+        else
+            probThreshold = 1.0E-12;
+        double expectedUtility = 0.0;
         double expectedV;
         double zeta0, zeta1;
         if (expectations.cohabitation) {
@@ -99,20 +105,26 @@ public class CESUtility implements IEvaluation {
         double bequest;
         if (expectations.anticipated.length>0) {
             for (int ii=0; ii<expectations.anticipated.length; ii++) {
-                if (expectations.probability[ii] > 1.0E-9) {
-                    if ( 1.0 - expectations.mortalityProbability > 1.0E-9 ) {
+                if (expectations.probability[ii] > probThreshold) {
+                    sumProb += expectations.probability[ii];
+                    if ( 1.0 - expectations.mortalityProbability > probThreshold ) {
                         expectedV = valueFunction.interpolateAll(expectations.anticipated[ii], true);
                         expectedUtility += expectations.probability[ii] *
                                 (1.0 - expectations.mortalityProbability) * Math.pow(expectedV, 1 - GAMMA);
                     }
-                    if (expectations.mortalityProbability > 1.0E-9 && zeta1 > 0) {
+                    if (expectations.mortalityProbability > probThreshold && zeta1 > 0) {
                         bequest = Math.max(0, Math.exp(expectations.anticipated[ii].states[0])- DecisionParams.C_LIQUID_WEALTH);
                         expectedUtility += expectations.probability[ii] *
                                         expectations.mortalityProbability * Math.pow(zeta1 * (zeta0 + bequest), 1 - GAMMA);
                     }
                 }
             }
+        } else {
+            sumProb = 1.0;
         }
+        if (sumProb<0.8)
+            throw new RuntimeException("utility expectation associated with low aggregate probability vector");
+        expectedUtility /= sumProb;
 
         // evaluate total utility for passing to minimisation function
         double discountFactor;

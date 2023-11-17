@@ -243,6 +243,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Column(name="social_care_cost_per_week")
 	private Double socialCareCostPerWeek;
 
+	@Column(name="social_care_provision")
+	private Integer socialCareProvision;
+
 	@Transient
 	private Integer n_children_allAges = 0; //Number of children of all ages in the household
 
@@ -345,9 +348,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 
 	public BenefitUnit(boolean regressionModel) {
-		this.model = null;
-		key = null;
-		collector = null;
+		if (regressionModel) {
+			model = null;
+			key = null;
+			collector = null;
+		} else {
+			throw new RuntimeException("Unrecognised call to benefit unit constructor");
+		}
 	}
 
 	public BenefitUnit(BenefitUnit originalBenefitUnit, boolean regressionProxy) {
@@ -432,6 +439,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.n_children_02_lag1 = 0;
 		this.childcareCostPerWeek = 0.0;
 		this.socialCareCostPerWeek = 0.0;
+		this.socialCareProvision = 0;
 		this.disposableIncomeMonthly = 0.;
 		this.grossIncomeMonthly = 0.;
 		this.equivalisedDisposableIncomeYearly = 0.;
@@ -588,6 +596,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.n_children_02_lag1 = originalBenefitUnit.n_children_02_lag1;
 		this.childcareCostPerWeek = originalBenefitUnit.childcareCostPerWeek;
 		this.socialCareCostPerWeek = originalBenefitUnit.socialCareCostPerWeek;
+		this.socialCareProvision = originalBenefitUnit.socialCareProvision;
 		this.region = originalBenefitUnit.region;
 		this.ydses_c5 = originalBenefitUnit.getYdses_c5();
 		this.ydses_c5_lag1 = originalBenefitUnit.ydses_c5_lag1;
@@ -1029,7 +1038,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 			}
 			double socialCareCostPerMonth = 0.0;
+			socialCareProvision = 0;
 			if (Parameters.flagSocialCare) {
+				updateSocialCareProvision();
 				updateSocialCareCostPerWeek();
 				socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 			}
@@ -1037,9 +1048,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			// update disposable income
 			TaxEvaluation evaluatedTransfers;
 			if (Parameters.donorPoolAveraging) {
-				evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
+				evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
 			} else {
-				evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
+				evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
 			}
 			disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 			benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1108,9 +1119,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						MultiKey<? extends Labour> labourKey = new MultiKey<>(male.getLabourSupplyWeekly(), female.getLabourSupplyWeekly());
 						TaxEvaluation evaluatedTransfers;
 						if (Parameters.donorPoolAveraging) {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
 						} else {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
 						}
 						disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 						benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1135,9 +1146,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						MultiKey<? extends Labour> labourKey = new MultiKey<>(male.getLabourSupplyWeekly(), Labour.ZERO);
 						TaxEvaluation evaluatedTransfers;
 						if (Parameters.donorPoolAveraging) {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
 						} else {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
 						}
 						disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 						benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1164,9 +1175,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 					TaxEvaluation evaluatedTransfers;
 					if (Parameters.donorPoolAveraging) {
-						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
+						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
 					} else {
-						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
+						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
 					}
 					disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 					benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1190,9 +1201,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 				TaxEvaluation evaluatedTransfers;
 				if (Parameters.donorPoolAveraging) {
-					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), -1, simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
+					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), -1, 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
 				} else {
-					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), -1, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
+					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), -1, 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
 				}
 				disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 				benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1213,9 +1224,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 				TaxEvaluation evaluatedTransfers;
 				if (Parameters.donorPoolAveraging) {
-					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), -1, female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
+					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), -1, female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, -1.0);
 				} else {
-					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), -1, female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
+					evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), -1, female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov.nextDouble());
 				}
 				disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 				benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1449,7 +1460,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 			}
 			double socialCareCostPerMonth = 0.0;
+			socialCareProvision = 0;
 			if (Parameters.flagSocialCare) {
+				updateSocialCareProvision();
 				updateSocialCareCostPerWeek();
 				socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 			}
@@ -1461,9 +1474,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 			TaxEvaluation evaluatedTransfers;
 			if (Parameters.donorPoolAveraging) {
-				evaluatedTransfers = new TaxEvaluation(model.getYear(), states.getAgeYears(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(), -1.0);
+				evaluatedTransfers = new TaxEvaluation(model.getYear(), states.getAgeYears(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(), -1.0);
 			} else {
-				evaluatedTransfers = new TaxEvaluation(model.getYear(), states.getAgeYears(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(), taxInnov.nextDouble());
+				evaluatedTransfers = new TaxEvaluation(model.getYear(), states.getAgeYears(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(), taxInnov.nextDouble());
 			}
 			disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 			benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1496,7 +1509,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 					}
 					double socialCareCostPerMonth = 0.0;
+					socialCareProvision = 0;
 					if (Parameters.flagSocialCare) {
+						updateSocialCareProvision();
 						updateSocialCareCostPerWeek();
 						socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 					}
@@ -1509,9 +1524,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 					TaxEvaluation evaluatedTransfers;
 					if (Parameters.donorPoolAveraging) {
-						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
+						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), socialCareProvision, simulatedIncomeToConvertPerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
 					} else {
-						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), simulatedIncomeToConvertPerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
+						evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), socialCareProvision, simulatedIncomeToConvertPerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
 					}
 					disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 					benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1557,7 +1572,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 							childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 						}
 						double socialCareCostPerMonth = 0.0;
+						socialCareProvision = 0;
 						if (Parameters.flagSocialCare) {
+							updateSocialCareProvision();
 							updateSocialCareCostPerWeek();
 							socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 						}
@@ -1566,9 +1583,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 						TaxEvaluation evaluatedTransfers;
 						if (Parameters.donorPoolAveraging) {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), 0., male.getDisability(), -1, simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), 0., male.getDisability(), -1, socialCareProvision, simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
 						} else {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), 0., male.getDisability(), -1, simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), 0., male.getDisability(), -1, socialCareProvision, simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
 						}
 						disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 						benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1601,7 +1618,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 							childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 						}
 						double socialCareCostPerMonth = 0.0;
+						socialCareProvision = 0;
 						if (Parameters.flagSocialCare) {
+							updateSocialCareProvision();
 							updateSocialCareCostPerWeek();
 							socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 						}
@@ -1610,9 +1629,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 						TaxEvaluation evaluatedTransfers;
 						if (Parameters.donorPoolAveraging) {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), 0., labourKey.getKey(1).getHours(female), -1, female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), 0., labourKey.getKey(1).getHours(female), -1, female.getDisability(), socialCareProvision, simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), -1.0);
 						} else {
-							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), 0., labourKey.getKey(1).getHours(female), -1, female.getDisability(), simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
+							evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), 0., labourKey.getKey(1).getHours(female), -1, female.getDisability(), socialCareProvision, simulatedIncomeToConvertPerMonth, 0.0, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(false), taxInnov.nextDouble());
 						}
 						disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 						benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1694,7 +1713,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	protected void calculateBUIncome() {
 
 		/*
-		 * This method updates income variables for responsible persons in the household and household
+		 * This method updates income variables for responsible persons in the household
 		 *
 		 * BenefitUnit income quintiles are based on labour, pension, miscellaneous (see comment for definition),
 		 * Trade Union / Friendly Society Payment and maintenace or alimony.
@@ -1721,21 +1740,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if(male != null && female != null) {
 
 				// male
-				double labourEarningsMale = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				male.setYplgrs_dv(asinh(labourEarningsMale)); //This follows asinh transform of labourEarnings
-				double YpnbihsMale = labourEarningsMale + Math.sinh(male.getYptciihs_dv()); //In levels
-				male.setYpnbihs_dv(asinh(YpnbihsMale)); //Set asinh transformed
-				male.setCovidModuleGrossLabourIncome_Baseline(YpnbihsMale); // Used in the Covid-19 labour supply module
+				double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				male.setYplgrs_dv(asinh(labourEarningsMaleMonthly));
+				double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getYptciihs_dv()); //personal non-benefit income per month
+				male.setYpnbihs_dv(asinh(ypnbihsMaleMonthly));
+				male.setCovidModuleGrossLabourIncome_Baseline(ypnbihsMaleMonthly); // Used in the Covid-19 labour supply module
 
 				// female
-				double labourEarningsFemale = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				female.setYplgrs_dv(asinh(labourEarningsFemale)); //This follows asinh transform of labourEarnings
-				double YpnbihsFemale = labourEarningsFemale + Math.sinh(female.getYptciihs_dv()); //In levels
-				female.setYpnbihs_dv(asinh(YpnbihsFemale)); //Set asinh transformed
-				female.setCovidModuleGrossLabourIncome_Baseline(YpnbihsFemale); // Used in the Covid-19 labour supply module
+				double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				female.setYplgrs_dv(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
+				double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getYptciihs_dv()); //In levels
+				female.setYpnbihs_dv(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
+				female.setCovidModuleGrossLabourIncome_Baseline(ypnbihsFemaleMonthly); // Used in the Covid-19 labour supply module
 
 				// benefit unit income is the sum of male and female non-benefit income
-				double tmpHHYpnbihs_dv = (YpnbihsMale + YpnbihsFemale) / getEquivalisedWeight(); //Equivalised
+				double tmpHHYpnbihs_dv = (ypnbihsMaleMonthly + ypnbihsFemaleMonthly) / getEquivalisedWeight(); //Equivalised
 				setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
 				//Based on the percentiles calculated by the collector, assign household to one of the quintiles of (equivalised) income distribution
@@ -1757,14 +1776,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 			if(male != null) {
 
-				double labourEarningsMale = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				male.setYplgrs_dv(asinh(labourEarningsMale)); //This follows asinh transform of labourEarnings
-				double YpnbihsMale = labourEarningsMale + Math.sinh(male.getYptciihs_dv()); //In levels
-				male.setYpnbihs_dv(asinh(YpnbihsMale)); //Set asinh transformed
-				male.setCovidModuleGrossLabourIncome_Baseline(YpnbihsMale); // Used in the Covid-19 labour supply module
+				double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				male.setYplgrs_dv(asinh(labourEarningsMaleMonthly)); //This follows asinh transform of labourEarnings
+				double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getYptciihs_dv()); //In levels
+				male.setYpnbihs_dv(asinh(ypnbihsMaleMonthly)); //Set asinh transformed
+				male.setCovidModuleGrossLabourIncome_Baseline(ypnbihsMaleMonthly); // Used in the Covid-19 labour supply module
 
 				//BenefitUnit income is the male non-benefit income
-				double tmpHHYpnbihs_dv = YpnbihsMale / getEquivalisedWeight(); //Equivalised
+				double tmpHHYpnbihs_dv = ypnbihsMaleMonthly / getEquivalisedWeight(); //Equivalised
 				setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
 				if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
@@ -1786,14 +1805,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if(female != null) {
 
 				//If not a couple nor a single male, occupancy must be single female
-				double labourEarningsFemale = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				female.setYplgrs_dv(asinh(labourEarningsFemale)); //This follows asinh transform of labourEarnings
-				double YpnbihsFemale = labourEarningsFemale + Math.sinh(female.getYptciihs_dv()); //In levels
-				female.setYpnbihs_dv(asinh(YpnbihsFemale)); //Set asinh transformed
-				female.setCovidModuleGrossLabourIncome_Baseline(YpnbihsFemale); // Used in the Covid-19 labour supply module
+				double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				female.setYplgrs_dv(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
+				double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getYptciihs_dv()); //In levels
+				female.setYpnbihs_dv(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
+				female.setCovidModuleGrossLabourIncome_Baseline(ypnbihsFemaleMonthly); // Used in the Covid-19 labour supply module
 
 				//BenefitUnit income is the female non-benefit income
-				double tmpHHYpnbihs_dv = YpnbihsFemale / getEquivalisedWeight(); //Equivalised
+				double tmpHHYpnbihs_dv = ypnbihsFemaleMonthly / getEquivalisedWeight(); //Equivalised
 				setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
 				if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
@@ -3563,7 +3582,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	public double getRegionIndex() {
 
-		return region.getDrgn1EUROMODvariable();
+		return region.getValue();
 	}
 
 	public int getChildrenByAge(int age) {
@@ -3700,7 +3719,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			boolean toRetire = refPerson.considerRetirement();
 			if (toRetire && getLiquidWealth() > 0.0) {
 				pensionIncomeAnnual = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
-						Parameters.annuityRates.getAnnuityRate(occupancy, getYear()-refPerson.getDag(), getYear());
+						Parameters.annuityRates.getAnnuityRate(occupancy, getYear()-refPerson.getDag(), refPerson.getDag());
 				liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
 
 				// upate person variables
@@ -3750,6 +3769,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			} else {
 				investmentIncomeAnnual = Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.SavingReturns) * liquidWealth;
 			}
+			if ((investmentIncomeAnnual < -2000000.0) || (investmentIncomeAnnual > 20000000.0))
+				throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
 
 			// update person level variables
 			double val;
@@ -3869,6 +3890,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		socialCareCostPerWeek = 0.0;
 		for (Person person : getPersonsInBU()) {
 			socialCareCostPerWeek += person.getSocialCareCostWeekly();
+		}
+	}
+
+	private void updateSocialCareProvision() {
+
+		socialCareProvision = 0;
+		for (Person person : getPersonsInBU()) {
+			if (!SocialCareProvision.None.equals(person.getSocialCareProvision()))
+				socialCareProvision = 1;
 		}
 	}
 

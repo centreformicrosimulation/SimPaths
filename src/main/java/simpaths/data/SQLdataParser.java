@@ -307,7 +307,7 @@ public class SQLdataParser {
 			Parameters.setCountryRegions(country);
 			for(Region region: Parameters.getCountryRegions()) {
 				stat.execute(
-					"UPDATE " + benefitUnitTable + " SET region = '" + region + "' WHERE drgn1 = " + region.getDrgn1EUROMODvariable() + ";"
+					"UPDATE " + benefitUnitTable + " SET region = '" + region + "' WHERE drgn1 = " + region.getValue() + ";"
 				);
 			}
 

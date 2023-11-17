@@ -61,6 +61,7 @@ public class Parameters {
 		"dwt", 					//household weight
 		"les", 					//labour employment status + health status
 		"lcs", 					//labour civil servant dummy indicator
+        "lcr01",                //carer status for benefits (0 no 1 yes)
 		"lhw", 					//hours worked per week
 		"ddi",					//disability status
         "yem", 					//employment income - used to construct work sector *NOT VALID FOR POLICY ANALYSIS*
@@ -253,6 +254,8 @@ public class Parameters {
     public static final int MIN_HOURS_FULL_TIME_EMPLOYED = 25;	// used to distinguish full-time from part-time employment (needs to be consistent with Labour enum)
     public static final double MIN_HOURLY_WAGE_RATE = 1.5;
     public static final double MAX_HOURLY_WAGE_RATE = 150.0;
+    public static final double MAX_HOURS_WEEKLY_FORMAL_CARE = 150.0;
+    public static final double MAX_HOURS_WEEKLY_INFORMAL_CARE = 16 * 7;
     public static final double CHILDCARE_COST_EARNINGS_CAP = 0.5;  // maximum share of earnings payable as childcare (for benefit units with some earnings)
     public static final int MIN_DIFFERENCE_AGE_MOTHER_CHILD_IN_ALIGNMENT = 15; //When assigning children to mothers in the population alignment, specify how much older (at the minimum) the mother must be than the child
     public static final int MAX_EM_DONOR_RATIO = 3; // Used by BenefitUnit => convertGrossToDisposable() to decide whether gross-to-net ratio should be applied or disposable income from the donor used directly
@@ -413,10 +416,10 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3c;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3d;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3e;
-    private static Map<SocialCareMarket, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2cMap;
+    private static Map<SocialCareReceipt, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2cMap;
     private static Map<PartnerSupplementaryCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2eMap;
     private static Map<NotPartnerInformalCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2fMap;
-    private static Map<SocialCareProvidedTo, MultiKeyCoefficientMap> coeffCovarianceSocialCareS3dMap;
+    private static Map<SocialCareProvision, MultiKeyCoefficientMap> coeffCovarianceSocialCareS3dMap;
 
 
     //Mental health
@@ -613,7 +616,7 @@ public class Parameters {
     private static LinearRegression regCareHoursS1b;
     private static ProbitRegression regNeedCareS2a;
     private static ProbitRegression regReceiveCareS2b;
-    private static MultiLogitRegression<SocialCareMarket> regSocialCareMarketS2c;
+    private static MultiLogitRegression<SocialCareReceipt> regSocialCareMarketS2c;
     private static ProbitRegression regReceiveCarePartnerS2d;
     private static MultiLogitRegression<PartnerSupplementaryCarer> regPartnerSupplementaryCareS2e;
     private static MultiLogitRegression<NotPartnerInformalCarer> regNotPartnerInformalCareS2f;
@@ -625,7 +628,7 @@ public class Parameters {
     private static ProbitRegression regCarePartnerProvCareToOtherS3a;
     private static ProbitRegression regNoCarePartnerProvCareToOtherS3b;
     private static ProbitRegression regNoPartnerProvCareToOtherS3c;
-    private static MultiLogitRegression<SocialCareProvidedTo> regInformalCareToS3d;
+    private static MultiLogitRegression<SocialCareProvision> regInformalCareToS3d;
     private static LinearRegression regCareHoursProvS3e;
 
 
@@ -1083,10 +1086,10 @@ public class Parameters {
             columnsSocialCareS1b = 18;
             columnsSocialCareS2a = 32;
             columnsSocialCareS2b = 32;
-            columnsSocialCareS2c = 37;
+            columnsSocialCareS2c = 39;
             columnsSocialCareS2d = 17;
-            columnsSocialCareS2e = 13;
-            columnsSocialCareS2f = 31;
+            columnsSocialCareS2e = 16;
+            columnsSocialCareS2f = 36;
             columnsSocialCareS2g = 21;
             columnsSocialCareS2h = 21;
             columnsSocialCareS2i = 21;
@@ -1096,7 +1099,7 @@ public class Parameters {
             columnsSocialCareS3b = 38;
             columnsSocialCareS3c = 37;
             columnsSocialCareS3d = 79;
-            columnsSocialCareS3e = 40;
+            columnsSocialCareS3e = 37;
             columnsEducationE1a = 21;
             columnsEducationE1b = 27;
             columnsEducationE2a = 22;
@@ -1441,18 +1444,18 @@ public class Parameters {
         regHealthH2b = new ProbitRegression(coeffCovarianceHealthH2b);
 
         //Social care
-        coeffCovarianceSocialCareS2cMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareMarket.class, coeffCovarianceSocialCareS2c);
+        coeffCovarianceSocialCareS2cMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareReceipt.class, coeffCovarianceSocialCareS2c);
         coeffCovarianceSocialCareS2eMap = MultiLogitRegression.populateMultinomialCoefficientMap(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2e);
         coeffCovarianceSocialCareS2fMap = MultiLogitRegression.populateMultinomialCoefficientMap(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f);
-        coeffCovarianceSocialCareS3dMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareProvidedTo.class, coeffCovarianceSocialCareS3d);
+        coeffCovarianceSocialCareS3dMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareProvision.class, coeffCovarianceSocialCareS3d);
         regReceiveCareS1a = new ProbitRegression(coeffCovarianceSocialCareS1a);
         regCareHoursS1b = new ProbitRegression(coeffCovarianceSocialCareS1b);
         regNeedCareS2a = new ProbitRegression(coeffCovarianceSocialCareS2a);
         regReceiveCareS2b = new ProbitRegression(coeffCovarianceSocialCareS2b);
-        regSocialCareMarketS2c = new MultiLogitRegression<>(coeffCovarianceSocialCareS2cMap);
+        regSocialCareMarketS2c = new MultiLogitRegression<>(SocialCareReceipt.class, coeffCovarianceSocialCareS2cMap);
         regReceiveCarePartnerS2d = new ProbitRegression(coeffCovarianceSocialCareS2d);
-        regPartnerSupplementaryCareS2e = new MultiLogitRegression<>(coeffCovarianceSocialCareS2eMap);
-        regNotPartnerInformalCareS2f = new MultiLogitRegression<>(coeffCovarianceSocialCareS2fMap);
+        regPartnerSupplementaryCareS2e = new MultiLogitRegression<>(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2eMap);
+        regNotPartnerInformalCareS2f = new MultiLogitRegression<>(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2fMap);
         regPartnerCareHoursS2g = new LinearRegression(coeffCovarianceSocialCareS2g);
         regDaughterCareHoursS2h = new LinearRegression(coeffCovarianceSocialCareS2h);
         regSonCareHoursS2i = new LinearRegression(coeffCovarianceSocialCareS2i);
@@ -1461,7 +1464,7 @@ public class Parameters {
         regCarePartnerProvCareToOtherS3a = new ProbitRegression(coeffCovarianceSocialCareS3a);
         regNoCarePartnerProvCareToOtherS3b = new ProbitRegression(coeffCovarianceSocialCareS3b);
         regNoPartnerProvCareToOtherS3c = new ProbitRegression(coeffCovarianceSocialCareS3c);
-        regInformalCareToS3d = new MultiLogitRegression<>(coeffCovarianceSocialCareS3dMap);
+        regInformalCareToS3d = new MultiLogitRegression<>(SocialCareProvision.class, coeffCovarianceSocialCareS3dMap);
         regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
 
         //Health mental
