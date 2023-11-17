@@ -63,6 +63,16 @@ import simpaths.model.taxes.DonorTaxUnitPolicy;
  */
 public class SimPathsModel extends AbstractSimulationManager implements EventListener {
 
+	public boolean isFirstRun() {
+		return isFirstRun;
+	}
+
+	public void setFirstRun(boolean firstRun) {
+		isFirstRun = firstRun;
+	}
+
+	private boolean isFirstRun;
+
 	// default simulation parameters
 	private static Logger log = Logger.getLogger(SimPathsModel.class);
 
@@ -2297,7 +2307,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				Class.forName("org.h2.Driver");
 				System.out.print("Reading from database at " + DatabaseUtils.databaseInputUrl);
 				try {
-					conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=TRUE", "sa", "");
+					conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=FALSE", "sa", "");
 				}
 				catch (SQLException e) {
 					log.info(e.getMessage());
@@ -2318,21 +2328,24 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				//If user chooses start year that is higher than the last available initial population, last available population should be used but with uprated monetary values
 				boolean uprateInitialPopulation = (startYear > Parameters.getMaxStartYear());
 
-				//Create database tables to be used in simulation from country-specific tables
-				String[] tableNames = new String[]{"PERSON", "DONORPERSON", "BENEFITUNIT", "DONORTAXUNIT", "HOUSEHOLD"};
-				String[] tableNamesInitial = new String[]{"PERSON", "BENEFITUNIT", "HOUSEHOLD"};
-				String[] tableNamesDonor = new String[]{"DONORPERSON", "DONORTAXUNIT"};
 				stat = conn.createStatement();
-				for(String tableName: tableNamesDonor) {
-					stat.execute("DROP TABLE IF EXISTS " + tableName);
-					stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
-				}
-				for(String tableName: tableNamesInitial) {
-					stat.execute("DROP TABLE IF EXISTS " + tableName);
-					if (uprateInitialPopulation) {
-						stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + Parameters.getMaxStartYear()); // Load the last available initial population from all available in tables of the database
-					} else {
-						stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + startYear); // Load the country-year specific initial population from all available in tables of the database
+
+				if (isFirstRun) {
+					//Create database tables to be used in simulation from country-specific tables
+					String[] tableNames = new String[]{"PERSON", "DONORPERSON", "BENEFITUNIT", "DONORTAXUNIT", "HOUSEHOLD"};
+					String[] tableNamesInitial = new String[]{"PERSON", "BENEFITUNIT", "HOUSEHOLD"};
+					String[] tableNamesDonor = new String[]{"DONORPERSON", "DONORTAXUNIT"};
+					for (String tableName : tableNamesDonor) {
+						stat.execute("DROP TABLE IF EXISTS " + tableName);
+						stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
+					}
+					for (String tableName : tableNamesInitial) {
+						stat.execute("DROP TABLE IF EXISTS " + tableName);
+						if (uprateInitialPopulation) {
+							stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + Parameters.getMaxStartYear()); // Load the last available initial population from all available in tables of the database
+						} else {
+							stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + startYear); // Load the country-year specific initial population from all available in tables of the database
+						}
 					}
 				}
 
@@ -2346,7 +2359,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				}
 
 				//If start year is higher than the last available population, calculate the uprating factor and apply it to the monetary values in the database:
-				if (uprateInitialPopulation) {
+				if (uprateInitialPopulation & isFirstRun) {
 					double upratingFactor =
 							Parameters.getTimeSeriesIndex(startYear, UpratingCase.ModelInitialise) /
 									Parameters.getTimeSeriesIndex(Parameters.getMaxStartYear(), UpratingCase.ModelInitialise);
