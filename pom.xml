@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-core</artifactId>
-			<version>4.3.3</version>
+			<version>4.3.5</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
