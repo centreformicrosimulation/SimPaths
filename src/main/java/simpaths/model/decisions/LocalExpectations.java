@@ -17,8 +17,7 @@ public class LocalExpectations {
 
 
     public LocalExpectations(double[] probs, double[] vals) {
-        probabilities = probs;
-        values = vals;
+        screenAndAssign(probs, vals);
     }
 
     public LocalExpectations(IDoubleSource obj, RegressionNames regression) {
@@ -55,8 +54,9 @@ public class LocalExpectations {
             probabilities = new double[] {1.0};
             values = new double[] {valueTrue};
         } else {
-            values = new double[] {valueFalse, valueTrue};
-            probabilities = new double[] {1.0-probabilityTrue, probabilityTrue};
+            double[] vals = new double[] {valueFalse, valueTrue};
+            double[] probs = new double[] {1.0-probabilityTrue, probabilityTrue};
+            screenAndAssign(probs, vals);
         }
     }
 
@@ -64,46 +64,87 @@ public class LocalExpectations {
     /**
      * WORKER METHODS
      */
+    private void screenAndAssign(double[] probs, double[] vals) {
+
+        double sumProbs = 0.0, delProbs = 0.0;
+        int drop = 0;
+        for (double prob : probs) {
+            if (DecisionParams.FILTER_LOCAL_EXPECTATIONS && prob<DecisionParams.MIN_STATE_PROBABILITY) {
+                drop++;
+                delProbs += prob;
+            } else {
+                sumProbs += prob;
+            }
+        }
+        if (Math.abs(sumProbs+delProbs-1.0)>=1.0E-5)
+            throw new RuntimeException("local expectations supplied probability vector that does not sum to 1.0");
+        if (drop==0 && Math.abs(sumProbs-1.0)<1.0E-5) {
+            probabilities = probs;
+            values = vals;
+        } else {
+            int ii = 0;
+            double probCheck = 0.0;
+            probabilities = new double[probs.length - drop];
+            values = new double[probs.length - drop];
+            for (int jj=0; jj<probs.length; jj++) {
+                if (probs[jj]>=DecisionParams.MIN_STATE_PROBABILITY) {
+                    double probHere = probs[jj] / sumProbs;
+                    probCheck += probHere;
+                    probabilities[ii] = probHere;
+                    values[ii] = vals[jj];
+                    ii++;
+                }
+            }
+            if (ii!=probs.length - drop || Math.abs(probCheck-1.0)>1.0E-5)
+                throw new RuntimeException("problem evaluating probabilities for local expectations");
+        }
+    }
+
     private void evaluateIndicator(IDoubleSource obj, RegressionNames regression) {
         evaluateIndicator(obj, regression, false);
     }
 
     private void evaluateIndicator(IDoubleSource obj, RegressionNames regression, boolean reversePolarity) {
+        double[] probs, vals;
         double prob = ManagerRegressions.getProbability(obj, regression);
-        probabilities = new double[] {1.0-prob, prob};
+        probs = new double[] {1.0-prob, prob};
         if (reversePolarity)
-            values = new double[] {1.0, 0.0};
+            vals = new double[] {1.0, 0.0};
         else
-            values = new double[] {0.0, 1.0};
+            vals = new double[] {0.0, 1.0};
+        screenAndAssign(probs, vals);
     }
 
     private <E extends Enum<E> & DoubleValuedEnum> void evaluateMultinomial(IDoubleSource obj, RegressionNames regression) {
-        Map<E,Double> probs = ManagerRegressions.getMultinomialProbabilities(obj, regression);
-        int nn = probs.size();
+        double[] probs, vals;
+        Map<E,Double> probsMap = ManagerRegressions.getMultinomialProbabilities(obj, regression);
+        int nn = probsMap.size();
         if (nn<2)
             throw new RuntimeException("call to evaluate multinomial probabilities returned fewer than 2 results");
-        values = new double[nn];
-        probabilities = new double[nn];
+        vals = new double[nn];
+        probs = new double[nn];
         int ii = 0;
-        for (E key : probs.keySet()) {
-            probabilities[ii] = probs.get(key);
-            values[ii] = key.getValue();
+        for (E key : probsMap.keySet()) {
+            probs[ii] = probsMap.get(key);
+            vals[ii] = key.getValue();
             ii++;
         }
+        screenAndAssign(probs, vals);
     }
 
     private void evaluateGaussian(IDoubleSource obj, RegressionNames regression, double minValue, double maxValue, double cTransform) {
-
+        double[] probs, vals;
         Double rmse = ManagerRegressions.getRmse(regression);
         Double score = ManagerRegressions.getScore(obj, regression);
-        probabilities = new double[DecisionParams.PTS_IN_QUADRATURE];
-        values = new double[DecisionParams.PTS_IN_QUADRATURE];
+        probs = new double[DecisionParams.PTS_IN_QUADRATURE];
+        vals = new double[DecisionParams.PTS_IN_QUADRATURE];
         for (int ii = 0; ii< DecisionParams.PTS_IN_QUADRATURE; ii++) {
-            probabilities[ii] = DecisionParams.quadrature.weights[ii];
+            probs[ii] = DecisionParams.quadrature.weights[ii];
             double value = score + rmse * DecisionParams.quadrature.abscissae[ii];
             value = Math.min(value, maxValue);
             value = Math.max(value, minValue);
-            values[ii] = Math.log(Math.exp(value) + cTransform);
+            vals[ii] = Math.log(Math.exp(value) + cTransform);
         }
+        screenAndAssign(probs, vals);
     }
 }

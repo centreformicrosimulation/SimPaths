@@ -13,9 +13,12 @@ public class DecisionParams {
 
     // CONTROLS FOR USER OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = true;
+    public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
-    public static final int SOLVE_FROM_AGE = 56;
+    public static final boolean FILTER_LOCAL_EXPECTATIONS = true;     // screens expectations to omit low probability events
+    public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
+    public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
+    public static final int SOLVE_FROM_AGE = 19;
     public static boolean flagRetirement;                             // model retirement state
     public static boolean enableIntertemporalOptimisations = false;   // intertemporal optimisations initialised to false
     public static int optionsEmployment1;                             // number of discrete employment alternatives to consider for principal earner

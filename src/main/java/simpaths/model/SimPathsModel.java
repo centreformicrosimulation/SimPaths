@@ -223,13 +223,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean projectSocialCare = true;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
-	private boolean enableIntertemporalOptimisations = true;
+	private boolean enableIntertemporalOptimisations = false;
 
 	@GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
-	private boolean useSavedBehaviour = false;
+	private boolean useSavedBehaviour = true;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
-	private String readGrid = "old";
+	private String readGrid = "5x5care";
 
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;
@@ -250,7 +250,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean responsesToHealth = true;
 
 	@GUIparameter(description = "whether to include disability in state space for IO behavioural solutions")
-	private boolean responsesToDisability = true;
+	private boolean responsesToDisability = false;
 
 	@GUIparameter(description = "minimum age for expecting less than perfect health in IO solutions")
 	private Integer minAgeForPoorHealth = 50;
@@ -468,7 +468,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// Social care
 		if (projectSocialCare) {
 			yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareIncidence);
-			yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
+			//yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
 		}
 
 		// UPDATE REFERENCES FOR OPTIMISING BEHAVIOUR (IF NECESSARY)
@@ -1785,7 +1785,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		double[] startVal = new double[] {careProvisionAdjustment};
 		double[] lowerBound = new double[] {careProvisionAdjustment - 1.5};
 		double[] upperBound = new double[] {careProvisionAdjustment + 1.5};
-		RootSearch search = new RootSearch(lowerBound, upperBound, startVal, socialCareAlignment, 1.0E-2, 0.1);
+		RootSearch search = new RootSearch(lowerBound, upperBound, startVal, socialCareAlignment, 1.0E-2, 0.001);
 		search.evaluate();
 		if (search.isTargetAltered()) {
 			Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.CareProvisionAdjustment);

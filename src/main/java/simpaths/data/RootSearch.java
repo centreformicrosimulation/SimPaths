@@ -44,7 +44,7 @@ public class RootSearch {
             xp = bounds.getXp();
             fp = bounds.getFp();
 
-            target = bisection(xn, xg, xp, fn, fg, fp);
+            //target = bisection(xn, xg, xp, fn, fg, fp);
             target = zbrent(xn, xp, fn, fp);
         }
     }
@@ -80,6 +80,7 @@ public class RootSearch {
     /************************************************************
      * Van Wijngaarden-Dekker-Brent Method for root finding in 1 dimension
      * based on Press et al (2007) (Numerical Recipes)
+     * NOTE: apache commons has a related method: BrentSolver.java
      ************************************************************/
     private double[] zbrent(double[] xn, double[] xp, double fn, double fp) {
 
@@ -87,6 +88,7 @@ public class RootSearch {
         final int ITMAX = 200;
 
         double[] bbv = new double[nn];
+        final double EPS = 3.0 * Math.ulp(1.0);
         double aa=xn[0], bb=xp[0], cc=xp[0], dd=0.0, ee=0.0, pp, qq, rr, ss, tol1, xm;
         double fa=fn, fb=fp, fc=fp;
         for (int iter=0; iter<ITMAX; iter++) {
@@ -104,53 +106,53 @@ public class RootSearch {
                 fb=fc;
                 fc=fa;
             }
-            tol1=2.0*epsOrdinates*Math.abs(bb)+0.5*epsFunction;      //Convergence check.
-            xm=0.5*(cc-bb);
+            tol1 = 2.0 * EPS * Math.abs(bb) + 0.5 * epsFunction;      //Convergence check.
+            xm = 0.5 * (cc - bb);
             if (Math.abs(xm) <= tol1 || fb == 0.0) {
                 bbv[0] = bb;
                 return bbv;
             }
             if (Math.abs(ee) >= tol1 && Math.abs(fa) > Math.abs(fb)) {
-                ss=fb/fa;   //Attempt inverse quadratic interpolation.
+                ss = fb / fa;   //Attempt inverse quadratic interpolation.
                 if (aa == cc) {
-                    pp=2.0*xm*ss;
-                    qq=1.0-ss;
+                    pp = 2.0 * xm * ss;
+                    qq = 1.0 - ss;
                 } else {
-                    qq=fa/fc;
-                    rr=fb/fc;
-                    pp=ss*(2.0*xm*qq*(qq-rr)-(bb-aa)*(rr-1.0));
-                    qq=(qq-1.0)*(rr-1.0)*(ss-1.0);
+                    qq = fa / fc;
+                    rr = fb / fc;
+                    pp = ss * (2.0 * xm * qq * (qq - rr) - (bb - aa) * (rr - 1.0));
+                    qq = (qq - 1.0) * (rr - 1.0) * (ss - 1.0);
                 }
-                if (pp > 0.0)
+                if (pp > 0.0) {
                     qq = -qq;     //Check whether in bounds.
-                pp=Math.abs(pp);
-                double min1=3.0*xm*qq-Math.abs(tol1*qq);
-                double min2=Math.abs(ee*qq);
-                if (2.0*pp < Math.min(min1,min2)) {
-                    ee=dd;  //Accept interpolation.
-                    dd=pp/qq;
                 } else {
-                    dd=xm;  //Interpolation failed, use bisection.
-                    ee=dd;
+                    pp = - pp;
+                }
+                double min1 = 3.0 * xm * qq - Math.abs(tol1 * qq);
+                double min2 = Math.abs(ee * qq);
+                if (2.0 * pp < Math.min(min1,min2)) {
+                    ee = dd;  //Accept interpolation.
+                    dd = pp / qq;
+                } else {
+                    dd = xm;  //Interpolation failed, use bisection.
+                    ee = dd;
                 }
             } else {
                 //Bounds decreasing too slowly, use bisection.
-                dd=xm;
-                ee=dd;
+                dd = xm;
+                ee = dd;
             }
-            aa=bb;  //Move last best guess to a.
-            fa=fb;
+            aa = bb;  //Move last best guess to a.
+            fa = fb;
             if (Math.abs(dd) > tol1)    //Evaluate new trial root.
                 bb += dd;
-            else {
-                if (xm < 0.0) {
-                    bb -= Math.abs(tol1);
-                } else {
-                    bb += Math.abs(tol1);
-                }
-                bbv[0] = bb;
-                fb=function.evaluate(bbv);
+            else if (xm < 0.0) {
+                bb -= Math.abs(tol1);
+            } else {
+                bb += Math.abs(tol1);
             }
+            bbv[0] = bb;
+            fb=function.evaluate(bbv);
         }
         throw new RuntimeException("Maximum number of iterations exceeded in zbrent");
     }

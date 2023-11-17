@@ -280,15 +280,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private Integer dcpagdf_lag1; //Lag(1) of difference between ages of partners in union
     @Column(name="ypnbihs_dv")
-    private Double ypnbihs_dv; //Gross personal non-benefit income per month
+    private Double ypnbihs_dv; // asinh of personal non-benefit income per month
     @Transient
     private Double ypnbihs_dv_lag1 = 0.; //Lag(1) of gross personal non-benefit income
     @Column(name="yptciihs_dv")
-    private double yptciihs_dv; // inverse hyperbolic sine of non-employment private income per month (capital and pension)
+    private double yptciihs_dv; // asinh of non-employment non-benefit income per month (capital and pension)
     @Column(name="ypncp")
-    private double ypncp; // inverse hyperbolic sine of capital income per month
+    private double ypncp; // asinh of capital income per month
     @Column(name="ypnoab")
-    private double ypnoab; // inverse hyperbolic sine of pension income per month
+    private double ypnoab; // asinh of pension income per month
     @Transient
     private double ypncp_lag1; //Lag(1) of ypncp
     @Transient
@@ -304,7 +304,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private double yptciihs_dv_lag3; //Lag(3) of gross personal non-benefit non-employment income
     @Column(name="yplgrs_dv")
-    private double yplgrs_dv; //Gross personal employment income
+    private double yplgrs_dv;       // asinh transform of personal labour income per month
     @Transient
     private double yplgrs_dv_lag1; //Lag(1) of gross personal employment income
     @Transient
@@ -1108,10 +1108,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 Map<SocialCareReceipt,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(this, Person.DoublesVariables.class);
                 SocialCareReceipt socialCareMarket = ManagerRegressions.multiEvent(probs1, socialCareInnov.nextDouble());
                 socialCareReceiptAll = SocialCareReceiptAll.getCode(socialCareMarket);
-                if (!SocialCareReceipt.Informal.equals(socialCareReceiptAll))
+                if (!SocialCareReceiptAll.Informal.equals(socialCareReceiptAll))
                     socialCareFromFormal = true;
 
-                if (!SocialCareReceipt.Formal.equals(socialCareReceiptAll)) {
+                if (!SocialCareReceiptAll.Formal.equals(socialCareReceiptAll)) {
                     // some informal care received
 
                     if (partner!=null) {
@@ -2124,6 +2124,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         CareFromDaughter,
         CareFromDaughter_L1,
         CareFromDaughterOther_L1,
+        CareFromDaughterOnly_L1,
         CareFromDaughterSon_L1,
         CareFromFormal,
         CareFromInformal,
@@ -2136,6 +2137,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         CareFromSonOnly_L1,
         CareFromOther,
         CareFromSonOther_L1,
+        CareMarketInformal_L1,
         CareMarketFormal_L1,
         CareMarketMixed_L1,
         CareToOtherOnly,
@@ -2446,6 +2448,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (getTotalHoursSocialCare_L1() > 0.01) ? 1. : 0.;
         case CareMarketMixed_L1:
             return (getHoursFormalSocialCare_L1()>0.01 && getHoursInformalSocialCare_L1()>0.01) ? 1. : 0.;
+        case CareMarketInformal_L1:
+            return (getHoursFormalSocialCare_L1()<0.01 && getHoursInformalSocialCare_L1()>0.01) ? 1. : 0.;
         case CareMarketFormal_L1:
             return (getHoursFormalSocialCare_L1()>0.01 && getHoursInformalSocialCare_L1()<0.01) ? 1. : 0.;
         case CareFromPartner_L1:
@@ -2456,6 +2460,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (getCareHoursFromSon_L1() > 0.01) ? 1. : 0.;
         case CareFromOther_L1:
             return (getCareHoursFromOther_L1() > 0.01) ? 1. : 0.;
+        case CareFromDaughterOnly_L1:
+            return (getCareHoursFromDaughter_L1() > 0.01 && Math.abs(getHoursInformalSocialCare_L1() - getCareHoursFromDaughter_L1())<0.01) ? 1. : 0.;
         case CareFromDaughterSon_L1:
             return (getCareHoursFromDaughter_L1() > 0.01 && getCareHoursFromSon_L1() > 0.01) ? 1. : 0.;
         case CareFromDaughterOther_L1:
@@ -3790,8 +3796,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.lesdf_c4_lag1 = lesdf_c4_lag1;
     }
 
-    public void setYpnbihs_dv_lag1(Double ynbcpdf_dv_lag1) {
-        this.ynbcpdf_dv_lag1 = ynbcpdf_dv_lag1;
+    public void setYpnbihs_dv_lag1(Double val) {
+        ypnbihs_dv_lag1 = val;
     }
 
     public void setDehsp_c3_lag1(Education dehsp_c3_lag1) {
@@ -3802,8 +3808,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhesp_lag1 = dhesp_lag1;
     }
 
-    public void setYnbcpdf_dv_lag1(Double ynbcpdf_dv_lag1) {
-        this.ynbcpdf_dv_lag1 = ynbcpdf_dv_lag1;
+    public void setYnbcpdf_dv_lag1(Double val) {
+        ynbcpdf_dv_lag1 = val;
     }
 
     public void setDcpyy_lag1(Integer dcpyy_lag1) {

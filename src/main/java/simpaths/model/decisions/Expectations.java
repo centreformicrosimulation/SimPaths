@@ -14,6 +14,8 @@ import simpaths.model.BenefitUnit;
 import simpaths.model.Person;
 import simpaths.model.TaxEvaluation;
 
+import static simpaths.data.Parameters.asinh;
+
 
 /**
  *
@@ -122,6 +124,7 @@ public class Expectations {
         // copy outerExpectations
         scale = outerExpectations.scale;
         cohabitation = outerExpectations.cohabitation;
+        retiring = outerExpectations.retiring;
         equivalenceScale = outerExpectations.equivalenceScale;
         ageYearsThisPeriod = outerExpectations.ageYearsThisPeriod;
         ageIndexNextPeriod = outerExpectations.ageIndexNextPeriod;
@@ -155,20 +158,12 @@ public class Expectations {
      */
     public Expectations(Expectations invariantExpectations) {
 
-        // prevailing characteristics - based on currentStates
-        ageYearsThisPeriod = invariantExpectations.ageYearsThisPeriod;
-        currentStates = invariantExpectations.currentStates;
+        // copy existing attributes
         scale = invariantExpectations.scale;
         cohabitation = invariantExpectations.cohabitation;
+        retiring = invariantExpectations.retiring;
         equivalenceScale = invariantExpectations.equivalenceScale;
-        fullTimeHourlyEarningsPotential = invariantExpectations.fullTimeHourlyEarningsPotential;
-        liquidWealth = invariantExpectations.liquidWealth;
-        pensionIncomePerYear = invariantExpectations.pensionIncomePerYear;
-        availableCredit = invariantExpectations.availableCredit;
-        mortalityProbability = invariantExpectations.mortalityProbability;
-        benefitUnitProxyThisPeriod = new BenefitUnit(invariantExpectations.benefitUnitProxyThisPeriod, true);
-
-        // prospective characteristics
+        ageYearsThisPeriod = invariantExpectations.ageYearsThisPeriod;
         ageIndexNextPeriod = invariantExpectations.ageIndexNextPeriod;
         ageYearsNextPeriod = invariantExpectations.ageYearsNextPeriod;
         numberExpected = invariantExpectations.numberExpected;
@@ -178,8 +173,15 @@ public class Expectations {
             probability[ii] = invariantExpectations.probability[ii];
             anticipated[ii] = new States(invariantExpectations.anticipated[ii]);
         }
+        benefitUnitProxyThisPeriod = new BenefitUnit(invariantExpectations.benefitUnitProxyThisPeriod, true);
+        currentStates = invariantExpectations.currentStates;
+        fullTimeHourlyEarningsPotential = invariantExpectations.fullTimeHourlyEarningsPotential;
+        pensionIncomePerYear = invariantExpectations.pensionIncomePerYear;
+        liquidWealth = invariantExpectations.liquidWealth;
+        availableCredit = invariantExpectations.availableCredit;
+        mortalityProbability = invariantExpectations.mortalityProbability;
 
-        // add person proxy for this period
+        // add new data for within period regression specifications
         personProxyThisPeriod = new Person(true);
         personProxyThisPeriod.setDag(ageYearsThisPeriod);
         personProxyThisPeriod.setRegionLocal(currentStates.getRegionCode());
@@ -201,6 +203,7 @@ public class Expectations {
         personProxyNextPeriod.setN_children_allAges_Local(currentStates.getChildrenAll());
         personProxyNextPeriod.setN_children_02_lag1Local(currentStates.getChildren02());
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
+        personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyNextPeriod.setDgn(currentStates.getGenderCode());
         personProxyNextPeriod.setDlltsd(currentStates.getDlltsd());
         personProxyNextPeriod.setDlltsd_lag1(currentStates.getDlltsd());
@@ -288,8 +291,6 @@ public class Expectations {
         } else if (emp1Pr>1.0E-5 || emp2Pr>1.0E-5) {
             throw new InvalidParameterException("inconsistent labour decisions supplied for updating expectations");
         }
-        if (leisureTime<(1.0/DecisionParams.LIVING_HOURS_WEEKLY))
-            leisureTime = leisureTime;
         leisureTime = Math.max(1.0/DecisionParams.LIVING_HOURS_WEEKLY, leisureTime);
 
         // pension income
@@ -375,11 +376,11 @@ public class Expectations {
             personProxyNextPeriod.setLes_c4_lag1(currentStates.getLesCode(emp1Pr));
             personProxyNextPeriod.setLesdf_c4_lag1(currentStates.getLesC4Code(emp1Pr, emp2Pr));
             personProxyNextPeriod.setYpnbihs_dv_lag1(
-                    labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0);
+                    asinh(labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0));
             if (cohabitation) {
                 personProxyNextPeriod.setYnbcpdf_dv_lag1(
-                        labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0 -
-                                (labourIncome2Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome2Annual + pensionIncome2Annual) / 12.0));
+                        asinh(labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0) -
+                                asinh(labourIncome2Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome2Annual + pensionIncome2Annual) / 12.0) );
             } else {
                 personProxyNextPeriod.setYnbcpdf_dv_lag1(0.0);
             }
@@ -394,6 +395,7 @@ public class Expectations {
                     anticipated[ii].states[stateIndexNextPeriod] = currentStates.states[stateIndexCurrPeriod];
                 }
                 personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
+                throw new RuntimeException("Please validate code for regions in expectations object");
             }
 
             // retirement - not a state included in personProxyNextPeriod (don't track changes)
@@ -411,6 +413,7 @@ public class Expectations {
                         anticipated[ii].states[stateIndexNextPeriod] = currentRetirement;
                     }
                 }
+                throw new RuntimeException("Please validate code for retirement in expectations object");
             }
 
             // student - don't need to track separately from education (no need for flagStudentVaries)
@@ -456,7 +459,6 @@ public class Expectations {
 
                     int numberExpectedInitial = numberExpected;
                     boolean flagEval = false;
-                    Map<Education,Double> probsStudent = Parameters.getRegEducationE2a().getProbabilities(personProxyNextPeriod, Person.DoublesVariables.class);
                     LocalExpectations lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE2a);
                     for (int ii = 0; ii < numberExpectedInitial; ii++) {
 
@@ -488,6 +490,7 @@ public class Expectations {
             if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
                 updateExpectations(Axis.Disability, RegressionNames.HealthH2b);
                 flagDisabilityVaries = true;
+                throw new RuntimeException("Please validate code for disability in expectations object");
             }
 
             // cohabitation (1 = cohabiting)
@@ -541,6 +544,7 @@ public class Expectations {
                                 }
                             }
                         }
+                        flagChildrenVaries = true;
                     } else {
                         // assume next year have same number of children as this year
 
@@ -549,15 +553,11 @@ public class Expectations {
                         LocalExpectations lexpect = new LocalExpectations(currentStates.states[stateIndexCurrPeriod]);
                         expandExpectationsAllIndices(stateIndexNextPeriod, lexpect);
                     }
-                    flagChildrenVaries = true;
-                } else if (ageYearsNextPeriod == (DecisionParams.BIRTH_AGE[jj] + Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
-                    // dependent child mature to adulthood
-                    flagChildrenVaries = true;
                 }
             }
 
             // social care receipt
-            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
+           if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
                 updateExpectations(Axis.SocialCareReceipt, 4);
                 flagSocialCareReceiptVaries = true;
             }
@@ -595,6 +595,7 @@ public class Expectations {
                     val = Math.log(val + DecisionParams.C_PENSION);
                     anticipated[ii].states[stateIndexNextPeriod] = val;
                 }
+                throw new RuntimeException("Please validate code for pension income in expectations object");
             }
 
             // wage offer
@@ -602,6 +603,7 @@ public class Expectations {
                 stateIndexNextPeriod = scale.getIndex(Axis.WageOffer1, ageYearsNextPeriod);
                 LocalExpectations lexpect = new LocalExpectations(1.0, 0.0, DecisionParams.PROBABILITY_WAGE_OFFER1);
                 expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
+                throw new RuntimeException("Please validate code for wage offers in expectations object");
             }
 
             // check evaluated probabilities
@@ -656,8 +658,6 @@ public class Expectations {
                 double score = Parameters.getRegCareHoursProvS3e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
                 double rmse = Parameters.getRMSEForRegression("S3e");
                 socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
-                if (socialCareHoursProvidedWeekly>79.0)
-                    socialCareHoursProvidedWeekly = socialCareHoursProvidedWeekly;
             }
         }
         return socialCareHoursProvidedWeekly;
@@ -1103,26 +1103,27 @@ public class Expectations {
         Map<SocialCareReceipt,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(personProxyNextPeriod, Person.DoublesVariables.class);
 
         // compile and package outputs
+        double probHere, probCheck = 0.0;
         double[] probs = new double[SocialCareReceiptAll.values().length];
         double[] vals = new double[SocialCareReceiptAll.values().length];
-        probs[0] = 1 - prob0;
-        vals[0] = 0.0;
+        probHere = 1.0 - prob0;
+        probs[0] = probHere;
+        vals[0] = SocialCareReceiptAll.None.getValue();
+        probCheck += probHere;
         int ii = 1;
         for (SocialCareReceipt key : SocialCareReceipt.values()) {
-            probs[ii] = probs1.get(key) * prob0;
+            probHere = probs1.get(key) * prob0;
+            probs[ii] = probHere;
             vals[ii] = SocialCareReceiptAll.getCode(key).getValue();
+            probCheck += probHere;
             ii++;
         }
 
         // check results
-        double probCheck = 0.0;
-        for (ii=0; ii<probs.length; ii++) {
-            probCheck += probs[ii];
-        }
         if (Math.abs(probCheck-1.0)>1.0E-5)
             throw new RuntimeException("problem evaluating probabilities for social care receipt");
 
-        // retrun
+        // return
         return new LocalExpectations(probs, vals);
     }
 }

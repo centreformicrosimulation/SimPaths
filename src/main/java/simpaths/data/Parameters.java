@@ -1078,10 +1078,10 @@ public class Parameters {
             columnsSocialCareS1b = 18;
             columnsSocialCareS2a = 32;
             columnsSocialCareS2b = 32;
-            columnsSocialCareS2c = 37;
+            columnsSocialCareS2c = 39;
             columnsSocialCareS2d = 17;
-            columnsSocialCareS2e = 13;
-            columnsSocialCareS2f = 31;
+            columnsSocialCareS2e = 16;
+            columnsSocialCareS2f = 36;
             columnsSocialCareS2g = 21;
             columnsSocialCareS2h = 21;
             columnsSocialCareS2i = 21;

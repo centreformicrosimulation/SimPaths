@@ -1713,7 +1713,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	protected void calculateBUIncome() {
 
 		/*
-		 * This method updates income variables for responsible persons in the household and household
+		 * This method updates income variables for responsible persons in the household
 		 *
 		 * BenefitUnit income quintiles are based on labour, pension, miscellaneous (see comment for definition),
 		 * Trade Union / Friendly Society Payment and maintenace or alimony.
@@ -1740,21 +1740,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if(male != null && female != null) {
 
 				// male
-				double labourEarningsMale = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				male.setYplgrs_dv(asinh(labourEarningsMale)); //This follows asinh transform of labourEarnings
-				double YpnbihsMale = labourEarningsMale + Math.sinh(male.getYptciihs_dv()); //In levels
-				male.setYpnbihs_dv(asinh(YpnbihsMale)); //Set asinh transformed
-				male.setCovidModuleGrossLabourIncome_Baseline(YpnbihsMale); // Used in the Covid-19 labour supply module
+				double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				male.setYplgrs_dv(asinh(labourEarningsMaleMonthly));
+				double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getYptciihs_dv()); //personal non-benefit income per month
+				male.setYpnbihs_dv(asinh(ypnbihsMaleMonthly));
+				male.setCovidModuleGrossLabourIncome_Baseline(ypnbihsMaleMonthly); // Used in the Covid-19 labour supply module
 
 				// female
-				double labourEarningsFemale = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				female.setYplgrs_dv(asinh(labourEarningsFemale)); //This follows asinh transform of labourEarnings
-				double YpnbihsFemale = labourEarningsFemale + Math.sinh(female.getYptciihs_dv()); //In levels
-				female.setYpnbihs_dv(asinh(YpnbihsFemale)); //Set asinh transformed
-				female.setCovidModuleGrossLabourIncome_Baseline(YpnbihsFemale); // Used in the Covid-19 labour supply module
+				double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				female.setYplgrs_dv(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
+				double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getYptciihs_dv()); //In levels
+				female.setYpnbihs_dv(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
+				female.setCovidModuleGrossLabourIncome_Baseline(ypnbihsFemaleMonthly); // Used in the Covid-19 labour supply module
 
 				// benefit unit income is the sum of male and female non-benefit income
-				double tmpHHYpnbihs_dv = (YpnbihsMale + YpnbihsFemale) / getEquivalisedWeight(); //Equivalised
+				double tmpHHYpnbihs_dv = (ypnbihsMaleMonthly + ypnbihsFemaleMonthly) / getEquivalisedWeight(); //Equivalised
 				setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
 				//Based on the percentiles calculated by the collector, assign household to one of the quintiles of (equivalised) income distribution
@@ -1776,14 +1776,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 			if(male != null) {
 
-				double labourEarningsMale = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				male.setYplgrs_dv(asinh(labourEarningsMale)); //This follows asinh transform of labourEarnings
-				double YpnbihsMale = labourEarningsMale + Math.sinh(male.getYptciihs_dv()); //In levels
-				male.setYpnbihs_dv(asinh(YpnbihsMale)); //Set asinh transformed
-				male.setCovidModuleGrossLabourIncome_Baseline(YpnbihsMale); // Used in the Covid-19 labour supply module
+				double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				male.setYplgrs_dv(asinh(labourEarningsMaleMonthly)); //This follows asinh transform of labourEarnings
+				double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getYptciihs_dv()); //In levels
+				male.setYpnbihs_dv(asinh(ypnbihsMaleMonthly)); //Set asinh transformed
+				male.setCovidModuleGrossLabourIncome_Baseline(ypnbihsMaleMonthly); // Used in the Covid-19 labour supply module
 
 				//BenefitUnit income is the male non-benefit income
-				double tmpHHYpnbihs_dv = YpnbihsMale / getEquivalisedWeight(); //Equivalised
+				double tmpHHYpnbihs_dv = ypnbihsMaleMonthly / getEquivalisedWeight(); //Equivalised
 				setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
 				if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
@@ -1805,14 +1805,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if(female != null) {
 
 				//If not a couple nor a single male, occupancy must be single female
-				double labourEarningsFemale = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-				female.setYplgrs_dv(asinh(labourEarningsFemale)); //This follows asinh transform of labourEarnings
-				double YpnbihsFemale = labourEarningsFemale + Math.sinh(female.getYptciihs_dv()); //In levels
-				female.setYpnbihs_dv(asinh(YpnbihsFemale)); //Set asinh transformed
-				female.setCovidModuleGrossLabourIncome_Baseline(YpnbihsFemale); // Used in the Covid-19 labour supply module
+				double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
+				female.setYplgrs_dv(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
+				double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getYptciihs_dv()); //In levels
+				female.setYpnbihs_dv(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
+				female.setCovidModuleGrossLabourIncome_Baseline(ypnbihsFemaleMonthly); // Used in the Covid-19 labour supply module
 
 				//BenefitUnit income is the female non-benefit income
-				double tmpHHYpnbihs_dv = YpnbihsFemale / getEquivalisedWeight(); //Equivalised
+				double tmpHHYpnbihs_dv = ypnbihsFemaleMonthly / getEquivalisedWeight(); //Equivalised
 				setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
 				if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
@@ -3720,8 +3720,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if (toRetire && getLiquidWealth() > 0.0) {
 				pensionIncomeAnnual = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
 						Parameters.annuityRates.getAnnuityRate(occupancy, getYear()-refPerson.getDag(), refPerson.getDag());
-				if (pensionIncomeAnnual > 1000000)
-					pensionIncomeAnnual = pensionIncomeAnnual;
 				liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
 
 				// upate person variables
