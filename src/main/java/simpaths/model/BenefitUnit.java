@@ -1652,7 +1652,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 			// populate labour supply
 			if(model.debugCommentsOn && labourSupplyChoice!=null) {
-				log.debug("labour supply choice " + labourSupplyChoice);
+				log.trace("labour supply choice " + labourSupplyChoice);
 			}
 			if(Occupancy.Couple.equals(occupancy)) {
 				male.setLabourSupplyWeekly(labourSupplyChoice.getKey(0));
