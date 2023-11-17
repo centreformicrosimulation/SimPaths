@@ -71,7 +71,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		isFirstRun = firstRun;
 	}
 
-	private boolean isFirstRun;
+	private boolean isFirstRun = true;
 
 	// default simulation parameters
 	private static Logger log = Logger.getLogger(SimPathsModel.class);
