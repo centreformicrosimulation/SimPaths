@@ -576,6 +576,7 @@ public class Statistics2 {
                 avkids[ii] += person.getBenefitUnit().getN_children_allAges();
                 health[ii] += person.getDheValue();
                 prDisa[ii] += (Indicator.True.equals(person.getDlltsd()))? 1.0: 0.0;
+                labInc[ii] += person.getEarningsWeekly();
                 if (person.getDoubleLabourSupplyWeeklyHours() > Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)
                     workFT[ii] += 1.0;
                 else if (person.getDoubleLabourSupplyWeeklyHours() > 1.0)
@@ -595,6 +596,7 @@ public class Statistics2 {
 
             if (popula[ii]>=0) {
 
+                labInc[ii] /= (workFT[ii] + workPT[ii]);
                 prMarr[ii] /= popula[ii];
                 avkids[ii] /= popula[ii];
                 health[ii] /= popula[ii];

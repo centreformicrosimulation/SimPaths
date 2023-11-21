@@ -12,10 +12,10 @@ import java.io.File;
 public class DecisionParams {
 
     // CONTROLS FOR USER OPTIONS
-    public static final boolean PARALLELISE_SOLUTIONS = true;
+    public static final boolean PARALLELISE_SOLUTIONS = false;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
-    public static final boolean FILTER_LOCAL_EXPECTATIONS = true;     // screens expectations to omit low probability events
+    public static final boolean FILTER_LOCAL_EXPECTATIONS = false;     // screens expectations to omit low probability events
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
     public static final int SOLVE_FROM_AGE = 19;
@@ -60,7 +60,7 @@ public class DecisionParams {
 
     // LIQUID WEALTH STATE
     //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH = 5;
+    public static final int PTS_LIQUID_WEALTH = 11;
     public static final int AGE_DEBT_DRAWDOWN = 55;                   // max debt limit reduced to zero in linear progression to max_age_debt
     public static final int MAX_AGE_DEBT = 65;                        // age at which all debt must be repaid
     public static final double MIN_LIQUID_WEALTH = -25000.0;          // lower bound of state-space (set to omit +/- 0.5% of benefit units)
@@ -73,7 +73,7 @@ public class DecisionParams {
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
     //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
-    public static final int PTS_WAGE_POTENTIAL = 5;
+    public static final int PTS_WAGE_POTENTIAL = 11;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour
     public static final double C_WAGE_POTENTIAL = 1.0;                // log scale adjustment (see liquid wealth above)
@@ -148,7 +148,7 @@ public class DecisionParams {
         rDebtHi = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostHigh);
 
         // directory structure
-        gridsInputDirectory = Parameters.WORKING_DIRECTORY + File.separator + "output" + File.separator + readGrid + File.separator + "grids";
+        setGridsInputDirectory(readGrid);
         gridsOutputDirectory = outputDir + File.separator + "grids";
 
         // set-up behavioural parameters
@@ -180,5 +180,9 @@ public class DecisionParams {
         Parameters.annuityRates = new AnnuityRates();
         maxPensionPYear = MAX_LIQUID_WEALTH * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                 Parameters.annuityRates.getAnnuityRate(Occupancy.Couple, minBirthYear, 65);
+    }
+
+    static void setGridsInputDirectory(String simName) {
+        gridsInputDirectory = Parameters.WORKING_DIRECTORY + File.separator + "output" + File.separator + simName + File.separator + "grids";
     }
 }

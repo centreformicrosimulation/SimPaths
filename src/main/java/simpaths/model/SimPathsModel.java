@@ -49,6 +49,7 @@ import microsim.matching.MatchingScoreClosure;
 
 // import LABOURsim packages
 import simpaths.data.Parameters;
+import simpaths.model.decisions.DecisionTests;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
@@ -71,7 +72,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		isFirstRun = firstRun;
 	}
 
-	private boolean isFirstRun = true;
+	private boolean isFirstRun = true;		// set default to true - this is required to support single run simulations
 
 	// default simulation parameters
 	private static Logger log = Logger.getLogger(SimPathsModel.class);
@@ -241,7 +242,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean useSavedBehaviour = true;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
-	private String readGrid = "5x5care";
+	private String readGrid = "11x11 no care no filter single core";
 
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;
@@ -323,6 +324,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
 					responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
+			//DecisionTests.compareGrids();
 		}
 
         log.debug("Parameters loaded");
