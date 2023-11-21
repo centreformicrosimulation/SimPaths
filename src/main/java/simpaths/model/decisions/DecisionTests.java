@@ -7,12 +7,12 @@ public class DecisionTests {
     public static void compareGrids() {
 
         // load in grids for comparison
-        String name1 = "serial";
+        String name1 = "laptop serial";
         DecisionParams.setGridsInputDirectory(name1);
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
 
-        String name2 = "laptop serial";
+        String name2 = "parallel";
         DecisionParams.setGridsInputDirectory(name2);
         Grids grids2 = new Grids();
         ManagerFileGrids.read(grids2);
@@ -23,6 +23,7 @@ public class DecisionTests {
             // set age specific working variables
             int innerDimension = (int)grids1.scale.gridDimensions[aa][0];
             int outerDimension = (int)grids1.scale.gridDimensions[aa][1];
+            long ii0=-9;
             for (int iiOuter=0; iiOuter<outerDimension; iiOuter++) {
 
                 // identify current state combination for outer states
@@ -39,13 +40,23 @@ public class DecisionTests {
                         if (stateConsider) {
 
                             long indexHere = currentStates.returnGridIndex();
+                            if (ii0>=0) {
+                                if (indexHere!=ii0+1) {
+                                    indexHere = currentStates.returnGridIndex();
+                                }
+                            }
                             double val1 = grids1.valueFunction.get(indexHere);
                             double val2 = grids2.valueFunction.get(indexHere);
                             if (Math.abs(val1 - val2) > 1.0E-3 * Math.abs(val1) ) {
                                 int iii = 1;
                             }
+                            ii0 = indexHere;
+                        } else {
+                            ii0 = -9;
                         }
                     }
+                } else {
+                    ii0 = -9;
                 }
             }
         }
