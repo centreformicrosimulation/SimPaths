@@ -422,7 +422,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		String title = "Creating " + Parameters.getTaxDonorInputFileName() + ".csv file";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Compiling single working file to facilitate construction of relational database for imputing transfer payments</h2>";
-		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+		JFrame csvFrame = null;
+		if (showGui) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
 
 		System.out.println(title);
 
@@ -565,7 +567,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// finish off
-		csvFrame.setVisible(false);
+		if (csvFrame != null) csvFrame.setVisible(false);
 //		return inputFilename;
 	}
 
@@ -583,7 +585,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
 				+ "</h2></html>";
-		JFrame databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+		JFrame databaseFrame = null;
+		if (showGui) databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
 
 
 		System.out.println(title);
@@ -623,7 +627,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// finish off
-        databaseFrame.setVisible(false);
+		if (databaseFrame != null) databaseFrame.setVisible(false);
 	}
 
 
@@ -638,7 +642,8 @@ public class SimPathsStart implements ExperimentBuilder {
 		String title = "Populating donor database tables";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Populating database with tax-unit data evaluated from person-level data</h2></html>";
-		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+		JFrame csvFrame = null;
+		if (showGui) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
 
 		System.out.println(title);
 
@@ -796,6 +801,6 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// remove message box
-		csvFrame.setVisible(false);
+		if (csvFrame != null) csvFrame.setVisible(false);
 	}
 }
