@@ -38,7 +38,8 @@ public class SQLDonorDataParser {
         String title = "Creating donor database tables";
         String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
                 + "Constructing donor database tables for imputing tax and benefit payments</h2></html>";
-        JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, isVisible);
+        JFrame csvFrame = null;
+        if (isVisible) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, isVisible);
 
         System.out.println(title);
 
@@ -80,7 +81,7 @@ public class SQLDonorDataParser {
         }
 
         // remove message box
-        csvFrame.setVisible(false);
+        if (csvFrame != null) csvFrame.setVisible(false);
     }
 
 
