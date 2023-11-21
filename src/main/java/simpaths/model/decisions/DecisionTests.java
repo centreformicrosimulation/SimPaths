@@ -7,11 +7,13 @@ public class DecisionTests {
     public static void compareGrids() {
 
         // load in grids for comparison
-        DecisionParams.setGridsInputDirectory("11x11 no care no filter");
+        String name1 = "serial";
+        DecisionParams.setGridsInputDirectory(name1);
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
 
-        DecisionParams.setGridsInputDirectory("11x11 no care no filter single core");
+        String name2 = "laptop serial";
+        DecisionParams.setGridsInputDirectory(name2);
         Grids grids2 = new Grids();
         ManagerFileGrids.read(grids2);
 

@@ -233,13 +233,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	EventGroup yearlySchedule = new EventGroup();
 
 	@GUIparameter(description = "tick to project social care")
-	private boolean projectSocialCare = true;
+	private boolean projectSocialCare = false;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
-	private boolean enableIntertemporalOptimisations = false;
+	private boolean enableIntertemporalOptimisations = true;
 
 	@GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
-	private boolean useSavedBehaviour = true;
+	private boolean useSavedBehaviour = false;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
 	private String readGrid = "11x11 no care no filter single core";
@@ -289,7 +289,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		super();
 		this.country = country;
 		this.startYear = startYear;
-		this.startYear = 2016;
 	}
 
 	public SimPathsModel(Country country) {
