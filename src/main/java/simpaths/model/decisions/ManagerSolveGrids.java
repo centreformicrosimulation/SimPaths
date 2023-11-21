@@ -98,7 +98,7 @@ public class ManagerSolveGrids {
                 }
             }
             int ageHere = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
-            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && ((ageHere % 5)==0))
+            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageHere<80) && ((ageHere % 5)==0))
                 ManagerFileGrids.write(grids, true);
             Instant after = Instant.now();
             if (aa == 0) afterTotal = after;

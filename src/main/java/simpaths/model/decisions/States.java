@@ -34,7 +34,7 @@ public class States {
         } else {
             states = new double[(int)(scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5])];
         }
-        eps = (scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5]) * 2.0 * Math.ulp(1.0);
+        setEps();
     }
 
     public States(States originalStates) {
@@ -45,13 +45,13 @@ public class States {
         states = new double[originalStates.states.length];
         System.arraycopy(originalStates.states, 0, states, 0, originalStates.states.length);
         scale = originalStates.scale;
-        eps = (scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5]) * 2.0 * Math.ulp(1.0);
+        setEps();
     }
 
     public States(BenefitUnit benefitUnit, GridScale scale) {
 
         this.scale = scale;
-        eps = (scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5]) * 2.0 * Math.ulp(1.0);
+        setEps();
 
         // initialise state vector and working variables
         Person refPerson = benefitUnit.getRefPersonForDecisions();
@@ -136,6 +136,13 @@ public class States {
         populate(Axis.Gender, refPerson.getGender());
     }
 
+    private void setEps() {
+        if (ageIndex == scale.simLifeSpan) {
+            eps = 10.0 * Math.ulp(1.0);
+        } else {
+            eps = (scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5]) * 2.0 * Math.ulp(1.0);
+        }
+    }
     private void populate(Enum<?> axisID, double val) {
         populate(axisID, 0, val);
     }

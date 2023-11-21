@@ -12,7 +12,7 @@ import java.io.File;
 public class DecisionParams {
 
     // CONTROLS FOR USER OPTIONS
-    public static final boolean PARALLELISE_SOLUTIONS = true;
+    public static final boolean PARALLELISE_SOLUTIONS = false;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = true;
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
     public static final boolean FILTER_LOCAL_EXPECTATIONS = false;     // screens expectations to omit low probability events
