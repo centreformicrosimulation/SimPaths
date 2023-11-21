@@ -154,6 +154,10 @@ public class SimPathsStart implements ExperimentBuilder {
 	private static void runGUIlessSetup(int option) {
 		if (option == 4) {
 
+			Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
+			if (testList.size()==0)
+				Parameters.setTrainingFlag(true);
+
 			String taxDonorInputFilename = "tax_donor_population_" + country;
 			Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 			// load uprating factors
