@@ -46,7 +46,7 @@ public class CallEUROMOD {
 								+ "When running EUROMOD, please ensure that the 'Output path' in<br>"
 								+ "the 'Run EUROMOD' window is set to the following location:<br><br>"
 								+ Parameters.EUROMOD_OUTPUT_DIRECTORY + "</h2></html>";
-						JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, true);
+						JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, true, true);
 
 						//Make process wait until EUROMOD has been terminated
 						p.waitFor();
@@ -85,7 +85,7 @@ public class CallEUROMOD {
 										+ "When running EUROMOD, please ensure that the 'Output path' in<br>"
 										+ "the 'Run EUROMOD' window is set to the following location:<br><br>"
 										+ Parameters.EUROMOD_OUTPUT_DIRECTORY + "</h2></html>";
-								JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, true);
+								JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, true, true);
 
 								p.waitFor();
 								 

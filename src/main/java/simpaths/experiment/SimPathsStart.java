@@ -62,6 +62,10 @@ public class SimPathsStart implements ExperimentBuilder {
 	private static Country country = Country.UK;
 	private static int startYear = Parameters.getMaxStartYear();
 
+	private static boolean showGui = true;  // Show GUI by default
+
+	private static boolean setupOnly = false;
+
 
 	/**
 	 *
@@ -70,11 +74,36 @@ public class SimPathsStart implements ExperimentBuilder {
 	 */
 	public static void main(String[] args) {
 
-		// show GUI by default
-		boolean showGui = true;
 
-		// display dialog box to allow users to define desired simulation
-		runGUIdialog();
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("-g")) {                //Set show GUI
+				showGui = Boolean.parseBoolean(args[i + 1]);
+				i++;
+			}
+			else if (args[i].equals("-c")) {
+				country = Country.valueOf(args[i + 1]);
+				i++;
+			}
+			else if (args[i].equals("-s")) {
+				startYear = Integer.parseInt(args[i + 1]);
+				i++;
+			}
+			else if (args[i].equals("-Setup")) {
+				setupOnly = true;
+			}
+		}
+
+		if (showGui) {
+			// display dialog box to allow users to define desired simulation
+			runGUIdialog();
+		} else {
+			runGUIlessSetup(4);
+		}
+
+		if (setupOnly) {
+			System.out.print("Setup complete, exiting.");
+			return;
+		}
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
@@ -122,6 +151,25 @@ public class SimPathsStart implements ExperimentBuilder {
 		model.setCollector(collector);
 	}
 
+	private static void runGUIlessSetup(int option) {
+		if (option == 4) {
+
+			String taxDonorInputFilename = "tax_donor_population_" + country;
+			Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
+			// load uprating factors
+			Parameters.loadTimeSeriesFactorMaps(country);
+			constructAggregateTaxDonorPopulationCSVfile(country);
+			createPopulationCrossSectionDatabaseTables(country); // Create initial and donor population database tables
+			SQLDonorDataParser.run(country, startYear, false);
+			Parameters.loadTimeSeriesFactorForTaxDonor(country);
+			populateDonorTaxUnitTables(country);
+
+		} else if (option == 0) {
+			// Do nothing; continue to run the simulation
+			return;
+		}
+	}
+
 
 	/**
 	 *
@@ -167,7 +215,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// display GUI
-		FormattedDialogBox.create(title, text, width, height, initialisationFrame, true, true);
+		FormattedDialogBox.create(title, text, width, height, initialisationFrame, true, true, true);
 
 		// get data returned from GUI
 		int choice_policy = startUpOptions.getChoice();
@@ -278,7 +326,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		if(choice_policy > 0 && !skip) {
 			// call to select policies
 
-			SQLDonorDataParser.run(country, startYear); // Donor database tables
+			SQLDonorDataParser.run(country, startYear, true); // Donor database tables
 			Parameters.loadTimeSeriesFactorForTaxDonor(country);
 			populateDonorTaxUnitTables(country); // Populate tax unit donor tables from person data
 		}
@@ -326,7 +374,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// display GUI
-		FormattedDialogBox.create(title, text, width, height, countryAndYearFrame, true, true);
+		FormattedDialogBox.create(title, text, width, height, countryAndYearFrame, true, true, true);
 
 		//Set country and start year from dialog box.  These values will appear in JAS-mine GUI.
         //TODO: There is a danger that these values could be reset in the JAS-mine GUI.  While the
@@ -370,7 +418,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		String title = "Creating " + Parameters.getTaxDonorInputFileName() + ".csv file";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Compiling single working file to facilitate construction of relational database for imputing transfer payments</h2>";
-		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
+		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+		System.out.println(title);
 
 		// fields for exporting tables to output .csv files
 		final String newLine = "\n";
@@ -529,7 +579,10 @@ public class SimPathsStart implements ExperimentBuilder {
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
 				+ "</h2></html>";
-		JFrame databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
+		JFrame databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+
+		System.out.println(title);
 
 		// start work
 		Connection conn = null;
@@ -581,7 +634,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		String title = "Populating donor database tables";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Populating database with tax-unit data evaluated from person-level data</h2></html>";
-		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
+		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+		System.out.println(title);
 
 		// gather all donor tax units
 		List<DonorTaxUnit> taxUnits = null;

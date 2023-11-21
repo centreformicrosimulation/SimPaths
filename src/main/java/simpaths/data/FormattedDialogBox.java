@@ -34,9 +34,10 @@ public class FormattedDialogBox {
 	 * @param component
 	 * @param modal
 	 * @param showButton
+	 * @param isVisible
 	 * @return
 	 */
-	public static JFrame create(String title, String text, int width, int height, JComponent component, boolean modal, boolean showButton) {
+	public static JFrame create(String title, String text, int width, int height, JComponent component, boolean modal, boolean showButton, boolean isVisible) {
 		
 		// create dialog box
 		JFrame frame = new JFrame();
@@ -96,7 +97,7 @@ public class FormattedDialogBox {
 		dialog.setSize(new Dimension(width, height));
 		dialog.setLocationRelativeTo(frame);
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		dialog.setVisible(true);
+		dialog.setVisible(isVisible);
 		dialog.setAlwaysOnTop(true);
 		
 		return frame;
