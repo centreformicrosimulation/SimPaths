@@ -7,7 +7,7 @@ public class DecisionTests {
     public static void compareGrids() {
 
         // load in grids for comparison
-        String name1 = "laptop serial";
+        String name1 = "workstation serial";
         DecisionParams.setGridsInputDirectory(name1);
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
