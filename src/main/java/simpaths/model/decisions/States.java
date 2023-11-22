@@ -16,7 +16,7 @@ import simpaths.model.BenefitUnit;
 public class States {
 
 
-    double eps;
+    final double eps = 10.0 * Math.ulp(1.0);;
     int ageIndex;           // age index for state
     int ageYears;           // age in years for state
     double[] states;        // vector to store combination of state variables (except age), in order as defined for axes in Grids
@@ -34,7 +34,6 @@ public class States {
         } else {
             states = new double[(int)(scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5])];
         }
-        setEps();
     }
 
     public States(States originalStates) {
@@ -45,13 +44,11 @@ public class States {
         states = new double[originalStates.states.length];
         System.arraycopy(originalStates.states, 0, states, 0, originalStates.states.length);
         scale = originalStates.scale;
-        setEps();
     }
 
     public States(BenefitUnit benefitUnit, GridScale scale) {
 
         this.scale = scale;
-        setEps();
 
         // initialise state vector and working variables
         Person refPerson = benefitUnit.getRefPersonForDecisions();
@@ -136,13 +133,6 @@ public class States {
         populate(Axis.Gender, refPerson.getGender());
     }
 
-    private void setEps() {
-        if (ageIndex == scale.simLifeSpan) {
-            eps = 10.0 * Math.ulp(1.0);
-        } else {
-            eps = (scale.gridDimensions[ageIndex][4]+scale.gridDimensions[ageIndex][5]) * 2.0 * Math.ulp(1.0);
-        }
-    }
     private void populate(Enum<?> axisID, double val) {
         populate(axisID, 0, val);
     }
