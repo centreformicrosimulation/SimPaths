@@ -239,10 +239,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean enableIntertemporalOptimisations = true;
 
 	@GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
-	private boolean useSavedBehaviour = false;
+	private boolean useSavedBehaviour = true;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
-	private String readGrid = "11x11 no care no filter single core";
+	private String readGrid = "laptop serial";
 
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;

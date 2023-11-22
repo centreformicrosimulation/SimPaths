@@ -12,10 +12,11 @@ public class DecisionTests {
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
 
-        String name2 = "parallel";
+        String name2 = "workstation parallel";
         DecisionParams.setGridsInputDirectory(name2);
         Grids grids2 = new Grids();
         ManagerFileGrids.read(grids2);
+        double maxDiff = -9.0;
 
         // loop through grids to find differences
         for (int aa=grids1.scale.simLifeSpan - 1; aa>=0; aa--) {
@@ -47,7 +48,12 @@ public class DecisionTests {
                             }
                             double val1 = grids1.valueFunction.get(indexHere);
                             double val2 = grids2.valueFunction.get(indexHere);
-                            if (Math.abs(val1 - val2) > 1.0E-3 * Math.abs(val1) ) {
+                            double diff = Math.abs(val1 - val2);
+                            if (diff > maxDiff)
+                                maxDiff = diff;
+                            if (diff > 0.0) {
+                                int iii = 1;
+                            } else if (diff > 1.0E-7 * Math.abs(val1) ) {
                                 int iii = 1;
                             }
                             ii0 = indexHere;
