@@ -152,26 +152,68 @@ public class SimPathsStart implements ExperimentBuilder {
 	}
 
 	private static void runGUIlessSetup(int option) {
-		if (option == 4) {
 
-			Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
-			if (testList.size()==0)
-				Parameters.setTrainingFlag(true);
+		// Detect if data available; set to testing data if not
+		Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
+		if (testList.size()==0)
+			Parameters.setTrainingFlag(true);
 
-			String taxDonorInputFilename = "tax_donor_population_" + country;
-			Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
-			// load uprating factors
-			Parameters.loadTimeSeriesFactorMaps(country);
-			constructAggregateTaxDonorPopulationCSVfile(country);
-			createPopulationCrossSectionDatabaseTables(country); // Create initial and donor population database tables
-			SQLDonorDataParser.run(country, startYear, false);
-			Parameters.loadTimeSeriesFactorForTaxDonor(country);
-			populateDonorTaxUnitTables(country);
+		// set country donor input file
+		String taxDonorInputFilename = "tax_donor_population_" + country;
+		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
-		} else if (option == 0) {
-			// Do nothing; continue to run the simulation
-			return;
+		// Create EUROMODPolicySchedule input from files
+		writePolicyScheduleExcelFile();
+		//Save the last selected country and year to Excel to use in the model if GUI launched straight away
+		String[] columnNames = {"Country", "Year"};
+		Object[][] data = new Object[1][columnNames.length];
+		data[0][0] = country.toString();
+		data[0][1] = startYear;
+		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.DatabaseCountryYearFilename, "Data", columnNames, data);
+
+		// load uprating factors
+		Parameters.loadTimeSeriesFactorMaps(country);
+		constructAggregateTaxDonorPopulationCSVfile(country);
+
+		// Create initial and donor population database tables
+		createPopulationCrossSectionDatabaseTables(country);
+		SQLDonorDataParser.run(country, startYear, false);
+		Parameters.loadTimeSeriesFactorForTaxDonor(country);
+		populateDonorTaxUnitTables(country);
+
+	}
+
+	public static void writePolicyScheduleExcelFile() {
+
+		Collection<File> euromodOutputTextFiles = FileUtils.listFiles(new File(Parameters.getEuromodOutputDirectory()), new String[]{"txt"}, false);
+		Iterator<File> fIter = euromodOutputTextFiles.iterator();
+		while (fIter.hasNext()) {
+			File file = fIter.next();
+			if (file.getName().endsWith("_EMHeader.txt")) {
+				fIter.remove();
+			}
 		}
+
+		// create table to allow user specification of policy environment
+		String[] columnNames = {
+				Parameters.EUROMODpolicyScheduleHeadingFilename,
+				Parameters.EUROMODpolicyScheduleHeadingScenarioYearBegins.replace('_', ' '),
+				Parameters.EUROMODpolicyScheduleHeadingScenarioSystemYear.replace('_', ' '),
+				Parameters.EUROMODpolicySchedulePlanHeadingDescription
+		};
+		Object[][] data = new Object[euromodOutputTextFiles.size()][columnNames.length];
+		int row = 0;
+		for (File file: euromodOutputTextFiles) {
+			String name = file.getName();
+			data[row][0] = name;
+			data[row][1] = name.split("_")[1];
+			data[row][2] = name.split("_")[1];
+			data[row][3] = "";
+			row++;
+		}
+
+		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
+
 	}
 
 
