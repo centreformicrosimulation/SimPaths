@@ -36,8 +36,6 @@ public class ManagerPopulateGrids {
             if (DecisionParams.SOLVE_FROM_INTERMEDIATE)
                 throw new RuntimeException("cannot solve from intermediate solutions without loading intermediate solutions");
         }
-        if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
-            ManagerFileGrids.write(grids);
         if (!useSavedGrids || DecisionParams.SOLVE_FROM_INTERMEDIATE) {
             // need to solve for intertemporal optimisations
 

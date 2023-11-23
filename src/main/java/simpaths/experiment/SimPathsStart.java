@@ -626,25 +626,19 @@ public class SimPathsStart implements ExperimentBuilder {
 					double dispIncome = 0.0;
 					double benmt = 0.0;
 					double bennt = 0.0;
-					double secondIncome = 0.0;
+					double principalIncome = -999999.0;
 					double childcare = 0.0;
-					boolean flagSecondIncome = false;
 					int ageTest = 0;
 					for(DonorPerson person : taxUnit.getPersons()) {
 						// loop through persons
 
 						origIncome += person.getPolicy(fromYear).getOriginalIncomePerMonth();
+						if (person.getPolicy(fromYear).getOriginalIncomePerMonth() > principalIncome)
+							principalIncome = person.getPolicy(fromYear).getOriginalIncomePerMonth();
 						earnings += person.getPolicy(fromYear).getEarningsPerMonth();
 						dispIncome += person.getPolicy(fromYear).getDisposableIncomePerMonth();
 						benmt += person.getPolicy(fromYear).getMonetaryBenefitsAmount();
 						bennt += person.getPolicy(fromYear).getNonMonetaryBenefitsAmount();
-						if (person.getPolicy(fromYear).getOriginalIncomePerMonth() > 0.01) {
-							if (flagSecondIncome) {
-								secondIncome = person.getPolicy(fromYear).getOriginalIncomePerMonth();
-							} else {
-								flagSecondIncome = true;
-							}
-						}
 						childcare += person.getPolicy(fromYear).getChildcareCostPerMonth();
 						int agePerson = person.getAge();
 						if (flagInitialiseDemographics) {
@@ -686,8 +680,7 @@ public class SimPathsStart implements ExperimentBuilder {
 					if (!flagInitialiseDemographics && ageTest!=age)
 						throw new RuntimeException("Demographic characteristics vary across system years derived from EUROMOD");
 					flagInitialiseDemographics = false;
-					if (Math.abs(secondIncome) > 0.01)
-						secondIncome = Math.max(0.0, Math.min(secondIncome, origIncome - secondIncome));
+					double secondIncome = Math.max(0.0, origIncome - principalIncome);
 					DonorTaxUnitPolicy taxUnitPolicy = taxUnit.getPolicyByFromYear(fromYear);
 					taxUnitPolicy.setSystemYear(systemYear);
 					if (numberMembersOver17==1 || numberMembersOver17==2) {

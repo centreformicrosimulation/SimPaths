@@ -97,12 +97,12 @@ public class ManagerSolveGrids {
                     }
                 }
             }
-            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
+            int ageHere = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
+            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageHere<80) && ((ageHere % 5)==0))
                 ManagerFileGrids.write(grids, true);
             Instant after = Instant.now();
             if (aa == 0) afterTotal = after;
             Duration duration = Duration.between(before, after);
-            int ageHere = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
             System.out.println("Calculations for age " + ageHere + " completed in " + String.format("%.3f", (double)duration.toMillis()/1000.0) + " seconds");
         }
         if (beforeTotal != null && afterTotal != null) {
