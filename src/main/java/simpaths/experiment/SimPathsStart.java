@@ -101,7 +101,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		if (setupOnly) {
-			System.out.print("Setup complete, exiting.");
+			System.out.println("Setup complete, exiting.");
 			return;
 		}
 
