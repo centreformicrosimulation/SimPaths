@@ -39,9 +39,8 @@ public class XLSXfileWriter {
         	//Creates file but checks whether a file with the same filename already exists - if so, overwrite. 
         	File f = new File(filePath);
 
-			if (!f.exists()) {
-        		f.createNewFile();
-        		wb = WorkbookFactory.create(true);		//Create workbook from copy
+			if (!f.exists()) {  // Create new empty workbook if doesn't exist
+        		wb = WorkbookFactory.create(true);
 				wb.createSheet(worksheetName);
 				out = new FileOutputStream(filePath);
 				wb.write(out);
