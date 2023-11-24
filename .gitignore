@@ -195,3 +195,5 @@ input/tax_donor_population_UK.csv
 input/input.mv.db
 input/DatabaseCountryYear.xlsx
 input/EUROMODpolicySchedule.xlsx
+
+dependency-reduced-pom.xml
