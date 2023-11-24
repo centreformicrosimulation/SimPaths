@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-core</artifactId>
-			<version>4.3.4</version>
+			<version>4.3.6</version>
         </dependency>
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
