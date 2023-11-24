@@ -9,8 +9,6 @@
 name: Build and run SimPaths
 
 on:
-  push:
-    branches: [ "experimental/actions_run" ]
   pull_request:
     branches: [ "main", "develop" ]
 
