@@ -1380,7 +1380,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     private void giveBirth() {				//To be called once per year after fertility alignment
 
-        if(toGiveBirth) {		//toGiveBirth is determined by fertility alignment (in the model class)
+        if(toGiveBirth) {		//toGiveBirth is determined by fertility process
 
             Gender babyGender = (fertilityInnov.nextDouble() < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
 
@@ -3131,6 +3131,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setLes_c4(Les_c4 les_c4) {
         this.les_c4 = les_c4;
     }
+
 
     public void setLes_c7_covid(Les_c7_covid les_c7_covid) { this.les_c7_covid = les_c7_covid; }
 
