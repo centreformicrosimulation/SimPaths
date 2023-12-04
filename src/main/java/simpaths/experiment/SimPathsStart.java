@@ -3,6 +3,7 @@ package simpaths.experiment;
 
 // import Java packages
 import java.awt.Dimension;
+import org.apache.commons.cli.*;
 import java.awt.Toolkit;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -75,22 +76,45 @@ public class SimPathsStart implements ExperimentBuilder {
 	public static void main(String[] args) {
 
 
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-g")) {                //Set show GUI
-				showGui = Boolean.parseBoolean(args[i + 1]);
-				i++;
+		Options options = new Options();
+
+		Option guiOption = new Option("g", true, "Show GUI [true/false]");
+		options.addOption(guiOption);
+
+		Option countryOption = new Option("c", true, "Country");
+		options.addOption(countryOption);
+
+		Option startYearOption = new Option("s", true, "Start year");
+		options.addOption(startYearOption);
+
+		Option setupOption = new Option("Setup", "Setup only");
+		options.addOption(setupOption);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("g")) {
+				showGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
 			}
-			else if (args[i].equals("-c")) {
-				country = Country.valueOf(args[i + 1]);
-				i++;
+
+			if (cmd.hasOption("c")) {
+				country = Country.valueOf(cmd.getOptionValue("c"));
 			}
-			else if (args[i].equals("-s")) {
-				startYear = Integer.parseInt(args[i + 1]);
-				i++;
+
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
 			}
-			else if (args[i].equals("-Setup")) {
+
+			if (cmd.hasOption("Setup")) {
 				setupOnly = true;
 			}
+		} catch (ParseException | IllegalArgumentException e) {
+			System.err.println("Error parsing command line arguments: " + e.getMessage());
+			formatter.printHelp("SimPathsStart", options);
+			System.exit(1);
 		}
 
 		if (showGui) {
