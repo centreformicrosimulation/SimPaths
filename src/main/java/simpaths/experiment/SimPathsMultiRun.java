@@ -89,7 +89,7 @@ public class SimPathsMultiRun extends MultiRun {
 			}
 
 			if (cmd.hasOption("g")) {
-				executeWithGui = true;
+				executeWithGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
 			}
 
 			if (cmd.hasOption("c")) {
