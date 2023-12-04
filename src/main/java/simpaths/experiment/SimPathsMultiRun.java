@@ -54,6 +54,9 @@ public class SimPathsMultiRun extends MultiRun {
 
 		Options options = new Options();
 
+		Option helpOption = new Option("h", "Print help message");
+		options.addOption(helpOption);
+
 		Option maxRunsOption = new Option("n", true, "Maximum number of runs");
 		options.addOption(maxRunsOption);
 
@@ -84,6 +87,10 @@ public class SimPathsMultiRun extends MultiRun {
 		try {
 			CommandLine cmd = parser.parse(options, args);
 
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				System.exit(0); // Exit without reporting an error
+			}
 			if (cmd.hasOption("n")) {
 				maxNumberOfRuns = Integer.parseInt(cmd.getOptionValue("n"));
 			}
@@ -140,7 +147,6 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 
 
-
 		log.info("Starting run with seed = " + randomSeed);
 		
 		SimulationEngine engine = SimulationEngine.getInstance();
@@ -154,6 +160,14 @@ public class SimPathsMultiRun extends MultiRun {
 			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
 		else
 			experimentBuilder.start();
+	}
+
+	private static void printHelpMessage(HelpFormatter formatter, Options options) {
+		String header = "SimPathsMultiRun can run multiple sequential runs," +
+				"resetting the population to the start year and iterating from the start seed. " +
+				"It takes the following options:";
+		String footer = "When running with no display, `-g` must be set to `false`.";
+		formatter.printHelp("SimPathsMultiRun", header, options, footer, true);
 	}
 
 	@Override

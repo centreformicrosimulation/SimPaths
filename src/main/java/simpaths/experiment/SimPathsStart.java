@@ -78,6 +78,9 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		Options options = new Options();
 
+		Option helpOption = new Option("h", "Print help message");
+		options.addOption(helpOption);
+
 		Option guiOption = new Option("g", true, "Show GUI [true/false]");
 		options.addOption(guiOption);
 
@@ -95,6 +98,11 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				System.exit(0); // Exit without reporting an error
+			}
 
 			if (cmd.hasOption("g")) {
 				showGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
@@ -150,6 +158,15 @@ public class SimPathsStart implements ExperimentBuilder {
 		SimPathsStart experimentBuilder = new SimPathsStart();
 		engine.setExperimentBuilder(experimentBuilder);
 		engine.setup();
+	}
+
+	private static void printHelpMessage(HelpFormatter formatter, Options options) {
+		String header = "SimPathsStart will start the SimPaths run. " +
+				"When using the argument `Setup`, this will create the population database " +
+				"and exit before starting the first run. " +
+				"It takes the following options:";
+		String footer = "When running with no display, `-g` must be set to `false`.";
+		formatter.printHelp("SimPathsStart", header, options, footer, true);
 	}
 
 
