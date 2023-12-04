@@ -236,7 +236,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean projectSocialCare = false;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
-	private boolean enableIntertemporalOptimisations = true;
+	private boolean enableIntertemporalOptimisations = false;
 
 	@GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
 	private boolean useSavedBehaviour = false;

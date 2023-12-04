@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Build and run SimPaths
 
 on:
   pull_request:
@@ -27,3 +27,33 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: simpaths_jars
+        path: ./*.jar
+
+  run-simpaths:
+    needs: build
+
+    runs-on: [ ubuntu-latest ]
+
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: simpaths_jars
+        path: .
+
+    - name: Setup run
+      run: java -jar singlerun.jar -c UK -y 2017 -Setup -g false
+
+    - name: Do one run
+      run: java -jar multirun.jar -p 50000 -s 2017 -e 2020 -r 100 -n 2 -g false

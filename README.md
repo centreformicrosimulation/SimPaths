@@ -51,9 +51,16 @@ SimPaths/
       `-- src
 ```
 
-To run a single SimPaths run (with GUI) and set up a population for subsequent multiruns:
+To run the SimPathsStart setup phases and set up a population for subsequent multiruns, `singlerun.jar` takes the following options:
+
+- `-c` Country ['UK' or 'IT']
+- `-s` Start year
+- `-g` [true/false] show/hide gui
+- `-Setup` do setup phases (creating input populations database) only
+
+e.g.
 ```
-$ java -jar singlerun.jar
+$ java -jar singlerun.jar -c UK -s 2017 -g false -Setup
 ```
 For multiple runs, `multirun.jar` takes the following options:
 
