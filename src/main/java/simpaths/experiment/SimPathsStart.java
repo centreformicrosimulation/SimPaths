@@ -101,7 +101,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 			if (cmd.hasOption("h")) {
 				printHelpMessage(formatter, options);
-				System.exit(0); // Exit without reporting an error
+				return; // Exit without reporting an error
 			}
 
 			if (cmd.hasOption("g")) {

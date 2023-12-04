@@ -89,7 +89,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 			if (cmd.hasOption("h")) {
 				printHelpMessage(formatter, options);
-				System.exit(0); // Exit without reporting an error
+				return; // Exit without reporting an error
 			}
 			if (cmd.hasOption("n")) {
 				maxNumberOfRuns = Integer.parseInt(cmd.getOptionValue("n"));
@@ -163,7 +163,7 @@ public class SimPathsMultiRun extends MultiRun {
 	}
 
 	private static void printHelpMessage(HelpFormatter formatter, Options options) {
-		String header = "SimPathsMultiRun can run multiple sequential runs," +
+		String header = "SimPathsMultiRun can run multiple sequential runs, " +
 				"resetting the population to the start year and iterating from the start seed. " +
 				"It takes the following options:";
 		String footer = "When running with no display, `-g` must be set to `false`.";
