@@ -1,4 +1,5 @@
 package simpaths.experiment;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-public class SimPathsMultiRunTest {
+public class SimPathsStartTest {
 
     private static final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private static final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -21,15 +22,26 @@ public class SimPathsMultiRunTest {
     @BeforeEach
     public void resetStreams() {
         outContent.reset();
-        errContent.reset();
+//        errContent.reset();
     }
 
     @Test
-    public void testSimPathsMultiRunHelpOption() {
+    public void testSimPathsStartHelpOption() {
         String[] args = {"-h"};
-        SimPathsMultiRun.main(args);
+        SimPathsStart.main(args);
 
-        String expectedHelpText = "SimPathsMultiRun can run multiple sequential runs, resetting the population to the start year and iterating from the start seed. It takes the following options:";
+        String expectedHelpText = "SimPathsStart will start the SimPaths run";
+
+        assertTrue(outContent.toString().contains(expectedHelpText));
+        assertEquals("", errContent.toString().trim());
+    }
+
+    @Test
+    public void testSimPathsStartHelpOptionWithOtherArguments() {
+        String[] args = {"-g", "false", "-h", "-c", "UK"};
+        SimPathsStart.main(args);
+
+        String expectedHelpText = "SimPathsStart will start the SimPaths run";
 
         assertTrue(outContent.toString().contains(expectedHelpText));
         assertEquals("", errContent.toString().trim());
