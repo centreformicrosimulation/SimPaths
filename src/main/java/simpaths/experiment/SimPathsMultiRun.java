@@ -77,6 +77,8 @@ public class SimPathsMultiRun extends MultiRun {
 			return;
 		}
 
+		parseYamlConfig(args);
+
 		log.info("Starting run with seed = " + randomSeed);
 		
 		SimulationEngine engine = SimulationEngine.getInstance();
