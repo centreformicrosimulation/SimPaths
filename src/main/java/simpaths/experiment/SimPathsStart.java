@@ -119,23 +119,27 @@ public class SimPathsStart implements ExperimentBuilder {
 	private static boolean parseCommandLineArgs(String[] args) {
 		Options options = new Options();
 
-		Option helpOption = new Option("h", "Print help message");
-		options.addOption(helpOption);
-
-		Option guiOption = new Option("g", true, "Show GUI [true/false]");
-		options.addOption(guiOption);
-
 		Option countryOption = new Option("c", true, "Country");
+		countryOption.setArgName("UK/IT");
 		options.addOption(countryOption);
 
 		Option startYearOption = new Option("s", true, "Start year");
+		startYearOption.setArgName("year");
 		options.addOption(startYearOption);
 
 		Option setupOption = new Option("Setup", "Setup only");
 		options.addOption(setupOption);
 
+		Option guiOption = new Option("g", true, "Show GUI [true/false]");
+		guiOption.setArgName("true/false");
+		options.addOption(guiOption);
+
+		Option helpOption = new Option("h", "Print help message");
+		options.addOption(helpOption);
+
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
+		formatter.setOptionComparator(null);
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
