@@ -304,7 +304,7 @@ public class SimPathsMultiRun extends MultiRun {
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
 
-		updateModelParameters(model, model_args);
+		if (model_args != null) updateModelParameters(model, model_args);
 
 		engine.addSimulationManager(model);
 		
