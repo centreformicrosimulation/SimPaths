@@ -167,7 +167,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		} catch (ParseException | IllegalArgumentException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
 			formatter.printHelp("SimPathsStart", options);
-			return false;
+			System.exit(0);
 		}
 
 		return true;
