@@ -77,32 +77,40 @@ public class SimPathsMultiRun extends MultiRun {
 
 		Options options = new Options();
 
-		Option helpOption = new Option("h", "Print help message");
-		options.addOption(helpOption);
 
-		Option maxRunsOption = new Option("n", true, "Maximum number of runs");
-		options.addOption(maxRunsOption);
-
-		Option guiOption = new Option("g", true, "Show GUI [true/false]");
-		options.addOption(guiOption);
-
-		Option seedOption = new Option("r", true, "Random seed");
-		options.addOption(seedOption);
+		Option popSizeOption = new Option("p", true, "Population size");
+		popSizeOption.setArgName("int");
+		options.addOption(popSizeOption);
 
 		Option startYearOption = new Option("s", true, "Start year");
+		startYearOption.setArgName("year");
 		options.addOption(startYearOption);
 
 		Option endYearOption = new Option("e", true, "End year");
+		endYearOption.setArgName("year");
 		options.addOption(endYearOption);
 
-		Option popSizeOption = new Option("p", true, "Population size");
-		options.addOption(popSizeOption);
+		Option maxRunsOption = new Option("n", true, "Maximum number of runs");
+		maxRunsOption.setArgName("int");
+		options.addOption(maxRunsOption);
+
+		Option seedOption = new Option("r", true, "Random seed");
+		seedOption.setArgName("int");
+		options.addOption(seedOption);
+
+		Option guiOption = new Option("g", true, "Show GUI");
+		guiOption.setArgName("true/false");
+		options.addOption(guiOption);
 
 		Option fileOption = new Option("f", "Output to file");
 		options.addOption(fileOption);
 
+		Option helpOption = new Option("h", "Print help message");
+		options.addOption(helpOption);
+
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
+		formatter.setOptionComparator(null);
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
