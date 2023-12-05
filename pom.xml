@@ -84,6 +84,11 @@
 			<version>1.4</version> <!-- Use the latest version available -->
 		</dependency>
 		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.29</version> <!-- Use the latest version available -->
+		</dependency>
+		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-core</artifactId>
 			<version>4.3.6</version>
