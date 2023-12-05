@@ -1,0 +1,11 @@
+maxNumberOfRuns: 5
+executeWithGui: false
+randomSeed: 12345
+startYear: 2020
+endYear: 2025
+popSize: 75000
+
+model_args:
+    alignEducation: true
+    sIndexAlpha: 2.1
+    enableIntertemporalOptimisations: true
