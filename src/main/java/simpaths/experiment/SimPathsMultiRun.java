@@ -86,9 +86,6 @@ public class SimPathsMultiRun extends MultiRun {
 		Option guiOption = new Option("g", true, "Show GUI [true/false]");
 		options.addOption(guiOption);
 
-		Option countryOption = new Option("c", true, "Country");
-		options.addOption(countryOption);
-
 		Option seedOption = new Option("r", true, "Random seed");
 		options.addOption(seedOption);
 
@@ -120,10 +117,6 @@ public class SimPathsMultiRun extends MultiRun {
 
 			if (cmd.hasOption("g")) {
 				executeWithGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
-			}
-
-			if (cmd.hasOption("c")) {
-				countryString = cmd.getOptionValue("c");
 			}
 
 			if (cmd.hasOption("r")) {
