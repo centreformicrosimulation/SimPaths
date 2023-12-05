@@ -76,53 +76,9 @@ public class SimPathsStart implements ExperimentBuilder {
 	public static void main(String[] args) {
 
 
-		Options options = new Options();
-
-		Option helpOption = new Option("h", "Print help message");
-		options.addOption(helpOption);
-
-		Option guiOption = new Option("g", true, "Show GUI [true/false]");
-		options.addOption(guiOption);
-
-		Option countryOption = new Option("c", true, "Country");
-		options.addOption(countryOption);
-
-		Option startYearOption = new Option("s", true, "Start year");
-		options.addOption(startYearOption);
-
-		Option setupOption = new Option("Setup", "Setup only");
-		options.addOption(setupOption);
-
-		CommandLineParser parser = new DefaultParser();
-		HelpFormatter formatter = new HelpFormatter();
-
-		try {
-			CommandLine cmd = parser.parse(options, args);
-
-			if (cmd.hasOption("h")) {
-				printHelpMessage(formatter, options);
-				return; // Exit without reporting an error
-			}
-
-			if (cmd.hasOption("g")) {
-				showGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
-			}
-
-			if (cmd.hasOption("c")) {
-				country = Country.valueOf(cmd.getOptionValue("c"));
-			}
-
-			if (cmd.hasOption("s")) {
-				startYear = Integer.parseInt(cmd.getOptionValue("s"));
-			}
-
-			if (cmd.hasOption("Setup")) {
-				setupOnly = true;
-			}
-		} catch (ParseException | IllegalArgumentException e) {
-			System.err.println("Error parsing command line arguments: " + e.getMessage());
-			formatter.printHelp("SimPathsStart", options);
-			System.exit(1);
+		if (!parseCommandLineArgs(args)) {
+			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
+			return;
 		}
 
 		if (showGui) {
@@ -158,6 +114,59 @@ public class SimPathsStart implements ExperimentBuilder {
 		SimPathsStart experimentBuilder = new SimPathsStart();
 		engine.setExperimentBuilder(experimentBuilder);
 		engine.setup();
+	}
+
+	private static boolean parseCommandLineArgs(String[] args) {
+		Options options = new Options();
+
+		Option helpOption = new Option("h", "Print help message");
+		options.addOption(helpOption);
+
+		Option guiOption = new Option("g", true, "Show GUI [true/false]");
+		options.addOption(guiOption);
+
+		Option countryOption = new Option("c", true, "Country");
+		options.addOption(countryOption);
+
+		Option startYearOption = new Option("s", true, "Start year");
+		options.addOption(startYearOption);
+
+		Option setupOption = new Option("Setup", "Setup only");
+		options.addOption(setupOption);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				return false; // Exit without reporting an error
+			}
+
+			if (cmd.hasOption("g")) {
+				showGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
+			}
+
+			if (cmd.hasOption("c")) {
+				country = Country.valueOf(cmd.getOptionValue("c"));
+			}
+
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
+			}
+
+			if (cmd.hasOption("Setup")) {
+				setupOnly = true;
+			}
+		} catch (ParseException | IllegalArgumentException e) {
+			System.err.println("Error parsing command line arguments: " + e.getMessage());
+			formatter.printHelp("SimPathsStart", options);
+			return false;
+		}
+
+		return true;
 	}
 
 	private static void printHelpMessage(HelpFormatter formatter, Options options) {

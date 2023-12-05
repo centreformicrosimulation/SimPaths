@@ -52,6 +52,29 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
+		// Parse command line arguments to override defaults
+		if (!parseCommandLineArgs(args)) {
+			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
+			return;
+		}
+
+		log.info("Starting run with seed = " + randomSeed);
+		
+		SimulationEngine engine = SimulationEngine.getInstance();
+		
+		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
+//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
+		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
+		engine.setup();													//Do we need this?  Worked fine without it...
+
+		if (executeWithGui)
+			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
+		else
+			experimentBuilder.start();
+	}
+
+	private static boolean parseCommandLineArgs(String[] args) {
+
 		Options options = new Options();
 
 		Option helpOption = new Option("h", "Print help message");
@@ -89,7 +112,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 			if (cmd.hasOption("h")) {
 				printHelpMessage(formatter, options);
-				return; // Exit without reporting an error
+				return false; // Exit without reporting an error
 			}
 			if (cmd.hasOption("n")) {
 				maxNumberOfRuns = Integer.parseInt(cmd.getOptionValue("n"));
@@ -143,23 +166,10 @@ public class SimPathsMultiRun extends MultiRun {
 		} catch (ParseException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
 			formatter.printHelp("SimPathsMultiRun", options);
-			System.exit(1);
+			return false;
 		}
 
-
-		log.info("Starting run with seed = " + randomSeed);
-		
-		SimulationEngine engine = SimulationEngine.getInstance();
-		
-		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
-//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
-		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
-		engine.setup();													//Do we need this?  Worked fine without it...
-
-		if (executeWithGui)
-			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
-		else
-			experimentBuilder.start();
+		return true;
 	}
 
 	private static void printHelpMessage(HelpFormatter formatter, Options options) {
