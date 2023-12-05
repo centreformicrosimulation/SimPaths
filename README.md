@@ -1,3 +1,5 @@
+[![Build and run SimPaths](https://github.com/centreformicrosimulation/SimPaths/actions/workflows/SimPathsBuild.yml/badge.svg)](https://github.com/centreformicrosimulation/SimPaths/actions/workflows/SimPathsBuild.yml)
+
 # SimPaths
 
 by Matteo Richiardi, Patryk Bronka, Justin van de Ven
