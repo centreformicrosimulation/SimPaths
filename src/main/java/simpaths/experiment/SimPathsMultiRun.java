@@ -62,13 +62,13 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
+		parseYamlConfig(args);
+
 		// Parse command line arguments to override defaults
 		if (!parseCommandLineArgs(args)) {
 			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
 			return;
 		}
-
-		parseYamlConfig(args);
 
 		log.info("Starting run with seed = " + randomSeed);
 		
