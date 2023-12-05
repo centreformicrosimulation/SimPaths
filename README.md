@@ -1,4 +1,4 @@
-[![Build and run SimPaths](https://github.com/centreformicrosimulation/SimPaths/actions/workflows/SimPathsBuild.yml/badge.svg)](https://github.com/centreformicrosimulation/SimPaths/actions/workflows/SimPathsBuild.yml)
+[![Build and run SimPaths](https://github.com/centreformicrosimulation/SimPaths/workflows/Build%20and%20run%20SimPaths/badge.svg)](https://github.com/centreformicrosimulation/SimPaths/actions/workflows/SimPathsBuild.yml)
 
 # SimPaths
 
