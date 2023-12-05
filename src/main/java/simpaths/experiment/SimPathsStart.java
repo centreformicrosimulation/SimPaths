@@ -123,7 +123,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		countryOption.setArgName("UK/IT");
 		options.addOption(countryOption);
 
-		Option startYearOption = new Option("y", true, "Start year");
+		Option startYearOption = new Option("s", true, "Start year");
 		startYearOption.setArgName("year");
 		options.addOption(startYearOption);
 
@@ -157,8 +157,8 @@ public class SimPathsStart implements ExperimentBuilder {
 				country = Country.valueOf(cmd.getOptionValue("c"));
 			}
 
-			if (cmd.hasOption("y")) {
-				startYear = Integer.parseInt(cmd.getOptionValue("y"));
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
 			}
 
 			if (cmd.hasOption("Setup")) {
