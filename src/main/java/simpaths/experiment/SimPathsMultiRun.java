@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import simpaths.data.Parameters;
@@ -41,6 +42,9 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Long randomSeed = 615L;
 
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
+
+	private static Map<String, Object> model_args;
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -211,6 +215,11 @@ public class SimPathsMultiRun extends MultiRun {
 				String key = entry.getKey();
 				Object value = entry.getValue();
 
+				if ("model_args".equals(key)) {
+					model_args = (Map<String, Object>) value;
+					continue;
+				}
+
 				// Use reflection to dynamically set the field based on the key
 				try {
 					Field field = SimPathsMultiRun.class.getDeclaredField(key);
@@ -235,6 +244,34 @@ public class SimPathsMultiRun extends MultiRun {
 		} catch (FileNotFoundException e) {
 			// Config file not found, continue with defaults
 		}
+	}
+
+	public static void updateModelParameters(SimPathsModel model, Map<String, Object> model_args) {
+
+		for (Map.Entry<String, Object> entry : model_args.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			try {
+				Field field = SimPathsModel.class.getDeclaredField(key);
+				field.setAccessible(true);
+
+				// Determine the field type
+				Class<?> fieldType = field.getType();
+
+				// Convert the YAML value to the field type
+				Object convertedValue = convertToType(value, fieldType);
+
+				// Set the field value
+				field.set(model, convertedValue);
+
+				field.setAccessible(false);
+			} catch (NoSuchFieldException | IllegalAccessException e) {
+				// Handle exceptions if the field is not found or inaccessible
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	private static Object convertToType(Object value, Class<?> targetType) {
@@ -266,6 +303,8 @@ public class SimPathsMultiRun extends MultiRun {
 		setCountry(model);		//Set country based on input arguments.
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
+
+		updateModelParameters(model, model_args);
 
 		engine.addSimulationManager(model);
 		
