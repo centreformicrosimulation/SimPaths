@@ -10,5 +10,5 @@ popSize: 75000
 
 # For arguments to pass to the SimPathsModel itself:
 model_args:
-    labourMarketCovid19On: false
-    enableIntertemporalOptimisations: false
+#    labourMarketCovid19On: false
+#    enableIntertemporalOptimisations: false
