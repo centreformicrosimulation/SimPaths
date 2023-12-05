@@ -4,6 +4,12 @@ package simpaths.experiment;
 // import Java packages
 import org.apache.log4j.Level;
 import org.apache.commons.cli.*;
+import org.yaml.snakeyaml.Yaml;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import simpaths.data.Parameters;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
@@ -57,6 +63,8 @@ public class SimPathsMultiRun extends MultiRun {
 			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
 			return;
 		}
+
+		parseYamlConfig(args);
 
 		log.info("Starting run with seed = " + randomSeed);
 		
@@ -181,6 +189,74 @@ public class SimPathsMultiRun extends MultiRun {
 		formatter.printHelp("SimPathsMultiRun", header, options, footer, true);
 	}
 
+	private static void parseYamlConfig(String[] args) {
+		String configFile = "config.yml";  // Default config file name
+
+		// Check if an alternative config file is specified in the command line
+		for (int i = 0; i < args.length - 1; i++) {
+			if (args[i].equals("-config")) {
+				configFile = args[i + 1];
+				break;
+			}
+		}
+
+		// Parse YAML config file and update parameters
+		try {
+			Yaml yaml = new Yaml();
+			FileInputStream inputStream = new FileInputStream(configFile);
+			Map<String, Object> config = yaml.load(inputStream);
+
+			// Update parameters from the config file
+			for (Map.Entry<String, Object> entry : config.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+
+				// Use reflection to dynamically set the field based on the key
+				try {
+					Field field = SimPathsMultiRun.class.getDeclaredField(key);
+					field.setAccessible(true);
+
+					// Determine the field type
+					Class<?> fieldType = field.getType();
+
+					// Convert the YAML value to the field type
+					Object convertedValue = convertToType(value, fieldType);
+
+					// Set the field value
+					field.set(null, convertedValue);
+
+					field.setAccessible(false);
+				} catch (NoSuchFieldException | IllegalAccessException e) {
+					// Handle exceptions if the field is not found or inaccessible
+					e.printStackTrace();
+				}
+			}
+
+		} catch (FileNotFoundException e) {
+			// Config file not found, continue with defaults
+		}
+	}
+
+	private static Object convertToType(Object value, Class<?> targetType) {
+		// Convert the YAML value to the target type
+		if (int.class.equals(targetType)) {
+			return ((Number) value).intValue();
+		} else if (Integer.class.equals(targetType)) {
+			return Integer.parseInt(value.toString());
+		} else if (long.class.equals(targetType) || Long.class.equals(targetType)) {
+			return ((Number) value).longValue();
+		} else if (boolean.class.equals(targetType) || Boolean.class.equals(targetType)) {
+			return Boolean.parseBoolean(value.toString());
+		} else if (double.class.equals(targetType)) {
+			return ((Number) value).doubleValue();
+		} else if (Double.class.equals(targetType)) {
+			return Double.parseDouble(value.toString());
+		} else {
+			// If it's none of the known types, return the value as is
+			return value;
+		}
+	}
+
 	@Override
 	public void buildExperiment(SimulationEngine engine) {
 		SimPathsModel model = new SimPathsModel(Country.IT.getCountryFromNameString(countryString), startYear);
@@ -190,6 +266,7 @@ public class SimPathsMultiRun extends MultiRun {
 		setCountry(model);		//Set country based on input arguments.
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
+
 		engine.addSimulationManager(model);
 		
 		SimPathsCollector collector = new SimPathsCollector(model);
