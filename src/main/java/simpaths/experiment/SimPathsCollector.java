@@ -31,6 +31,7 @@ import microsim.statistics.IDoubleSource;
 import simpaths.data.Parameters;
 import simpaths.data.Statistics;
 import simpaths.data.Statistics2;
+import simpaths.data.Statistics3;
 import simpaths.model.Person;
 import simpaths.model.enums.Region;
 
@@ -52,6 +53,9 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
 	@GUIparameter(description="Calculate extended set of population characteristics (useful for validation)")
 	private boolean persistStatistics2 = true;
+
+	@GUIparameter(description="Calculate customised statistics")
+	private boolean persistStatistics3 = true;
 
 	@GUIparameter(description="Toggle to turn database persistence on/off")
 	private boolean exportToDatabase = false;
@@ -85,6 +89,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
 	private Statistics2 stats2;
 
+	private Statistics3 stats3;
+
 	private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
 	private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
@@ -106,6 +112,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 	private DataExport exportStatistics;
 
 	private DataExport exportStatistics2;
+
+	private DataExport exportStatistics3;
 
 	protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
@@ -141,6 +149,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 		DumpHouseholds,
 		DumpStatistics,
 		DumpStatistics2,
+		DumpStatistics3,
 	}
 
 
@@ -201,6 +210,14 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 				log.error(e.getMessage());
 			}
 			break;
+			case DumpStatistics3:
+			stats3.update(model);
+			try {
+				exportStatistics3.export();
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+			break;
 		}
 	}
 	
@@ -216,7 +233,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 		
 		stats = new Statistics();
 		stats2 = new Statistics2();
-		
+		stats3 = new Statistics3();
+
 		//For export to database or .csv files.
 		if(persistPersons) 
 			exportPersons = new DataExport(model.getPersons(), exportToDatabase, exportToCSV);
@@ -228,6 +246,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 			exportStatistics = new DataExport(stats, exportToDatabase, exportToCSV);
 		if (persistStatistics2)
 			exportStatistics2 = new DataExport(stats2, exportToDatabase, exportToCSV);
+		if (persistStatistics3)
+			exportStatistics3 = new DataExport(stats3, exportToDatabase, exportToCSV);
 
 		
 		if (calculateGiniCoefficients) {
@@ -282,6 +302,10 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
 		if (persistStatistics2) {
 			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatistics2), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
+		}
+
+		if (persistStatistics3) {
+			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatistics3), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
 		}
 
 		if (persistPersons) {
@@ -913,6 +937,14 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
 	public void setPersistStatistics(boolean persistStatistics) {
 		this.persistStatistics = persistStatistics;
+	}
+
+	public boolean isPersistStatistics3() {
+		return persistStatistics3;
+	}
+
+	public void setPersistStatistics3(boolean persistStatistics3) {
+		this.persistStatistics3 = persistStatistics3;
 	}
 
 	public boolean isCalculateGiniCoefficients() {
