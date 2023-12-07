@@ -40,3 +40,15 @@ model_args:
 #    responsesToDisability: false
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
+
+collector_args:
+#    calculateGiniCoefficients: false
+#    exportToDatabase: false
+#    exportToCSV: true
+#    persistStatistics: true
+#    persistStatistics2: true
+#    persistPersons: false
+#    persistBenefitUnits: false
+#    persistHouseholds: false
+#    dataDumpStartTime: 0L
+#    dataDumpTimePeriod: 1.0
