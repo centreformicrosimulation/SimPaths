@@ -45,6 +45,8 @@ public class SimPathsMultiRun extends MultiRun {
 
 	private static Map<String, Object> model_args;
 
+	private static Map<String, Object> collector_args;
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -220,6 +222,11 @@ public class SimPathsMultiRun extends MultiRun {
 					continue;
 				}
 
+				if ("collector_args".equals(key)) {
+					collector_args = (Map<String, Object>) value;
+					continue;
+				}
+
 				// Use reflection to dynamically set the field based on the key
 				try {
 					Field field = SimPathsMultiRun.class.getDeclaredField(key);
@@ -274,6 +281,34 @@ public class SimPathsMultiRun extends MultiRun {
 
 	}
 
+	public static void updateCollectorParameters(SimPathsCollector collector, Map<String, Object> model_args) {
+
+		for (Map.Entry<String, Object> entry : model_args.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			try {
+				Field field = SimPathsCollector.class.getDeclaredField(key);
+				field.setAccessible(true);
+
+				// Determine the field type
+				Class<?> fieldType = field.getType();
+
+				// Convert the YAML value to the field type
+				Object convertedValue = convertToType(value, fieldType);
+
+				// Set the field value
+				field.set(collector, convertedValue);
+
+				field.setAccessible(false);
+			} catch (NoSuchFieldException | IllegalAccessException e) {
+				// Handle exceptions if the field is not found or inaccessible
+				e.printStackTrace();
+			}
+		}
+
+	}
+
 	private static Object convertToType(Object value, Class<?> targetType) {
 		// Convert the YAML value to the target type
 		if (int.class.equals(targetType)) {
@@ -307,8 +342,9 @@ public class SimPathsMultiRun extends MultiRun {
 		if (model_args != null) updateModelParameters(model, model_args);
 
 		engine.addSimulationManager(model);
-		
+
 		SimPathsCollector collector = new SimPathsCollector(model);
+		if (collector_args != null) updateCollectorParameters(collector, collector_args);
 		engine.addSimulationManager(collector);
 
 		model.setCollector(collector);
