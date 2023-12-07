@@ -298,7 +298,7 @@ public class Statistics3 {
 
 
         // count
-        CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons());
+        CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
         n_persons.setFilter(ageFilter);
         CountArrayFunction count_f = new CountArrayFunction(n_persons);
         count_f.applyFunction();
