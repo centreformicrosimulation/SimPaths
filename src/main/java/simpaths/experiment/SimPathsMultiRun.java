@@ -253,14 +253,14 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 	}
 
-	public static void updateModelParameters(SimPathsModel model, Map<String, Object> model_args) {
+	public static void updateParameters(Object object, Map<String, Object> model_args) {
 
 		for (Map.Entry<String, Object> entry : model_args.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 
 			try {
-				Field field = SimPathsModel.class.getDeclaredField(key);
+				Field field = object.getClass().getDeclaredField(key);
 				field.setAccessible(true);
 
 				// Determine the field type
@@ -270,35 +270,7 @@ public class SimPathsMultiRun extends MultiRun {
 				Object convertedValue = convertToType(value, fieldType);
 
 				// Set the field value
-				field.set(model, convertedValue);
-
-				field.setAccessible(false);
-			} catch (NoSuchFieldException | IllegalAccessException e) {
-				// Handle exceptions if the field is not found or inaccessible
-				e.printStackTrace();
-			}
-		}
-
-	}
-
-	public static void updateCollectorParameters(SimPathsCollector collector, Map<String, Object> model_args) {
-
-		for (Map.Entry<String, Object> entry : model_args.entrySet()) {
-			String key = entry.getKey();
-			Object value = entry.getValue();
-
-			try {
-				Field field = SimPathsCollector.class.getDeclaredField(key);
-				field.setAccessible(true);
-
-				// Determine the field type
-				Class<?> fieldType = field.getType();
-
-				// Convert the YAML value to the field type
-				Object convertedValue = convertToType(value, fieldType);
-
-				// Set the field value
-				field.set(collector, convertedValue);
+				field.set(object, convertedValue);
 
 				field.setAccessible(false);
 			} catch (NoSuchFieldException | IllegalAccessException e) {
@@ -339,12 +311,12 @@ public class SimPathsMultiRun extends MultiRun {
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
 
-		if (model_args != null) updateModelParameters(model, model_args);
+		if (model_args != null) updateParameters(model, model_args);
 
 		engine.addSimulationManager(model);
 
 		SimPathsCollector collector = new SimPathsCollector(model);
-		if (collector_args != null) updateCollectorParameters(collector, collector_args);
+		if (collector_args != null) updateParameters(collector, collector_args);
 		engine.addSimulationManager(collector);
 
 		model.setCollector(collector);
