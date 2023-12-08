@@ -39,6 +39,7 @@ public class TaxEvaluation {
         evaluateImputedTaxes(year, age, numberMembersOver17, numberChildrenUnder5, numberChildren5To9, numberChildren10To17,
                 hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, disabilityMan, disabilityWoman, careProvision, originalIncomePerMonth,
                 secondIncomePerMonth, childcareCostPerMonth);
+
     }
     public TaxEvaluation(int year, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9, int numberChildren10To17,
                          double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int disabilityMan, int disabilityWoman, int careProvision,
