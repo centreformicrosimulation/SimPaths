@@ -210,12 +210,15 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 				log.error(e.getMessage());
 			}
 			break;
-			case DumpStatistics3:
-			stats3.update(model);
-			try {
-				exportStatistics3.export();
-			} catch (Exception e) {
-				log.error(e.getMessage());
+		case DumpStatistics3:
+			String[] genders = {"Total", "Male", "Female"};
+			for (String gender_s: genders) {
+				stats3.update(model, gender_s);
+				try {
+					exportStatistics3.export();
+				} catch (Exception e) {
+					log.error(e.getMessage());
+				}
 			}
 			break;
 		}
