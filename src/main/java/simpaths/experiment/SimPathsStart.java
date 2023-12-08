@@ -3,6 +3,7 @@ package simpaths.experiment;
 
 // import Java packages
 import java.awt.Dimension;
+import org.apache.commons.cli.*;
 import java.awt.Toolkit;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -75,22 +76,9 @@ public class SimPathsStart implements ExperimentBuilder {
 	public static void main(String[] args) {
 
 
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-g")) {                //Set show GUI
-				showGui = Boolean.parseBoolean(args[i + 1]);
-				i++;
-			}
-			else if (args[i].equals("-c")) {
-				country = Country.valueOf(args[i + 1]);
-				i++;
-			}
-			else if (args[i].equals("-s")) {
-				startYear = Integer.parseInt(args[i + 1]);
-				i++;
-			}
-			else if (args[i].equals("-Setup")) {
-				setupOnly = true;
-			}
+		if (!parseCommandLineArgs(args)) {
+			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
+			return;
 		}
 
 		if (showGui) {
@@ -126,6 +114,72 @@ public class SimPathsStart implements ExperimentBuilder {
 		SimPathsStart experimentBuilder = new SimPathsStart();
 		engine.setExperimentBuilder(experimentBuilder);
 		engine.setup();
+	}
+
+	private static boolean parseCommandLineArgs(String[] args) {
+		Options options = new Options();
+
+		Option countryOption = new Option("c", "country", true, "Country (by country code CC, e.g. 'UK'/'IT')");
+		countryOption.setArgName("CC");
+		options.addOption(countryOption);
+
+		Option startYearOption = new Option("s", "startYear", true, "Start year");
+		startYearOption.setArgName("year");
+		options.addOption(startYearOption);
+
+		Option setupOption = new Option("Setup", "Setup only");
+		options.addOption(setupOption);
+
+		Option guiOption = new Option("g", "showGui", true, "Show GUI");
+		guiOption.setArgName("true/false");
+		options.addOption(guiOption);
+
+		Option helpOption = new Option("h", "help", false, "Print help message");
+		options.addOption(helpOption);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.setOptionComparator(null);
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				return false; // Exit without reporting an error
+			}
+
+			if (cmd.hasOption("g")) {
+				showGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
+			}
+
+			if (cmd.hasOption("c")) {
+				country = Country.valueOf(cmd.getOptionValue("c"));
+			}
+
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
+			}
+
+			if (cmd.hasOption("Setup")) {
+				setupOnly = true;
+			}
+		} catch (ParseException | IllegalArgumentException e) {
+			System.err.println("Error parsing command line arguments: " + e.getMessage());
+			formatter.printHelp("SimPathsStart", options);
+			System.exit(1);
+		}
+
+		return true;
+	}
+
+	private static void printHelpMessage(HelpFormatter formatter, Options options) {
+		String header = "SimPathsStart will start the SimPaths run. " +
+				"When using the argument `Setup`, this will create the population database " +
+				"and exit before starting the first run. " +
+				"It takes the following options:";
+		String footer = "When running with no display, `-g` must be set to `false`.";
+		formatter.printHelp("SimPathsStart", header, options, footer, true);
 	}
 
 

@@ -3,6 +3,7 @@ package simpaths.experiment;
 
 // import Java packages
 import org.apache.log4j.Level;
+import org.apache.commons.cli.*;
 import simpaths.data.Parameters;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
@@ -41,8 +42,6 @@ public class SimPathsMultiRun extends MultiRun {
 	 */
 	public static void main(String[] args) {
 
-
-
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
 		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
@@ -53,43 +52,97 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-n")){ // These options are for use from the command line
-				
-				try {
-					maxNumberOfRuns = Integer.parseInt(args[i + 1]);
-			    } catch (NumberFormatException e) {
-			        System.err.println("Argument " + args[i + 1] + " must be an integer reflecting the maximum number of runs.");
-			        System.exit(1);
-			    }
-				
-				i++;
+		// Parse command line arguments to override defaults
+		if (!parseCommandLineArgs(args)) {
+			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
+			return;
+		}
+
+		log.info("Starting run with seed = " + randomSeed);
+		
+		SimulationEngine engine = SimulationEngine.getInstance();
+		
+		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
+//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
+		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
+		engine.setup();													//Do we need this?  Worked fine without it...
+
+		if (executeWithGui)
+			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
+		else
+			experimentBuilder.start();
+	}
+
+	private static boolean parseCommandLineArgs(String[] args) {
+
+		Options options = new Options();
+
+
+		Option popSizeOption = new Option("p", "popSize", true, "Population size");
+		popSizeOption.setArgName("int");
+		options.addOption(popSizeOption);
+
+		Option startYearOption = new Option("s", "startYear", true, "Start year");
+		startYearOption.setArgName("year");
+		options.addOption(startYearOption);
+
+		Option endYearOption = new Option("e", "endYear",true, "End year");
+		endYearOption.setArgName("year");
+		options.addOption(endYearOption);
+
+		Option maxRunsOption = new Option("n", "maxNumberOfRuns", true, "Maximum number of runs");
+		maxRunsOption.setArgName("int");
+		options.addOption(maxRunsOption);
+
+		Option seedOption = new Option("r", "randomSeed", true, "Random seed");
+		seedOption.setArgName("int");
+		options.addOption(seedOption);
+
+		Option guiOption = new Option("g", "executeWithGui", true, "Show GUI");
+		guiOption.setArgName("true/false");
+		options.addOption(guiOption);
+
+		Option fileOption = new Option("f", "Output to file");
+		options.addOption(fileOption);
+
+		Option helpOption = new Option("h", "help", false, "Print this help message");
+		options.addOption(helpOption);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.setOptionComparator(null);
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				return false; // Exit without reporting an error
 			}
-			else if (args[i].equals("-g")){				//Set show GUI
-				executeWithGui = Boolean.parseBoolean(args[i + 1]);
-				i++;
+			if (cmd.hasOption("n")) {
+				maxNumberOfRuns = Integer.parseInt(cmd.getOptionValue("n"));
 			}
-			else if (args[i].equals("-c")){				//Set country by arguments here
-				countryString = args[i+1];				
-				i++;
+
+			if (cmd.hasOption("g")) {
+				executeWithGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
 			}
-			else if (args[i].equals("-r")){				//Set random seed
-				randomSeed = Long.parseLong(args[i+1]);
-				i++;
+
+			if (cmd.hasOption("r")) {
+				randomSeed = Long.parseLong(cmd.getOptionValue("r"));
 			}
-			else if (args[i].equals("-s")) {			//Set start year
-				startYear = Integer.parseInt(args[i + 1]);
-				i++;
+
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
 			}
-			else if (args[i].equals("-e")) {			//Set end year
-				endYear = Integer.parseInt(args[i + 1]);
-				i++;
+
+			if (cmd.hasOption("e")) {
+				endYear = Integer.parseInt(cmd.getOptionValue("e"));
 			}
-			else if (args[i].equals("-p")){				//Set population size
-				popSize = Integer.parseInt(args[i+1]);
-				i++;
+
+			if (cmd.hasOption("p")) {
+				popSize = Integer.parseInt(cmd.getOptionValue("p"));
 			}
-			else if (args[i].equals("-f")){             //Output to file
+			if (cmd.hasOption("f")) {
 				try {
 					File logDir = new File("output/logs");
 					if (!logDir.exists()) {
@@ -111,21 +164,21 @@ public class SimPathsMultiRun extends MultiRun {
 					throw new RuntimeException(e);
 				}
 			}
+		} catch (ParseException e) {
+			System.err.println("Error parsing command line arguments: " + e.getMessage());
+			formatter.printHelp("SimPathsMultiRun", options);
+			System.exit(1);
 		}
 
-		log.info("Starting run with seed = " + randomSeed);
-		
-		SimulationEngine engine = SimulationEngine.getInstance();
-		
-		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
-//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
-		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
-		engine.setup();													//Do we need this?  Worked fine without it...
+		return true;
+	}
 
-		if (executeWithGui)
-			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
-		else
-			experimentBuilder.start();
+	private static void printHelpMessage(HelpFormatter formatter, Options options) {
+		String header = "SimPathsMultiRun can run multiple sequential runs, " +
+				"resetting the population to the start year and iterating from the start seed. " +
+				"It takes the following options:";
+		String footer = "When running with no display, `-g` must be set to `false`.";
+		formatter.printHelp("SimPathsMultiRun", header, options, footer, true);
 	}
 
 	@Override

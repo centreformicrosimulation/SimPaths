@@ -53,7 +53,7 @@ jobs:
         path: .
 
     - name: Setup run
-      run: java -jar singlerun.jar -c UK -y 2017 -Setup -g false
+      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false
 
     - name: Do one run
       run: java -jar multirun.jar -p 50000 -s 2017 -e 2020 -r 100 -n 2 -g false
