@@ -17,6 +17,7 @@ import simpaths.model.Person;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Gender;
+import simpaths.model.enums.Labour;
 
 @Entity
 public class Statistics3 {
@@ -236,12 +237,12 @@ public class Statistics3 {
 
 //        AgeGroupCSfilter ageFilter = new AgeGroupCSfilter(18, 65);
 //        GenderCSfilter genderCSfilter = new GenderCSfilter(Gender.Female);
-        AgeGenderCSfilter ageFilter = new AgeGenderCSfilter(18, 65);
+        AgeGenderCSfilter ageGenderFilter = new AgeGenderCSfilter(18, 65);
 
 
         if (gender_s != "Total") {
             Gender gender = (gender_s == "Female")? Gender.Female: Gender.Male;
-            ageFilter = new AgeGenderCSfilter(18, 65, gender);
+            ageGenderFilter = new AgeGenderCSfilter(18, 65, gender);
         }
 
         // set gender
@@ -249,8 +250,7 @@ public class Statistics3 {
 
         // dhm score
         CrossSection.Double personsDhm = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhm); // Get cross section of simulated individuals and their mental health using the IDoubleSource interface implemented by Person class.
-        personsDhm.setFilter(ageFilter);
-//        if (gender_s != "Total") personsDhm.setFilter(genderCSfilter);
+        personsDhm.setFilter(ageGenderFilter);
 
 
         MeanArrayFunction dhm_mean_f = new MeanArrayFunction(personsDhm); // Create MeanArrayFunction
@@ -270,8 +270,7 @@ public class Statistics3 {
 
         // dhm caseness prevalence
         CrossSection.Integer personsDhmCase = new CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isPsychologicallyDistressed);
-        personsDhmCase.setFilter(ageFilter);
-//        if (gender_s != "Total") personsDhmCase.setFilter(genderCSfilter);
+        personsDhmCase.setFilter(ageGenderFilter);
 
         MeanArrayFunction dhm_case_f = new MeanArrayFunction(personsDhmCase);
         dhm_case_f.applyFunction();
@@ -290,8 +289,7 @@ public class Statistics3 {
 
         // Employed prevalence
         CrossSection.Integer personsEmployed = new CrossSection.Integer(model.getPersons(), Person.class, "getEmployed", true);
-        personsEmployed.setFilter(ageFilter);
-//        if (gender_s != "Total") personsEmployed.setFilter(genderCSfilter);
+        personsEmployed.setFilter(ageGenderFilter);
 
         MeanArrayFunction isEmployed_f = new MeanArrayFunction(personsEmployed);
         isEmployed_f.applyFunction();
@@ -305,8 +303,7 @@ public class Statistics3 {
 
         // labour supply numeric
         CrossSection.Double personLabourSupplyNumeric = new CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyWeeklyHours", true);
-        personLabourSupplyNumeric.setFilter(ageFilter);
-//        if (gender_s != "Total") personLabourSupplyNumeric.setFilter(genderCSfilter);
+        personLabourSupplyNumeric.setFilter(ageGenderFilter);
 
         MeanArrayFunction meanLabourSupplyNumeric = new MeanArrayFunction(personLabourSupplyNumeric);
         meanLabourSupplyNumeric.applyFunction();
@@ -330,8 +327,8 @@ public class Statistics3 {
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
-        n_persons.setFilter(ageFilter);
-//        if (gender_s != "Total") n_persons.setFilter(genderCSfilter);
+        n_persons.setFilter(ageGenderFilter);
+
         CountArrayFunction count_f = new CountArrayFunction(n_persons);
         count_f.applyFunction();
         setN(count_f.getIntValue(IDoubleSource.Variables.Default));
