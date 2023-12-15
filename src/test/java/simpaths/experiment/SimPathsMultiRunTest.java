@@ -21,7 +21,7 @@ public class SimPathsMultiRunTest {
     @BeforeEach
     public void resetStreams() {
         outContent.reset();
-//        errContent.reset();
+        errContent.reset();
     }
 
     @Test
