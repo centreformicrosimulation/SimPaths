@@ -254,6 +254,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 		} catch (FileNotFoundException e) {
 			// Config file not found, continue with defaults
+			System.out.println("Config file " + configFile + " not found; continuing with default/cli parameters.");
 		}
 	}
 
