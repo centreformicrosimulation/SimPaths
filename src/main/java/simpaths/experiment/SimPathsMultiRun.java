@@ -116,6 +116,10 @@ public class SimPathsMultiRun extends MultiRun {
 		guiOption.setArgName("true/false");
 		options.addOption(guiOption);
 
+		Option configOption = new Option("config", true, "Specify custom config file (default: config.yml)");
+		configOption.setArgName("file");
+		options.addOption(configOption);
+
 		Option fileOption = new Option("f", "Output to file");
 		options.addOption(fileOption);
 
