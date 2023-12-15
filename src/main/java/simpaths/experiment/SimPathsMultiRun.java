@@ -47,6 +47,8 @@ public class SimPathsMultiRun extends MultiRun {
 
 	private static Map<String, Object> collector_args;
 
+	public static String configFile = "config.yml";  // Default config file name
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -64,7 +66,10 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
-		parseYamlConfig(args);
+		if (!parseYamlConfig(args)) {
+			// if parseYamlConfig returns false (indicating bad filename passed), exit main
+			return;
+		}
 
 		// Parse command line arguments to override defaults
 		if (!parseCommandLineArgs(args)) {
@@ -199,13 +204,15 @@ public class SimPathsMultiRun extends MultiRun {
 		formatter.printHelp("SimPathsMultiRun", header, options, footer, true);
 	}
 
-	private static void parseYamlConfig(String[] args) {
-		String configFile = "config.yml";  // Default config file name
+	private static boolean parseYamlConfig(String[] args) {
+
+		boolean custom_config = false;
 
 		// Check if an alternative config file is specified in the command line
 		for (int i = 0; i < args.length - 1; i++) {
 			if (args[i].equals("-config")) {
 				configFile = args[i + 1];
+				custom_config = true;
 				break;
 			}
 		}
@@ -253,9 +260,13 @@ public class SimPathsMultiRun extends MultiRun {
 			}
 
 		} catch (FileNotFoundException e) {
-			// Config file not found, continue with defaults
-			System.out.println("Config file " + configFile + " not found; continuing with default/cli parameters.");
+			// Config file specified but not found, continue with defaults
+			if (custom_config) {
+				System.err.println("Config file " + configFile + " not found; please supply a valid config file.");
+				return false;
+			}
 		}
+		return true;
 	}
 
 	public static void updateParameters(Object object, Map<String, Object> model_args) {
