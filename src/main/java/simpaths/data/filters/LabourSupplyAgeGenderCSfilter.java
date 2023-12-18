@@ -35,12 +35,12 @@ public class LabourSupplyAgeGenderCSfilter implements ICollectionFilter {
         if (this.gender == null)
             return ( (person.getDag() >= ageFrom) &&
                     (person.getDag() <= ageTo)  &&
-                    person.getLabourSupplyWeekly().equals(labour));
+                    (person.getLabourSupplyWeekly().equals(labour)));
         else
             return ( (person.getDag() >= ageFrom) &&
                     (person.getDag() <= ageTo) &&
                     (person.getDgn().equals(gender)) &&
-                    person.getLabourSupplyWeekly().equals(labour));
+                    (person.getLabourSupplyWeekly().equals(labour)));
 
     }
 }
