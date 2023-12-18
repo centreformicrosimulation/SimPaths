@@ -55,5 +55,15 @@ jobs:
     - name: Setup run
       run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
 
+    - name: Check input db exists
+      id: check_file
+      uses: thebinaryfelix/check-file-existence-action@v1
+      with:
+        files: 'input/impoot.mv.db'
+
+    - name: Files exist
+      if: steps.check_files.outputs.exists == 'false'
+      run: exit 1
+
     - name: Do one run
       run: java -jar multirun.jar -p 50000 -s 2017 -e 2020 -r 100 -n 2 -g false
