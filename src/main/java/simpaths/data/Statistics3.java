@@ -11,13 +11,12 @@ import microsim.statistics.functions.CountArrayFunction;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.PercentileArrayFunction;
 import simpaths.data.filters.AgeGenderCSfilter;
-import simpaths.data.filters.AgeGroupCSfilter;
-import simpaths.data.filters.GenderCSfilter;
+import simpaths.data.filters.EmploymentAgeGenderCSfilter;
 import simpaths.model.Person;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Gender;
-import simpaths.model.enums.Labour;
+import simpaths.model.enums.Les_c4;
 
 @Entity
 public class Statistics3 {
@@ -213,20 +212,20 @@ public class Statistics3 {
         this.n_labour_ZERO = n_labour_ZERO;
     }
 
-    public void setN_labour_THIRTY(int n_labour_THIRTY) {
-        this.n_labour_THIRTY = n_labour_THIRTY;
-    }
-
-    public void setN_labour_FORTY(int n_labour_FORTY) {
-        this.n_labour_FORTY = n_labour_FORTY;
-    }
-
     public void setN_labour_TEN(int n_labour_TEN) {
         this.n_labour_TEN = n_labour_TEN;
     }
 
     public void setN_labour_TWENTY(int n_labour_TWENTY) {
         this.n_labour_TWENTY = n_labour_TWENTY;
+    }
+
+    public void setN_labour_THIRTY(int n_labour_THIRTY) {
+        this.n_labour_THIRTY = n_labour_THIRTY;
+    }
+
+    public void setN_labour_FORTY(int n_labour_FORTY) {
+        this.n_labour_FORTY = n_labour_FORTY;
     }
 
     public void setN(int n) {
@@ -238,11 +237,13 @@ public class Statistics3 {
 //        AgeGroupCSfilter ageFilter = new AgeGroupCSfilter(18, 65);
 //        GenderCSfilter genderCSfilter = new GenderCSfilter(Gender.Female);
         AgeGenderCSfilter ageGenderFilter = new AgeGenderCSfilter(18, 65);
+        EmploymentAgeGenderCSfilter employmentAgeGenderCSfilter = new EmploymentAgeGenderCSfilter(16, 65, Les_c4.EmployedOrSelfEmployed);
 
 
         if (gender_s != "Total") {
             Gender gender = (gender_s == "Female")? Gender.Female: Gender.Male;
             ageGenderFilter = new AgeGenderCSfilter(18, 65, gender);
+            employmentAgeGenderCSfilter = new EmploymentAgeGenderCSfilter(16, 65, Les_c4.EmployedOrSelfEmployed, gender);
         }
 
         // set gender
@@ -323,7 +324,12 @@ public class Statistics3 {
 
 
         // employed count
-        // still to be implemented
+        CrossSection.Integer n_emp = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+        n_emp.setFilter(employmentAgeGenderCSfilter);
+
+        CountArrayFunction emp_f = new CountArrayFunction(n_emp);
+        emp_f.applyFunction();
+        setEmployed_n(emp_f.getIntValue(IDoubleSource.Variables.Default));
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
