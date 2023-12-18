@@ -1795,7 +1795,9 @@ public class Parameters {
             MultiKey k = (MultiKey)o;
             if(k.getKey(0) != null) {
                 String name = k.getKey(0).toString();
-                if(name != null) {
+                if(name != null &&
+                        currentEUROMODpolicySchedule.getValue(name, EUROMODpolicyScheduleHeadingScenarioYearBegins) != null &&
+                        currentEUROMODpolicySchedule.getValue(name, EUROMODpolicyScheduleHeadingScenarioSystemYear) != null) {
                     String policyStartYearString = currentEUROMODpolicySchedule.getValue(name, EUROMODpolicyScheduleHeadingScenarioYearBegins).toString();
                     String policySystemYearString = currentEUROMODpolicySchedule.getValue(name, EUROMODpolicyScheduleHeadingScenarioSystemYear).toString();
                     if(policyStartYearString != null && !policyStartYearString.isEmpty()) {
