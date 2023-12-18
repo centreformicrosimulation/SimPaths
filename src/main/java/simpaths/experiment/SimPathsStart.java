@@ -88,7 +88,7 @@ public class SimPathsStart implements ExperimentBuilder {
 				runGUIlessSetup(4);
 			} catch (FileNotFoundException f) {
 				System.err.println(f.getMessage());
-				return;
+				System.exit(1);
 			};
 		}
 
@@ -229,9 +229,9 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		// Create EUROMODPolicySchedule input from files
 		if (!rewritePolicySchedule &&
-				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString()).exists()) {
+				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
 			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + "input" + File.separator +
-					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist with worksheet '" + country.toString() + "'. " +
+					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist. " +
 					"Provide excel file or use `--rewrite-policy-schedule` to re-construct from available policy files.");
 		};
 		if (rewritePolicySchedule) writePolicyScheduleExcelFile();
