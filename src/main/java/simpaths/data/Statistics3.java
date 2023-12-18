@@ -10,6 +10,7 @@ import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.CountArrayFunction;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.PercentileArrayFunction;
+import microsim.statistics.functions.SumArrayFunction;
 import simpaths.data.filters.AgeGenderCSfilter;
 import simpaths.data.filters.EmploymentAgeGenderCSfilter;
 import simpaths.data.filters.LabourSupplyAgeGenderCSfilter;
@@ -326,10 +327,10 @@ public class Statistics3 {
         setLabour_supply_numeric_p_90(percLabourSupplyNumeric.getDoubleValue(PercentileArrayFunction.Variables.P95));
 
         // labour supply categories
-        Map<Labour, CountArrayFunction> labour_fs = new HashMap<>();
-        CrossSection.Integer n_labour = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+        Map<Labour, SumArrayFunction.Integer> labour_fs = new HashMap<>();
+        CrossSection.Integer n_labour = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", false);
         LabourSupplyAgeGenderCSfilter labour_filter;
-        CountArrayFunction labour_f;
+        SumArrayFunction.Integer labour_f;
 
         for (Labour labour: Labour.values()) {
              labour_filter = new LabourSupplyAgeGenderCSfilter(18, 65, labour);
@@ -340,7 +341,7 @@ public class Statistics3 {
             }
 
             n_labour.setFilter(labour_filter);
-            labour_f = new CountArrayFunction(n_labour);
+            labour_f = new SumArrayFunction.Integer(n_labour);
             labour_f.applyFunction();
 
             labour_fs.put(labour, labour_f);
@@ -355,18 +356,18 @@ public class Statistics3 {
 
 
         // employed count
-        CrossSection.Integer n_emp = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+        CrossSection.Integer n_emp = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", false);
         n_emp.setFilter(employmentAgeGenderCSfilter);
 
-        CountArrayFunction emp_f = new CountArrayFunction(n_emp);
+        SumArrayFunction.Integer emp_f = new SumArrayFunction.Integer(n_emp);
         emp_f.applyFunction();
         setEmployed_n(emp_f.getIntValue(IDoubleSource.Variables.Default));
 
         // count
-        CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+        CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
         n_persons.setFilter(ageGenderFilter);
 
-        CountArrayFunction count_f = new CountArrayFunction(n_persons);
+        SumArrayFunction.Integer count_f = new SumArrayFunction.Integer(n_persons);
         count_f.applyFunction();
         setN(count_f.getIntValue(IDoubleSource.Variables.Default));
 
