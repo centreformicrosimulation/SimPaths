@@ -161,7 +161,11 @@ public class SimPathsStart implements ExperimentBuilder {
 			}
 
 			if (cmd.hasOption("c")) {
-				country = Country.valueOf(cmd.getOptionValue("c"));
+				try {
+					country = Country.valueOf(cmd.getOptionValue("c"));
+				} catch (Exception e) {
+					throw new IllegalArgumentException("Code '" + cmd.getOptionValue("c") + "' not a valid country.");
+				}
 			}
 
 			if (cmd.hasOption("s")) {
@@ -178,7 +182,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		} catch (ParseException | IllegalArgumentException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
 			formatter.printHelp("SimPathsStart", options);
-			System.exit(1);
+			return false;
 		}
 
 		return true;

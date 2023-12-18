@@ -22,7 +22,7 @@ public class SimPathsStartTest {
     @BeforeEach
     public void resetStreams() {
         outContent.reset();
-//        errContent.reset();
+        errContent.reset();
     }
 
     @Test
@@ -47,5 +47,13 @@ public class SimPathsStartTest {
         assertEquals("", errContent.toString().trim());
     }
 
-    // Add more test methods for other scenarios as needed
+    @Test
+    public void testBadCountryName() {
+        String[] args = {"-g", "false", "-s", "2017", "-c", "XX"};
+
+        String expectedError = "Code 'XX' not a valid country.";
+
+        SimPathsStart.main(args);
+        assertTrue(errContent.toString().contains(expectedError));
+    }
 }
