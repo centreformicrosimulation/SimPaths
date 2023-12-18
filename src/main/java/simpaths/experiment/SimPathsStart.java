@@ -67,6 +67,8 @@ public class SimPathsStart implements ExperimentBuilder {
 
 	private static boolean setupOnly = false;
 
+	private static boolean rewritePolicySchedule = false;
+
 
 	/**
 	 *
@@ -130,6 +132,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		Option setupOption = new Option("Setup", "Setup only");
 		options.addOption(setupOption);
 
+		Option rewritePolicyScheduleOption = new Option("r", "rewrite-policy-schedule",false, "Re-write policy schedule from detected policy files");
+		options.addOption(rewritePolicyScheduleOption);
+
 		Option guiOption = new Option("g", "showGui", true, "Show GUI");
 		guiOption.setArgName("true/false");
 		options.addOption(guiOption);
@@ -163,6 +168,10 @@ public class SimPathsStart implements ExperimentBuilder {
 
 			if (cmd.hasOption("Setup")) {
 				setupOnly = true;
+			}
+
+			if (cmd.hasOption("r")) {
+				rewritePolicySchedule = true;
 			}
 		} catch (ParseException | IllegalArgumentException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
@@ -217,7 +226,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
 		// Create EUROMODPolicySchedule input from files
-		writePolicyScheduleExcelFile();
+		if (rewritePolicySchedule) writePolicyScheduleExcelFile();
 		//Save the last selected country and year to Excel to use in the model if GUI launched straight away
 		String[] columnNames = {"Country", "Year"};
 		Object[][] data = new Object[1][columnNames.length];
