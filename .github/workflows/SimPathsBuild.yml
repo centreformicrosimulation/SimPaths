@@ -59,11 +59,7 @@ jobs:
       id: check_file
       uses: thebinaryfelix/check-file-existence-action@1.0.0
       with:
-        files: 'input/input.mv.db'
-
-    - name: Files exist
-      if: steps.check_files.outputs.exists == 'false'
-      run: exit 1
+        files: 'input/input.mv.db, input/EUROMODpolicySchedule.xlsx, input/DatabaseCountryYear.xlsx'
 
     - name: Do one run
       run: java -jar multirun.jar -p 50000 -s 2017 -e 2020 -r 100 -n 2 -g false
