@@ -328,12 +328,13 @@ public class Statistics3 {
 
         // labour supply categories
         Map<Labour, SumArrayFunction.Integer> labour_fs = new HashMap<>();
-        CrossSection.Integer n_labour = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", false);
+        CrossSection.Integer n_labour;
         LabourSupplyAgeGenderCSfilter labour_filter;
         SumArrayFunction.Integer labour_f;
 
         for (Labour labour: Labour.values()) {
              labour_filter = new LabourSupplyAgeGenderCSfilter(18, 65, labour);
+             n_labour = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
 
             if (gender_s != "Total") {
                 Gender gender = (gender_s == "Female")? Gender.Female: Gender.Male;
@@ -356,7 +357,7 @@ public class Statistics3 {
 
 
         // employed count
-        CrossSection.Integer n_emp = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", false);
+        CrossSection.Integer n_emp = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
         n_emp.setFilter(employmentAgeGenderCSfilter);
 
         SumArrayFunction.Integer emp_f = new SumArrayFunction.Integer(n_emp);
