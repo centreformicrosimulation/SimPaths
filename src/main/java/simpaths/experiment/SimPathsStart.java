@@ -5,10 +5,7 @@ package simpaths.experiment;
 import java.awt.Dimension;
 import org.apache.commons.cli.*;
 import java.awt.Toolkit;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,7 +84,12 @@ public class SimPathsStart implements ExperimentBuilder {
 			// display dialog box to allow users to define desired simulation
 			runGUIdialog();
 		} else {
-			runGUIlessSetup(4);
+			try {
+				runGUIlessSetup(4);
+			} catch (FileNotFoundException f) {
+				System.err.println(f.getMessage());
+				return;
+			};
 		}
 
 		if (setupOnly) {
@@ -214,7 +216,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		model.setCollector(collector);
 	}
 
-	private static void runGUIlessSetup(int option) {
+	private static void runGUIlessSetup(int option) throws FileNotFoundException {
 
 		// Detect if data available; set to testing data if not
 		Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
@@ -226,6 +228,12 @@ public class SimPathsStart implements ExperimentBuilder {
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
 		// Create EUROMODPolicySchedule input from files
+		if (!rewritePolicySchedule &&
+				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString()).exists()) {
+			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + "input" + File.separator +
+					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist with worksheet '" + country.toString() + "'. " +
+					"Provide excel file or use `--rewrite-policy-schedule` to re-construct from available policy files.");
+		};
 		if (rewritePolicySchedule) writePolicyScheduleExcelFile();
 		//Save the last selected country and year to Excel to use in the model if GUI launched straight away
 		String[] columnNames = {"Country", "Year"};
