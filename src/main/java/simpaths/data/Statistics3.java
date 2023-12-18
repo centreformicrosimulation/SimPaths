@@ -12,11 +12,17 @@ import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.PercentileArrayFunction;
 import simpaths.data.filters.AgeGenderCSfilter;
 import simpaths.data.filters.EmploymentAgeGenderCSfilter;
+import simpaths.data.filters.LabourSupplyAgeGenderCSfilter;
 import simpaths.model.Person;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Gender;
+import simpaths.model.enums.Labour;
 import simpaths.model.enums.Les_c4;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 public class Statistics3 {
@@ -320,7 +326,32 @@ public class Statistics3 {
         setLabour_supply_numeric_p_90(percLabourSupplyNumeric.getDoubleValue(PercentileArrayFunction.Variables.P95));
 
         // labour supply categories
-        // still to be implemented
+        Map<Labour, CountArrayFunction> labour_fs = new HashMap<>();
+        CrossSection.Integer n_labour = new CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+        LabourSupplyAgeGenderCSfilter labour_filter;
+        CountArrayFunction labour_f;
+
+        for (Labour labour: Labour.values()) {
+             labour_filter = new LabourSupplyAgeGenderCSfilter(18, 65, labour);
+
+            if (gender_s != "Total") {
+                Gender gender = (gender_s == "Female")? Gender.Female: Gender.Male;
+                labour_filter = new LabourSupplyAgeGenderCSfilter(18, 65, labour, gender);
+            }
+
+            n_labour.setFilter(labour_filter);
+            labour_f = new CountArrayFunction(n_labour);
+            labour_f.applyFunction();
+
+            labour_fs.put(labour, labour_f);
+
+        }
+
+        setN_labour_ZERO(labour_fs.get(Labour.ZERO).getIntValue(IDoubleSource.Variables.Default));
+        setN_labour_TEN(labour_fs.get(Labour.TEN).getIntValue(IDoubleSource.Variables.Default));
+        setN_labour_TWENTY(labour_fs.get(Labour.TWENTY).getIntValue(IDoubleSource.Variables.Default));
+        setN_labour_THIRTY(labour_fs.get(Labour.THIRTY).getIntValue(IDoubleSource.Variables.Default));
+        setN_labour_FORTY(labour_fs.get(Labour.FORTY).getIntValue(IDoubleSource.Variables.Default));
 
 
         // employed count
