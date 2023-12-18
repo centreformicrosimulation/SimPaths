@@ -167,7 +167,7 @@ public class SimPathsMultiRun extends MultiRun {
 		} catch (ParseException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
 			formatter.printHelp("SimPathsMultiRun", options);
-			System.exit(1);
+			return false;
 		}
 
 		return true;
