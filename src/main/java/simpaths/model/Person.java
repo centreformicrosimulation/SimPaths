@@ -1350,7 +1350,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 setDer(Indicator.True);
                 setDed(Indicator.True);
                 labourSupplyWeekly = Labour.ZERO; //Assume no part-time work while studying
-                //TODO: Note that individuals re-entering education do not have a new level of education set. (They don't "leave school")
             }
             else if (les_c4.equals(Les_c4.Student)){ //If activity status is student but regression to be in education was evaluated to false, remove student status
                 setLes_c4(Les_c4.NotEmployed);
