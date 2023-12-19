@@ -5,10 +5,7 @@ package simpaths.experiment;
 import java.awt.Dimension;
 import org.apache.commons.cli.*;
 import java.awt.Toolkit;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +64,8 @@ public class SimPathsStart implements ExperimentBuilder {
 
 	private static boolean setupOnly = false;
 
+	private static boolean rewritePolicySchedule = false;
+
 
 	/**
 	 *
@@ -85,7 +84,12 @@ public class SimPathsStart implements ExperimentBuilder {
 			// display dialog box to allow users to define desired simulation
 			runGUIdialog();
 		} else {
-			runGUIlessSetup(4);
+			try {
+				runGUIlessSetup(4);
+			} catch (FileNotFoundException f) {
+				System.err.println(f.getMessage());
+				System.exit(1);
+			};
 		}
 
 		if (setupOnly) {
@@ -130,6 +134,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		Option setupOption = new Option("Setup", "Setup only");
 		options.addOption(setupOption);
 
+		Option rewritePolicyScheduleOption = new Option("r", "rewrite-policy-schedule",false, "Re-write policy schedule from detected policy files");
+		options.addOption(rewritePolicyScheduleOption);
+
 		Option guiOption = new Option("g", "showGui", true, "Show GUI");
 		guiOption.setArgName("true/false");
 		options.addOption(guiOption);
@@ -154,7 +161,11 @@ public class SimPathsStart implements ExperimentBuilder {
 			}
 
 			if (cmd.hasOption("c")) {
-				country = Country.valueOf(cmd.getOptionValue("c"));
+				try {
+					country = Country.valueOf(cmd.getOptionValue("c"));
+				} catch (Exception e) {
+					throw new IllegalArgumentException("Code '" + cmd.getOptionValue("c") + "' not a valid country.");
+				}
 			}
 
 			if (cmd.hasOption("s")) {
@@ -164,10 +175,14 @@ public class SimPathsStart implements ExperimentBuilder {
 			if (cmd.hasOption("Setup")) {
 				setupOnly = true;
 			}
+
+			if (cmd.hasOption("r")) {
+				rewritePolicySchedule = true;
+			}
 		} catch (ParseException | IllegalArgumentException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
 			formatter.printHelp("SimPathsStart", options);
-			System.exit(1);
+			return false;
 		}
 
 		return true;
@@ -205,7 +220,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		model.setCollector(collector);
 	}
 
-	private static void runGUIlessSetup(int option) {
+	private static void runGUIlessSetup(int option) throws FileNotFoundException {
 
 		// Detect if data available; set to testing data if not
 		Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
@@ -217,7 +232,13 @@ public class SimPathsStart implements ExperimentBuilder {
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
 		// Create EUROMODPolicySchedule input from files
-		writePolicyScheduleExcelFile();
+		if (!rewritePolicySchedule &&
+				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
+			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + "input" + File.separator +
+					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist. " +
+					"Provide excel file or use `--rewrite-policy-schedule` to re-construct from available policy files.");
+		};
+		if (rewritePolicySchedule) writePolicyScheduleExcelFile();
 		//Save the last selected country and year to Excel to use in the model if GUI launched straight away
 		String[] columnNames = {"Country", "Year"};
 		Object[][] data = new Object[1][columnNames.length];

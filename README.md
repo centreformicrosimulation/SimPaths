@@ -56,6 +56,7 @@ To run the SimPathsStart setup phases and set up a population for subsequent mul
 - `-c` Country ['UK' or 'IT']
 - `-s` Start year
 - `-g` [true/false] show/hide gui
+- `-r` Re-write policy schedule from detected policy files
 - `-Setup` do setup phases (creating input populations database) only
 
 e.g.
@@ -70,12 +71,14 @@ For multiple runs, `multirun.jar` takes the following options:
 - `-s` start year of runs
 - `-e` end year of runs
 - `-g` [true/false] show/hide gui
-- `-f` write console output to file (in 'output/logs/run_[seed].txt')
+- `-f` write console output and logs to file (in 'output/logs/run_[seed].txt')
 
 e.g.
 ```
 $ java -jar multirun.jar -r 100 -p 50000 -n 20 -s 2017 -e 2020 -g false -f
 ```
+
+Run `java -jar singlerun.jar -h` or `java -jar multirun.jar -h` to show these help messages.
 
 ### Contributing
 
