@@ -1050,7 +1050,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
             Map<Dhe,Double> probs = Parameters.getRegHealthH1a().getProbabilities(this, Person.DoublesVariables.class);
             dhe = ManagerRegressions.multiEvent(probs, healthInnov.nextDouble());
-        } else if(dag >= 16) {
+        } else if (dag >= 16) {
 
             Map<Dhe,Double> probs = Parameters.getRegHealthH1b().getProbabilities(this, Person.DoublesVariables.class);
             dhe = ManagerRegressions.multiEvent(probs, healthInnov.nextDouble());

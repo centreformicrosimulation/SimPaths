@@ -199,6 +199,10 @@ if ($flagDoWASFile==1) {
 
 /**********************************************************************
 *	coarse exact matching
+*
+*	matching organised around 3 sets of ranking criteria, where rank 1
+*	criteria are the most fine grained, and rank 3 are the most coarse
+*	grained.
 **********************************************************************/
 
 * identify non-reference population and save for retrieval
@@ -306,17 +310,18 @@ qui {
 	local nn = r(mean) * r(N)
 }
 forval kk = 1/`nn' {
+// loop over each reference person in dataset to match to 
 
-	* local kk = 6
 	qui {
-		gen chk = 1-treat
+		gen chk = 1-treat 		// consider data points in "from" dataset
 		local rnk = 1
 		foreach vv in tt grad gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp gradsp {
-			replace chk = 0 if (`vv'!=`vv'[`kk'])
+			replace chk = 0 if (`vv'!=`vv'[`kk'])  // limit data point in from dataset to those with the same discrete characteristics
 		}
 		sum chk, mean
 	}
 	if (r(mean)==0) {
+	// no match obtained to rnk 1 coarse matching criteria - consider rnk 2 criteria
 
 		qui {
 			drop chk
@@ -328,6 +333,7 @@ forval kk = 1/`nn' {
 			sum chk, mean
 		}
 		if (r(mean)==0) {
+		// no match obtained to rnk 2 coarse matching criteria - consider rnk 3 criteria
 			
 			qui {
 				drop chk
@@ -347,6 +353,8 @@ forval kk = 1/`nn' {
 	qui {
 		replace smp = r(mean)*r(N) if (_n==`kk')
 		if (r(mean)>0) {
+		// the matching pool is not empty
+		
 			local ee = ee2[`kk']
 			preserve
 			keep if (chk==1)

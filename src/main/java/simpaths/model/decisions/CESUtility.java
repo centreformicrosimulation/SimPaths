@@ -19,15 +19,15 @@ public class CESUtility implements IEvaluation {
 
     // CES utility options
     public static final double EPSILON = 0.6;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_SINGLES = 2.2 * 0.01756;                      // utility price of leisure for single adults
-    public static final double ALPHA_COUPLES = 2.2 * 0.47 * 0.01756;               // utility price of leisure for couples
+    public static final double ALPHA_SINGLES = 2.2;                      // utility price of leisure for single adults
+    public static final double ALPHA_COUPLES = 2.2;               // utility price of leisure for couples
     public static final double GAMMA = 1.55;                                       // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
     public static final double ZETA0_SINGLES = 1000;                               // warm-glow bequests parameter for singles - additive
     public static final double ZETA1_SINGLES = 0;                                  // warm-glow bequests parameter for singles - slope
     public static final double ZETA0_COUPLES = 1000;                               // warm-glow bequests parameter for couples - additive
     public static final double ZETA1_COUPLES = 0;                                  // warm-glow bequests parameter for couples - slope
-    public static final double DELTA_SINGLES = 0.97;                               // exponential intertemporal discount factor for singles
-    public static final double DELTA_COUPLES = 0.93;                               // exponential intertemporal discount factor for couples
+    public static final double DELTA_SINGLES = 0.98;                               // exponential intertemporal discount factor for singles
+    public static final double DELTA_COUPLES = 0.98;                               // exponential intertemporal discount factor for couples
 
     /**
      * CONSTRUCTOR

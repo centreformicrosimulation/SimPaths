@@ -16,7 +16,7 @@ import simpaths.model.BenefitUnit;
 public class States {
 
 
-    final double eps = 10.0 * Math.ulp(1.0);;
+    final double eps = 10.0 * Math.ulp(1.0);
     int ageIndex;           // age index for state
     int ageYears;           // age in years for state
     double[] states;        // vector to store combination of state variables (except age), in order as defined for axes in Grids
