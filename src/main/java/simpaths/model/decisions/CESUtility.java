@@ -19,8 +19,8 @@ public class CESUtility implements IEvaluation {
 
     // CES utility options
     public static final double EPSILON = 0.6;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_SINGLES = 2.2;                      // utility price of leisure for single adults
-    public static final double ALPHA_COUPLES = 2.2;               // utility price of leisure for couples
+    public static final double ALPHA_SINGLES = 2.2;                                // utility price of leisure for single adults
+    public static final double ALPHA_COUPLES = 2.2;                                // utility price of leisure for couples
     public static final double GAMMA = 1.55;                                       // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
     public static final double ZETA0_SINGLES = 1000;                               // warm-glow bequests parameter for singles - additive
     public static final double ZETA1_SINGLES = 0;                                  // warm-glow bequests parameter for singles - slope

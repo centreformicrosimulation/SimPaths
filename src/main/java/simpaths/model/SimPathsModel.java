@@ -84,10 +84,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private Integer popSize = 25000;
 
 	@GUIparameter(description = "Simulation first year [valid range 2011-2017]")
-	private Integer startYear = 2011;
+	private Integer startYear = 2017;
 
 	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
-	private Integer endYear = 2020;
+	private Integer endYear = 2017;
 
 	@GUIparameter(description = "Maximum simulated age")
 	private Integer maxAge = 130;
@@ -254,13 +254,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private Integer employmentOptionsOfSecondaryWorker = 3;
 
 	@GUIparameter(description = "whether to include student and education status in state space for IO behavioural solutions")
-	private boolean responsesToEducation = true;
+	private boolean responsesToEducation = false;
 
 	@GUIparameter(description = "whether to include retirement (and private pensions) in the state space for IO behavioural solutions")
 	private boolean responsesToRetirement = false;
 
 	@GUIparameter(description = "whether to include health in state space for IO behavioural solutions")
-	private boolean responsesToHealth = true;
+	private boolean responsesToHealth = false;
 
 	@GUIparameter(description = "whether to include disability in state space for IO behavioural solutions")
 	private boolean responsesToDisability = false;
@@ -331,6 +331,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// populate tax donor references
 		populateTaxdbReferences();
 		//TestTaxRoutine.run();
+
 
 		if (fixRandomSeed) Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().reseedRandomGenerator(randomSeedIfFixed);
 
