@@ -374,48 +374,17 @@ public class Minimiser {
                 fu = function.evaluate(uu);
                 if ( fu <= fx ) {
 
-                    if ( fu == fx ) {
-                        // flat region found - undertake grid search to verify that minimum has been found
-
-                        uu = Arrays.copyOf(xx, nn);
-                        stepSize = new double[nn];
-                        for (int ii = 0; ii < nn; ii++) {
-                            stepSize[ii] = (cx[ii] - ax[ii]) / 200;
-                        }
-                        stepNumber = Math.min(10, (int) ((cx[adim] - uu[adim]) / stepSize[adim]));
-                        result = gridSearch(uu, stepSize, stepNumber);
-                        uu = Arrays.copyOf(result.ordinates,nn);
-                        fu = result.value;
-
-                        if ((fu + EPS) > fx) {
-                            // test below
-
-                            uu = Arrays.copyOf(xx, nn);
-                            for (int ii = 0; ii < nn; ii++) {
-                                stepSize[ii] = -stepSize[ii];
-                            }
-                            stepNumber = Math.min(10, (int) ((uu[adim] - ax[adim]) / stepSize[adim]));
-                            result = gridSearch(uu, stepSize, stepNumber);
-                            uu = Arrays.copyOf(result.ordinates,nn);
-                            fu = result.value;
-                        }
-                        if ( fu == fx ) {
-                            flatAboutMin = true;
-                        }
+                    if( uu[adim] >= xx[adim] ) {
+                        aa = Arrays.copyOf(xx,nn);
+                    } else {
+                        bb = Arrays.copyOf(xx,nn);
                     }
-                    if ((fu+EPS) < fx) {
-                        if( uu[adim] >= xx[adim] ) {
-                            aa = Arrays.copyOf(xx,nn);
-                        } else {
-                            bb = Arrays.copyOf(xx,nn);
-                        }
-                        vv = Arrays.copyOf(ww,nn);
-                        fv = fw;
-                        ww = Arrays.copyOf(xx,nn);
-                        fw = fx;
-                        xx = Arrays.copyOf(uu,nn);
-                        fx = fu;
-                    }
+                    vv = Arrays.copyOf(ww,nn);
+                    fv = fw;
+                    ww = Arrays.copyOf(xx,nn);
+                    fw = fx;
+                    xx = Arrays.copyOf(uu,nn);
+                    fx = fu;
                 } else {
 
                     if( uu[adim] < xx[adim] ) {

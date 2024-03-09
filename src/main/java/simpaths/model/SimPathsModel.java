@@ -84,7 +84,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private Integer popSize = 25000;
 
 	@GUIparameter(description = "Simulation first year [valid range 2011-2017]")
-	private Integer startYear = 2017;
+	private Integer startYear = 2011;
 
 	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
 	private Integer endYear = 2017;

@@ -7,12 +7,12 @@ public class DecisionTests {
     public static void compareGrids() {
 
         // load in grids for comparison
-        String name1 = "workstation serial";
+        String name1 = "serial";
         DecisionParams.setGridsInputDirectory(name1);
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
 
-        String name2 = "workstation parallel";
+        String name2 = "parallel";
         DecisionParams.setGridsInputDirectory(name2);
         Grids grids2 = new Grids();
         ManagerFileGrids.read(grids2);
