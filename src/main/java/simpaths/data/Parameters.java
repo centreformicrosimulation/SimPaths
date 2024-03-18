@@ -245,6 +245,7 @@ public class Parameters {
     public static final int MIN_AGE_COHABITATION = AGE_TO_BECOME_RESPONSIBLE;  	// Min age a person can marry
     public static final int MIN_AGE_TO_HAVE_INCOME = 16; //Minimum age to have non-employment non-benefit income
     public static final int MIN_AGE_TO_RETIRE = 50; //Minimum age to consider retirement
+    public static final int DEFAULT_AGE_TO_RETIRE = 67; //if pension included, but retirement decision not
     public static final int MIN_AGE_FORMAL_SOCARE = 65; //Minimum age to receive formal social care
     public static final int MIN_AGE_FLEXIBLE_LABOUR_SUPPLY = 16; //Used when filtering people who can be "flexible in labour supply"
     public static final int MAX_AGE_FLEXIBLE_LABOUR_SUPPLY = 75;

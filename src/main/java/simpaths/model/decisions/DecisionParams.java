@@ -14,13 +14,15 @@ public class DecisionParams {
     // CONTROLS FOR USER OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
+    public static final boolean SAVE_INTERMEDIATE_GRID_SLICES = false;
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
+    public static final double GRID_DEFAULT_VALUE = 999.0;
     public static final int SOLVE_FROM_AGE = 100;                     // if SOLVE_FROM_INTERMEDIATE
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
     public static boolean flagRetirement;                             // model retirement state
-    public static boolean enableIntertemporalOptimisations = false;   // intertemporal optimisations initialised to false
+    public static boolean flagPrivatePension;
     public static int optionsEmployment1;                             // number of discrete employment alternatives to consider for principal earner
     public static int optionsEmployment2;                             // number of discrete employment alternatives to consider for secondary earner
     public static int startYear;                                      // first year considered for simulation
@@ -60,12 +62,9 @@ public class DecisionParams {
 
     // LIQUID WEALTH STATE
     //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH = 11;
-    public static final int AGE_DEBT_DRAWDOWN = 55;                   // max debt limit reduced to zero in linear progression to max_age_debt
-    public static final int MAX_AGE_DEBT = 65;                        // age at which all debt must be repaid
-    public static final double MIN_LIQUID_WEALTH = -25000.0;          // lower bound of state-space (set to omit +/- 0.5% of benefit units)
-    public static final double MAX_LIQUID_WEALTH = 4500000.0;         // upper bound of state-space
-    public static final double C_LIQUID_WEALTH = 30000.0;             // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
+    public static final int PTS_LIQUID_WEALTH_WKG = 11;
+    public static final int PTS_LIQUID_WEALTH_RTD = 11;
+    public static final double C_LIQUID_WEALTH = 50260;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
     public static double rDebtHi;                                     // interest charge on net debt
@@ -84,9 +83,9 @@ public class DecisionParams {
 
     // PRIVATE PENSION STATE
     //public static final int PTS_PENSION = 15;
-    public static final int PTS_PENSION = 5;
+    public static final int PTS_PENSION = 15;
     public static double maxPensionPYear;
-    public static final double C_PENSION = 50.0;                       // log scale adjustment (see liquid wealth above)
+    public static final double C_PENSION = 80705.6;                       // log scale adjustment (see liquid wealth above)
 
 
     // HEALTH STATE
@@ -139,10 +138,10 @@ public class DecisionParams {
      */
     public static void loadParameters(Integer employmentOptionsOfPrincipalWorker, Integer employmentOptionsOfSecondaryWorker,
                                       boolean respondToHealth, int minAgeForPoorHealth1, boolean respondToDisability,
-                                      boolean responsesToRegion, boolean responsesToEducation, boolean respondToRetirement,
-                                      String readGrid, String outputDir, Integer startYearInit, Integer endYear) {
+                                      boolean responsesToRegion, boolean responsesToEducation, boolean responsesToPension,
+                                      boolean respondToRetirement, String readGrid, String outputDir, Integer startYearInit,
+                                      Integer endYear) {
 
-        enableIntertemporalOptimisations = false;
         rSafeAssets = Parameters.getSampleAverageRate(TimeVaryingRate.SavingReturns);
         rDebtLow = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostLow);
         rDebtHi = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostHigh);
@@ -163,6 +162,10 @@ public class DecisionParams {
         }
         flagRegion = responsesToRegion;
         flagEducation = responsesToEducation;
+        if (responsesToPension || respondToRetirement)
+            flagPrivatePension = true;
+        else
+            flagPrivatePension = false;
         flagRetirement = respondToRetirement;
         minBirthYear = startYearInit - 80;
         ptsBirthYear = 1 + (int)((endYear - 20 - minBirthYear) / 20 + 0.5);
@@ -171,18 +174,68 @@ public class DecisionParams {
 
         maxAgeFlexibleLabourSupply = Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY;
         maxAge = Parameters.maxAge;
-        minAgeToRetire = Parameters.MIN_AGE_TO_RETIRE;
+        if (!flagRetirement && flagPrivatePension)
+            minAgeToRetire = Parameters.DEFAULT_AGE_TO_RETIRE;
+        else
+            minAgeToRetire = Parameters.MIN_AGE_TO_RETIRE;
         minAgeReceiveFormalCare = Parameters.MIN_AGE_FORMAL_SOCARE;
-        if (MIN_LIQUID_WEALTH+C_LIQUID_WEALTH < 0.0) {
-            throw new RuntimeException("minimum liquid wealth must be greater than -" + C_LIQUID_WEALTH);
-        }
 
         Parameters.annuityRates = new AnnuityRates();
-        maxPensionPYear = MAX_LIQUID_WEALTH * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
+        maxPensionPYear = getMaxWealthByAge(Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                 Parameters.annuityRates.getAnnuityRate(Occupancy.Couple, minBirthYear, 65);
     }
 
     static void setGridsInputDirectory(String simName) {
         gridsInputDirectory = Parameters.WORKING_DIRECTORY + File.separator + "output" + File.separator + simName + File.separator + "grids";
+    }
+
+    public static double getMinWealthByAge(int age) {
+
+        if (-50000 + C_LIQUID_WEALTH < 0.0)
+            throw new RuntimeException("minimum liquid wealth must be greater than -" + C_LIQUID_WEALTH);
+
+        int AGE1 = 35, AGE2 = 65, AGE3 = 70;
+        if (age <= AGE1) {
+            return -20000.0 - 30000.0 * (double)(age - Parameters.AGE_TO_BECOME_RESPONSIBLE) / (double)(AGE1 - Parameters.AGE_TO_BECOME_RESPONSIBLE);
+        } else if (age <= AGE2) {
+            return -50000.0;
+        } else if (age < AGE3) {
+            return -50000.0 * (double)(AGE3 - age) / (double)(AGE3 - AGE2);
+        } else {
+            return 0.0;
+        }
+    }
+
+    public static double getMaxWealthByAge(int age) {
+
+        int AGE1 = 35, AGE2 = 65, AGE3 = 80;
+        double value = 3000000.0;
+        if (false) {
+            // experimental code
+
+            if ( age > Parameters.AGE_TO_BECOME_RESPONSIBLE ) {
+
+                for (int aa=Parameters.AGE_TO_BECOME_RESPONSIBLE; aa<=age; aa++) {
+
+                    double income;
+                    if (age < AGE3) {
+
+                        income = (rSafeAssets * value + DecisionParams.MAX_WAGE_PHOUR * FULLTIME_HOURS_WEEKLY * Parameters.WEEKS_PER_YEAR) * 0.7;
+                        if (aa < AGE1) {
+                            income = income * 0.15;
+                        } else if (age <= AGE2) {
+                            income = income * 0.25;
+                        } else {
+                            income = income * 0.10;
+                        }
+                    } else {
+
+                        income = 0.0;
+                    }
+                    value = value + income;
+                }
+            }
+        }
+        return value;
     }
 }

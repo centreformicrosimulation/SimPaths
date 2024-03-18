@@ -1,8 +1,155 @@
 package simpaths.model.decisions;
 
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import simpaths.data.Parameters;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class DecisionTests {
+
+    public DecisionTests() {}
+
+    public static void apacheCsvWriteTest2() {
+
+        List<WriteBean> beans = new ArrayList<>();
+
+        WriteBean bean1 = new WriteBean();
+        bean1.setCohabitation(0);
+        bean1.setLiquidWealth(53572266.858582);
+        bean1.setValueFunction(1.357372715792E-9);
+        beans.add(bean1);
+
+        WriteBean bean2 = new WriteBean();
+        bean2.setCohabitation(1);
+        bean2.setLiquidWealth(-28386.3841173);
+        bean2.setValueFunction(2.343143434141E-12);
+        beans.add(bean2);
+
+        String NEW_LINE_SEPARATOR = "\n";
+
+        // write output to csv file
+        File dir = new File(DecisionParams.gridsOutputDirectory);
+        if (!dir.exists()) dir.mkdir();
+        String filePath = DecisionParams.gridsOutputDirectory + File.separator + "test.csv";
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader("cohabitation", "value_function", "liquid_wealth").build();
+            CSVPrinter printer = new CSVPrinter(writer, csvFormat);
+
+            for (WriteBean bean : beans) {
+                List<String> record = new ArrayList<>();
+                record.add(bean.getCohabitationString());
+                record.add(bean.getValueFunctionString());
+                record.add(bean.getLiquidWealthString());
+                printer.printRecord(record);
+            }
+
+            writer.flush();
+            writer.close();
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
+
+    public static void apacheCsvWriteTest1() {
+
+        Map<String, String> AUTHOR_BOOK_MAP = new HashMap<String, String>() {
+            {
+                put("Dan Simmons", "Hyperion");
+                put("Douglas Adams", "The Hitchhiker's Guide to the Galaxy");
+            }
+        };
+        String[] HEADERS = { "author", "title"};
+
+        File dir = new File(DecisionParams.gridsOutputDirectory);
+        if (!dir.exists()) dir.mkdir();
+        String filePath = DecisionParams.gridsOutputDirectory + File.separator + "test.csv";
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
+            try (final CSVPrinter printer = new CSVPrinter(writer, csvFormat)) {
+                AUTHOR_BOOK_MAP.forEach((author, title) -> {
+                    try {
+                        printer.printRecord(author, title);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                writer.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void openCsvWriteTest() {
+        // FAILS DUE TO OLD APACHE COMMONS BEAN UTILS DEPENDENCY IN JASMINE-GUI
+
+        List<WriteBean> beans = new ArrayList<>();
+
+        WriteBean bean1 = new WriteBean();
+        bean1.setCohabitation(0);
+        bean1.setBirthYear(1920);
+        bean1.setGender(0);
+        bean1.setEducation(0);
+        bean1.setHealth(0);
+        bean1.setLiquidWealth(5.0);
+        bean1.setWagePotentialperHour(5.0);
+        bean1.setPensionIncomePerYear(5.0);
+        bean1.setValueFunction(1.0E-9);
+        bean1.setConsumptionShare(0.1);
+        bean1.setEmployment1(0.0);
+        bean1.setEmployment2(0.0);
+        beans.add(bean1);
+
+        WriteBean bean2 = new WriteBean();
+        bean2.setCohabitation(0);
+        bean2.setBirthYear(1920);
+        bean2.setGender(0);
+        bean2.setEducation(0);
+        bean2.setHealth(0);
+        bean2.setLiquidWealth(5.0);
+        bean2.setWagePotentialperHour(5.0);
+        bean2.setPensionIncomePerYear(5.0);
+        bean2.setValueFunction(1.0E-9);
+        bean2.setConsumptionShare(0.1);
+        bean2.setEmployment1(0.0);
+        bean2.setEmployment2(0.0);
+        beans.add(bean2);
+
+        // write output to csv file
+        File dir = new File(DecisionParams.gridsOutputDirectory);
+        if (!dir.exists()) dir.mkdir();
+        String filePath = DecisionParams.gridsOutputDirectory + File.separator + "test.csv";
+        try {
+            Writer writer = new FileWriter(filePath);
+            StatefulBeanToCsv<WriteBean> beanToCsv = new StatefulBeanToCsvBuilder<WriteBean>(writer)
+                    .withQuotechar('\'').withSeparator(CSVWriter.DEFAULT_SEPARATOR).build();
+            beanToCsv.write(beans);
+            writer.close();
+        } catch (CsvDataTypeMismatchException e) {
+            throw new RuntimeException(e);
+        } catch (CsvRequiredFieldEmptyException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void compareGrids() {
 

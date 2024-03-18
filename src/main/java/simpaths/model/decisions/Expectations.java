@@ -136,12 +136,8 @@ public class Expectations {
 
         // prevailing characteristics - based on currentStates
         this.currentStates = currentStates;
-        fullTimeHourlyEarningsPotential = DecisionParams.MIN_WAGE_PHOUR;
-        if (ageYearsThisPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
-            int scaleIndex = scale.getIndex(Axis.WagePotential, ageYearsThisPeriod);
-            fullTimeHourlyEarningsPotential = (Math.exp(currentStates.states[scaleIndex]) - DecisionParams.C_WAGE_POTENTIAL);
-        }
-        liquidWealth = Math.exp(currentStates.states[0]) - DecisionParams.C_LIQUID_WEALTH;
+        fullTimeHourlyEarningsPotential = currentStates.getFullTimeHourlyEarningsPotential();
+        liquidWealth = currentStates.getLiquidWealth();
         if (ageYearsThisPeriod == DecisionParams.maxAge) {
             availableCredit = 0;
             mortalityProbability = 1;
@@ -294,10 +290,16 @@ public class Expectations {
         leisureTime = Math.max(1.0/DecisionParams.LIVING_HOURS_WEEKLY, leisureTime);
 
         // pension income
+        boolean retiring = false;
         double pensionIncome1Annual, pensionIncome2Annual;
-        if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
-            if (currentStates.getRetirement() == 0 && emp1Pr == 0 && pensionIncomePerYear == 0 && liquidWealth > 0) {
-                // allow for annuitisation at retirement
+        if (DecisionParams.flagPrivatePension && ageYearsThisPeriod>=DecisionParams.minAgeToRetire) {
+            // allow for pension take-up (take-up in previous year accounted for at instantiation)
+            if (!DecisionParams.flagRetirement && ageYearsThisPeriod == DecisionParams.minAgeToRetire) {
+                retiring = true;
+            } else if (DecisionParams.flagRetirement && currentStates.getRetirement()==0 && emp1Pr == 0 && liquidWealth > 0) {
+                retiring = true;
+            }
+            if (retiring) {
                 pensionIncomePerYear = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                         Parameters.annuityRates.getAnnuityRate(currentStates.getOccupancyCode(), currentStates.getBirthYear(), currentStates.getYear());
                 liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
@@ -401,8 +403,7 @@ public class Expectations {
             // retirement - not a state included in personProxyNextPeriod (don't track changes)
             if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire && ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
                 stateIndexNextPeriod = scale.getIndex(Axis.Retirement, ageYearsNextPeriod);
-                int currentRetirement = currentStates.getRetirement();
-                if (currentRetirement==0 && emp1Pr==0) {
+                if (retiring) {
                     // retire this period
                     for (int ii = 0; ii < numberExpected; ii++) {
                         anticipated[ii].states[stateIndexNextPeriod] = 1.0;
@@ -410,7 +411,7 @@ public class Expectations {
                 } else {
                     // no change to retirement state
                     for (int ii = 0; ii < numberExpected; ii++) {
-                        anticipated[ii].states[stateIndexNextPeriod] = currentRetirement;
+                        anticipated[ii].states[stateIndexNextPeriod] = currentStates.getRetirement();
                     }
                 }
                 throw new RuntimeException("Please validate code for retirement in expectations object");
@@ -580,7 +581,7 @@ public class Expectations {
             }
 
             // pension income
-            if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
+            if (DecisionParams.flagPrivatePension && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
                 stateIndexNextPeriod = scale.getIndex(Axis.PensionIncome, ageYearsNextPeriod);
                 int numberExpectedInitial = numberExpected;
                 double val;
@@ -595,7 +596,6 @@ public class Expectations {
                     val = Math.log(val + DecisionParams.C_PENSION);
                     anticipated[ii].states[stateIndexNextPeriod] = val;
                 }
-                throw new RuntimeException("Please validate code for pension income in expectations object");
             }
 
             // wage offer

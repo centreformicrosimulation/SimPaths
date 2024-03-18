@@ -3816,8 +3816,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				nonDiscretionaryConsumptionPerYear += getSocialCareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
 			}
 
-			double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.MIN_LIQUID_WEALTH) + getDisposableIncomeMonthly()*12.0 +
-					states.getAvailableCredit() - nonDiscretionaryConsumptionPerYear;
+			double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
+					+ getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - nonDiscretionaryConsumptionPerYear;
 			if (Double.isNaN(cashOnHand)) {
 				throw new RuntimeException("Problem identifying cash on hand");
 			}

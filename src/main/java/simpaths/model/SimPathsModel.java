@@ -256,6 +256,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "whether to include student and education status in state space for IO behavioural solutions")
 	private boolean responsesToEducation = true;
 
+	@GUIparameter(description = "whether to include private pensions in the state space for IO behavioural solutions")
+	private boolean responsesToPension = false;
+
 	@GUIparameter(description = "whether to include retirement (and private pensions) in the state space for IO behavioural solutions")
 	private boolean responsesToRetirement = false;
 
@@ -323,8 +326,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
-					responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
-			//DecisionTests.compareGrids();
+					responsesToPension, responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(),
+					startYear, endYear);
+			//DecisionTests.apacheCsvWriteTest2();
 		}
 
         log.debug("Parameters loaded");
@@ -3195,6 +3199,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	public boolean getResponsesToRetirement() { return responsesToRetirement;}
 	public void setResponsesToRetirement(boolean val) { responsesToRetirement = val;}
+	public boolean getResponsesToPension() { return responsesToPension;}
+	public void setResponsesToPension(boolean val) { responsesToPension = val;}
 
 	public Map<String, Double> getPolicyNameIncomeMedianMap() {
 		return policyNameIncomeMedianMap;

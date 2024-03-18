@@ -46,7 +46,7 @@ public class ManagerPopulateGrids {
 
         // save populated grids if necessary
         if (saveGrids || DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
-            ManagerFileGrids.write(grids);
+            ManagerFileGrids.unformattedWrite(grids);
 
         // reporting
         Instant afterTotal = Instant.now();

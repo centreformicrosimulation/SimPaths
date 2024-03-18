@@ -1,7 +1,6 @@
 package simpaths.model.decisions;
 
 import simpaths.data.Parameters;
-import simpaths.model.SimPathsModel;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -59,12 +58,12 @@ public class ManagerSolveGrids {
             // set age specific working variables
             int innerDimension = (int)grids.scale.gridDimensions[aa][0];
             int outerDimension = (int)grids.scale.gridDimensions[aa][1];
+            int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
 
             // loop over outer dimensions, for which expectations are independent of IO decisions (controls)
             for (int iiOuter=0; iiOuter<outerDimension; iiOuter++) {
 
                 // identify current state combination for outer states
-                int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
                 States outerStates = new States(grids.scale, ageYears);
                 outerStates.populateOuterGridStates(iiOuter);
                 boolean loopConsider = outerStates.checkOuterStateCombination();
@@ -97,13 +96,14 @@ public class ManagerSolveGrids {
                     }
                 }
             }
-            int ageHere = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
-            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageHere<80) && ((ageHere % 5)==0))
-                ManagerFileGrids.write(grids, true);
+            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageYears<80) && ((ageYears % 5)==0))
+                ManagerFileGrids.unformattedWrite(grids, true);
+            if (DecisionParams.SAVE_INTERMEDIATE_GRID_SLICES)
+                ManagerFileGrids.formattedWrite(grids, aa);
             Instant after = Instant.now();
             if (aa == 0) afterTotal = after;
             Duration duration = Duration.between(before, after);
-            System.out.println("Calculations for age " + ageHere + " completed in " + String.format("%.3f", (double)duration.toMillis()/1000.0) + " seconds");
+            System.out.println("Calculations for age " + ageYears + " completed in " + String.format("%.3f", (double)duration.toMillis()/1000.0) + " seconds");
         }
         if (beforeTotal != null && afterTotal != null) {
 
