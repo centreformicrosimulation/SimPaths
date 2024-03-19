@@ -385,7 +385,10 @@ public class Parameters {
     private static int mortalityProbabilityMaxYear;
     private static int mortalityProbabilityMinYear;
     private static int mortalityProbabilityMaxAge;
-    private static MultiKeyCoefficientMap fertilityProjectionsByYear; //NB: these currently only go up to 2043?
+    private static MultiKeyCoefficientMap fertilityProjectionsByYear; //NB: these currently only go up to 2043
+    public static int fertilityProjectionsMaxYear;
+    public static int fertilityProjectionsMinYear;
+
 
     //Number of employments on full and flexible furlough from HMRC statistics, used as regressors in the Covid-19 module
     private static MultiKeyCoefficientMap employmentsFurloughedFull;
@@ -815,39 +818,7 @@ public class Parameters {
 
         // alignment parameters
         populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 50);
-        boolean searchBack = true;
-        boolean searchForward = true;
-        boolean searchAge = true;
-        String rgn = countryString + "C";
-        int ii = 1;
-        while (searchBack || searchForward || searchAge) {
-
-            if (searchForward) {
-
-                Number val = (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR+ii);
-                if (val==null) {
-                    populationProjectionsMaxYear = MIN_START_YEAR + ii - 1;
-                    searchForward = false;
-                }
-            }
-            if (searchBack) {
-
-                Number val = (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR-ii);
-                if (val==null) {
-                    populationProjectionsMinYear = MIN_START_YEAR - ii + 1;
-                    searchBack = false;
-                }
-            }
-            if (searchAge) {
-
-                Number val = (Number) populationProjections.getValue("Female", rgn, 80+ii, MIN_START_YEAR);
-                if (val==null) {
-                    populationProjectionsMaxAge = 80 + ii - 1;
-                    searchAge = false;
-                }
-            }
-            ii++;
-        }
+        setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels
         projectionsHighEdu = ExcelAssistant.loadCoefficientMap("input/align_educLevel.xlsx", countryString + "_High", 1, 2);
@@ -864,41 +835,11 @@ public class Parameters {
 
         //Mortality rates
         mortalityProbabilityByGenderAgeYear = ExcelAssistant.loadCoefficientMap("input/projections_mortality.xlsx", countryString + "_MortalityByGenderAgeYear", 2, 120);
-        searchBack = true;
-        searchForward = true;
-        searchAge = true;
-        ii = 1;
-        while (searchBack || searchForward || searchAge) {
-
-            if (searchForward) {
-
-                Number val = (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR+ii);
-                if (val==null) {
-                    mortalityProbabilityMaxYear = MIN_START_YEAR + ii - 1;
-                    searchForward = false;
-                }
-            }
-            if (searchBack) {
-
-                Number val = (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR-ii);
-                if (val==null) {
-                    mortalityProbabilityMinYear = MIN_START_YEAR - ii + 1;
-                    searchBack = false;
-                }
-            }
-            if (searchAge) {
-
-                Number val = (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 80+ii, MIN_START_YEAR);
-                if (val==null) {
-                    mortalityProbabilityMaxAge = 80 + ii - 1;
-                    searchAge = false;
-                }
-            }
-            ii++;
-        }
+        setMapBounds(MapBounds.Mortality, countryString);
 
         //Fertility rates:
         fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap("input/projections_fertility.xlsx", countryString + "_FertilityByYear", 1, 71);
+        setMapBounds(MapBounds.Fertility, countryString);
 
         //RMSE
         coefficientMapRMSE = ExcelAssistant.loadCoefficientMap("input/reg_RMSE.xlsx", countryString, 1, 1);
@@ -2055,6 +1996,12 @@ public class Parameters {
         return fertilityRateByRegionYear;
     }
 
+    public static double getFertilityRateByRegionYear(Region region, int year) {
+        int yearHere = Math.max(fertilityProjectionsMinYear, Math.min(fertilityProjectionsMaxYear, year));
+        //We calculate the rate per woman, but the standard to report (and what is used in the estimates) is per 1000 hence multiplication
+        return 1000*((Number)fertilityRateByRegionYear.get(region, yearHere)).doubleValue();
+    }
+
     public static LinearRegression getRegWagesMales() {
         return regWagesMales;
     }
@@ -2211,6 +2158,10 @@ public class Parameters {
     public static int getPopulationProjectionsMaxYear() { return populationProjectionsMaxYear; }
 
     public static MultiKeyCoefficientMap getFertilityProjectionsByYear() { return fertilityProjectionsByYear; }
+    public static double getFertilityProjectionsByYear(int year) {
+        int yearHere = Math.min(fertilityProjectionsMaxYear, Math.max(fertilityProjectionsMinYear, year));
+        return ((Number) fertilityProjectionsByYear.getValue("Value", yearHere)).doubleValue();
+    }
 
     public static MultivariateNormalDistribution getWageAndAgeDifferentialMultivariateNormalDistribution() {
         return wageAndAgeDifferentialMultivariateNormalDistribution;
@@ -2838,5 +2789,70 @@ public class Parameters {
     }
     public static String getInputDirectoryInitialPopulations() {
         return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
+    }
+    private static void setMapBounds(MapBounds map, String countryString) {
+
+        String rgn = countryString + "C";
+        boolean searchBack = true;
+        boolean searchForward = true;
+        boolean searchAge;
+        searchAge = !map.equals(MapBounds.Fertility);
+        int ii = 1;
+        int maxYear=0, minYear=0, maxAge=0;
+        while (searchBack || searchForward || searchAge) {
+
+            if (searchForward) {
+
+                Number val = switch (map) {
+                    case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR + ii);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR + ii);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR + ii);
+                };
+                if (val==null) {
+                    maxYear = MIN_START_YEAR + ii - 1;
+                    searchForward = false;
+                }
+            }
+            if (searchBack) {
+
+                Number val = switch (map) {
+                    case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR - ii);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR - ii);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR - ii);
+                };
+                if (val==null) {
+                    minYear = MIN_START_YEAR - ii + 1;
+                    searchBack = false;
+                }
+            }
+            if (searchAge) {
+
+                Number val = switch (map) {
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 80+ii, MIN_START_YEAR);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 80+ii, MIN_START_YEAR);
+                };
+                if (val==null) {
+                    maxAge = 80 + ii - 1;
+                    searchAge = false;
+                }
+            }
+            ii++;
+        }
+        switch (map) {
+            case Fertility -> {
+                fertilityProjectionsMaxYear = maxYear;
+                fertilityProjectionsMinYear = minYear;
+            }
+            case Mortality -> {
+                mortalityProbabilityMaxYear = maxYear;
+                mortalityProbabilityMinYear = minYear;
+                mortalityProbabilityMaxAge = maxAge;
+            }
+            default -> {
+                populationProjectionsMaxYear = maxYear;
+                populationProjectionsMinYear = minYear;
+                populationProjectionsMaxAge = maxAge;
+            }
+        }
     }
 }

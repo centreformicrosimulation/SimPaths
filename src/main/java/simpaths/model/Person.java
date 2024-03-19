@@ -2667,13 +2667,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             else return 0.;
         case FertilityRate:
             if ( ioFlag ) {
-                if (getYear() < DecisionParams.FERTILITY_MAX_YEAR) {
-                    return ((Number) Parameters.getFertilityProjectionsByYear().getValue("Value", getYear())).doubleValue();
-                } else {
-                    return ((Number) Parameters.getFertilityProjectionsByYear().getValue("Value", DecisionParams.FERTILITY_MAX_YEAR)).doubleValue();
-                }
+                return Parameters.getFertilityProjectionsByYear(getYear());
             } else {
-                return 1000*((Number)Parameters.getFertilityRateByRegionYear().get(getRegion(), getYear())).doubleValue(); //We calculate the rate per woman, but the standard to report (and what is used in the estimates) is per 1000 hence multiplication
+                return Parameters.getFertilityRateByRegionYear(getRegion(), getYear());
             }
         case Female:
             return dgn.equals(Gender.Female)? 1. : 0.;

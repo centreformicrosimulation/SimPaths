@@ -79,7 +79,7 @@ public class CESUtility implements IEvaluation {
             dim = 0;
             // allow for liquid wealth
             numeraire = expectations.liquidWealth + expectations.disposableIncomeAnnual - consumptionAnnual;
-            gridValue = Math.log(numeraire + DecisionParams.C_LIQUID_WEALTH);
+            gridValue = Math.log( Math.max(1.0, numeraire + DecisionParams.C_LIQUID_WEALTH) );
             if (expectations.ageIndexNextPeriod < valueFunction.scale.axes.length) {
                 gridValue = Math.max(gridValue, valueFunction.scale.axes[expectations.ageIndexNextPeriod][0][1]);
                 gridValue = Math.min(gridValue, valueFunction.scale.axes[expectations.ageIndexNextPeriod][0][2]);
@@ -94,7 +94,7 @@ public class CESUtility implements IEvaluation {
             probThreshold = DecisionParams.MIN_FACTOR_PROBABILITY / (double) expectations.probability.length;
         else
             probThreshold = 1.0E-12;
-        double expectedUtility = 0.0;
+        Double expectedUtility = 0.0;
         double expectedV;
         double zeta0, zeta1;
         if (expectations.cohabitation) {
@@ -113,11 +113,15 @@ public class CESUtility implements IEvaluation {
                         expectedV = valueFunction.interpolateAll(expectations.anticipated[ii], true);
                         expectedUtility += expectations.probability[ii] *
                                 (1.0 - expectations.mortalityProbability) * Math.pow(expectedV, 1 - GAMMA);
+                        if (expectedUtility.isNaN())
+                            throw new RuntimeException("expected utility expected utility 1");
                     }
                     if (expectations.mortalityProbability > probThreshold && zeta1 > 0) {
                         bequest = Math.max(0, Math.exp(expectations.anticipated[ii].states[0])- DecisionParams.C_LIQUID_WEALTH);
                         expectedUtility += expectations.probability[ii] * expectations.mortalityProbability *
                                 zeta1 * Math.pow((zeta0 + bequest), 1 - GAMMA);
+                        if (expectedUtility.isNaN())
+                            throw new RuntimeException("expected utility expected utility 2");
                     }
                 }
             }
@@ -135,9 +139,12 @@ public class CESUtility implements IEvaluation {
         } else {
             discountFactor = DELTA_SINGLES;
         }
-        double totalUtility = Math.pow(periodUtility + discountFactor * expectedUtility, 1/(1- GAMMA));
+        Double totalUtility = Math.pow(periodUtility + discountFactor * expectedUtility, 1/(1- GAMMA));
+
+        if (totalUtility.isNaN())
+            throw new RuntimeException("failed to evaluate lifetime utility");
 
         // return
-        return - totalUtility;
+        return -totalUtility;
     }
 }

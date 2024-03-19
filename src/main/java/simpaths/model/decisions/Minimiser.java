@@ -19,6 +19,7 @@ public class Minimiser {
      * ATTRIBUTES
      */
     int nn;                             // number of arguments of function
+    int freeNn;                         // number of unconstrained arguments
     double[] lowerBounds;               // lower bounds of continuous control variables to optimise
     double[] upperBounds;               // upper bounds of continuous control variables to optimise
     double[] target;                    // starting co-ordinates at entry and co-ordinates of minimum at exit
@@ -40,6 +41,11 @@ public class Minimiser {
         this.target = target;
         this.function = function;
         nn = lowerBounds.length;
+        freeNn = 0;
+        for(int ii=0; ii<nn; ii++) {
+            if (upperBounds[ii] > lowerBounds[ii]+1.0E-10)
+                freeNn++;
+        }
     }
 
 
@@ -53,13 +59,26 @@ public class Minimiser {
      */
     public void minimise() {
         FunctionEvaluation result;
-        if (nn == 1) {
+        if (freeNn == 0) {
+            result = constrained(target);
+        } else if (nn == 1) {
             result = brent(lowerBounds, upperBounds, target);
         } else {
             result = powell();
         }
         minimisedValue = result.value;
         target = Arrays.copyOf(result.ordinates, nn);
+    }
+
+    private FunctionEvaluation constrained(double[] bx) {
+
+        // initialise return object
+        FunctionEvaluation result = new FunctionEvaluation(nn);
+
+        result.ordinates = Arrays.copyOf(bx,nn);
+        result.value = function.evaluate(bx);
+
+        return result;
     }
 
 

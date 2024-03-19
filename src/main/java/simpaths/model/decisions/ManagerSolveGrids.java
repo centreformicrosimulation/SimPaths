@@ -98,7 +98,7 @@ public class ManagerSolveGrids {
             }
             if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageYears<80) && ((ageYears % 5)==0))
                 ManagerFileGrids.unformattedWrite(grids, true);
-            if (DecisionParams.SAVE_INTERMEDIATE_GRID_SLICES)
+            if (DecisionParams.SAVE_GRID_SLICES_TO_CSV)
                 ManagerFileGrids.formattedWrite(grids, aa);
             Instant after = Instant.now();
             if (aa == 0) afterTotal = after;

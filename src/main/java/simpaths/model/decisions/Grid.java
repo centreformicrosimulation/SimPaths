@@ -93,8 +93,15 @@ public class Grid {
             int ii = (int)(index%MAX_LEN);
             value = gridLong[slice][ii];
         }
-        if (Math.abs(value-DecisionParams.GRID_DEFAULT_VALUE) < 1.0E-10)
+        return value;
+    }
+    public double getChecked(States supplied, long index) {
+
+        double value = get(index);
+        if (Math.abs(value-DecisionParams.GRID_DEFAULT_VALUE) < 1.0E-10) {
+            supplied.systemReportError(index);
             throw new InvalidParameterException("attempt to retrieve uninitialised grid value");
+        }
         return value;
     }
 
@@ -230,7 +237,7 @@ public class Grid {
                     indexHere += (long)nn[jj] * offset[jj];
                 }
                 indexHere += startingIndex;
-                valueHere = get(indexHere);
+                valueHere = getChecked(supplied, indexHere);
                 result += valueHere * weight[ii];
                 weightTotal += weight[ii];
             }

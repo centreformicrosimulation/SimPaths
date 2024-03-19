@@ -2169,7 +2169,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//With new fertility alignment for the target number instead of fertility rate
 
 		for (Region region: Parameters.getCountryRegions()) {
-			double fertilityRate = ((Number)Parameters.getFertilityRateByRegionYear().get(region, year)).doubleValue();
+			double fertilityRate = Parameters.getFertilityRateByRegionYear(region, year) / 1000.0;
 
 			int numberNewbornsProjected = 0;
 			for (Gender gender : Gender.values()) {

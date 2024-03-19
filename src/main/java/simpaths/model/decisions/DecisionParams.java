@@ -13,11 +13,11 @@ public class DecisionParams {
 
     // CONTROLS FOR USER OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
+    public static final boolean SAVE_GRID_SLICES_TO_CSV = false;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
-    public static final boolean SAVE_INTERMEDIATE_GRID_SLICES = false;
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
+    public static final int SOLVE_FROM_AGE = 31;                     // if SOLVE_FROM_INTERMEDIATE
     public static final double GRID_DEFAULT_VALUE = 999.0;
-    public static final int SOLVE_FROM_AGE = 100;                     // if SOLVE_FROM_INTERMEDIATE
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
@@ -62,9 +62,9 @@ public class DecisionParams {
 
     // LIQUID WEALTH STATE
     //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH_WKG = 11;
-    public static final int PTS_LIQUID_WEALTH_RTD = 11;
-    public static final double C_LIQUID_WEALTH = 50260;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
+    public static final int PTS_LIQUID_WEALTH_WKG = 26;
+    public static final int PTS_LIQUID_WEALTH_RTD = 26;
+    public static final double C_LIQUID_WEALTH = 50260.0;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
     public static double rDebtHi;                                     // interest charge on net debt
@@ -72,7 +72,7 @@ public class DecisionParams {
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
     //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
-    public static final int PTS_WAGE_POTENTIAL = 11;
+    public static final int PTS_WAGE_POTENTIAL = 26;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour
     public static final double C_WAGE_POTENTIAL = 1.0;                // log scale adjustment (see liquid wealth above)
@@ -128,7 +128,6 @@ public class DecisionParams {
     public static final int NUMBER_BIRTH_AGES = 3;                    // number of discrete ages at which a woman is assumed to be able to give
     public static final int[] BIRTH_AGE = new int[]{20, 29, 37};      // array listing discrete birth ages
     public static final int[] MAX_BIRTHS = new int[]{2, 2, 2};        // array listing the maximum number of births possible at each birth age
-    public static final int FERTILITY_MAX_YEAR = 2043;                // maximum year supplied for fertility rates in "projections_fertility.xls"
 
 
     /**
@@ -191,16 +190,16 @@ public class DecisionParams {
 
     public static double getMinWealthByAge(int age) {
 
-        if (-50000 + C_LIQUID_WEALTH < 0.0)
+        int AGE1 = 35, AGE2 = 55, AGE3 = 70;
+        double peakDebt = 35000.00, startDebt = 20000.00;
+        if (-peakDebt + C_LIQUID_WEALTH < 0.0)
             throw new RuntimeException("minimum liquid wealth must be greater than -" + C_LIQUID_WEALTH);
-
-        int AGE1 = 35, AGE2 = 65, AGE3 = 70;
         if (age <= AGE1) {
-            return -20000.0 - 30000.0 * (double)(age - Parameters.AGE_TO_BECOME_RESPONSIBLE) / (double)(AGE1 - Parameters.AGE_TO_BECOME_RESPONSIBLE);
+            return -startDebt - (peakDebt - startDebt) * (double)(age - Parameters.AGE_TO_BECOME_RESPONSIBLE) / (double)(AGE1 - Parameters.AGE_TO_BECOME_RESPONSIBLE);
         } else if (age <= AGE2) {
-            return -50000.0;
+            return -peakDebt;
         } else if (age < AGE3) {
-            return -50000.0 * (double)(AGE3 - age) / (double)(AGE3 - AGE2);
+            return -peakDebt * (double)(AGE3 - age) / (double)(AGE3 - AGE2);
         } else {
             return 0.0;
         }

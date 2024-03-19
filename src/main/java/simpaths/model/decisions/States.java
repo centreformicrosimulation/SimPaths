@@ -310,11 +310,6 @@ public class States {
         // initialise return
         boolean loopConsider = true;
 
-        // check if prior to simulated period
-        int year = getYear();
-        if (year < DecisionParams.startYear)
-            loopConsider = false;
-
         // check wage offer
         int wageOffer = getWageOffer();
         if (wageOffer == 0) {
@@ -661,7 +656,7 @@ public class States {
     }
 
     int getHealthVal() {
-        if (DecisionParams.flagHealth) {
+        if (DecisionParams.flagHealth && ageYears >= DecisionParams.minAgeForPoorHealth) {
             return (int)states[scale.getIndex(Axis.Health, ageYears)];
         } else {
             return 0;
@@ -907,15 +902,25 @@ public class States {
     }
 
     public void systemReportError() {
+        systemReportError(-1);
+    }
+    public void systemReportError(long errorIndex) {
 
         String fmtFinancial = "%.2f";
         String fmtInteger = "%.1f";
         String fmtIndicator = "%.1f";
         String fmtProportion = "%.3f";
 
-        System.out.println("--------------------------------------");
-        System.out.println("CALL TO INTERPOLATE OUTSIDE OF GRID");
-        System.out.println("--------------------------------------");
+        if (errorIndex == -1) {
+            System.out.println("--------------------------------------");
+            System.out.println("CALL TO INTERPOLATE OUTSIDE OF GRID");
+            System.out.println("--------------------------------------");
+        } else {
+            System.out.println("--------------------------------------");
+            System.out.println("REFERENCE TO UNINITIALISED POINT OF GRID");
+            System.out.println("--------------------------------------");
+            System.out.println("Referenced index: " + Long.toString(errorIndex));
+        }
         Integer vali = ageYears;
         String msg = "Current age: " + vali.toString();
         System.out.println(msg);
