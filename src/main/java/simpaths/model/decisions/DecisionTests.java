@@ -150,20 +150,24 @@ public class DecisionTests {
         }
     }
 
-
     public static void compareGrids() {
 
+        double TOL = Math.ulp(1.0) * 2.0;
+
         // load in grids for comparison
-        String name1 = "serial";
+        String name1 = "test";
         DecisionParams.setGridsInputDirectory(name1);
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
 
-        String name2 = "parallel";
+        String name2 = "no care filter 11x11";
         DecisionParams.setGridsInputDirectory(name2);
         Grids grids2 = new Grids();
         ManagerFileGrids.read(grids2);
+
+        System.out.println("Testing grid solution from run " + name1 + " against solution from run " + name2);
         double maxDiff = -9.0;
+        long counter1=0, counter2=0, counter3=0;
 
         // loop through grids to find differences
         for (int aa=grids1.scale.simLifeSpan - 1; aa>=0; aa--) {
@@ -199,9 +203,13 @@ public class DecisionTests {
                             if (diff > maxDiff)
                                 maxDiff = diff;
                             if (diff > 0.0) {
-                                int iii = 1;
-                            } else if (diff > 1.0E-7 * Math.abs(val1) ) {
-                                int iii = 1;
+                                counter1++;
+                            }
+                            if (diff > TOL) {
+                                counter2++;
+                            }
+                            if (diff > 1.0E-7 * Math.abs(val1) ) {
+                                counter3++;
                             }
                             ii0 = indexHere;
                         } else {
@@ -213,5 +221,8 @@ public class DecisionTests {
                 }
             }
         }
+        System.out.println("Number of grid points with different value function estimates: " + counter1);
+        System.out.println("Number of grid points with significantly different value function estimates: " + counter2);
+        System.out.println("Number of grid points with substantially different value function estimates: " + counter3);
     }
 }

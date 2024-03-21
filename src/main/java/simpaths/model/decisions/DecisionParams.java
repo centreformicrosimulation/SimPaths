@@ -11,16 +11,20 @@ import java.io.File;
  */
 public class DecisionParams {
 
-    // CONTROLS FOR USER OPTIONS
+    // RUNNING OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static final boolean SAVE_GRID_SLICES_TO_CSV = false;
+    public static final boolean SAVE_GRID_SLICES_TO_CSV = true;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
-    public static final boolean SOLVE_FROM_INTERMEDIATE = false;
-    public static final int SOLVE_FROM_AGE = 31;                     // if SOLVE_FROM_INTERMEDIATE
-    public static final double GRID_DEFAULT_VALUE = 999.0;
+
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
+
+    public static final boolean SOLVE_FROM_INTERMEDIATE = false;
+    public static final int SOLVE_FROM_AGE = 31;                     // if SOLVE_FROM_INTERMEDIATE
+
+    // MODEL SETTINGS
+    public static final double GRID_DEFAULT_VALUE = 999.0;
     public static boolean flagRetirement;                             // model retirement state
     public static boolean flagPrivatePension;
     public static int optionsEmployment1;                             // number of discrete employment alternatives to consider for principal earner
@@ -62,8 +66,8 @@ public class DecisionParams {
 
     // LIQUID WEALTH STATE
     //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH_WKG = 26;
-    public static final int PTS_LIQUID_WEALTH_RTD = 26;
+    public static final int PTS_LIQUID_WEALTH_WKG = 91;
+    public static final int PTS_LIQUID_WEALTH_RTD = 91;
     public static final double C_LIQUID_WEALTH = 50260.0;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
@@ -72,7 +76,7 @@ public class DecisionParams {
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
     //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
-    public static final int PTS_WAGE_POTENTIAL = 26;
+    public static final int PTS_WAGE_POTENTIAL = 91;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour
     public static final double C_WAGE_POTENTIAL = 1.0;                // log scale adjustment (see liquid wealth above)

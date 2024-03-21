@@ -328,7 +328,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
 					responsesToPension, responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(),
 					startYear, endYear);
-			//DecisionTests.apacheCsvWriteTest2();
+			//DecisionTests.compareGrids();
 		}
 
         log.debug("Parameters loaded");
