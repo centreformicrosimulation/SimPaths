@@ -292,7 +292,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		super();
 		this.country = country;
 		this.startYear = startYear;
-		this.startYear = 2016;
 	}
 
 	public SimPathsModel(Country country) {
