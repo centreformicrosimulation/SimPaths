@@ -15,27 +15,20 @@ public class WriteBean {
      */
     //@CsvBindByName(column = "birthyear")
     private int birthYear;
-    //@CsvBindByName(column = "gender")
     private int gender;
-    //@CsvBindByName(column = "education")
+    private int student;
     private int education;
-    //@CsvBindByName(column = "health")
     private int health;
-    //@CsvBindByName(column = "cohabitation")
     private int cohabitation;
-    //@CsvBindByName(column = "liquidwealth")
+    private int nk0;
+    private int nk1;
+    private int nk2;
     private double liquidWealth;
-    //@CsvBindByName(column = "wagepotential")
     private double wagePotentialperHour;
-    //@CsvBindByName(column = "pension")
     private double pensionIncomePerYear;
-    //@CsvBindByName(column = "consumption")
     private double consumptionShare;
-    //@CsvBindByName(column = "employment1")
     private double employment1;
-    //@CsvBindByName(column = "employment2")
     private double employment2;
-    //@CsvBindByName(column = "valuefunction")
     private double valueFunction;
 
     /**
@@ -43,138 +36,192 @@ public class WriteBean {
      */
     public WriteBean(){}
 
+
     /**
-     * GETTERS AND SETTERS
+     * SETTERS
      */
-
-    public double getEmployment1() {
-        return employment1;
-    }
-    public String getEmployment1String() {
-        return Double.toString(employment1);
-    }
-
-    public void setEmployment1(double employment1) {
-        this.employment1 = employment1;
-    }
-
-    public double getEmployment2() {
-        return employment2;
-    }
-    public String getEmployment2String() {
-        return Double.toString(employment2);
-    }
-
-    public void setEmployment2(double employment2) {
-        this.employment2 = employment2;
-    }
-
-    public double getWagePotentialperHour() {
-        return wagePotentialperHour;
-    }
-    public String getWagePotentialperHourString() {
-        return Double.toString(wagePotentialperHour);
-    }
-
-    public void setWagePotentialperHour(double wagePotentialperHour) {
-        this.wagePotentialperHour = wagePotentialperHour;
-    }
-
-    public double getPensionIncomePerYear() {
-        return pensionIncomePerYear;
-    }
-    public String getPensionIncomePerYearString() {
-        return Double.toString(pensionIncomePerYear);
-    }
-
-    public void setPensionIncomePerYear(double pensionIncomePerYear) {
-        this.pensionIncomePerYear = pensionIncomePerYear;
-    }
-
-    public int getEducation() {
-        return education;
-    }
-    public String getEducationString() {
-        return String.valueOf(education);
-    }
-
-    public void setEducation(int education) {
-        this.education = education;
-    }
-
-    public int getHealth() {
-        return health;
-    }
-    public String getHealthString() {
-        return String.valueOf(health);
-    }
-
-    public void setHealth(int health) {
-        this.health = health;
-    }
-    public double getValueFunction() {
-        return valueFunction;
-    }
-    public String getValueFunctionString() {
-        return Double.toString(valueFunction);
-    }
-
-    public void setValueFunction(double valueFunction) {
-        this.valueFunction = valueFunction;
-    }
-
-    public double getConsumptionShare() {
-        return consumptionShare;
-    }
-    public String getConsumptionShareString() {
-        return Double.toString(consumptionShare);
-    }
-
-    public void setConsumptionShare(double consumptionShare) {
-        this.consumptionShare = consumptionShare;
-    }
-
-    public double getLiquidWealth() {
-        return liquidWealth;
-    }
-    public String getLiquidWealthString() {
-        return Double.toString(liquidWealth);
-    }
-
-    public void setLiquidWealth(double liquidWealth) {
-        this.liquidWealth = liquidWealth;
-    }
-
-    public int getCohabitation() {
-        return cohabitation;
-    }
-    public String getCohabitationString() {
-        return String.valueOf(cohabitation);
-    }
-
-    public void setCohabitation(int cohabitation) {
-        this.cohabitation = cohabitation;
-    }
-
-    public int getGender() {
-        return gender;
-    }
-    public String getGenderString() {
-        return String.valueOf(gender);
+    public void setBirthYear(int birthYear) {
+        this.birthYear = birthYear;
     }
 
     public void setGender(int gender) {
         this.gender = gender;
     }
 
+    public void setStudent(int student) {
+        this.student = student;
+    }
+
+    public void setEducation(int education) {
+        this.education = education;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public void setCohabitation(int cohabitation) {
+        this.cohabitation = cohabitation;
+    }
+
+    public void setNk0(int nk0) {
+        this.nk0 = nk0;
+    }
+
+    public void setNk1(int nk1) {
+        this.nk1 = nk1;
+    }
+
+    public void setNk2(int nk2) {
+        this.nk2 = nk2;
+    }
+
+    public void setLiquidWealth(double liquidWealth) {
+        this.liquidWealth = liquidWealth;
+    }
+
+    public void setWagePotentialperHour(double wagePotentialperHour) {
+        this.wagePotentialperHour = wagePotentialperHour;
+    }
+
+    public void setPensionIncomePerYear(double pensionIncomePerYear) {
+        this.pensionIncomePerYear = pensionIncomePerYear;
+    }
+
+    public void setConsumptionShare(double consumptionShare) {
+        this.consumptionShare = consumptionShare;
+    }
+
+    public void setEmployment1(double employment1) {
+        this.employment1 = employment1;
+    }
+
+    public void setEmployment2(double employment2) {
+        this.employment2 = employment2;
+    }
+
+    public void setValueFunction(double valueFunction) {
+        this.valueFunction = valueFunction;
+    }
+
+    /**
+     * GETTERS
+     */
     public int getBirthYear() {
         return birthYear;
     }
-    public String getBirthYearString() {
-        return String.valueOf(birthYear);
+
+    public int getGender() {
+        return gender;
     }
 
-    public void setBirthYear(int birthYear) {
-        this.birthYear = birthYear;
+    public int getStudent() {
+        return student;
+    }
+
+    public int getEducation() {
+        return education;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getCohabitation() {
+        return cohabitation;
+    }
+
+    public int getNk0() {
+        return nk0;
+    }
+
+    public int getNk1() {
+        return nk1;
+    }
+
+    public int getNk2() {
+        return nk2;
+    }
+
+    public double getLiquidWealth() {
+        return liquidWealth;
+    }
+
+    public double getWagePotentialperHour() {
+        return wagePotentialperHour;
+    }
+
+    public double getPensionIncomePerYear() {
+        return pensionIncomePerYear;
+    }
+
+    public double getConsumptionShare() {
+        return consumptionShare;
+    }
+
+    public double getEmployment1() {
+        return employment1;
+    }
+
+    public double getEmployment2() {
+        return employment2;
+    }
+
+    public double getValueFunction() {
+        return valueFunction;
+    }
+
+
+    /**
+     * STRING GETTERS
+     */
+
+    public String getEmployment1String() {
+        return Double.toString(employment1);
+    }
+    public String getEmployment2String() {
+        return Double.toString(employment2);
+    }
+    public String getWagePotentialperHourString() {
+        return Double.toString(wagePotentialperHour);
+    }
+    public String getPensionIncomePerYearString() {
+        return Double.toString(pensionIncomePerYear);
+    }
+    public String getEducationString() {
+        return String.valueOf(education);
+    }
+    public String getStudentString() {
+        return String.valueOf(student);
+    }
+    public String getHealthString() {
+        return String.valueOf(health);
+    }
+    public String getValueFunctionString() {
+        return Double.toString(valueFunction);
+    }
+    public String getConsumptionShareString() {
+        return Double.toString(consumptionShare);
+    }
+    public String getLiquidWealthString() {
+        return Double.toString(liquidWealth);
+    }
+    public String getCohabitationString() {
+        return String.valueOf(cohabitation);
+    }
+    public String getNk0String() {
+        return String.valueOf(nk0);
+    }
+    public String getNk1String() {
+        return String.valueOf(nk1);
+    }
+    public String getNk2String() {
+        return String.valueOf(nk2);
+    }
+    public String getGenderString() {
+        return String.valueOf(gender);
+    }
+    public String getBirthYearString() {
+        return String.valueOf(birthYear);
     }
 }

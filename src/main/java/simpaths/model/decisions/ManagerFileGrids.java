@@ -1,11 +1,5 @@
 package simpaths.model.decisions;
 
-import com.opencsv.bean.HeaderColumnNameMappingStrategy;
-import com.opencsv.bean.HeaderColumnNameMappingStrategyBuilder;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import simpaths.data.Parameters;
@@ -176,9 +170,13 @@ public class ManagerFileGrids {
 
                 // populate with state combination
                 bean.setCohabitation(currentStates.getCohabitationIndex());
+                bean.setNk0(currentStates.getChildrenByBirthIndex(0));
+                bean.setNk1(currentStates.getChildrenByBirthIndex(1));
+                bean.setNk2(currentStates.getChildrenByBirthIndex(2));
                 bean.setBirthYear(currentStates.getBirthYear());
                 bean.setGender(currentStates.getGender());
                 bean.setEducation(currentStates.getEducation());
+                bean.setStudent(currentStates.getStudent());
                 bean.setHealth(currentStates.getHealthVal());
                 bean.setLiquidWealth(currentStates.getLiquidWealth());
                 bean.setWagePotentialperHour(currentStates.getFullTimeHourlyEarningsPotential());
@@ -199,7 +197,7 @@ public class ManagerFileGrids {
         File dir = new File(DecisionParams.gridsOutputDirectory);
         if (!dir.exists()) dir.mkdir();
         String filePath = DecisionParams.gridsOutputDirectory + File.separator + "grid_age_" + ageYears + ".csv";
-        String[] HEADERS = {"gender", "birthyear", "education", "married", "wealth", "wageperhour", "pensionperyear",
+        String[] HEADERS = {"gender", "birthyear", "education", "student", "married", "children0", "children1", "children2", "health", "wealth", "wageperhour", "pensionperyear",
                 "valuefunction", "consumptionshare", "employment1", "employment2"};
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
@@ -211,7 +209,12 @@ public class ManagerFileGrids {
                 record.add(bean.getGenderString());
                 record.add(bean.getBirthYearString());
                 record.add(bean.getEducationString());
+                record.add(bean.getStudentString());
                 record.add(bean.getCohabitationString());
+                record.add(bean.getNk0String());
+                record.add(bean.getNk1String());
+                record.add(bean.getNk2String());
+                record.add(bean.getHealthString());
                 record.add(bean.getLiquidWealthString());
                 record.add(bean.getWagePotentialperHourString());
                 record.add(bean.getPensionIncomePerYearString());

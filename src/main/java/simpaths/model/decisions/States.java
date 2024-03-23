@@ -411,6 +411,14 @@ public class States {
      * first column reports (notional) age of children from respective birth age
      * second column reports number of dependent children in benefitUnit from respective birth age
      */
+    int getChildrenByBirthIndex(int ii) {
+        int index = scale.getIndex(Axis.Child,ageYears,ii);
+        if (index>=0) {
+            return (int)Math.round(states[index]);
+        } else {
+            return 0;
+        }
+    }
     int[][] getChildrenByAge() {
 
         // initialise return
