@@ -1,8 +1,6 @@
 package simpaths.model.decisions;
 
 
-import simpaths.model.SimPathsModel;
-
 /**
  * CLASS TO MANAGE EVALUATION OF NUMERICAL SOLUTIONS FOR SPECIFIC STATE COMBINATION
  *
@@ -74,6 +72,11 @@ public class ManagerSolveState {
 
                 // evaluate solution for current control combination
                 UtilityMaximisation solutionHere = new UtilityMaximisation(grids.valueFunction, states, expectations, emp1Pr, emp2Pr);
+
+                // check for imperfect matches
+                if (!expectations.imperfectMatches.isEmpty()) {
+                    outerExpectations.imperfectMatches.addSet(expectations.imperfectMatches.getSet());
+                }
 
                 // check for wage offer solutions for both principal and secondary earner
                 if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1 &&

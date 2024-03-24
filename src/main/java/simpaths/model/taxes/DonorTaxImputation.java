@@ -3,7 +3,6 @@ package simpaths.model.taxes;
 
 import org.apache.commons.lang3.tuple.Triple;
 import simpaths.model.enums.UpratingCase;
-import org.apache.commons.math3.util.Pair;
 
 import java.util.*;
 
@@ -28,15 +27,20 @@ public class DonorTaxImputation {
      */
     private DonorKeys keys;                // keys for donor matching
 
-    // the match criterion is a 3-digit indicator of the type of match obtained
-    // first digit indicates the level of coarse-exact match obtained (1 to 3, from most fine-grained)
-    // second digit indicates the size of the candidate pool considered for imputation (max 9)
-    // third digit indicates the number of "accepted" candidates used to evaluate taxes and benefits (max 9)
+    // the match criterion is a 4-digit indicator of the type of match obtained
+    // matchCriterion = RppNNn;
+    //  R  = level of coarse-exact match obtained (0 to 2, from most fine-grained)
+    //  pp = percentage point (absolute) difference of target with (normalised) income of nearest neighbour (max 99)
+    //       if low income, then values is absolute difference in weekly income (not %)
+    //       normalised income is monthly in current year prices
+    //  NN = size of the candidate pool considered for imputation (max 99)
+    //  n  = number of "accepted" candidates used to evaluate taxes and benefits (max 9)
     private int matchCriterion = 0;
     private long donorID = 0;
     private double disposableIncomePerWeek;
     private double benefitsReceivedPerWeek; // Sum of monetary and non-monetary benefits
     private double grossIncomePerWeek;
+    private double targetNormalisedOriginalIncome;
 
     /**
      * CONSTRUCTORS
@@ -71,6 +75,7 @@ public class DonorTaxImputation {
         return grossIncomePerWeek * Parameters.WEEKS_PER_MONTH;
     }
     public long getDonorID() { return donorID; }
+    public double getTargetNormalisedOriginalIncome() { return targetNormalisedOriginalIncome; }
 
 
     /**
@@ -105,7 +110,7 @@ public class DonorTaxImputation {
                     minCandidatePool = 10;
                 }
                 if (getPoolSize(candidatePool)>=minCandidatePool) {
-                    matchCriterion = ii * 1000;
+                    matchCriterion = ii * 100000;
                     if (jj==0 && getCounterVal(MatchFeature.DualIncome, ii, keys.getKey(ii))==1)
                         flagSecondIncome = true;
                     if (jj==0 && getCounterVal(MatchFeature.Childcare, ii, keys.getKey(ii))==1)
@@ -128,34 +133,35 @@ public class DonorTaxImputation {
         //------------------------------------------------------------
         // The candidate pool is organised in increasing order of original income
         // ordering is controlled by database query in SimPathsModel.populateTaxdbReferences
-        double targetOrigInc = Parameters.normaliseWeeklyIncome(keys.getPriceYear(), keys.getOriginalIncomePerWeek());
+        // normalised income is monthly in BASE_PRICE_YEAR prices (same as EUROMOD)
+        targetNormalisedOriginalIncome = Parameters.normaliseWeeklyIncome(keys.getPriceYear(), keys.getOriginalIncomePerWeek());
         int lowerInd, upperInd, testInd;
         double lowerOrigInc, upperOrigInc, testOrigInc;
         final double MEAN_BIAS = 0.5;
 
         lowerInd = 0;
-        lowerOrigInc = Parameters.getDonorPool().get(candidatePool.get(lowerInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncome();
+        lowerOrigInc = Parameters.getDonorPool().get(candidatePool.get(lowerInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth();
         upperInd = candidatePool.size()-1;
-        upperOrigInc = Parameters.getDonorPool().get(candidatePool.get(upperInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncome();
+        upperOrigInc = Parameters.getDonorPool().get(candidatePool.get(upperInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth();
 
         int iiTarget;
-        if (targetOrigInc<lowerOrigInc) {
+        if (targetNormalisedOriginalIncome<lowerOrigInc) {
             iiTarget = lowerInd;
-        } else if (targetOrigInc>upperOrigInc) {
+        } else if (targetNormalisedOriginalIncome>upperOrigInc) {
             iiTarget = upperInd;
         } else {
 
             while (upperInd > lowerInd+1) {
 
-                double adjFactor = 0.5 * MEAN_BIAS + (targetOrigInc-lowerOrigInc) / (upperOrigInc - lowerOrigInc) * (1-MEAN_BIAS);
+                double adjFactor = 0.5 * MEAN_BIAS + (targetNormalisedOriginalIncome-lowerOrigInc) / (upperOrigInc - lowerOrigInc) * (1-MEAN_BIAS);
                 int adjInd = (int) ((upperInd - lowerInd) * adjFactor);
                 testInd = lowerInd + Math.max(1, adjInd);
-                testOrigInc = Parameters.getDonorPool().get(candidatePool.get(testInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncome();
+                testOrigInc = Parameters.getDonorPool().get(candidatePool.get(testInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth();
 
-                if (testOrigInc > targetOrigInc) {
+                if (testOrigInc > targetNormalisedOriginalIncome) {
                     upperInd = testInd;
                     upperOrigInc = testOrigInc;
-                } else if (testOrigInc < targetOrigInc) {
+                } else if (testOrigInc < targetNormalisedOriginalIncome) {
                     lowerInd = testInd;
                     lowerOrigInc = testOrigInc;
                 } else {
@@ -166,6 +172,13 @@ public class DonorTaxImputation {
             }
             iiTarget = upperInd;
         }
+        double targetIncomeDifference = Math.abs(targetNormalisedOriginalIncome -
+                Parameters.getDonorPool().get(candidatePool.get(iiTarget)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth());
+        if (!keys.isLowIncome()) {
+            targetIncomeDifference /= Math.abs(targetNormalisedOriginalIncome);
+            targetIncomeDifference *= 100;
+        }
+        matchCriterion += Math.max(0, Math.min(99, (int)targetIncomeDifference)) * 1000;
 
 
         //------------------------------------------------------------
@@ -195,6 +208,10 @@ public class DonorTaxImputation {
                 DonorTaxUnit candidate = Parameters.getDonorPool().get(candidatePool.get(ii));
                 double[] candidateVector = getCandidateMeasVector(candidate, flagSecondIncome, flagChildcareCost);
                 double distance = evaluateDistance(targetVector, candidateVector, flagSecondIncome, flagChildcareCost);
+                if (ii==iiTarget) {
+                    // initialise donorID to target
+                    donorID = candidate.getId();
+                }
                 if (Math.abs(distance - bracketDist) > 1.0E-4) {
                     bracketDist = distance;
                     bracketInd++;

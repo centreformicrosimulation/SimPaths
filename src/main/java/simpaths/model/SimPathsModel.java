@@ -49,7 +49,6 @@ import microsim.matching.MatchingScoreClosure;
 
 // import LABOURsim packages
 import simpaths.data.Parameters;
-import simpaths.model.decisions.DecisionTests;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
@@ -3326,9 +3325,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 
 					// collect data for populating MahalanobisDistance objects
-					double originalIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedOriginalIncome();
-					double secondIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedSecondIncome();
-					double childcareCost = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedChildcareCost();;
+					double originalIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedOriginalIncomePerMonth();
+					double secondIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedSecondIncomePerMonth();
+					double childcareCost = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedChildcareCostPerMonth();;
 					if (secondIncome > 0.01 && childcareCost < 0.01) {
 						double[] datum = {originalIncome, secondIncome};
 						dataDualIncome = ArrayUtils.add(dataDualIncome, datum);

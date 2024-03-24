@@ -1,10 +1,7 @@
 package simpaths.model;
 
 import simpaths.data.Parameters;
-import simpaths.model.taxes.DonorKeys;
-import simpaths.model.taxes.DonorTaxImputation;
-import simpaths.model.taxes.KeyFunction;
-import simpaths.model.taxes.SocialCareExpenditureSupport;
+import simpaths.model.taxes.*;
 
 /**
  *
@@ -22,6 +19,7 @@ public class TaxEvaluation {
     private DonorTaxImputation imputedTransfers;
     private KeyFunction keyFunction;
     private DonorKeys keys;
+    private Match match;
     private double socialCareSupportPerMonth = 0.0;
 
 
@@ -77,6 +75,11 @@ public class TaxEvaluation {
         keys.evaluate(keyFunction);
         imputedTransfers = new DonorTaxImputation(keys);
         imputedTransfers.evaluate();
+        match = new Match(keys, imputedTransfers.getDonorID(), imputedTransfers.getMatchCriterion(), imputedTransfers.getTargetNormalisedOriginalIncome());
+    }
+
+    public Match getMatch() {
+        return match;
     }
 
     public double getDisposableIncomePerMonth() {

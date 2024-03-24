@@ -153,7 +153,7 @@ public class ManagerFileGrids {
         int innerDimension = (int)grids.scale.gridDimensions[aa][0];
         int outerDimension = (int)grids.scale.gridDimensions[aa][1];
         int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
-        List<WriteBean> beans = new ArrayList<WriteBean>();
+        List<WriteGridsBean> beans = new ArrayList<WriteGridsBean>();
         for (int iiOuter=0; iiOuter<outerDimension; iiOuter++) {
 
             // identify current state combination for outer states
@@ -166,7 +166,7 @@ public class ManagerFileGrids {
                 currentStates.populateInnerGridStates(iiInner);
 
                 // instantiate writeBean
-                WriteBean bean = new WriteBean();
+                WriteGridsBean bean = new WriteGridsBean();
 
                 // populate with state combination
                 bean.setCohabitation(currentStates.getCohabitationIndex());
@@ -204,7 +204,7 @@ public class ManagerFileGrids {
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
             CSVPrinter printer = new CSVPrinter(writer, csvFormat);
 
-            for (WriteBean bean : beans) {
+            for (WriteGridsBean bean : beans) {
                 List<String> record = new ArrayList<>();
                 record.add(bean.getGenderString());
                 record.add(bean.getBirthYearString());

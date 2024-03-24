@@ -8,7 +8,7 @@ package simpaths.model.decisions;
  * CLASS TO STORE GRID SOLUTIONS FOR WRITING TO CSV FILE
  *
  */
-public class WriteBean {
+public class WriteGridsBean {
 
     /**
      * ATTRIBUTES
@@ -34,7 +34,7 @@ public class WriteBean {
     /**
      * CONSTRUCTOR
      */
-    public WriteBean(){}
+    public WriteGridsBean(){}
 
 
     /**

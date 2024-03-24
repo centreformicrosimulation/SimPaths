@@ -23,15 +23,15 @@ public class DecisionTests {
 
     public static void apacheCsvWriteTest2() {
 
-        List<WriteBean> beans = new ArrayList<>();
+        List<WriteGridsBean> beans = new ArrayList<>();
 
-        WriteBean bean1 = new WriteBean();
+        WriteGridsBean bean1 = new WriteGridsBean();
         bean1.setCohabitation(0);
         bean1.setLiquidWealth(53572266.858582);
         bean1.setValueFunction(1.357372715792E-9);
         beans.add(bean1);
 
-        WriteBean bean2 = new WriteBean();
+        WriteGridsBean bean2 = new WriteGridsBean();
         bean2.setCohabitation(1);
         bean2.setLiquidWealth(-28386.3841173);
         bean2.setValueFunction(2.343143434141E-12);
@@ -48,7 +48,7 @@ public class DecisionTests {
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader("cohabitation", "value_function", "liquid_wealth").build();
             CSVPrinter printer = new CSVPrinter(writer, csvFormat);
 
-            for (WriteBean bean : beans) {
+            for (WriteGridsBean bean : beans) {
                 List<String> record = new ArrayList<>();
                 record.add(bean.getCohabitationString());
                 record.add(bean.getValueFunctionString());
@@ -99,9 +99,9 @@ public class DecisionTests {
     public static void openCsvWriteTest() {
         // FAILS DUE TO OLD APACHE COMMONS BEAN UTILS DEPENDENCY IN JASMINE-GUI
 
-        List<WriteBean> beans = new ArrayList<>();
+        List<WriteGridsBean> beans = new ArrayList<>();
 
-        WriteBean bean1 = new WriteBean();
+        WriteGridsBean bean1 = new WriteGridsBean();
         bean1.setCohabitation(0);
         bean1.setBirthYear(1920);
         bean1.setGender(0);
@@ -116,7 +116,7 @@ public class DecisionTests {
         bean1.setEmployment2(0.0);
         beans.add(bean1);
 
-        WriteBean bean2 = new WriteBean();
+        WriteGridsBean bean2 = new WriteGridsBean();
         bean2.setCohabitation(0);
         bean2.setBirthYear(1920);
         bean2.setGender(0);
@@ -137,7 +137,7 @@ public class DecisionTests {
         String filePath = DecisionParams.gridsOutputDirectory + File.separator + "test.csv";
         try {
             Writer writer = new FileWriter(filePath);
-            StatefulBeanToCsv<WriteBean> beanToCsv = new StatefulBeanToCsvBuilder<WriteBean>(writer)
+            StatefulBeanToCsv<WriteGridsBean> beanToCsv = new StatefulBeanToCsvBuilder<WriteGridsBean>(writer)
                     .withQuotechar('\'').withSeparator(CSVWriter.DEFAULT_SEPARATOR).build();
             beanToCsv.write(beans);
             writer.close();

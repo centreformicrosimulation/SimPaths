@@ -1,11 +1,8 @@
 package simpaths.model.decisions;
 
 import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionNames;
@@ -13,6 +10,8 @@ import simpaths.model.enums.*;
 import simpaths.model.BenefitUnit;
 import simpaths.model.Person;
 import simpaths.model.TaxEvaluation;
+import simpaths.model.taxes.Match;
+import simpaths.model.taxes.Matches;
 
 import static simpaths.data.Parameters.asinh;
 
@@ -52,7 +51,7 @@ public class Expectations {
     double leisureTime;             // proportion of time spent in leisure
     double disposableIncomeAnnual;  // disposable income
     double cashOnHand;              // total value of pot that can be used to finance consumption within period
-
+    Matches imperfectMatches = new Matches();
 
      // OBJECTS FOR EVALUATING MODEL TAX AND BENEFIT AND REGRESSION FUNCTIONS
     BenefitUnit benefitUnitProxyThisPeriod;
@@ -713,6 +712,11 @@ public class Expectations {
         TaxEvaluation evaluatedTransfers = new TaxEvaluation(year, ageYearsNextPeriod, numberAdults, numberChildrenUnder5, numberChildrenAged5To9,
                 numberChildrenAged10To17, hoursWorkPerWeek1, hoursWorkPerWeek2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth,
                 childcareCostPerMonth, socialCareCostPerMonth, liquidWealth, -1.0);
+
+        Match match = evaluatedTransfers.getMatch();
+        if (match.getMatchCriterion()>DecisionParams.IMPERFECT_THRESHOLD) {
+            imperfectMatches.addMatch(match);
+        }
 
         // finalise outputs
         disposableIncomeAnnual = evaluatedTransfers.getDisposableIncomePerMonth() * 12.0;
