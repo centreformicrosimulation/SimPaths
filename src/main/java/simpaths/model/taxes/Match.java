@@ -70,6 +70,9 @@ public class Match {
     public String getKey0String() {
         return String.valueOf(key.getKey(0));
     }
+    public String getMatchCriterionString() {
+        return String.valueOf(matchCriterion);
+    }
     public String getCandidateIDString() {
         return String.valueOf(candidateID);
     }

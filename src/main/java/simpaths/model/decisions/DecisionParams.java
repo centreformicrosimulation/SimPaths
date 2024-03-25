@@ -69,8 +69,8 @@ public class DecisionParams {
 
     // LIQUID WEALTH STATE
     //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH_WKG = 31;
-    public static final int PTS_LIQUID_WEALTH_RTD = 31;
+    public static final int PTS_LIQUID_WEALTH_WKG = 91;
+    public static final int PTS_LIQUID_WEALTH_RTD = 91;
     public static final double C_LIQUID_WEALTH = 50260.0;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
@@ -79,7 +79,7 @@ public class DecisionParams {
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
     //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
-    public static final int PTS_WAGE_POTENTIAL = 31;
+    public static final int PTS_WAGE_POTENTIAL = 91;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour
     public static final double C_WAGE_POTENTIAL = 1.0;                // log scale adjustment (see liquid wealth above)

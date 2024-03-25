@@ -57,7 +57,7 @@ public class Matches {
         for (Match ss : set) {
             if ( (match.getKey().getKey(0) == ss.getKey().getKey(0)) &&
                     (match.getCandidateID() == ss.getCandidateID()) &&
-                    (match.getTargetNormalisedOriginalIncome() == ss.getTargetNormalisedOriginalIncome()) ) {
+                    (Math.abs(match.getTargetNormalisedOriginalIncome() - ss.getTargetNormalisedOriginalIncome())<5.0) ) {
                 result = true;
                 break;
             }
@@ -74,7 +74,7 @@ public class Matches {
         File dir = new File(DecisionParams.gridsOutputDirectory);
         if (!dir.exists()) dir.mkdir();
         String filePath = DecisionParams.gridsOutputDirectory + File.separator + "poor_match_age_" + ageYears + ".csv";
-        String[] HEADERS = {"key", "candidateID", "targetIncome"};
+        String[] HEADERS = {"key", "criterion", "candidateID", "targetIncome"};
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
@@ -83,6 +83,7 @@ public class Matches {
             for (Match match : set) {
                 List<String> record = new ArrayList<>();
                 record.add(match.getKey0String());
+                record.add(match.getMatchCriterionString());
                 record.add(match.getCandidateIDString());
                 record.add(match.getTargetNormalisedOriginalIncomeString());
                 printer.printRecord(record);

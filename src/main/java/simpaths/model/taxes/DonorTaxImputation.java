@@ -172,8 +172,10 @@ public class DonorTaxImputation {
             }
             iiTarget = upperInd;
         }
+        DonorTaxUnit targetCandidate = Parameters.getDonorPool().get(candidatePool.get(iiTarget));
+        donorID = targetCandidate.getId();
         double targetIncomeDifference = Math.abs(targetNormalisedOriginalIncome -
-                Parameters.getDonorPool().get(candidatePool.get(iiTarget)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth());
+                targetCandidate.getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth());
         if (!keys.isLowIncome()) {
             targetIncomeDifference /= Math.abs(targetNormalisedOriginalIncome);
             targetIncomeDifference *= 100;
@@ -208,10 +210,6 @@ public class DonorTaxImputation {
                 DonorTaxUnit candidate = Parameters.getDonorPool().get(candidatePool.get(ii));
                 double[] candidateVector = getCandidateMeasVector(candidate, flagSecondIncome, flagChildcareCost);
                 double distance = evaluateDistance(targetVector, candidateVector, flagSecondIncome, flagChildcareCost);
-                if (ii==iiTarget) {
-                    // initialise donorID to target
-                    donorID = candidate.getId();
-                }
                 if (Math.abs(distance - bracketDist) > 1.0E-4) {
                     bracketDist = distance;
                     bracketInd++;

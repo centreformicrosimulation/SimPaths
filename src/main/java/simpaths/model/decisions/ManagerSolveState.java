@@ -1,6 +1,10 @@
 package simpaths.model.decisions;
 
 
+import simpaths.model.taxes.Matches;
+
+import java.util.List;
+
 /**
  * CLASS TO MANAGE EVALUATION OF NUMERICAL SOLUTIONS FOR SPECIFIC STATE COMBINATION
  *
@@ -19,7 +23,7 @@ public class ManagerSolveState {
      *
      * THE MANAGER IS 'run' FROM ManagerSolveGrids
      */
-    public static void run(Grids grids, States states, Expectations outerExpectations) {
+    public static void run(Grids grids, States states, Expectations outerExpectations, List<Matches> imperfectMatchStore) {
 
         // instantiate expectations object with data for all states that are invariant to agent expectations
         Expectations invariantExpectations = new Expectations(states, outerExpectations);
@@ -64,6 +68,7 @@ public class ManagerSolveState {
         UtilityMaximisation solutionMax = null;
         UtilityMaximisation solutionMaxEmp1 = null;
         UtilityMaximisation solutionMaxEmp2 = null;
+        Matches localImperfectMatches = new Matches();
         for (double emp1Pr=emp1Start; emp1Pr<=(emp1End+1.0E-7); emp1Pr+=emp1Step) {
             for (double emp2Pr=emp2Start; emp2Pr<=(emp2End+1.0E-7); emp2Pr+=emp2Step) {
 
@@ -74,8 +79,8 @@ public class ManagerSolveState {
                 UtilityMaximisation solutionHere = new UtilityMaximisation(grids.valueFunction, states, expectations, emp1Pr, emp2Pr);
 
                 // check for imperfect matches
-                if (!expectations.imperfectMatches.isEmpty()) {
-                    outerExpectations.imperfectMatches.addSet(expectations.imperfectMatches.getSet());
+                if (DecisionParams.SAVE_IMPERFECT_MATCHES && !expectations.imperfectMatches.isEmpty()) {
+                    localImperfectMatches.addSet(expectations.imperfectMatches.getSet());
                 }
 
                 // check for wage offer solutions for both principal and secondary earner
@@ -137,5 +142,10 @@ public class ManagerSolveState {
 
         // save state optimum
         grids.populate(states, solutionMax);
+
+        if (DecisionParams.SAVE_IMPERFECT_MATCHES && !localImperfectMatches.isEmpty()) {
+            int ageSpecificIndex = (int)states.returnAgeSpecificIndex();
+            imperfectMatchStore.set(ageSpecificIndex, localImperfectMatches);
+        }
     }
 }

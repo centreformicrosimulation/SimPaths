@@ -5,6 +5,8 @@ import simpaths.model.taxes.Matches;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 
@@ -61,6 +63,7 @@ public class ManagerSolveGrids {
             int outerDimension = (int)grids.scale.gridDimensions[aa][1];
             int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
             Matches imperfectMatches = new Matches();
+            List<Matches> imperfectMatchStore = newImperfectMatchStore((int)grids.scale.gridDimensions[aa][2]);
 
             // loop over outer dimensions, for which expectations are independent of IO decisions (controls)
             for (int iiOuter=0; iiOuter<outerDimension; iiOuter++) {
@@ -82,7 +85,7 @@ public class ManagerSolveGrids {
                             currentStates.populateInnerGridStates(iiInner);
                             boolean stateConsider = currentStates.checkStateCombination();
                             if (stateConsider) {
-                                ManagerSolveState.run(grids, currentStates, outerExpectations);
+                                ManagerSolveState.run(grids, currentStates, outerExpectations, imperfectMatchStore);
                             }
                         });
                     } else {
@@ -92,18 +95,21 @@ public class ManagerSolveGrids {
                             currentStates.populateInnerGridStates(iiInner);
                             boolean stateConsider = currentStates.checkStateCombination();
                             if (stateConsider) {
-                                ManagerSolveState.run(grids, currentStates, outerExpectations);
+                                ManagerSolveState.run(grids, currentStates, outerExpectations, imperfectMatchStore);
                             }
                         }
                     }
-                    if (!outerExpectations.imperfectMatches.isEmpty()) {
-                        imperfectMatches.addSet(outerExpectations.imperfectMatches.getSet());
-                    }
-
                 }
             }
-            if (DecisionParams.SAVE_IMPERFECT_MATCHES && !imperfectMatches.isEmpty())
-                imperfectMatches.write(ageYears);
+            if (DecisionParams.SAVE_IMPERFECT_MATCHES) {
+                for (Matches mm : imperfectMatchStore) {
+                    if (!mm.isEmpty()) {
+                        imperfectMatches.addSet(mm.getSet());
+                    }
+                }
+                if (!imperfectMatches.isEmpty())
+                    imperfectMatches.write(ageYears);
+            }
             if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageYears<80) && ((ageYears % 5)==0))
                 ManagerFileGrids.unformattedWrite(grids, true);
             if (DecisionParams.SAVE_GRID_SLICES_TO_CSV)
@@ -118,5 +124,13 @@ public class ManagerSolveGrids {
             Duration durationTotal = Duration.between(beforeTotal, afterTotal);
             System.out.println("Calculations for optimal decisions completed in " + String.format("%.3f", (double)durationTotal.toSeconds()/60.0) + " minutes");
         }
+    }
+
+    private static List<Matches> newImperfectMatchStore(int size) {
+        List<Matches> list = new ArrayList<>();
+        for (int ii=0; ii<size; ii++) {
+            list.add(new Matches());
+        }
+        return list;
     }
 }

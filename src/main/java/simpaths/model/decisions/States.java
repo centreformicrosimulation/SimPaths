@@ -161,11 +161,20 @@ public class States {
      */
 
     /**
-     * METHOD TO EVALUATE AGE SPECIFIC INDEX FOR GIVEN SET OF STATE CHARACTERISTICS
+     * METHOD TO EVALUATE GRID INDEX FOR GIVEN SET OF STATE CHARACTERISTICS
      * IF STATE IS NOT PRECISELY ON GRID INDEX, THEN THE NEAREST LOWER INTEGER IS RETURNED
      * @return grid index
      */
     public long returnGridIndex() {
+        return returnAgeSpecificIndex() + scale.gridDimensions[ageIndex][3];
+    }
+
+    /**
+     * METHOD TO EVALUATE AGE SPECIFIC INDEX FOR GIVEN SET OF STATE CHARACTERISTICS
+     * IF STATE IS NOT PRECISELY ON GRID INDEX, THEN THE NEAREST LOWER INTEGER IS RETURNED
+     * @return grid index
+     */
+    public long returnAgeSpecificIndex() {
 
         // working variables
         long index;
@@ -190,9 +199,6 @@ public class States {
             }
             iiCounter *= (int)scale.axes[ageIndex][ii][0];
         }
-
-        // add age index
-        index += scale.gridDimensions[ageIndex][3];
 
         // return result
         return index;
