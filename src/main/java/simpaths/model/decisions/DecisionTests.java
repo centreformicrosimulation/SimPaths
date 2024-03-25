@@ -6,8 +6,11 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import simpaths.data.Parameters;
+import simpaths.model.taxes.Matches;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -21,6 +24,20 @@ public class DecisionTests {
 
     public DecisionTests() {}
 
+    public static void apacheCsvReadTest() {
+
+        Matches imperfectMatches = new Matches();
+
+        // file reference
+        File dir = new File("c:/temp/temp");
+        String filePath = "c:/temp/temp/poor_match_age_75.csv";
+
+        try {
+            imperfectMatches.read(filePath);
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
     public static void apacheCsvWriteTest2() {
 
         List<WriteGridsBean> beans = new ArrayList<>();

@@ -75,7 +75,7 @@ public class TaxEvaluation {
         keys.evaluate(keyFunction);
         imputedTransfers = new DonorTaxImputation(keys);
         imputedTransfers.evaluate();
-        match = new Match(keys, imputedTransfers.getDonorID(), imputedTransfers.getMatchCriterion(), imputedTransfers.getTargetNormalisedOriginalIncome());
+        match = new Match(keys, imputedTransfers.getDonorID(), imputedTransfers.getMatchCriterion(), Math.sinh(imputedTransfers.getTargetNormalisedOriginalIncome()));
     }
 
     public Match getMatch() {

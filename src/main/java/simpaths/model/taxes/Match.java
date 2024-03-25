@@ -12,6 +12,7 @@ public class Match {
      * ATTRIBUTES
      */
     private DonorKeys key;
+    private int key0;
     private long candidateID;
     private int matchCriterion;
     double targetNormalisedOriginalIncome;  // normalised income is per month in BASE_PRICE_YEAR year prices
@@ -21,11 +22,19 @@ public class Match {
      * CONSTRUCTORS
      */
     public Match(){}
-    public Match(DonorKeys key, long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
-        this.key = key;
+    public Match(long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
         this.candidateID = candidate;
         this.matchCriterion = matchCriterion;
         this.targetNormalisedOriginalIncome = targetNormalisedOriginalIncome;
+    }
+    public Match(int key0, long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
+        this(candidate, matchCriterion, targetNormalisedOriginalIncome);
+        this.key0 = key0;
+    }
+    public Match(DonorKeys key, long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
+        this(candidate, matchCriterion, targetNormalisedOriginalIncome);
+        this.key = key;
+        this.key0 = key.getKey(0);
     }
 
 
@@ -38,6 +47,14 @@ public class Match {
 
     public void setKey(DonorKeys key) {
         this.key = key;
+    }
+
+    public int getKey0() {
+        return key0;
+    }
+
+    public void setKey0(int key0) {
+        this.key0 = key0;
     }
 
     public long getCandidateID() {
@@ -68,7 +85,7 @@ public class Match {
      * WORKER METHODS
      */
     public String getKey0String() {
-        return String.valueOf(key.getKey(0));
+        return String.valueOf(key0);
     }
     public String getMatchCriterionString() {
         return String.valueOf(matchCriterion);

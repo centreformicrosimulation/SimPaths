@@ -1,8 +1,6 @@
 package simpaths.model.decisions;
 
 
-//import com.opencsv.bean.CsvBindByName;
-
 /**
  *
  * CLASS TO STORE GRID SOLUTIONS FOR WRITING TO CSV FILE

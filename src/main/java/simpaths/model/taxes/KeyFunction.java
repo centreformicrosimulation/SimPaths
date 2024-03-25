@@ -26,7 +26,6 @@ public class KeyFunction {
     private KeyFunction4 keyFunction;
 
 
-
     /**
      * CONSTRUCTORS
      */
@@ -93,6 +92,125 @@ public class KeyFunction {
                 hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, dlltsdMan, dlltsdWoman, careProvision, originalIncomePerWeek);
         this.childcareCostPerWeek = childcareCostPerWeek;
         this.secondIncomePerWeek = Math.max(0.0, Math.min(secondIncomePerWeek, originalIncomePerWeek - secondIncomePerWeek));
+    }
+
+
+    /**
+     * GETTERS AND SETTERS
+     */
+    public void setSimYear(int simYear) {
+        this.simYear = simYear;
+    }
+
+    public void setPriceYear(int priceYear) {
+        this.priceYear = priceYear;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public int getNumberMembersOver17() {
+        return numberMembersOver17;
+    }
+
+    public void setNumberMembersOver17(int numberMembersOver17) {
+        this.numberMembersOver17 = numberMembersOver17;
+    }
+
+    public int getNumberChildrenUnder5() {
+        return numberChildrenUnder5;
+    }
+
+    public void setNumberChildrenUnder5(int numberChildrenUnder5) {
+        this.numberChildrenUnder5 = numberChildrenUnder5;
+    }
+
+    public int getNumberChildren5To9() {
+        return numberChildren5To9;
+    }
+
+    public void setNumberChildren5To9(int numberChildren5To9) {
+        this.numberChildren5To9 = numberChildren5To9;
+    }
+
+    public int getNumberChildren10To17() {
+        return numberChildren10To17;
+    }
+
+    public void setNumberChildren10To17(int numberChildren10To17) {
+        this.numberChildren10To17 = numberChildren10To17;
+    }
+
+    public int getDlltsdMan() {
+        return dlltsdMan;
+    }
+
+    public void setDlltsdMan(int dlltsdMan) {
+        this.dlltsdMan = dlltsdMan;
+    }
+
+    public int getDlltsdWoman() {
+        return dlltsdWoman;
+    }
+
+    public void setDlltsdWoman(int dlltsdWoman) {
+        this.dlltsdWoman = dlltsdWoman;
+    }
+
+    public int getCareProvision() {
+        return careProvision;
+    }
+
+    public void setCareProvision(int careProvision) {
+        this.careProvision = careProvision;
+    }
+
+    public double getHoursWorkedPerWeekMan() {
+        return hoursWorkedPerWeekMan;
+    }
+
+    public void setHoursWorkedPerWeekMan(double hoursWorkedPerWeekMan) {
+        this.hoursWorkedPerWeekMan = hoursWorkedPerWeekMan;
+    }
+
+    public double getHoursWorkedPerWeekWoman() {
+        return hoursWorkedPerWeekWoman;
+    }
+
+    public void setHoursWorkedPerWeekWoman(double hoursWorkedPerWeekWoman) {
+        this.hoursWorkedPerWeekWoman = hoursWorkedPerWeekWoman;
+    }
+
+    public void setOriginalIncomePerWeek(double originalIncomePerWeek) {
+        this.originalIncomePerWeek = originalIncomePerWeek;
+    }
+
+    public void setSecondIncomePerWeek(double secondIncomePerWeek) {
+        this.secondIncomePerWeek = secondIncomePerWeek;
+    }
+
+    public void setChildcareCostPerWeek(double childcareCostPerWeek) {
+        this.childcareCostPerWeek = childcareCostPerWeek;
+    }
+
+    public KeyFunction4 getKeyFunction() {
+        return keyFunction;
+    }
+
+    public void setKeyFunction(KeyFunction4 keyFunction) {
+        this.keyFunction = keyFunction;
+    }
+
+    /**
+     * WORKER METHODS
+     */
+    public int getMatchFeatureIndex(MatchFeature feature, int taxDBRegime, int key) {
+        return keyFunction.getMatchFeatureIndex(feature, taxDBRegime, key);
     }
 
     public Integer[] evaluateKeys() {

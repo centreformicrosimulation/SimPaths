@@ -2,17 +2,17 @@ package simpaths.model.taxes;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import simpaths.model.decisions.DecisionParams;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 /**
  *
@@ -26,6 +26,7 @@ public class Matches {
      * ATTRIBUTES
      */
     private Set<Match> set = new HashSet<>();
+    private final String[] HEADERS = {"key", "criterion", "candidateID", "targetIncome"};
 
 
     /**
@@ -55,9 +56,7 @@ public class Matches {
     public boolean isMatchInSet(Match match) {
         boolean result = false;
         for (Match ss : set) {
-            if ( (match.getKey().getKey(0) == ss.getKey().getKey(0)) &&
-                    (match.getCandidateID() == ss.getCandidateID()) &&
-                    (Math.abs(match.getTargetNormalisedOriginalIncome() - ss.getTargetNormalisedOriginalIncome())<5.0) ) {
+            if ( (match.getKey0() == ss.getKey0()) && (Math.abs(match.getTargetNormalisedOriginalIncome() - ss.getTargetNormalisedOriginalIncome())<5.0) ) {
                 result = true;
                 break;
             }
@@ -74,7 +73,6 @@ public class Matches {
         File dir = new File(DecisionParams.gridsOutputDirectory);
         if (!dir.exists()) dir.mkdir();
         String filePath = DecisionParams.gridsOutputDirectory + File.separator + "poor_match_age_" + ageYears + ".csv";
-        String[] HEADERS = {"key", "criterion", "candidateID", "targetIncome"};
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
@@ -92,6 +90,24 @@ public class Matches {
             writer.close();
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
+        }
+    }
+
+    public void read(String filePath) throws IOException {
+
+        File file = new File(filePath);
+        if (!file.exists())
+            throw new RuntimeException("failed to find csv file to read: " + filePath);
+
+        Reader reader = new FileReader(filePath);
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).setSkipHeaderRecord(true).build();
+        Iterable<CSVRecord> records = csvFormat.parse(reader);
+        for (CSVRecord record : records) {
+            int key0 = Integer.parseInt(record.get("key"));
+            int criterion = Integer.parseInt(record.get("criterion"));
+            long candidateID = Long.parseLong(record.get("candidateID"));
+            double targetNormalisedOriginalIncome = Double.parseDouble(record.get("targetIncome"));
+            addMatch(new Match(key0, candidateID, criterion, targetNormalisedOriginalIncome));
         }
     }
 }

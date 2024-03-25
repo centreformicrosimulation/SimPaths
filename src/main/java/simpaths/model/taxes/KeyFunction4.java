@@ -31,6 +31,7 @@ public class KeyFunction4 {
      */
     public KeyFunction4() {}
 
+
     /**
      * METHOD TO EVALUATE DONOR KEYS FOR COARSE EXACT MATCHING
      * @param simYear simulated year
@@ -286,6 +287,23 @@ public class KeyFunction4 {
         // return
         return result;
     }
+
+    public int getMatchFeatureIndex(MatchFeature feature, int taxDBRegime, int keyValue) {
+
+        Map<MatchFeature, Map<Integer, Integer>> taxdbCounter = getTaxdbCounter();
+        int keyLocal = keyValue;
+        for (int ii = MatchFeature.values().length-1; ii>=0; ii--) {
+            MatchFeature featureHere = MatchFeature.values()[ii];
+            int size = taxdbCounter.get(featureHere).get(taxDBRegime);
+            int index = keyLocal / size;
+            if (feature.equals(featureHere))
+                return index;
+            else
+                keyLocal -= index * size;
+        }
+        throw new RuntimeException("failed to identify match feature for indexing");
+    }
+
 
     /**
      * METHOD TO INDICATE IF TAX UNIT IS MEMBER OF 'LOW INCOME' CATEGORY FOR DATABASE MATCHING

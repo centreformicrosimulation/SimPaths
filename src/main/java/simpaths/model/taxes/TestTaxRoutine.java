@@ -1,11 +1,48 @@
 package simpaths.model.taxes;
 
-import simpaths.model.BenefitUnit;
 import simpaths.model.TaxEvaluation;
+
+import java.io.File;
+import java.io.IOException;
 
 public class TestTaxRoutine {
 
     TestTaxRoutine(){}
+
+    /**
+     * METHOD TO SCREEN IMPERFECT DATABASE MATCHES REPORTED BY THE MODEL AND REPACKAGE DATA TO FILL GAPS
+     */
+    public static void screenImperfectMatches() {
+
+        // read and screen
+        Matches imperfectMatches = new Matches();
+        String dir = "c:/temp/temp";
+        try {
+            for (int aa=18; aa<131; aa++) {
+                String filePath = dir + File.separator + "poor_match_age_" + aa + ".csv";
+                File file = new File(filePath);
+                if (file.exists())
+                    imperfectMatches.read(filePath);
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+
+        // generate working variables for expanding tax database
+        MatchIndicesSet matchIndicesSet = new MatchIndicesSet();
+        KeyFunction keyFunction = new KeyFunction();
+        for (Match match : imperfectMatches.getSet()) {
+
+            MatchIndices indices = new MatchIndices(match.getCandidateID(), match.getTargetNormalisedOriginalIncome());
+            for (MatchFeature feature : MatchFeature.values()) {
+                indices.set(feature, keyFunction.getMatchFeatureIndex(feature, 0, match.getKey0()));
+            }
+            matchIndicesSet.add(indices);
+        }
+
+        // write set to CSV file for processing in Stata
+        matchIndicesSet.write(dir);
+    }
 
     public static void run() {
 
