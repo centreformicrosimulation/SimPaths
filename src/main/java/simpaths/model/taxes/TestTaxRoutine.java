@@ -10,13 +10,24 @@ public class TestTaxRoutine {
     TestTaxRoutine(){}
 
     /**
+     * METHOD TO EXTEND UKMOD INPUT DATA TO FILL GAPS
+     */
+    public static void extendDatabaseInput() {
+
+        // compile data that identify database gaps
+        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(false);
+
+
+    }
+
+    /**
      * METHOD TO SCREEN IMPERFECT DATABASE MATCHES REPORTED BY THE MODEL AND REPACKAGE DATA TO FILL GAPS
      */
-    public static void screenImperfectMatches() {
+    public static MatchIndicesSet screenImperfectMatches(boolean flagSave) {
 
         // read and screen
         Matches imperfectMatches = new Matches();
-        String dir = "c:/temp/temp";
+        String dir = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\20240325215222\\grids";
         try {
             for (int aa=18; aa<131; aa++) {
                 String filePath = dir + File.separator + "poor_match_age_" + aa + ".csv";
@@ -41,7 +52,11 @@ public class TestTaxRoutine {
         }
 
         // write set to CSV file for processing in Stata
-        matchIndicesSet.write(dir);
+        if (flagSave)
+            matchIndicesSet.write(dir);
+
+        // return
+        return matchIndicesSet;
     }
 
     public static void run() {

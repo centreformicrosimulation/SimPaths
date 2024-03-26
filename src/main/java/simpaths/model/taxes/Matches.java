@@ -55,8 +55,9 @@ public class Matches {
      */
     public boolean isMatchInSet(Match match) {
         boolean result = false;
+        double incLimit = Math.max(50.0, 0.05*match.getTargetNormalisedOriginalIncome());
         for (Match ss : set) {
-            if ( (match.getKey0() == ss.getKey0()) && (Math.abs(match.getTargetNormalisedOriginalIncome() - ss.getTargetNormalisedOriginalIncome())<5.0) ) {
+            if ( (match.getKey0() == ss.getKey0()) && (Math.abs(match.getTargetNormalisedOriginalIncome() - ss.getTargetNormalisedOriginalIncome())<incLimit) ) {
                 result = true;
                 break;
             }
