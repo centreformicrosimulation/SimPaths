@@ -1,5 +1,8 @@
-package simpaths.model.taxes;
+package simpaths.model.taxes.database;
 
+
+import simpaths.model.taxes.Match;
+import simpaths.model.taxes.MatchFeature;
 
 /**
  *
@@ -12,6 +15,7 @@ public class MatchIndices {
      * ATTRIBUTES
      */
     private long candidateID;
+    private int key0;
     double targetNormalisedOriginalIncome;  // normalised income is per month in BASE_PRICE_YEAR year prices
     private int childcare;
     private int dualIncome;
@@ -29,15 +33,40 @@ public class MatchIndices {
      */
     public MatchIndices() {}
 
-    public MatchIndices(long candidateID, double targetOriginalIncomePerMonth) {
-        this.candidateID = candidateID;
-        this.targetNormalisedOriginalIncome = targetOriginalIncomePerMonth;
+    public MatchIndices(Match match) {
+        candidateID = match.getCandidateID();
+        key0 = match.getKey0();
+        targetNormalisedOriginalIncome = match.getTargetNormalisedOriginalIncome();
     }
 
+    public int getKey0() {
+        return key0;
+    }
+
+    public void setKey0(int key0) {
+        this.key0 = key0;
+    }
+
+    public long getCandidateID() {
+        return candidateID;
+    }
+
+    public void setCandidateID(long candidateID) {
+        this.candidateID = candidateID;
+    }
+
+    public double getTargetNormalisedOriginalIncome() {
+        return targetNormalisedOriginalIncome;
+    }
+
+    public void setTargetNormalisedOriginalIncome(double targetNormalisedOriginalIncome) {
+        this.targetNormalisedOriginalIncome = targetNormalisedOriginalIncome;
+    }
 
     /**
      * GETTERS AND SETTERS
      */
+
     public int getChildcare() {
         return childcare;
     }
@@ -169,6 +198,9 @@ public class MatchIndices {
     }
     public String getCandidateIDString() {
         return Long.toString(candidateID);
+    }
+    public String getKey0String() {
+        return String.valueOf(getKey0());
     }
     public String getTargetOriginalIncomeString() {
         return Double.toString(targetNormalisedOriginalIncome);

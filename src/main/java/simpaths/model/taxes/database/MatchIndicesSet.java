@@ -1,8 +1,10 @@
-package simpaths.model.taxes;
+package simpaths.model.taxes.database;
 
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import simpaths.model.taxes.MatchFeature;
+import simpaths.model.taxes.database.MatchIndices;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,7 +24,7 @@ import java.util.Set;
 public class MatchIndicesSet {
 
     private Set<MatchIndices> set = new HashSet<>();
-    private final String[] HEADERS = {"candidateID", "targetIncome", "age", "adults", "children", "employment", "disability",
+    private final String[] HEADERS = {"candidateID", "key0", "targetIncome", "age", "adults", "children", "employment", "disability",
     "careprovision", "income", "dualincome", "childcare"};
 
 
@@ -39,6 +41,8 @@ public class MatchIndicesSet {
         set.add(matchIndices);
     }
 
+    public Set<MatchIndices> getSet() {return set;}
+
     public void write(String dir) {
 
         File chk = new File(dir);
@@ -52,6 +56,7 @@ public class MatchIndicesSet {
             for (MatchIndices indices : set) {
                 List<String> record = new ArrayList<>();
                 record.add(indices.getCandidateIDString());
+                record.add(indices.getKey0String());
                 record.add(indices.getTargetOriginalIncomeString());
                 for (MatchFeature feature : MatchFeature.values()) {
                     if (!feature.equals(MatchFeature.Final))

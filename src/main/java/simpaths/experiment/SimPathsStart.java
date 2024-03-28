@@ -49,6 +49,7 @@ import simpaths.model.enums.Country;
 import simpaths.data.*;
 import simpaths.model.HibernateUtil;
 import simpaths.model.taxes.*;
+import simpaths.model.taxes.database.DatabaseExtension;
 
 
 /**

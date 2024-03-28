@@ -54,7 +54,7 @@ import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
-import simpaths.model.taxes.TestTaxRoutine;
+import simpaths.model.taxes.database.DatabaseExtension;
 
 
 /**
@@ -328,7 +328,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					responsesToPension, responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(),
 					startYear, endYear);
 			//DecisionTests.compareGrids();
-			TestTaxRoutine.screenImperfectMatches(true);
+			//DatabaseExtension.extendInputData();
+			//DatabaseExtension.extendInputData();
 		}
 
         log.debug("Parameters loaded");

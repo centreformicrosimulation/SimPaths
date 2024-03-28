@@ -1,63 +1,13 @@
 package simpaths.model.taxes;
 
 import simpaths.model.TaxEvaluation;
+import simpaths.model.taxes.database.MatchIndices;
+import simpaths.model.taxes.database.MatchIndicesSet;
 
 import java.io.File;
 import java.io.IOException;
 
 public class TestTaxRoutine {
-
-    TestTaxRoutine(){}
-
-    /**
-     * METHOD TO EXTEND UKMOD INPUT DATA TO FILL GAPS
-     */
-    public static void extendDatabaseInput() {
-
-        // compile data that identify database gaps
-        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(false);
-
-
-    }
-
-    /**
-     * METHOD TO SCREEN IMPERFECT DATABASE MATCHES REPORTED BY THE MODEL AND REPACKAGE DATA TO FILL GAPS
-     */
-    public static MatchIndicesSet screenImperfectMatches(boolean flagSave) {
-
-        // read and screen
-        Matches imperfectMatches = new Matches();
-        String dir = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\20240325215222\\grids";
-        try {
-            for (int aa=18; aa<131; aa++) {
-                String filePath = dir + File.separator + "poor_match_age_" + aa + ".csv";
-                File file = new File(filePath);
-                if (file.exists())
-                    imperfectMatches.read(filePath);
-            }
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
-        }
-
-        // generate working variables for expanding tax database
-        MatchIndicesSet matchIndicesSet = new MatchIndicesSet();
-        KeyFunction keyFunction = new KeyFunction();
-        for (Match match : imperfectMatches.getSet()) {
-
-            MatchIndices indices = new MatchIndices(match.getCandidateID(), match.getTargetNormalisedOriginalIncome());
-            for (MatchFeature feature : MatchFeature.values()) {
-                indices.set(feature, keyFunction.getMatchFeatureIndex(feature, 0, match.getKey0()));
-            }
-            matchIndicesSet.add(indices);
-        }
-
-        // write set to CSV file for processing in Stata
-        if (flagSave)
-            matchIndicesSet.write(dir);
-
-        // return
-        return matchIndicesSet;
-    }
 
     public static void run() {
 
