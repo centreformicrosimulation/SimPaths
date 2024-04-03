@@ -2,7 +2,72 @@ package simpaths.model.taxes.database;
 
 public class Variables2019b {
 
-    public static String[] list() {
+
+    public static String[] listLong() {
+        String[] list = {
+                "idhh",
+                "idperson",
+                "idpartner",
+                "idfather",
+                "idmother",
+        };
+        return list;
+    }
+
+    public static String[] listInt() {
+        String[] list = {
+                "dpd",
+                "idorighh",
+                "idorigbenunit",
+                "idorigperson",
+                "drgn1",
+                "dgn",
+                "dag",
+                "dms",
+                "dct",
+                "dcz",
+                "ddi",
+                "ddi03",
+                "dhr",
+                "ddt",
+                "ddt01",
+                "dec",
+                "deh",
+                "dew",
+                "dey",
+                "dot",
+                "lfs",
+                "les",
+                "lcwnm",
+                "lcs",
+                "lindi",
+                "liwwh",
+                "loc",
+                "lowas",
+                "lcr01",
+                "lcr02",
+                "lle",
+                "amrrm",
+                "amriv00",
+                "amrtn",
+                "lhw00",
+                "lhw01",
+                "lhw",
+                "lim",
+                "bhoro",
+                "lhwiv00",
+                "lhwiv01",
+                "tpceeivpx",
+                "limiv",
+                "liwivwh",
+                "lemiw",
+                "ddi02",
+                "dwtorig",
+        };
+        return list;
+    }
+
+    public static String[] listAll() {
 
         String[] list = {"dpd",
                 "idhh",

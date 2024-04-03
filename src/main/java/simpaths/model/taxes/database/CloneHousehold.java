@@ -27,8 +27,7 @@ public class CloneHousehold {
     String[] HOUSEHOLD_VARIABLES = {"drgn1", "dwt", "dct", "dcz", "ddt", "ddt01", "dpd", "dot", "amrrm", "amrtn"};
     String[] SPOUSE_SPECIFIC_VARIABLES = {"dec", "dag", "deh", "dew", "dey"};
     String[] SPOUSE_VARIABLES = ArrayUtils.addAll(HOUSEHOLD_VARIABLES, SPOUSE_SPECIFIC_VARIABLES);
-    String[] INCOME_VARIABLES = {"yem", "yiytx", "yiynt", "yptmp", "yot01", "yprtx", "yprnt", "ypp", "yptot", "yse"};
-
+    String[] INCOME_VARIABLES = {"yem", "yiy", "yiytx", "yiynt", "yptmp", "yot01", "ypr", "yprtx", "yprnt", "ypp", "yptot", "yse"};
 
 
     /**
@@ -80,8 +79,10 @@ public class CloneHousehold {
             double currentIncome = targetIncome + spouseIncome;
             if ( income < 0.0 ) {
                 double incomeAdj = income - currentIncome;
-                double yprnt = (double)target.get("yprnt") + incomeAdj;
-                target.replace("yprnt", yprnt);
+                double val = (double)target.get("yprnt") + incomeAdj;
+                target.replace("yprnt", val);
+                val = (double)target.get("ypr") + incomeAdj;
+                target.replace("ypr", val);
             } else {
                 if ( targetIncome > 10.0 ) {
                     if ( spouseIncome > 10.0 ) {
@@ -98,8 +99,10 @@ public class CloneHousehold {
                         setIncome(spouse, spouseIncome, incomeAdj);
                     } else {
                         double incomeAdj = income - currentIncome;
-                        double yprnt = (double)target.get("yprnt") + incomeAdj;
-                        target.replace("yprnt", yprnt);
+                        double val = (double)target.get("yprnt") + incomeAdj;
+                        target.replace("yprnt", val);
+                        val = (double)target.get("ypr") + incomeAdj;
+                        target.replace("ypr", val);
                     }
                 }
             }
@@ -118,9 +121,13 @@ public class CloneHousehold {
                 change = true;
                 if (targetIncome<0.01) {
                     target.replace("yprnt", 500.0);
+                    target.replace("yprtx", 0.0);
+                    target.replace("ypr", 500.0);
                 }
                 if (spouseIncome<0.01) {
                     spouse.replace("yprnt", 500.0);
+                    spouse.replace("yprtx", 0.0);
+                    spouse.replace("ypr", 500.0);
                 }
             }
         } else if (index==1)

@@ -17,7 +17,7 @@ public class InputDataSet {
     /**
      * ATTRIBUTES
      */
-    private Set<Map> set = new HashSet<>();
+    private List<Map> set = new ArrayList<>();
 
 
     /**
@@ -34,7 +34,7 @@ public class InputDataSet {
             set.add(person);
         }
     }
-    public Set<Map> getSet() {return set;}
+    public List<Map> getSet() {return set;}
     public void read(String[] variables, String filePath) throws IOException {
 
         File file = new File(filePath);
@@ -52,7 +52,7 @@ public class InputDataSet {
             set.add(values);
         }
     }
-    public void write(String[] variables, String directory, String fileName) throws IOException {
+    public void write(String[] variables, String[] longVars, String[] intVars, String directory, String fileName) throws IOException {
 
         File chk = new File(directory);
         if (!chk.exists()) chk.mkdir();
@@ -64,7 +64,12 @@ public class InputDataSet {
         for (Map obs : set) {
             List<String> record = new ArrayList<>();
             for (String variable : variables) {
-                record.add(Double.toString((double)obs.get(variable)));
+                if (Arrays.stream(longVars).anyMatch(variable::equals))
+                    record.add(Long.toString(Double.valueOf((double)obs.get(variable)).longValue()));
+                else if (Arrays.stream(intVars).anyMatch(variable::equals))
+                    record.add(String.valueOf(Double.valueOf((double)obs.get(variable)).intValue()));
+                else
+                    record.add(Double.toString((double)obs.get(variable)));
             }
             printer.printRecord(record);
         }

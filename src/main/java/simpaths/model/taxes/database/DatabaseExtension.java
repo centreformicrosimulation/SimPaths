@@ -20,14 +20,16 @@ public class DatabaseExtension {
     public static void extendInputData() {
 
         // database specific variables
-        String[] variablesAll = Variables2019b.list();
+        String[] variablesAll = Variables2019b.listAll();
+        String[] variablesLong = Variables2019b.listLong();
+        String[] variablesInt = Variables2019b.listInt();
         String datasetPath = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input\\UK_2019_b1.txt";
-        String imperfectMatchesPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\tests\\behavioural solutions\\Grid size\\91x91";
+        String imperfectMatchesPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\tests\\behavioural solutions\\Grid size\\51x51tax2";
         String outputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
         String outputFilename = "UK_2019_b1adj.txt";
 
         // compile data that identify database gaps
-        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(false, imperfectMatchesPath);
+        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(true, imperfectMatchesPath);
 
         // load input data
         InputDataSet dataset = new InputDataSet();
@@ -38,7 +40,7 @@ public class DatabaseExtension {
         }
 
         // extend dataset
-        long newHouseholdId = 999900000;
+        long newHouseholdId = 999000000;
         for (MatchIndices imperfectMatch : imperfectMatchIndices.getSet()) {
 
             CloneHousehold household = new CloneHousehold();
@@ -77,7 +79,7 @@ public class DatabaseExtension {
 
         // save augmented dataset
         try {
-            dataset.write(variablesAll, outputDirectory, outputFilename);
+            dataset.write(variablesAll, variablesLong, variablesInt, outputDirectory, outputFilename);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }

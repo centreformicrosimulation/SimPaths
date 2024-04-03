@@ -329,7 +329,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					startYear, endYear);
 			//DecisionTests.compareGrids();
 			//DatabaseExtension.extendInputData();
-			//DatabaseExtension.extendInputData();
+			DatabaseExtension.extendInputData();
 		}
 
         log.debug("Parameters loaded");
