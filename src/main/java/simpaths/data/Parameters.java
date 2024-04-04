@@ -276,6 +276,7 @@ public class Parameters {
     private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
+    public static final boolean FLAG_SINGLE_MOTHERS = false;
 
     public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 

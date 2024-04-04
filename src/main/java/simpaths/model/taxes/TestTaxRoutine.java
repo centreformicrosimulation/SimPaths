@@ -1,11 +1,7 @@
 package simpaths.model.taxes;
 
 import simpaths.model.TaxEvaluation;
-import simpaths.model.taxes.database.MatchIndices;
-import simpaths.model.taxes.database.MatchIndicesSet;
 
-import java.io.File;
-import java.io.IOException;
 
 public class TestTaxRoutine {
 
