@@ -521,7 +521,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
 		// REPORTING OF IMPERFECT TAX DATABASE MATCHES
-		addCollectionEventToAllYears(benefitUnits, Processes.CheckForImperfectTaxDBMatches);
+		addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
 
 		//9 - END OF YEAR PROCESSES
 		addEventToAllYears(Processes.CheckForEmptyBenefitUnits); //Check all household before the end of the year
