@@ -2318,12 +2318,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				}
 				catch (SQLException e) {
 					log.info(e.getMessage());
-					System.out.print("... failed! Retrying in 2s\n");
-					if (conn != null) { conn.close(); }
-					TimeUnit.SECONDS.sleep(2);
-					retry = true;
-					continue;
-//					throw new RuntimeException("SQL Exception! " + e.getMessage());
+					throw new RuntimeException("SQL Exception! " + e.getMessage());
 				}
 //        	//Create input database from input file (population_[country].csv)
 //			if(refreshInputDatabase) {

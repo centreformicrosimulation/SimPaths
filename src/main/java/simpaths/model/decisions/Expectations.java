@@ -216,7 +216,14 @@ public class Expectations {
         personProxyNextPeriod.setDeh_c3_lag1(currentStates.getEducationCode());
         personProxyNextPeriod.setDehf_c3(DecisionParams.EDUCATION_FATHER);
         personProxyNextPeriod.setDehm_c3(DecisionParams.EDUCATION_MOTHER);
-        personProxyNextPeriod.setDcpst(currentStates.getDcpst());
+        if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
+            personProxyNextPeriod.setDcpst(currentStates.getDcpst());
+        } else {
+            if (currentStates.getDcpst().equals(Dcpst.Partnered))
+                personProxyNextPeriod.setDcpst(Dcpst.PreviouslyPartnered);
+            else
+                personProxyNextPeriod.setDcpst(Dcpst.SingleNeverMarried);
+        }
         personProxyNextPeriod.setDcpst_lag1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);
         personProxyNextPeriod.setL1_fullTimeHourlyEarningsPotential(fullTimeHourlyEarningsPotential);

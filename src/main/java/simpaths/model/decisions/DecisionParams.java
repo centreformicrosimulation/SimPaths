@@ -12,7 +12,7 @@ import java.io.File;
 public class DecisionParams {
 
     // RUNNING OPTIONS
-    public static final boolean PARALLELISE_SOLUTIONS = true;
+    public static final boolean PARALLELISE_SOLUTIONS = false;
     public static final boolean SAVE_GRID_SLICES_TO_CSV = false;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
 
