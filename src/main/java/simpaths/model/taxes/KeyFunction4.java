@@ -294,12 +294,17 @@ public class KeyFunction4 {
         int keyLocal = keyValue;
         for (int ii = MatchFeature.values().length-1; ii>=0; ii--) {
             MatchFeature featureHere = MatchFeature.values()[ii];
-            int size = taxdbCounter.get(featureHere).get(taxDBRegime);
-            int index = keyLocal / size;
-            if (feature.equals(featureHere))
-                return index;
-            else
-                keyLocal -= index * size;
+            try {
+                int size = taxdbCounter.get(featureHere).get(taxDBRegime);
+                int index = keyLocal / size;
+                if (feature.equals(featureHere))
+                    return index;
+                else
+                    keyLocal -= index * size;
+            } catch (Exception e) {
+                System.out.println("Issue retrieving feature" + featureHere + "for regime " + taxDBRegime);
+                e.printStackTrace();
+            }
         }
         throw new RuntimeException("failed to identify match feature for indexing");
     }
