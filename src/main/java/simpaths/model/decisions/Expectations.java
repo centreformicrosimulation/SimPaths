@@ -1027,19 +1027,20 @@ public class Expectations {
         int stateIndexNextPeriod = scale.getIndex(axis, ageYearsNextPeriod);
 
         // populate expectations
-        LocalExpectations lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
+        LocalExpectations lexpect = null;
         if (anyVaries()) {
             boolean flagEval;
             int numberExpectedInitial = numberExpected;
             for (int ii=0; ii<numberExpectedInitial; ii++) {
 
                 flagEval = updatePersonNextPeriod(ii);
-                if (flagEval) {
+                if (flagEval || lexpect==null) {
                     lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
                 }
                 expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect);
             }
         } else {
+            lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
             expandExpectationsAllIndices(stateIndexNextPeriod, lexpect);
         }
     }
