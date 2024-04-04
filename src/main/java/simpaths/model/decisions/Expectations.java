@@ -609,7 +609,6 @@ public class Expectations {
                 stateIndexNextPeriod = scale.getIndex(Axis.WageOffer1, ageYearsNextPeriod);
                 LocalExpectations lexpect = new LocalExpectations(1.0, 0.0, DecisionParams.PROBABILITY_WAGE_OFFER1);
                 expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-                throw new RuntimeException("Please validate code for wage offers in expectations object");
             }
 
             // check evaluated probabilities
