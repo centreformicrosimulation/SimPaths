@@ -233,7 +233,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	EventGroup yearlySchedule = new EventGroup();
 
 	@GUIparameter(description = "tick to project social care")
-	private boolean projectSocialCare = false;
+	private boolean projectSocialCare = true;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
 	private boolean enableIntertemporalOptimisations = true;
@@ -329,7 +329,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					startYear, endYear);
 			//DecisionTests.compareGrids();
 			//DatabaseExtension.extendInputData();
-			DatabaseExtension.extendInputData();
+			//DatabaseExtension.extendInputData();
 		}
 
         log.debug("Parameters loaded");

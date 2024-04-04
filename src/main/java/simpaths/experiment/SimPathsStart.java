@@ -136,8 +136,6 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		int count;
 
-		MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(true, "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\tests\\behavioural solutions\\Grid size\\51x51tax3");
-
 		// initiate radio buttons to define policy environment and input database
 		count = 0;
 		Map<String, Integer> startUpOptionsStringsMap = new LinkedHashMap<>();

@@ -12,7 +12,7 @@ import java.io.File;
 public class DecisionParams {
 
     // RUNNING OPTIONS
-    public static final boolean PARALLELISE_SOLUTIONS = true;
+    public static final boolean PARALLELISE_SOLUTIONS = false;
     public static final boolean SAVE_GRID_SLICES_TO_CSV = false;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
 
@@ -38,7 +38,7 @@ public class DecisionParams {
     public static boolean flagDisability;                             // user option to include disability in state space for IO solution
     public static boolean flagRegion;                                 // user option to indicate region in state space for IO solution
     public static boolean flagEducation;                              // user option to indicate student and education in state space for IO solution
-    public static final boolean FLAG_WAGE_OFFER1 = false;             // flag identifying whether to allow for wage offers in state space for principal earner - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
+    public static final boolean FLAG_WAGE_OFFER1 = true;             // flag identifying whether to allow for wage offers in state space for principal earner - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
     public static final boolean FLAG_WAGE_OFFER2 = false;             // flag identifying whether to allow for wage offers in state space for secondary earner - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
     public static final boolean FLAG_IO_EMPLOYMENT1 = true;           // flag identifying whether to project employment of principal earner as an intertemporal optimisation decision - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
     public static final boolean FLAG_IO_EMPLOYMENT2 = true;           // flag identifying whether to project employment of secondary earner as an intertemporal optimisation decision - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
@@ -69,8 +69,8 @@ public class DecisionParams {
 
     // LIQUID WEALTH STATE
     //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH_WKG = 91;
-    public static final int PTS_LIQUID_WEALTH_RTD = 91;
+    public static final int PTS_LIQUID_WEALTH_WKG = 5;
+    public static final int PTS_LIQUID_WEALTH_RTD = 5;
     public static final double C_LIQUID_WEALTH = 50260.0;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
@@ -79,7 +79,7 @@ public class DecisionParams {
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
     //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
-    public static final int PTS_WAGE_POTENTIAL = 91;
+    public static final int PTS_WAGE_POTENTIAL = 5;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour
     public static final double C_WAGE_POTENTIAL = 1.0;                // log scale adjustment (see liquid wealth above)

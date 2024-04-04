@@ -497,7 +497,7 @@ public class Expectations {
             if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
 
                 if (cohabitation) {
-                    updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU2b, true);
+                    updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU2b, 0.0);
                 } else {
                     updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU1b, RegressionNames.PartnershipU1a);
                 }
@@ -993,41 +993,41 @@ public class Expectations {
 
 
     private void updateExpectations(Axis axis, RegressionNames regressionName) {
-        updateExpectations(axis, regressionName, null, false, null, null, null, 0);
+        updateExpectations(axis, regressionName, null, 1.0, null, null, null, 0);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName, boolean reversePolarity) {
-        updateExpectations(axis, regressionName, null, reversePolarity, null, null, null, 1);
+    private void updateExpectations(Axis axis, RegressionNames regressionName, Double valueTrue) {
+        updateExpectations(axis, regressionName, null, valueTrue, null, null, null, 1);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2) {
-        updateExpectations(axis, regressionName1, regressionName2, false, null, null, null, 2);
+        updateExpectations(axis, regressionName1, regressionName2, 1.0, null, null, null, 2);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2, int method) {
-        updateExpectations(axis, regressionName1, regressionName2, false, null, null, null, method);
+        updateExpectations(axis, regressionName1, regressionName2, 3.0, null, null, null, method);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName, double minValue, double maxValue, double cTransform) {
-        updateExpectations(axis, regressionName, null, false, minValue, maxValue, cTransform, 3);
+        updateExpectations(axis, regressionName, null, 1.0, minValue, maxValue, cTransform, 3);
     }
 
     private void updateExpectations(Axis axis, int method) {
-        updateExpectations(axis, null, null, false, null, null, null, method);
+        updateExpectations(axis, null, null, 1.0, null, null, null, method);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2,
-                                    boolean reversePolarity, Double minValue, Double maxValue, Double cTransform,
+                                    Double valueTrue, Double minValue, Double maxValue, Double cTransform,
                                     int method) {
 
         // check consistency of method and inputs
-        checkParameterConsistency(regressionName1, regressionName2, reversePolarity, minValue, maxValue, cTransform, method);
+        checkParameterConsistency(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
 
         // state indices
         int stateIndexNextPeriod = scale.getIndex(axis, ageYearsNextPeriod);
 
         // populate expectations
-        LocalExpectations lexpect = lexpectEval(regressionName1, regressionName2, reversePolarity, minValue, maxValue, cTransform, method);
+        LocalExpectations lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
         if (anyVaries()) {
             boolean flagEval;
             int numberExpectedInitial = numberExpected;
@@ -1035,7 +1035,7 @@ public class Expectations {
 
                 flagEval = updatePersonNextPeriod(ii);
                 if (flagEval) {
-                    lexpect = lexpectEval(regressionName1, regressionName2, reversePolarity, minValue, maxValue, cTransform, method);
+                    lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
                 }
                 expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect);
             }
@@ -1044,25 +1044,25 @@ public class Expectations {
         }
     }
 
-    private void checkParameterConsistency(RegressionNames regressionName1, RegressionNames regressionName2, boolean reversePolarity, Double minValue,
+    private void checkParameterConsistency(RegressionNames regressionName1, RegressionNames regressionName2, Double valueTrue, Double minValue,
                                            Double maxValue, Double cTransform, int method) {
         if (method==0) {
-            if (regressionName1==null || regressionName2!=null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (0) inconsistent with supplied inputs");
         } else if (method==1) {
-            if (regressionName1==null || regressionName2!=null || !reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (1) inconsistent with supplied inputs");
         } else if (method==2) {
-            if (regressionName1==null || regressionName2==null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2==null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (2) inconsistent with supplied inputs");
         } else if (method==3) {
-            if (regressionName1==null || regressionName2!=null || reversePolarity || minValue==null || maxValue==null || cTransform==null )
+            if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue==null || maxValue==null || cTransform==null )
                 throw new RuntimeException("updateExpectations method (3) inconsistent with supplied inputs");
         } else if (method==4) {
-            if (regressionName1!=null || regressionName2!=null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1!=null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (4) inconsistent with supplied inputs");
         } else if (method==5) {
-            if (regressionName1==null || regressionName2==null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2==null || (Math.abs(valueTrue-3.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (5) inconsistent with supplied inputs");
         } else
             throw new RuntimeException("unrecognised method to update local expectations");
@@ -1070,7 +1070,7 @@ public class Expectations {
 
 
     private LocalExpectations lexpectEval(RegressionNames regressionName1, RegressionNames regressionName2,
-                                          boolean reversePolarity, Double minValue, Double maxValue, Double cTransform, int method) {
+                                          Double valueTrue, Double minValue, Double maxValue, Double cTransform, int method) {
         // method = 0 default
         //          1 reverse polarity
         //          2 student/nonStudent regression names
@@ -1081,7 +1081,7 @@ public class Expectations {
         if (method==0) {
             return new LocalExpectations(personProxyNextPeriod, regressionName1);
         } else if (method==1) {
-            return new LocalExpectations(personProxyNextPeriod, regressionName1, reversePolarity);
+            return new LocalExpectations(personProxyNextPeriod, regressionName1, valueTrue);
         } else if (method==2) {
             if (personProxyNextPeriod.getStudent()==0)
                 return new LocalExpectations(personProxyNextPeriod, regressionName1);
@@ -1095,7 +1095,7 @@ public class Expectations {
             if (Dcpst.Partnered.equals(personProxyNextPeriod.getDcpst()))
                 return new LocalExpectations(personProxyNextPeriod, regressionName2);
             else
-                return new LocalExpectations(personProxyNextPeriod, regressionName1);
+                return new LocalExpectations(personProxyNextPeriod, regressionName1, valueTrue);
         } else
             throw new RuntimeException("unrecognised method to generate local expectations");
     }
