@@ -2,6 +2,7 @@
 package simpaths.model;
 
 // import Java packages
+import java.io.File;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -54,6 +55,8 @@ import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
+import simpaths.model.taxes.Match;
+import simpaths.model.taxes.Matches;
 import simpaths.model.taxes.database.DatabaseExtension;
 
 
@@ -517,6 +520,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//9C: UPDATE CASE-BASED MEASURE (STEPS 1 AND 2 TOGETHER)
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
+		// REPORTING OF IMPERFECT TAX DATABASE MATCHES
+		addCollectionEventToAllYears(benefitUnits, Processes.CheckForImperfectTaxDBMatches);
+
 		//9 - END OF YEAR PROCESSES
 		addEventToAllYears(Processes.CheckForEmptyBenefitUnits); //Check all household before the end of the year
 		addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
@@ -590,6 +596,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		RationalOptimisation,
 		UpdateYear,
 		CheckForEmptyBenefitUnits,
+		CheckForImperfectTaxDBMatches,
 	}
 
 	@Override
@@ -719,6 +726,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					removeBenefitUnit(benefitUnit);
 				}
 				break;
+			case CheckForImperfectTaxDBMatches:
+				if (Parameters.SAVE_IMPERFECT_TAXDB_MATCHES) {
+					screenForImperfectTaxDbMatches();
+				}
 			default:
 				break;
 		}
@@ -730,6 +741,28 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	 * METHODS IMPLEMENTING PROCESS LEVEL COMPUTATIONS
 	 *
 	 */
+
+
+	/**
+	 *
+	 * PROCESS - SCREEN FOR IMPERFECT TAX DATABASE MATCHES
+	 *
+	 */
+	private void screenForImperfectTaxDbMatches() {
+
+		Matches imperfectMatches = new Matches();
+		for (BenefitUnit benefitUnit: benefitUnits) {
+
+			Match match = benefitUnit.getTaxDbMatch();
+			if (match.getMatchCriterion()>Parameters.IMPERFECT_THRESHOLD) {
+				imperfectMatches.addMatch(match);
+			}
+		}
+		if (!imperfectMatches.isEmpty()) {
+			String dir = getEngine().getCurrentExperiment().getOutputFolder() + File.separator + "csv";
+			imperfectMatches.write(dir, "poor_taxmatch_year_" + year + ".csv");
+		}
+	}
 
 
 	/**

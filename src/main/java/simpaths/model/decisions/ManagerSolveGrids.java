@@ -3,6 +3,7 @@ package simpaths.model.decisions;
 import simpaths.data.Parameters;
 import simpaths.model.taxes.Matches;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -101,14 +102,15 @@ public class ManagerSolveGrids {
                     }
                 }
             }
-            if (DecisionParams.SAVE_IMPERFECT_MATCHES) {
+            if (DecisionParams.saveImperfectTaxDbMatches) {
                 for (Matches mm : imperfectMatchStore) {
                     if (!mm.isEmpty()) {
                         imperfectMatches.addSet(mm.getSet());
                     }
                 }
-                if (!imperfectMatches.isEmpty())
-                    imperfectMatches.write(ageYears);
+                if (!imperfectMatches.isEmpty()) {
+                    imperfectMatches.write(DecisionParams.gridsOutputDirectory, "poor_taxmatch_age_" + ageYears + ".csv");
+                }
             }
             if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageYears<80) && ((ageYears % 5)==0))
                 ManagerFileGrids.unformattedWrite(grids, true);

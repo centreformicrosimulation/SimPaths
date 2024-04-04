@@ -15,9 +15,7 @@ public class DecisionParams {
     public static final boolean PARALLELISE_SOLUTIONS = false;
     public static final boolean SAVE_GRID_SLICES_TO_CSV = false;
     public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
-
-    public static final boolean SAVE_IMPERFECT_MATCHES = false;
-    public static final int IMPERFECT_THRESHOLD = 5999;
+    public static boolean saveImperfectTaxDbMatches = false;
 
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
@@ -189,6 +187,8 @@ public class DecisionParams {
         Parameters.annuityRates = new AnnuityRates();
         maxPensionPYear = getMaxWealthByAge(Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                 Parameters.annuityRates.getAnnuityRate(Occupancy.Couple, minBirthYear, 65);
+        if (Parameters.SAVE_IMPERFECT_TAXDB_MATCHES)
+            saveImperfectTaxDbMatches = true;
     }
 
     static void setGridsInputDirectory(String simName) {

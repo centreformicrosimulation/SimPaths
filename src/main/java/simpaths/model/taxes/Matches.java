@@ -68,13 +68,13 @@ public class Matches {
         return set.isEmpty();
     }
 
-    public void write(int ageYears) {
+    public void write(String fileDirectory, String fileName) {
         // Method to write imperfect matches to csv file for post-simulation processing
 
-        File dir = new File(DecisionParams.gridsOutputDirectory);
+        File dir = new File(fileDirectory);
         if (!dir.exists()) dir.mkdir();
-        String filePath = DecisionParams.gridsOutputDirectory + File.separator + "poor_match_age_" + ageYears + ".csv";
         try {
+            String filePath = fileDirectory + File.separator + fileName;
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
             CSVPrinter printer = new CSVPrinter(writer, csvFormat);

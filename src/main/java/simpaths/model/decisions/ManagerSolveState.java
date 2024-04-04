@@ -1,6 +1,7 @@
 package simpaths.model.decisions;
 
 
+import simpaths.data.Parameters;
 import simpaths.model.taxes.Matches;
 
 import java.util.List;
@@ -79,7 +80,7 @@ public class ManagerSolveState {
                 UtilityMaximisation solutionHere = new UtilityMaximisation(grids.valueFunction, states, expectations, emp1Pr, emp2Pr);
 
                 // check for imperfect matches
-                if (DecisionParams.SAVE_IMPERFECT_MATCHES && !expectations.imperfectMatches.isEmpty()) {
+                if ( DecisionParams.saveImperfectTaxDbMatches && !expectations.imperfectMatches.isEmpty()) {
                     localImperfectMatches.addSet(expectations.imperfectMatches.getSet());
                 }
 
@@ -143,7 +144,7 @@ public class ManagerSolveState {
         // save state optimum
         grids.populate(states, solutionMax);
 
-        if (DecisionParams.SAVE_IMPERFECT_MATCHES && !localImperfectMatches.isEmpty()) {
+        if ( DecisionParams.saveImperfectTaxDbMatches && !localImperfectMatches.isEmpty()) {
             int ageSpecificIndex = (int)states.returnAgeSpecificIndex();
             imperfectMatchStore.set(ageSpecificIndex, localImperfectMatches);
         }

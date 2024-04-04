@@ -31,6 +31,7 @@ import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import simpaths.model.enums.Les_c4;
+import simpaths.model.taxes.Match;
 
 import static java.lang.Math.max;
 import static java.lang.StrictMath.min;
@@ -245,6 +246,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	@Column(name="social_care_provision")
 	private Integer socialCareProvision;
+
+	@Column(name="tax_db_donor_id")
+	private Long taxDbDonorId;
+
+	@Transient
+	private Match taxDbMatch;
 
 	@Transient
 	private Integer n_children_allAges = 0; //Number of children of all ages in the household
@@ -1056,6 +1063,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
 			grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
 			calculateBUIncome();
+			taxDbMatch = evaluatedTransfers.getMatch();
+			taxDbDonorId = taxDbMatch.getCandidateID();
 		} else {
 			throw new RuntimeException("call to evaluate disposable income on assumption of zero risk of employment where there is risk");
 		}
@@ -1481,6 +1490,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
 			benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
 			grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+			taxDbMatch = evaluatedTransfers.getMatch();
+			taxDbDonorId = taxDbMatch.getCandidateID();
 		} else {
 			// intertemporal optimisations disabled
 
@@ -1491,6 +1502,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			MultiKeyMap<Labour, Double> disposableIncomeMonthlyByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 			MultiKeyMap<Labour, Double> benefitsReceivedMonthlyByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 			MultiKeyMap<Labour, Double> grossIncomeMonthlyByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+			MultiKeyMap<Labour, Match> taxDbMatchByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 			LinkedHashSet<MultiKey<Labour>> possibleLabourCombinations = findPossibleLabourCombinations(); // Find possible labour combinations for this benefit unit
 			MultiKeyMap<Labour, Double> labourSupplyUtilityExponentialRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
@@ -1555,6 +1567,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
 					benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
 					grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
+					taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
 					labourSupplyUtilityExponentialRegressionScoresByLabourPairs.put(labourKey, exponentialRegressionScore); //XXX: Adult children could contribute their income to the hh, but then utility would have to be joint for a household with adult children, and they couldn't be treated separately as they are at the moment?
 				}
 			} else {
@@ -1604,6 +1617,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
 						benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
 						grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
+						taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
 						labourSupplyUtilityExponentialRegressionScoresByLabourPairs.put(labourKey, exponentialRegressionScore);
 					}
 				} else if (Occupancy.Single_Female.equals(occupancy)) {        //Occupant must be a single female
@@ -1649,6 +1663,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
 						benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
 						grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
+						taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
 						labourSupplyUtilityExponentialRegressionScoresByLabourPairs.put(labourKey, exponentialRegressionScore);
 					}
 				}
@@ -1696,6 +1711,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			disposableIncomeMonthly = disposableIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
 			benefitsReceivedPerMonth = benefitsReceivedMonthlyByLabourPairs.get(labourSupplyChoice);
 			grossIncomeMonthly = grossIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
+			taxDbMatch = taxDbMatchByLabourPairs.get(labourSupplyChoice);
+			taxDbDonorId = taxDbMatch.getCandidateID();
 		}
 
 		//Update gross income variables for the household and all occupants:
@@ -4031,5 +4048,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 	public void setLabourHoursWeekly2Local(Integer hours) {
 		labourHoursWeekly2Local = hours;
+	}
+	public long getTaxDbDonorId() {
+		return taxDbDonorId;
+	}
+	public Match getTaxDbMatch() {
+		return taxDbMatch;
 	}
 }
