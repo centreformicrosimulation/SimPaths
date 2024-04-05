@@ -334,7 +334,7 @@ public class Parameters {
     private static String populationInitialisationInputFileName;
     private static MultiKeyMap<Object, Double> populationGrowthRatiosByRegionYear;
 
-    public static final boolean SAVE_IMPERFECT_TAXDB_MATCHES = true;
+    public static final boolean SAVE_IMPERFECT_TAXDB_MATCHES = false;
     public static final int IMPERFECT_THRESHOLD = 5999;
 
 

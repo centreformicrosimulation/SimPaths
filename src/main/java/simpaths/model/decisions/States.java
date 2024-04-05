@@ -87,7 +87,8 @@ public class States {
         populate(Axis.BirthYear, benefitUnit.getYear() - ageYears);
 
         // wage offer 1
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) populate(Axis.WageOffer1, refPerson.getWageOffer());
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1)
+            populate(Axis.WageOffer1, refPerson.getWageOffer());
 
         // retirement
         if (DecisionParams.flagRetirement && ageYears > DecisionParams.minAgeToRetire && ageYears <= DecisionParams.maxAgeFlexibleLabourSupply)
@@ -98,22 +99,28 @@ public class States {
             populate(Axis.Health, Math.min(Math.max(benefitUnit.getHealthValForBehaviour(), DecisionParams.MIN_HEALTH), DecisionParams.MAX_HEALTH));
 
         // disability
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) populate(Axis.Disability, (double)refPerson.getDisability());
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth)
+            populate(Axis.Disability, (double)refPerson.getDisability());
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptAll().getValue());
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+            populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptAll().getValue());
 
         // social care provision
-        if (Parameters.flagSocialCare) populate(Axis.SocialCareProvision, refPerson.getSocialCareProvision().getValue());
+        if (Parameters.flagSocialCare)
+            populate(Axis.SocialCareProvision, refPerson.getSocialCareProvision().getValue());
 
         // region
-        if ( DecisionParams.flagRegion ) populate(Axis.Region, benefitUnit.getRegionIndex());
+        if ( DecisionParams.flagRegion )
+            populate(Axis.Region, benefitUnit.getRegionIndex());
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) populate(Axis.Student, refPerson.getStudent());
+        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation)
+            populate(Axis.Student, refPerson.getStudent());
 
         // education
-        if ( DecisionParams.flagEducation ) populate(Axis.Education, refPerson.getEducation());
+        if ( DecisionParams.flagEducation )
+            populate(Axis.Education, refPerson.getEducation());
 
         // children
         int[] children;
