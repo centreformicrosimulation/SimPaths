@@ -3087,6 +3087,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if (male != null) {
 				male.setPartner(null);
 				occupancy = Occupancy.Single_Male;
+				if (male.getSocialCareProvision().equals(SocialCareProvision.OnlyPartner))
+					male.setSocialCareProvision(SocialCareProvision.None);
+				else if (male.getSocialCareProvision().equals(SocialCareProvision.PartnerAndOther))
+					male.setSocialCareProvision(SocialCareProvision.OnlyOther);
+				if (male.getCareHoursFromPartnerWeekly() > 0.0)
+					male.setCareHoursFromPartnerWeekly(0.0);
 			}
 			for (Person child : children) {
 				child.setIdMother((Person)null);
@@ -3121,11 +3127,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				child.setIdFather(male);
 			}
 		} else {
+
 			male = null;
 			idMale = null;
 			if (female != null) {
 				female.setPartner(null);
 				occupancy = Occupancy.Single_Female;
+				if (female.getSocialCareProvision().equals(SocialCareProvision.OnlyPartner))
+					female.setSocialCareProvision(SocialCareProvision.None);
+				else if (female.getSocialCareProvision().equals(SocialCareProvision.PartnerAndOther))
+					female.setSocialCareProvision(SocialCareProvision.OnlyOther);
+				if (female.getCareHoursFromPartnerWeekly() > 0.0)
+					female.setCareHoursFromPartnerWeekly(0.0);
 			}
 			for (Person child : children) {
 				child.setIdFather((Person)null);

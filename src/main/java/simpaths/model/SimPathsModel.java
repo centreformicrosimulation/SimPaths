@@ -245,7 +245,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean useSavedBehaviour = false;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
-	private String readGrid = "laptop serial";
+	private String readGrid = "test1";
 
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;

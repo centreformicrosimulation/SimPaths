@@ -4324,6 +4324,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 hours = careHoursFromPartnerWeekly;
         return hours;
     }
+    public void setCareHoursFromPartnerWeekly(double hours) {
+        careHoursFromPartnerWeekly = hours;
+    }
 
     public double getCareHoursFromParentWeekly() {
         double hours = 0.0;
