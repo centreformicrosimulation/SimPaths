@@ -1609,19 +1609,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         not disabled
          */
 
-        if(dag < Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY)
+        if (dag < Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY)
             return false;
-        if(dag > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY)
+        if (dag > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY)
             return false;
         if (les_c4.equals(Les_c4.Retired))
             return false;
-        if(les_c4.equals(Les_c4.Student))
+        if (les_c4.equals(Les_c4.Student))
             return false;
-        if(dlltsd.equals(Indicator.True))
+        if (dlltsd.equals(Indicator.True))
             return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.
-        //These people will not work for any wage (their activity status will will be set to Nonwork in the Labour Market Module
+        //These people will not work for any wage (their activity status will be set to Nonwork in the Labour Market Module
         double inverseMillsRatio = getDoubleValue(DoublesVariables.InverseMillsRatio);
         if(!Double.isFinite(inverseMillsRatio)) {
             return false;

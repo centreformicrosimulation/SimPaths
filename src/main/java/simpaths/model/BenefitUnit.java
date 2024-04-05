@@ -2883,10 +2883,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	public boolean getAtRiskOfWork() {
 
 		boolean atRiskOfWork = false;
-		if(female != null) {
+		if (female != null) {
 			atRiskOfWork = female.atRiskOfWork();
 		}
-		if(atRiskOfWork == false && male != null) {        //Can skip checking if atRiskOfWork is true already
+		if (atRiskOfWork == false && male != null) {        //Can skip checking if atRiskOfWork is true already
 			atRiskOfWork = male.atRiskOfWork();
 		}
 		return atRiskOfWork;
