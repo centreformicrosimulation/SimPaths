@@ -158,12 +158,12 @@ public class DecisionTests {
         double TOL = Math.ulp(1.0) * 2.0;
 
         // load in grids for comparison
-        String name1 = "test";
+        String name1 = "test0";
         DecisionParams.setGridsInputDirectory(name1);
         Grids grids1 = new Grids();
         ManagerFileGrids.read(grids1);
 
-        String name2 = "no care filter 11x11";
+        String name2 = "test1";
         DecisionParams.setGridsInputDirectory(name2);
         Grids grids2 = new Grids();
         ManagerFileGrids.read(grids2);

@@ -4052,7 +4052,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public SocialCareProvision getSocialCareProvision() {
-        return socialCareProvision;
+        if (socialCareProvision==null)
+            return SocialCareProvision.None;
+        else
+            return socialCareProvision;
     }
 
     public double getRetired() {
@@ -4294,7 +4297,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getCareHoursFromPartnerWeekly() {
         double hours = 0.0;
-        if (careHoursFromPartnerWeekly !=null)
+        if (careHoursFromPartnerWeekly != null)
             if (careHoursFromPartnerWeekly >0.0)
                 hours = careHoursFromPartnerWeekly;
         return hours;
