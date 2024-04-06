@@ -2463,8 +2463,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		double aggregatePersonsWeight = 0.;            //Aggregate Weight of simulated individuals (a weighted sum of the simulated individuals)
 		double aggregateHouseholdsWeight = 0.;        //Aggregate Weight of simulated benefitUnits (a weighted sum of the simulated households)
-		int minAgeInInitialPopulation = Integer.MAX_VALUE;
-		int maxAgeInInitialPopulation = Integer.MIN_VALUE;
 
 
         /*
