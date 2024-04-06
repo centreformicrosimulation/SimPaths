@@ -384,15 +384,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private Ydses_c5 ydses_c5_lag1Local;
     @Transient
-    Integer n_children_allAges_lag1Local;
+    Integer numberChildrenAllLocal_lag1;
     @Transient
-    Integer n_children_allAges_Local;
+    Integer numberChildrenAllLocal;
     @Transient
-    Integer n_children_02_lag1Local;
+    Integer numberChildren02Local_lag1;
     @Transient
-    private Integer n_children_017Local;
+    private Integer numberChildren017Local;
     @Transient
-    private Indicator d_children_2underLocal;
+    private Indicator indicatorChildren02Local;
     @Transient
     RandomGenerator healthInnov;
     @Transient
@@ -1389,7 +1389,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             benefitUnit.addChild(child);
 
             //Update maternity status
-            benefitUnit.newBornUpdate();			//Update benefitUnit fields related to new born children
             toGiveBirth = false;						//Reset boolean for next year
         }
     }
@@ -2537,35 +2536,23 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             else return 0.;
         case D_children_2under:
-            return (double) getD_children_2under().ordinal();
+            return (double)benefitUnit.getIndicatorChildren(0,2).ordinal();
         case D_children_3_6:
-            if (benefitUnit.getD_children_3_6() != null) {
-                return (double) benefitUnit.getD_children_3_6().ordinal();
-            }
-            else return 0.;
+            return (double)benefitUnit.getIndicatorChildren(3,6).ordinal();
         case D_children_7_12:
-            if (benefitUnit.getD_children_7_12() != null) {
-                return (double) benefitUnit.getD_children_7_12().ordinal();
-            }
-            else return 0.;
+            return (double)benefitUnit.getIndicatorChildren(7,12).ordinal();
         case D_children_13_17:
-            if (benefitUnit.getD_children_13_17() != null) {
-                return (double) benefitUnit.getD_children_13_17().ordinal();
-            }
-            else return 0.;
+            return (double)benefitUnit.getIndicatorChildren(13,17).ordinal();
         case D_children_18over:
-            if (benefitUnit.getD_children_18over() != null) {
-                return (double) benefitUnit.getD_children_18over().ordinal();	//Currently this will always return 0 (false) as children leave home when they are 18 years old
-            }
-            else return 0.;
+            return (double)benefitUnit.getIndicatorChildren(18,99).ordinal();
         case D_children:
-            return (getN_children_allAges()>0) ? 1. : 0.;
+            return (getNumberChildrenAll()>0) ? 1. : 0.;
         case Dnc_L1:
-            return (double) getN_children_allAges_lag1();
+            return (double) getNumberChildrenAll_lag1();
         case Dnc02_L1:
-            return (double) getN_children_02_lag1();
+            return (double) getNumberChildren02_lag1();
         case Dnc017:
-            return (double) getN_children_017();
+            return (double) getNumberChildren017();
         case Dgn:
             return (Gender.Male.equals(dgn)) ? 1.0 : 0.0;
         case Dhe:
@@ -2740,10 +2727,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Liwwh:
             return (double) liwwh;
         case NumberChildren:
-            return (double) benefitUnit.getChildren().size();
+            return (double)benefitUnit.getNumberChildrenAll();
         case NumberChildren_2under:
-            int count = benefitUnit.getN_children_0() + benefitUnit.getN_children_1() + benefitUnit.getN_children_2();
-            return (double) count;
+            return (double)benefitUnit.getNumberChildren(0,2);
         case OtherIncome:			// "Other income corresponds to other benefitUnit incomes divided by 10,000." (From Bargain et al. (2014).  From employment selection equation.
             return 0.;				// Other incomes "correspond to partner's and other family members' income as well as capital income of various sources."
         case Parents:
@@ -4103,20 +4089,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setYdses_c5_lag1Local(Ydses_c5 ydses_c5_lag1) {
         ydses_c5_lag1Local = ydses_c5_lag1;
     }
-    public void setN_children_allAges_lag1Local(Integer n_children_allAges_lag1) {
-        n_children_allAges_lag1Local = n_children_allAges_lag1;
+    public void setNumberChildrenAllLocal_lag1(Integer nbr) {
+        numberChildrenAllLocal_lag1 = nbr;
     }
-    public void setN_children_allAges_Local(Integer n_children_allAges) {
-        n_children_allAges_Local = n_children_allAges;
+    public void setNumberChildrenAllLocal(Integer nbr) {
+        numberChildrenAllLocal = nbr;
     }
-    public void setN_children_02_lag1Local(Integer n_children_02_lag1) {
-        n_children_02_lag1Local = n_children_02_lag1;
+    public void setNumberChildren02Local_lag1(Integer nbr) {
+        numberChildren02Local_lag1 = nbr;
     }
-    public void setN_children_017Local(Integer n_children_017) {
-        n_children_017Local = n_children_017;
+    public void setNumberChildren017Local(Integer nbr) {
+        numberChildren017Local = nbr;
     }
-    public void setD_children_2underLocal(Indicator d_children_2under) {
-        d_children_2underLocal = d_children_2under;
+    public void setIndicatorChildren02Local(Indicator idctr) {
+        indicatorChildren02Local = idctr;
     }
     private Ydses_c5 getYdses_c5_lag1() {
         if (benefitUnit!=null) {
@@ -4132,39 +4118,32 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return dhhtp_c4_lag1Local;
         }
     }
-    private Integer getN_children_allAges_lag1() {
+    private Integer getNumberChildrenAll_lag1() {
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildrenAll_lag1() != null) ? benefitUnit.getNumberChildrenAll_lag1() : 0;
         } else {
-            return n_children_allAges_lag1Local;
+            return numberChildrenAllLocal_lag1;
         }
     }
-    private Integer getN_children_allAges() {
+    private Integer getNumberChildrenAll() {
         if (benefitUnit != null) {
-            return benefitUnit.getN_children_allAges(false);
+            return benefitUnit.getNumberChildrenAll();
         } else {
-            return n_children_allAges_Local;
+            return numberChildrenAllLocal;
         }
     }
-    private Integer getN_children_02_lag1() {
+    private Integer getNumberChildren02_lag1() {
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildren02_lag1() != null) ? benefitUnit.getNumberChildren02_lag1() : 0;
         } else {
-            return n_children_02_lag1Local;
+            return numberChildren02Local_lag1;
         }
     }
-    private Integer getN_children_017() {
+    private Integer getNumberChildren017() {
         if (benefitUnit != null) {
-            return benefitUnit.getN_children_017();
+            return benefitUnit.getNumberChildren(0,17);
         } else {
-            return n_children_017Local;
-        }
-    }
-    private Indicator getD_children_2under() {
-        if (benefitUnit != null) {
-            return benefitUnit.getD_children_2under();
-        } else {
-            return d_children_2underLocal;
+            return numberChildren017Local;
         }
     }
     private double getInverseMillsRatio() {
@@ -4265,17 +4244,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getEarningsWeekly(int labourHoursWeekly) {
         return getHourlyWageRate(labourHoursWeekly) * (double) labourHoursWeekly;
     }
-    public Integer getN_children_017Local() {
-        return n_children_017Local;
+    public Integer getNumberChildren017Local() {
+        return numberChildren017Local;
     }
-    public Integer getN_children_allAges_Local() {
-        return n_children_allAges_Local;
+    public Integer getNumberChildrenAllLocal() {
+        return numberChildrenAllLocal;
     }
-    public int getN_children_allAges_int() {
-        return (n_children_allAges_Local != null)? n_children_allAges_Local: 0;
-    }
-    public Indicator getD_children_2underLocal() {
-        return d_children_2underLocal;
+    public Indicator getIndicatorChildren02Local() {
+        return indicatorChildren02Local;
     }
     public Map<Labour, Integer> getPersonContinuousHoursLabourSupplyMap() {
         return personContinuousHoursLabourSupplyMap;

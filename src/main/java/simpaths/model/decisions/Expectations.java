@@ -194,9 +194,9 @@ public class Expectations {
         personProxyNextPeriod.setYearLocal(currentStates.getYearByAge(ageYearsNextPeriod));
         personProxyNextPeriod.setDhhtp_c4_lag1Local(currentStates.getHouseholdTypeCode());
         personProxyNextPeriod.setYdses_c5_lag1Local(Ydses_c5.Q3);
-        personProxyNextPeriod.setN_children_allAges_lag1Local(currentStates.getChildrenAll());
-        personProxyNextPeriod.setN_children_allAges_Local(currentStates.getChildrenAll());
-        personProxyNextPeriod.setN_children_02_lag1Local(currentStates.getChildren02());
+        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(currentStates.getChildrenAll());
+        personProxyNextPeriod.setNumberChildrenAllLocal(currentStates.getChildrenAll());
+        personProxyNextPeriod.setNumberChildren02Local_lag1(currentStates.getChildren02());
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
         personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyNextPeriod.setDgn(currentStates.getGenderCode());
@@ -822,8 +822,8 @@ public class Expectations {
 
                 // ii = number of previous births for this birth age
                 int birthsHere02 = Math.min(ii + children02, 2);  // assume at most 2 children under 3
-                personProxyNextPeriod.setN_children_allAges_lag1Local(childrenAll + ii);
-                personProxyNextPeriod.setN_children_02_lag1Local(birthsHere02);
+                personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll + ii);
+                personProxyNextPeriod.setNumberChildren02Local_lag1(birthsHere02);
                 double proportionBirths = ManagerRegressions.getProbability(personProxyNextPeriod, regression);
                 probabilities[ii+1] += probabilities[ii] * proportionBirths;
                 probabilities[ii] *= (1 - proportionBirths);
@@ -835,8 +835,8 @@ public class Expectations {
 
         // restore benefitUnit and person characteristics
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
-        personProxyNextPeriod.setN_children_allAges_lag1Local(childrenAll);
-        personProxyNextPeriod.setN_children_02_lag1Local(children02);
+        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll);
+        personProxyNextPeriod.setNumberChildren02Local_lag1(children02);
     }
 
     private <E extends Enum<E> & DoubleValuedEnum> void expandExpectationsAllIndices(int stateIndex, Map<E, Double> probs) {
@@ -949,14 +949,14 @@ public class Expectations {
             val0 = personProxyNextPeriod.getDcpst();
             val1 = states.getDcpst();
         } else if (Axis.Child.equals(axis)) {
-            val0 = personProxyNextPeriod.getN_children_017Local();
+            val0 = personProxyNextPeriod.getNumberChildren017Local();
             val1 = states.getChildren017();
             if (val0==val1) {
-                val0 = personProxyNextPeriod.getD_children_2underLocal();
+                val0 = personProxyNextPeriod.getIndicatorChildren02Local();
                 val1 = states.getChildrenUnder3Indicator();
             }
             if (val0==val1) {
-                val0 = personProxyNextPeriod.getN_children_allAges_Local();
+                val0 = personProxyNextPeriod.getNumberChildrenAllLocal();
                 val1 = states.getChildren017();
             }
         } else {
@@ -981,9 +981,9 @@ public class Expectations {
             } else if (Axis.Cohabitation.equals(axis)) {
                 personProxyNextPeriod.setDcpst(states.getDcpst());
             } else if (Axis.Child.equals(axis)) {
-                personProxyNextPeriod.setN_children_017Local(states.getChildren017());
-                personProxyNextPeriod.setD_children_2underLocal(states.getChildrenUnder3Indicator());
-                personProxyNextPeriod.setN_children_allAges_Local(states.getChildren017());
+                personProxyNextPeriod.setNumberChildren017Local(states.getChildren017());
+                personProxyNextPeriod.setIndicatorChildren02Local(states.getChildrenUnder3Indicator());
+                personProxyNextPeriod.setNumberChildrenAllLocal(states.getChildren017());
             }
         }
         return changed;

@@ -573,7 +573,7 @@ public class Statistics2 {
                 double es = person.getBenefitUnit().getEquivalisedWeight();
                 
                 prMarr[ii] += person.getCohabiting();
-                avkids[ii] += person.getBenefitUnit().getN_children_allAges();
+                avkids[ii] += person.getBenefitUnit().getNumberChildrenAll();
                 health[ii] += person.getDheValue();
                 prDisa[ii] += (Indicator.True.equals(person.getDlltsd()))? 1.0: 0.0;
                 labInc[ii] += person.getEarningsWeekly();

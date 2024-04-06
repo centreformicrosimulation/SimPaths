@@ -1453,22 +1453,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				tabSet.add(DispIncByGenderAndEducationPlotter);
 			}
 
-			if (incomeHistograms) {
-				/*
-				Note that the variable isDisposableIncomeMonthlyImputedFlag is set to false at the beginning of each year, so this statistic reflects imputations done in a given year
-				 */
-				TimeSeriesSimulationPlotter ratioVsImputedConversionPlotter;
-				int colorCounter = 0;
-				ratioVsImputedConversionPlotter = new TimeSeriesSimulationPlotter("Share of BUs with imputed income", "Share");
-				Weighted_CrossSection.Double imputedCS = new Weighted_CrossSection.Double(model.getBenefitUnits(), BenefitUnit.class, "isDisposableIncomeMonthlyImputedFlag", true);
-				ratioVsImputedConversionPlotter.addSeries("Share imputed", new Weighted_MeanArrayFunction(imputedCS), null, colorArrayList.get(colorCounter), false);
-				colorCounter++;
-				ratioVsImputedConversionPlotter.setName("Share of BUs with imputed income");
-				updateChartSet.add(ratioVsImputedConversionPlotter);
-				tabSet.add(ratioVsImputedConversionPlotter);
-			}
-
-
 		    if (securityIndex) {
 
 		    	/*
