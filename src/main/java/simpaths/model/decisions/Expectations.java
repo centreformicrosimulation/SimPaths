@@ -109,7 +109,7 @@ public class Expectations {
         benefitUnitProxyThisPeriod.setDeh_c3Local(currentStates.getEducationCode());
         benefitUnitProxyThisPeriod.setRegion(currentStates.getRegionCode());
         for (int ii=0; ii<18; ii++) {
-            benefitUnitProxyThisPeriod.setN_children_byAge(ii, currentStates.getChildrenByAge(ii));
+            benefitUnitProxyThisPeriod.setNumberChildrenByAge(ii, currentStates.getChildrenByAge(ii));
         }
     }
 

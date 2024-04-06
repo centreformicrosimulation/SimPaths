@@ -99,7 +99,6 @@ public class Household implements EventListener, IDoubleSource {
         size = 0;
         weight = 0.0;
         for (BenefitUnit benefitUnit : benefitUnitSet) {
-
             size += benefitUnit.getSize();
             weight += benefitUnit.getWeight() * (double) benefitUnit.getSize();
         }
@@ -114,7 +113,7 @@ public class Household implements EventListener, IDoubleSource {
 
                 person.setWeight(newWeight);
             }
-            benefitUnit.updateSizeAndWeight();
+            benefitUnit.updateWeight();
         }
         updateSizeAndWeight();
     }

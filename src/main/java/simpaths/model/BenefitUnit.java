@@ -140,11 +140,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	@Transient
 	@Enumerated(EnumType.ORDINAL)
-	private Indicator d_children_3under_lag;                //Lag(1) of d_children_3under;
+	private Indicator indicatorChildren03_lag1;                //Lag(1) of d_children_3under;
 
 	@Transient
 	@Enumerated(EnumType.ORDINAL)
-	private Indicator d_children_4_12_lag;                //Lag(1) of d_children_4_12;
+	private Indicator indicatorChildren412_lag1;                //Lag(1) of d_children_4_12;
 
 	@Transient    //Temporarily added as new input database does not contain this information
 	@Enumerated(EnumType.ORDINAL)
@@ -257,7 +257,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	private Integer n_children_allAges = 0; //Number of children of all ages in the household
 
 	@Transient
-	private Integer n_children_allAges_lag1 = 0; //Lag(1) of the number of children of all ages in the household
+	private Integer numberChildrenAll_lag1 = 0; //Lag(1) of the number of children of all ages in the household
 
 	@Transient
 	private Integer n_children_02 = 0; //Number of children aged 0-2 in the household
@@ -275,7 +275,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Integer n_children_017 = 0; //Number of children aged 0-17 in the household
 
 	@Transient
-	private Integer n_children_02_lag1 = 0; //Lag(1) of the number of children aged 0-2 in the household
+	private Integer numberChildren02_lag1 = 0; //Lag(1) of the number of children aged 0-2 in the household
 
 	@Enumerated(EnumType.STRING)
 	private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
@@ -411,8 +411,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 		this.d_children_3under = Indicator.False;
 		this.d_children_4_12 = Indicator.False;
-		this.d_children_3under_lag = Indicator.False;
-		this.d_children_4_12_lag = Indicator.False;
+		this.indicatorChildren03_lag1 = Indicator.False;
+		this.indicatorChildren412_lag1 = Indicator.False;
 		this.d_children_2under = Indicator.False;
 		this.d_children_3_6 = Indicator.False;
 		this.d_children_7_12 = Indicator.False;
@@ -437,13 +437,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.n_children_16 = 0;
 		this.n_children_17 = 0;
 		this.n_children_allAges = 0;
-		this.n_children_allAges_lag1 = 0;
+		this.numberChildrenAll_lag1 = 0;
 		this.n_children_02 = 0;
 		this.n_children_04 = 0;
 		this.n_children_59 = 0;
 		this.n_children_1017 = 0;
 		this.n_children_517 = 0;
-		this.n_children_02_lag1 = 0;
+		this.numberChildren02_lag1 = 0;
 		this.childcareCostPerWeek = 0.0;
 		this.socialCareCostPerWeek = 0.0;
 		this.socialCareProvision = 0;
@@ -567,8 +567,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.size = originalBenefitUnit.size;
 		this.d_children_3under = originalBenefitUnit.d_children_3under;
 		this.d_children_4_12 = originalBenefitUnit.d_children_4_12;
-		this.d_children_3under_lag = originalBenefitUnit.d_children_3under_lag;
-		this.d_children_4_12_lag = originalBenefitUnit.d_children_4_12_lag;
+		this.indicatorChildren03_lag1 = originalBenefitUnit.indicatorChildren03_lag1;
+		this.indicatorChildren412_lag1 = originalBenefitUnit.indicatorChildren412_lag1;
 		this.d_children_2under = originalBenefitUnit.d_children_2under;
 		this.d_children_3_6 = originalBenefitUnit.d_children_3_6;
 		this.d_children_7_12 = originalBenefitUnit.d_children_7_12;
@@ -593,14 +593,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.n_children_16 = originalBenefitUnit.n_children_16;
 		this.n_children_17 = originalBenefitUnit.n_children_17;
 		this.n_children_allAges = originalBenefitUnit.n_children_allAges;
-		this.n_children_allAges_lag1 = originalBenefitUnit.n_children_allAges_lag1;
+		this.numberChildrenAll_lag1 = originalBenefitUnit.numberChildrenAll_lag1;
 		this.n_children_02 = originalBenefitUnit.n_children_02;
 		this.n_children_04 = originalBenefitUnit.n_children_04;
 		this.n_children_59 = originalBenefitUnit.n_children_59;
 		this.n_children_1017 = originalBenefitUnit.n_children_1017;
 		this.n_children_517 = originalBenefitUnit.n_children_517;
 		this.n_children_017 = originalBenefitUnit.n_children_017;
-		this.n_children_02_lag1 = originalBenefitUnit.n_children_02_lag1;
+		this.numberChildren02_lag1 = originalBenefitUnit.numberChildren02_lag1;
 		this.childcareCostPerWeek = originalBenefitUnit.childcareCostPerWeek;
 		this.socialCareCostPerWeek = originalBenefitUnit.socialCareCostPerWeek;
 		this.socialCareProvision = originalBenefitUnit.socialCareProvision;
@@ -626,6 +626,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 
 	public enum Processes {
+		UpdateLags,
 		Update,        //This updates the household fields, such as number of children of a certain age
 		CalculateChangeInEDI, //Calculate change in equivalised disposable income
 		Homeownership,
@@ -639,6 +640,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Override
 	public void onEvent(Enum<?> type) {
 		switch ((Processes) type) {
+			case UpdateLags:
+				updateLagFields();
 			case Update:
 				updateChildrenFields();
 				updateOccupancy();
@@ -677,6 +680,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 		}
 	}
+	protected void updateLagFields() {
+
+		indicatorChildren03_lag1 = getIndicatorChildren(0,3);
+		indicatorChildren412_lag1 = getIndicatorChildren(4,12);
+		numberChildrenAll_lag1 = getNumberChildrenAll();
+		numberChildren02_lag1 = getNumberChildren(0,2);
+		dhhtp_c4_lag1 = getDhhtp_c4();
+
+		equivalisedDisposableIncomeYearly_lag1 = getEquivalisedDisposableIncomeYearly();
+		atRiskOfPoverty_lag1 = getAtRiskOfPoverty();
+		ydses_c5_lag1 = getYdses_c5();
+	}
 
 	protected void initializeFields() {
 
@@ -711,10 +726,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 
 		//Define lagged values of children variables
-		d_children_3under_lag = d_children_3under;
-		d_children_4_12_lag = d_children_4_12;
-		n_children_allAges_lag1 = n_children_allAges;
-		n_children_02_lag1 = n_children_02;
+		indicatorChildren03_lag1 = d_children_3under;
+		indicatorChildren412_lag1 = d_children_4_12;
+		numberChildrenAll_lag1 = n_children_allAges;
+		numberChildren02_lag1 = n_children_02;
 
 		//Reset child age variables to update
 		n_children_0 = 0;
@@ -814,11 +829,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		n_children_1017 = n_children_10 + n_children_11 + n_children_12 + n_children_13 + n_children_14 + n_children_15 + n_children_16 + n_children_17;
 		n_children_517 = n_children_59 + n_children_1017;
 		n_children_017 = n_children_04 + n_children_517;
-		if (n_children_allAges_lag1 == null) {
-			n_children_allAges_lag1 = n_children_allAges - n_children_0;
+		if (numberChildrenAll_lag1 == null) {
+			numberChildrenAll_lag1 = n_children_allAges - n_children_0;
 		}
-		if (n_children_02_lag1 == null) {
-			n_children_02_lag1 = n_children_1 + n_children_2 + n_children_3;
+		if (numberChildren02_lag1 == null) {
+			numberChildren02_lag1 = n_children_1 + n_children_2 + n_children_3;
 		}
 
 		//New fields for Labour Supply Utility Regression calculation
@@ -851,11 +866,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		if(n_children_3 > 0) {
 			d_children_3under = Indicator.True;
 		}
-		if (d_children_3under_lag == null) {
+		if (indicatorChildren03_lag1 == null) {
 			if (n_children_1 + n_children_2 + n_children_3 + n_children_4 > 0) {
-				d_children_3under_lag = Indicator.True;
+				indicatorChildren03_lag1 = Indicator.True;
 			} else {
-				d_children_3under_lag = Indicator.False;
+				indicatorChildren03_lag1 = Indicator.False;
 			}
 		}
 
@@ -863,12 +878,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		if ( n_children_4 > 0 || n_children_5 > 0 || n_children_6 > 0){
 			d_children_4_12 = Indicator.True;
 		}
-		if (d_children_4_12_lag == null) {
+		if (indicatorChildren412_lag1 == null) {
 			if (n_children_5 + n_children_6 + n_children_7 + n_children_8 + n_children_9 + n_children_10 +
 					n_children_11 + n_children_12 + n_children_13 > 0) {
-				d_children_4_12_lag = Indicator.True;
+				indicatorChildren412_lag1 = Indicator.True;
 			} else {
-				d_children_4_12_lag = Indicator.False;
+				indicatorChildren412_lag1 = Indicator.False;
 			}
 		}
 	}
@@ -1851,7 +1866,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 
 	// benefit unit weight is average of all benefit unit members
-	public void updateSizeAndWeight() {
+	public void updateWeight() {
 
 		weight = 0.0d;
 		size = 0;
@@ -1887,7 +1902,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		} else {
 			setMale(person);
 		}
-		updateSizeAndWeight();
+		updateWeight();
 	}
 
 	public void addResponsibleCouple(Person person, Person partner) {
@@ -1905,7 +1920,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			setMale(person);
 			setFemale(partner);
 		}
-		updateSizeAndWeight();
+		updateWeight();
 	}
 
 	public void addChild(Person person) {
@@ -1924,7 +1939,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		if (male != null) person.setIdFather(male);
 		if (female != null) person.setIdMother(female);
 
-		updateSizeAndWeight();
+		updateWeight();
 	}
 
 	public void removePerson(Person person) {
@@ -1946,7 +1961,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		if (male == null && female == null) {
 			model.removeBenefitUnit(this);
 		} else {
-			updateSizeAndWeight();
+			updateWeight();
 		}
 	}
 
@@ -2874,7 +2889,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				female.setPartner(null);
 			}
 		}
-		updateSizeAndWeight();
+		updateWeight();
 	}
 
 	/*
@@ -3247,12 +3262,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return d_children_18over;
 	}
 
-	public Indicator getD_children_3under_lag() {
-		return d_children_3under_lag;
+	public Indicator getIndicatorChildren03_lag1() {
+		return indicatorChildren03_lag1;
 	}
 
-	public Indicator getD_children_4_12_lag() {
-		return d_children_4_12_lag;
+	public Indicator getIndicatorChildren412_lag1() {
+		return indicatorChildren412_lag1;
 	}
 
 	public Integer getN_children_0() {
@@ -3348,8 +3363,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.n_children_allAges = n_children_allAges;
 	}
 
-	public Integer getN_children_allAges_lag1() {
-		return n_children_allAges_lag1;
+	public Integer getNumberChildrenAll_lag1() {
+		return numberChildrenAll_lag1;
 	}
 
 
@@ -3358,8 +3373,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 
 
-	public Integer getN_children_02_lag1() {
-		return n_children_02_lag1;
+	public Integer getNumberChildren02_lag1() {
+		return numberChildren02_lag1;
 	}
 
     public Integer getN_children_017() {
@@ -3452,9 +3467,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return dhhtp_c4_lag1;
 	}
 
-	public void setN_children_allAges_lag1(int n_children_allAges_lag1) { this.n_children_allAges_lag1 =  n_children_allAges_lag1; }
+	public void setNumberChildrenAll_lag1(int numberChildrenAll_lag1) { this.numberChildrenAll_lag1 = numberChildrenAll_lag1; }
 
-	public void setN_children_02_lag1(int n_children_02_lag1) { this.n_children_02_lag1 =  n_children_02_lag1; }
+	public void setNumberChildren02_lag1(int numberChildren02_lag1) { this.numberChildren02_lag1 = numberChildren02_lag1; }
 
 	public void setOccupancy(Occupancy occupancy) { this.occupancy =  occupancy; }
 
@@ -3615,7 +3630,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return region.getValue();
 	}
 
-	public int getChildrenByAge(int age) {
+	public int getNumberChildrenByAge(int age) {
 		int children = 0;
 		if (age==0) {
 			if (n_children_0 != null) children = n_children_0;
@@ -3656,7 +3671,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		return children;
 	}
-	public void setN_children_byAge(int age, int number) {
+
+	public void setNumberChildrenByAge(int age, int number) {
 
 		switch(age) {
 			case (0):
@@ -4067,5 +4083,50 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 	public Match getTaxDbMatch() {
 		return taxDbMatch;
+	}
+
+	public int getNumberChildrenAll() {
+		int nChildren = 0;
+		if (model==null) {
+			nChildren = getNumberChildren(0,Parameters.AGE_TO_BECOME_RESPONSIBLE);
+		} else {
+			nChildren = children.size();
+		}
+		return nChildren;
+	}
+	public int getNumberChildren(int age) {
+		return getNumberChildren(age, age);
+	}
+	public int getNumberChildren(int minAge, int maxAge) {
+		int nChildren = 0;
+		if (model==null) {
+			for (int aa=minAge; aa<=maxAge; aa++) {
+				nChildren += getNumberChildrenByAge(aa);
+			}
+		} else {
+			for (Person child : children) {
+				if ( (child.getDag()>=minAge) && (child.getDag()<=maxAge) )
+					nChildren++;
+			}
+		}
+		return nChildren;
+	}
+	public Indicator getIndicatorChildren(int minAge, int maxAge) {
+		Indicator flag = Indicator.False;
+		if (model==null) {
+			for (int aa=minAge; aa<=maxAge; aa++) {
+				if (getNumberChildrenByAge(aa) > 0) {
+					flag = Indicator.True;
+					break;
+				}
+			}
+		}
+		for (Person child : children) {
+			if ( (child.getDag()>=minAge) && (child.getDag()<=maxAge) ) {
+				flag = Indicator.True;
+				break;
+			}
+		}
+		return flag;
 	}
 }

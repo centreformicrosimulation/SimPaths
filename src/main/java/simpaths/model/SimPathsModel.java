@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.random.RandomGenerator;
-import java.util.concurrent.TimeUnit;
 
 // import plug-in packages
 import jakarta.persistence.EntityManager;
@@ -57,7 +56,6 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
-import simpaths.model.taxes.database.DatabaseExtension;
 
 
 /**
@@ -427,6 +425,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		addEventToAllYears(Processes.UpdateParameters);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
+		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateLags);
 
 		//1 - DEMOGRAPHIC MODULE
 		// A: Ageing
@@ -436,7 +435,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// B: Population Alignment - adjust population to projections by Gender and Age, and creates new population for minimum age
 		addEventToAllYears(Processes.PopulationAlignment);
 
-		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Update);
+		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
 		// C: Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
@@ -710,7 +709,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					if (benefitUnit.getMale() == null && benefitUnit.getFemale() == null) {
 						benefitUnitsWithoutAdult.add(benefitUnit);
 					} else if (benefitUnit.getSize() <= 0) {
-						benefitUnit.updateSizeAndWeight();
+						benefitUnit.updateWeight();
 						if (benefitUnit.getSize() <= 0) {
 							benefitUnitsWithoutAdult.add(benefitUnit);
 						}
@@ -799,7 +798,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			person.setWeight(weight);
 		}
 		for (BenefitUnit benefitUnit : benefitUnits) {
-			benefitUnit.updateSizeAndWeight();
+			benefitUnit.updateWeight();
 		}
 		for (Household household : households) {
 			household.updateSizeAndWeight();

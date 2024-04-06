@@ -7,7 +7,6 @@ import java.util.random.RandomGenerator;
 
 import jakarta.persistence.*;
 
-import org.hibernate.query.sqm.function.SelfRenderingOrderedSetAggregateFunctionSqlAstExpression;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.RegressionNames;
 import simpaths.model.enums.*;
@@ -2676,9 +2675,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case InverseMillsRatio:
             return getInverseMillsRatio();
         case Ld_children_3under:
-            return benefitUnit.getD_children_3under_lag().ordinal();
+            return benefitUnit.getIndicatorChildren03_lag1().ordinal();
         case Ld_children_4_12:
-            return benefitUnit.getD_children_4_12_lag().ordinal();
+            return benefitUnit.getIndicatorChildren412_lag1().ordinal();
         case Lemployed:
             if(les_c4_lag1 != null) {		//Problem will null pointer exceptions for those who are inactive and then become active as their lagged employment status is null!
                 return les_c4_lag1.equals(Les_c4.EmployedOrSelfEmployed)? 1. : 0.;
@@ -2821,9 +2820,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Yplgrs_dv_L3:
             return yplgrs_dv_lag3;
         case Ld_children_3underIT:
-            return model.getCountry().equals(Country.IT) ? benefitUnit.getD_children_3under_lag().ordinal() : 0.;
+            return model.getCountry().equals(Country.IT) ? benefitUnit.getIndicatorChildren03_lag1().ordinal() : 0.;
         case Ld_children_4_12IT:
-            return model.getCountry().equals(Country.IT) ? benefitUnit.getD_children_4_12_lag().ordinal() : 0.;
+            return model.getCountry().equals(Country.IT) ? benefitUnit.getIndicatorChildren412_lag1().ordinal() : 0.;
         case LunionIT:
             return (household_status_lag.equals(Household_status.Couple) && (getRegion().toString().startsWith(Country.IT.toString())))? 1. : 0.;
         case EduMediumIT:
@@ -4135,7 +4134,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
     private Integer getN_children_allAges_lag1() {
         if (benefitUnit != null) {
-            return (benefitUnit.getN_children_allAges_lag1() != null) ? benefitUnit.getN_children_allAges_lag1() : 0;
+            return (benefitUnit.getNumberChildrenAll_lag1() != null) ? benefitUnit.getNumberChildrenAll_lag1() : 0;
         } else {
             return n_children_allAges_lag1Local;
         }
@@ -4149,7 +4148,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
     private Integer getN_children_02_lag1() {
         if (benefitUnit != null) {
-            return (benefitUnit.getN_children_02_lag1() != null) ? benefitUnit.getN_children_02_lag1() : 0;
+            return (benefitUnit.getNumberChildren02_lag1() != null) ? benefitUnit.getNumberChildren02_lag1() : 0;
         } else {
             return n_children_02_lag1Local;
         }
