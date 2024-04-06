@@ -24,7 +24,7 @@ import java.util.Set;
 public class MatchIndicesSet {
 
     private Set<MatchIndices> set = new HashSet<>();
-    private final String[] HEADERS = {"candidateID", "key0", "targetIncome", "age", "adults", "children", "employment", "disability",
+    private final String[] HEADERS = {"candidateID", "gridAge", "simYear", "key0", "targetIncome", "age", "adults", "children", "employment", "disability",
     "careprovision", "income", "dualincome", "childcare"};
 
 
@@ -56,6 +56,8 @@ public class MatchIndicesSet {
             for (MatchIndices indices : set) {
                 List<String> record = new ArrayList<>();
                 record.add(indices.getCandidateIDString());
+                record.add(indices.getGridAgeString());
+                record.add(indices.getSimYearString());
                 record.add(indices.getKey0String());
                 record.add(indices.getTargetOriginalIncomeString());
                 for (MatchFeature feature : MatchFeature.values()) {

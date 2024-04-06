@@ -15,6 +15,8 @@ public class MatchIndices {
      * ATTRIBUTES
      */
     private long candidateID;
+    private int gridAge;
+    private int simYear;
     private int key0;
     double targetNormalisedOriginalIncome;  // normalised income is per month in BASE_PRICE_YEAR year prices
     private int childcare;
@@ -35,6 +37,8 @@ public class MatchIndices {
 
     public MatchIndices(Match match) {
         candidateID = match.getCandidateID();
+        gridAge = match.getGridAge();
+        simYear = match.getSimYear();
         key0 = match.getKey0();
         targetNormalisedOriginalIncome = match.getTargetNormalisedOriginalIncome();
     }
@@ -198,6 +202,12 @@ public class MatchIndices {
     }
     public String getCandidateIDString() {
         return Long.toString(candidateID);
+    }
+    public String getGridAgeString() {
+        return String.valueOf(gridAge);
+    }
+    public String getSimYearString() {
+        return String.valueOf(simYear);
     }
     public String getKey0String() {
         return String.valueOf(getKey0());

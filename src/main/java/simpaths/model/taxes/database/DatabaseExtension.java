@@ -24,12 +24,12 @@ public class DatabaseExtension {
         String[] variablesLong = Variables2019b.listLong();
         String[] variablesInt = Variables2019b.listInt();
         String datasetPath = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input\\UK_2019_b1.txt";
-        String imperfectMatchesPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\tests\\behavioural solutions\\Grid size\\51x51tax2";
+        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\20240405212340";
         String outputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
-        String outputFilename = "UK_2019_b1adj.txt";
+        String outputFilename = "UK_2019_b1 - augmented.txt";
 
         // compile data that identify database gaps
-        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(true, imperfectMatchesPath);
+        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(true, imperfectMatchesSimPath);
 
         // load input data
         InputDataSet dataset = new InputDataSet();
@@ -95,10 +95,16 @@ public class DatabaseExtension {
         Matches imperfectMatches = new Matches();
         try {
             for (int aa=18; aa<131; aa++) {
-                String filePath = dir + File.separator + "poor_match_age_" + aa + ".csv";
+                String filePath = dir + File.separator + "grids\\poor_taxmatch_age_" + aa + ".csv";
                 File file = new File(filePath);
                 if (file.exists())
-                    imperfectMatches.read(filePath);
+                    imperfectMatches.read(true, aa, filePath);
+            }
+            for (int yy=2016; yy<=2026; yy++) {
+                String filePath = dir + File.separator + "csv\\poor_taxmatch_year_" + yy + ".csv";
+                File file = new File(filePath);
+                if (file.exists())
+                    imperfectMatches.read(false, yy, filePath);
             }
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);

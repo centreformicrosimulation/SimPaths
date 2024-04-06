@@ -24,20 +24,6 @@ public class DecisionTests {
 
     public DecisionTests() {}
 
-    public static void apacheCsvReadTest() {
-
-        Matches imperfectMatches = new Matches();
-
-        // file reference
-        File dir = new File("c:/temp/temp");
-        String filePath = "c:/temp/temp/poor_match_age_75.csv";
-
-        try {
-            imperfectMatches.read(filePath);
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
-        }
-    }
     public static void apacheCsvWriteTest2() {
 
         List<WriteGridsBean> beans = new ArrayList<>();

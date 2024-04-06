@@ -16,6 +16,8 @@ public class Match {
     private long candidateID;
     private int matchCriterion;
     double targetNormalisedOriginalIncome;  // normalised income is per month in BASE_PRICE_YEAR year prices
+    private int gridAge;
+    private int simYear;
 
 
     /**
@@ -27,9 +29,13 @@ public class Match {
         this.matchCriterion = matchCriterion;
         this.targetNormalisedOriginalIncome = targetNormalisedOriginalIncome;
     }
-    public Match(int key0, long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
+    public Match(boolean flagGrid, int id, int key0, long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
         this(candidate, matchCriterion, targetNormalisedOriginalIncome);
         this.key0 = key0;
+        if (flagGrid)
+            gridAge = id;
+        else
+            simYear = id;
     }
     public Match(DonorKeys key, long candidate, int matchCriterion, double targetNormalisedOriginalIncome) {
         this(candidate, matchCriterion, targetNormalisedOriginalIncome);
@@ -80,6 +86,15 @@ public class Match {
     public void setTargetNormalisedOriginalIncome(double targetNormalisedOriginalIncome) {
         this.targetNormalisedOriginalIncome = targetNormalisedOriginalIncome;
     }
+
+    public int getGridAge() {
+        return gridAge;
+    }
+
+    public int getSimYear() {
+        return simYear;
+    }
+
 
     /**
      * WORKER METHODS

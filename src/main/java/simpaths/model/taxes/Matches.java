@@ -94,7 +94,7 @@ public class Matches {
         }
     }
 
-    public void read(String filePath) throws IOException {
+    public void read(boolean flagGrid, int id, String filePath) throws IOException {
 
         File file = new File(filePath);
         if (!file.exists())
@@ -108,7 +108,7 @@ public class Matches {
             int criterion = Integer.parseInt(record.get("criterion"));
             long candidateID = Long.parseLong(record.get("candidateID"));
             double targetNormalisedOriginalIncome = Double.parseDouble(record.get("targetIncome"));
-            addMatch(new Match(key0, candidateID, criterion, targetNormalisedOriginalIncome));
+            addMatch(new Match(flagGrid, id, key0, candidateID, criterion, targetNormalisedOriginalIncome));
         }
     }
 }
