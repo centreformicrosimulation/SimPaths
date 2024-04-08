@@ -54,7 +54,7 @@ public class KeyFunction4 {
                                       int careProvision, double originalIncomePerWeek, double secondIncomePerWeek, double childcareCostPerWeek) {
 
         // initialise working variables
-        int spa = getStatePensionAge(age, simYear);
+        int spa = Parameters.getStatePensionAge(simYear, age);
         Map<MatchFeature, Map<Integer, Integer>> taxdbCounter = getTaxdbCounter();
         Map<MatchFeature, Map<Integer, Integer>> units = new HashMap<>();
         Integer[] result = new Integer[Parameters.TAXDB_REGIMES];
@@ -325,27 +325,6 @@ public class KeyFunction4 {
             lowIncome = true;
         }
         return lowIncome;
-    }
-
-    /**
-     * WORKER METHOD TO PROVIDE STATE PENSION AGE AND YEAR
-     * @param age age of eldest family member
-     * @param simYear simulated year
-     * @return state pension age
-     */
-    public int getStatePensionAge(int age, int simYear) {
-
-        int spa;
-        if (simYear - age + 65 < 2019) {
-            spa = 65;
-        } else if (simYear - age + 66 < 2027) {
-            spa = 66;
-        } else if (simYear - age + 67 < 2045) {
-            spa = 67;
-        } else {
-            spa = 68;
-        }
-        return spa;
     }
 
     /**

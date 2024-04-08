@@ -53,7 +53,7 @@ public class TaxEvaluation {
             if (liquidWealth==null)
                 throw new RuntimeException("problem identifying wealth in evaluation of social care costs after transfer payments");
             boolean flagCouple = (numberMembersOver17 > 1) ? true : false;
-            boolean flagSPA = (keyFunction.getStatePensionAge() <= age) ? true : false;
+            boolean flagSPA = (Parameters.getStatePensionAge(year, age) <= age) ? true : false;
             socialCareSupportPerMonth = new SocialCareExpenditureSupport(year, flagCouple, flagSPA, socialCareCostPerMonth, imputedTransfers.getDisposableIncomePerMonth(), liquidWealth).getSupportPerMonth();
         }
     }
@@ -77,6 +77,10 @@ public class TaxEvaluation {
         imputedTransfers = new DonorTaxImputation(keys);
         imputedTransfers.evaluate();
         match = new Match(keys, imputedTransfers.getDonorID(), imputedTransfers.getMatchCriterion(), Math.sinh(imputedTransfers.getTargetNormalisedOriginalIncome()));
+        if (numberChildren5To9+numberChildren10To17+numberChildrenUnder5==0 && childcareCostPerMonth>0.0)
+            throw new RuntimeException("call for childcare with no children");
+        if (imputedTransfers.getMatchCriterion()==100996 && imputedTransfers.getDonorID()==2019282201)
+            throw new RuntimeException("this is my error");
     }
 
     public Match getMatch() {

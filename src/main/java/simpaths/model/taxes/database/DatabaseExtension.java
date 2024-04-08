@@ -24,12 +24,22 @@ public class DatabaseExtension {
         String[] variablesLong = Variables2019b.listLong();
         String[] variablesInt = Variables2019b.listInt();
         String datasetPath = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input\\UK_2019_b1.txt";
-        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\20240405212340";
+        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\test0";
         String outputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
         String outputFilename = "UK_2019_b1 - augmented.txt";
+        boolean flagReadScreenedIndices = true;
 
         // compile data that identify database gaps
-        MatchIndicesSet imperfectMatchIndices = screenImperfectMatches(true, imperfectMatchesSimPath);
+        MatchIndicesSet imperfectMatchIndices;
+        if (flagReadScreenedIndices) {
+            try {
+                imperfectMatchIndices = new MatchIndicesSet();
+                imperfectMatchIndices.read(imperfectMatchesSimPath);
+            } catch (IOException ioe) {
+                throw new RuntimeException(ioe);
+            }
+        } else
+            imperfectMatchIndices = screenImperfectMatches(true, imperfectMatchesSimPath);
 
         // load input data
         InputDataSet dataset = new InputDataSet();
@@ -40,39 +50,49 @@ public class DatabaseExtension {
         }
 
         // extend dataset
+        int pop = imperfectMatchIndices.getSet().size();
+        System.out.println("Expanding input data to account for additional " + pop + " benefit units");
+        int no = 0, dec=1;
         long newHouseholdId = 999000000;
         for (MatchIndices imperfectMatch : imperfectMatchIndices.getSet()) {
 
-            CloneHousehold household = new CloneHousehold();
-            long[] result = household.clone(imperfectMatch.getCandidateID(), dataset, variablesAll, newHouseholdId);
+            if (pop>5000) {
+                no++;
+                if (no > pop/10*dec) {
+                    System.out.println("Completed processing " + dec * 10 + "% of targeted benefit units");
+                    dec++;
+                }
+            }
+            CloneBenefitUnit benefitUnit = new CloneBenefitUnit();
+            long[] result = benefitUnit.clone(imperfectMatch.getCandidateID(), dataset, variablesAll, newHouseholdId);
             newHouseholdId = result[0];
             long newPersonId = result[1];
 
             // match clone to target indices
             boolean changed;
-            changed = household.matchAgeIndex(imperfectMatch.getAge());
-            newPersonId = household.matchAdultIndex(imperfectMatch.getAdults(), newPersonId);
-            newPersonId = household.matchChildrenIndex(imperfectMatch.getChildren(), newPersonId);
-            changed = household.matchEmploymentIndex(imperfectMatch.getEmployment());
-            changed = household.matchDisabledIndex(imperfectMatch.getDisability());
-            changed = household.matchCarerIndex(imperfectMatch.getCareProvision());
-            changed = household.matchChildcareIndex(imperfectMatch.getChildcare());
-            changed = household.matchDualIncomeIndex(imperfectMatch.getDualIncome());
+            changed = benefitUnit.matchAgeIndex(imperfectMatch.getAge());
+            newPersonId = benefitUnit.matchAdultIndex(imperfectMatch.getAdults(), newPersonId);
+            newPersonId = benefitUnit.matchChildrenIndex(imperfectMatch.getChildren(), newPersonId);
+            changed = benefitUnit.matchEmploymentIndex(imperfectMatch.getEmployment());
+            changed = benefitUnit.matchDisabledIndex(imperfectMatch.getDisability());
+            changed = benefitUnit.matchCarerIndex(imperfectMatch.getCareProvision());
+            changed = benefitUnit.matchChildcareIndex(imperfectMatch.getChildcare());
+            changed = benefitUnit.matchDualIncomeIndex(imperfectMatch.getDualIncome());
 
             // adjust income add to input data
-            int priceYear = household.getPriceYear();
+            int priceYear = benefitUnit.getPriceYear();
             double targetIncome = imperfectMatch.getTargetNormalisedOriginalIncome() *
                     Parameters.getTimeSeriesValue(priceYear, TimeSeriesVariable.Inflation) /
                     Parameters.getTimeSeriesValue(Parameters.BASE_PRICE_YEAR, TimeSeriesVariable.Inflation);
             for (double income = targetIncome - 100.0; income <= targetIncome + 101.0; income += 50.0) {
 
-                household.matchIncome(income);
-                dataset.add(household);
+                benefitUnit.matchIncome(income);
+                dataset.add(benefitUnit);
                 if (income<targetIncome + 99.0) {
-                    CloneHousehold household1 = new CloneHousehold();
-                    result = household1.clone(household, variablesAll, newHouseholdId);
+                    CloneBenefitUnit household1 = new CloneBenefitUnit();
+                    result = household1.clone(benefitUnit, variablesAll, newHouseholdId);
                     newHouseholdId = result[0];
-                    household = household1;
+                    benefitUnit = household1;
                 }
             }
         }

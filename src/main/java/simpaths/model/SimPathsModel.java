@@ -57,6 +57,7 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
+import simpaths.model.taxes.database.DatabaseExtension;
 
 
 /**

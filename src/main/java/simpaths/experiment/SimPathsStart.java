@@ -52,8 +52,6 @@ import simpaths.model.taxes.*;
 import simpaths.model.taxes.database.DatabaseExtension;
 import simpaths.model.taxes.database.MatchIndicesSet;
 
-import static simpaths.model.taxes.database.DatabaseExtension.screenImperfectMatches;
-
 
 /**
  *

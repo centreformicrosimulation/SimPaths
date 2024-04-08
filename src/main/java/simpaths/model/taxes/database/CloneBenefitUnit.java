@@ -11,7 +11,7 @@ import java.util.*;
  * CLASS TO MANAGE PRODUCTION AND SPECIFICATION OF CLONES TO FILL GAPS IN TAX DATABASE
  *
  */
-public class CloneHousehold {
+public class CloneBenefitUnit {
 
     /**
      * ATTRIBUTES
@@ -33,19 +33,21 @@ public class CloneHousehold {
     /**
      * CONSTRUCTORS
      */
-    public CloneHousehold(){}
+    public CloneBenefitUnit(){}
 
     public long[] clone(long idTarget, InputDataSet dataSet, String[] variablesAll, long newHouseholdId) {
 
         this.variablesAll = variablesAll;
         long newPersonId = newHouseholdId*100 + 1;
-        long idhh = findTargetHouseholdId(idTarget, dataSet);
-        long[] result = cloneAllHouseholdMembers(dataSet, idhh, idTarget, newHouseholdId, newPersonId);
+        long[] ids = findTargetHouseholdId(idTarget, dataSet);
+        long householdId = ids[0];
+        int benefitUnitId = (int)ids[1];
+        long[] result = cloneAllHouseholdMembers(dataSet, householdId, benefitUnitId, idTarget, newHouseholdId, newPersonId);
         result[0]++;
         return result;
     }
 
-    public long[] clone(CloneHousehold household, String[] variableAll, long newHouseholdId) {
+    public long[] clone(CloneBenefitUnit household, String[] variableAll, long newHouseholdId) {
         this.variablesAll = variableAll;
         long newPersonId = newHouseholdId*100 + 1;
         long[] result = cloneAllHouseholdMembers(household, newHouseholdId, newPersonId);
@@ -495,15 +497,15 @@ public class CloneHousehold {
         }
         return values;
     }
-    private long[] cloneAllHouseholdMembers(CloneHousehold household, long newHouseholdId, long newPersonId) {
+    private long[] cloneAllHouseholdMembers(CloneBenefitUnit household, long newHouseholdId, long newPersonId) {
 
         return cloneAllHouseholdMembers(household.getMembers(), getLong(household.getTarget(),"idperson"), newHouseholdId, newPersonId);
     }
-    private long[] cloneAllHouseholdMembers(InputDataSet dataSet, long idhh, long idTarget, long newHouseholdId, long newPersonId) {
+    private long[] cloneAllHouseholdMembers(InputDataSet dataSet, long idhh, int idbu, long idTarget, long newHouseholdId, long newPersonId) {
 
         List<Map> originalMembers = new ArrayList<>();
         for (Map obs : dataSet.getSet()) {
-            if (getLong(obs, "idhh") == idhh) {
+            if ((getLong(obs, "idhh") == idhh) && (getInteger(obs, "idorigbenunit") == idbu)) {
                 originalMembers.add(obs);
             }
         }
@@ -536,9 +538,9 @@ public class CloneHousehold {
         if (members.isEmpty() || target==null)
             throw new RuntimeException("failed to clone members");
         for (Map obs : members) {
-            replaceId(idKey, obs, "idpartner");
-            replaceId(idKey, obs, "idfather");
-            replaceId(idKey, obs, "idmother");
+            replaceId(true, idKey, obs, "idpartner");
+            replaceId(false, idKey, obs, "idfather");
+            replaceId(false, idKey, obs, "idmother");
         }
         for (Map obs : members) {
             getLong(obs, "idperson");
@@ -549,13 +551,21 @@ public class CloneHousehold {
         long[] result = {newHouseholdId, newPersonId};
         return result;
     }
-    private void replaceId(Map idKey, Map obs, String name) {
+    private void replaceId(boolean flagError, Map idKey, Map obs, String name) {
 
         long idchk = getLong(obs,name);
-        if (idchk!=0)
-            obs.replace(name,idKey.get(idchk));
+        if (idchk!=0) {
+            Double val = (Double)idKey.get(idchk);
+            if (val==null) {
+                if (flagError)
+                    throw new RuntimeException("failed to clone members");
+                else
+                    val = 0.0;
+            }
+            obs.replace(name, val);
+        }
     }
-    private long findTargetHouseholdId(long idTarget, InputDataSet dataSet) {
+    private long[] findTargetHouseholdId(long idTarget, InputDataSet dataSet) {
 
         Map target = null;
         for(Map obs : dataSet.getSet()) {
@@ -566,7 +576,8 @@ public class CloneHousehold {
         }
         if (target.equals(null))
             throw new RuntimeException("Failed to identify imperfect match observation");
-        return getLong(target, "idhh");
+        long[] result = {getLong(target,"idhh"), getInteger(target, "idorigbenunit")};
+        return result;
     }
     private long getLong(Map obj, String val) {
         Object oo = obj.get(val);

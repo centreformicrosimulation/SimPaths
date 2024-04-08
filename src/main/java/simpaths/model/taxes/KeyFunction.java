@@ -232,9 +232,6 @@ public class KeyFunction {
     }
 
     public int getSimYear() { return simYear; }
-    public int getStatePensionAge() {
-        return keyFunction.getStatePensionAge(age, simYear);
-    }
     public int getPriceYear() { return priceYear; }
     public Map<MatchFeature, Map<Integer, Integer>> getTaxdbCounter() {
         return keyFunction.getTaxdbCounter();

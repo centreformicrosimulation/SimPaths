@@ -29,7 +29,7 @@ public class InputDataSet {
     /**
      * WORKER METHODS
      */
-    public void add(CloneHousehold household) {
+    public void add(CloneBenefitUnit household) {
         for (Map person : household.getMembers()) {
             set.add(person);
         }

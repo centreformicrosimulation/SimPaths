@@ -899,7 +899,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		childcareCostPerWeek = 0.0;
 		double childcareCostPerMonth = 0.0;
 		if (Parameters.flagFormalChildcare) {
-			updateChildcareCostPerWeek();
+			updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
 			childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 		}
 
@@ -1482,7 +1482,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 			// allow for formal childcare costs
 			if (Parameters.flagFormalChildcare) {
-				updateChildcareCostPerWeek();
+				updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
 			}
 			if (Parameters.flagSocialCare) {
 				updateSocialCareCostPerWeek();
@@ -3613,10 +3613,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return Math.log(xx + Math.sqrt(xx * xx + 1.0));
 	}
 
-	private void updateChildcareCostPerWeek() {
+	private void updateChildcareCostPerWeek(int year, int age) {
 
 		childcareCostPerWeek = 0.0;
-		if (hasChildrenEligibleForCare()) {
+		if (hasChildrenEligibleForCare() && (age < Parameters.getStatePensionAge(year, age))) {
 
 			double prob = Parameters.getRegChildcareC1a().getProbability(this, Regressors.class);
 			if (childCareInnov.nextDouble() < prob) {

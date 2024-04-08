@@ -42,6 +42,13 @@ public class MatchIndices {
         key0 = match.getKey0();
         targetNormalisedOriginalIncome = match.getTargetNormalisedOriginalIncome();
     }
+    public MatchIndices(long candidateID, int gridAge, int simYear, int key0, double targetNormalisedOriginalIncome) {
+        this.candidateID = candidateID;
+        this.gridAge = gridAge;
+        this.simYear = simYear;
+        this.key0 = key0;
+        this.targetNormalisedOriginalIncome = targetNormalisedOriginalIncome;
+    }
 
     public int getKey0() {
         return key0;

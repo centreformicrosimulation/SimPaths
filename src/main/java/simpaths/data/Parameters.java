@@ -2859,4 +2859,19 @@ public class Parameters {
             }
         }
     }
+
+    public static int getStatePensionAge(int year, int age) {
+
+        int spa;
+        if (year - age + 65 < 2019) {
+            spa = 65;
+        } else if (year - age + 66 < 2027) {
+            spa = 66;
+        } else if (year - age + 67 < 2045) {
+            spa = 67;
+        } else {
+            spa = 68;
+        }
+        return spa;
+    }
 }
