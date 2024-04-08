@@ -124,6 +124,26 @@ public class Statistics2 {
     @Column(name = "disposableIncome_60_79")
     private double disposableIncome60to79;
 
+    //investment losses
+    @Column(name = "investmentLosses_20_39")
+    private double investmentLosses20to39;
+
+    @Column(name = "investmentLosses_40_59")
+    private double investmentLosses40to59;
+
+    @Column(name = "investmentLosses_60_79")
+    private double investmentLosses60to79;
+
+    //disposable income gross of investment losses
+    @Column(name = "dispInc_grossLosses_20_39")
+    private double dispIncomeGrossOfLosses20to39;
+
+    @Column(name = "dispInc_grossLosses_40_59")
+    private double dispIncomeGrossOfLosses40to59;
+
+    @Column(name = "dispInc_grossLosses_60_79")
+    private double dispIncomeGrossOfLosses60to79;
+
     //discretionary expenditure
     @Column(name = "dexpenditure_20_39")
     private double dexpenditure20to39;
@@ -395,6 +415,54 @@ public class Statistics2 {
         this.disposableIncome60to79 = disposableIncome60to79;
     }
 
+    public double getInvestmentLosses20to39() {
+        return investmentLosses20to39;
+    }
+
+    public void setInvestmentLosses20to39(double investmentLosses20to39) {
+        this.investmentLosses20to39 = investmentLosses20to39;
+    }
+
+    public double getInvestmentLosses40to59() {
+        return investmentLosses40to59;
+    }
+
+    public void setInvestmentLosses40to59(double investmentLosses40to59) {
+        this.investmentLosses40to59 = investmentLosses40to59;
+    }
+
+    public double getInvestmentLosses60to79() {
+        return investmentLosses60to79;
+    }
+
+    public void setInvestmentLosses60to79(double investmentLosses60to79) {
+        this.investmentLosses60to79 = investmentLosses60to79;
+    }
+
+    public double getDispIncomeGrossOfLosses20to39() {
+        return dispIncomeGrossOfLosses20to39;
+    }
+
+    public void setDispIncomeGrossOfLosses20to39(double dispIncomeGrossOfLosses20to39) {
+        this.dispIncomeGrossOfLosses20to39 = dispIncomeGrossOfLosses20to39;
+    }
+
+    public double getDispIncomeGrossOfLosses40to59() {
+        return dispIncomeGrossOfLosses40to59;
+    }
+
+    public void setDispIncomeGrossOfLosses40to59(double dispIncomeGrossOfLosses40to59) {
+        this.dispIncomeGrossOfLosses40to59 = dispIncomeGrossOfLosses40to59;
+    }
+
+    public double getDispIncomeGrossOfLosses60to79() {
+        return dispIncomeGrossOfLosses60to79;
+    }
+
+    public void setDispIncomeGrossOfLosses60to79(double dispIncomeGrossOfLosses60to79) {
+        this.dispIncomeGrossOfLosses60to79 = dispIncomeGrossOfLosses60to79;
+    }
+
     public double getDexpenditure20to39() {
         return dexpenditure20to39;
     }
@@ -551,8 +619,10 @@ public class Statistics2 {
         double[] workNn = {0.,0.,0.};
         double[] labInc = {0.,0.,0.};
         double[] invInc = {0.,0.,0.};
+        double[] invLosses = {0.,0.,0.};
         double[] penInc = {0.,0.,0.};
         double[] disInc = {0.,0.,0.};
+        double[] grossDisInc = {0.,0.,0.};
         double[] dexpen = {0.,0.,0.};
         double[] cexpen = {0.,0.,0.};
         double[] wealth = {0.,0.,0.};
@@ -586,6 +656,13 @@ public class Statistics2 {
                 invInc[ii] += person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0 / es;
                 penInc[ii] += person.getBenefitUnit().getPensionIncomeAnnual() / 12.0 / es;
                 disInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthly() / es;
+                if (person.getBenefitUnit().getInvestmentIncomeAnnual()<0.0) {
+                    invLosses[ii] += person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0 / es;
+                    grossDisInc[ii] += (person.getBenefitUnit().getDisposableIncomeMonthly() -
+                            person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0) / es;
+                } else {
+                    grossDisInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthly() / es;
+                }
                 dexpen[ii] += person.getBenefitUnit().getDiscretionaryConsumptionPerYear(false) / 12.0 / es;
                 cexpen[ii] += person.getBenefitUnit().getChildcareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH / es;
                 wealth[ii] += person.getBenefitUnit().getLiquidWealth(false) / es;
@@ -607,6 +684,8 @@ public class Statistics2 {
                 invInc[ii] /= popula[ii];
                 penInc[ii] /= popula[ii];
                 disInc[ii] /= popula[ii];
+                invLosses[ii] /= popula[ii];
+                grossDisInc[ii] /= popula[ii];
                 dexpen[ii] /= popula[ii];
                 cexpen[ii] /= popula[ii];
                 wealth[ii] /= popula[ii];
@@ -658,6 +737,14 @@ public class Statistics2 {
         setDisposableIncome20to39(disInc[0]);
         setDisposableIncome40to59(disInc[1]);
         setDisposableIncome60to79(disInc[2]);
+
+        setInvestmentLosses20to39(invLosses[0]);
+        setInvestmentLosses40to59(invLosses[1]);
+        setInvestmentLosses60to79(invLosses[2]);
+
+        setDispIncomeGrossOfLosses20to39(grossDisInc[0]);
+        setDispIncomeGrossOfLosses40to59(grossDisInc[1]);
+        setDispIncomeGrossOfLosses60to79(grossDisInc[2]);
 
         setDexpenditure20to39(dexpen[0]);
         setDexpenditure40to59(dexpen[1]);

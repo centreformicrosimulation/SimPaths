@@ -231,6 +231,13 @@ public class KeyFunction {
         return keyFunction.isLowIncome(priceYear, originalIncomePerWeek);
     }
 
+    public boolean isSubstantialIncome() {
+        if (keyFunction == null) {
+            throw new RuntimeException("call to evaluate donor keys before KeyFunction populated 2");
+        }
+        return keyFunction.isSubstantialIncome(priceYear, originalIncomePerWeek);
+    }
+
     public int getSimYear() { return simYear; }
     public int getPriceYear() { return priceYear; }
     public Map<MatchFeature, Map<Integer, Integer>> getTaxdbCounter() {
