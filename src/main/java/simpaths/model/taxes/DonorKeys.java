@@ -17,10 +17,9 @@ public class DonorKeys {
      * ATTRIBUTES
      */
     private Integer[] keys = new Integer[Parameters.TAXDB_REGIMES];       // from most fine to most coarse
-    private Integer simYear = null;    // year for which keys evaluated
-    private Integer priceYear = null;  // year of prices used to measure financial statistics
-    private boolean lowIncome = false; // low income identifier used to determine income imputation method
-    private boolean substantialIncome = false;  // income substantially different from zero (may be negative)
+    private Integer simYear = null;     // year for which keys evaluated
+    private Integer priceYear = null;   // year of prices used to measure financial statistics
+    private boolean[] lowIncome;  // low income identifier used to determine income imputation method
     private Double originalIncomePerWeek = null;
     private Double secondIncomePerWeek = null;
     private Double childcareCostPerWeek = null;
@@ -58,8 +57,11 @@ public class DonorKeys {
     public Double getSecondIncomePerWeek() { return secondIncomePerWeek; }
     public Double getChildcareCostPerWeek() { return childcareCostPerWeek; }
     public double getRandomDraw() { return randomDraw; }
-    public boolean isLowIncome() { return lowIncome; }
-    public boolean isSubstantialIncome() { return substantialIncome; }
+    public boolean isLowIncome(int regime) {
+        if (regime<0)
+            throw new RuntimeException("attempt to retrieve low income identifier for null regime");
+        return lowIncome[regime];
+    }
 
 
     /**
@@ -72,8 +74,7 @@ public class DonorKeys {
         childcareCostPerWeek = function.getChildcareCostPerWeek();
         simYear = function.getSimYear();
         priceYear = function.getPriceYear();
-        lowIncome = function.isLowIncome();
-        substantialIncome = function.isSubstantialIncome();
         keys = function.evaluateKeys();
+        lowIncome = function.isLowIncome(keys);
     }
 }

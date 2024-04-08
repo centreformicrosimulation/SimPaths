@@ -214,7 +214,14 @@ public class KeyFunction4 {
         localMap = new HashMap<>();
         double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
                 Parameters.getTimeSeriesIndex(priceYear, UpratingCase.TaxDonor);
-        if (originalIncomePerWeekAdjusted < LO_INCOME) {
+        if (originalIncomePerWeekAdjusted < -LO_INCOME) {
+            // low income
+            localMap.put(0,0);
+            localMap.put(1,0);
+            localMap.put(2,0);
+            localMap.put(3,0);
+            localMap.put(4,0);
+        } else if (originalIncomePerWeekAdjusted < LO_INCOME) {
             // low income
             localMap.put(0,0);
             localMap.put(1,0);
@@ -311,38 +318,20 @@ public class KeyFunction4 {
 
 
     /**
-     * METHOD TO INDICATE IF TAX UNIT HAS ORIGINAL INCOME "SUBSTANTIAL" IS MEMBER OF 'LOW INCOME' CATEGORY FOR DATABASE MATCHING
-     * @param priceYear year of prices used to measure income
-     * @param originalIncomePerWeek original income per week of family
-     * @return boolean equal to true if family treated as low income
-     */
-    public boolean isSubstantialIncome(int priceYear, double originalIncomePerWeek) {
-
-        boolean substantialIncome = false;
-        double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
-                Parameters.getTimeSeriesIndex(priceYear, UpratingCase.TaxDonor);
-        if (Math.abs(originalIncomePerWeekAdjusted) > LO_INCOME) {
-            substantialIncome = true;
-        }
-        return substantialIncome;
-    }
-
-    /**
      * METHOD TO INDICATE IF TAX UNIT IS MEMBER OF 'LOW INCOME' CATEGORY FOR DATABASE MATCHING
-     * @param priceYear year of prices used to measure income
-     * @param originalIncomePerWeek original income per week of family
-     * @return boolean equal to true if family treated as low income
      */
-    public boolean isLowIncome(int priceYear, double originalIncomePerWeek) {
-
-        boolean lowIncome = false;
-        double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
-                Parameters.getTimeSeriesIndex(priceYear, UpratingCase.TaxDonor);
-        if (originalIncomePerWeekAdjusted < LO_INCOME) {
-            lowIncome = true;
+    public boolean[] isLowIncome(Integer[] keys) {
+        boolean[] lowIncome = new boolean[Parameters.TAXDB_REGIMES];
+        for (int regime=0;regime<Parameters.TAXDB_REGIMES;regime++) {
+            int index = getMatchFeatureIndex(MatchFeature.Income, regime, keys[regime]);
+            if ( (regime<=1 && index==0) || (regime>1 && index==0) )
+                lowIncome[regime] = true;
+            else
+                lowIncome[regime] = false;
         }
         return lowIncome;
     }
+
 
     /**
      * WORKER METHOD TO CALL OR INITIALISE THE COUNTER MAPPING FOR DONOR KEYS

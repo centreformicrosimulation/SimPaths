@@ -223,19 +223,12 @@ public class KeyFunction {
                 hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, dlltsdMan, dlltsdWoman, careProvision, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek);
     }
 
-    public boolean isLowIncome() {
+    public boolean[] isLowIncome(Integer[] keys) {
 
         if (keyFunction == null) {
             throw new InvalidParameterException("call to evaluate donor keys before KeyFunction populated");
         }
-        return keyFunction.isLowIncome(priceYear, originalIncomePerWeek);
-    }
-
-    public boolean isSubstantialIncome() {
-        if (keyFunction == null) {
-            throw new RuntimeException("call to evaluate donor keys before KeyFunction populated 2");
-        }
-        return keyFunction.isSubstantialIncome(priceYear, originalIncomePerWeek);
+        return keyFunction.isLowIncome(keys);
     }
 
     public int getSimYear() { return simYear; }
