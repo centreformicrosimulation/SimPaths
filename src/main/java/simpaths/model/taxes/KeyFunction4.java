@@ -223,22 +223,22 @@ public class KeyFunction4 {
             localMap.put(4,0);
         } else if (originalIncomePerWeekAdjusted < LO_INCOME) {
             // low income
-            localMap.put(0,0);
-            localMap.put(1,0);
+            localMap.put(0,1);
+            localMap.put(1,1);
             localMap.put(2,0);
             localMap.put(3,0);
             localMap.put(4,0);
         } else if ( originalIncomePerWeekAdjusted < HI_INCOME ) {
             // mid income
-            localMap.put(0,1);
-            localMap.put(1,1);
+            localMap.put(0,2);
+            localMap.put(1,2);
             localMap.put(2,1);
             localMap.put(3,1);
             localMap.put(4,1);
         } else {
             // high income
-            localMap.put(0,2);
-            localMap.put(1,2);
+            localMap.put(0,3);
+            localMap.put(1,3);
             localMap.put(2,2);
             localMap.put(3,1);
             localMap.put(4,1);
@@ -324,7 +324,7 @@ public class KeyFunction4 {
         boolean[] lowIncome = new boolean[Parameters.TAXDB_REGIMES];
         for (int regime=0;regime<Parameters.TAXDB_REGIMES;regime++) {
             int index = getMatchFeatureIndex(MatchFeature.Income, regime, keys[regime]);
-            if ( (regime<=1 && index==0) || (regime>1 && index==0) )
+            if ( (regime<=1 && index==1) || (regime>1 && index==0) )
                 lowIncome[regime] = true;
             else
                 lowIncome[regime] = false;
@@ -387,7 +387,7 @@ public class KeyFunction4 {
             // original income
             mapLocal = updateMap(mapLocal, ptsLocal);
             taxdbCounter.put(MatchFeature.Income,mapLocal);
-            ptsLocal = new int[]{3,3,3,2,2};
+            ptsLocal = new int[]{4,4,3,2,2};
 
             // dual income
             mapLocal = updateMap(mapLocal, ptsLocal);

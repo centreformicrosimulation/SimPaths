@@ -36,7 +36,7 @@ public class DecisionParams {
     public static boolean flagDisability;                             // user option to include disability in state space for IO solution
     public static boolean flagRegion;                                 // user option to indicate region in state space for IO solution
     public static boolean flagEducation;                              // user option to indicate student and education in state space for IO solution
-    public static final boolean FLAG_WAGE_OFFER1 = true;             // flag identifying whether to allow for wage offers in state space for principal earner - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
+    public static final boolean FLAG_WAGE_OFFER1 = true;              // flag identifying whether to allow for wage offers in state space for principal earner - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
     public static final boolean FLAG_WAGE_OFFER2 = false;             // flag identifying whether to allow for wage offers in state space for secondary earner - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
     public static final boolean FLAG_IO_EMPLOYMENT1 = true;           // flag identifying whether to project employment of principal earner as an intertemporal optimisation decision - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
     public static final boolean FLAG_IO_EMPLOYMENT2 = true;           // flag identifying whether to project employment of secondary earner as an intertemporal optimisation decision - THIS IS HARD-CODED AT PRESENT AND ONLY PARTLY IMPLEMENTED
