@@ -27,7 +27,7 @@ public class DatabaseExtension {
         String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\test0";
         String outputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
         String outputFilename = "UK_2019_b1 - augmented.txt";
-        boolean flagReadScreenedIndices = true;
+        boolean flagReadScreenedIndices = false;
 
         // compile data that identify database gaps
         MatchIndicesSet imperfectMatchIndices;
