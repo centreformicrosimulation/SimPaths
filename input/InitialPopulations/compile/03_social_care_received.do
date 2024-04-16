@@ -1,9 +1,9 @@
 /********************************************************************************
 *
-*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN SIMPATHS INITIAL POPULATION
+*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN INITIAL POPULATION
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 01/11/2023 (JV)
+*	LAST EDIT: Daria Popova
 *
 ********************************************************************************/
 
@@ -11,24 +11,12 @@
 /********************************************************************************
 	local data directories - commented out when using master program
 ********************************************************************************/
-/*
-* folder to store working data
-global workingDir "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\data"
-
-* folder containing UKHLS (Understanding Society - 6614) data
-global UKHLSDir "C:\MyFiles\01 DATA\UK\us2009-21\stata\stata13_se\ukhls"
-
-* waves reporting social care module in ukhls
-global SCwaves_bh "g i k"
 
 * define seed to ensure replicatability of results
 global seedBase = 3141592
 global seedAdjust = 0
 
-* sample window for input data
-global firstSimYear = 2010
-global lastSimYear = 2017
-
+global careWageRate_minyear = 2010
 * social care wage rates (real 2015 prices for consistency with inflation figures)
 matrix careHourlyWageRates = (9.04 \ ///	2010
 9.12 \ ///	2011
@@ -42,30 +30,28 @@ matrix careHourlyWageRates = (9.04 \ ///	2010
 9.61 \ ///	2019
 9.97 \ ///	2020
 9.92 \ ///	2021
-10.01276101)
-*/
-
+10.01276101) ///2022
 
 
 /**********************************************************************
 *	start analysis
 **********************************************************************/
-cd "$workingDir"
-disp "identifying social care receipt"
+cd "${dir_data}"
+disp "identifying social care data"
 
 
 /**************************************************************************************
 *	load data
 **************************************************************************************/
 global firstWave = 7
-foreach waveid in $socCareWaves {
+foreach waveid in $scRecWaves {
 	
 	disp "evaluating social care for survey wave `waveid'"
 	qui {
 	
 		local waveno=strpos("abcdefghijklmnopqrstuvwxyz","`waveid'")
 
-		use "$UKHLSDir/`waveid'_indresp.dta", clear
+		use "${dir_ukhls_data}/`waveid'_indresp.dta", clear
 		rename *, l
 		rename `waveid'_* *
 
@@ -126,7 +112,7 @@ foreach waveid in $socCareWaves {
 // pool data
 disp "pooling social care data"
 qui {
-	foreach waveid in $socCareWaves {
+	foreach waveid in $scRecWaves {
 		
 		local waveno=strpos("abcdefghijklmnopqrstuvwxyz","`waveid'")
 		if (`waveno'==7) {
@@ -142,6 +128,7 @@ qui {
 	save sample_temp, replace
 }
 
+
 /**************************************************************************************
 *	interpolate missing data
 **************************************************************************************/
@@ -153,7 +140,7 @@ qui {
 
 		use sample_temp, clear
 		local waveid = substr("abcdefghijklmnopqrstuvwxyz", `waveno', 1)
-		local chk = strpos("$socCareWaves", "`waveid'")
+		local chk = strpos("$scRecWaves", "`waveid'")
 		if ( `chk' > 0 ) {
 		
 			merge 1:1 pidp using "ukhls_socare_`waveid'.dta", nogen
@@ -235,44 +222,42 @@ qui {
 }
 
 
+
 /**************************************************************************************
 *	merge with main data set
 **************************************************************************************/
 disp "merge results with existing data"
-qui{
-	forvalues year = $firstSimYear/$lastSimYear {
-		
-		noi disp "merging data for `year'"
 
-		use population_initial_uk_`year', clear
-		merge 1:1 idperson swv using ukhls_socare_poolb, keep(1 3) nogen
-		foreach var of varlist need_socare partner_socare_hrs son_socare_hrs daughter_socare_hrs other_socare_hrs formal_socare_hrs {
-			replace `var' = -9 if (missing(`var'))
-		}
-		gen formal_socare_cost = -9
-		replace formal_socare_cost = careHourlyWageRates[`year' - $careWageRate_minyear + 1,1] * formal_socare_hrs if (formal_socare_hrs>0)
-		save population_initial_uk_`year', replace
-		if (`year'==$yearWealth) {
-			drop rnk smp mtc
-		}
-		sort idperson
-		export delimited using "$workingDir/input data/population_initial_UK_`year'.csv", nolabel replace
+qui {
+	
+	use "UKHLS_pooled_all_obs.dta", clear
+
+	merge 1:1 idperson swv using ukhls_socare_poolb, keep(1 3) nogen
+
+
+	foreach var of varlist need_socare partner_socare_hrs son_socare_hrs daughter_socare_hrs other_socare_hrs formal_socare_hrs {
+		replace `var' = -9 if (missing(`var'))
 	}
+
+
+	cap gen formal_socare_cost = -9
+	//replace formal_socare_cost = $careHourlyWageRates[`year' - $careWageRate_minyear + 1] * formal_socare_hrs if (formal_socare_hrs>0)
+	replace formal_socare_cost = 9.04 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2010
+	replace formal_socare_cost = 9.12 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2010
+	replace formal_socare_cost = 8.91 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2011
+	replace formal_socare_cost = 8.71 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2012
+	replace formal_socare_cost = 8.58 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2013
+	replace formal_socare_cost = 8.79 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2014
+	replace formal_socare_cost = 9.13 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2016
+	replace formal_socare_cost = 9.22 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2017
+	replace formal_socare_cost = 9.37 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2018
+	replace formal_socare_cost = 9.61 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2019
+	replace formal_socare_cost = 9.97 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2020		  
+	replace formal_socare_cost = 9.92 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2021
+	replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2022
+
+
+	sort idperson swv 
+
+	save "UKHLS_pooled_all_obs.dta", replace 
 }
-
-
-/**************************************************************************************
-*	clean-up
-**************************************************************************************/
-forvalues waveno = $firstWave/$lastWave {
-
-	local waveid = substr("abcdefghijklmnopqrstuvwxyz", `waveno', 1)
-	local chk = strpos("$socCareWaves","`waveid'")
-	if (`chk' != 0) {
-		rm "ukhls_socare_`waveid'.dta"
-	}
-	rm "ukhls_socareb_`waveid'.dta"
-}
-rm "sample_temp.dta"
-rm "ukhls_socare_pool.dta"
-rm "ukhls_socare_poolb.dta"
