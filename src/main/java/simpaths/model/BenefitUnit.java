@@ -287,6 +287,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Transient
 	private Integer labourHoursWeekly2Local;
 
+	@Transient
+	double randomDrawLabourSupply = -9;
+
 
 
 	/*********************************************************************
@@ -355,6 +358,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		labourInnov = new Random(SimulationEngine.getRnd().nextLong());
 		homeOwnerInnov = new Random(SimulationEngine.getRnd().nextLong());
 		taxInnov = new Random(SimulationEngine.getRnd().nextLong());
+		randomDrawLabourSupply = -9;
 
 		this.n_children_0 = 0;
 		this.n_children_1 = 0;
@@ -1257,6 +1261,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	protected void updateLabourSupplyAndIncome() {
 
+		if (randomDrawLabourSupply < 0) {
+			randomDrawLabourSupply = labourInnov.nextDouble();
+		}
+
 		//Update potential earnings
 		updateFullTimeHourlyEarnings();
 		if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
@@ -1463,7 +1471,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 
 			//Sample labour supply from possible labour (pairs of) values
-			labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityExponentialRegressionScoresByLabourPairs, labourInnov.nextDouble());
+			labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityExponentialRegressionScoresByLabourPairs, randomDrawLabourSupply);
 
 			// populate labour supply
 			if(model.debugCommentsOn && labourSupplyChoice!=null) {
@@ -1658,6 +1666,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		weight = weight / (double)getSize();
 		if (household != null) household.updateSizeAndWeight();
+	}
+
+	public void updateActivityOfPersonsWithinBenefitUnit() {
+		updateActivity(getMale());
+		updateActivity(getFemale());
+	}
+
+	private void updateActivity(Person person) {
+		if (person != null && person.getLabourSupplyHoursWeekly() > 0) {
+			person.setLes_c4(Les_c4.EmployedOrSelfEmployed);
+		} else if (person != null && !person.getLes_c4().equals(Les_c4.Student) && !person.getLes_c4().equals(Les_c4.Retired)) {
+			// No need to reset Retiree status
+			person.setLes_c4(Les_c4.NotEmployed);
+		}
 	}
 
 	public void addResponsiblePerson(Person person) {
@@ -2656,6 +2678,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			atRiskOfWork = male.atRiskOfWork();
 		}
 		return atRiskOfWork;
+	}
+
+	public boolean isEmployed() {
+		boolean isEmployed = false;
+		if(female != null) {
+			isEmployed = female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed);
+		}
+		if(!isEmployed  && male != null) {        //Can skip checking if atRiskOfWork is true already
+			isEmployed = male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed);
+		}
+		return isEmployed;
 	}
 
 	protected void homeownership() {

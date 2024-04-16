@@ -84,7 +84,12 @@ public class LabourMarket {
 				if (benefitUnit.getAtRiskOfWork()) {
 					benefitUnitsCovid19Update.add(benefitUnit); // Put benefit units at risk of work in a set to update. Could use the same set as structural model, but seems cleaner to keep the two separate
 				} else {
-					benefitUnit.updateDisposableIncomeIfNotAtRiskOfWork();
+					try {
+						benefitUnit.updateDisposableIncomeIfNotAtRiskOfWork();
+					} catch (RuntimeException e) {
+						System.out.println("Failed tax evaluation for Benefit Unit " + benefitUnit.getKey().getId()  + ": " + e.getMessage());
+						System.exit(1);
+					}
 				}
 			}
 
@@ -225,7 +230,12 @@ public class LabourMarket {
 			// When all the monthly transitions in a year have been predicted, choose one monthly value to represent the whole year for each individual and set labour force status, work hours, gross and disposable income.
 		//	benefitUnitsCovid19Update.parallelStream().forEach(benefitUnit -> benefitUnit.chooseRandomMonthlyOutcomeCovid19());
 			for (BenefitUnit benefitUnit : benefitUnitsCovid19Update) {
-				benefitUnit.chooseRandomMonthlyOutcomeCovid19();
+				try {
+					benefitUnit.chooseRandomMonthlyOutcomeCovid19();
+				} catch (RuntimeException e) {
+					System.out.println("Failed tax evaluation for Benefit Unit " + benefitUnit.getKey().getId()  + ": " + e.getMessage());
+					System.exit(1);
+				}
 			}
 
 		} else {
@@ -244,16 +254,24 @@ public class LabourMarket {
 					benefitUnitsAllRegions.add(benefitUnit);
 				} else {
 					benefitUnit.updateNonLabourIncome();
-					benefitUnit.updateDisposableIncomeIfNotAtRiskOfWork();
+					try {
+						benefitUnit.updateDisposableIncomeIfNotAtRiskOfWork();
+					} catch (RuntimeException e) {
+						System.out.println("Failed tax evaluation for Benefit Unit " + benefitUnit.getKey().getId()  + ": " + e.getMessage());
+						System.exit(1);
+					}
 				}
 			}
 
-			//Update Labour Supply
-			for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
-				//Given current wage equation coefficients, benefitUnits update their supply of labour
-
-				benefitUnit.updateLabourSupplyAndIncome();
+			if (model.isAlignEmployment() & model.getYear() <= 2019) {
+				model.activityAlignmentSingleMales();
+				model.activityAlignmentSingleFemales();
+				model.activityAlignmentCouples();
 			}
+
+			//Update Labour Supply
+			benefitUnitsAllRegions.parallelStream()
+					.forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
 			Map<Education, Double> potentialHourlyEarningsByEdu = new LinkedHashMap<Education, Double>();
 			Map<Education, Integer> countByEdu = new LinkedHashMap<Education, Integer>();
@@ -289,32 +307,11 @@ public class LabourMarket {
 					}
 				}
 			}
-			for (BenefitUnit benefitUnit : benefitUnits) {
 
-				if (benefitUnit.getMale() != null) {
+			// Update activity status of persons residing within the benefit unit
+			benefitUnits.stream()
+					.forEach(BenefitUnit::updateActivityOfPersonsWithinBenefitUnit);
 
-					Person person = benefitUnit.getMale();
-					if (person.getLabourSupplyHoursWeekly() > 0) {
-
-						person.setLes_c4(Les_c4.EmployedOrSelfEmployed);
-					} else if (!person.getLes_c4().equals(Les_c4.Student) && !person.getLes_c4().equals(Les_c4.Retired)) {
-						//No need to reset Retiree status
-
-						person.setLes_c4(Les_c4.NotEmployed);
-					}
-				}
-				if (benefitUnit.getFemale() != null) {
-
-					Person female = benefitUnit.getFemale();
-					if (female.getLabourSupplyHoursWeekly() > 0) {
-
-						female.setLes_c4(Les_c4.EmployedOrSelfEmployed);
-					} else if (!female.getLes_c4().equals(Les_c4.Student) && !female.getLes_c4().equals(Les_c4.Retired)) { //No need to reset Retiree status
-
-						female.setLes_c4(Les_c4.NotEmployed);
-					}
-				}
-			}
 		}
 	}
 	

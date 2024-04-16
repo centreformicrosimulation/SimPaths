@@ -3,6 +3,14 @@ package simpaths.experiment;
 
 // import Java packages
 import org.apache.log4j.Level;
+import org.apache.commons.cli.*;
+import org.yaml.snakeyaml.Yaml;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import simpaths.data.Parameters;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
@@ -22,7 +30,7 @@ import java.io.*;
 public class SimPathsMultiRun extends MultiRun {
 
 	public static boolean executeWithGui = true;
-	private static int maxNumberOfRuns = 10;
+	private static int maxNumberOfRuns = 25;
 	private static String countryString;
 	private static int startYear;
 	private static int endYear = 2020;
@@ -34,14 +42,19 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Long randomSeed = 615L;
 
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
+
+	private static Map<String, Object> model_args;
+
+	private static Map<String, Object> collector_args;
+
+	public static String configFile = "config.yml";  // Default config file name
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
 	 *
 	 */
 	public static void main(String[] args) {
-
-
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
@@ -53,43 +66,106 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
-		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-n")){ // These options are for use from the command line
-				
-				try {
-					maxNumberOfRuns = Integer.parseInt(args[i + 1]);
-			    } catch (NumberFormatException e) {
-			        System.err.println("Argument " + args[i + 1] + " must be an integer reflecting the maximum number of runs.");
-			        System.exit(1);
-			    }
-				
-				i++;
+		if (!parseYamlConfig(args)) {
+			// if parseYamlConfig returns false (indicating bad filename passed), exit main
+			return;
+		}
+
+		// Parse command line arguments to override defaults
+		if (!parseCommandLineArgs(args)) {
+			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
+			return;
+		}
+
+		log.info("Starting run with seed = " + randomSeed);
+		
+		SimulationEngine engine = SimulationEngine.getInstance();
+		
+		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
+//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
+		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
+		engine.setup();													//Do we need this?  Worked fine without it...
+
+		if (executeWithGui)
+			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
+		else
+			experimentBuilder.start();
+	}
+
+	private static boolean parseCommandLineArgs(String[] args) {
+
+		Options options = new Options();
+
+
+		Option popSizeOption = new Option("p", "popSize", true, "Population size");
+		popSizeOption.setArgName("int");
+		options.addOption(popSizeOption);
+
+		Option startYearOption = new Option("s", "startYear", true, "Start year");
+		startYearOption.setArgName("year");
+		options.addOption(startYearOption);
+
+		Option endYearOption = new Option("e", "endYear",true, "End year");
+		endYearOption.setArgName("year");
+		options.addOption(endYearOption);
+
+		Option maxRunsOption = new Option("n", "maxNumberOfRuns", true, "Maximum number of runs");
+		maxRunsOption.setArgName("int");
+		options.addOption(maxRunsOption);
+
+		Option seedOption = new Option("r", "randomSeed", true, "Random seed");
+		seedOption.setArgName("int");
+		options.addOption(seedOption);
+
+		Option guiOption = new Option("g", "executeWithGui", true, "Show GUI");
+		guiOption.setArgName("true/false");
+		options.addOption(guiOption);
+
+		Option configOption = new Option("config", true, "Specify custom config file (default: config.yml)");
+		configOption.setArgName("file");
+		options.addOption(configOption);
+
+		Option fileOption = new Option("f", "Output to file");
+		options.addOption(fileOption);
+
+		Option helpOption = new Option("h", "help", false, "Print this help message");
+		options.addOption(helpOption);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.setOptionComparator(null);
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				return false; // Exit without reporting an error
 			}
-			else if (args[i].equals("-g")){				//Set show GUI
-				executeWithGui = Boolean.parseBoolean(args[i + 1]);
-				i++;
+			if (cmd.hasOption("n")) {
+				maxNumberOfRuns = Integer.parseInt(cmd.getOptionValue("n"));
 			}
-			else if (args[i].equals("-c")){				//Set country by arguments here
-				countryString = args[i+1];				
-				i++;
+
+			if (cmd.hasOption("g")) {
+				executeWithGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
 			}
-			else if (args[i].equals("-r")){				//Set random seed
-				randomSeed = Long.parseLong(args[i+1]);
-				i++;
+
+			if (cmd.hasOption("r")) {
+				randomSeed = Long.parseLong(cmd.getOptionValue("r"));
 			}
-			else if (args[i].equals("-s")) {			//Set start year
-				startYear = Integer.parseInt(args[i + 1]);
-				i++;
+
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
 			}
-			else if (args[i].equals("-e")) {			//Set end year
-				endYear = Integer.parseInt(args[i + 1]);
-				i++;
+
+			if (cmd.hasOption("e")) {
+				endYear = Integer.parseInt(cmd.getOptionValue("e"));
 			}
-			else if (args[i].equals("-p")){				//Set population size
-				popSize = Integer.parseInt(args[i+1]);
-				i++;
+
+			if (cmd.hasOption("p")) {
+				popSize = Integer.parseInt(cmd.getOptionValue("p"));
 			}
-			else if (args[i].equals("-f")){             //Output to file
+			if (cmd.hasOption("f")) {
 				try {
 					File logDir = new File("output/logs");
 					if (!logDir.exists()) {
@@ -111,21 +187,134 @@ public class SimPathsMultiRun extends MultiRun {
 					throw new RuntimeException(e);
 				}
 			}
+		} catch (ParseException e) {
+			System.err.println("Error parsing command line arguments: " + e.getMessage());
+			formatter.printHelp("SimPathsMultiRun", options);
+			return false;
 		}
 
-		log.info("Starting run with seed = " + randomSeed);
-		
-		SimulationEngine engine = SimulationEngine.getInstance();
-		
-		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
-//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
-		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
-		engine.setup();													//Do we need this?  Worked fine without it...
+		return true;
+	}
 
-		if (executeWithGui)
-			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
-		else
-			experimentBuilder.start();
+	private static void printHelpMessage(HelpFormatter formatter, Options options) {
+		String header = "SimPathsMultiRun can run multiple sequential runs, " +
+				"resetting the population to the start year and iterating from the start seed. " +
+				"It takes the following options:";
+		String footer = "When running with no display, `-g` must be set to `false`.";
+		formatter.printHelp("SimPathsMultiRun", header, options, footer, true);
+	}
+
+	private static boolean parseYamlConfig(String[] args) {
+
+		boolean custom_config = false;
+
+		// Check if an alternative config file is specified in the command line
+		for (int i = 0; i < args.length - 1; i++) {
+			if (args[i].equals("-config")) {
+				configFile = args[i + 1];
+				custom_config = true;
+				break;
+			}
+		}
+
+		// Parse YAML config file and update parameters
+		try {
+			Yaml yaml = new Yaml();
+			FileInputStream inputStream = new FileInputStream(configFile);
+			Map<String, Object> config = yaml.load(inputStream);
+
+			// Update parameters from the config file
+			for (Map.Entry<String, Object> entry : config.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+
+				if ("model_args".equals(key)) {
+					model_args = (Map<String, Object>) value;
+					continue;
+				}
+
+				if ("collector_args".equals(key)) {
+					collector_args = (Map<String, Object>) value;
+					continue;
+				}
+
+				// Use reflection to dynamically set the field based on the key
+				try {
+					Field field = SimPathsMultiRun.class.getDeclaredField(key);
+					field.setAccessible(true);
+
+					// Determine the field type
+					Class<?> fieldType = field.getType();
+
+					// Convert the YAML value to the field type
+					Object convertedValue = convertToType(value, fieldType);
+
+					// Set the field value
+					field.set(null, convertedValue);
+
+					field.setAccessible(false);
+				} catch (NoSuchFieldException | IllegalAccessException e) {
+					// Handle exceptions if the field is not found or inaccessible
+					e.printStackTrace();
+				}
+			}
+
+		} catch (FileNotFoundException e) {
+			// Config file specified but not found, continue with defaults
+			if (custom_config) {
+				System.err.println("Config file " + configFile + " not found; please supply a valid config file.");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static void updateParameters(Object object, Map<String, Object> model_args) {
+
+		for (Map.Entry<String, Object> entry : model_args.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			try {
+				Field field = object.getClass().getDeclaredField(key);
+				field.setAccessible(true);
+
+				// Determine the field type
+				Class<?> fieldType = field.getType();
+
+				// Convert the YAML value to the field type
+				Object convertedValue = convertToType(value, fieldType);
+
+				// Set the field value
+				field.set(object, convertedValue);
+
+				field.setAccessible(false);
+			} catch (NoSuchFieldException | IllegalAccessException e) {
+				// Handle exceptions if the field is not found or inaccessible
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	private static Object convertToType(Object value, Class<?> targetType) {
+		// Convert the YAML value to the target type
+		if (int.class.equals(targetType)) {
+			return ((Number) value).intValue();
+		} else if (Integer.class.equals(targetType)) {
+			return Integer.parseInt(value.toString());
+		} else if (long.class.equals(targetType) || Long.class.equals(targetType)) {
+			return ((Number) value).longValue();
+		} else if (boolean.class.equals(targetType) || Boolean.class.equals(targetType)) {
+			return Boolean.parseBoolean(value.toString());
+		} else if (double.class.equals(targetType)) {
+			return ((Number) value).doubleValue();
+		} else if (Double.class.equals(targetType)) {
+			return Double.parseDouble(value.toString());
+		} else {
+			// If it's none of the known types, return the value as is
+			return value;
+		}
 	}
 
 	@Override
@@ -137,9 +326,13 @@ public class SimPathsMultiRun extends MultiRun {
 		setCountry(model);		//Set country based on input arguments.
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
+
+		if (model_args != null) updateParameters(model, model_args);
+
 		engine.addSimulationManager(model);
-		
+
 		SimPathsCollector collector = new SimPathsCollector(model);
+		if (collector_args != null) updateParameters(collector, collector_args);
 		engine.addSimulationManager(collector);
 
 		model.setCollector(collector);

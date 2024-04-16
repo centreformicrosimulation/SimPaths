@@ -3,11 +3,9 @@ package simpaths.experiment;
 
 // import Java packages
 import java.awt.Dimension;
+import org.apache.commons.cli.*;
 import java.awt.Toolkit;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -64,6 +62,12 @@ public class SimPathsStart implements ExperimentBuilder {
 	private static Country country = Country.UK;
 	private static int startYear = Parameters.getMaxStartYear();
 
+	private static boolean showGui = true;  // Show GUI by default
+
+	private static boolean setupOnly = false;
+
+	private static boolean rewritePolicySchedule = false;
+
 
 	/**
 	 *
@@ -72,11 +76,28 @@ public class SimPathsStart implements ExperimentBuilder {
 	 */
 	public static void main(String[] args) {
 
-		// show GUI by default
-		boolean showGui = true;
 
-		// display dialog box to allow users to define desired simulation
-		runGUIdialog();
+		if (!parseCommandLineArgs(args)) {
+			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
+			return;
+		}
+
+		if (showGui) {
+			// display dialog box to allow users to define desired simulation
+			runGUIdialog();
+		} else {
+			try {
+				runGUIlessSetup(4);
+			} catch (FileNotFoundException f) {
+				System.err.println(f.getMessage());
+				System.exit(1);
+			};
+		}
+
+		if (setupOnly) {
+			System.out.println("Setup complete, exiting.");
+			return;
+		}
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
@@ -101,6 +122,83 @@ public class SimPathsStart implements ExperimentBuilder {
 		engine.setup();
 	}
 
+	private static boolean parseCommandLineArgs(String[] args) {
+		Options options = new Options();
+
+		Option countryOption = new Option("c", "country", true, "Country (by country code CC, e.g. 'UK'/'IT')");
+		countryOption.setArgName("CC");
+		options.addOption(countryOption);
+
+		Option startYearOption = new Option("s", "startYear", true, "Start year");
+		startYearOption.setArgName("year");
+		options.addOption(startYearOption);
+
+		Option setupOption = new Option("Setup", "Setup only");
+		options.addOption(setupOption);
+
+		Option rewritePolicyScheduleOption = new Option("r", "rewrite-policy-schedule",false, "Re-write policy schedule from detected policy files");
+		options.addOption(rewritePolicyScheduleOption);
+
+		Option guiOption = new Option("g", "showGui", true, "Show GUI");
+		guiOption.setArgName("true/false");
+		options.addOption(guiOption);
+
+		Option helpOption = new Option("h", "help", false, "Print help message");
+		options.addOption(helpOption);
+
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.setOptionComparator(null);
+
+		try {
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption("h")) {
+				printHelpMessage(formatter, options);
+				return false; // Exit without reporting an error
+			}
+
+			if (cmd.hasOption("g")) {
+				showGui = Boolean.parseBoolean(cmd.getOptionValue("g"));
+			}
+
+			if (cmd.hasOption("c")) {
+				try {
+					country = Country.valueOf(cmd.getOptionValue("c"));
+				} catch (Exception e) {
+					throw new IllegalArgumentException("Code '" + cmd.getOptionValue("c") + "' not a valid country.");
+				}
+			}
+
+			if (cmd.hasOption("s")) {
+				startYear = Integer.parseInt(cmd.getOptionValue("s"));
+			}
+
+			if (cmd.hasOption("Setup")) {
+				setupOnly = true;
+			}
+
+			if (cmd.hasOption("r")) {
+				rewritePolicySchedule = true;
+			}
+		} catch (ParseException | IllegalArgumentException e) {
+			System.err.println("Error parsing command line arguments: " + e.getMessage());
+			formatter.printHelp("SimPathsStart", options);
+			return false;
+		}
+
+		return true;
+	}
+
+	private static void printHelpMessage(HelpFormatter formatter, Options options) {
+		String header = "SimPathsStart will start the SimPaths run. " +
+				"When using the argument `Setup`, this will create the population database " +
+				"and exit before starting the first run. " +
+				"It takes the following options:";
+		String footer = "When running with no display, `-g` must be set to `false`.";
+		formatter.printHelp("SimPathsStart", header, options, footer, true);
+	}
+
 
 	/**
 	 *
@@ -122,6 +220,77 @@ public class SimPathsStart implements ExperimentBuilder {
 		engine.addSimulationManager(observer);
 
 		model.setCollector(collector);
+	}
+
+	private static void runGUIlessSetup(int option) throws FileNotFoundException {
+
+		// Detect if data available; set to testing data if not
+		Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
+		if (testList.size()==0)
+			Parameters.setTrainingFlag(true);
+
+		// set country donor input file
+		String taxDonorInputFilename = "tax_donor_population_" + country;
+		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
+
+		// Create EUROMODPolicySchedule input from files
+		if (!rewritePolicySchedule &&
+				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
+			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + "input" + File.separator +
+					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist. " +
+					"Provide excel file or use `--rewrite-policy-schedule` to re-construct from available policy files.");
+		};
+		if (rewritePolicySchedule) writePolicyScheduleExcelFile();
+		//Save the last selected country and year to Excel to use in the model if GUI launched straight away
+		String[] columnNames = {"Country", "Year"};
+		Object[][] data = new Object[1][columnNames.length];
+		data[0][0] = country.toString();
+		data[0][1] = startYear;
+		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.DatabaseCountryYearFilename, "Data", columnNames, data);
+
+		// load uprating factors
+		Parameters.loadTimeSeriesFactorMaps(country);
+		constructAggregateTaxDonorPopulationCSVfile(country);
+
+		// Create initial and donor population database tables
+		createPopulationCrossSectionDatabaseTables(country);
+		SQLDonorDataParser.run(country, startYear, false);
+		Parameters.loadTimeSeriesFactorForTaxDonor(country);
+		populateDonorTaxUnitTables(country);
+
+	}
+
+	public static void writePolicyScheduleExcelFile() {
+
+		Collection<File> euromodOutputTextFiles = FileUtils.listFiles(new File(Parameters.getEuromodOutputDirectory()), new String[]{"txt"}, false);
+		Iterator<File> fIter = euromodOutputTextFiles.iterator();
+		while (fIter.hasNext()) {
+			File file = fIter.next();
+			if (file.getName().endsWith("_EMHeader.txt")) {
+				fIter.remove();
+			}
+		}
+
+		// create table to allow user specification of policy environment
+		String[] columnNames = {
+				Parameters.EUROMODpolicyScheduleHeadingFilename,
+				Parameters.EUROMODpolicyScheduleHeadingScenarioYearBegins.replace('_', ' '),
+				Parameters.EUROMODpolicyScheduleHeadingScenarioSystemYear.replace('_', ' '),
+				Parameters.EUROMODpolicySchedulePlanHeadingDescription
+		};
+		Object[][] data = new Object[euromodOutputTextFiles.size()][columnNames.length];
+		int row = 0;
+		for (File file: euromodOutputTextFiles) {
+			String name = file.getName();
+			data[row][0] = name;
+			data[row][1] = name.split("_")[1];
+			data[row][2] = name.split("_")[1];
+			data[row][3] = "";
+			row++;
+		}
+
+		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
+
 	}
 
 
@@ -169,7 +338,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// display GUI
-		FormattedDialogBox.create(title, text, width, height, initialisationFrame, true, true);
+		FormattedDialogBox.create(title, text, width, height, initialisationFrame, true, true, true);
 
 		// get data returned from GUI
 		int choice_policy = startUpOptions.getChoice();
@@ -280,7 +449,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		if(choice_policy > 0 && !skip) {
 			// call to select policies
 
-			SQLDonorDataParser.run(country, startYear); // Donor database tables
+			SQLDonorDataParser.run(country, startYear, true); // Donor database tables
 			Parameters.loadTimeSeriesFactorForTaxDonor(country);
 			populateDonorTaxUnitTables(country); // Populate tax unit donor tables from person data
 		}
@@ -328,7 +497,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// display GUI
-		FormattedDialogBox.create(title, text, width, height, countryAndYearFrame, true, true);
+		FormattedDialogBox.create(title, text, width, height, countryAndYearFrame, true, true, true);
 
 		//Set country and start year from dialog box.  These values will appear in JAS-mine GUI.
         //TODO: There is a danger that these values could be reset in the JAS-mine GUI.  While the
@@ -372,7 +541,11 @@ public class SimPathsStart implements ExperimentBuilder {
 		String title = "Creating " + Parameters.getTaxDonorInputFileName() + ".csv file";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Compiling single working file to facilitate construction of relational database for imputing transfer payments</h2>";
-		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
+
+		JFrame csvFrame = null;
+		if (showGui) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+		System.out.println(title);
 
 		// fields for exporting tables to output .csv files
 		final String newLine = "\n";
@@ -513,7 +686,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// finish off
-		csvFrame.setVisible(false);
+		if (csvFrame != null) csvFrame.setVisible(false);
 //		return inputFilename;
 	}
 
@@ -531,7 +704,12 @@ public class SimPathsStart implements ExperimentBuilder {
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
 				+ "</h2></html>";
-		JFrame databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
+
+		JFrame databaseFrame = null;
+		if (showGui) databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+
+		System.out.println(title);
 
 		// start work
 		Connection conn = null;
@@ -568,7 +746,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// finish off
-        databaseFrame.setVisible(false);
+		if (databaseFrame != null) databaseFrame.setVisible(false);
 	}
 
 
@@ -583,7 +761,10 @@ public class SimPathsStart implements ExperimentBuilder {
 		String title = "Populating donor database tables";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Populating database with tax-unit data evaluated from person-level data</h2></html>";
-		JFrame csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false);
+		JFrame csvFrame = null;
+		if (showGui) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+
+		System.out.println(title);
 
 		// gather all donor tax units
 		List<DonorTaxUnit> taxUnits = null;
@@ -732,6 +913,6 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		// remove message box
-		csvFrame.setVisible(false);
+		if (csvFrame != null) csvFrame.setVisible(false);
 	}
 }

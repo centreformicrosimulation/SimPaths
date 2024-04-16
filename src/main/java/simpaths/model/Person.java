@@ -1349,7 +1349,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 setDer(Indicator.True);
                 setDed(Indicator.True);
                 labourSupplyWeekly = Labour.ZERO; //Assume no part-time work while studying
-                //TODO: Note that individuals re-entering education do not have a new level of education set. (They don't "leave school")
             }
             else if (les_c4.equals(Les_c4.Student)){ //If activity status is student but regression to be in education was evaluated to false, remove student status
                 setLes_c4(Les_c4.NotEmployed);
@@ -1379,7 +1378,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     private void giveBirth() {				//To be called once per year after fertility alignment
 
-        if(toGiveBirth) {		//toGiveBirth is determined by fertility alignment (in the model class)
+        if(toGiveBirth) {		//toGiveBirth is determined by fertility process
 
             Gender babyGender = (fertilityInnov.nextDouble() < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
 
@@ -3112,6 +3111,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setLes_c4(Les_c4 les_c4) {
         this.les_c4 = les_c4;
     }
+
 
     public void setLes_c7_covid(Les_c7_covid les_c7_covid) { this.les_c7_covid = les_c7_covid; }
 
