@@ -566,6 +566,24 @@ sum wealth [fweight=dwt] if (bu_rp), detail
 */
 
 
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	chk.dta
+	was_temp.dta
+	was_temp_hh5.dta
+	was_temp_hh6.dta
+	was_temp_hh7.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
+
+
 
 /**************************************************************/
 *

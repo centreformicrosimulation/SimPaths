@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave m]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          10 Apr 2024
+* LAST UPDATE:          10 Apr 2024 (JV)
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -16,7 +16,7 @@ cap log close
 log using "${dir_log}/05_drop_hholds.log", replace
 ********************************************************************************
 
-use "$dir_data\UKHLS_pooled_all_obs.dta", clear 
+use "$dir_data\UKHLS_pooled_all_obs_04.dta", clear 
 /*******************************************************************************/
 fre ivfio
 keep if ivfio == 1 | ivfio == 2 | ivfio == 21 | ivfio == 24 
@@ -245,12 +245,29 @@ cap gen child = 1 - adult
 
 * define benefit units
 cap gen long idbenefitunit = .
-replace idbenefitunit = idperson if (adult==1 & dgn==0)
-replace idbenefitunit = idpartner if (adult==1 & dgn==1 & idpartner>0 & ssscp!=1 ) // ignores same-sex couples
-replace idbenefitunit = idperson if (adult==1 & missing(idbenefitunit))
-replace idbenefitunit = idmother if (child==1)
-replace idbenefitunit = idfather if (child==1 & (missing(idbenefitunit) | idbenefitunit<0))
-replace idbenefitunit = . if (idbenefitunit<0)
+cap gen long idbupartner = .
+
+order swv idhh idbenefitunit idbupartner idperson idpartner idmother idfather dag adult child
+gsort swv idhh -dag
+bys swv idhh: replace idbenefitunit = idperson[1]
+bys swv idhh: replace idbupartner = idpartner[1]
+
+replace idbupartner = .   if (adult==1 & idperson!=idbenefitunit & idpartner!=idbenefitunit)
+replace idbenefitunit = . if (adult==1 & idperson!=idbenefitunit & idpartner!=idbenefitunit)
+replace idbupartner = .   if (child==1 & idfather!=idbenefitunit & idmother!=idbenefitunit & idfather!=idbupartner & idmother!=idbupartner)
+replace idbenefitunit = . if (child==1 & idfather!=idbenefitunit & idmother!=idbenefitunit & idfather!=idbupartner & idmother!=idbupartner)
+replace idbenefitunit = idperson if (missing(idbenefitunit) & adult==1 & (missing(idpartner) | idpartner<0))
+bys swv idhh: replace idbenefitunit = idperson if (missing(idbenefitunit) & adult==1 & !missing(idbenefitunit[_n-1]) & idpartner!=idbenefitunit[_n-1])
+replace idbupartner = idpartner if (missing(idbupartner) & idbenefitunit==idperson & !missing(idpartner) & idpartner>0)
+bys swv idhh: replace idbenefitunit = idpartner if (missing(idbenefitunit) & adult==1 & !missing(idbenefitunit[_n-1]) & idpartner==idbenefitunit[_n-1])
+replace idbupartner = idperson if (missing(idbupartner) & idbenefitunit==idpartner)
+replace idbenefitunit = idmother if (missing(idbenefitunit) & child==1 & idmother==idbenefitunit[_n-1])
+replace idbenefitunit = idfather if (missing(idbenefitunit) & child==1 & idfather==idbenefitunit[_n-1])
+
+drop if idbenefitunit == . 	// 4396 observations deleted
+drop if idbenefitunit<0 	// 0 observations deleted
+
+drop idbupartner
 sum idbenefitunit, d
 
 gsort idbenefitunit -dag
@@ -390,4 +407,4 @@ cap drop dropHH
 bys stm idhh: egen dropHH = max(dropObs)
 bys stm: tab dropHH, mis
 drop if stm<0
-save "$dir_data\UKHLS_pooled_all_obs.dta", replace  
+save "$dir_data\ukhls_pooled_all_obs_05.dta", replace  

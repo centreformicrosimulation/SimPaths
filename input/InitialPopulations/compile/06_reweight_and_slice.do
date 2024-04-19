@@ -2,11 +2,13 @@
 *
 *	WEIGHT ADJUSTMENT TO ACCOUNT FOR USING HOUSEHOLDS WITHOUT MISSING VALUES
 *	
-*
-*	AUTH: Patryk Bronka (PB)
-*	LAST EDIT: Daria Popova 
+*	AUTH: Patryk Bronka, Daria Popova, Justin van de Ven
+*	LAST EDIT: 18/04/2024 (JV)
 *
 **********************************************************************/
+
+use "$dir_data\ukhls_pooled_all_obs_05.dta", clear
+
 *1. Adjust weights by estimating a probit model for inclusion in the restricted sample of households without missing values.
 sort stm idhh
 
@@ -19,7 +21,7 @@ cap gen drop_indicator = .
 replace drop_indicator = 1 if dgn < 0 | dag < 0 | drgn1 < 0
 
 by stm idhh: egen max_drop_indicator = max(drop_indicator)
-drop if max_drop_indicator == 1 /*2,312 observations deleted*/
+drop if max_drop_indicator == 1 /*583 observations deleted*/
 
 recode deh_c3 dcpst stm (-9 = .)
 sum deh_c3 dcpst
@@ -29,7 +31,6 @@ egen dagcat = cut(dag), at(0,20,30,40,50,60,70,80,120)
 tab dagcat, gen(dagcat) //Generate age group dummies
 tab dcpst, gen(dcpstcat) //Marital status categories
 
-drop if idbenefitunit == .
 cap drop hh_size
 bys stm idhh: gen hh_size = _N
 sum hh_size
@@ -79,36 +80,54 @@ save "$dir_data/temp_adjusted_dwt", replace
 **************************************************************************	
 *WEIGHT ADJUSTMENT TO ACCOUNT FOR USING HOUSEHOLDS WITHOUT MISSING VALUES*
 **************************************************************************
-use "$dir_data\UKHLS_pooled_all_obs.dta", clear 
+use "$dir_data\ukhls_pooled_all_obs_05.dta", clear 
 count 
 cap drop _merge
 merge m:1 stm idhh using "$dir_data\temp_adjusted_dwt.dta", keepusing (dwt_adjusted)
 keep if _merge==1 | _merge==3
 
-//drop dwt 
 gen dwt_sampling=dwt //keep original weights before any adjustment 
-replace dwt=dwt_adjusted  //keep weigths adjusted for probability of being complete hhs 
+replace dwt=dwt_adjusted if (!missing(dwt_adjusted)) //keep weigths adjusted for probability of being complete hhs 
 drop _merge
 
 bys stm: sum dwt dwt_adjusted dwt_sampling
 	
 *Cannot have missing values in continuous variables - recode to 0 for now: 
-*(But note this missings are valid in general - e.g. people without a partner don't have years in partnership etc.)
+*(But note this treatment of missings is generally valid - e.g. people without a partner don't have years in partnership etc.)
 recode dcpyy dcpagdf ynbcpdf_dv dnc02 dnc ypnbihs_dv yptciihs_dv ypncp ypnoab yplgrs_dv stm swv /*dhe dhesp*/ dhm scghq2_dv dhm_ghq (-9 . = 0)
     
-save "$dir_data\UKHLS_pooled_all_obs.dta", replace  
+save "$dir_data\ukhls_pooled_all_obs_06.dta", replace  
 
 
 /**********************Slice the original pooled dataset into years ********************************************/
 forvalues yy = $firstSimYear/$lastSimYear {
-* load pooled data with missing values removed  
-	use "$dir_data\UKHLS_pooled_all_obs.dta", clear
+
+	use "$dir_data\ukhls_pooled_all_obs_06.dta", clear
+
 	drop if dwt==0
 
 	* limit year
-	global year = `yy'
-	keep if stm == $year 
+	keep if stm == `yy' 
+
+	* ensure consistency of benefit unit data
+	gsort idbenefitunit -dag
+	foreach vv of varlist dwt drgn1 dhhtp_c4 ydses_c5 dnc02 dnc {
+		bys idbenefitunit: replace `vv' = `vv'[1] if (`vv'!=`vv'[1])
+	}
 	
-	save "$dir_data/population_initial_fs_UK_$year.dta", replace
-	
+	save "$dir_data/population_initial_fs_UK_`yy'.dta", replace
+}
+
+
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	temp_adjusted_dwt.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
 }

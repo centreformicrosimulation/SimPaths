@@ -17,7 +17,7 @@ cap log close
 log using "${dir_log}/02_create_UKHLS_variables.log", replace
 *****************************************************************************************************
 
-use "$dir_data\ukhls_pooled_all_obs.dta", clear
+use "$dir_data\ukhls_pooled_all_obs_01.dta", clear
 lab define dummy 1 "yes" 0 "no"
 
 
@@ -1439,26 +1439,26 @@ replace dwt = 0 if missing(dwt)
 
 /***************************Keep required variables****************************/
 keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst  ///
-ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
-dimxwt dhhwt jbhrs jshrs j2hrs les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
-ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
-sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date
+	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
+	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
+	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
+	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date
 
 sort swv idhh idperson 
 
 
 /**************************Recode missing values*******************************/
 foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst ///
-ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
-jbhrs jshrs j2hrs les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
-ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
-scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  {
-qui recode `var' (-9/-1=-9) (.=-9) 
+	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
+	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
+	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
+	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  {
+		qui recode `var' (-9/-1=-9) (.=-9) 
 }
 
 *recode missings in weights to zero. 
 foreach var in dimlwt disclwt dimxwt dhhwt {
-qui recode `var' (.=0) (-9/-1=0) 
+	qui recode `var' (.=0) (-9/-1=0) 
 } 
 
 *add potential hourly earnings
@@ -1492,5 +1492,37 @@ isid idperson idhh swv
 /*******************************************************************************
 * save the whole pooled dataset that will be used for regression estimates
 *******************************************************************************/
-save "$dir_data\UKHLS_pooled_all_obs.dta", replace 
+save "$dir_data\ukhls_pooled_all_obs_02.dta", replace 
 cap log close 
+
+
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	father_edu.dta
+	mother_dchpd.dta 
+	mother_edu.dta 
+	parametricUnionDataset.dta 
+	temp.dta
+	temp_age.dta
+	temp_dagpns.dta
+	temp_deh.dta
+	temp_dgn.dta
+	temp_dhe.dta
+	temp_dlltsd.dta
+	temp_father_dag.dta
+	temp_lesc3.dta
+	temp_lesc4.dta
+	temp_mother_dag.dta
+	temp_ypnb.dta
+	tmp_partnershipDuration.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
+
+

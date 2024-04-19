@@ -282,25 +282,14 @@ public class SQLdataParser {
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"
 			);
 
-			//BenefitUnit table:
+			//Create benefitUnit table
 			stat.execute(
 				"DROP TABLE IF EXISTS " + benefitUnitTable + ";"
-				//Create household table with columns representing EUROMOD variables listed in Parameters class EUROMOD_VARIABLES_HOUSEHOLD set.
 				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
 
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
-			);
-
-			stat.execute(
-				"DROP TABLE IF EXISTS " + householdTable + ";"
-				+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
-				+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
-				+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-				+ "ALTER TABLE " + householdTable + " DROP COLUMN idperson;"
-				+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
-				+ "SELECT * FROM " + householdTable + " ORDER BY id;"
 			);
 
 			//Region - See Region class for mapping definitions and sources of info
@@ -313,12 +302,6 @@ public class SQLdataParser {
 
 			stat.execute(
 				"ALTER TABLE " + benefitUnitTable + " DROP COLUMN drgn1;"
-				+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN idfather;"
-				+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN idmother;"
-				+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN idperson;"
-
-				//Rename EUROMOD variables
-				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN dwt RENAME TO household_weight;"
 
 				//BenefitUnit composition
 				+ "ALTER TABLE " + benefitUnitTable + " ADD household_composition VARCHAR_IGNORECASE;"
@@ -356,14 +339,24 @@ public class SQLdataParser {
 				+ "SELECT * FROM " + benefitUnitTable + " ORDER BY id;"
 			);
 
-
-			//Remove duplicate rows in household tables (as they are derived from persons, there is one row per person, so for households with N people, there would be N rows with same data)
+			//Remove duplicate rows
 			stat.execute(
 				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + " ORDER BY ID;"
 				+ "DROP TABLE IF EXISTS " + benefitUnitTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + benefitUnitTable + ";"
 			);
 
+			//Create household table
+			stat.execute(
+					"DROP TABLE IF EXISTS " + householdTable + ";"
+							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
+							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
+							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
+							+ "SELECT * FROM " + householdTable + " ORDER BY id;"
+			);
+
+			//Remove duplicate rows
 			stat.execute(
 					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + " ORDER BY ID;"
 				+ "DROP TABLE IF EXISTS " + householdTable + ";"

@@ -478,9 +478,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         this.dgn = gender;
         this.idMother = mother.getKey().getId();
-        this.idFather = mother.getPartner().getKey().getId();
         this.dehm_c3 = mother.getDeh_c3();
-        this.dehf_c3 = mother.getPartner().getDeh_c3();
+        if (mother.getPartner()==null) {
+            idFather = null;
+            dehf_c3 = mother.getDeh_c3();
+        } else {
+            this.idFather = mother.getPartner().getKey().getId();
+            this.dehf_c3 = mother.getPartner().getDeh_c3();
+        }
         this.dcpen = Indicator.False;
         this.dcpex = Indicator.False;
         this.dlltsd = Indicator.False;
@@ -539,7 +544,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.receivesBenefitsFlag = false;
         this.receivesBenefitsFlag_L1 = receivesBenefitsFlag;
         updateVariables(false);
-
     }
 
     //Below is a "copy constructor" for persons: it takes an original person as input, changes the ID, copies the rest of the person's properties, and creates a new person.
@@ -2235,11 +2239,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhe_c5_3_L1,
         Dhe_c5_4_L1,
         Dhe_c5_5_L1,
-        Dhe_Fair,
-        Dhe_Good,
         Dhe_L1, 						//Health status lag(1)
         Dhe_Poor,
+        Dhe_Fair,
+        Dhe_Good,
         Dhe_VeryGood,
+        Dhe_Excellent,
         Dhesp_L1, 						//Lag(1) of partner's health status
         Dhhtp_c4_CoupleChildren_L1,
         Dhhtp_c4_CoupleNoChildren_L1,
@@ -2558,6 +2563,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return dhe.getValue();
         case Dhe_L1:
             return dhe_lag1.getValue();
+        case Dhe_Excellent:
+            return (Dhe.Excellent.equals(dhe)) ? 1. : 0.;
         case Dhe_VeryGood:
             return (Dhe.VeryGood.equals(dhe)) ? 1. : 0.;
         case Dhe_Good:

@@ -290,7 +290,6 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
-
 	}
 
 
@@ -305,14 +304,13 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		// initiate radio buttons to define policy environment and input database
 		count = 0;
-		Map<String, Integer> startUpOptionsStringsMap = new LinkedHashMap<>();
-		startUpOptionsStringsMap.put("Run SimPaths GUI", count++); //Option 0
-	//	startUpOptionsStringsMap.put("SimPaths GUI, create Input Database", count++);
-		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies", count++); //Option 1
-		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Load input data", count++); //Option 2
-		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Modify policies", count++); //Option 3
-		startUpOptionsStringsMap.put("Run SimPaths GUI <= Select policies <= Modify policies <= Load input data", count++); //Option 4
-	    StartUpRadioButtons startUpOptions = new StartUpRadioButtons(startUpOptionsStringsMap);
+		Map<String,Integer> startUpOptionsStringsMap = new LinkedHashMap<>();
+		startUpOptionsStringsMap.put("Change country and/or simulation start year", count++);
+		startUpOptionsStringsMap.put("Load new input data for starting populations", count++);
+		startUpOptionsStringsMap.put("Use UKMOD Light to alter description of tax and benefit systems", count++);
+		startUpOptionsStringsMap.put("Load new input data for tax and benefit systems", count++);
+		startUpOptionsStringsMap.put("Select tax and benefit systems for analysis", count++);
+		StartUpCheckBoxes startUpOptions = new StartUpCheckBoxes(startUpOptionsStringsMap);
 
 	    // combine button groups into a single form component
 		JInternalFrame initialisationFrame = new JInternalFrame();
@@ -341,22 +339,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		FormattedDialogBox.create(title, text, width, height, initialisationFrame, true, true, true);
 
 		// get data returned from GUI
-		int choice_policy = startUpOptions.getChoice();
+		boolean[] choices = startUpOptions.getChoices();
 
-		// run through requested pre-processing steps
-		boolean skip = false;
-
-		if (choice_policy >= 3) {
-			// call to modify policies
-
-			// run EUROMOD
-//			CallEUROMOD.run();
-
-			//run EUROMOD Light
-			CallEMLight.run();
-		}
-
-		if (choice_policy > 0) {
+		if (choices[0]) {
 			// choose the country and the simulation start year
 			// this information can be used when constructing a new donor population
 			// and referenced when adjusting the EUROMOD policy schedule (scenario plan).
@@ -368,7 +353,22 @@ public class SimPathsStart implements ExperimentBuilder {
 		String taxDonorInputFilename = "tax_donor_population_" + country;
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 
-		if (choice_policy > 0) {
+		if (choices[0] || choices[1]) {
+			// rebuild databases for population cross-section used to initialise simulated population
+			createPopulationCrossSectionDatabaseTables(country); // Initial database tables
+		}
+
+		if (choices[2]) {
+			// call to modify policies
+
+			// run EUROMOD
+			//CallEUROMOD.run();
+
+			//run EUROMOD Light
+			CallEMLight.run();
+		}
+
+		if (choices[0] || choices[2] || choices[3] || choices[4]) {
 			// call to select policies
 
 			// load previously stored values for policy description and initiation year
@@ -423,32 +423,15 @@ public class SimPathsStart implements ExperimentBuilder {
 	        ScenarioTable tableEUROMODscenarios = new ScenarioTable(textEUROMODtable, columnNames, data);
 
 	        // pass content to display
-			FormattedDialogBoxNonStatic policyScheduleBox;
+			FormattedDialogBoxNonStatic policyScheduleBox = new FormattedDialogBoxNonStatic(titleEUROMODtable, null, 900, 300 + euromodOutputTextFiles.size()*11, tableEUROMODscenarios, true);
 
-			if (choice_policy==2 || choice_policy==4) { // If full rebuild of the database is required, disabled the "Keep existing policy schedule" button by overriding the display box
-				policyScheduleBox = new FormattedDialogBoxNonStatic(titleEUROMODtable, null, 900, 300 + euromodOutputTextFiles.size()*11, tableEUROMODscenarios, true, false);
-			}
-			else {
-				policyScheduleBox = new FormattedDialogBoxNonStatic(titleEUROMODtable, null, 900, 300 + euromodOutputTextFiles.size()*11, tableEUROMODscenarios, true, true);
-			}
-
-	        // return from table
-	        skip  = policyScheduleBox.isSkip();
-	        if (!skip) {
-				//Store a copy in the input directory so that we have a record of the policy schedule for reference
-		        XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
-		    	constructAggregateTaxDonorPopulationCSVfile(country);
-	        }
+			//Store a copy in the input directory so that we have a record of the policy schedule for reference
+			XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
 		}
 
-		if (choice_policy==2 || choice_policy==4) {
-			// rebuild databases for population cross-section used to initialise simulated population
-
-			createPopulationCrossSectionDatabaseTables(country); // Initial database tables
-		}
-		if(choice_policy > 0 && !skip) {
-			// call to select policies
-
+		if(choices[0] || choices[2] || choices[3] || choices[4]) {
+			// call to import new tax data
+			constructAggregateTaxDonorPopulationCSVfile(country);
 			SQLDonorDataParser.run(country, startYear, true); // Donor database tables
 			Parameters.loadTimeSeriesFactorForTaxDonor(country);
 			populateDonorTaxUnitTables(country); // Populate tax unit donor tables from person data
@@ -700,7 +683,7 @@ public class SimPathsStart implements ExperimentBuilder {
 	private static void createPopulationCrossSectionDatabaseTables(Country country) {
 
 		// display a dialog box to let the user know what is happening
-		String title = "Building all database tables";
+		String title = "Building database tables for starting populations";
 		String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
 				+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
 				+ "</h2></html>";

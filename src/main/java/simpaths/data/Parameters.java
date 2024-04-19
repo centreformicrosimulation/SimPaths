@@ -79,18 +79,11 @@ public class Parameters {
 
     public static final String[] HOUSEHOLD_VARIABLES_INITIAL = new String[] {
 		"idhh",				//id of household (can contain multiple benefit units)
-		"idbenefitunit",	//id of a benefit unit
-		"idperson",			//Use to handle non-uniqueness of household table rows
-		"dwt" 				//household weight
     };
 
     public static final String[] BENEFIT_UNIT_VARIABLES_INITIAL = new String[] {
 		"idhh",				//id of household (can contain multiple benefit units)
 		"idbenefitunit",	//id of a benefit unit
-		"idperson",			//Use to handle non-uniqueness of household table rows
-		"dwt", 				//household weight
-		"idfather",			//id of father, to be used to define (responsible) male of the household (if defined)
-		"idmother",			//id of mother, to be used to define (responsible) female of the household (if defined)
 		"drgn1", 			//region (NUTS1)
 		"dhhtp_c4",			//household composition
 		"ydses_c5",			//household income quantile
@@ -276,7 +269,7 @@ public class Parameters {
     private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
-    public static final boolean FLAG_SINGLE_MOTHERS = false;
+    public static final boolean FLAG_SINGLE_MOTHERS = true;
 
     public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
@@ -1051,8 +1044,8 @@ public class Parameters {
             columnsPartnershipU1a = 20;
             columnsPartnershipU1b = 28;
             columnsPartnershipU2b = 33;
-            columnsFertilityF1a = 13;
-            columnsFertilityF1b = 29;
+            columnsFertilityF1a = 10;
+            columnsFertilityF1b = 33;
             columnsIncomeI1a = 19;
             columnsIncomeI1b = 31;
             columnsIncomeI3a = 19;

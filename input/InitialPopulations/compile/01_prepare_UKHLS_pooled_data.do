@@ -196,10 +196,29 @@ replace month = 1 if month == -10 // month not available for IEMB (Ethnic Minori
 
 
 /**************************************************************************************
-* finalise and exit
+* save output
 **************************************************************************************/
-save "$dir_data\ukhls_pooled_all_obs.dta", replace
+save "$dir_data\ukhls_pooled_all_obs_01.dta", replace
 cap log close 
+
+
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	add_vars_ukhls.dta
+	add_vars_ukhls_hhresp.dta 
+	add_vars_ukhls_income.dta 
+	add_vars_ukhls_indresp.dta 
+	add_vars_ukhls_youth.dta
+	tmp_income.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
 
 
 

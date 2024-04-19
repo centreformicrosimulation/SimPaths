@@ -403,5 +403,23 @@ save "population_initial_fs_UK_$yearWealth", replace
 
 
 /**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	ukhls_wealthtemp.dta
+	ukhls_wealthtemp1.dta
+	ukhls_wealthtemp2.dta
+	ukhls_wealthtemp3.dta
+	was_wealthdata.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
+
+
+/**************************************************************************************
 *	fin
 **************************************************************************************/

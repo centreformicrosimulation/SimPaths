@@ -49,7 +49,6 @@ import microsim.matching.MatchingScoreClosure;
 
 // import LABOURsim packages
 import simpaths.data.Parameters;
-import simpaths.model.decisions.DecisionTests;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
@@ -57,7 +56,6 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
-import simpaths.model.taxes.database.DatabaseExtension;
 
 
 /**
@@ -84,7 +82,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private Country country; // = Country.UK;
 
 	@GUIparameter(description = "Simulated population size (base year)")
-	private Integer popSize = 25000;
+	private Integer popSize = 170000;
 
 	@GUIparameter(description = "Simulation first year [valid range 2011-2017]")
 	private Integer startYear = 2011;
@@ -707,11 +705,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				for (BenefitUnit benefitUnit: benefitUnits) {
 					if (benefitUnit.getMale() == null && benefitUnit.getFemale() == null) {
 						benefitUnitsWithoutAdult.add(benefitUnit);
-					} else if (benefitUnit.getSize() <= 0) {
-						benefitUnit.updateWeight();
-						if (benefitUnit.getSize() <= 0) {
-							benefitUnitsWithoutAdult.add(benefitUnit);
-						}
 					}
 				}
 				for (BenefitUnit benefitUnit: benefitUnitsWithoutAdult) {
@@ -795,12 +788,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			int age = Math.min(person.getDag(), maxAlignAge);
 			double weight = ((Number)weightsByGenderRegionAndAge.get(gender, region, age)).doubleValue();
 			person.setWeight(weight);
-		}
-		for (BenefitUnit benefitUnit : benefitUnits) {
-			benefitUnit.updateWeight();
-		}
-		for (Household household : households) {
-			household.updateSizeAndWeight();
 		}
 	}
 
@@ -2523,9 +2510,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		Double minWeight = null;
 		for (Household household : inputHouseholdList) {
 
-			if (minWeight == null || household.getWeight() < minWeight) {
-				minWeight = household.getWeight();
-			}
 			Iterator<BenefitUnit> benefitUnitIterator = benefitUnitsToAllocate.iterator();
 			LinkedList<Person> orphans = new LinkedList<>();
 			while (benefitUnitIterator.hasNext()) {
@@ -2577,9 +2561,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 						benefitUnit.initializeFields();
 					}
 				}
-			}
-			if (household.getSize() < 1) {
-				throw new RuntimeException("Empty household included at population load.");
 			}
 			if (!orphans.isEmpty()) {
 
@@ -2635,6 +2616,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			}
 			if (!orphans.isEmpty()) {
 				throw new RuntimeException("Children not associated with a qualifying benefit unit included in population load.");
+			}
+			if (minWeight == null || household.getWeight() < minWeight) {
+				minWeight = household.getWeight();
 			}
 		}
 		if (!benefitUnitsToAllocate.isEmpty()) {

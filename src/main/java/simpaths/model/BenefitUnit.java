@@ -87,9 +87,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Column(name="consumption_annual")
 	private Double discretionaryConsumptionPerYear;
 
-	@Column(name="household_weight")
-	private double weight = 1.0;
-
 	@Column(name="liquid_wealth")
 	private Double liquidWealth;
 
@@ -261,7 +258,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	private String createdByConstructor;
 
 	@Column(name="dhh_owned")
-	private boolean dhh_owned; // Is any of the individuals in the benefit unit a homeowner? True / false
+	private Boolean dhh_owned = false; // are any of the individuals in the benefit unit a homeowner? True / false
 
 	@Transient
 	ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
@@ -465,7 +462,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this(benefitUnitIdCounter++);
 
 		this.log = originalBenefitUnit.log;
-		this.weight = originalBenefitUnit.weight;
 		this.occupancy = originalBenefitUnit.occupancy;
 		if (originalBenefitUnit.getDisposableIncomeMonthly() != null) {
 			this.disposableIncomeMonthly = originalBenefitUnit.getDisposableIncomeMonthly();
@@ -1649,25 +1645,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return size;
 	}
 
-	// benefit unit weight is average of all benefit unit members
-	public void updateWeight() {
-
-		weight = 0.0;
-		if(female != null) {
-			weight += female.getWeight();
-		}
-		if(male != null) {
-			weight += male.getWeight();
-		}
-		if (!children.isEmpty()) {
-			for (Person child : children) {
-				weight += child.getWeight();
-			}
-		}
-		weight = weight / (double)getSize();
-		if (household != null) household.updateSizeAndWeight();
-	}
-
 	public void updateActivityOfPersonsWithinBenefitUnit() {
 		updateActivity(getMale());
 		updateActivity(getFemale());
@@ -1696,7 +1673,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		} else {
 			setMale(person);
 		}
-		updateWeight();
 	}
 
 	public void addResponsibleCouple(Person person, Person partner) {
@@ -1704,17 +1680,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		if (!person.getRegion().equals(partner.getRegion())) {
 			throw new RuntimeException("Error - couple belong to two different regions!");
 		}
-
 		if (person.getDgn().equals(Gender.Female)) {
-
 			setFemale(person);
 			setMale(partner);
 		} else {
-
 			setMale(person);
 			setFemale(partner);
 		}
-		updateWeight();
 	}
 
 	public void addChild(Person person) {
@@ -1734,7 +1706,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		if (female != null) person.setIdMother(female);
 
 		updateChildrenFields();
-		updateWeight();
 	}
 
 	public void removePerson(Person person) {
@@ -1757,7 +1728,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			model.removeBenefitUnit(this);
 		} else {
 			updateChildrenFields();
-			updateWeight();
 		}
 	}
 
@@ -2662,7 +2632,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 		}
 		updateChildrenFields();
-		updateWeight();
 	}
 
 	/*
@@ -2972,7 +2941,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 			household = newHousehold;
 			idHousehold = newHousehold.getId();
-			if(!newHousehold.getBenefitUnitSet().contains(this)) newHousehold.addBenefitUnit(this);
+			if(!newHousehold.getBenefitUnitSet().contains(this))
+				newHousehold.addBenefitUnit(this);
 		}
 
 		// update benefit unit members
@@ -2999,7 +2969,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 
 	public double getWeight() {
-		return weight;
+		double cumulativeWeight = 0.0;
+		double size = 0.0;
+		for( Person person : getPersonsInBU()) {
+			cumulativeWeight += person.getWeight();
+			size++;
+		}
+		return cumulativeWeight / size;
 	}
 
 	public Set<Person> getChildren() {
@@ -3237,6 +3213,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 
 	public boolean isDhh_owned() {
+		if (dhh_owned==null) {
+			dhh_owned = false;
+		}
 		return dhh_owned;
 	}
 

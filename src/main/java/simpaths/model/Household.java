@@ -41,11 +41,6 @@ public class Household implements EventListener, IDoubleSource {
     @Id
     private final PanelEntityKey key;
 
-    @Column(name="dwt")
-    private double weight = 1.0d;
-
-    private Integer size;
-
     @Transient
     private Set<BenefitUnit> benefitUnitSet;
 
@@ -60,9 +55,7 @@ public class Household implements EventListener, IDoubleSource {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdIdCounter++);
-
         benefitUnitSet = new LinkedHashSet<BenefitUnit>();
-        size = 0;
     }
 
     public Household(long householdId) {
@@ -71,14 +64,11 @@ public class Household implements EventListener, IDoubleSource {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdId);
-
         benefitUnitSet = new LinkedHashSet<BenefitUnit>();
-        size = 0;
     }
 
     public Household(LinkedHashSet<BenefitUnit> benefitUnitsToAdd) {
         this(); //Refers to the basic constructor Household()
-
         for(BenefitUnit benefitUnit : benefitUnitsToAdd) {
             addBenefitUnit(benefitUnit);
         }
@@ -94,38 +84,21 @@ public class Household implements EventListener, IDoubleSource {
     METHODS
      */
 
-    protected void updateSizeAndWeight() {
-
-        size = 0;
-        weight = 0.0;
-        for (BenefitUnit benefitUnit : benefitUnitSet) {
-            size += benefitUnit.getSize();
-            weight += benefitUnit.getWeight() * (double) benefitUnit.getSize();
-        }
-        weight /= (double) size;
-    }
-
     public void resetWeights(double newWeight) {
 
         for (BenefitUnit benefitUnit : benefitUnitSet) {
-
             for( Person person : benefitUnit.getPersonsInBU()) {
-
                 person.setWeight(newWeight);
             }
-            benefitUnit.updateWeight();
         }
-        updateSizeAndWeight();
     }
 
     public void addBenefitUnit(BenefitUnit benefitUnit) {
 
         benefitUnitSet.add(benefitUnit);
-        updateSizeAndWeight();
-
-        if( benefitUnit.getHousehold() != this ) {
-
-            if ( benefitUnit.getHousehold() != null ) benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
+        if ( benefitUnit.getHousehold() != this ) {
+            if ( benefitUnit.getHousehold() != null )
+                benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
             benefitUnit.setHousehold(this);
         }
     }
@@ -136,17 +109,14 @@ public class Household implements EventListener, IDoubleSource {
         if(benefitUnitSet.contains(benefitUnit)) {
 
             boolean removed = benefitUnitSet.remove(benefitUnit);
-            if(!removed) {
+            if (!removed)
                 throw new IllegalArgumentException("BenefitUnit " + benefitUnit.getKey().getId() + " could not be removed from household");
-            }
         }
         if (benefitUnit.getHousehold() == this) benefitUnit.setHousehold(null);
 
         //Check for benefit units remaining in the household - if none, remove the household
         if (benefitUnitSet.isEmpty()) {
             model.removeHousehold(this);
-        } else {
-            updateSizeAndWeight();
         }
     }
 
@@ -161,15 +131,19 @@ public class Household implements EventListener, IDoubleSource {
     }
 
     public double getWeight() {
-        return weight;
+        double cumulativeWeight = 0.0;
+        double size = 0.0;
+        for (BenefitUnit benefitUnit : benefitUnitSet) {
+            for( Person person : benefitUnit.getPersonsInBU()) {
+                cumulativeWeight += person.getWeight();
+                size++;
+            }
+        }
+        return cumulativeWeight / size;
     }
 
     public long getId() { //Get household ID as set in the simulation. Note that it is different than in the input data.
         return key.getId();
-    }
-
-    public int getSize() { //Get total number of people from all benefit units in the household
-        return size;
     }
 
     public Set<BenefitUnit> getBenefitUnitSet() { return benefitUnitSet; }

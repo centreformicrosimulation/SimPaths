@@ -127,7 +127,7 @@ save "ukhls_scprov_pooled1.dta", replace
 **************************************************************************************/
 disp "merge results with existing data"
 
-use "UKHLS_pooled_all_obs.dta", clear
+use "UKHLS_pooled_all_obs_03.dta", clear
 
 merge 1:1 idperson swv using ukhls_scprov_pooled1, keep(1 3) nogen
 
@@ -136,6 +136,31 @@ foreach var of varlist careWho aidhrs {
 }
 
 sort idperson swv 
-save "UKHLS_pooled_all_obs.dta", replace 
-		
+save "ukhls_pooled_all_obs_04.dta", replace 
+
+
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	int_temp.dta
+	ukhls_scprov_f.dta
+	ukhls_scprov_g.dta
+	ukhls_scprov_h.dta
+	ukhls_scprov_i.dta
+	ukhls_scprov_j.dta
+	ukhls_scprov_k.dta
+	ukhls_scprov_l.dta
+	ukhls_scprov_m.dta
+	ukhls_scprov_pooled0.dta
+	ukhls_scprov_pooled1.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
+
+
 	

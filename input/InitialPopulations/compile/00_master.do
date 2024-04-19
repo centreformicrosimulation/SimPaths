@@ -65,7 +65,7 @@ global age_become_responsible 18
 /*
 * UKHLS Wave letters: we start from 2010 - wave 2 - b
 first initial population starts in 2011 (as some variables are using data from the previous wave)
-wave 1  a 2009-2011
+wave 1  a 2009-2011 (last year is small)
 wave 2  b 2010-2012
 wave 3  c 2011-2013
 wave 4  d 2012-2014
@@ -80,9 +80,9 @@ wave 12 l 2020-2022
 wave 13 m 2021-2023
 */
 global UKHLSwaves "a b c d e f g h i j k l m" /*all waves*/
-* waves reporting social care module in ukhls
-global scRecWaves "g i k m" /*ADL questions added from wave 7 and then every other wave*/
-* waves reporting social care provided in ukhls
+* waves reporting social care module in ukhls - ADL questions added from wave 7 and then every other wave (from 2016)
+global scRecWaves "g i k m"
+* waves reporting social care provided in ukhls (from 2015)
 global scProvWaves "f g h i j k l m"
 global firstSimYear = 2010
 global lastSimYear = 2023

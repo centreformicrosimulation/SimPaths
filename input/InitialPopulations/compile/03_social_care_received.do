@@ -230,7 +230,7 @@ disp "merge results with existing data"
 
 qui {
 	
-	use "UKHLS_pooled_all_obs.dta", clear
+	use "UKHLS_pooled_all_obs_02.dta", clear
 
 	merge 1:1 idperson swv using ukhls_socare_poolb, keep(1 3) nogen
 
@@ -259,5 +259,32 @@ qui {
 
 	sort idperson swv 
 
-	save "UKHLS_pooled_all_obs.dta", replace 
+	save "ukhls_pooled_all_obs_03.dta", replace 
+}
+
+
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	sample_temp.dta
+	ukhls_socare_g.dta 
+	ukhls_socare_i.dta 
+	ukhls_socare_k.dta 
+	ukhls_socare_m.dta
+	ukhls_socare_pool.dta
+	ukhls_socare_poolb.dta
+	ukhls_socareb_g.dta
+	ukhls_socareb_h.dta
+	ukhls_socareb_i.dta
+	ukhls_socareb_j.dta
+	ukhls_socareb_k.dta
+	ukhls_socareb_l.dta
+	ukhls_socareb_m.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
 }
