@@ -47,10 +47,10 @@ global dir_data "${dir_work}/data"
 global dir_log "${dir_work}/log"
 
 * Directory which contains UKHLS data
-global dir_ukhls_data "C:\MyFiles\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls"
+global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls"
 
 * Directory which contains WAS data
-global dir_was_data "C:\MyFiles\01 DATA\UK\was\wave7\stata\stata13_se"
+global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
 
 * Directory which contains original initial popultions 
 global dir_ipop_orig "${dir_work}/original_initial_populations"

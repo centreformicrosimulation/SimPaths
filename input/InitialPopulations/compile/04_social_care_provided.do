@@ -115,6 +115,8 @@ gen careWho = 0
 replace careWho = 1 if (care_partner==1 & care_nonpartner==0)
 replace careWho = 2 if (care_partner==1 & care_nonpartner==1)
 replace careWho = 3 if (care_partner==0 & care_nonpartner==1)
+label variable careWho "who person provides care to"
+label define careWho 1 "partner only" 2 "partner and non-partner" 3 "non-partner only"
 
 keep pidp swv careWho aidhrs_adj
 rename aidhrs_adj aidhrs

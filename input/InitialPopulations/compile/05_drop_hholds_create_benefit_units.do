@@ -264,10 +264,33 @@ replace idbupartner = idperson if (missing(idbupartner) & idbenefitunit==idpartn
 replace idbenefitunit = idmother if (missing(idbenefitunit) & child==1 & idmother==idbenefitunit[_n-1])
 replace idbenefitunit = idfather if (missing(idbenefitunit) & child==1 & idfather==idbenefitunit[_n-1])
 
-drop if idbenefitunit == . 	// 4396 observations deleted
+drop if idbenefitunit == . 	// 4403 observations deleted
 drop if idbenefitunit<0 	// 0 observations deleted
-
 drop idbupartner
+
+// screen out benefit units with multiple adults of same sex
+gen adultMan = adult * (dgn==1)
+gen adultWoman = adult * (dgn==0)
+gsort swv idbenefitunit
+bys swv idbenefitunit: egen sumMen = sum(adultMan)
+bys swv idbenefitunit: egen sumWomen = sum(adultWoman)
+tab swv sumMen
+tab swv sumWomen
+drop if (sumWomen>1)	// 1638 obserations
+drop if (sumMen>1)		// 14 observations
+
+// adjust bu identifiers to allow for possiblity that units are sampled in same calendar year
+order idbenefitunit stm swv
+gsort idbenefitunit stm swv
+gen idtemp = 1
+gen switch = 0
+replace switch = 1 if (idbenefitunit!=idbenefitunit[_n-1] | swv!=swv[_n-1])
+order idbenefitunit stm swv idtemp switch
+replace idtemp = idtemp[_n-1] + switch if (_n>1)
+
+drop idbenefitunit switch
+rename idtemp idbenefitunit
+
 sum idbenefitunit, d
 
 gsort idbenefitunit -dag

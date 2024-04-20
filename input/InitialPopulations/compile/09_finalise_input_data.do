@@ -166,7 +166,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	gsort idhh idbenefitunit idperson
 	save "$dir_data/population_initial_UK_$year.dta", replace
 	
-	recode liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
+	recode dgn liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 }
 
@@ -174,6 +174,16 @@ forvalues yy = $firstSimYear/$lastSimYear {
 ***************************************************************************************
 * finalise
 ***************************************************************************************
+#delimit ;
+local files_to_drop 
+	was_wealthdata.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
+
 cap log close
 
 
