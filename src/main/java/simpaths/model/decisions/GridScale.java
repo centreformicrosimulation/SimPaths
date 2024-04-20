@@ -37,7 +37,7 @@ public class GridScale {
         numberOfStates++;                                         // full-time wage potential
         if (DecisionParams.flagPrivatePension) numberOfStates++;      // private pension income
         numberOfStates++;                                         // birth year
-        if (DecisionParams.flagLowWageOffer1) numberOfStates++;    // wage offer of principal earner (1 = receive wage offer)
+        if (DecisionParams.flagLowWageOffer1) numberOfStates++;   // wage offer of principal earner (1 = receive wage offer)
         if (DecisionParams.FLAG_WAGE_OFFER2) numberOfStates++;    // wage offer of secondary earner (1 = receive wage offer)
         if (DecisionParams.flagRetirement) numberOfStates++;      // retirement status
         if (DecisionParams.flagHealth) numberOfStates++;          // health status

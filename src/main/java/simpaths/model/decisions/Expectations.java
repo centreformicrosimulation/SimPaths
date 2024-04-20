@@ -606,7 +606,7 @@ public class Expectations {
 
             // wage offer
             if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
-                updateExpectations(Axis.WageOffer1, getUnemploymentRegressionName());
+                updateExpectations(Axis.WageOffer1, getUnemploymentRegressionName(), 0.0);
                 flagUnemploymentVaries = true;
             }
 

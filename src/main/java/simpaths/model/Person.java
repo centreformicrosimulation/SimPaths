@@ -1781,7 +1781,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         careHoursFromSonWeekly_lag1 = careHoursFromSonWeekly;
         careHoursFromOtherWeekly_lag1 = careHoursFromOtherWeekly;
         socialCareProvision_lag1 = socialCareProvision;
-        lowWageOffer_lag1 = lowWageOffer;
+        lowWageOffer_lag1 = getLowWageOffer();
         deh_c3_lag1 = deh_c3; //Update lag(1) of education level
         ypnbihs_dv_lag1 = getYpnbihs_dv(); //Update lag(1) of gross personal non-benefit income
         dehsp_c3_lag1 = dehsp_c3; //Update lag(1) of partner's education status
@@ -4470,4 +4470,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.leftPartnerTest = leftPartnerTest;
     }
 
+    public boolean getLowWageOffer() {
+        if (lowWageOffer==null) {
+            lowWageOffer = false;
+        }
+        return lowWageOffer;
+    }
 }

@@ -2066,26 +2066,26 @@ public class Parameters {
     }
 
     public static double getUnemploymentRateByGenderEducationAgeYear(Gender gender, Education education, int age, int year) {
-        double val = 0.0;
+        double val;
         if (gender.equals(Gender.Male)) {
             if (education.equals(Education.High)) {
                 int yearHere = Math.max(unemploymentRatesMaleGraduatesMinYear, Math.min(unemploymentRatesMaleGraduatesMaxYear, year));
                 int ageHere = Math.min(unemploymentRatesMaleGraduatesMaxAge, age);
-                val = ((Number)unemploymentRatesMaleGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+                val = ((Number)unemploymentRatesMaleGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
             } else {
                 int yearHere = Math.max(unemploymentRatesMaleNonGraduatesMinYear, Math.min(unemploymentRatesMaleNonGraduatesMaxYear, year));
                 int ageHere = Math.min(unemploymentRatesMaleNonGraduatesMaxAge, age);
-                val = ((Number)unemploymentRatesMaleNonGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+                val = ((Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
             }
         } else {
             if (education.equals(Education.High)) {
                 int yearHere = Math.max(unemploymentRatesFemaleGraduatesMinYear, Math.min(unemploymentRatesFemaleGraduatesMaxYear, year));
                 int ageHere = Math.min(unemploymentRatesFemaleGraduatesMaxAge, age);
-                val = ((Number)unemploymentRatesFemaleGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+                val = ((Number)unemploymentRatesFemaleGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
             } else {
                 int yearHere = Math.max(unemploymentRatesFemaleNonGraduatesMinYear, Math.min(unemploymentRatesFemaleNonGraduatesMaxYear, year));
                 int ageHere = Math.min(unemploymentRatesFemaleNonGraduatesMaxAge, age);
-                val = ((Number)unemploymentRatesFemaleNonGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+                val = ((Number)unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
             }
         }
         return val;

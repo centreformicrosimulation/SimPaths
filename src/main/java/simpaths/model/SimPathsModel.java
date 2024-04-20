@@ -327,6 +327,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear);
 		if (enableIntertemporalOptimisations) {
 
+			alignEmployment = false;
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
 					responsesToPension, responsesToLowWageOffer, responsesToRetirement, readGrid,
