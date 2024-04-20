@@ -849,7 +849,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		}
 		for (Person person : persons) {
 			int age = Math.min(person.getDag(), maxAlignAge);
-			personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age).add(person);
+			List<Person> listHere = personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age);
+			if (listHere==null)
+				throw new RuntimeException("failed to identify requested person alignment list");
+			listHere.add(person);
 		}
 
 		// order subgroup lists by id
