@@ -377,7 +377,7 @@ public class Parameters {
     //MultivariateNormalDistribution of age and potential earnings differential to use in the parametric partnership process
     private static MultivariateNormalDistribution wageAndAgeDifferentialMultivariateNormalDistribution;
 
-    //Mortality and fertility tables for the intertemporal optimisation model
+    //Mortality, fertility, and unemployment tables for the intertemporal optimisation model
     private static MultiKeyCoefficientMap mortalityProbabilityByGenderAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
     private static int mortalityProbabilityMaxYear;
     private static int mortalityProbabilityMinYear;
@@ -385,7 +385,22 @@ public class Parameters {
     private static MultiKeyCoefficientMap fertilityProjectionsByYear; //NB: these currently only go up to 2043
     public static int fertilityProjectionsMaxYear;
     public static int fertilityProjectionsMinYear;
-
+    private static MultiKeyCoefficientMap unemploymentRatesMaleGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesMaleGraduatesMaxYear;
+    private static int unemploymentRatesMaleGraduatesMinYear;
+    private static int unemploymentRatesMaleGraduatesMaxAge;
+    private static MultiKeyCoefficientMap unemploymentRatesMaleNonGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesMaleNonGraduatesMaxYear;
+    private static int unemploymentRatesMaleNonGraduatesMinYear;
+    private static int unemploymentRatesMaleNonGraduatesMaxAge;
+    private static MultiKeyCoefficientMap unemploymentRatesFemaleGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesFemaleGraduatesMaxYear;
+    private static int unemploymentRatesFemaleGraduatesMinYear;
+    private static int unemploymentRatesFemaleGraduatesMaxAge;
+    private static MultiKeyCoefficientMap unemploymentRatesFemaleNonGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesFemaleNonGraduatesMaxYear;
+    private static int unemploymentRatesFemaleNonGraduatesMinYear;
+    private static int unemploymentRatesFemaleNonGraduatesMaxAge;
 
     //Number of employments on full and flexible furlough from HMRC statistics, used as regressors in the Covid-19 module
     private static MultiKeyCoefficientMap employmentsFurloughedFull;
@@ -836,6 +851,16 @@ public class Parameters {
         //Fertility rates:
         fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap("input/projections_fertility.xlsx", countryString + "_FertilityByYear", 1, 71);
         setMapBounds(MapBounds.Fertility, countryString);
+
+        //Unemployment rates
+        unemploymentRatesMaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesMaleGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentMaleGraduates, countryString);
+        unemploymentRatesMaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesMaleNonGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentMaleNonGraduates, countryString);
+        unemploymentRatesFemaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesFemaleGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentFemaleGraduates, countryString);
+        unemploymentRatesFemaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesFemaleNonGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentFemaleNonGraduates, countryString);
 
         //RMSE
         coefficientMapRMSE = ExcelAssistant.loadCoefficientMap("input/reg_RMSE.xlsx", countryString, 1, 1);
@@ -2838,9 +2863,13 @@ public class Parameters {
             if (searchForward) {
 
                 Number val = switch (map) {
+                    case UnemploymentMaleGraduates -> (Number) unemploymentRatesMaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case UnemploymentMaleNonGraduates -> (Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
                     case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR + ii);
-                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR + ii);
-                    default -> (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR + ii);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR + ii);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 25, MIN_START_YEAR + ii);
                 };
                 if (val==null) {
                     maxYear = MIN_START_YEAR + ii - 1;
@@ -2850,9 +2879,13 @@ public class Parameters {
             if (searchBack) {
 
                 Number val = switch (map) {
+                    case UnemploymentMaleGraduates -> (Number) unemploymentRatesMaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case UnemploymentMaleNonGraduates -> (Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
                     case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR - ii);
-                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR - ii);
-                    default -> (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR - ii);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR - ii);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 25, MIN_START_YEAR - ii);
                 };
                 if (val==null) {
                     minYear = MIN_START_YEAR - ii + 1;
@@ -2862,17 +2895,41 @@ public class Parameters {
             if (searchAge) {
 
                 Number val = switch (map) {
-                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 80+ii, MIN_START_YEAR);
-                    default -> (Number) populationProjections.getValue("Female", rgn, 80+ii, MIN_START_YEAR);
+                    case UnemploymentMaleGraduates -> (Number) unemploymentRatesMaleGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case UnemploymentMaleNonGraduates -> (Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 55+ii, MIN_START_YEAR);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 55+ii, MIN_START_YEAR);
                 };
                 if (val==null) {
-                    maxAge = 80 + ii - 1;
+                    maxAge = 55 + ii - 1;
                     searchAge = false;
                 }
             }
             ii++;
         }
         switch (map) {
+            case UnemploymentMaleGraduates -> {
+                unemploymentRatesMaleGraduatesMaxYear = maxYear;
+                unemploymentRatesMaleGraduatesMinYear = minYear;
+                unemploymentRatesMaleGraduatesMaxAge = maxAge;
+            }
+            case UnemploymentMaleNonGraduates -> {
+                unemploymentRatesMaleNonGraduatesMaxYear = maxYear;
+                unemploymentRatesMaleNonGraduatesMinYear = minYear;
+                unemploymentRatesMaleNonGraduatesMaxAge = maxAge;
+            }
+            case UnemploymentFemaleGraduates -> {
+                unemploymentRatesFemaleGraduatesMaxYear = maxYear;
+                unemploymentRatesFemaleGraduatesMinYear = minYear;
+                unemploymentRatesFemaleGraduatesMaxAge = maxAge;
+            }
+            case UnemploymentFemaleNonGraduates -> {
+                unemploymentRatesFemaleNonGraduatesMaxYear = maxYear;
+                unemploymentRatesFemaleNonGraduatesMinYear = minYear;
+                unemploymentRatesFemaleNonGraduatesMaxAge = maxAge;
+            }
             case Fertility -> {
                 fertilityProjectionsMaxYear = maxYear;
                 fertilityProjectionsMinYear = minYear;

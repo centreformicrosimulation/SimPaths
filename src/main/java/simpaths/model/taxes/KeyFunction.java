@@ -43,31 +43,31 @@ public class KeyFunction {
 
         // check initialisation data
         if (simYear<1900 || simYear>2200)
-            throw new RuntimeException("Key function supplied odd simulation year");
+            throw new RuntimeException("Key function supplied odd simulation year: " + simYear);
         if (age<16 || age>131)
-            throw new RuntimeException("Key function supplied odd age");
+            throw new RuntimeException("Key function supplied odd age: " + age);
         if (numberMembersOver17<1 || numberMembersOver17>2)
-            throw new RuntimeException("Key function supplied odd number of adults");
+            throw new RuntimeException("Key function supplied odd number of adults: " + numberMembersOver17);
         if (numberChildrenUnder5<0 || numberChildrenUnder5>5)
-            throw new RuntimeException("Key function supplied odd number of children under 5");
+            throw new RuntimeException("Key function supplied odd number of children under 5: " + numberChildrenUnder5);
         if (numberChildren5To9<0 || numberChildren5To9>8)
-            throw new RuntimeException("Key function supplied odd number of children aged between 5 and 9");
+            throw new RuntimeException("Key function supplied odd number of children aged between 5 and 9: " + numberChildren5To9);
         if (numberChildren10To17<0 || numberChildren10To17>7)
-            throw new RuntimeException("Key function supplied odd number of children aged between 10 and 17");
+            throw new RuntimeException("Key function supplied odd number of children aged between 10 and 17: " + numberChildren10To17);
         if (hoursWorkedPerWeekMan<0.0 || hoursWorkedPerWeekMan>200.0)
-            throw new RuntimeException("Key function supplied odd hours worked by man");
+            throw new RuntimeException("Key function supplied odd hours worked by man: " + hoursWorkedPerWeekMan);
         if (hoursWorkedPerWeekWoman<0.0 || hoursWorkedPerWeekWoman>200.0)
-            throw new RuntimeException("Key function supplied odd hours worked by woman");
+            throw new RuntimeException("Key function supplied odd hours worked by woman: " + hoursWorkedPerWeekWoman);
         if ((dlltsdMan<0 && numberMembersOver17==2) || dlltsdMan>1)
-            throw new RuntimeException("Key function supplied odd disability status for man");
+            throw new RuntimeException("Key function supplied odd disability status for man: " + dlltsdMan);
         if ((dlltsdWoman<0 && numberMembersOver17==2) || dlltsdWoman>1)
-            throw new RuntimeException("Key function supplied odd disability status for woman");
+            throw new RuntimeException("Key function supplied odd disability status for woman: " + dlltsdWoman);
         if (dlltsdMan<0 && dlltsdWoman<0)
-            throw new RuntimeException("Key function supplied odd disability status for man and woman");
+            throw new RuntimeException("Key function supplied odd disability status for man and woman: " + dlltsdMan);
         if (careProvision<0)
-            throw new RuntimeException("Key function supplied odd care provision indicator");
+            throw new RuntimeException("Key function supplied odd care provision indicator: " + careProvision);
         if (originalIncomePerWeek<-40000.0 || originalIncomePerWeek>300000.0)
-            throw new RuntimeException("Key function supplied odd original income per week");
+            throw new RuntimeException("Key function supplied odd original income per week: " + originalIncomePerWeek);
 
         // set attributes
         this.simYear = simYear;
