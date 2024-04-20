@@ -37,7 +37,7 @@ public class GridScale {
         numberOfStates++;                                         // full-time wage potential
         if (DecisionParams.flagPrivatePension) numberOfStates++;      // private pension income
         numberOfStates++;                                         // birth year
-        if (DecisionParams.FLAG_WAGE_OFFER1) numberOfStates++;    // wage offer of principal earner (1 = receive wage offer)
+        if (DecisionParams.flagLowWageOffer1) numberOfStates++;    // wage offer of principal earner (1 = receive wage offer)
         if (DecisionParams.FLAG_WAGE_OFFER2) numberOfStates++;    // wage offer of secondary earner (1 = receive wage offer)
         if (DecisionParams.flagRetirement) numberOfStates++;      // retirement status
         if (DecisionParams.flagHealth) numberOfStates++;          // health status
@@ -153,7 +153,7 @@ public class GridScale {
             dimIndex++;
 
             // wage offer of principal earner (1 = receive wage offer)
-            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
                 axes[aa][dimIndex][0] = 2;
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 1;
@@ -458,7 +458,7 @@ public class GridScale {
         dimIndex++;
 
         // wage offer of principal earner (1 = receive wage offer)
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             if (axisID==Axis.WageOffer1) return dimIndex;
             dimIndex++;
         } else {

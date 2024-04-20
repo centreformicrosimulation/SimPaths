@@ -61,7 +61,7 @@ public class Expectations {
 
     // flags to indicate expectations variation
     boolean flagRegionVaries=false, flagEducationVaries=false, flagHealthVaries=false, flagDisabilityVaries=false, flagSocialCareReceiptVaries=false;
-    boolean flagSocialCareProvisionVaries=false, flagCohabitationVaries=false, flagChildrenVaries=false, flagWageVaries=false;
+    boolean flagSocialCareProvisionVaries=false, flagCohabitationVaries=false, flagChildrenVaries=false, flagWageVaries=false, flagUnemploymentVaries = false;
 
 
     /**
@@ -564,7 +564,7 @@ public class Expectations {
             }
 
             // social care receipt
-           if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
+            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
                 updateExpectations(Axis.SocialCareReceipt, 4);
                 flagSocialCareReceiptVaries = true;
             }
@@ -605,10 +605,9 @@ public class Expectations {
             }
 
             // wage offer
-            if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
-                stateIndexNextPeriod = scale.getIndex(Axis.WageOffer1, ageYearsNextPeriod);
-                LocalExpectations lexpect = new LocalExpectations(1.0, 0.0, DecisionParams.PROBABILITY_WAGE_OFFER1);
-                expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
+            if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
+                updateExpectations(Axis.WageOffer1, getUnemploymentRegressionName());
+                flagUnemploymentVaries = true;
             }
 
             // check evaluated probabilities
@@ -618,6 +617,22 @@ public class Expectations {
             }
             if (Math.abs(probabilityCheck-1) > 1.0E-5) {
                 throw new InvalidParameterException("problem with probabilities supplied to outer expectations 1");
+            }
+        }
+    }
+
+    private RegressionNames getUnemploymentRegressionName() {
+        if (currentStates.getGenderCode().equals(Gender.Male)) {
+            if (currentStates.getEducationCode().equals(Education.High)) {
+                return RegressionNames.UnemploymentU1a;
+            } else {
+                return RegressionNames.UnemploymentU1b;
+            }
+        } else {
+            if (currentStates.getEducationCode().equals(Education.High)) {
+                return RegressionNames.UnemploymentU1c;
+            } else {
+                return RegressionNames.UnemploymentU1d;
             }
         }
     }

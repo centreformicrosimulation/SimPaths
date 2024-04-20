@@ -87,7 +87,7 @@ public class States {
         populate(Axis.BirthYear, benefitUnit.getYear() - ageYears);
 
         // wage offer 1
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1)
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1)
             populate(Axis.WageOffer1, refPerson.getWageOffer());
 
         // retirement
@@ -393,7 +393,7 @@ public class States {
      */
     int getWageOffer() {
         int wageOffer;
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             wageOffer = (int) Math.round(states[scale.getIndex(Axis.WageOffer1, ageYears)]);
         } else {
             wageOffer = -1;
@@ -983,7 +983,7 @@ public class States {
         System.out.println(msg);
 
         // wage offer
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             stateIndex = scale.getIndex(Axis.WageOffer1, ageYears);
             printOutOfBounds(stateIndex);
             msg = "wage offer: " + String.format(fmtIndicator,states[stateIndex]);

@@ -260,6 +260,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "whether to include private pensions in the state space for IO behavioural solutions")
 	private boolean responsesToPension = false;
 
+	@GUIparameter(description = "whether to include low wage offers (unemployment) in the state space for IO behavioural solutions")
+	private boolean responsesToLowWageOffer = false;
+
 	@GUIparameter(description = "whether to include retirement (and private pensions) in the state space for IO behavioural solutions")
 	private boolean responsesToRetirement = false;
 
@@ -326,8 +329,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
-					responsesToPension, responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(),
-					startYear, endYear);
+					responsesToPension, responsesToLowWageOffer, responsesToRetirement, readGrid,
+					getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
 			//DecisionTests.compareGrids();
 			//DatabaseExtension.extendInputData();
 		}
@@ -427,114 +430,117 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateLags);
 
-		//1 - DEMOGRAPHIC MODULE
-		// A: Ageing
+		// DEMOGRAPHIC MODULE
+		// Ageing
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.Ageing, false);        //Read only mode as agents are removed when they become older than Parameters.getMAX_AGE();
 		addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
 
-		// B: Population Alignment - adjust population to projections by Gender and Age, and creates new population for minimum age
+		// Population Alignment - adjust population to projections by Gender and Age, and creates new population for minimum age
 		addEventToAllYears(Processes.PopulationAlignment);
 
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
-		// C: Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
+		// Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
 		//Turned off for now as health determined below based on individual characteristics
 		//yearlySchedule.addEvent(this, Processes.HealthAlignment);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
-		// D: Check whether persons have reached retirement Age
+		// Check whether persons have reached retirement Age
 		addCollectionEventToAllYears(persons, Person.Processes.ConsiderRetirement, false);
 
-		//2 - EDUCATION MODULE
-		// A: Check In School - check whether still in education, and if leaving school, reset Education Level
+		// EDUCATION MODULE
+		// Check In School - check whether still in education, and if leaving school, reset Education Level
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.InSchool);
 
-		// B: In School alignment
+		// In School alignment
 		addEventToAllYears(Processes.InSchoolAlignment);
 		addCollectionEventToAllYears(persons, Person.Processes.LeavingSchool);
 
-		// C: Align the level of education if required
+		// Align the level of education if required
 		addEventToAllYears(Processes.EducationLevelAlignment);
 
-		// 3 A: Homeownership status
+		// Homeownership status
 		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Homeownership);
 
-		//4 - HEALTH MODULE
-		// 4A: Update Health - determine health (continuous) based on regression models: done here because health depends on education
+		// HEALTH MODULE
+		// Update Health - determine health (continuous) based on regression models: done here because health depends on education
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.Health);
 
-		// 4B: Update mental health - determine (continuous) mental health level based on regression models
+		// Update mental health - determine (continuous) mental health level based on regression models
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
 
-		//5 - HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
+		// HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
 
-		// A: Update potential earnings so that as up to date as possible to decide partner in union matching.
+		// Update potential earnings so that as up to date as possible to decide partner in union matching.
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.UpdatePotentialHourlyEarnings);
 
-		// B: Consider whether in consensual union (cohabiting)
+		// Consider whether in consensual union (cohabiting)
 		yearlySchedule.addEvent(this, Processes.CohabitationRegressionAlignment);
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderCohabitation);
 
-		// C: Union matching
+		// Union matching
 		yearlySchedule.addEvent(this, Processes.UnionMatching);
 		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateOccupancy);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 		//yearlySchedule.addEvent(this, Processes.Timer);
 
-		// D: Fertility
+		// Fertility
 		yearlySchedule.addEvent(this, Processes.FertilityAlignment);        //Align to fertility rates implied by projected population statistics.
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.GiveBirth, false);        //Cannot use read-only collection schedule as newborn children cause concurrent modification exception.  Need to specify false in last argument of Collection event.
 
+		// TIME USE MODULE
 		// Social care
 		if (projectSocialCare) {
 			yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareIncidence);
 			//yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
 		}
 
-		// UPDATE REFERENCES FOR OPTIMISING BEHAVIOUR (IF NECESSARY)
+		// Unemployment
+		addCollectionEventToAllYears(persons, Person.Processes.Unemployment);
+
+		// update references for optimising behaviour
 		// needs to be positioned after all decision states for the current period have been simulated
 		if (enableIntertemporalOptimisations)
 			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateStates, false);
 
-		//7 - TIME USE MODULE
 		addEventToAllYears(Processes.LabourMarketAndIncomeUpdate);
 
-		//Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
+		// Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
-		//8 - UPDATE CONSUMPTION FOR THE SECURITY INDEX
+		// CONSUMPTION AND SAVINGS MODULE
 		if (Parameters.projectWealth)
 			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
 		addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
 
-		//8B - UPDATE EQUIVALISED DISPOSABLE INCOME AND CALCULATE CHANGE SINCE LAST YEAR
+		// equivalised disposable income
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
 
-		//9: MENTAL HEALTH MODULE
-		//9A: Update mental health - determine (continuous) mental health level based on regression models + caseness
+		// MENTAL HEALTH MODULE
+		// Update mental health - determine (continuous) mental health level based on regression models + caseness
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
-		//9B: - UPDATE MENTAL HELATH: STEP 2: modify the outcome of Step 1 depending on individual's exposures + caseness
+		// modify the outcome of Step 1 depending on individual's exposures + caseness
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
-		//9C: UPDATE CASE-BASED MEASURE (STEPS 1 AND 2 TOGETHER)
+		// update case-based measure
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
 		// REPORTING OF IMPERFECT TAX DATABASE MATCHES
 		addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
 
-		//9 - END OF YEAR PROCESSES
+		// END OF YEAR PROCESSES
 		addEventToAllYears(Processes.CheckForEmptyBenefitUnits); //Check all household before the end of the year
 		addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
 		addEventToAllYears(Processes.EndYear);
 
-		//10 - UPDATE YEAR
+		// UPDATE YEAR
 		addEventToAllYears(Processes.UpdateYear);
 
 		// UPDATE EVENT QUEUE
 		getEngine().getEventQueue().scheduleOnce(firstYearSched, startYear, ordering);
 		getEngine().getEventQueue().scheduleRepeat(yearlySchedule, startYear+1, ordering, 1.);
 
-		//For termination of simulation
+		// at termination of simulation
 		int orderEarlier = -1;            //Set less than order so that this is called before the yearlySchedule in the endYear.
 		SystemEvent end = new SystemEvent(SimulationEngine.getInstance(), SystemEventType.End);
 		getEngine().getEventQueue().scheduleOnce(end, endYear+1, orderEarlier);
@@ -3238,6 +3244,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		this.responsesToRegion = responsesToRegion;
 	}
 
+	public boolean getResponsesToLowWageOffer() { return responsesToLowWageOffer; }
+	public void setResponsesToLowWageOffer(boolean val) { responsesToLowWageOffer = val; }
 	public boolean getResponsesToRetirement() { return responsesToRetirement;}
 	public void setResponsesToRetirement(boolean val) { responsesToRetirement = val;}
 	public boolean getResponsesToPension() { return responsesToPension;}

@@ -270,6 +270,7 @@ public class Parameters {
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
     public static final boolean FLAG_SINGLE_MOTHERS = true;
+    public static boolean flagUnemployment = false;
 
     public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
@@ -437,6 +438,11 @@ public class Parameters {
     private static Map<NotPartnerInformalCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2fMap;
     private static Map<SocialCareProvision, MultiKeyCoefficientMap> coeffCovarianceSocialCareS3dMap;
 
+    //Unemployment
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1a;
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1b;
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1c;
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1d;
 
     //Mental health
     private static MultiKeyCoefficientMap coeffCovarianceHM1Level; //Step 1 coefficients for mental health
@@ -646,6 +652,11 @@ public class Parameters {
     private static MultiLogitRegression<SocialCareProvision> regInformalCareToS3d;
     private static LinearRegression regCareHoursProvS3e;
 
+    //Unemployment
+    private static ProbitRegression regUnemploymentMaleGraduateU1a;
+    private static ProbitRegression regUnemploymentMaleNonGraduateU1b;
+    private static ProbitRegression regUnemploymentFemaleGraduateU1c;
+    private static ProbitRegression regUnemploymentFemaleNonGraduateU1d;
 
     //Health mental
     private static LinearRegression regHealthHM1Level;
@@ -915,6 +926,10 @@ public class Parameters {
         int columnsSocialCareS3c = -1;
         int columnsSocialCareS3d = -1;
         int columnsSocialCareS3e = -1;
+        int columnsUnemploymentU1a = -1;
+        int columnsUnemploymentU1b = -1;
+        int columnsUnemploymentU1c = -1;
+        int columnsUnemploymentU1d = -1;
         int columnsEducationE1a = -1;
         int columnsEducationE1b = -1;
         int columnsEducationE2a = -1;
@@ -1063,6 +1078,10 @@ public class Parameters {
             columnsSocialCareS3c = 37;
             columnsSocialCareS3d = 79;
             columnsSocialCareS3e = 37;
+            columnsUnemploymentU1a = 19;
+            columnsUnemploymentU1b = 19;
+            columnsUnemploymentU1c = 19;
+            columnsUnemploymentU1d = 19;
             columnsEducationE1a = 21;
             columnsEducationE1b = 27;
             columnsEducationE2a = 22;
@@ -1229,6 +1248,12 @@ public class Parameters {
         coeffCovarianceSocialCareS3d = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3d", 1, columnsSocialCareS3d);
         coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3e", 1, columnsSocialCareS3e);
 
+        //Unemployment
+        coeffCovarianceUnemploymentU1a = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1a", 1, columnsUnemploymentU1a);
+        coeffCovarianceUnemploymentU1b = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1b", 1, columnsUnemploymentU1b);
+        coeffCovarianceUnemploymentU1c = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1c", 1, columnsUnemploymentU1c);
+        coeffCovarianceUnemploymentU1d = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1d", 1, columnsUnemploymentU1d);
+
         //Health mental: level and case-based
         coeffCovarianceHM1Level = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM1_L", 1, columnsHealthHM1);
         coeffCovarianceHM2LevelMales = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM2_Males_L", 1, columnsHealthHM2Males);
@@ -1358,6 +1383,12 @@ public class Parameters {
             coeffCovarianceSocialCareS3d = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3d);
             coeffCovarianceSocialCareS3e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3e);
 
+            //Unemployment
+            coeffCovarianceUnemploymentU1a = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1a);
+            coeffCovarianceUnemploymentU1b = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1b);
+            coeffCovarianceUnemploymentU1c = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1c);
+            coeffCovarianceUnemploymentU1d = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1d);
+
             //Non-labour income
             // coeffCovarianceIncomeI1a = RegressionUtils.bootstrap(coeffCovarianceIncomeI1a); // Commented out as not used any more since income is split.
             // coeffCovarianceIncomeI1b = RegressionUtils.bootstrap(coeffCovarianceIncomeI1b); // Commented out as not used any more since income is split.
@@ -1429,6 +1460,12 @@ public class Parameters {
         regNoPartnerProvCareToOtherS3c = new ProbitRegression(coeffCovarianceSocialCareS3c);
         regInformalCareToS3d = new MultiLogitRegression<>(SocialCareProvision.class, coeffCovarianceSocialCareS3dMap);
         regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
+
+        //Unemployment
+        regUnemploymentMaleGraduateU1a = new ProbitRegression(coeffCovarianceUnemploymentU1a);
+        regUnemploymentMaleNonGraduateU1b = new ProbitRegression(coeffCovarianceUnemploymentU1b);
+        regUnemploymentFemaleGraduateU1c = new ProbitRegression(coeffCovarianceUnemploymentU1c);
+        regUnemploymentFemaleNonGraduateU1d = new ProbitRegression(coeffCovarianceUnemploymentU1d);
 
         //Health mental
         regHealthHM1Level = new LinearRegression(coeffCovarianceHM1Level);
@@ -1891,9 +1928,7 @@ public class Parameters {
     public static OrderedProbitRegression getRegHealthH1b() {
         return regHealthH1b;
     }
-    public static ProbitRegression getRegHealthH2b() {
-        return regHealthH2b;
-    }
+    public static ProbitRegression getRegHealthH2b() { return regHealthH2b; }
 
     public static ProbitRegression getRegReceiveCareS1a() { return regReceiveCareS1a; }
     public static LinearRegression getRegCareHoursS1b() { return regCareHoursS1b; }
@@ -1913,6 +1948,11 @@ public class Parameters {
     public static ProbitRegression getRegNoPartnerProvCareToOtherS3c() { return regNoPartnerProvCareToOtherS3c; }
     public static MultiLogitRegression getRegInformalCareToS3d() { return regInformalCareToS3d; }
     public static LinearRegression getRegCareHoursProvS3e() { return regCareHoursProvS3e; }
+
+    public static ProbitRegression getRegUnemploymentMaleGraduateU1a() { return regUnemploymentMaleGraduateU1a; }
+    public static ProbitRegression getRegUnemploymentMaleNonGraduateU1b() { return regUnemploymentMaleNonGraduateU1b; }
+    public static ProbitRegression getRegUnemploymentFemaleGraduateU1c() { return regUnemploymentFemaleGraduateU1c; }
+    public static ProbitRegression getRegUnemploymentFemaleNonGraduateU1d() { return regUnemploymentFemaleNonGraduateU1d; }
 
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
@@ -2023,6 +2063,32 @@ public class Parameters {
         int yearHere = Math.max(fertilityProjectionsMinYear, Math.min(fertilityProjectionsMaxYear, year));
         //We calculate the rate per woman, but the standard to report (and what is used in the estimates) is per 1000 hence multiplication
         return 1000*((Number)fertilityRateByRegionYear.get(region, yearHere)).doubleValue();
+    }
+
+    public static double getUnemploymentRateByGenderEducationAgeYear(Gender gender, Education education, int age, int year) {
+        double val = 0.0;
+        if (gender.equals(Gender.Male)) {
+            if (education.equals(Education.High)) {
+                int yearHere = Math.max(unemploymentRatesMaleGraduatesMinYear, Math.min(unemploymentRatesMaleGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesMaleGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesMaleGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+            } else {
+                int yearHere = Math.max(unemploymentRatesMaleNonGraduatesMinYear, Math.min(unemploymentRatesMaleNonGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesMaleNonGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesMaleNonGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+            }
+        } else {
+            if (education.equals(Education.High)) {
+                int yearHere = Math.max(unemploymentRatesFemaleGraduatesMinYear, Math.min(unemploymentRatesFemaleGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesFemaleGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesFemaleGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+            } else {
+                int yearHere = Math.max(unemploymentRatesFemaleNonGraduatesMinYear, Math.min(unemploymentRatesFemaleNonGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesFemaleNonGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesFemaleNonGraduatesByAgeYear.get(ageHere, yearHere)).doubleValue();
+            }
+        }
+        return val;
     }
 
     public static LinearRegression getRegWagesMales() {

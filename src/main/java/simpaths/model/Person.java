@@ -24,6 +24,8 @@ import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.IIntSource;
 
+import static simpaths.data.Parameters.getUnemploymentRateByGenderEducationAgeYear;
+
 @Entity
 public class Person implements EventListener, IDoubleSource, IIntSource, Weight, Comparable<Person>
 {
@@ -130,6 +132,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Double careHoursFromSonWeekly = 0.0;
     @Column(name="other_socare_hrs")
     private Double careHoursFromOtherWeekly = 0.0;
+    @Column(name="low_wage_offer")
+    private Boolean lowWageOffer = false;
+    @Transient
+    private boolean lowWageOffer_lag1 = false;
     @Transient
     SocialCareReceiptAll socialCareReceiptAll = SocialCareReceiptAll.None;
     @Transient
@@ -513,6 +519,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.careHoursFromSonWeekly_lag1 = -9.0;
         this.careHoursFromOtherWeekly_lag1 = -9.0;
         this.socialCareProvision_lag1 = SocialCareProvision.None;
+        this.lowWageOffer = false;
+        this.lowWageOffer_lag1 = false;
         this.women_fertility = Indicator.False;
         this.idBenefitUnit = mother.getIdBenefitUnit();
         this.benefitUnit = mother.benefitUnit;
@@ -656,6 +664,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
         this.careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
         this.socialCareProvision_lag1 = originalPerson.socialCareProvision_lag1;
+        this.lowWageOffer = originalPerson.lowWageOffer;
+        this.lowWageOffer_lag1 = originalPerson.lowWageOffer_lag1;
         this.sedex = originalPerson.sedex;
         this.partnership_samesex = originalPerson.partnership_samesex;
         this.women_fertility = originalPerson.women_fertility;
@@ -816,6 +826,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         InSchool,
         LeavingSchool,
         UpdatePotentialHourlyEarnings,	//Needed to union matching and labour supply
+        Unemployment,
     }
 
     @Override
@@ -867,6 +878,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 //			System.out.println("Update wage equation for person " + this.getKey().getId() + " with age " + age + " with activity_status " + activity_status + " and activity_status_lag " + activity_status_lag + " and toLeaveSchool " + toLeaveSchool + " with education " + education);
             updateFullTimeHourlyEarnings();
             break;
+        case Unemployment:
+            updateUnemploymentState();
+            break;
         }
     }
 
@@ -874,6 +888,33 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // ---------------------------------------------------------------------
     // Processes
     // ---------------------------------------------------------------------
+
+    private void updateUnemploymentState() {
+        lowWageOffer = false;
+        if (Parameters.flagUnemployment) {
+
+            if (this == benefitUnit.getRefPersonForDecisions()) {
+                // unemployment currently limited to reference person for decisions
+
+                double draw = labourInnov.nextDouble();
+                double prob;
+                if (dgn.equals(Gender.Male)) {
+                    if (deh_c3.equals(Education.High)) {
+                        prob = Parameters.getRegUnemploymentMaleGraduateU1a().getProbability(this, Person.DoublesVariables.class);
+                    } else {
+                        prob = Parameters.getRegUnemploymentMaleNonGraduateU1b().getProbability(this, Person.DoublesVariables.class);
+                    }
+                } else {
+                    if (deh_c3.equals(Education.High)) {
+                        prob = Parameters.getRegUnemploymentFemaleGraduateU1c().getProbability(this, Person.DoublesVariables.class);
+                    } else {
+                        prob = Parameters.getRegUnemploymentFemaleNonGraduateU1d().getProbability(this, Person.DoublesVariables.class);
+                    }
+                }
+                lowWageOffer = draw < prob;
+            }
+        }
+    }
 
     private void ageing() {
 
@@ -1382,7 +1423,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     private void giveBirth() {				//To be called once per year after fertility alignment
 
-        if(toGiveBirth) {		//toGiveBirth is determined by fertility process
+        if (toGiveBirth) {		//toGiveBirth is determined by fertility process
 
             Gender babyGender = (fertilityInnov.nextDouble() < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
 
@@ -1740,6 +1781,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         careHoursFromSonWeekly_lag1 = careHoursFromSonWeekly;
         careHoursFromOtherWeekly_lag1 = careHoursFromOtherWeekly;
         socialCareProvision_lag1 = socialCareProvision;
+        lowWageOffer_lag1 = lowWageOffer;
         deh_c3_lag1 = deh_c3; //Update lag(1) of education level
         ypnbihs_dv_lag1 = getYpnbihs_dv(); //Update lag(1) of gross personal non-benefit income
         dehsp_c3_lag1 = dehsp_c3; //Update lag(1) of partner's education status
@@ -2105,9 +2147,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public enum DoublesVariables {
         // ORGANISED ALPHABETICALLY TO ASSIST IDENTIFICATION
 
-        GrossEarningsYearly,
-        GrossLabourIncomeMonthly,
-
         Age,
         AgeSquared,
         AgeCubed,
@@ -2267,6 +2306,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         EquivalisedIncomeYearly, 							//Equivalised income for use with the security index
         Female,
         FertilityRate,
+        GrossEarningsYearly,
+        GrossLabourIncomeMonthly,
         InverseMillsRatio,
         ITC,			//Italy
         ITF,
@@ -2302,6 +2343,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         LunionIT,
         NeedCare_L1,
         NonPovertyToPoverty,
+        NotEmployed_L1,
         NumberChildren,
         NumberChildren_2under,
         OnleaveBenefits,
@@ -2330,6 +2372,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Single_kids,
         StatePensionAge,
         UnemployedToEmployed,
+        UnemploymentRate,
         Union,
         Union_kids,
         UKC,				//UK
@@ -2371,22 +2414,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         switch ((DoublesVariables) variableID) {
 
-        case GrossEarningsYearly:
-            return getGrossEarningsYearly();
-        case GrossLabourIncomeMonthly:
-            return getCovidModuleGrossLabourIncome_Baseline();
-        case CareToPartnerOnly:
-            return (SocialCareProvision.OnlyPartner.equals(socialCareProvision)) ? 1. : 0.;
-        case CareToPartnerAndOther:
-            return (SocialCareProvision.PartnerAndOther.equals(socialCareProvision)) ? 1. : 0.;
-        case CareToOtherOnly:
-            return (SocialCareProvision.OnlyOther.equals(socialCareProvision)) ? 1. : 0.;
-        case CareToPartnerOnly_L1:
-            return (SocialCareProvision.OnlyPartner.equals(socialCareProvision_lag1)) ? 1. : 0.;
-        case CareToPartnerAndOther_L1:
-            return (SocialCareProvision.PartnerAndOther.equals(socialCareProvision_lag1)) ? 1. : 0.;
-        case CareToOtherOnly_L1:
-            return (SocialCareProvision.OnlyOther.equals(socialCareProvision_lag1)) ? 1. : 0.;
         case Age:
             return (double) dag;
         case Dag:
@@ -2473,6 +2500,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (dag >= 68) ? 1. : 0.;
         case NeedCare_L1:
             return (Indicator.True.equals(needSocialCare_lag1)) ? 1. : 0.;
+        case CareToPartnerOnly:
+            return (SocialCareProvision.OnlyPartner.equals(socialCareProvision)) ? 1. : 0.;
+        case CareToPartnerAndOther:
+            return (SocialCareProvision.PartnerAndOther.equals(socialCareProvision)) ? 1. : 0.;
+        case CareToOtherOnly:
+            return (SocialCareProvision.OnlyOther.equals(socialCareProvision)) ? 1. : 0.;
+        case CareToPartnerOnly_L1:
+            return (SocialCareProvision.OnlyPartner.equals(socialCareProvision_lag1)) ? 1. : 0.;
+        case CareToPartnerAndOther_L1:
+            return (SocialCareProvision.PartnerAndOther.equals(socialCareProvision_lag1)) ? 1. : 0.;
+        case CareToOtherOnly_L1:
+            return (SocialCareProvision.OnlyOther.equals(socialCareProvision_lag1)) ? 1. : 0.;
         case ReceiveCare_L1:
             return (getTotalHoursSocialCare_L1() > 0.01) ? 1. : 0.;
         case CareMarketMixed_L1:
@@ -2665,6 +2704,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         case Female:
             return dgn.equals(Gender.Female)? 1. : 0.;
+        case GrossEarningsYearly:
+            return getGrossEarningsYearly();
+        case GrossLabourIncomeMonthly:
+            return getCovidModuleGrossLabourIncome_Baseline();
         case InverseMillsRatio:
             return getInverseMillsRatio();
         case Ld_children_3under:
@@ -2732,6 +2775,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         case Liwwh:
             return (double) liwwh;
+        case NotEmployed_L1:
+            return (les_c4_lag1.equals(Les_c4.NotEmployed))? 1. : 0.;
         case NumberChildren:
             return (double)benefitUnit.getNumberChildrenAll();
         case NumberChildren_2under:
@@ -2753,6 +2798,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 else return 0.;
             }
             else return 0.;
+        case UnemploymentRate:
+            return getUnemploymentRateByGenderEducationAgeYear(getDgn(), getDeh_c3(), getDag(), getYear());
         case Union:
             return household_status.equals(Household_status.Couple)? 1. : 0.;
         case Union_kids:		//TODO: Is this sufficient, or do we need to take children aged over 12 into account as well?
@@ -4036,8 +4083,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getDisposableIncomeMonthly() { return benefitUnit.getDisposableIncomeMonthly();}
 
     public double getWageOffer() {
-        //TODO: WAGE OFFER NOT CURRENTLY WORKING
-        return 1.0;
+        if (lowWageOffer)
+            return 0.0;
+        else
+            return 1.0;
     }
 
     public int getDisability() {

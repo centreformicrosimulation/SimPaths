@@ -1,7 +1,6 @@
 package simpaths.model.decisions;
 
 
-import simpaths.data.Parameters;
 import simpaths.model.taxes.Matches;
 
 import java.util.List;
@@ -43,7 +42,7 @@ public class ManagerSolveState {
                 if (DecisionParams.optionsEmployment1 > 1) {
                     emp1Step = 1 / (double)(DecisionParams.optionsEmployment1 - 1);
                 }
-            } else if (DecisionParams.FLAG_WAGE_OFFER1) {
+            } else if (DecisionParams.flagLowWageOffer1) {
                 emp1End = 1;
             } else {
                 emp1Start = 1;
@@ -85,7 +84,7 @@ public class ManagerSolveState {
                 }
 
                 // check for wage offer solutions for both principal and secondary earner
-                if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1 &&
+                if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 &&
                         emp2End > emp2Start && DecisionParams.FLAG_WAGE_OFFER2 &&
                         emp1Pr < 1.0E-5 && emp2Pr < 1.0E-5) {
                     States targetStates = new States(states);
@@ -95,7 +94,7 @@ public class ManagerSolveState {
                 }
 
                 // check wage offer solutions for principal earner
-                if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1 && emp1Pr < 1.0E-5) {
+                if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 && emp1Pr < 1.0E-5) {
                     if (solutionMaxEmp1==null) {
                         solutionMaxEmp1 = solutionHere;
                     } else {
@@ -128,7 +127,7 @@ public class ManagerSolveState {
         }
 
         // save wage offer solutions for principal earner
-        if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1) {
             States targetStates = new States(states);
             targetStates.setWageOffer1(0);
             grids.populate(targetStates, solutionMaxEmp1);
