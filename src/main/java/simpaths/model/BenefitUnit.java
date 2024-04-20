@@ -559,6 +559,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		switch ((Processes) type) {
 			case UpdateLags:
 				updateLagFields();
+				break;
 			case Update:
 				updateChildrenFields();
 				updateOccupancy();

@@ -199,3 +199,6 @@ input/input.mv.db.new
 input/input.mv.db.old
 input/input.mv.db.original
 dependency-reduced-pom.xml
+input/DatabaseCountryYear.xlsx
+input/EUROMODpolicySchedule.xlsx
+.idea/vcs.xml
