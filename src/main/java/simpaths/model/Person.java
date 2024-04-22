@@ -2262,6 +2262,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dehm_c3_High,					//Mother's education == High indicator
         Dehm_c3_Low,					//Mother's education == Low indicator
         Dehm_c3_Medium,					//Mother's education == Medium indicator
+        Dehmf_c3_High,
+        Dehmf_c3_Medium,
+        Dehmf_c3_Low,
         Dehsp_c3_Low_L1,				//Partner's education == Low at lag(1)
         Dehsp_c3_Medium_L1,				//Partner's education == Medium at lag(1)
         Dgn,							//Gender: returns 1 if male
@@ -2284,7 +2287,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhe_Good,
         Dhe_VeryGood,
         Dhe_Excellent,
+        Dhe_Poor_L1,
+        Dhe_Fair_L1,
+        Dhe_Good_L1,
+        Dhe_VeryGood_L1,
+        Dhe_Excellent_L1,
         Dhesp_L1, 						//Lag(1) of partner's health status
+        Dhesp_Poor_L1,
+        Dhesp_Fair_L1,
+        Dhesp_Good_L1,
+        Dhesp_VeryGood_L1,
+        Dhesp_Excellent_L1,
         Dhhtp_c4_CoupleChildren_L1,
         Dhhtp_c4_CoupleNoChildren_L1,
         Dhhtp_c4_SingleChildren_L1,
@@ -2612,6 +2625,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (Dhe.Fair.equals(dhe)) ? 1. : 0.;
         case Dhe_Poor:
             return (Dhe.Poor.equals(dhe)) ? 1. : 0.;
+        case Dhe_Excellent_L1:
+            return (Dhe.Excellent.equals(dhe_lag1)) ? 1. : 0.;
+        case Dhe_VeryGood_L1:
+            return (Dhe.VeryGood.equals(dhe_lag1)) ? 1. : 0.;
+        case Dhe_Good_L1:
+            return (Dhe.Good.equals(dhe_lag1)) ? 1. : 0.;
+        case Dhe_Fair_L1:
+            return (Dhe.Fair.equals(dhe_lag1)) ? 1. : 0.;
+        case Dhe_Poor_L1:
+            return (Dhe.Poor.equals(dhe_lag1)) ? 1. : 0.;
+        case Dhesp_Excellent_L1:
+            return (Dhe.Excellent.equals(dhesp_lag1)) ? 1. : 0.;
+        case Dhesp_VeryGood_L1:
+            return (Dhe.VeryGood.equals(dhesp_lag1)) ? 1. : 0.;
+        case Dhesp_Good_L1:
+            return (Dhe.Good.equals(dhesp_lag1)) ? 1. : 0.;
+        case Dhesp_Fair_L1:
+            return (Dhe.Fair.equals(dhesp_lag1)) ? 1. : 0.;
+        case Dhesp_Poor_L1:
+            return (Dhe.Poor.equals(dhesp_lag1)) ? 1. : 0.;
         case Dhe_2:
             return (Dhe.Fair.equals(dhe))? 1. : 0.;
         case Dhe_3:
@@ -2640,10 +2673,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Dhmghq_L1:
             return (dhm_ghq_lag1)? 1. : 0.;
         case Dhesp_L1:
-            if(dhesp_lag1 != null) {
-                return dhesp_lag1.getValue();
-            }
-            else return 0.;
+            return (dhesp_lag1 != null) ? dhesp_lag1.getValue() : 0.0;
         case Ded:
             return (Indicator.True.equals(ded)) ? 1.0 : 0.0;
         case Deh_c3_High:
@@ -2668,16 +2698,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (Education.Medium.equals(dehf_c3)) ? 1.0 : 0.0;
         case Dehf_c3_Low:
             return (Education.Low.equals(dehf_c3)) ? 1.0 : 0.0;
+        case Dehmf_c3_High:
+            return (checkHighestParentalEducationEquals(Education.High)) ? 1.0 : 0.0;
+        case Dehmf_c3_Medium:
+            return (checkHighestParentalEducationEquals(Education.Medium)) ? 1.0 : 0.0;
+        case Dehmf_c3_Low:
+            return (checkHighestParentalEducationEquals(Education.Low)) ? 1.0 : 0.0;
         case Dehsp_c3_Medium_L1:
-            if(dehsp_c3_lag1 != null) {
-                return dehsp_c3_lag1.equals(Education.Medium)? 1. : 0.;
-            }
-            else return 0.;
+            return (Education.Medium.equals(dehsp_c3_lag1)) ? 1. : 0.;
         case Dehsp_c3_Low_L1:
-            if(dehsp_c3_lag1 != null) {
-                return dehsp_c3_lag1.equals(Education.Low)? 1. : 0.;
-            }
-            else return 0.;
+            return (Education.Low.equals(dehsp_c3_lag1)) ? 1. : 0.;
         case Dhhtp_c4_CoupleChildren_L1:
             return (Dhhtp_c4.CoupleChildren.equals(getDhhtp_c4_lag1())) ? 1.0 : 0.0;
         case Dhhtp_c4_CoupleNoChildren_L1:
@@ -2687,15 +2717,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Dhhtp_c4_SingleChildren_L1:
             return (Dhhtp_c4.SingleChildren.equals(getDhhtp_c4_lag1())) ? 1.0 : 0.0;
         case Dlltsd:
-            if(dlltsd != null) {
-            return dlltsd.equals(Indicator.True)? 1. : 0.;
-            }
-            else return 0.;
+            return Indicator.True.equals(dlltsd)? 1. : 0.;
         case Dlltsd_L1:
-            if(dlltsd_lag1 != null) {
-            return dlltsd_lag1.equals(Indicator.True)? 1. : 0.;
-            }
-            else return 0.;
+            return Indicator.True.equals(dlltsd_lag1)? 1. : 0.;
         case FertilityRate:
             if ( ioFlag ) {
                 return Parameters.getFertilityProjectionsByYear(getYear());
@@ -4475,5 +4499,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             lowWageOffer = false;
         }
         return lowWageOffer;
+    }
+
+    private boolean checkHighestParentalEducationEquals(Education ee) {
+        if (dehf_c3!=null && dehm_c3!=null) {
+            if (dehf_c3.getValue() > dehm_c3.getValue())
+                return ee.equals(dehf_c3);
+            else
+                return ee.equals(dehm_c3);
+        } else if (dehf_c3!=null) {
+            return ee.equals(dehf_c3);
+        } else {
+            return ee.equals(dehm_c3);
+        }
     }
 }

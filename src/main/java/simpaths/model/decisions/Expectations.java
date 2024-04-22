@@ -491,7 +491,7 @@ public class Expectations {
             if (DecisionParams.flagHealth && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
                 updateExpectations(Axis.Health, RegressionNames.HealthH1b);
                 flagHealthVaries = true;
-           }
+            }
 
             // disability
             if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {

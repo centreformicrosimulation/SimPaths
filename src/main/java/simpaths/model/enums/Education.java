@@ -9,7 +9,7 @@ public enum Education implements DoubleValuedEnum {
 	Education(double val) {value=val;}
 	@Override
 	public double getValue() {return value;}
-	Education getCode(int val) {
+	public static Education getCode(int val) {
 		if (val == 0)
 			return Education.Low;
 		else if (val == 1)
