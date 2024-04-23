@@ -12,19 +12,9 @@
 
 
 ***************************************************************************************
-* pool all waves
+* start
 ***************************************************************************************
-forvalues year = $firstSimYear/$lastSimYear {
-* load pooled data with missing values removed  
-	
-	if (`year'==$firstSimYear) {
-		use "$dir_data/population_initial_fs_UK_`year'.dta", clear
-	}
-	else {
-		append using "$dir_data/population_initial_fs_UK_`year'.dta"
-	}
-}
-save "$dir_data\ukhls_pooled_all_obs_09.dta", replace
+use "$dir_data\ukhls_pooled_all_obs_09b.dta", clear
 
 
 ***************************************************************************************

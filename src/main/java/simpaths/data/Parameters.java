@@ -1033,18 +1033,14 @@ public class Parameters {
             columnsValidationLabourSupplyByEducation = 3;
         }
         else if(country.equals(Country.UK)) {
-            columnsWagesMales = 18;
-            columnsWagesMalesNE = 34;
-            columnsWagesMalesE = 35;
-            columnsWagesFemales = 18;
-            columnsWagesFemalesNE = 34;
-            columnsWagesFemalesE = 35;
-            columnsEmploymentSelectionMales = 21;
-            columnsEmploymentSelectionMalesNE = 32;
-            columnsEmploymentSelectionMalesE = 31;
-            columnsEmploymentSelectionFemales = 21;
-            columnsEmploymentSelectionFemalesNE = 32;
-            columnsEmploymentSelectionFemalesE = 31;
+            columnsWagesMalesNE = 30;
+            columnsWagesMalesE = 31;
+            columnsWagesFemalesNE = 30;
+            columnsWagesFemalesE = 31;
+            columnsEmploymentSelectionMalesNE = 30;
+            columnsEmploymentSelectionMalesE = 29;
+            columnsEmploymentSelectionFemalesNE = 30;
+            columnsEmploymentSelectionFemalesE = 29;
             columnsLabourSupplyUtilityMales = 6;
             columnsLabourSupplyUtilityFemales = 6;
             columnsLabourSupplyUtilityMalesWithDependent = 6;
@@ -1056,7 +1052,7 @@ public class Parameters {
             columnsLabourCovid19_2a_processes = 1;
             columnsHealthH1a = 28;
             columnsHealthH1b = 35;
-            columnsHealthH2b = 29;
+            columnsHealthH2b = 35;
             columnsHealthHM1 = 31;
             columnsHealthHM2Males = 11;
             columnsHealthHM2Females = 11;
@@ -1082,29 +1078,29 @@ public class Parameters {
             columnsUnemploymentU1b = 19;
             columnsUnemploymentU1c = 19;
             columnsUnemploymentU1d = 19;
-            columnsEducationE1a = 21;
-            columnsEducationE1b = 27;
-            columnsEducationE2a = 22;
-            columnsPartnershipU1a = 20;
-            columnsPartnershipU1b = 28;
-            columnsPartnershipU2b = 33;
-            columnsFertilityF1a = 10;
-            columnsFertilityF1b = 33;
-            columnsIncomeI1a = 19;
-            columnsIncomeI1b = 31;
-            columnsIncomeI3a = 19;
-            columnsIncomeI3b = 28;
-            columnsIncomeI3c = 28;
-            columnsIncomeI4a = 24;
+            columnsEducationE1a = 19;
+            columnsEducationE1b = 25;
+            columnsEducationE2a = 20;
+            columnsPartnershipU1a = 27;
+            columnsPartnershipU1b = 31;
+            columnsPartnershipU2b = 38;
+            columnsFertilityF1a = 11;
+            columnsFertilityF1b = 34;
+            columnsIncomeI1a = 19;  //*
+            columnsIncomeI1b = 31;  //*
+            columnsIncomeI3a = 20;
+            columnsIncomeI3b = 29;
+            columnsIncomeI3c = 28;  //*
+            columnsIncomeI4a = 24;  //*
             columnsIncomeI4b = 25;
-            columnsIncomeI5a = 24;
-            columnsIncomeI5b = 24;
-            columnsIncomeI6a = 22;
-            columnsIncomeI6b = 22;
-            columnsIncomeI3a_selection = 19;
-            columnsIncomeI3b_selection = 28;
-            columnsLeaveHomeP1a = 26;
-            columnsHomeownership = 32;
+            columnsIncomeI5a = 25;
+            columnsIncomeI5b = 25;
+            columnsIncomeI6a = 22;  //*
+            columnsIncomeI6b = 22;  //*
+            columnsIncomeI3a_selection = 20;
+            columnsIncomeI3b_selection = 29;
+            columnsLeaveHomeP1a = 25;
+            columnsHomeownership = 33;
             columnsRetirementR1a = 26;
             columnsRetirementR1b = 31;
             columnsChildcareC1a = 37;
@@ -1133,18 +1129,18 @@ public class Parameters {
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Males", 1, columnsEmploymentSelectionMales);
+        //coeffCovarianceEmploymentSelectionMales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Males", 1, columnsEmploymentSelectionMales);
         coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleE", 1, columnsEmploymentSelectionMalesE);
         coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleNE", 1, columnsEmploymentSelectionMalesNE);
-        coeffCovarianceEmploymentSelectionFemales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Females", 1, columnsEmploymentSelectionFemales);
+        //coeffCovarianceEmploymentSelectionFemales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Females", 1, columnsEmploymentSelectionFemales);
         coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleE", 1, columnsEmploymentSelectionFemalesE);
         coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleNE", 1, columnsEmploymentSelectionFemalesNE);
 
         // Wages
-        coeffCovarianceWagesMales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Males", 1, columnsWagesMales);
+        //coeffCovarianceWagesMales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Males", 1, columnsWagesMales);
         coeffCovarianceWagesMalesE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_MalesE", 1, columnsWagesMalesE);
         coeffCovarianceWagesMalesNE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_MalesNE", 1, columnsWagesMalesNE);
-        coeffCovarianceWagesFemales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Females", 1, columnsWagesFemales);
+        //coeffCovarianceWagesFemales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Females", 1, columnsWagesFemales);
         coeffCovarianceWagesFemalesE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_FemalesE", 1, columnsWagesFemalesE);
         coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_FemalesNE", 1, columnsWagesFemalesNE);
 
@@ -1291,17 +1287,17 @@ public class Parameters {
         }
 
         //Income
-        coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1a", 1, columnsIncomeI1a);
-        coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1b", 1, columnsIncomeI1b);
+        //coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1a", 1, columnsIncomeI1a);
+        //coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1b", 1, columnsIncomeI1b);
         coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a", 1, columnsIncomeI3a);
         coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b", 1, columnsIncomeI3b);
-        coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
-        coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
+        //coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
+        //coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
         coeffCovarianceIncomeI4b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4b", 1, columnsIncomeI4b);
-        coeffCovarianceIncomeI5a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5a_selection", 1, columnsIncomeI5a);
-        coeffCovarianceIncomeI5b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5b_amount", 1, columnsIncomeI5b);
-        coeffCovarianceIncomeI6a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6a_selection", 1, columnsIncomeI6a);
-        coeffCovarianceIncomeI6b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6b_amount", 1, columnsIncomeI6b);
+        coeffCovarianceIncomeI5a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5a", 1, columnsIncomeI5a);
+        coeffCovarianceIncomeI5b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5b", 1, columnsIncomeI5b);
+        //coeffCovarianceIncomeI6a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6a_selection", 1, columnsIncomeI6a);
+        //coeffCovarianceIncomeI6b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6b_amount", 1, columnsIncomeI6b);
         coeffCovarianceIncomeI3a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a_selection", 1, columnsIncomeI3a_selection);
         coeffCovarianceIncomeI3b_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b_selection", 1, columnsIncomeI3b_selection);
 
@@ -1323,18 +1319,18 @@ public class Parameters {
         if(bootstrapAll) {
 
             //Wages
-            coeffCovarianceWagesMales = RegressionUtils.bootstrap(coeffCovarianceWagesMales);
+            //coeffCovarianceWagesMales = RegressionUtils.bootstrap(coeffCovarianceWagesMales);
             coeffCovarianceWagesMalesE = RegressionUtils.bootstrap(coeffCovarianceWagesMalesE);
             coeffCovarianceWagesMalesNE = RegressionUtils.bootstrap(coeffCovarianceWagesMalesNE);
-            coeffCovarianceWagesFemales = RegressionUtils.bootstrap(coeffCovarianceWagesFemales);
+            //coeffCovarianceWagesFemales = RegressionUtils.bootstrap(coeffCovarianceWagesFemales);
             coeffCovarianceWagesFemalesE = RegressionUtils.bootstrap(coeffCovarianceWagesFemalesE);
             coeffCovarianceWagesFemalesNE = RegressionUtils.bootstrap(coeffCovarianceWagesFemalesNE);
 
             //Employment selection
-            coeffCovarianceEmploymentSelectionMales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMales);
+            //coeffCovarianceEmploymentSelectionMales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMales);
             coeffCovarianceEmploymentSelectionMalesE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMalesE);
             coeffCovarianceEmploymentSelectionMalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMalesNE);
-            coeffCovarianceEmploymentSelectionFemales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemales);
+            //coeffCovarianceEmploymentSelectionFemales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemales);
             coeffCovarianceEmploymentSelectionFemalesE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesE);
             coeffCovarianceEmploymentSelectionFemalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesNE);
 
@@ -1394,13 +1390,13 @@ public class Parameters {
             // coeffCovarianceIncomeI1b = RegressionUtils.bootstrap(coeffCovarianceIncomeI1b); // Commented out as not used any more since income is split.
             coeffCovarianceIncomeI3a = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a);
             coeffCovarianceIncomeI3b = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b);
-            coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
-            coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
+            //coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
+            //coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
             coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
             coeffCovarianceIncomeI5a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a_selection);
             coeffCovarianceIncomeI5b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI5b_amount);
-            coeffCovarianceIncomeI6a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI6a_selection);
-            coeffCovarianceIncomeI6b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI6b_amount);
+            //coeffCovarianceIncomeI6a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI6a_selection);
+            //coeffCovarianceIncomeI6b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI6b_amount);
             coeffCovarianceIncomeI3a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a_selection);
             coeffCovarianceIncomeI3b_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b_selection);
 
@@ -1500,37 +1496,37 @@ public class Parameters {
         }
 
         //Income
-        regIncomeI1a = new LinearRegression(coeffCovarianceIncomeI1a);
-        regIncomeI1b = new LinearRegression(coeffCovarianceIncomeI1b);
+        //regIncomeI1a = new LinearRegression(coeffCovarianceIncomeI1a);
+        //regIncomeI1b = new LinearRegression(coeffCovarianceIncomeI1b);
         regIncomeI3a = new LinearRegression(coeffCovarianceIncomeI3a);
         regIncomeI3b = new LinearRegression(coeffCovarianceIncomeI3b);
-        regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
-        regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
+        //regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
+        //regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
         regIncomeI4b = new LinearRegression(coeffCovarianceIncomeI4b);
         regIncomeI5b_amount = new LinearRegression(coeffCovarianceIncomeI5b_amount);
-        regIncomeI6b_amount = new LinearRegression(coeffCovarianceIncomeI6b_amount);
+        //regIncomeI6b_amount = new LinearRegression(coeffCovarianceIncomeI6b_amount);
         regIncomeI3a_selection = new LogitRegression(coeffCovarianceIncomeI3a_selection);
         regIncomeI3b_selection = new LogitRegression(coeffCovarianceIncomeI3b_selection);
         regIncomeI5a_selection = new LogitRegression(coeffCovarianceIncomeI5a_selection);
-        regIncomeI6a_selection = new LogitRegression(coeffCovarianceIncomeI6a_selection);
+        //regIncomeI6a_selection = new LogitRegression(coeffCovarianceIncomeI6a_selection);
 
         //Homeownership
         regHomeownershipHO1a = new ProbitRegression(coeffCovarianceHomeownership);
 
         //XXX: Note: the model used for selection in Heckman procedure is a Probit, but to obtain Inverse Mills Ratio, linear prediction needs to be obtained - so linear regression used here
-        regEmploymentSelectionMale = new LinearRegression(coeffCovarianceEmploymentSelectionMales);
+        //regEmploymentSelectionMale = new LinearRegression(coeffCovarianceEmploymentSelectionMales);
         regEmploymentSelectionMaleE = new LinearRegression(coeffCovarianceEmploymentSelectionMalesE);
         regEmploymentSelectionMaleNE = new LinearRegression(coeffCovarianceEmploymentSelectionMalesNE);
-        regEmploymentSelectionFemale = new LinearRegression(coeffCovarianceEmploymentSelectionFemales);
+        //regEmploymentSelectionFemale = new LinearRegression(coeffCovarianceEmploymentSelectionFemales);
         regEmploymentSelectionFemaleE = new LinearRegression(coeffCovarianceEmploymentSelectionFemalesE);
         regEmploymentSelectionFemaleNE = new LinearRegression(coeffCovarianceEmploymentSelectionFemalesNE);
         standardNormalDistribution = new NormalDistribution();
 
         //Wages
-        regWagesMales = new LinearRegression(coeffCovarianceWagesMales);
+        //regWagesMales = new LinearRegression(coeffCovarianceWagesMales);
         regWagesMalesE = new LinearRegression(coeffCovarianceWagesMalesE);
         regWagesMalesNE = new LinearRegression(coeffCovarianceWagesMalesNE);
-        regWagesFemales = new LinearRegression(coeffCovarianceWagesFemales);
+        //regWagesFemales = new LinearRegression(coeffCovarianceWagesFemales);
         regWagesFemalesE = new LinearRegression(coeffCovarianceWagesFemalesE);
         regWagesFemalesNE = new LinearRegression(coeffCovarianceWagesFemalesNE);
 
@@ -2025,9 +2021,7 @@ public class Parameters {
 
     public static LinearRegression getRegIncomeI3c() { return regIncomeI3c; }
 
-    public static LinearRegression getRegIncomeI4a() {
-        return regIncomeI4a;
-    }
+    public static LinearRegression getRegIncomeI4a() { return regIncomeI4a; }
 
     public static LinearRegression getRegIncomeI4b() {
         return regIncomeI4b;
@@ -2037,9 +2031,7 @@ public class Parameters {
         return regIncomeI5b_amount;
     }
 
-    public static LinearRegression getRegIncomeI6b_amount() {
-        return regIncomeI6b_amount;
-    }
+    public static LinearRegression getRegIncomeI6b_amount() { return regIncomeI6b_amount; }
 
     public static LogitRegression getRegIncomeI3a_selection() { return regIncomeI3a_selection; }
 
