@@ -110,9 +110,8 @@ forvalues year = $wealthStartYear / $wealthEndYear {
 	global yearWealth = `year'
 	do "${dir_do}/08_wealth_to_ukhls.do"
 }
-do "${dir_do}/09_fill_in_missing_spouses.do"
-do "${dir_do}/10_finalise_input_data.do"
-*do "${dir_do}/11_check_yearly_data.do"
+do "${dir_do}/09_finalise_input_data.do"
+*do "${dir_do}/10_check_yearly_data.do"
 
 
 /**************************************************************************************

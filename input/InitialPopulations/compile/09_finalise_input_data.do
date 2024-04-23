@@ -12,9 +12,25 @@
 
 
 ***************************************************************************************
+* pool all waves
+***************************************************************************************
+forvalues year = $firstSimYear/$lastSimYear {
+* load pooled data with missing values removed  
+	
+	if (`year'==$firstSimYear) {
+		use "$dir_data/population_initial_fs_UK_`year'.dta", clear
+	}
+	else {
+		append using "$dir_data/population_initial_fs_UK_`year'.dta"
+	}
+}
+save "$dir_data\ukhls_pooled_all_obs_09.dta", replace
+
+
+***************************************************************************************
 * start
 ***************************************************************************************
-use "$dir_data\ukhls_pooled_all_obs_09b.dta", clear
+use "$dir_data\ukhls_pooled_all_obs_09.dta", clear
 
 
 ***************************************************************************************
@@ -59,6 +75,17 @@ assert duplicate==0
 cap drop duplicate 
 duplicates tag swv idperson , generate(duplicate)
 assert duplicate==0 
+
+sort idbenefitunit
+by idbenefitunit : egen na = sum(adult)
+gen chk = (na==1 & dcpst==1 & adult==1)
+by idbenefitunit : egen chk2 = max(chk)
+drop if (chk2==1)
+drop chk chk2
+gen chk = (na==2 & dcpst!=1 & adult==1)
+by idbenefitunit : egen chk2 = max(chk)
+drop if (chk2==1)
+drop chk chk2
 
 		
 ***************************************************************************************
