@@ -3465,6 +3465,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (labourSupplyWeekly != null) ? labourSupplyWeekly.getHours(this) : 0;
     }
 
+    public double getDoubleLabourSupplyHoursWeekly() {
+        // this method is needed for the stupid observer
+        return (double)getLabourSupplyHoursWeekly();
+    }
+
     public void setLabourSupplyWeekly(Labour labourSupply) {
         labourSupplyWeekly = labourSupply;
         hoursWorkedWeekly = getLabourSupplyHoursWeekly(); // Update number of hours worked weekly

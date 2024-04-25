@@ -1291,7 +1291,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				hoursOfWorkByGenderPlotter = new TimeSeriesSimulationPlotter("Hours of Work Weekly by Gender", "Hours");
 				for (Gender gender : Gender.values()) {
 					GenderWorkingCSfilter genderWorkingFilter = new GenderWorkingCSfilter(gender);
-					Weighted_CrossSection.Double hoursCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyWeeklyHours", true); // Note: these are nominal values for each simulated year
+					Weighted_CrossSection.Double hoursCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyHoursWeekly", true); // Note: these are nominal values for each simulated year
 					hoursCS.setFilter(genderWorkingFilter);
 					hoursOfWorkByGenderPlotter.addSeries(gender.toString(), new Weighted_MeanArrayFunction(hoursCS), null, colorArrayList.get(colorCounter), false);
 					hoursOfWorkByGenderPlotter.addSeries("Validation " + gender, validator, Validator.DoublesVariables.valueOf("lhw_"+ gender), colorArrayList.get(colorCounter), true);
