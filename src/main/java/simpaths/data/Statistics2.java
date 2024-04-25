@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import microsim.data.db.PanelEntityKey;
 import simpaths.model.Person;
 import simpaths.model.SimPathsModel;
+import simpaths.model.enums.Education;
 import simpaths.model.enums.Indicator;
 import simpaths.model.enums.TimeSeriesVariable;
 
@@ -17,171 +18,168 @@ public class Statistics2 {
     private PanelEntityKey key = new PanelEntityKey(1L);
 
     //population shares in cohabiting relationships
-    @Column(name = "pr_married_20_39")
-    private double prMarried20to39;
+    @Column(name = "pr_married_18_29")
+    private double prMarried18to29;
 
-    @Column(name = "pr_married_40_59")
-    private double prMarried40to59;
+    @Column(name = "pr_married_30_54")
+    private double prMarried30to54;
 
-    @Column(name = "pr_married_60_79")
-    private double prMarried60to79;
+    @Column(name = "pr_married_55_74")
+    private double prMarried55to74;
 
     //average dependent children
-    @Column(name = "avkids_20_39")
-    private double avkids20to39;
+    @Column(name = "avkids_18_29")
+    private double avkids18to29;
 
-    @Column(name = "avkids_40_59")
-    private double avkids40to59;
+    @Column(name = "avkids_30_54")
+    private double avkids30to54;
 
-    @Column(name = "avkids_60_79")
-    private double avkids60to79;
+    @Column(name = "avkids_55_74")
+    private double avkids55to74;
 
     //average health
-    @Column(name = "health_20_39")
-    private double health20to39;
+    @Column(name = "health_18_29")
+    private double health18to29;
 
-    @Column(name = "health_40_59")
-    private double health40to59;
+    @Column(name = "health_30_54")
+    private double health30to54;
 
-    @Column(name = "health_60_79")
-    private double health60to79;
+    @Column(name = "health_55_74")
+    private double health55to74;
 
     //population shares disabled
-    @Column(name = "pr_disabled_20_39")
-    private double prDisabled20to39;
+    @Column(name = "pr_disabled_18_29")
+    private double prDisabled18to29;
 
-    @Column(name = "pr_disabled_40_59")
-    private double prDisabled40to59;
+    @Column(name = "pr_disabled_30_54")
+    private double prDisabled30to54;
 
-    @Column(name = "pr_disabled_60_79")
-    private double prDisabled60to79;
+    @Column(name = "pr_disabled_55_74")
+    private double prDisabled55to74;
 
     //average labour status by age and gender
-    @Column(name = "work_fulltime_20_39")
-    private double workFulltime20to39;
+    @Column(name = "work_fulltime_18_29")
+    private double workFulltime18to29;
 
-    @Column(name = "work_fulltime_40_59")
-    private double workFulltime40to59;
+    @Column(name = "work_fulltime_30_54")
+    private double workFulltime30to54;
 
-    @Column(name = "work_fulltime_60_79")
-    private double workFulltime60to79;
+    @Column(name = "work_fulltime_55_74")
+    private double workFulltime55to74;
 
-    @Column(name = "work_parttime_20_39")
-    private double workParttime20to39;
+    @Column(name = "work_parttime_18_29")
+    private double workParttime18to29;
 
-    @Column(name = "work_parttime_40_59")
-    private double workParttime40to59;
+    @Column(name = "work_parttime_30_54")
+    private double workParttime30to54;
 
-    @Column(name = "work_parttime_60_79")
-    private double workParttime60to79;
+    @Column(name = "work_parttime_55_74")
+    private double workParttime55to74;
 
-    @Column(name = "work_none_20_39")
-    private double workNone20to39;
+    @Column(name = "work_none_18_29")
+    private double workNone18to29;
 
-    @Column(name = "work_none_40_59")
-    private double workNone40to59;
+    @Column(name = "work_none_30_54")
+    private double workNone30to54;
 
-    @Column(name = "work_none_60_79")
-    private double workNone60to79;
+    @Column(name = "work_none_55_74")
+    private double workNone55to74;
 
     //employment income
-    @Column(name = "labourIncome_20_39")
-    private double labourIncome20to39;
+    @Column(name = "labourIncome_18_29")
+    private double labourIncome18to29;
 
-    @Column(name = "labourIncome_40_59")
-    private double labourIncome40to59;
+    @Column(name = "labourIncome_30_54")
+    private double labourIncome30to54;
 
-    @Column(name = "labourIncome_60_79")
-    private double labourIncome60to79;
+    @Column(name = "labourIncome_55_74")
+    private double labourIncome55to74;
 
     //investment income
-    @Column(name = "investmentIncome_20_39")
-    private double investmentIncome20to39;
+    @Column(name = "investmentIncome_18_29")
+    private double investmentIncome18to29;
 
-    @Column(name = "investmentIncome_40_59")
-    private double investmentIncome40to59;
+    @Column(name = "investmentIncome_30_54")
+    private double investmentIncome30to54;
 
-    @Column(name = "investmentIncome_60_79")
-    private double investmentIncome60to79;
+    @Column(name = "investmentIncome_55_74")
+    private double investmentIncome55to74;
 
     //pension income
-    @Column(name = "pensionIncome_20_39")
-    private double pensionIncome20to39;
+    @Column(name = "pensionIncome_18_29")
+    private double pensionIncome18to29;
 
-    @Column(name = "pensionIncome_40_59")
-    private double pensionIncome40to59;
+    @Column(name = "pensionIncome_30_54")
+    private double pensionIncome30to54;
 
-    @Column(name = "pensionIncome_60_79")
-    private double pensionIncome60to79;
+    @Column(name = "pensionIncome_55_74")
+    private double pensionIncome55to74;
 
     //disposable income
-    @Column(name = "disposableIncome_20_39")
-    private double disposableIncome20to39;
+    @Column(name = "disposableIncome_18_29")
+    private double disposableIncome18to29;
 
-    @Column(name = "disposableIncome_40_59")
-    private double disposableIncome40to59;
+    @Column(name = "disposableIncome_30_54")
+    private double disposableIncome30to54;
 
-    @Column(name = "disposableIncome_60_79")
-    private double disposableIncome60to79;
+    @Column(name = "disposableIncome_55_74")
+    private double disposableIncome55to74;
 
     //investment losses
-    @Column(name = "investmentLosses_20_39")
-    private double investmentLosses20to39;
+    @Column(name = "investmentLosses_18_29")
+    private double investmentLosses18to29;
 
-    @Column(name = "investmentLosses_40_59")
-    private double investmentLosses40to59;
+    @Column(name = "investmentLosses_30_54")
+    private double investmentLosses30to54;
 
-    @Column(name = "investmentLosses_60_79")
-    private double investmentLosses60to79;
+    @Column(name = "investmentLosses_55_74")
+    private double investmentLosses55to74;
 
     //disposable income gross of investment losses
-    @Column(name = "dispInc_grossLosses_20_39")
-    private double dispIncomeGrossOfLosses20to39;
+    @Column(name = "dispInc_grossLosses_18_29")
+    private double dispIncomeGrossOfLosses18to29;
 
-    @Column(name = "dispInc_grossLosses_40_59")
-    private double dispIncomeGrossOfLosses40to59;
+    @Column(name = "dispInc_grossLosses_30_54")
+    private double dispIncomeGrossOfLosses30to54;
 
-    @Column(name = "dispInc_grossLosses_60_79")
-    private double dispIncomeGrossOfLosses60to79;
+    @Column(name = "dispInc_grossLosses_55_74")
+    private double dispIncomeGrossOfLosses55to74;
 
-    //discretionary expenditure
-    @Column(name = "dexpenditure_20_39")
-    private double dexpenditure20to39;
+    //expenditure
+    @Column(name = "expenditure_18_29")
+    private double expenditure18to29;
 
-    @Column(name = "dexpenditure_40_59")
-    private double dexpenditure40to59;
+    @Column(name = "expenditure_30_54")
+    private double expenditure30to54;
 
-    @Column(name = "dexpenditure_60_79")
-    private double dexpenditure60to79;
+    @Column(name = "expenditure_55_74")
+    private double expenditure55to74;
 
-    //committed expenditure
-    @Column(name = "cexpenditure_20_39")
-    private double cexpenditure20to39;
+    //consumption to leisure ratios
+    @Column(name = "cons_to_leis_non_grad")
+    private double consToLeisNonGrad;
 
-    @Column(name = "cexpenditure_40_59")
-    private double cexpenditure40to59;
-
-    @Column(name = "cexpenditure_60_79")
-    private double cexpenditure60to79;
+    @Column(name = "cons_to_leis_grad")
+    private double consToLeisGrad;
 
     //wealth
-    @Column(name = "wealth_20_39")
-    private double wealth20to39;
+    @Column(name = "wealth_18_29")
+    private double wealth18to29;
 
-    @Column(name = "wealth_40_59")
-    private double wealth40to59;
+    @Column(name = "wealth_30_54")
+    private double wealth30to54;
 
-    @Column(name = "wealth_60_79")
-    private double wealth60to79;
+    @Column(name = "wealth_55_74")
+    private double wealth55to74;
 
-    @Column(name= "population_20_39")
-    private double population20to39;
+    @Column(name= "population_18_29")
+    private double population18to29;
 
-    @Column(name= "population_40_59")
-    private double population40to59;
+    @Column(name= "population_30_54")
+    private double population30to54;
 
-    @Column(name= "population_60_79")
-    private double population60to79;
+    @Column(name= "population_55_74")
+    private double population55to74;
 
     @Column(name= "social_care_adj_factor")
     private double socialCareAdjustmentFactor;
@@ -197,6 +195,22 @@ public class Statistics2 {
 
     @Column(name = "utility_adj_factor_couples")
     private double utilityAdjustmentFactorCouples;
+
+    public double getConsToLeisNonGrad() {
+        return consToLeisNonGrad;
+    }
+
+    public void setConsToLeisNonGrad(double consToLeisNonGrad) {
+        this.consToLeisNonGrad = consToLeisNonGrad;
+    }
+
+    public double getConsToLeisGrad() {
+        return consToLeisGrad;
+    }
+
+    public void setConsToLeisGrad(double consToLeisGrad) {
+        this.consToLeisGrad = consToLeisGrad;
+    }
 
     public double getPartnershipAdjustmentFactor() {
         return partnershipAdjustmentFactor;
@@ -233,412 +247,388 @@ public class Statistics2 {
     public double getSocialCareAdjustmentFactor() { return socialCareAdjustmentFactor; }
     public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
 
-    public double getPopulation20to39() {
-        return population20to39;
+    public double getPopulation18to29() {
+        return population18to29;
     }
 
-    public void setPopulation20to39(double population20to39) {
-        this.population20to39 = population20to39;
+    public void setPopulation18to29(double population18to29) {
+        this.population18to29 = population18to29;
     }
 
-    public double getPopulation60to79() {
-        return population60to79;
+    public double getPopulation55to74() {
+        return population55to74;
     }
 
-    public void setPopulation40to59(double population40to59) {
-        this.population40to59 = population40to59;
+    public void setPopulation30to54(double population30to54) {
+        this.population30to54 = population30to54;
     }
 
-    public double getPopulation40to59() {
-        return population40to59;
+    public double getPopulation30to54() {
+        return population30to54;
     }
 
-    public void setPopulation60to79(double population60to79) {
-        this.population60to79 = population60to79;
+    public void setPopulation55to74(double population55to74) {
+        this.population55to74 = population55to74;
     }
 
-    public double getPrMarried20to39() {
-        return prMarried20to39;
+    public double getPrMarried18to29() {
+        return prMarried18to29;
     }
 
-    public void setPrMarried20to39(double prMarried20to39) {
-        this.prMarried20to39 = prMarried20to39;
+    public void setPrMarried18to29(double prMarried18to29) {
+        this.prMarried18to29 = prMarried18to29;
     }
 
-    public double getPrMarried40to59() {
-        return prMarried40to59;
+    public double getPrMarried30to54() {
+        return prMarried30to54;
     }
 
-    public void setPrMarried40to59(double prMarried40to59) {
-        this.prMarried40to59 = prMarried40to59;
+    public void setPrMarried30to54(double prMarried30to54) {
+        this.prMarried30to54 = prMarried30to54;
     }
 
-    public double getPrMarried60to79() {
-        return prMarried60to79;
+    public double getPrMarried55to74() {
+        return prMarried55to74;
     }
 
-    public void setPrMarried60to79(double prMarried60to79) {
-        this.prMarried60to79 = prMarried60to79;
+    public void setPrMarried55to74(double prMarried55to74) {
+        this.prMarried55to74 = prMarried55to74;
     }
 
-    public double getAvkids20to39() {
-        return avkids20to39;
+    public double getAvkids18to29() {
+        return avkids18to29;
     }
 
-    public void setAvkids20to39(double avkids20to39) {
-        this.avkids20to39 = avkids20to39;
+    public void setAvkids18to29(double avkids18to29) {
+        this.avkids18to29 = avkids18to29;
     }
 
-    public double getAvkids40to59() {
-        return avkids40to59;
+    public double getAvkids30to54() {
+        return avkids30to54;
     }
 
-    public void setAvkids40to59(double avkids40to59) {
-        this.avkids40to59 = avkids40to59;
+    public void setAvkids30to54(double avkids30to54) {
+        this.avkids30to54 = avkids30to54;
     }
 
-    public double getAvkids60to79() {
-        return avkids60to79;
+    public double getAvkids55to74() {
+        return avkids55to74;
     }
 
-    public void setAvkids60to79(double avkids60to79) {
-        this.avkids60to79 = avkids60to79;
+    public void setAvkids55to74(double avkids55to74) {
+        this.avkids55to74 = avkids55to74;
     }
 
-    public double getHealth20to39() {
-        return health20to39;
+    public double getHealth18to29() {
+        return health18to29;
     }
 
-    public void setHealth20to39(double health20to39) {
-        this.health20to39 = health20to39;
+    public void setHealth18to29(double health18to29) {
+        this.health18to29 = health18to29;
     }
 
-    public double getHealth40to59() {
-        return health40to59;
+    public double getHealth30to54() {
+        return health30to54;
     }
 
-    public void setHealth40to59(double health40to59) {
-        this.health40to59 = health40to59;
+    public void setHealth30to54(double health30to54) {
+        this.health30to54 = health30to54;
     }
 
-    public double getHealth60to79() {
-        return health60to79;
+    public double getHealth55to74() {
+        return health55to74;
     }
 
-    public void setHealth60to79(double health60to79) {
-        this.health60to79 = health60to79;
+    public void setHealth55to74(double health55to74) {
+        this.health55to74 = health55to74;
     }
 
-    public double getPrDisabled20to39() {
-        return prDisabled20to39;
+    public double getPrDisabled18to29() {
+        return prDisabled18to29;
     }
 
-    public void setPrDisabled20to39(double prDisabled20to39) {
-        this.prDisabled20to39 = prDisabled20to39;
+    public void setPrDisabled18to29(double prDisabled18to29) {
+        this.prDisabled18to29 = prDisabled18to29;
     }
 
-    public double getPrDisabled40to59() {
-        return prDisabled40to59;
+    public double getPrDisabled30to54() {
+        return prDisabled30to54;
     }
 
-    public void setPrDisabled40to59(double prDisabled40to59) {
-        this.prDisabled40to59 = prDisabled40to59;
+    public void setPrDisabled30to54(double prDisabled30to54) {
+        this.prDisabled30to54 = prDisabled30to54;
     }
 
-    public double getPrDisabled60to79() {
-        return prDisabled60to79;
+    public double getPrDisabled55to74() {
+        return prDisabled55to74;
     }
 
-    public void setPrDisabled60to79(double prDisabled60to79) {
-        this.prDisabled60to79 = prDisabled60to79;
+    public void setPrDisabled55to74(double prDisabled55to74) {
+        this.prDisabled55to74 = prDisabled55to74;
     }
 
-    public double getLabourIncome20to39() {
-        return labourIncome20to39;
+    public double getLabourIncome18to29() {
+        return labourIncome18to29;
     }
 
-    public void setLabourIncome20to39(double labourIncome20to39) {
-        this.labourIncome20to39 = labourIncome20to39;
+    public void setLabourIncome18to29(double labourIncome18to29) {
+        this.labourIncome18to29 = labourIncome18to29;
     }
 
-    public double getLabourIncome40to59() {
-        return labourIncome40to59;
+    public double getLabourIncome30to54() {
+        return labourIncome30to54;
     }
 
-    public void setLabourIncome40to59(double labourIncome40to59) {
-        this.labourIncome40to59 = labourIncome40to59;
+    public void setLabourIncome30to54(double labourIncome30to54) {
+        this.labourIncome30to54 = labourIncome30to54;
     }
 
-    public double getLabourIncome60to79() {
-        return labourIncome60to79;
+    public double getLabourIncome55to74() {
+        return labourIncome55to74;
     }
 
-    public void setLabourIncome60to79(double labourIncome60to79) {
-        this.labourIncome60to79 = labourIncome60to79;
+    public void setLabourIncome55to74(double labourIncome55to74) {
+        this.labourIncome55to74 = labourIncome55to74;
     }
 
-    public double getInvestmentIncome20to39() {
-        return investmentIncome20to39;
+    public double getInvestmentIncome18to29() {
+        return investmentIncome18to29;
     }
 
-    public void setInvestmentIncome20to39(double investmentIncome20to39) {
-        this.investmentIncome20to39 = investmentIncome20to39;
+    public void setInvestmentIncome18to29(double investmentIncome18to29) {
+        this.investmentIncome18to29 = investmentIncome18to29;
     }
 
-    public double getInvestmentIncome40to59() {
-        return investmentIncome40to59;
+    public double getInvestmentIncome30to54() {
+        return investmentIncome30to54;
     }
 
-    public void setInvestmentIncome40to59(double investmentIncome40to59) {
-        this.investmentIncome40to59 = investmentIncome40to59;
+    public void setInvestmentIncome30to54(double investmentIncome30to54) {
+        this.investmentIncome30to54 = investmentIncome30to54;
     }
 
-    public double getInvestmentIncome60to79() {
-        return investmentIncome60to79;
+    public double getInvestmentIncome55to74() {
+        return investmentIncome55to74;
     }
 
-    public void setInvestmentIncome60to79(double investmentIncome60to79) {
-        this.investmentIncome60to79 = investmentIncome60to79;
+    public void setInvestmentIncome55to74(double investmentIncome55to74) {
+        this.investmentIncome55to74 = investmentIncome55to74;
     }
 
-    public double getPensionIncome20to39() {
-        return pensionIncome20to39;
+    public double getPensionIncome18to29() {
+        return pensionIncome18to29;
     }
 
-    public void setPensionIncome20to39(double pensionIncome20to39) {
-        this.pensionIncome20to39 = pensionIncome20to39;
+    public void setPensionIncome18to29(double pensionIncome18to29) {
+        this.pensionIncome18to29 = pensionIncome18to29;
     }
 
-    public double getPensionIncome40to59() {
-        return pensionIncome40to59;
+    public double getPensionIncome30to54() {
+        return pensionIncome30to54;
     }
 
-    public void setPensionIncome40to59(double pensionIncome40to59) {
-        this.pensionIncome40to59 = pensionIncome40to59;
+    public void setPensionIncome30to54(double pensionIncome30to54) {
+        this.pensionIncome30to54 = pensionIncome30to54;
     }
 
-    public double getPensionIncome60to79() {
-        return pensionIncome60to79;
+    public double getPensionIncome55to74() {
+        return pensionIncome55to74;
     }
 
-    public void setPensionIncome60to79(double pensionIncome60to79) {
-        this.pensionIncome60to79 = pensionIncome60to79;
+    public void setPensionIncome55to74(double pensionIncome55to74) {
+        this.pensionIncome55to74 = pensionIncome55to74;
     }
 
-    public double getDisposableIncome20to39() {
-        return disposableIncome20to39;
+    public double getDisposableIncome18to29() {
+        return disposableIncome18to29;
     }
 
-    public void setDisposableIncome20to39(double disposableIncome20to39) {
-        this.disposableIncome20to39 = disposableIncome20to39;
+    public void setDisposableIncome18to29(double disposableIncome18to29) {
+        this.disposableIncome18to29 = disposableIncome18to29;
     }
 
-    public double getDisposableIncome40to59() {
-        return disposableIncome40to59;
+    public double getDisposableIncome30to54() {
+        return disposableIncome30to54;
     }
 
-    public void setDisposableIncome40to59(double disposableIncome40to59) {
-        this.disposableIncome40to59 = disposableIncome40to59;
+    public void setDisposableIncome30to54(double disposableIncome30to54) {
+        this.disposableIncome30to54 = disposableIncome30to54;
     }
 
-    public double getDisposableIncome60to79() {
-        return disposableIncome60to79;
+    public double getDisposableIncome55to74() {
+        return disposableIncome55to74;
     }
 
-    public void setDisposableIncome60to79(double disposableIncome60to79) {
-        this.disposableIncome60to79 = disposableIncome60to79;
+    public void setDisposableIncome55to74(double disposableIncome55to74) {
+        this.disposableIncome55to74 = disposableIncome55to74;
     }
 
-    public double getInvestmentLosses20to39() {
-        return investmentLosses20to39;
+    public double getInvestmentLosses18to29() {
+        return investmentLosses18to29;
     }
 
-    public void setInvestmentLosses20to39(double investmentLosses20to39) {
-        this.investmentLosses20to39 = investmentLosses20to39;
+    public void setInvestmentLosses18to29(double investmentLosses18to29) {
+        this.investmentLosses18to29 = investmentLosses18to29;
     }
 
-    public double getInvestmentLosses40to59() {
-        return investmentLosses40to59;
+    public double getInvestmentLosses30to54() {
+        return investmentLosses30to54;
     }
 
-    public void setInvestmentLosses40to59(double investmentLosses40to59) {
-        this.investmentLosses40to59 = investmentLosses40to59;
+    public void setInvestmentLosses30to54(double investmentLosses30to54) {
+        this.investmentLosses30to54 = investmentLosses30to54;
     }
 
-    public double getInvestmentLosses60to79() {
-        return investmentLosses60to79;
+    public double getInvestmentLosses55to74() {
+        return investmentLosses55to74;
     }
 
-    public void setInvestmentLosses60to79(double investmentLosses60to79) {
-        this.investmentLosses60to79 = investmentLosses60to79;
+    public void setInvestmentLosses55to74(double investmentLosses55to74) {
+        this.investmentLosses55to74 = investmentLosses55to74;
     }
 
-    public double getDispIncomeGrossOfLosses20to39() {
-        return dispIncomeGrossOfLosses20to39;
+    public double getDispIncomeGrossOfLosses18to29() {
+        return dispIncomeGrossOfLosses18to29;
     }
 
-    public void setDispIncomeGrossOfLosses20to39(double dispIncomeGrossOfLosses20to39) {
-        this.dispIncomeGrossOfLosses20to39 = dispIncomeGrossOfLosses20to39;
+    public void setDispIncomeGrossOfLosses18to29(double dispIncomeGrossOfLosses18to29) {
+        this.dispIncomeGrossOfLosses18to29 = dispIncomeGrossOfLosses18to29;
     }
 
-    public double getDispIncomeGrossOfLosses40to59() {
-        return dispIncomeGrossOfLosses40to59;
+    public double getDispIncomeGrossOfLosses30to54() {
+        return dispIncomeGrossOfLosses30to54;
     }
 
-    public void setDispIncomeGrossOfLosses40to59(double dispIncomeGrossOfLosses40to59) {
-        this.dispIncomeGrossOfLosses40to59 = dispIncomeGrossOfLosses40to59;
+    public void setDispIncomeGrossOfLosses30to54(double dispIncomeGrossOfLosses30to54) {
+        this.dispIncomeGrossOfLosses30to54 = dispIncomeGrossOfLosses30to54;
     }
 
-    public double getDispIncomeGrossOfLosses60to79() {
-        return dispIncomeGrossOfLosses60to79;
+    public double getDispIncomeGrossOfLosses55to74() {
+        return dispIncomeGrossOfLosses55to74;
     }
 
-    public void setDispIncomeGrossOfLosses60to79(double dispIncomeGrossOfLosses60to79) {
-        this.dispIncomeGrossOfLosses60to79 = dispIncomeGrossOfLosses60to79;
+    public void setDispIncomeGrossOfLosses55to74(double dispIncomeGrossOfLosses55to74) {
+        this.dispIncomeGrossOfLosses55to74 = dispIncomeGrossOfLosses55to74;
     }
 
-    public double getDexpenditure20to39() {
-        return dexpenditure20to39;
+    public double getExpenditure18to29() {
+        return expenditure18to29;
     }
 
-    public void setDexpenditure20to39(double dexpenditure20to39) {
-        this.dexpenditure20to39 = dexpenditure20to39;
+    public void setExpenditure18to29(double expenditure18to29) {
+        this.expenditure18to29 = expenditure18to29;
     }
 
-    public double getDexpenditure40to59() {
-        return dexpenditure40to59;
+    public double getExpenditure30to54() {
+        return expenditure30to54;
     }
 
-    public void setDexpenditure40to59(double dexpenditure40to59) {
-        this.dexpenditure40to59 = dexpenditure40to59;
+    public void setExpenditure30to54(double expenditure30to54) {
+        this.expenditure30to54 = expenditure30to54;
     }
 
-    public double getDexpenditure60to79() {
-        return dexpenditure60to79;
+    public double getExpenditure55to74() {
+        return expenditure55to74;
     }
 
-    public void setDexpenditure60to79(double dexpenditure60to79) {
-        this.dexpenditure60to79 = dexpenditure60to79;
+    public void setExpenditure55to74(double expenditure55to74) {
+        this.expenditure55to74 = expenditure55to74;
     }
 
-    public double getCexpenditure20to39() {
-        return cexpenditure20to39;
+    public double getWealth18to29() {
+        return wealth18to29;
     }
 
-    public void setCexpenditure20to39(double cexpenditure20to39) {
-        this.cexpenditure20to39 = cexpenditure20to39;
+    public void setWealth18to29(double wealth18to29) {
+        this.wealth18to29 = wealth18to29;
     }
 
-    public double getCexpenditure40to59() {
-        return cexpenditure40to59;
+    public double getWealth30to54() {
+        return wealth30to54;
     }
 
-    public void setCexpenditure40to59(double cexpenditure40to59) {
-        this.cexpenditure40to59 = cexpenditure40to59;
+    public void setWealth30to54(double wealth30to54) {
+        this.wealth30to54 = wealth30to54;
     }
 
-    public double getCexpenditure60to79() {
-        return cexpenditure60to79;
+    public double getWealth55to74() {
+        return wealth55to74;
     }
 
-    public void setCexpenditure60to79(double cexpenditure60to79) {
-        this.cexpenditure60to79 = cexpenditure60to79;
+    public void setWealth55to74(double wealth55to74) {
+        this.wealth55to74 = wealth55to74;
     }
 
-    public double getWealth20to39() {
-        return wealth20to39;
+    public double getWorkFulltime18to29() {
+        return workFulltime18to29;
     }
 
-    public void setWealth20to39(double wealth20to39) {
-        this.wealth20to39 = wealth20to39;
+    public void setWorkFulltime18to29(double workFulltime18to29) {
+        this.workFulltime18to29 = workFulltime18to29;
     }
 
-    public double getWealth40to59() {
-        return wealth40to59;
+    public double getWorkFulltime30to54() {
+        return workFulltime30to54;
     }
 
-    public void setWealth40to59(double wealth40to59) {
-        this.wealth40to59 = wealth40to59;
+    public void setWorkFulltime30to54(double workFulltime30to54) {
+        this.workFulltime30to54 = workFulltime30to54;
     }
 
-    public double getWealth60to79() {
-        return wealth60to79;
+    public double getWorkFulltime55to74() {
+        return workFulltime55to74;
     }
 
-    public void setWealth60to79(double wealth60to79) {
-        this.wealth60to79 = wealth60to79;
+    public void setWorkFulltime55to74(double workFulltime55to74) {
+        this.workFulltime55to74 = workFulltime55to74;
     }
 
-    public double getWorkFulltime20to39() {
-        return workFulltime20to39;
+    public double getWorkParttime18to29() {
+        return workParttime18to29;
     }
 
-    public void setWorkFulltime20to39(double workFulltime20to39) {
-        this.workFulltime20to39 = workFulltime20to39;
+    public void setWorkParttime18to29(double workParttime18to29) {
+        this.workParttime18to29 = workParttime18to29;
     }
 
-    public double getWorkFulltime40to59() {
-        return workFulltime40to59;
+    public double getWorkParttime30to54() {
+        return workParttime30to54;
     }
 
-    public void setWorkFulltime40to59(double workFulltime40to59) {
-        this.workFulltime40to59 = workFulltime40to59;
+    public void setWorkParttime30to54(double workParttime30to54) {
+        this.workParttime30to54 = workParttime30to54;
     }
 
-    public double getWorkFulltime60to79() {
-        return workFulltime60to79;
+    public double getWorkParttime55to74() {
+        return workParttime55to74;
     }
 
-    public void setWorkFulltime60to79(double workFulltime60to79) {
-        this.workFulltime60to79 = workFulltime60to79;
+    public void setWorkParttime55to74(double workParttime55to74) {
+        this.workParttime55to74 = workParttime55to74;
     }
 
-    public double getWorkParttime20to39() {
-        return workParttime20to39;
+    public double getWorkNone18to29() {
+        return workNone18to29;
     }
 
-    public void setWorkParttime20to39(double workParttime20to39) {
-        this.workParttime20to39 = workParttime20to39;
+    public void setWorkNone18to29(double workNone18to29) {
+        this.workNone18to29 = workNone18to29;
     }
 
-    public double getWorkParttime40to59() {
-        return workParttime40to59;
+    public double getWorkNone30to54() {
+        return workNone30to54;
     }
 
-    public void setWorkParttime40to59(double workParttime40to59) {
-        this.workParttime40to59 = workParttime40to59;
+    public void setWorkNone30to54(double workNone30to54) {
+        this.workNone30to54 = workNone30to54;
     }
 
-    public double getWorkParttime60to79() {
-        return workParttime60to79;
+    public double getWorkNone55to74() {
+        return workNone55to74;
     }
 
-    public void setWorkParttime60to79(double workParttime60to79) {
-        this.workParttime60to79 = workParttime60to79;
-    }
-
-    public double getWorkNone20to39() {
-        return workNone20to39;
-    }
-
-    public void setWorkNone20to39(double workNone20to39) {
-        this.workNone20to39 = workNone20to39;
-    }
-
-    public double getWorkNone40to59() {
-        return workNone40to59;
-    }
-
-    public void setWorkNone40to59(double workNone40to59) {
-        this.workNone40to59 = workNone40to59;
-    }
-
-    public double getWorkNone60to79() {
-        return workNone60to79;
-    }
-
-    public void setWorkNone60to79(double workNone60to79) {
-        this.workNone60to79 = workNone60to79;
+    public void setWorkNone55to74(double workNone55to74) {
+        this.workNone55to74 = workNone55to74;
     }
 
     public void update(SimPathsModel model) {
@@ -657,19 +647,20 @@ public class Statistics2 {
         double[] penInc = {0.,0.,0.};
         double[] disInc = {0.,0.,0.};
         double[] grossDisInc = {0.,0.,0.};
-        double[] dexpen = {0.,0.,0.};
-        double[] cexpen = {0.,0.,0.};
+        double[] expen = {0.,0.,0.};
         double[] wealth = {0.,0.,0.};
         double[] popula = {0.,0.,0.};
+        double ctlNG = 0.0, ctlG = 0.0;
+        double numberNG = 0.0, numberG = 0.0;
         for (Person person : model.getPersons()) {
             // loop over entire population
 
             int ii = -1;
-            if (person.getDag()>=20 && person.getDag()<=39) {
+            if (person.getDag()>=18 && person.getDag()<=29) {
                 ii = 0;
-            } else if (person.getDag()>=40 && person.getDag()<=59) {
+            } else if (person.getDag()>=30 && person.getDag()<=54) {
                 ii = 1;
-            } else if (person.getDag()>=60 && person.getDag()<=79) {
+            } else if (person.getDag()>=55 && person.getDag()<=74) {
                 ii = 2;
             }
             if (ii>=0) {
@@ -697,11 +688,32 @@ public class Statistics2 {
                 } else {
                     grossDisInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthly() / es;
                 }
-                dexpen[ii] += person.getBenefitUnit().getDiscretionaryConsumptionPerYear(false) / 12.0 / es;
-                cexpen[ii] += person.getBenefitUnit().getChildcareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH / es;
+                double expenditurePerMonth = person.getBenefitUnit().getDiscretionaryConsumptionPerYear(false) / 12.0 +
+                        person.getBenefitUnit().getChildcareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH +
+                        person.getBenefitUnit().getSocialCareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH;
+                if (expenditurePerMonth > 0.0) {
+                    expenditurePerMonth /= es;
+                    expen[ii] += Math.log(expenditurePerMonth);
+                }
+                if (person.getDag()>=55 && person.getDag()<=60) {
+
+                    if (Education.High.equals(person.getDeh_c3())) {
+                        numberG += 1.0;
+                        ctlG += expenditurePerMonth / Parameters.WEEKS_PER_MONTH / person.getLeisureHoursPerWeek();
+                    } else {
+                        numberNG += 1.0;
+                        ctlNG += expenditurePerMonth / Parameters.WEEKS_PER_MONTH / person.getLeisureHoursPerWeek();
+                    }
+                }
                 wealth[ii] += person.getBenefitUnit().getLiquidWealth(false) / es;
                 popula[ii] += 1.0;
             }
+        }
+        if (numberG>0.1) {
+            ctlG /= numberG;
+        }
+        if (numberNG>0.1) {
+            ctlNG /= numberNG;
         }
         for (int ii=0; ii<=2; ii++) {
 
@@ -720,81 +732,78 @@ public class Statistics2 {
                 disInc[ii] /= popula[ii];
                 invLosses[ii] /= popula[ii];
                 grossDisInc[ii] /= popula[ii];
-                dexpen[ii] /= popula[ii];
-                cexpen[ii] /= popula[ii];
+                expen[ii] = Math.exp(expen[ii] / popula[ii]);
                 wealth[ii] /= popula[ii];
             }
         }
 
-
         // map statistics to outputs
-        setPrMarried20to39(prMarr[0]);
-        setPrMarried40to59(prMarr[1]);
-        setPrMarried60to79(prMarr[2]);
+        setPrMarried18to29(prMarr[0]);
+        setPrMarried30to54(prMarr[1]);
+        setPrMarried55to74(prMarr[2]);
 
-        setAvkids20to39(avkids[0]);
-        setAvkids40to59(avkids[1]);
-        setAvkids60to79(avkids[2]);
+        setAvkids18to29(avkids[0]);
+        setAvkids30to54(avkids[1]);
+        setAvkids55to74(avkids[2]);
 
-        setHealth20to39(health[0]);
-        setHealth40to59(health[1]);
-        setHealth60to79(health[2]);
+        setHealth18to29(health[0]);
+        setHealth30to54(health[1]);
+        setHealth55to74(health[2]);
 
-        setPrDisabled20to39(prDisa[0]);
-        setPrDisabled40to59(prDisa[1]);
-        setPrDisabled60to79(prDisa[2]);
+        setPrDisabled18to29(prDisa[0]);
+        setPrDisabled30to54(prDisa[1]);
+        setPrDisabled55to74(prDisa[2]);
 
-        setWorkFulltime20to39(workFT[0]);
-        setWorkFulltime40to59(workFT[1]);
-        setWorkFulltime60to79(workFT[2]);
+        setWorkFulltime18to29(workFT[0]);
+        setWorkFulltime30to54(workFT[1]);
+        setWorkFulltime55to74(workFT[2]);
 
-        setWorkParttime20to39(workPT[0]);
-        setWorkParttime40to59(workPT[1]);
-        setWorkParttime60to79(workPT[2]);
+        setWorkParttime18to29(workPT[0]);
+        setWorkParttime30to54(workPT[1]);
+        setWorkParttime55to74(workPT[2]);
 
-        setWorkNone20to39(workNn[0]);
-        setWorkNone40to59(workNn[1]);
-        setWorkNone60to79(workNn[2]);
+        setWorkNone18to29(workNn[0]);
+        setWorkNone30to54(workNn[1]);
+        setWorkNone55to74(workNn[2]);
 
-        setLabourIncome20to39(labInc[0]);
-        setLabourIncome40to59(labInc[1]);
-        setLabourIncome60to79(labInc[2]);
+        setLabourIncome18to29(labInc[0]);
+        setLabourIncome30to54(labInc[1]);
+        setLabourIncome55to74(labInc[2]);
 
-        setInvestmentIncome20to39(invInc[0]);
-        setInvestmentIncome40to59(invInc[1]);
-        setInvestmentIncome60to79(invInc[2]);
+        setInvestmentIncome18to29(invInc[0]);
+        setInvestmentIncome30to54(invInc[1]);
+        setInvestmentIncome55to74(invInc[2]);
 
-        setPensionIncome20to39(penInc[0]);
-        setPensionIncome40to59(penInc[1]);
-        setPensionIncome60to79(penInc[2]);
+        setPensionIncome18to29(penInc[0]);
+        setPensionIncome30to54(penInc[1]);
+        setPensionIncome55to74(penInc[2]);
 
-        setDisposableIncome20to39(disInc[0]);
-        setDisposableIncome40to59(disInc[1]);
-        setDisposableIncome60to79(disInc[2]);
+        setDisposableIncome18to29(disInc[0]);
+        setDisposableIncome30to54(disInc[1]);
+        setDisposableIncome55to74(disInc[2]);
 
-        setInvestmentLosses20to39(invLosses[0]);
-        setInvestmentLosses40to59(invLosses[1]);
-        setInvestmentLosses60to79(invLosses[2]);
+        setInvestmentLosses18to29(invLosses[0]);
+        setInvestmentLosses30to54(invLosses[1]);
+        setInvestmentLosses55to74(invLosses[2]);
 
-        setDispIncomeGrossOfLosses20to39(grossDisInc[0]);
-        setDispIncomeGrossOfLosses40to59(grossDisInc[1]);
-        setDispIncomeGrossOfLosses60to79(grossDisInc[2]);
+        setDispIncomeGrossOfLosses18to29(grossDisInc[0]);
+        setDispIncomeGrossOfLosses30to54(grossDisInc[1]);
+        setDispIncomeGrossOfLosses55to74(grossDisInc[2]);
 
-        setDexpenditure20to39(dexpen[0]);
-        setDexpenditure40to59(dexpen[1]);
-        setDexpenditure60to79(dexpen[2]);
+        setExpenditure18to29(expen[0]);
+        setExpenditure30to54(expen[1]);
+        setExpenditure55to74(expen[2]);
 
-        setCexpenditure20to39(cexpen[0]);
-        setCexpenditure40to59(cexpen[1]);
-        setCexpenditure60to79(cexpen[2]);
+        setConsToLeisNonGrad(ctlNG);
+        setConsToLeisGrad(ctlG);
 
-        setWealth20to39(wealth[0]);
-        setWealth40to59(wealth[1]);
-        setWealth60to79(wealth[2]);
+        setWealth18to29(wealth[0]);
+        setWealth30to54(wealth[1]);
+        setWealth55to74(wealth[2]);
 
-        setPopulation20to39(popula[0]);
-        setPopulation40to59(popula[1]);
-        setPopulation60to79(popula[2]);
+        setPopulation18to29(popula[0]);
+        setPopulation30to54(popula[1]);
+        setPopulation55to74(popula[2]);
 
         setSocialCareAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.CareProvisionAdjustment));
         setPartnershipAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.PartnershipAdjustment));

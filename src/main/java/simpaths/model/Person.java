@@ -4419,8 +4419,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getCareHoursProvidedWeekly() {
         double hours = 0.0;
-        if (careHoursProvidedWeekly !=null)
-            if (careHoursProvidedWeekly >0.0)
+        if (careHoursProvidedWeekly != null)
+            if (careHoursProvidedWeekly > 0.0)
                 hours = careHoursProvidedWeekly;
         return hours;
     }
@@ -4511,5 +4511,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             return ee.equals(dehm_c3);
         }
+    }
+
+    public double getHoursWorkedWeekly() {
+        return ( (hoursWorkedWeekly != null) && hoursWorkedWeekly > 0 ) ? (double) hoursWorkedWeekly : 0.0;
+    }
+
+    public double getLeisureHoursPerWeek() {
+        return Parameters.HOURS_IN_WEEK - getCareHoursProvidedWeekly() - getHoursWorkedWeekly();
     }
 }

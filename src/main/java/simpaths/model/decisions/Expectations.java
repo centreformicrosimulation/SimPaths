@@ -274,9 +274,9 @@ public class Expectations {
         leisureTime = 1.0;
         if (careHoursProvidedWeekly>0.0) {
             if (cohabitation)
-                leisureTime -= careHoursProvidedWeekly / (2.0*DecisionParams.LIVING_HOURS_WEEKLY);
+                leisureTime -= careHoursProvidedWeekly / (2.0*Parameters.HOURS_IN_WEEK);
             else
-                leisureTime -= careHoursProvidedWeekly / DecisionParams.LIVING_HOURS_WEEKLY;
+                leisureTime -= careHoursProvidedWeekly / Parameters.HOURS_IN_WEEK;
         }
         if (ageYearsThisPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
             labourHours1Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp1Pr);
@@ -286,14 +286,14 @@ public class Expectations {
                 labourHours2Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp2Pr);
                 hourlyWageRate2 = getHourlyWageRate(labourHours2Weekly);
                 labourIncome2Weekly = hourlyWageRate2 * (double)labourHours2Weekly;
-                leisureTime -= ((double)(labourHours1Weekly + labourHours2Weekly)) / (2.0 * DecisionParams.LIVING_HOURS_WEEKLY);
+                leisureTime -= ((double)(labourHours1Weekly + labourHours2Weekly)) / (2.0 * Parameters.HOURS_IN_WEEK);
             } else {
-                leisureTime -= ((double)labourHours1Weekly) / DecisionParams.LIVING_HOURS_WEEKLY;
+                leisureTime -= ((double)labourHours1Weekly) / Parameters.HOURS_IN_WEEK;
             }
         } else if (emp1Pr>1.0E-5 || emp2Pr>1.0E-5) {
             throw new InvalidParameterException("inconsistent labour decisions supplied for updating expectations");
         }
-        leisureTime = Math.max(1.0/DecisionParams.LIVING_HOURS_WEEKLY, leisureTime);
+        leisureTime = Math.max(1.0/Parameters.HOURS_IN_WEEK, leisureTime);
 
         // pension income
         boolean retiring = false;
