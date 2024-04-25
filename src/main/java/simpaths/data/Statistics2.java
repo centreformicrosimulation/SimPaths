@@ -672,9 +672,9 @@ public class Statistics2 {
                 health[ii] += person.getDheValue();
                 prDisa[ii] += (Indicator.True.equals(person.getDlltsd()))? 1.0: 0.0;
                 labInc[ii] += person.getEarningsWeekly();
-                if (person.getDoubleLabourSupplyWeeklyHours() > Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)
+                if ((double)person.getLabourSupplyHoursWeekly() > Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)
                     workFT[ii] += 1.0;
-                else if (person.getDoubleLabourSupplyWeeklyHours() > 1.0)
+                else if ((double)person.getLabourSupplyHoursWeekly() > 1.0)
                     workPT[ii] += 1.0;
                 else
                     workNn[ii] += 1.0;

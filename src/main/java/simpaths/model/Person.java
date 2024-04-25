@@ -3461,10 +3461,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return labourSupplyWeekly;
     }
 
-    public double getDoubleLabourSupplyWeeklyHours() {
-        return (labourSupplyWeekly != null) ? (double)labourSupplyWeekly.getHours(this) : 0.0;
-    }
-
     public int getLabourSupplyHoursWeekly() {
         return (labourSupplyWeekly != null) ? labourSupplyWeekly.getHours(this) : 0;
     }
@@ -3474,12 +3470,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         hoursWorkedWeekly = getLabourSupplyHoursWeekly(); // Update number of hours worked weekly
     }
 
-    public double getLabourSupplyYearly() {
-        return (double) getLabourSupplyWeekly().getHours(this) * Parameters.WEEKS_PER_YEAR;
-    } //TODO: add scaling factor multiplication?
+    public double getLabourSupplyHoursYearly() {
+        return (double) getLabourSupplyHoursWeekly() * Parameters.WEEKS_PER_YEAR;
+    }
 
     public double getScaledLabourSupplyYearly() {
-        return (double) getLabourSupplyWeekly().getHours(this) * Parameters.WEEKS_PER_YEAR * model.getScalingFactor();
+        return getLabourSupplyHoursYearly() * model.getScalingFactor();
     }
 
 
