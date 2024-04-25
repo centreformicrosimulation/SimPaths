@@ -2,7 +2,7 @@
 # These will be overridden by command-line arguments
 
 maxNumberOfRuns: 3
-executeWithGui: true
+executeWithGui: false
 randomSeed: 12345
 startYear: 2019
 endYear: 2020
