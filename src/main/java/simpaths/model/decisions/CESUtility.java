@@ -62,15 +62,15 @@ public class CESUtility implements IEvaluation {
         // evaluate within period utility
         double consumptionAnnual = args[0];
         double consumptionNormalised = consumptionAnnual / ANNUAL_CONSUMPTION_NORMALISATION_FACTOR;
-        double consumptionComponent = Math.pow(consumptionNormalised/expectations.equivalenceScale, 1 - 1/ EPSILON);
-        double leisureComponent = Math.pow(expectations.leisureTime, 1 - 1/ EPSILON);
+        double consumptionComponent = Math.pow(consumptionNormalised/expectations.equivalenceScale, 1.0 - 1.0/EPSILON);
+        double leisureComponent = Math.pow(expectations.leisureTime, 1.0 - 1.0/EPSILON);
         double priceOfLeisure;
         if (expectations.cohabitation) {
-            priceOfLeisure = Math.pow(ALPHA_COUPLES, 1/ EPSILON);
+            priceOfLeisure = Math.pow(ALPHA_COUPLES, 1.0/EPSILON);
         } else {
-            priceOfLeisure = Math.pow(ALPHA_SINGLES, 1/ EPSILON);
+            priceOfLeisure = Math.pow(ALPHA_SINGLES, 1.0/EPSILON);
         }
-        double periodUtility = Math.pow(consumptionComponent + priceOfLeisure * leisureComponent, (1- GAMMA)/(1-1/ EPSILON));
+        double periodUtility = Math.pow(consumptionComponent + priceOfLeisure * leisureComponent, (1.0 - GAMMA)/(1.0 - 1.0/EPSILON));
 
         // adjust expectations array
         int dim;
@@ -112,14 +112,14 @@ public class CESUtility implements IEvaluation {
                     if ( 1.0 - expectations.mortalityProbability > probThreshold ) {
                         expectedV = valueFunction.interpolateAll(expectations.anticipated[ii], true);
                         expectedUtility += expectations.probability[ii] *
-                                (1.0 - expectations.mortalityProbability) * Math.pow(expectedV, 1 - GAMMA);
+                                (1.0 - expectations.mortalityProbability) * Math.pow(expectedV, 1.0 - GAMMA);
                         if (expectedUtility.isNaN())
                             throw new RuntimeException("expected utility expected utility 1");
                     }
                     if (expectations.mortalityProbability > probThreshold && zeta1 > 0) {
                         bequest = Math.max(0, Math.exp(expectations.anticipated[ii].states[0])- DecisionParams.C_LIQUID_WEALTH);
                         expectedUtility += expectations.probability[ii] * expectations.mortalityProbability *
-                                zeta1 * Math.pow((zeta0 + bequest), 1 - GAMMA);
+                                zeta1 * Math.pow((zeta0 + bequest), 1.0 - GAMMA);
                         if (expectedUtility.isNaN())
                             throw new RuntimeException("expected utility expected utility 2");
                     }
@@ -139,7 +139,7 @@ public class CESUtility implements IEvaluation {
         } else {
             discountFactor = DELTA_SINGLES;
         }
-        Double totalUtility = Math.pow(periodUtility + discountFactor * expectedUtility, 1/(1- GAMMA));
+        Double totalUtility = Math.pow(periodUtility + discountFactor * expectedUtility, 1.0/(1.0 - GAMMA));
 
         if (totalUtility.isNaN())
             throw new RuntimeException("failed to evaluate lifetime utility");
