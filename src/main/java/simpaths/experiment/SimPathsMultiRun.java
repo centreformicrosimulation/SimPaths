@@ -68,7 +68,7 @@ public class SimPathsMultiRun extends MultiRun {
 		} else {
 			countryString = "United Kingdom";
 		}
-		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
+		String valueYear = lastDatabaseCountryAndYear.getValue(Country.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
 		if (!parseYamlConfig(args)) {
@@ -102,7 +102,6 @@ public class SimPathsMultiRun extends MultiRun {
 	private static boolean parseCommandLineArgs(String[] args) {
 
 		Options options = new Options();
-
 
 		Option popSizeOption = new Option("p", "popSize", true, "Population size");
 		popSizeOption.setArgName("int");
