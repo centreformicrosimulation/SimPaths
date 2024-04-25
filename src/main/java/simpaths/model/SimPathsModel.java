@@ -135,6 +135,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Value of saving rate (s). The default value is based on average % of household disposable income saved between 2000 - 2019 reported by the OECD")
 	private Double savingRate = 0.056;
 
+	private double interestRateInnov = 0.0;		// used to explore behavioural sensitivity to assumed interest rates
+
 //	@GUIparameter(description = "Force recreation of input database based on the data provided by the population_[country].csv file")
 //	private boolean refreshInputDatabase = false;		//Tables can be constructed in GUI dialog in launch, before JAS-mine GUI appears.  However, if skipping that, and manually altering the EUROMODpolicySchedule.xlsx file, this will need to be set to true to build new input database before simulation is run (though the new input database will only be viewable in the output/input/input.h2.db file).
 
@@ -324,7 +326,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		popAlignInnov = new Random(SimulationEngine.getRnd().nextLong());
 
 		// load model parameters
-		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear);
+		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear, interestRateInnov);
 		if (enableIntertemporalOptimisations) {
 
 			alignEmployment = false;
@@ -2914,6 +2916,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	public void setRandomSeedIfFixed(Long randomSeedIfFixed) {
 		this.randomSeedIfFixed = randomSeedIfFixed;
+	}
+
+	public void setInterestRateInnov(double innov) {
+		interestRateInnov = innov;
 	}
 
 	public Integer getsIndexTimeWindow() {

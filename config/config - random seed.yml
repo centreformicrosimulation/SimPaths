@@ -41,6 +41,10 @@ model_args:
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
 
+innovation_args:
+#  randomSeedInnov: false
+#  intertemporalElasticityInnov: true
+
 collector_args:
 #    calculateGiniCoefficients: false
 #    exportToDatabase: false

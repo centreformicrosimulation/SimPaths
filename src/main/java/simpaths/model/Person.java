@@ -1101,9 +1101,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
             boolean becomeLTSickDisabled = (healthInnov.nextDouble() < Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class));
-            if(becomeLTSickDisabled == true) {
+            if (becomeLTSickDisabled) {
                 dlltsd = Indicator.True;
-            } else if(becomeLTSickDisabled == false) {
+            } else {
                 dlltsd = Indicator.False;
             }
         }

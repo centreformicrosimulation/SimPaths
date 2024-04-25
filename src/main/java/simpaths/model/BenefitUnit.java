@@ -3528,9 +3528,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				}
 				phi = Math.min(phi, 1.0);
 				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostLow)*(1.0-phi) +
-						Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostHigh)*phi) * liquidWealth;
+						Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostHigh)*phi +
+						Parameters.interestRateInnov) * liquidWealth;
 			} else {
-				investmentIncomeAnnual = Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.SavingReturns) * liquidWealth;
+				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.SavingReturns) +
+						Parameters.interestRateInnov) * liquidWealth;
 			}
 			if ((investmentIncomeAnnual < -2000000.0) || (investmentIncomeAnnual > 20000000.0))
 				throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
