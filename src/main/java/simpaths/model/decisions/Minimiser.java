@@ -19,6 +19,7 @@ public class Minimiser {
      * ATTRIBUTES
      */
     int nn;                             // number of arguments of function
+    int freeNn;                         // number of unconstrained arguments
     double[] lowerBounds;               // lower bounds of continuous control variables to optimise
     double[] upperBounds;               // upper bounds of continuous control variables to optimise
     double[] target;                    // starting co-ordinates at entry and co-ordinates of minimum at exit
@@ -40,6 +41,11 @@ public class Minimiser {
         this.target = target;
         this.function = function;
         nn = lowerBounds.length;
+        freeNn = 0;
+        for(int ii=0; ii<nn; ii++) {
+            if (upperBounds[ii] > lowerBounds[ii]+1.0E-10)
+                freeNn++;
+        }
     }
 
 
@@ -53,13 +59,26 @@ public class Minimiser {
      */
     public void minimise() {
         FunctionEvaluation result;
-        if (nn == 1) {
+        if (freeNn == 0) {
+            result = constrained(target);
+        } else if (nn == 1) {
             result = brent(lowerBounds, upperBounds, target);
         } else {
             result = powell();
         }
         minimisedValue = result.value;
         target = Arrays.copyOf(result.ordinates, nn);
+    }
+
+    private FunctionEvaluation constrained(double[] bx) {
+
+        // initialise return object
+        FunctionEvaluation result = new FunctionEvaluation(nn);
+
+        result.ordinates = Arrays.copyOf(bx,nn);
+        result.value = function.evaluate(bx);
+
+        return result;
     }
 
 
@@ -374,48 +393,17 @@ public class Minimiser {
                 fu = function.evaluate(uu);
                 if ( fu <= fx ) {
 
-                    if ( fu == fx ) {
-                        // flat region found - undertake grid search to verify that minimum has been found
-
-                        uu = Arrays.copyOf(xx, nn);
-                        stepSize = new double[nn];
-                        for (int ii = 0; ii < nn; ii++) {
-                            stepSize[ii] = (cx[ii] - ax[ii]) / 200;
-                        }
-                        stepNumber = Math.min(10, (int) ((cx[adim] - uu[adim]) / stepSize[adim]));
-                        result = gridSearch(uu, stepSize, stepNumber);
-                        uu = Arrays.copyOf(result.ordinates,nn);
-                        fu = result.value;
-
-                        if ((fu + EPS) > fx) {
-                            // test below
-
-                            uu = Arrays.copyOf(xx, nn);
-                            for (int ii = 0; ii < nn; ii++) {
-                                stepSize[ii] = -stepSize[ii];
-                            }
-                            stepNumber = Math.min(10, (int) ((uu[adim] - ax[adim]) / stepSize[adim]));
-                            result = gridSearch(uu, stepSize, stepNumber);
-                            uu = Arrays.copyOf(result.ordinates,nn);
-                            fu = result.value;
-                        }
-                        if ( fu == fx ) {
-                            flatAboutMin = true;
-                        }
+                    if( uu[adim] >= xx[adim] ) {
+                        aa = Arrays.copyOf(xx,nn);
+                    } else {
+                        bb = Arrays.copyOf(xx,nn);
                     }
-                    if ((fu+EPS) < fx) {
-                        if( uu[adim] >= xx[adim] ) {
-                            aa = Arrays.copyOf(xx,nn);
-                        } else {
-                            bb = Arrays.copyOf(xx,nn);
-                        }
-                        vv = Arrays.copyOf(ww,nn);
-                        fv = fw;
-                        ww = Arrays.copyOf(xx,nn);
-                        fw = fx;
-                        xx = Arrays.copyOf(uu,nn);
-                        fx = fu;
-                    }
+                    vv = Arrays.copyOf(ww,nn);
+                    fv = fw;
+                    ww = Arrays.copyOf(xx,nn);
+                    fw = fx;
+                    xx = Arrays.copyOf(uu,nn);
+                    fx = fu;
                 } else {
 
                     if( uu[adim] < xx[adim] ) {

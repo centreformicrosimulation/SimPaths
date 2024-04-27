@@ -1,11 +1,9 @@
 package simpaths.model.taxes;
 
-import simpaths.model.BenefitUnit;
 import simpaths.model.TaxEvaluation;
 
-public class TestTaxRoutine {
 
-    TestTaxRoutine(){}
+public class TestTaxRoutine {
 
     public static void run() {
 

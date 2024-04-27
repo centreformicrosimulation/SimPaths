@@ -97,4 +97,35 @@ public class Grids {
             }
         }
     }
+
+    public double getValueFunction(States states) {
+
+        // evaluate state index
+        long gridIndex = states.returnGridIndex();
+        return valueFunction.get(gridIndex);
+    }
+    public double getConsumptionShare(States states) {
+
+        // evaluate state index
+        long gridIndex = states.returnGridIndex();
+        return consumption.get(gridIndex);
+    }
+    public double getEmployment1(States states) {
+
+        if (states.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_IO_EMPLOYMENT1) {
+            long gridIndex = states.returnGridIndex();
+            return employment1.get(gridIndex);
+        } else {
+            return 0.0;
+        }
+    }
+    public double getEmployment2(States states) {
+
+        if (states.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_IO_EMPLOYMENT2 && states.getCohabitation()) {
+            long gridIndex = states.returnGridIndex();
+            return employment2.get(gridIndex);
+        } else {
+            return 0.0;
+        }
+    }
 }

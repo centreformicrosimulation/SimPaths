@@ -193,7 +193,8 @@ input/~$scenario_uprating_factor.xlsx
 /input/*.db
 input/tax_donor_population_UK.csv
 input/input.mv.db
-input/DatabaseCountryYear.xlsx
-input/EUROMODpolicySchedule.xlsx
-
+input/input.mv.db.new
+input/input.mv.db.old
+input/input.mv.db.original
 dependency-reduced-pom.xml
+.idea/vcs.xml

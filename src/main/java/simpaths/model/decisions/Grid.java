@@ -1,6 +1,7 @@
 package simpaths.model.decisions;
 
 import java.security.InvalidParameterException;
+import simpaths.model.decisions.DecisionParams;
 
 
 /**
@@ -14,15 +15,15 @@ public class Grid {
     /**
      * ATTRIBUTES
      */
-    final int MAX_LEN = Integer.MAX_VALUE - 16;
+    private final int MAX_LEN = Integer.MAX_VALUE - 16;
     // MAX_LEN defines the maximum array length permitted for the grid object.  The limits imposed by Java
     // vary by JVM, and are currently due to use of int (4 byte) indexing used for arrays.  The "16" buffer
     // assumed here is arbitrary, accounting for sporadic reports about varying array length constraints.
 
-    long size;         // length of grid array stored here
+    long size;              // length of grid array stored here
     GridScale scale;        // object describing dimensionality of grid
     double[] grid;          // array to store variable values at grid ordinates
-    double[][] gridLong;   // array to store variable values at grid ordinates, if grid dimensions extend beyond int(4)
+    double[][] gridLong;    // array to store variable values at grid ordinates, if grid dimensions extend beyond int(4)
 
 
     /**
@@ -34,14 +35,23 @@ public class Grid {
         this.size = size;
         if (size <= MAX_LEN) {
             grid = new double[(int)size];
+            for (int jj=0; jj<(int)size; jj++) {
+                grid[jj] = DecisionParams.GRID_DEFAULT_VALUE;
+            }
         } else {
             int slices = 1 + (int)((double)size / (double)MAX_LEN);
             gridLong = new double[slices][];
             for (int ii=0; ii<slices; ii++) {
                 if (ii==slices-1) {
                     gridLong[ii] = new double[(int)(size%MAX_LEN)];
+                    for (int jj=0; jj<(int)(size%MAX_LEN); jj++) {
+                        grid[jj] = DecisionParams.GRID_DEFAULT_VALUE;
+                    }
                 } else {
                     gridLong[ii] = new double[MAX_LEN];
+                    for (int jj=0; jj<MAX_LEN; jj++) {
+                        grid[jj] = DecisionParams.GRID_DEFAULT_VALUE;
+                    }
                 }
             }
         }
@@ -82,6 +92,15 @@ public class Grid {
             int slice = (int)((double)index / (double)MAX_LEN);
             int ii = (int)(index%MAX_LEN);
             value = gridLong[slice][ii];
+        }
+        return value;
+    }
+    public double getChecked(States supplied, long index) {
+
+        double value = get(index);
+        if (Math.abs(value-DecisionParams.GRID_DEFAULT_VALUE) < 1.0E-10) {
+            supplied.systemReportError(index);
+            throw new InvalidParameterException("attempt to retrieve uninitialised grid value");
         }
         return value;
     }
@@ -218,7 +237,7 @@ public class Grid {
                     indexHere += (long)nn[jj] * offset[jj];
                 }
                 indexHere += startingIndex;
-                valueHere = get(indexHere);
+                valueHere = getChecked(supplied, indexHere);
                 result += valueHere * weight[ii];
                 weightTotal += weight[ii];
             }

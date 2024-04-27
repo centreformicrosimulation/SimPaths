@@ -1,10 +1,13 @@
 package simpaths.model.decisions;
 
 import simpaths.data.Parameters;
-import simpaths.model.SimPathsModel;
+import simpaths.model.taxes.Matches;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 
@@ -59,12 +62,14 @@ public class ManagerSolveGrids {
             // set age specific working variables
             int innerDimension = (int)grids.scale.gridDimensions[aa][0];
             int outerDimension = (int)grids.scale.gridDimensions[aa][1];
+            int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
+            Matches imperfectMatches = new Matches();
+            List<Matches> imperfectMatchStore = newImperfectMatchStore((int)grids.scale.gridDimensions[aa][2]);
 
             // loop over outer dimensions, for which expectations are independent of IO decisions (controls)
             for (int iiOuter=0; iiOuter<outerDimension; iiOuter++) {
 
                 // identify current state combination for outer states
-                int ageYears = aa + Parameters.AGE_TO_BECOME_RESPONSIBLE;
                 States outerStates = new States(grids.scale, ageYears);
                 outerStates.populateOuterGridStates(iiOuter);
                 boolean loopConsider = outerStates.checkOuterStateCombination();
@@ -81,7 +86,7 @@ public class ManagerSolveGrids {
                             currentStates.populateInnerGridStates(iiInner);
                             boolean stateConsider = currentStates.checkStateCombination();
                             if (stateConsider) {
-                                ManagerSolveState.run(grids, currentStates, outerExpectations);
+                                ManagerSolveState.run(grids, currentStates, outerExpectations, imperfectMatchStore);
                             }
                         });
                     } else {
@@ -91,24 +96,43 @@ public class ManagerSolveGrids {
                             currentStates.populateInnerGridStates(iiInner);
                             boolean stateConsider = currentStates.checkStateCombination();
                             if (stateConsider) {
-                                ManagerSolveState.run(grids, currentStates, outerExpectations);
+                                ManagerSolveState.run(grids, currentStates, outerExpectations, imperfectMatchStore);
                             }
                         }
                     }
                 }
             }
-            int ageHere = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
-            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageHere<80) && ((ageHere % 5)==0))
-                ManagerFileGrids.write(grids, true);
+            if (DecisionParams.saveImperfectTaxDbMatches) {
+                for (Matches mm : imperfectMatchStore) {
+                    if (!mm.isEmpty()) {
+                        imperfectMatches.addSet(mm.getSet());
+                    }
+                }
+                if (!imperfectMatches.isEmpty()) {
+                    imperfectMatches.write(DecisionParams.gridsOutputDirectory, "poor_taxmatch_age_" + ageYears + ".csv");
+                }
+            }
+            if (DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS && (ageYears<80) && ((ageYears % 5)==0))
+                ManagerFileGrids.unformattedWrite(grids, true);
+            if (DecisionParams.SAVE_GRID_SLICES_TO_CSV)
+                ManagerFileGrids.formattedWrite(grids, aa);
             Instant after = Instant.now();
             if (aa == 0) afterTotal = after;
             Duration duration = Duration.between(before, after);
-            System.out.println("Calculations for age " + ageHere + " completed in " + String.format("%.3f", (double)duration.toMillis()/1000.0) + " seconds");
+            System.out.println("Calculations for age " + ageYears + " completed in " + String.format("%.3f", (double)duration.toMillis()/1000.0) + " seconds");
         }
         if (beforeTotal != null && afterTotal != null) {
 
             Duration durationTotal = Duration.between(beforeTotal, afterTotal);
             System.out.println("Calculations for optimal decisions completed in " + String.format("%.3f", (double)durationTotal.toSeconds()/60.0) + " minutes");
         }
+    }
+
+    private static List<Matches> newImperfectMatchStore(int size) {
+        List<Matches> list = new ArrayList<>();
+        for (int ii=0; ii<size; ii++) {
+            list.add(new Matches());
+        }
+        return list;
     }
 }

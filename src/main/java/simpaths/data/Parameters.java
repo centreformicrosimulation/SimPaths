@@ -79,18 +79,11 @@ public class Parameters {
 
     public static final String[] HOUSEHOLD_VARIABLES_INITIAL = new String[] {
 		"idhh",				//id of household (can contain multiple benefit units)
-		"idbenefitunit",	//id of a benefit unit
-		"idperson",			//Use to handle non-uniqueness of household table rows
-		"dwt" 				//household weight
     };
 
     public static final String[] BENEFIT_UNIT_VARIABLES_INITIAL = new String[] {
 		"idhh",				//id of household (can contain multiple benefit units)
 		"idbenefitunit",	//id of a benefit unit
-		"idperson",			//Use to handle non-uniqueness of household table rows
-		"dwt", 				//household weight
-		"idfather",			//id of father, to be used to define (responsible) male of the household (if defined)
-		"idmother",			//id of mother, to be used to define (responsible) female of the household (if defined)
 		"drgn1", 			//region (NUTS1)
 		"dhhtp_c4",			//household composition
 		"ydses_c5",			//household income quantile
@@ -245,6 +238,7 @@ public class Parameters {
     public static final int MIN_AGE_COHABITATION = AGE_TO_BECOME_RESPONSIBLE;  	// Min age a person can marry
     public static final int MIN_AGE_TO_HAVE_INCOME = 16; //Minimum age to have non-employment non-benefit income
     public static final int MIN_AGE_TO_RETIRE = 50; //Minimum age to consider retirement
+    public static final int DEFAULT_AGE_TO_RETIRE = 67; //if pension included, but retirement decision not
     public static final int MIN_AGE_FORMAL_SOCARE = 65; //Minimum age to receive formal social care
     public static final int MIN_AGE_FLEXIBLE_LABOUR_SUPPLY = 16; //Used when filtering people who can be "flexible in labour supply"
     public static final int MAX_AGE_FLEXIBLE_LABOUR_SUPPLY = 75;
@@ -268,13 +262,15 @@ public class Parameters {
     //public static int MAX_AGE_IN_EDUCATION;// = MAX_AGE;//30;			// Max age a person can stay in education	//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
-    private static final int MAX_START_YEAR = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static final int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
     private static int startYear;
     private static int endYear;
     private static final int MIN_START_YEAR_TRAINING = 2017;
     private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
+    public static final boolean FLAG_SINGLE_MOTHERS = true;
+    public static boolean flagUnemployment = false;
 
     public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
@@ -332,6 +328,9 @@ public class Parameters {
     private static String populationInitialisationInputFileName;
     private static MultiKeyMap<Object, Double> populationGrowthRatiosByRegionYear;
 
+    public static final boolean SAVE_IMPERFECT_TAXDB_MATCHES = false;
+    public static final int IMPERFECT_THRESHOLD = 5999;
+
 
     /////////////////////////////////////////////////////////////////// INITIALISATION OF DATA STRUCTURES //////////////////////////////////
     public static Map<Integer, String> EUROMODpolicySchedule = new TreeMap<Integer, String>();
@@ -379,12 +378,30 @@ public class Parameters {
     //MultivariateNormalDistribution of age and potential earnings differential to use in the parametric partnership process
     private static MultivariateNormalDistribution wageAndAgeDifferentialMultivariateNormalDistribution;
 
-    //Mortality and fertility tables for the intertemporal optimisation model
+    //Mortality, fertility, and unemployment tables for the intertemporal optimisation model
     private static MultiKeyCoefficientMap mortalityProbabilityByGenderAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
     private static int mortalityProbabilityMaxYear;
     private static int mortalityProbabilityMinYear;
     private static int mortalityProbabilityMaxAge;
-    private static MultiKeyCoefficientMap fertilityProjectionsByYear; //NB: these currently only go up to 2043?
+    private static MultiKeyCoefficientMap fertilityProjectionsByYear; //NB: these currently only go up to 2043
+    public static int fertilityProjectionsMaxYear;
+    public static int fertilityProjectionsMinYear;
+    private static MultiKeyCoefficientMap unemploymentRatesMaleGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesMaleGraduatesMaxYear;
+    private static int unemploymentRatesMaleGraduatesMinYear;
+    private static int unemploymentRatesMaleGraduatesMaxAge;
+    private static MultiKeyCoefficientMap unemploymentRatesMaleNonGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesMaleNonGraduatesMaxYear;
+    private static int unemploymentRatesMaleNonGraduatesMinYear;
+    private static int unemploymentRatesMaleNonGraduatesMaxAge;
+    private static MultiKeyCoefficientMap unemploymentRatesFemaleGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesFemaleGraduatesMaxYear;
+    private static int unemploymentRatesFemaleGraduatesMinYear;
+    private static int unemploymentRatesFemaleGraduatesMaxAge;
+    private static MultiKeyCoefficientMap unemploymentRatesFemaleNonGraduatesByAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int unemploymentRatesFemaleNonGraduatesMaxYear;
+    private static int unemploymentRatesFemaleNonGraduatesMinYear;
+    private static int unemploymentRatesFemaleNonGraduatesMaxAge;
 
     //Number of employments on full and flexible furlough from HMRC statistics, used as regressors in the Covid-19 module
     private static MultiKeyCoefficientMap employmentsFurloughedFull;
@@ -421,6 +438,11 @@ public class Parameters {
     private static Map<NotPartnerInformalCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2fMap;
     private static Map<SocialCareProvision, MultiKeyCoefficientMap> coeffCovarianceSocialCareS3dMap;
 
+    //Unemployment
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1a;
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1b;
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1c;
+    private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1d;
 
     //Mental health
     private static MultiKeyCoefficientMap coeffCovarianceHM1Level; //Step 1 coefficients for mental health
@@ -630,6 +652,11 @@ public class Parameters {
     private static MultiLogitRegression<SocialCareProvision> regInformalCareToS3d;
     private static LinearRegression regCareHoursProvS3e;
 
+    //Unemployment
+    private static ProbitRegression regUnemploymentMaleGraduateU1a;
+    private static ProbitRegression regUnemploymentMaleNonGraduateU1b;
+    private static ProbitRegression regUnemploymentFemaleGraduateU1c;
+    private static ProbitRegression regUnemploymentFemaleNonGraduateU1d;
 
     //Health mental
     private static LinearRegression regHealthHM1Level;
@@ -746,13 +773,16 @@ public class Parameters {
     public static boolean flagSocialCare;
     public static boolean donorPoolAveraging;
 
+    public static double interestRateInnov;
+
+
     /**
      *
      * METHOD TO LOAD PARAMETERS FOR GIVEN COUNTRY
      * @param country
      *
      */
-    public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations, boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1, boolean fixTimeTrend, Integer timeTrendStops, int startYearModel, int endYearModel) {
+    public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations, boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1, boolean fixTimeTrend, Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -783,6 +813,7 @@ public class Parameters {
         flagFormalChildcare = projectFormalChildcare;
         flagSocialCare = projectSocialCare;
         donorPoolAveraging = donorPoolAveraging1;
+        interestRateInnov = interestRateInnov1;
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
 //		unemploymentRates = ExcelAssistant.loadCoefficientMap("input/scenario_unemploymentRates.xlsx", countryString, 1, 46);
@@ -813,39 +844,7 @@ public class Parameters {
 
         // alignment parameters
         populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 50);
-        boolean searchBack = true;
-        boolean searchForward = true;
-        boolean searchAge = true;
-        String rgn = countryString + "C";
-        int ii = 1;
-        while (searchBack || searchForward || searchAge) {
-
-            if (searchForward) {
-
-                Number val = (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR+ii);
-                if (val==null) {
-                    populationProjectionsMaxYear = MIN_START_YEAR + ii - 1;
-                    searchForward = false;
-                }
-            }
-            if (searchBack) {
-
-                Number val = (Number) populationProjections.getValue("Female", rgn, 0, MIN_START_YEAR-ii);
-                if (val==null) {
-                    populationProjectionsMinYear = MIN_START_YEAR - ii + 1;
-                    searchBack = false;
-                }
-            }
-            if (searchAge) {
-
-                Number val = (Number) populationProjections.getValue("Female", rgn, 80+ii, MIN_START_YEAR);
-                if (val==null) {
-                    populationProjectionsMaxAge = 80 + ii - 1;
-                    searchAge = false;
-                }
-            }
-            ii++;
-        }
+        setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels
         projectionsHighEdu = ExcelAssistant.loadCoefficientMap("input/align_educLevel.xlsx", countryString + "_High", 1, 2);
@@ -862,41 +861,21 @@ public class Parameters {
 
         //Mortality rates
         mortalityProbabilityByGenderAgeYear = ExcelAssistant.loadCoefficientMap("input/projections_mortality.xlsx", countryString + "_MortalityByGenderAgeYear", 2, 120);
-        searchBack = true;
-        searchForward = true;
-        searchAge = true;
-        ii = 1;
-        while (searchBack || searchForward || searchAge) {
-
-            if (searchForward) {
-
-                Number val = (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR+ii);
-                if (val==null) {
-                    mortalityProbabilityMaxYear = MIN_START_YEAR + ii - 1;
-                    searchForward = false;
-                }
-            }
-            if (searchBack) {
-
-                Number val = (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 0, MIN_START_YEAR-ii);
-                if (val==null) {
-                    mortalityProbabilityMinYear = MIN_START_YEAR - ii + 1;
-                    searchBack = false;
-                }
-            }
-            if (searchAge) {
-
-                Number val = (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 80+ii, MIN_START_YEAR);
-                if (val==null) {
-                    mortalityProbabilityMaxAge = 80 + ii - 1;
-                    searchAge = false;
-                }
-            }
-            ii++;
-        }
+        setMapBounds(MapBounds.Mortality, countryString);
 
         //Fertility rates:
         fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap("input/projections_fertility.xlsx", countryString + "_FertilityByYear", 1, 71);
+        setMapBounds(MapBounds.Fertility, countryString);
+
+        //Unemployment rates
+        unemploymentRatesMaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesMaleGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentMaleGraduates, countryString);
+        unemploymentRatesMaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesMaleNonGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentMaleNonGraduates, countryString);
+        unemploymentRatesFemaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesFemaleGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentFemaleGraduates, countryString);
+        unemploymentRatesFemaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_RatesFemaleNonGraduates", 1, 49);
+        setMapBounds(MapBounds.UnemploymentFemaleNonGraduates, countryString);
 
         //RMSE
         coefficientMapRMSE = ExcelAssistant.loadCoefficientMap("input/reg_RMSE.xlsx", countryString, 1, 1);
@@ -951,6 +930,10 @@ public class Parameters {
         int columnsSocialCareS3c = -1;
         int columnsSocialCareS3d = -1;
         int columnsSocialCareS3e = -1;
+        int columnsUnemploymentU1a = -1;
+        int columnsUnemploymentU1b = -1;
+        int columnsUnemploymentU1c = -1;
+        int columnsUnemploymentU1d = -1;
         int columnsEducationE1a = -1;
         int columnsEducationE1b = -1;
         int columnsEducationE2a = -1;
@@ -1054,18 +1037,14 @@ public class Parameters {
             columnsValidationLabourSupplyByEducation = 3;
         }
         else if(country.equals(Country.UK)) {
-            columnsWagesMales = 18;
-            columnsWagesMalesNE = 34;
-            columnsWagesMalesE = 35;
-            columnsWagesFemales = 18;
-            columnsWagesFemalesNE = 34;
-            columnsWagesFemalesE = 35;
-            columnsEmploymentSelectionMales = 21;
-            columnsEmploymentSelectionMalesNE = 32;
-            columnsEmploymentSelectionMalesE = 31;
-            columnsEmploymentSelectionFemales = 21;
-            columnsEmploymentSelectionFemalesNE = 32;
-            columnsEmploymentSelectionFemalesE = 31;
+            columnsWagesMalesNE = 30;
+            columnsWagesMalesE = 31;
+            columnsWagesFemalesNE = 30;
+            columnsWagesFemalesE = 31;
+            columnsEmploymentSelectionMalesNE = 30;
+            columnsEmploymentSelectionMalesE = 29;
+            columnsEmploymentSelectionFemalesNE = 30;
+            columnsEmploymentSelectionFemalesE = 29;
             columnsLabourSupplyUtilityMales = 6;
             columnsLabourSupplyUtilityFemales = 6;
             columnsLabourSupplyUtilityMalesWithDependent = 6;
@@ -1077,7 +1056,7 @@ public class Parameters {
             columnsLabourCovid19_2a_processes = 1;
             columnsHealthH1a = 28;
             columnsHealthH1b = 35;
-            columnsHealthH2b = 29;
+            columnsHealthH2b = 35;
             columnsHealthHM1 = 31;
             columnsHealthHM2Males = 11;
             columnsHealthHM2Females = 11;
@@ -1099,29 +1078,33 @@ public class Parameters {
             columnsSocialCareS3c = 37;
             columnsSocialCareS3d = 79;
             columnsSocialCareS3e = 37;
-            columnsEducationE1a = 21;
-            columnsEducationE1b = 27;
-            columnsEducationE2a = 22;
-            columnsPartnershipU1a = 20;
-            columnsPartnershipU1b = 28;
-            columnsPartnershipU2b = 33;
-            columnsFertilityF1a = 13;
-            columnsFertilityF1b = 29;
-            columnsIncomeI1a = 19;
-            columnsIncomeI1b = 31;
-            columnsIncomeI3a = 19;
-            columnsIncomeI3b = 28;
-            columnsIncomeI3c = 28;
-            columnsIncomeI4a = 24;
+            columnsUnemploymentU1a = 19;
+            columnsUnemploymentU1b = 19;
+            columnsUnemploymentU1c = 19;
+            columnsUnemploymentU1d = 19;
+            columnsEducationE1a = 19;
+            columnsEducationE1b = 25;
+            columnsEducationE2a = 20;
+            columnsPartnershipU1a = 27;
+            columnsPartnershipU1b = 31;
+            columnsPartnershipU2b = 38;
+            columnsFertilityF1a = 11;
+            columnsFertilityF1b = 34;
+            columnsIncomeI1a = 19;  //*
+            columnsIncomeI1b = 31;  //*
+            columnsIncomeI3a = 20;
+            columnsIncomeI3b = 29;
+            columnsIncomeI3c = 28;  //*
+            columnsIncomeI4a = 24;  //*
             columnsIncomeI4b = 25;
-            columnsIncomeI5a = 24;
-            columnsIncomeI5b = 24;
-            columnsIncomeI6a = 22;
-            columnsIncomeI6b = 22;
-            columnsIncomeI3a_selection = 19;
-            columnsIncomeI3b_selection = 28;
-            columnsLeaveHomeP1a = 26;
-            columnsHomeownership = 32;
+            columnsIncomeI5a = 25;
+            columnsIncomeI5b = 25;
+            columnsIncomeI6a = 22;  //*
+            columnsIncomeI6b = 22;  //*
+            columnsIncomeI3a_selection = 20;
+            columnsIncomeI3b_selection = 29;
+            columnsLeaveHomeP1a = 25;
+            columnsHomeownership = 33;
             columnsRetirementR1a = 26;
             columnsRetirementR1b = 31;
             columnsChildcareC1a = 37;
@@ -1150,18 +1133,18 @@ public class Parameters {
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Males", 1, columnsEmploymentSelectionMales);
+        //coeffCovarianceEmploymentSelectionMales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Males", 1, columnsEmploymentSelectionMales);
         coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleE", 1, columnsEmploymentSelectionMalesE);
         coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleNE", 1, columnsEmploymentSelectionMalesNE);
-        coeffCovarianceEmploymentSelectionFemales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Females", 1, columnsEmploymentSelectionFemales);
+        //coeffCovarianceEmploymentSelectionFemales = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_Females", 1, columnsEmploymentSelectionFemales);
         coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleE", 1, columnsEmploymentSelectionFemalesE);
         coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap("input/reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleNE", 1, columnsEmploymentSelectionFemalesNE);
 
         // Wages
-        coeffCovarianceWagesMales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Males", 1, columnsWagesMales);
+        //coeffCovarianceWagesMales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Males", 1, columnsWagesMales);
         coeffCovarianceWagesMalesE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_MalesE", 1, columnsWagesMalesE);
         coeffCovarianceWagesMalesNE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_MalesNE", 1, columnsWagesMalesNE);
-        coeffCovarianceWagesFemales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Females", 1, columnsWagesFemales);
+        //coeffCovarianceWagesFemales = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_Females", 1, columnsWagesFemales);
         coeffCovarianceWagesFemalesE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_FemalesE", 1, columnsWagesFemalesE);
         coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap("input/reg_wages.xlsx", countryString + "_Wages_FemalesNE", 1, columnsWagesFemalesNE);
 
@@ -1265,6 +1248,12 @@ public class Parameters {
         coeffCovarianceSocialCareS3d = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3d", 1, columnsSocialCareS3d);
         coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap("input/reg_socialcare.xlsx", countryString + "_S3e", 1, columnsSocialCareS3e);
 
+        //Unemployment
+        coeffCovarianceUnemploymentU1a = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1a", 1, columnsUnemploymentU1a);
+        coeffCovarianceUnemploymentU1b = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1b", 1, columnsUnemploymentU1b);
+        coeffCovarianceUnemploymentU1c = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1c", 1, columnsUnemploymentU1c);
+        coeffCovarianceUnemploymentU1d = ExcelAssistant.loadCoefficientMap("input/reg_unemployment.xlsx", countryString + "_U1d", 1, columnsUnemploymentU1d);
+
         //Health mental: level and case-based
         coeffCovarianceHM1Level = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM1_L", 1, columnsHealthHM1);
         coeffCovarianceHM2LevelMales = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM2_Males_L", 1, columnsHealthHM2Males);
@@ -1302,17 +1291,17 @@ public class Parameters {
         }
 
         //Income
-        coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1a", 1, columnsIncomeI1a);
-        coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1b", 1, columnsIncomeI1b);
+        //coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1a", 1, columnsIncomeI1a);
+        //coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1b", 1, columnsIncomeI1b);
         coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a", 1, columnsIncomeI3a);
         coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b", 1, columnsIncomeI3b);
-        coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
-        coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
+        //coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
+        //coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
         coeffCovarianceIncomeI4b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4b", 1, columnsIncomeI4b);
-        coeffCovarianceIncomeI5a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5a_selection", 1, columnsIncomeI5a);
-        coeffCovarianceIncomeI5b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5b_amount", 1, columnsIncomeI5b);
-        coeffCovarianceIncomeI6a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6a_selection", 1, columnsIncomeI6a);
-        coeffCovarianceIncomeI6b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6b_amount", 1, columnsIncomeI6b);
+        coeffCovarianceIncomeI5a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5a", 1, columnsIncomeI5a);
+        coeffCovarianceIncomeI5b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5b", 1, columnsIncomeI5b);
+        //coeffCovarianceIncomeI6a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6a_selection", 1, columnsIncomeI6a);
+        //coeffCovarianceIncomeI6b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6b_amount", 1, columnsIncomeI6b);
         coeffCovarianceIncomeI3a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a_selection", 1, columnsIncomeI3a_selection);
         coeffCovarianceIncomeI3b_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b_selection", 1, columnsIncomeI3b_selection);
 
@@ -1334,18 +1323,18 @@ public class Parameters {
         if(bootstrapAll) {
 
             //Wages
-            coeffCovarianceWagesMales = RegressionUtils.bootstrap(coeffCovarianceWagesMales);
+            //coeffCovarianceWagesMales = RegressionUtils.bootstrap(coeffCovarianceWagesMales);
             coeffCovarianceWagesMalesE = RegressionUtils.bootstrap(coeffCovarianceWagesMalesE);
             coeffCovarianceWagesMalesNE = RegressionUtils.bootstrap(coeffCovarianceWagesMalesNE);
-            coeffCovarianceWagesFemales = RegressionUtils.bootstrap(coeffCovarianceWagesFemales);
+            //coeffCovarianceWagesFemales = RegressionUtils.bootstrap(coeffCovarianceWagesFemales);
             coeffCovarianceWagesFemalesE = RegressionUtils.bootstrap(coeffCovarianceWagesFemalesE);
             coeffCovarianceWagesFemalesNE = RegressionUtils.bootstrap(coeffCovarianceWagesFemalesNE);
 
             //Employment selection
-            coeffCovarianceEmploymentSelectionMales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMales);
+            //coeffCovarianceEmploymentSelectionMales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMales);
             coeffCovarianceEmploymentSelectionMalesE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMalesE);
             coeffCovarianceEmploymentSelectionMalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMalesNE);
-            coeffCovarianceEmploymentSelectionFemales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemales);
+            //coeffCovarianceEmploymentSelectionFemales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemales);
             coeffCovarianceEmploymentSelectionFemalesE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesE);
             coeffCovarianceEmploymentSelectionFemalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesNE);
 
@@ -1394,18 +1383,24 @@ public class Parameters {
             coeffCovarianceSocialCareS3d = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3d);
             coeffCovarianceSocialCareS3e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3e);
 
+            //Unemployment
+            coeffCovarianceUnemploymentU1a = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1a);
+            coeffCovarianceUnemploymentU1b = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1b);
+            coeffCovarianceUnemploymentU1c = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1c);
+            coeffCovarianceUnemploymentU1d = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1d);
+
             //Non-labour income
             // coeffCovarianceIncomeI1a = RegressionUtils.bootstrap(coeffCovarianceIncomeI1a); // Commented out as not used any more since income is split.
             // coeffCovarianceIncomeI1b = RegressionUtils.bootstrap(coeffCovarianceIncomeI1b); // Commented out as not used any more since income is split.
             coeffCovarianceIncomeI3a = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a);
             coeffCovarianceIncomeI3b = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b);
-            coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
-            coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
+            //coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
+            //coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
             coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
             coeffCovarianceIncomeI5a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a_selection);
             coeffCovarianceIncomeI5b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI5b_amount);
-            coeffCovarianceIncomeI6a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI6a_selection);
-            coeffCovarianceIncomeI6b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI6b_amount);
+            //coeffCovarianceIncomeI6a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI6a_selection);
+            //coeffCovarianceIncomeI6b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI6b_amount);
             coeffCovarianceIncomeI3a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a_selection);
             coeffCovarianceIncomeI3b_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b_selection);
 
@@ -1466,6 +1461,12 @@ public class Parameters {
         regInformalCareToS3d = new MultiLogitRegression<>(SocialCareProvision.class, coeffCovarianceSocialCareS3dMap);
         regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
 
+        //Unemployment
+        regUnemploymentMaleGraduateU1a = new ProbitRegression(coeffCovarianceUnemploymentU1a);
+        regUnemploymentMaleNonGraduateU1b = new ProbitRegression(coeffCovarianceUnemploymentU1b);
+        regUnemploymentFemaleGraduateU1c = new ProbitRegression(coeffCovarianceUnemploymentU1c);
+        regUnemploymentFemaleNonGraduateU1d = new ProbitRegression(coeffCovarianceUnemploymentU1d);
+
         //Health mental
         regHealthHM1Level = new LinearRegression(coeffCovarianceHM1Level);
         regHealthHM2LevelMales = new LinearRegression(coeffCovarianceHM2LevelMales);
@@ -1499,37 +1500,37 @@ public class Parameters {
         }
 
         //Income
-        regIncomeI1a = new LinearRegression(coeffCovarianceIncomeI1a);
-        regIncomeI1b = new LinearRegression(coeffCovarianceIncomeI1b);
+        //regIncomeI1a = new LinearRegression(coeffCovarianceIncomeI1a);
+        //regIncomeI1b = new LinearRegression(coeffCovarianceIncomeI1b);
         regIncomeI3a = new LinearRegression(coeffCovarianceIncomeI3a);
         regIncomeI3b = new LinearRegression(coeffCovarianceIncomeI3b);
-        regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
-        regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
+        //regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
+        //regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
         regIncomeI4b = new LinearRegression(coeffCovarianceIncomeI4b);
         regIncomeI5b_amount = new LinearRegression(coeffCovarianceIncomeI5b_amount);
-        regIncomeI6b_amount = new LinearRegression(coeffCovarianceIncomeI6b_amount);
+        //regIncomeI6b_amount = new LinearRegression(coeffCovarianceIncomeI6b_amount);
         regIncomeI3a_selection = new LogitRegression(coeffCovarianceIncomeI3a_selection);
         regIncomeI3b_selection = new LogitRegression(coeffCovarianceIncomeI3b_selection);
         regIncomeI5a_selection = new LogitRegression(coeffCovarianceIncomeI5a_selection);
-        regIncomeI6a_selection = new LogitRegression(coeffCovarianceIncomeI6a_selection);
+        //regIncomeI6a_selection = new LogitRegression(coeffCovarianceIncomeI6a_selection);
 
         //Homeownership
         regHomeownershipHO1a = new ProbitRegression(coeffCovarianceHomeownership);
 
         //XXX: Note: the model used for selection in Heckman procedure is a Probit, but to obtain Inverse Mills Ratio, linear prediction needs to be obtained - so linear regression used here
-        regEmploymentSelectionMale = new LinearRegression(coeffCovarianceEmploymentSelectionMales);
+        //regEmploymentSelectionMale = new LinearRegression(coeffCovarianceEmploymentSelectionMales);
         regEmploymentSelectionMaleE = new LinearRegression(coeffCovarianceEmploymentSelectionMalesE);
         regEmploymentSelectionMaleNE = new LinearRegression(coeffCovarianceEmploymentSelectionMalesNE);
-        regEmploymentSelectionFemale = new LinearRegression(coeffCovarianceEmploymentSelectionFemales);
+        //regEmploymentSelectionFemale = new LinearRegression(coeffCovarianceEmploymentSelectionFemales);
         regEmploymentSelectionFemaleE = new LinearRegression(coeffCovarianceEmploymentSelectionFemalesE);
         regEmploymentSelectionFemaleNE = new LinearRegression(coeffCovarianceEmploymentSelectionFemalesNE);
         standardNormalDistribution = new NormalDistribution();
 
         //Wages
-        regWagesMales = new LinearRegression(coeffCovarianceWagesMales);
+        //regWagesMales = new LinearRegression(coeffCovarianceWagesMales);
         regWagesMalesE = new LinearRegression(coeffCovarianceWagesMalesE);
         regWagesMalesNE = new LinearRegression(coeffCovarianceWagesMalesNE);
-        regWagesFemales = new LinearRegression(coeffCovarianceWagesFemales);
+        //regWagesFemales = new LinearRegression(coeffCovarianceWagesFemales);
         regWagesFemalesE = new LinearRegression(coeffCovarianceWagesFemalesE);
         regWagesFemalesNE = new LinearRegression(coeffCovarianceWagesFemalesNE);
 
@@ -1927,9 +1928,7 @@ public class Parameters {
     public static OrderedProbitRegression getRegHealthH1b() {
         return regHealthH1b;
     }
-    public static ProbitRegression getRegHealthH2b() {
-        return regHealthH2b;
-    }
+    public static ProbitRegression getRegHealthH2b() { return regHealthH2b; }
 
     public static ProbitRegression getRegReceiveCareS1a() { return regReceiveCareS1a; }
     public static LinearRegression getRegCareHoursS1b() { return regCareHoursS1b; }
@@ -1949,6 +1948,11 @@ public class Parameters {
     public static ProbitRegression getRegNoPartnerProvCareToOtherS3c() { return regNoPartnerProvCareToOtherS3c; }
     public static MultiLogitRegression getRegInformalCareToS3d() { return regInformalCareToS3d; }
     public static LinearRegression getRegCareHoursProvS3e() { return regCareHoursProvS3e; }
+
+    public static ProbitRegression getRegUnemploymentMaleGraduateU1a() { return regUnemploymentMaleGraduateU1a; }
+    public static ProbitRegression getRegUnemploymentMaleNonGraduateU1b() { return regUnemploymentMaleNonGraduateU1b; }
+    public static ProbitRegression getRegUnemploymentFemaleGraduateU1c() { return regUnemploymentFemaleGraduateU1c; }
+    public static ProbitRegression getRegUnemploymentFemaleNonGraduateU1d() { return regUnemploymentFemaleNonGraduateU1d; }
 
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
@@ -2021,9 +2025,7 @@ public class Parameters {
 
     public static LinearRegression getRegIncomeI3c() { return regIncomeI3c; }
 
-    public static LinearRegression getRegIncomeI4a() {
-        return regIncomeI4a;
-    }
+    public static LinearRegression getRegIncomeI4a() { return regIncomeI4a; }
 
     public static LinearRegression getRegIncomeI4b() {
         return regIncomeI4b;
@@ -2033,9 +2035,7 @@ public class Parameters {
         return regIncomeI5b_amount;
     }
 
-    public static LinearRegression getRegIncomeI6b_amount() {
-        return regIncomeI6b_amount;
-    }
+    public static LinearRegression getRegIncomeI6b_amount() { return regIncomeI6b_amount; }
 
     public static LogitRegression getRegIncomeI3a_selection() { return regIncomeI3a_selection; }
 
@@ -2053,6 +2053,38 @@ public class Parameters {
 
     public static MultiKeyMap getFertilityRateByRegionYear() {
         return fertilityRateByRegionYear;
+    }
+
+    public static double getFertilityRateByRegionYear(Region region, int year) {
+        int yearHere = Math.max(fertilityProjectionsMinYear, Math.min(fertilityProjectionsMaxYear, year));
+        //We calculate the rate per woman, but the standard to report (and what is used in the estimates) is per 1000 hence multiplication
+        return 1000*((Number)fertilityRateByRegionYear.get(region, yearHere)).doubleValue();
+    }
+
+    public static double getUnemploymentRateByGenderEducationAgeYear(Gender gender, Education education, int age, int year) {
+        double val;
+        if (gender.equals(Gender.Male)) {
+            if (education.equals(Education.High)) {
+                int yearHere = Math.max(unemploymentRatesMaleGraduatesMinYear, Math.min(unemploymentRatesMaleGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesMaleGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesMaleGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
+            } else {
+                int yearHere = Math.max(unemploymentRatesMaleNonGraduatesMinYear, Math.min(unemploymentRatesMaleNonGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesMaleNonGraduatesMaxAge, age);
+                val = ((Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
+            }
+        } else {
+            if (education.equals(Education.High)) {
+                int yearHere = Math.max(unemploymentRatesFemaleGraduatesMinYear, Math.min(unemploymentRatesFemaleGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesFemaleGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesFemaleGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
+            } else {
+                int yearHere = Math.max(unemploymentRatesFemaleNonGraduatesMinYear, Math.min(unemploymentRatesFemaleNonGraduatesMaxYear, year));
+                int ageHere = Math.min(unemploymentRatesFemaleNonGraduatesMaxAge, age);
+                val = ((Number)unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(ageHere, yearHere)).doubleValue();
+            }
+        }
+        return val;
     }
 
     public static LinearRegression getRegWagesMales() {
@@ -2211,6 +2243,10 @@ public class Parameters {
     public static int getPopulationProjectionsMaxYear() { return populationProjectionsMaxYear; }
 
     public static MultiKeyCoefficientMap getFertilityProjectionsByYear() { return fertilityProjectionsByYear; }
+    public static double getFertilityProjectionsByYear(int year) {
+        int yearHere = Math.min(fertilityProjectionsMaxYear, Math.max(fertilityProjectionsMinYear, year));
+        return ((Number) fertilityProjectionsByYear.getValue("Value", yearHere)).doubleValue();
+    }
 
     public static MultivariateNormalDistribution getWageAndAgeDifferentialMultivariateNormalDistribution() {
         return wageAndAgeDifferentialMultivariateNormalDistribution;
@@ -2875,6 +2911,118 @@ public class Parameters {
     public static String getInputDirectoryInitialPopulations() {
         return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
     }
+    private static void setMapBounds(MapBounds map, String countryString) {
+
+        String rgn = countryString + "C";
+        boolean searchBack = true;
+        boolean searchForward = true;
+        boolean searchAge;
+        searchAge = !map.equals(MapBounds.Fertility);
+        int ii = 1;
+        int maxYear=0, minYear=0, maxAge=0;
+        while (searchBack || searchForward || searchAge) {
+
+            if (searchForward) {
+
+                Number val = switch (map) {
+                    case UnemploymentMaleGraduates -> (Number) unemploymentRatesMaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case UnemploymentMaleNonGraduates -> (Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
+                    case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR + ii);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR + ii);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 25, MIN_START_YEAR + ii);
+                };
+                if (val==null) {
+                    maxYear = MIN_START_YEAR + ii - 1;
+                    searchForward = false;
+                }
+            }
+            if (searchBack) {
+
+                Number val = switch (map) {
+                    case UnemploymentMaleGraduates -> (Number) unemploymentRatesMaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case UnemploymentMaleNonGraduates -> (Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
+                    case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR - ii);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR - ii);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 25, MIN_START_YEAR - ii);
+                };
+                if (val==null) {
+                    minYear = MIN_START_YEAR - ii + 1;
+                    searchBack = false;
+                }
+            }
+            if (searchAge) {
+
+                Number val = switch (map) {
+                    case UnemploymentMaleGraduates -> (Number) unemploymentRatesMaleGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case UnemploymentMaleNonGraduates -> (Number) unemploymentRatesMaleNonGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
+                    case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 55+ii, MIN_START_YEAR);
+                    default -> (Number) populationProjections.getValue("Female", rgn, 55+ii, MIN_START_YEAR);
+                };
+                if (val==null) {
+                    maxAge = 55 + ii - 1;
+                    searchAge = false;
+                }
+            }
+            ii++;
+        }
+        switch (map) {
+            case UnemploymentMaleGraduates -> {
+                unemploymentRatesMaleGraduatesMaxYear = maxYear;
+                unemploymentRatesMaleGraduatesMinYear = minYear;
+                unemploymentRatesMaleGraduatesMaxAge = maxAge;
+            }
+            case UnemploymentMaleNonGraduates -> {
+                unemploymentRatesMaleNonGraduatesMaxYear = maxYear;
+                unemploymentRatesMaleNonGraduatesMinYear = minYear;
+                unemploymentRatesMaleNonGraduatesMaxAge = maxAge;
+            }
+            case UnemploymentFemaleGraduates -> {
+                unemploymentRatesFemaleGraduatesMaxYear = maxYear;
+                unemploymentRatesFemaleGraduatesMinYear = minYear;
+                unemploymentRatesFemaleGraduatesMaxAge = maxAge;
+            }
+            case UnemploymentFemaleNonGraduates -> {
+                unemploymentRatesFemaleNonGraduatesMaxYear = maxYear;
+                unemploymentRatesFemaleNonGraduatesMinYear = minYear;
+                unemploymentRatesFemaleNonGraduatesMaxAge = maxAge;
+            }
+            case Fertility -> {
+                fertilityProjectionsMaxYear = maxYear;
+                fertilityProjectionsMinYear = minYear;
+            }
+            case Mortality -> {
+                mortalityProbabilityMaxYear = maxYear;
+                mortalityProbabilityMinYear = minYear;
+                mortalityProbabilityMaxAge = maxAge;
+            }
+            default -> {
+                populationProjectionsMaxYear = maxYear;
+                populationProjectionsMinYear = minYear;
+                populationProjectionsMaxAge = maxAge;
+            }
+        }
+    }
+
+    public static int getStatePensionAge(int year, int age) {
+
+        int spa;
+        if (year - age + 65 < 2019) {
+            spa = 65;
+        } else if (year - age + 66 < 2027) {
+            spa = 66;
+        } else if (year - age + 67 < 2045) {
+            spa = 67;
+        } else {
+            spa = 68;
+        }
+        return spa;
+    }
 
     public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityMales() {
         return coeffLabourSupplyUtilityMales;
@@ -2899,5 +3047,4 @@ public class Parameters {
     public static void setCoeffLabourSupplyUtilityCouples(MultiKeyCoefficientMap coeffLabourSupplyUtilityCouples) {
         Parameters.coeffLabourSupplyUtilityCouples = coeffLabourSupplyUtilityCouples;
     }
-
 }

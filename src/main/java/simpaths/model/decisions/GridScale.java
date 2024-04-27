@@ -35,9 +35,9 @@ public class GridScale {
         // number_of_states
         numberOfStates = 1;                                       // liquid wealth
         numberOfStates++;                                         // full-time wage potential
-        if (DecisionParams.flagRetirement) numberOfStates++;      // private pension income
+        if (DecisionParams.flagPrivatePension) numberOfStates++;      // private pension income
         numberOfStates++;                                         // birth year
-        if (DecisionParams.FLAG_WAGE_OFFER1) numberOfStates++;    // wage offer of principal earner (1 = receive wage offer)
+        if (DecisionParams.flagLowWageOffer1) numberOfStates++;   // wage offer of principal earner (1 = receive wage offer)
         if (DecisionParams.FLAG_WAGE_OFFER2) numberOfStates++;    // wage offer of secondary earner (1 = receive wage offer)
         if (DecisionParams.flagRetirement) numberOfStates++;      // retirement status
         if (DecisionParams.flagHealth) numberOfStates++;          // health status
@@ -109,17 +109,13 @@ public class GridScale {
             dimIndex = 0;
 
             // liquid wealth
-            axes[aa][dimIndex][0] = DecisionParams.PTS_LIQUID_WEALTH;
-            if (ageHh<= DecisionParams.AGE_DEBT_DRAWDOWN) {
-                axes[aa][dimIndex][1] = Math.log(DecisionParams.MIN_LIQUID_WEALTH + DecisionParams.C_LIQUID_WEALTH);
-            } else if (ageHh< DecisionParams.MAX_AGE_DEBT) {
-                value = DecisionParams.MIN_LIQUID_WEALTH * (DecisionParams.MAX_AGE_DEBT - ageHh) /
-                        (DecisionParams.MAX_AGE_DEBT - DecisionParams.AGE_DEBT_DRAWDOWN);
-                axes[aa][dimIndex][1] = Math.log(value + DecisionParams.C_LIQUID_WEALTH);
+            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply) {
+                axes[aa][dimIndex][0] = DecisionParams.PTS_LIQUID_WEALTH_WKG;
             } else {
-                axes[aa][dimIndex][1] = Math.log(DecisionParams.C_LIQUID_WEALTH);
+                axes[aa][dimIndex][0] = DecisionParams.PTS_LIQUID_WEALTH_RTD;
             }
-            axes[aa][dimIndex][2] = Math.log(DecisionParams.MAX_LIQUID_WEALTH + DecisionParams.C_LIQUID_WEALTH);
+            axes[aa][dimIndex][1] = Math.log(DecisionParams.getMinWealthByAge(ageHh) + DecisionParams.C_LIQUID_WEALTH);
+            axes[aa][dimIndex][2] = Math.log(DecisionParams.getMaxWealthByAge(ageHh) + DecisionParams.C_LIQUID_WEALTH);
             axes[aa][dimIndex][3] = 1;
             axes[aa][dimIndex][4] = 1;
             dimIndex++;
@@ -135,7 +131,7 @@ public class GridScale {
             }
 
             // pension income
-            if (DecisionParams.flagRetirement && ageHh > DecisionParams.minAgeToRetire) {
+            if (DecisionParams.flagPrivatePension && ageHh > DecisionParams.minAgeToRetire) {
                 axes[aa][dimIndex][0] = DecisionParams.PTS_PENSION;
                 axes[aa][dimIndex][1] = Math.log(DecisionParams.C_PENSION);
                 axes[aa][dimIndex][2] = Math.log(DecisionParams.maxPensionPYear + DecisionParams.C_PENSION);
@@ -157,7 +153,7 @@ public class GridScale {
             dimIndex++;
 
             // wage offer of principal earner (1 = receive wage offer)
-            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
                 axes[aa][dimIndex][0] = 2;
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 1;
@@ -450,7 +446,7 @@ public class GridScale {
         }
 
         // private pension
-        if (DecisionParams.flagRetirement && ageYears > DecisionParams.minAgeToRetire) {
+        if (DecisionParams.flagPrivatePension && ageYears > DecisionParams.minAgeToRetire) {
             if (axisID==Axis.PensionIncome) return dimIndex;
             dimIndex++;
         } else {
@@ -462,7 +458,7 @@ public class GridScale {
         dimIndex++;
 
         // wage offer of principal earner (1 = receive wage offer)
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             if (axisID==Axis.WageOffer1) return dimIndex;
             dimIndex++;
         } else {

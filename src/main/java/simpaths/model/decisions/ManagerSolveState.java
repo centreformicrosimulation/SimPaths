@@ -1,7 +1,9 @@
 package simpaths.model.decisions;
 
 
-import simpaths.model.SimPathsModel;
+import simpaths.model.taxes.Matches;
+
+import java.util.List;
 
 /**
  * CLASS TO MANAGE EVALUATION OF NUMERICAL SOLUTIONS FOR SPECIFIC STATE COMBINATION
@@ -21,7 +23,7 @@ public class ManagerSolveState {
      *
      * THE MANAGER IS 'run' FROM ManagerSolveGrids
      */
-    public static void run(Grids grids, States states, Expectations outerExpectations) {
+    public static void run(Grids grids, States states, Expectations outerExpectations, List<Matches> imperfectMatchStore) {
 
         // instantiate expectations object with data for all states that are invariant to agent expectations
         Expectations invariantExpectations = new Expectations(states, outerExpectations);
@@ -40,7 +42,7 @@ public class ManagerSolveState {
                 if (DecisionParams.optionsEmployment1 > 1) {
                     emp1Step = 1 / (double)(DecisionParams.optionsEmployment1 - 1);
                 }
-            } else if (DecisionParams.FLAG_WAGE_OFFER1) {
+            } else if (DecisionParams.flagLowWageOffer1) {
                 emp1End = 1;
             } else {
                 emp1Start = 1;
@@ -66,6 +68,7 @@ public class ManagerSolveState {
         UtilityMaximisation solutionMax = null;
         UtilityMaximisation solutionMaxEmp1 = null;
         UtilityMaximisation solutionMaxEmp2 = null;
+        Matches localImperfectMatches = new Matches();
         for (double emp1Pr=emp1Start; emp1Pr<=(emp1End+1.0E-7); emp1Pr+=emp1Step) {
             for (double emp2Pr=emp2Start; emp2Pr<=(emp2End+1.0E-7); emp2Pr+=emp2Step) {
 
@@ -75,8 +78,13 @@ public class ManagerSolveState {
                 // evaluate solution for current control combination
                 UtilityMaximisation solutionHere = new UtilityMaximisation(grids.valueFunction, states, expectations, emp1Pr, emp2Pr);
 
+                // check for imperfect matches
+                if ( DecisionParams.saveImperfectTaxDbMatches && !expectations.imperfectMatches.isEmpty()) {
+                    localImperfectMatches.addSet(expectations.imperfectMatches.getSet());
+                }
+
                 // check for wage offer solutions for both principal and secondary earner
-                if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1 &&
+                if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 &&
                         emp2End > emp2Start && DecisionParams.FLAG_WAGE_OFFER2 &&
                         emp1Pr < 1.0E-5 && emp2Pr < 1.0E-5) {
                     States targetStates = new States(states);
@@ -86,7 +94,7 @@ public class ManagerSolveState {
                 }
 
                 // check wage offer solutions for principal earner
-                if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1 && emp1Pr < 1.0E-5) {
+                if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 && emp1Pr < 1.0E-5) {
                     if (solutionMaxEmp1==null) {
                         solutionMaxEmp1 = solutionHere;
                     } else {
@@ -119,7 +127,7 @@ public class ManagerSolveState {
         }
 
         // save wage offer solutions for principal earner
-        if (emp1End > emp1Start && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1) {
             States targetStates = new States(states);
             targetStates.setWageOffer1(0);
             grids.populate(targetStates, solutionMaxEmp1);
@@ -134,5 +142,10 @@ public class ManagerSolveState {
 
         // save state optimum
         grids.populate(states, solutionMax);
+
+        if ( DecisionParams.saveImperfectTaxDbMatches && !localImperfectMatches.isEmpty()) {
+            int ageSpecificIndex = (int)states.returnAgeSpecificIndex();
+            imperfectMatchStore.set(ageSpecificIndex, localImperfectMatches);
+        }
     }
 }

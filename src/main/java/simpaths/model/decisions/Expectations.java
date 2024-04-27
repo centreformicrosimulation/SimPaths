@@ -1,11 +1,8 @@
 package simpaths.model.decisions;
 
 import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionNames;
@@ -13,6 +10,8 @@ import simpaths.model.enums.*;
 import simpaths.model.BenefitUnit;
 import simpaths.model.Person;
 import simpaths.model.TaxEvaluation;
+import simpaths.model.taxes.Match;
+import simpaths.model.taxes.Matches;
 
 import static simpaths.data.Parameters.asinh;
 
@@ -52,7 +51,7 @@ public class Expectations {
     double leisureTime;             // proportion of time spent in leisure
     double disposableIncomeAnnual;  // disposable income
     double cashOnHand;              // total value of pot that can be used to finance consumption within period
-
+    Matches imperfectMatches = new Matches();
 
      // OBJECTS FOR EVALUATING MODEL TAX AND BENEFIT AND REGRESSION FUNCTIONS
     BenefitUnit benefitUnitProxyThisPeriod;
@@ -62,7 +61,7 @@ public class Expectations {
 
     // flags to indicate expectations variation
     boolean flagRegionVaries=false, flagEducationVaries=false, flagHealthVaries=false, flagDisabilityVaries=false, flagSocialCareReceiptVaries=false;
-    boolean flagSocialCareProvisionVaries=false, flagCohabitationVaries=false, flagChildrenVaries=false, flagWageVaries=false;
+    boolean flagSocialCareProvisionVaries=false, flagCohabitationVaries=false, flagChildrenVaries=false, flagWageVaries=false, flagUnemploymentVaries = false;
 
 
     /**
@@ -110,7 +109,7 @@ public class Expectations {
         benefitUnitProxyThisPeriod.setDeh_c3Local(currentStates.getEducationCode());
         benefitUnitProxyThisPeriod.setRegion(currentStates.getRegionCode());
         for (int ii=0; ii<18; ii++) {
-            benefitUnitProxyThisPeriod.setN_children_byAge(ii, currentStates.getChildrenByAge(ii));
+            benefitUnitProxyThisPeriod.setNumberChildrenByAge(ii, currentStates.getChildrenByAge(ii));
         }
     }
 
@@ -136,12 +135,8 @@ public class Expectations {
 
         // prevailing characteristics - based on currentStates
         this.currentStates = currentStates;
-        fullTimeHourlyEarningsPotential = DecisionParams.MIN_WAGE_PHOUR;
-        if (ageYearsThisPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
-            int scaleIndex = scale.getIndex(Axis.WagePotential, ageYearsThisPeriod);
-            fullTimeHourlyEarningsPotential = (Math.exp(currentStates.states[scaleIndex]) - DecisionParams.C_WAGE_POTENTIAL);
-        }
-        liquidWealth = Math.exp(currentStates.states[0]) - DecisionParams.C_LIQUID_WEALTH;
+        fullTimeHourlyEarningsPotential = currentStates.getFullTimeHourlyEarningsPotential();
+        liquidWealth = currentStates.getLiquidWealth();
         if (ageYearsThisPeriod == DecisionParams.maxAge) {
             availableCredit = 0;
             mortalityProbability = 1;
@@ -199,9 +194,9 @@ public class Expectations {
         personProxyNextPeriod.setYearLocal(currentStates.getYearByAge(ageYearsNextPeriod));
         personProxyNextPeriod.setDhhtp_c4_lag1Local(currentStates.getHouseholdTypeCode());
         personProxyNextPeriod.setYdses_c5_lag1Local(Ydses_c5.Q3);
-        personProxyNextPeriod.setN_children_allAges_lag1Local(currentStates.getChildrenAll());
-        personProxyNextPeriod.setN_children_allAges_Local(currentStates.getChildrenAll());
-        personProxyNextPeriod.setN_children_02_lag1Local(currentStates.getChildren02());
+        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(currentStates.getChildrenAll());
+        personProxyNextPeriod.setNumberChildrenAllLocal(currentStates.getChildrenAll());
+        personProxyNextPeriod.setNumberChildren02Local_lag1(currentStates.getChildren02());
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
         personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyNextPeriod.setDgn(currentStates.getGenderCode());
@@ -221,7 +216,14 @@ public class Expectations {
         personProxyNextPeriod.setDeh_c3_lag1(currentStates.getEducationCode());
         personProxyNextPeriod.setDehf_c3(DecisionParams.EDUCATION_FATHER);
         personProxyNextPeriod.setDehm_c3(DecisionParams.EDUCATION_MOTHER);
-        personProxyNextPeriod.setDcpst(currentStates.getDcpst());
+        if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
+            personProxyNextPeriod.setDcpst(currentStates.getDcpst());
+        } else {
+            if (currentStates.getDcpst().equals(Dcpst.Partnered))
+                personProxyNextPeriod.setDcpst(Dcpst.PreviouslyPartnered);
+            else
+                personProxyNextPeriod.setDcpst(Dcpst.SingleNeverMarried);
+        }
         personProxyNextPeriod.setDcpst_lag1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);
         personProxyNextPeriod.setL1_fullTimeHourlyEarningsPotential(fullTimeHourlyEarningsPotential);
@@ -272,9 +274,9 @@ public class Expectations {
         leisureTime = 1.0;
         if (careHoursProvidedWeekly>0.0) {
             if (cohabitation)
-                leisureTime -= careHoursProvidedWeekly / (2.0*DecisionParams.LIVING_HOURS_WEEKLY);
+                leisureTime -= careHoursProvidedWeekly / (2.0*Parameters.HOURS_IN_WEEK);
             else
-                leisureTime -= careHoursProvidedWeekly / DecisionParams.LIVING_HOURS_WEEKLY;
+                leisureTime -= careHoursProvidedWeekly / Parameters.HOURS_IN_WEEK;
         }
         if (ageYearsThisPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
             labourHours1Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp1Pr);
@@ -284,20 +286,26 @@ public class Expectations {
                 labourHours2Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp2Pr);
                 hourlyWageRate2 = getHourlyWageRate(labourHours2Weekly);
                 labourIncome2Weekly = hourlyWageRate2 * (double)labourHours2Weekly;
-                leisureTime -= ((double)(labourHours1Weekly + labourHours2Weekly)) / (2.0 * DecisionParams.LIVING_HOURS_WEEKLY);
+                leisureTime -= ((double)(labourHours1Weekly + labourHours2Weekly)) / (2.0 * Parameters.HOURS_IN_WEEK);
             } else {
-                leisureTime -= ((double)labourHours1Weekly) / DecisionParams.LIVING_HOURS_WEEKLY;
+                leisureTime -= ((double)labourHours1Weekly) / Parameters.HOURS_IN_WEEK;
             }
         } else if (emp1Pr>1.0E-5 || emp2Pr>1.0E-5) {
             throw new InvalidParameterException("inconsistent labour decisions supplied for updating expectations");
         }
-        leisureTime = Math.max(1.0/DecisionParams.LIVING_HOURS_WEEKLY, leisureTime);
+        leisureTime = Math.max(1.0/Parameters.HOURS_IN_WEEK, leisureTime);
 
         // pension income
+        boolean retiring = false;
         double pensionIncome1Annual, pensionIncome2Annual;
-        if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
-            if (currentStates.getRetirement() == 0 && emp1Pr == 0 && pensionIncomePerYear == 0 && liquidWealth > 0) {
-                // allow for annuitisation at retirement
+        if (DecisionParams.flagPrivatePension && ageYearsThisPeriod>=DecisionParams.minAgeToRetire) {
+            // allow for pension take-up (take-up in previous year accounted for at instantiation)
+            if (!DecisionParams.flagRetirement && ageYearsThisPeriod == DecisionParams.minAgeToRetire) {
+                retiring = true;
+            } else if (DecisionParams.flagRetirement && currentStates.getRetirement()==0 && emp1Pr == 0 && liquidWealth > 0) {
+                retiring = true;
+            }
+            if (retiring) {
                 pensionIncomePerYear = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                         Parameters.annuityRates.getAnnuityRate(currentStates.getOccupancyCode(), currentStates.getBirthYear(), currentStates.getYear());
                 liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
@@ -401,8 +409,7 @@ public class Expectations {
             // retirement - not a state included in personProxyNextPeriod (don't track changes)
             if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire && ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
                 stateIndexNextPeriod = scale.getIndex(Axis.Retirement, ageYearsNextPeriod);
-                int currentRetirement = currentStates.getRetirement();
-                if (currentRetirement==0 && emp1Pr==0) {
+                if (retiring) {
                     // retire this period
                     for (int ii = 0; ii < numberExpected; ii++) {
                         anticipated[ii].states[stateIndexNextPeriod] = 1.0;
@@ -410,7 +417,7 @@ public class Expectations {
                 } else {
                     // no change to retirement state
                     for (int ii = 0; ii < numberExpected; ii++) {
-                        anticipated[ii].states[stateIndexNextPeriod] = currentRetirement;
+                        anticipated[ii].states[stateIndexNextPeriod] = currentStates.getRetirement();
                     }
                 }
                 throw new RuntimeException("Please validate code for retirement in expectations object");
@@ -484,7 +491,7 @@ public class Expectations {
             if (DecisionParams.flagHealth && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
                 updateExpectations(Axis.Health, RegressionNames.HealthH1b);
                 flagHealthVaries = true;
-           }
+            }
 
             // disability
             if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
@@ -497,7 +504,7 @@ public class Expectations {
             if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
 
                 if (cohabitation) {
-                    updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU2b, true);
+                    updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU2b, 0.0);
                 } else {
                     updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU1b, RegressionNames.PartnershipU1a);
                 }
@@ -557,7 +564,7 @@ public class Expectations {
             }
 
             // social care receipt
-           if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
+            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
                 updateExpectations(Axis.SocialCareReceipt, 4);
                 flagSocialCareReceiptVaries = true;
             }
@@ -580,7 +587,7 @@ public class Expectations {
             }
 
             // pension income
-            if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
+            if (DecisionParams.flagPrivatePension && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
                 stateIndexNextPeriod = scale.getIndex(Axis.PensionIncome, ageYearsNextPeriod);
                 int numberExpectedInitial = numberExpected;
                 double val;
@@ -595,15 +602,12 @@ public class Expectations {
                     val = Math.log(val + DecisionParams.C_PENSION);
                     anticipated[ii].states[stateIndexNextPeriod] = val;
                 }
-                throw new RuntimeException("Please validate code for pension income in expectations object");
             }
 
             // wage offer
-            if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
-                stateIndexNextPeriod = scale.getIndex(Axis.WageOffer1, ageYearsNextPeriod);
-                LocalExpectations lexpect = new LocalExpectations(1.0, 0.0, DecisionParams.PROBABILITY_WAGE_OFFER1);
-                expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-                throw new RuntimeException("Please validate code for wage offers in expectations object");
+            if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
+                updateExpectations(Axis.WageOffer1, getUnemploymentRegressionName(), 0.0);
+                flagUnemploymentVaries = true;
             }
 
             // check evaluated probabilities
@@ -613,6 +617,22 @@ public class Expectations {
             }
             if (Math.abs(probabilityCheck-1) > 1.0E-5) {
                 throw new InvalidParameterException("problem with probabilities supplied to outer expectations 1");
+            }
+        }
+    }
+
+    private RegressionNames getUnemploymentRegressionName() {
+        if (currentStates.getGenderCode().equals(Gender.Male)) {
+            if (currentStates.getEducationCode().equals(Education.High)) {
+                return RegressionNames.UnemploymentU1a;
+            } else {
+                return RegressionNames.UnemploymentU1b;
+            }
+        } else {
+            if (currentStates.getEducationCode().equals(Education.High)) {
+                return RegressionNames.UnemploymentU1c;
+            } else {
+                return RegressionNames.UnemploymentU1d;
             }
         }
     }
@@ -714,6 +734,11 @@ public class Expectations {
                 numberChildrenAged10To17, hoursWorkPerWeek1, hoursWorkPerWeek2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth,
                 childcareCostPerMonth, socialCareCostPerMonth, liquidWealth, -1.0);
 
+        Match match = evaluatedTransfers.getMatch();
+        if (match.getMatchCriterion()>Parameters.IMPERFECT_THRESHOLD) {
+            imperfectMatches.addMatch(match);
+        }
+
         // finalise outputs
         disposableIncomeAnnual = evaluatedTransfers.getDisposableIncomePerMonth() * 12.0;
         return disposableIncomeAnnual;
@@ -812,8 +837,8 @@ public class Expectations {
 
                 // ii = number of previous births for this birth age
                 int birthsHere02 = Math.min(ii + children02, 2);  // assume at most 2 children under 3
-                personProxyNextPeriod.setN_children_allAges_lag1Local(childrenAll + ii);
-                personProxyNextPeriod.setN_children_02_lag1Local(birthsHere02);
+                personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll + ii);
+                personProxyNextPeriod.setNumberChildren02Local_lag1(birthsHere02);
                 double proportionBirths = ManagerRegressions.getProbability(personProxyNextPeriod, regression);
                 probabilities[ii+1] += probabilities[ii] * proportionBirths;
                 probabilities[ii] *= (1 - proportionBirths);
@@ -825,8 +850,8 @@ public class Expectations {
 
         // restore benefitUnit and person characteristics
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
-        personProxyNextPeriod.setN_children_allAges_lag1Local(childrenAll);
-        personProxyNextPeriod.setN_children_02_lag1Local(children02);
+        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll);
+        personProxyNextPeriod.setNumberChildren02Local_lag1(children02);
     }
 
     private <E extends Enum<E> & DoubleValuedEnum> void expandExpectationsAllIndices(int stateIndex, Map<E, Double> probs) {
@@ -939,14 +964,14 @@ public class Expectations {
             val0 = personProxyNextPeriod.getDcpst();
             val1 = states.getDcpst();
         } else if (Axis.Child.equals(axis)) {
-            val0 = personProxyNextPeriod.getN_children_017Local();
+            val0 = personProxyNextPeriod.getNumberChildren017Local();
             val1 = states.getChildren017();
             if (val0==val1) {
-                val0 = personProxyNextPeriod.getD_children_2underLocal();
+                val0 = personProxyNextPeriod.getIndicatorChildren02Local();
                 val1 = states.getChildrenUnder3Indicator();
             }
             if (val0==val1) {
-                val0 = personProxyNextPeriod.getN_children_allAges_Local();
+                val0 = personProxyNextPeriod.getNumberChildrenAllLocal();
                 val1 = states.getChildren017();
             }
         } else {
@@ -971,9 +996,9 @@ public class Expectations {
             } else if (Axis.Cohabitation.equals(axis)) {
                 personProxyNextPeriod.setDcpst(states.getDcpst());
             } else if (Axis.Child.equals(axis)) {
-                personProxyNextPeriod.setN_children_017Local(states.getChildren017());
-                personProxyNextPeriod.setD_children_2underLocal(states.getChildrenUnder3Indicator());
-                personProxyNextPeriod.setN_children_allAges_Local(states.getChildren017());
+                personProxyNextPeriod.setNumberChildren017Local(states.getChildren017());
+                personProxyNextPeriod.setIndicatorChildren02Local(states.getChildrenUnder3Indicator());
+                personProxyNextPeriod.setNumberChildrenAllLocal(states.getChildren017());
             }
         }
         return changed;
@@ -989,76 +1014,77 @@ public class Expectations {
 
 
     private void updateExpectations(Axis axis, RegressionNames regressionName) {
-        updateExpectations(axis, regressionName, null, false, null, null, null, 0);
+        updateExpectations(axis, regressionName, null, 1.0, null, null, null, 0);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName, boolean reversePolarity) {
-        updateExpectations(axis, regressionName, null, reversePolarity, null, null, null, 1);
+    private void updateExpectations(Axis axis, RegressionNames regressionName, Double valueTrue) {
+        updateExpectations(axis, regressionName, null, valueTrue, null, null, null, 1);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2) {
-        updateExpectations(axis, regressionName1, regressionName2, false, null, null, null, 2);
+        updateExpectations(axis, regressionName1, regressionName2, 1.0, null, null, null, 2);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2, int method) {
-        updateExpectations(axis, regressionName1, regressionName2, false, null, null, null, method);
+        updateExpectations(axis, regressionName1, regressionName2, 3.0, null, null, null, method);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName, double minValue, double maxValue, double cTransform) {
-        updateExpectations(axis, regressionName, null, false, minValue, maxValue, cTransform, 3);
+        updateExpectations(axis, regressionName, null, 1.0, minValue, maxValue, cTransform, 3);
     }
 
     private void updateExpectations(Axis axis, int method) {
-        updateExpectations(axis, null, null, false, null, null, null, method);
+        updateExpectations(axis, null, null, 1.0, null, null, null, method);
     }
 
     private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2,
-                                    boolean reversePolarity, Double minValue, Double maxValue, Double cTransform,
+                                    Double valueTrue, Double minValue, Double maxValue, Double cTransform,
                                     int method) {
 
         // check consistency of method and inputs
-        checkParameterConsistency(regressionName1, regressionName2, reversePolarity, minValue, maxValue, cTransform, method);
+        checkParameterConsistency(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
 
         // state indices
         int stateIndexNextPeriod = scale.getIndex(axis, ageYearsNextPeriod);
 
         // populate expectations
-        LocalExpectations lexpect = lexpectEval(regressionName1, regressionName2, reversePolarity, minValue, maxValue, cTransform, method);
+        LocalExpectations lexpect = null;
         if (anyVaries()) {
             boolean flagEval;
             int numberExpectedInitial = numberExpected;
             for (int ii=0; ii<numberExpectedInitial; ii++) {
 
                 flagEval = updatePersonNextPeriod(ii);
-                if (flagEval) {
-                    lexpect = lexpectEval(regressionName1, regressionName2, reversePolarity, minValue, maxValue, cTransform, method);
+                if (flagEval || lexpect==null) {
+                    lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
                 }
                 expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect);
             }
         } else {
+            lexpect = lexpectEval(regressionName1, regressionName2, valueTrue, minValue, maxValue, cTransform, method);
             expandExpectationsAllIndices(stateIndexNextPeriod, lexpect);
         }
     }
 
-    private void checkParameterConsistency(RegressionNames regressionName1, RegressionNames regressionName2, boolean reversePolarity, Double minValue,
+    private void checkParameterConsistency(RegressionNames regressionName1, RegressionNames regressionName2, Double valueTrue, Double minValue,
                                            Double maxValue, Double cTransform, int method) {
         if (method==0) {
-            if (regressionName1==null || regressionName2!=null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (0) inconsistent with supplied inputs");
         } else if (method==1) {
-            if (regressionName1==null || regressionName2!=null || !reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (1) inconsistent with supplied inputs");
         } else if (method==2) {
-            if (regressionName1==null || regressionName2==null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2==null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (2) inconsistent with supplied inputs");
         } else if (method==3) {
-            if (regressionName1==null || regressionName2!=null || reversePolarity || minValue==null || maxValue==null || cTransform==null )
+            if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue==null || maxValue==null || cTransform==null )
                 throw new RuntimeException("updateExpectations method (3) inconsistent with supplied inputs");
         } else if (method==4) {
-            if (regressionName1!=null || regressionName2!=null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1!=null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (4) inconsistent with supplied inputs");
         } else if (method==5) {
-            if (regressionName1==null || regressionName2==null || reversePolarity || minValue!=null || maxValue!=null || cTransform!=null )
+            if (regressionName1==null || regressionName2==null || (Math.abs(valueTrue-3.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
                 throw new RuntimeException("updateExpectations method (5) inconsistent with supplied inputs");
         } else
             throw new RuntimeException("unrecognised method to update local expectations");
@@ -1066,7 +1092,7 @@ public class Expectations {
 
 
     private LocalExpectations lexpectEval(RegressionNames regressionName1, RegressionNames regressionName2,
-                                          boolean reversePolarity, Double minValue, Double maxValue, Double cTransform, int method) {
+                                          Double valueTrue, Double minValue, Double maxValue, Double cTransform, int method) {
         // method = 0 default
         //          1 reverse polarity
         //          2 student/nonStudent regression names
@@ -1077,7 +1103,7 @@ public class Expectations {
         if (method==0) {
             return new LocalExpectations(personProxyNextPeriod, regressionName1);
         } else if (method==1) {
-            return new LocalExpectations(personProxyNextPeriod, regressionName1, reversePolarity);
+            return new LocalExpectations(personProxyNextPeriod, regressionName1, valueTrue);
         } else if (method==2) {
             if (personProxyNextPeriod.getStudent()==0)
                 return new LocalExpectations(personProxyNextPeriod, regressionName1);
@@ -1091,7 +1117,7 @@ public class Expectations {
             if (Dcpst.Partnered.equals(personProxyNextPeriod.getDcpst()))
                 return new LocalExpectations(personProxyNextPeriod, regressionName2);
             else
-                return new LocalExpectations(personProxyNextPeriod, regressionName1);
+                return new LocalExpectations(personProxyNextPeriod, regressionName1, valueTrue);
         } else
             throw new RuntimeException("unrecognised method to generate local expectations");
     }

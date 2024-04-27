@@ -3,7 +3,6 @@ package simpaths.model.taxes;
 
 import jakarta.persistence.*;
 import simpaths.data.Parameters;
-import simpaths.model.enums.UpratingCase;
 
 
 /**
@@ -82,14 +81,14 @@ public class DonorTaxUnitPolicy {
             throw new RuntimeException("attempt to get original income before instantiated");
         return originalIncomePerMonth;
     }
-    public double getNormalisedOriginalIncome() {
+    public double getNormalisedOriginalIncomePerMonth() {
         return Parameters.normaliseMonthlyIncome(systemYear, getOriginalIncomePerMonth());
     }
-    public double getNormalisedSecondIncome() {
+    public double getNormalisedSecondIncomePerMonth() {
         double secondIncome = Math.max(0.0, Math.min(getSecondIncomePerMonth(), getOriginalIncomePerMonth() - getSecondIncomePerMonth()));
         return Parameters.normaliseMonthlyIncome(systemYear, secondIncome);
     }
-    public double getNormalisedChildcareCost() {
+    public double getNormalisedChildcareCostPerMonth() {
         return Parameters.normaliseMonthlyIncome(systemYear, getChildcareCostPerMonth());
     }
     public void setOriginalIncomePerMonth(double value) {

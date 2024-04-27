@@ -8,7 +8,6 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import simpaths.data.Parameters;
@@ -21,11 +20,11 @@ import microsim.gui.shell.MultiRunFrame;
 import simpaths.model.enums.Country;
 
 // Logging and file writing
-import simpaths.model.SimPathsModel;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import java.io.*;
+
 
 public class SimPathsMultiRun extends MultiRun {
 
@@ -34,6 +33,9 @@ public class SimPathsMultiRun extends MultiRun {
 	private static String countryString;
 	private static int startYear;
 	private static int endYear = 2020;
+	private static boolean randomSeedInnov = true;
+	private static boolean intertemporalElasticityInnov = false;
+	private static double interestRateInnov = 0.0;
 
 	private Long counter = 0L;
 
@@ -43,11 +45,14 @@ public class SimPathsMultiRun extends MultiRun {
 
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 
-	private static Map<String, Object> model_args;
+	private static Map<String, Object> modelArgs;
 
-	private static Map<String, Object> collector_args;
+	private static Map<String, Object> innovationArgs;
 
-	public static String configFile = "config.yml";  // Default config file name
+	private static Map<String, Object> collectorArgs;
+
+	public static String configFile = "config - intertemporal elasticity.yml";
+
 
 	/**
 	 *
@@ -63,13 +68,15 @@ public class SimPathsMultiRun extends MultiRun {
 		} else {
 			countryString = "United Kingdom";
 		}
-		String valueYear = lastDatabaseCountryAndYear.getValue(Country.UK.getCountryFromNameString(countryString).toString()).toString();
+		String valueYear = lastDatabaseCountryAndYear.getValue(Country.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
 		if (!parseYamlConfig(args)) {
 			// if parseYamlConfig returns false (indicating bad filename passed), exit main
 			return;
 		}
+		if (innovationArgs!=null)
+			updateLocalParameters(innovationArgs);
 
 		// Parse command line arguments to override defaults
 		if (!parseCommandLineArgs(args)) {
@@ -95,7 +102,6 @@ public class SimPathsMultiRun extends MultiRun {
 	private static boolean parseCommandLineArgs(String[] args) {
 
 		Options options = new Options();
-
 
 		Option popSizeOption = new Option("p", "popSize", true, "Population size");
 		popSizeOption.setArgName("int");
@@ -206,13 +212,13 @@ public class SimPathsMultiRun extends MultiRun {
 
 	private static boolean parseYamlConfig(String[] args) {
 
-		boolean custom_config = false;
+		boolean customConfig = false;
 
 		// Check if an alternative config file is specified in the command line
 		for (int i = 0; i < args.length - 1; i++) {
 			if (args[i].equals("-config")) {
 				configFile = args[i + 1];
-				custom_config = true;
+				customConfig = true;
 				break;
 			}
 		}
@@ -220,7 +226,8 @@ public class SimPathsMultiRun extends MultiRun {
 		// Parse YAML config file and update parameters
 		try {
 			Yaml yaml = new Yaml();
-			FileInputStream inputStream = new FileInputStream(configFile);
+			String configFilePath = "config" + File.separator + configFile;
+			FileInputStream inputStream = new FileInputStream(configFilePath);
 			Map<String, Object> config = yaml.load(inputStream);
 
 			// Update parameters from the config file
@@ -229,39 +236,27 @@ public class SimPathsMultiRun extends MultiRun {
 				Object value = entry.getValue();
 
 				if ("model_args".equals(key)) {
-					model_args = (Map<String, Object>) value;
+					modelArgs = (Map<String, Object>) value;
+					continue;
+				}
+
+				if ("innovation_args".equals(key)) {
+					innovationArgs = (Map<String, Object>) value;
 					continue;
 				}
 
 				if ("collector_args".equals(key)) {
-					collector_args = (Map<String, Object>) value;
+					collectorArgs = (Map<String, Object>) value;
 					continue;
 				}
 
 				// Use reflection to dynamically set the field based on the key
-				try {
-					Field field = SimPathsMultiRun.class.getDeclaredField(key);
-					field.setAccessible(true);
-
-					// Determine the field type
-					Class<?> fieldType = field.getType();
-
-					// Convert the YAML value to the field type
-					Object convertedValue = convertToType(value, fieldType);
-
-					// Set the field value
-					field.set(null, convertedValue);
-
-					field.setAccessible(false);
-				} catch (NoSuchFieldException | IllegalAccessException e) {
-					// Handle exceptions if the field is not found or inaccessible
-					e.printStackTrace();
-				}
+				updateLocalParameters(key, value);
 			}
 
 		} catch (FileNotFoundException e) {
 			// Config file specified but not found, continue with defaults
-			if (custom_config) {
+			if (customConfig) {
 				System.err.println("Config file " + configFile + " not found; please supply a valid config file.");
 				return false;
 			}
@@ -269,9 +264,37 @@ public class SimPathsMultiRun extends MultiRun {
 		return true;
 	}
 
-	public static void updateParameters(Object object, Map<String, Object> model_args) {
+	public static void updateLocalParameters(String key, Object value) {
+		try {
+			Field field = SimPathsMultiRun.class.getDeclaredField(key);
+			field.setAccessible(true);
 
-		for (Map.Entry<String, Object> entry : model_args.entrySet()) {
+			// Determine the field type
+			Class<?> fieldType = field.getType();
+
+			// Convert the YAML value to the field type
+			Object convertedValue = convertToType(value, fieldType);
+
+			// Set the field value
+			field.set(null, convertedValue);
+
+			field.setAccessible(false);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			// Handle exceptions if the field is not found or inaccessible
+			e.printStackTrace();
+		}
+	}
+
+	public static void updateLocalParameters(Map<String, Object> args) {
+
+		for (Map.Entry<String, Object> entry : args.entrySet()) {
+			updateLocalParameters(entry.getKey(), entry.getValue());
+		}
+	}
+
+	public static void updateParameters(Object object, Map<String, Object> args) {
+
+		for (Map.Entry<String, Object> entry : args.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 
@@ -294,7 +317,6 @@ public class SimPathsMultiRun extends MultiRun {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 	private static Object convertToType(Object value, Class<?> targetType) {
@@ -319,55 +341,58 @@ public class SimPathsMultiRun extends MultiRun {
 
 	@Override
 	public void buildExperiment(SimulationEngine engine) {
-		SimPathsModel model = new SimPathsModel(Country.IT.getCountryFromNameString(countryString), startYear);
-		model.setEndYear(endYear);
-		model.setFirstRun(counter == 0);
-//		SimPathsModel model = new SimPathsModel();
-		setCountry(model);		//Set country based on input arguments.
-		model.setPopSize(popSize);
-		model.setRandomSeedIfFixed(randomSeed);
 
-		if (model_args != null) updateParameters(model, model_args);
+		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
+		updateLocalParameters(model);
+		if (modelArgs != null)
+			updateParameters(model, modelArgs);
 
 		engine.addSimulationManager(model);
 
 		SimPathsCollector collector = new SimPathsCollector(model);
-		if (collector_args != null) updateParameters(collector, collector_args);
+		if (collectorArgs != null)
+			updateParameters(collector, collectorArgs);
 		engine.addSimulationManager(collector);
-
 		model.setCollector(collector);
 
-//		SimPathsObserver observer = new SimPathsObserver(model, collector);		//Not needed for MultiRun?
-//		engine.addSimulationManager(observer);
-
-		
 	}
 
-	private void setCountry(SimPathsModel model) {
-		if(countryString.equalsIgnoreCase("Italy")) {
-			model.setCountry(Country.IT);
+	private void updateLocalParameters(SimPathsModel model) {
+		model.setEndYear(endYear);
+		model.setFirstRun(counter == 0);
+//		SimPathsModel model = new SimPathsModel();
+		model.setPopSize(popSize);
+		model.setRandomSeedIfFixed(randomSeed);
+		model.setInterestRateInnov(interestRateInnov);
+	}
+
+	private void iterateParameters(Long counter) {
+
+		if (randomSeedInnov) {
+			randomSeed++;
+			System.out.println("Random seed " + randomSeed);
 		}
-		else if(countryString.equalsIgnoreCase("United Kingdom")) {
-			model.setCountry(Country.UK);
+		if (intertemporalElasticityInnov) {
+			if (counter==1)
+				interestRateInnov = 0.005;
+			else if (counter==2)
+				interestRateInnov = -0.005;
 		}
-		else throw new RuntimeException("countryString is not set to an appropriate string!");
 	}
 	
 	@Override
 	public boolean nextModel() {
-		randomSeed++;
 		counter++;
-		System.out.println("Random seed " + randomSeed);
-
-		if(counter < maxNumberOfRuns) {
+		if (counter < maxNumberOfRuns) {
+			iterateParameters(counter);
 			return true;
+		} else {
+			return false;
 		}
-		else return false;
 	}
 
 	@Override
 	public String setupRunLabel() {
-		return randomSeed.toString();
+		return counter.toString();
 	}
-
 }

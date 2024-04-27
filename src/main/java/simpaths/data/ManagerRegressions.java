@@ -92,6 +92,18 @@ public class ManagerRegressions {
             case HealthH2b:
                 probability = Parameters.getRegHealthH2b().getProbability(obj, Person.DoublesVariables.class);
                 break;
+            case UnemploymentU1a:
+                probability = Parameters.getRegUnemploymentMaleGraduateU1a().getProbability(obj, Person.DoublesVariables.class);
+                break;
+            case UnemploymentU1b:
+                probability = Parameters.getRegUnemploymentMaleNonGraduateU1b().getProbability(obj, Person.DoublesVariables.class);
+                break;
+            case UnemploymentU1c:
+                probability = Parameters.getRegUnemploymentFemaleGraduateU1c().getProbability(obj, Person.DoublesVariables.class);
+                break;
+            case UnemploymentU1d:
+                probability = Parameters.getRegUnemploymentFemaleNonGraduateU1d().getProbability(obj, Person.DoublesVariables.class);
+                break;
             case SocialCareS2a:
                 probability = Parameters.getRegNeedCareS2a().getProbability(obj, Person.DoublesVariables.class);
                 break;

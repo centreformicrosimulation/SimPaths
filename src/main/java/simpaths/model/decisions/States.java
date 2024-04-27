@@ -16,7 +16,7 @@ import simpaths.model.BenefitUnit;
 public class States {
 
 
-    final double eps = 10.0 * Math.ulp(1.0);;
+    final double eps = 1.0E-10;
     int ageIndex;           // age index for state
     int ageYears;           // age in years for state
     double[] states;        // vector to store combination of state variables (except age), in order as defined for axes in Grids
@@ -64,7 +64,7 @@ public class States {
 
         // populate wealth
         double val;
-        val = Math.min(Math.max(benefitUnit.getLiquidWealth(), DecisionParams.MIN_LIQUID_WEALTH), DecisionParams.MAX_LIQUID_WEALTH);
+        val = Math.min(Math.max(benefitUnit.getLiquidWealth(), DecisionParams.getMinWealthByAge(ageYears)), DecisionParams.getMaxWealthByAge(ageYears));
         val = Math.log(val + DecisionParams.C_LIQUID_WEALTH);
         populate(Axis.LiquidWealth, val);
 
@@ -77,7 +77,7 @@ public class States {
         }
 
         // private pension
-        if (DecisionParams.flagRetirement && ageYears > DecisionParams.minAgeToRetire) {
+        if (DecisionParams.flagPrivatePension && ageYears > DecisionParams.minAgeToRetire) {
             val = Math.min(benefitUnit.getPensionIncomeAnnual(), DecisionParams.maxPensionPYear);
             val = Math.log(val + DecisionParams.C_PENSION);
             populate(Axis.PensionIncome, val);
@@ -87,7 +87,8 @@ public class States {
         populate(Axis.BirthYear, benefitUnit.getYear() - ageYears);
 
         // wage offer 1
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) populate(Axis.WageOffer1, refPerson.getWageOffer());
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1)
+            populate(Axis.WageOffer1, refPerson.getWageOffer());
 
         // retirement
         if (DecisionParams.flagRetirement && ageYears > DecisionParams.minAgeToRetire && ageYears <= DecisionParams.maxAgeFlexibleLabourSupply)
@@ -98,22 +99,28 @@ public class States {
             populate(Axis.Health, Math.min(Math.max(benefitUnit.getHealthValForBehaviour(), DecisionParams.MIN_HEALTH), DecisionParams.MAX_HEALTH));
 
         // disability
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) populate(Axis.Disability, (double)refPerson.getDisability());
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth)
+            populate(Axis.Disability, (double)refPerson.getDisability());
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptAll().getValue());
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+            populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptAll().getValue());
 
         // social care provision
-        if (Parameters.flagSocialCare) populate(Axis.SocialCareProvision, refPerson.getSocialCareProvision().getValue());
+        if (Parameters.flagSocialCare)
+            populate(Axis.SocialCareProvision, refPerson.getSocialCareProvision().getValue());
 
         // region
-        if ( DecisionParams.flagRegion ) populate(Axis.Region, benefitUnit.getRegionIndex());
+        if ( DecisionParams.flagRegion )
+            populate(Axis.Region, benefitUnit.getRegionIndex());
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) populate(Axis.Student, refPerson.getStudent());
+        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation)
+            populate(Axis.Student, refPerson.getStudent());
 
         // education
-        if ( DecisionParams.flagEducation ) populate(Axis.Education, refPerson.getEducation());
+        if ( DecisionParams.flagEducation )
+            populate(Axis.Education, refPerson.getEducation());
 
         // children
         int[] children;
@@ -161,11 +168,20 @@ public class States {
      */
 
     /**
-     * METHOD TO EVALUATE AGE SPECIFIC INDEX FOR GIVEN SET OF STATE CHARACTERISTICS
+     * METHOD TO EVALUATE GRID INDEX FOR GIVEN SET OF STATE CHARACTERISTICS
      * IF STATE IS NOT PRECISELY ON GRID INDEX, THEN THE NEAREST LOWER INTEGER IS RETURNED
      * @return grid index
      */
     public long returnGridIndex() {
+        return returnAgeSpecificIndex() + scale.gridDimensions[ageIndex][3];
+    }
+
+    /**
+     * METHOD TO EVALUATE AGE SPECIFIC INDEX FOR GIVEN SET OF STATE CHARACTERISTICS
+     * IF STATE IS NOT PRECISELY ON GRID INDEX, THEN THE NEAREST LOWER INTEGER IS RETURNED
+     * @return grid index
+     */
+    public long returnAgeSpecificIndex() {
 
         // working variables
         long index;
@@ -185,14 +201,11 @@ public class States {
             } else {
                 iiIndex = (states[ii] - scale.axes[ageIndex][ii][1]) /
                         (scale.axes[ageIndex][ii][2] - scale.axes[ageIndex][ii][1]) *
-                        (scale.axes[ageIndex][ii][0] - 1);
+                        (scale.axes[ageIndex][ii][0] - 1.0);
                 index += iiCounter * (long)(iiIndex+eps);
             }
             iiCounter *= (int)scale.axes[ageIndex][ii][0];
         }
-
-        // add age index
-        index += scale.gridDimensions[ageIndex][3];
 
         // return result
         return index;
@@ -310,11 +323,6 @@ public class States {
         // initialise return
         boolean loopConsider = true;
 
-        // check if prior to simulated period
-        int year = getYear();
-        if (year < DecisionParams.startYear)
-            loopConsider = false;
-
         // check wage offer
         int wageOffer = getWageOffer();
         if (wageOffer == 0) {
@@ -354,27 +362,30 @@ public class States {
      * @return the retirement state if during working lifetime, and -1 otherwise
      */
     int getRetirement() {
-        int retirement;
-        if (ageYears > DecisionParams.minAgeToRetire && DecisionParams.flagRetirement) {
-            if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply) {
-                retirement = (int) Math.round(states[scale.getIndex(Axis.Retirement, ageYears)]);
-            } else {
+        int retirement = 0;
+        if (ageYears > DecisionParams.minAgeToRetire) {
+            if (DecisionParams.flagRetirement) {
+                if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply) {
+                    retirement = (int) Math.round(states[scale.getIndex(Axis.Retirement, ageYears)]);
+                } else {
+                    retirement = 1;
+                }
+            } else if (DecisionParams.flagPrivatePension) {
                 retirement = 1;
             }
-        } else {
-            retirement = 0;
         }
         return retirement;
     }
 
     public double getPensionPerYear() {
 
-        if (ageYears > DecisionParams.minAgeToRetire && DecisionParams.flagRetirement) {
+        if (DecisionParams.flagPrivatePension && ageYears > DecisionParams.minAgeToRetire) {
             return Math.exp(states[scale.getIndex(Axis.PensionIncome, ageYears)]) - DecisionParams.C_PENSION;
         } else {
             return 0.0;
         }
     }
+
 
     /**
      * METHOD TO EXTRACT WAGE OFFER STATE FROM STATES ARRAY
@@ -382,7 +393,7 @@ public class States {
      */
     int getWageOffer() {
         int wageOffer;
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             wageOffer = (int) Math.round(states[scale.getIndex(Axis.WageOffer1, ageYears)]);
         } else {
             wageOffer = -1;
@@ -393,14 +404,15 @@ public class States {
     /**
      * METHOD TO EXTRACT COHABITATION STATE FROM STATES ARRAY
      */
-    boolean getCohabitation() {
-        int cohabit;
+    int getCohabitationIndex() {
         if (ageYears <= DecisionParams.MAX_AGE_COHABITATION) {
-            cohabit = (int)Math.round(states[scale.getIndex(Axis.Cohabitation, ageYears)]);
+            return (int)Math.round(states[scale.getIndex(Axis.Cohabitation, ageYears)]);
         } else {
-            cohabit = 0;
+            return 0;
         }
-        return (cohabit==1) ? true : false;
+    }
+    boolean getCohabitation() {
+        return getCohabitationIndex() == 1;
     }
     Dcpst getDcpst() {
         return (getCohabitation()) ? Dcpst.Partnered : Dcpst.SingleNeverMarried;
@@ -412,6 +424,14 @@ public class States {
      * first column reports (notional) age of children from respective birth age
      * second column reports number of dependent children in benefitUnit from respective birth age
      */
+    int getChildrenByBirthIndex(int ii) {
+        int index = scale.getIndex(Axis.Child,ageYears,ii);
+        if (index>=0) {
+            return (int)Math.round(states[index]);
+        } else {
+            return 0;
+        }
+    }
     int[][] getChildrenByAge() {
 
         // initialise return
@@ -628,7 +648,13 @@ public class States {
      * METHOD TO RETURN EDUCATION STATUS IMPLIED BY STATE COMBINATION
      * @return integer
      */
-    int getEducation() { return (int)states[scale.getIndex(Axis.Education, ageYears)]; }
+    int getEducation() {
+        if (DecisionParams.flagEducation) {
+            return (int)states[scale.getIndex(Axis.Education, ageYears)];
+        } else {
+            return 0;
+        }
+    }
 
     /**
      * METHOD TO RETURN EDUCATION STATUS IMPLIED BY STATE COMBINATION
@@ -650,9 +676,23 @@ public class States {
         return states[scale.getIndex(ee, ageYears)];
     }
 
-    double getHealthVal() {
-        return states[scale.getIndex(Axis.Health, ageYears)];
+    int getHealthVal() {
+        if (DecisionParams.flagHealth && ageYears >= DecisionParams.minAgeForPoorHealth) {
+            return (int)states[scale.getIndex(Axis.Health, ageYears)];
+        } else {
+            return 0;
+        }
     }
+    double getLiquidWealth() { return Math.exp(states[scale.getIndex(Axis.LiquidWealth, ageYears)]) - DecisionParams.C_LIQUID_WEALTH; }
+
+    double getFullTimeHourlyEarningsPotential() {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply) {
+            return Math.exp(states[scale.getIndex(Axis.WagePotential, ageYears)]) - DecisionParams.C_WAGE_POTENTIAL;
+        } else {
+            return 0.0;
+        }
+    }
+
 
     /**
      * METHOD TO EVALUATE OECD SCALE FROM STATES ARRAY
@@ -883,15 +923,25 @@ public class States {
     }
 
     public void systemReportError() {
+        systemReportError(-1);
+    }
+    public void systemReportError(long errorIndex) {
 
         String fmtFinancial = "%.2f";
         String fmtInteger = "%.1f";
         String fmtIndicator = "%.1f";
         String fmtProportion = "%.3f";
 
-        System.out.println("--------------------------------------");
-        System.out.println("CALL TO INTERPOLATE OUTSIDE OF GRID");
-        System.out.println("--------------------------------------");
+        if (errorIndex == -1) {
+            System.out.println("--------------------------------------");
+            System.out.println("CALL TO INTERPOLATE OUTSIDE OF GRID");
+            System.out.println("--------------------------------------");
+        } else {
+            System.out.println("--------------------------------------");
+            System.out.println("REFERENCE TO UNINITIALISED POINT OF GRID");
+            System.out.println("--------------------------------------");
+            System.out.println("Referenced index: " + Long.toString(errorIndex));
+        }
         Integer vali = ageYears;
         String msg = "Current age: " + vali.toString();
         System.out.println(msg);
@@ -911,7 +961,7 @@ public class States {
         }
 
         // pension
-        if (DecisionParams.flagRetirement && ageYears > DecisionParams.minAgeToRetire) {
+        if (DecisionParams.flagPrivatePension && ageYears > DecisionParams.minAgeToRetire) {
             stateIndex = scale.getIndex(Axis.PensionIncome, ageYears);
             printOutOfBounds(stateIndex);
             msg = "private pension: " + String.format(fmtFinancial,Math.exp(states[stateIndex]) - DecisionParams.C_PENSION);
@@ -933,7 +983,7 @@ public class States {
         System.out.println(msg);
 
         // wage offer
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             stateIndex = scale.getIndex(Axis.WageOffer1, ageYears);
             printOutOfBounds(stateIndex);
             msg = "wage offer: " + String.format(fmtIndicator,states[stateIndex]);

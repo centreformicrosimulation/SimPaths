@@ -41,8 +41,8 @@ public class LocalExpectations {
         }
     }
 
-    public LocalExpectations(IDoubleSource obj, RegressionNames regression, boolean reversePolarity) {
-        evaluateIndicator(obj, regression, reversePolarity);
+    public LocalExpectations(IDoubleSource obj, RegressionNames regression, Double valueTrue) {
+        evaluateIndicator(obj, regression, valueTrue);
     }
 
     public LocalExpectations(double valueTrue) {
@@ -101,17 +101,17 @@ public class LocalExpectations {
     }
 
     private void evaluateIndicator(IDoubleSource obj, RegressionNames regression) {
-        evaluateIndicator(obj, regression, false);
+        evaluateIndicator(obj, regression, 1.0);
     }
 
-    private void evaluateIndicator(IDoubleSource obj, RegressionNames regression, boolean reversePolarity) {
+    private void evaluateIndicator(IDoubleSource obj, RegressionNames regression, Double valueTrue) {
         double[] probs, vals;
         double prob = ManagerRegressions.getProbability(obj, regression);
         probs = new double[] {1.0-prob, prob};
-        if (reversePolarity)
+        if (Math.abs(valueTrue)<1.0E-5)
             vals = new double[] {1.0, 0.0};
         else
-            vals = new double[] {0.0, 1.0};
+            vals = new double[] {0.0, valueTrue};
         screenAndAssign(probs, vals);
     }
 

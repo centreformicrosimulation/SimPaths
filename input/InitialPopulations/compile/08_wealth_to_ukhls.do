@@ -1,6 +1,8 @@
 /**********************************************************************
 *
 *	MANAGES IMPUTATION OF WEALTH DATA FROM WAS TO UKHLS FOR SIMPATHS INPUT DATA
+*		Imputes data for year defined by $yearWealth
+*		May be called multiple times from 00_master.do
 *
 *	AUTH: Justin van de Ven (JV)
 *	LAST EDIT: 01/11/2023 (JV)
@@ -8,38 +10,27 @@
 **********************************************************************/
 
 
-/********************************************************************************
-	local data directories - commented out when using master program
-********************************************************************************/
-/*
+/**********************************************************************
+*	start analysis
+**********************************************************************/
+cd "${dir_data}"
+disp "imputing wealth data"
+*global yearWealth = 2019
+
+/**********************************************************************
+*	preliminaries
+**********************************************************************/
 * define seed to ensure replicatability of results
 global seedBase = 3141592
 global seedAdjust = 0
 
-* folder to store working data
-global workingDir "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\data"
-
-* year to impute wealth for
-global yearWealth = 2017
-
-* prepare was data
-global WASDoFile "C:\MyFiles\00 CURRENT\03 PROJECTS\Essex\SimPaths\02 PARAMETERISE\STARTING DATA\progs\02b was wealth data.do"
-
-* dataset to impute wealth to *
-global imputeWealthToDataset "population_initial_UK_$yearWealth"
-global imputeWealthToDataset "preWealthTraining"
-*/
-
 
 /**********************************************************************
-*	start analysis
+*	adjust UKHLS data to facilitate imputation
 **********************************************************************/
-cd "$workingDir"
-disp "imputing wealth to UKHLS data"
-//import delimited "$workingDir\\population_initial_UK_$yearWealth.csv", clear
-use $imputeWealthToDataset, clear
+use "population_initial_fs_UK_$yearWealth", clear
 sort idperson
-drop liquid_wealth
+drop liquid_wealth smp rnk mtc
 
 
 /**********************************************************************
@@ -51,6 +42,9 @@ forval ii = 1/16 {
 	replace dvage17 = `ii' if (dag>=5*(`ii'-1) & dag<5*`ii')
 }
 replace dvage17 = 17 if (dag>79)
+
+gen year = stm
+
 gen gor = drgn1
 /* Northern Ireland recoded to East Midlands for imputing wealth. This reflects
 the omission of Northern Ireland from the WAS, and the observation that the 
@@ -59,9 +53,12 @@ GDP per capita of NI (25981) was closest to that of East Midlands (25946) in
 by gross domestic product, UK: 1998 to 2018 */
 gen gor2 = gor
 replace gor2 = 5 if (gor==13)
+
 gen sex = 1
 replace sex=2 if (dgn==0)
+
 gen nk = dnc
+
 gen na = 1
 replace na = 2 if (idpartner>0)
 
@@ -81,10 +78,12 @@ replace dhesp2=4 if (dhesp>3)
 replace dhesp2=3 if (dhesp==3)
 replace dhesp2=2 if (dhesp==2)
 replace dhesp2=1 if (dhesp==1)
+
 gen grad = 0
 replace grad=1 if (deh_c3==1)
 gen gradsp = 0
 replace gradsp=1 if (dehsp_c3==1)
+
 gen emp = (les_c3==1)
 gen empsp = (lessp_c3==1)
 
@@ -125,22 +124,23 @@ replace couple_ref = couple if (couple_ref==0 & chk2==0)
 drop chk2
 
 gen pct = .
-xtile pct1 = inc [fweight=dwt] if (single_woman & grad), nq(10)
+gen dwt2 = round(dwt*10000)
+xtile pct1 = inc [fweight=dwt2] if (single_woman & grad), nq(10)
 replace pct = pct1 if (pct1<.)
 drop pct1
-xtile pct1 = inc [fweight=dwt] if (single_man & grad), nq(10)
+xtile pct1 = inc [fweight=dwt2] if (single_man & grad), nq(10)
 replace pct = pct1 if (pct1<.)
 drop pct1
-xtile pct1 = inc [fweight=dwt] if (single_woman & grad==0), nq(10)
+xtile pct1 = inc [fweight=dwt2] if (single_woman & grad==0), nq(10)
 replace pct = pct1 if (pct1<.)
 drop pct1
-xtile pct1 = inc [fweight=dwt] if (single_man & grad==0), nq(10)
+xtile pct1 = inc [fweight=dwt2] if (single_man & grad==0), nq(10)
 replace pct = pct1 if (pct1<.)
 drop pct1
-xtile pct1 = inc [fweight=dwt] if (couple_ref & grad), nq(10)
+xtile pct1 = inc [fweight=dwt2] if (couple_ref & grad), nq(10)
 replace pct = pct1 if (pct1<.)
 drop pct1
-xtile pct1 = inc [fweight=dwt] if (couple_ref & grad==0), nq(10)
+xtile pct1 = inc [fweight=dwt2] if (couple_ref & grad==0), nq(10)
 replace pct = pct1 if (pct1<.)
 drop pct1
 
@@ -148,75 +148,59 @@ drop pct1
 /**********************************************************************
 *	save working data
 **********************************************************************/
-save "$workingDir\\ukhls_wealthtemp0.dta", replace
+save "ukhls_wealthtemp.dta", replace
 
 
 /**********************************************************************
 *	analyse sample
 **********************************************************************/
 /*
-use "$workingDir\\ukhls_wealthtemp.dta", clear
-drop if (dvage17<5)
-
-tab gor2 [fweight=dwt]
-tab dvage17 [fweight=dwt]
-tab sex [fweight=dwt]
-gen dwt2 = round(dwt/na, 1)
-tab na [fweight=dwt2]
-tab nk [fweight=dwt2]
-tab nk04 [fweight=dwt2]
-tab dhe [fweight=dwt]
-tab dhe2 [fweight=dwt]
-tab grad [fweight=dwt]
-tab dlltsd [fweight=dwt]
-tab les_c4 [fweight=dwt]
-tab emp [fweight=dwt]
+use "ukhls_wealthtemp.dta", clear
+tab gor2 [fweight=dwt2]
+tab dvage17 if (dvage17>4) [fweight=dwt2]
+tab sex if (dvage17>4) [fweight=dwt2]
+tab na if (single_woman + single_man + couple_ref > 0) [fweight=dwt2]
+tab nk if (single_woman + single_man + couple_ref > 0) [fweight=dwt2]
+tab nk04 if (single_woman + single_man + couple_ref > 0) [fweight=dwt2]
+tab dhe if (dvage17>4) [fweight=dwt2]
+tab dhe2 if (dvage17>4) [fweight=dwt2]
+tab grad if (dvage17>4) [fweight=dwt2]
+tab dlltsd if (dvage17>4) [fweight=dwt2]
+tab emp if (dvage17>4) [fweight=dwt2]
 
 gen chk = (inc<0.01)
-tab chk [fweight=dwt2]
+tab chk if (single_woman + single_man + couple_ref > 0) [fweight=dwt2]
 sum inc [fweight=dwt2] if (chk==0)
-
-tab dhe [fweight=dwt] if (dag>17)
-tab dhesp [fweight=dwt] if (dag>17 & dhesp>0)
-tab dcpst [fweight=dwt] if (dag>17)
-tab ded [fweight=dwt] if (dag>17)
-tab deh_c3 [fweight=dwt] if (dag>17 & deh_c3>0)
-tab deh_c3 dehsp_c3 [fweight=dwt] if (dag>17 & deh_c3>0 & dehsp_c3>0)
-tab dlltsd [fweight=dwt] if (dag>17)
-tab dhe dlltsd [fweight=dwt] if (dag>17)
-tab les_c4 [fweight=dwt] if (dag>17)
-sum ypnbihs_dv [fweight=dwt] if (dag>17)
 */
-
-
-/**********************************************************************
-*	prepare was data
-**********************************************************************/
-if ($flagDoWASFile==1) {
-	do "$WASDoFile"
-}
-
 
 /**********************************************************************
 *	coarse exact matching
+*
+*	matching organised around 3 sets of ranking criteria, where rank 1
+*	criteria are the most fine grained, and rank 3 are the most coarse
+*	grained.
 **********************************************************************/
-
 * identify non-reference population and save for retrieval
-use "$workingDir\\ukhls_wealthtemp0.dta", clear
+use "ukhls_wealthtemp.dta", clear
 gen treat = (single_woman + single_man + couple_ref)
 gsort bu -treat
 by bu: egen chk = sum(treat)
 tab chk
 drop chk
 replace treat = 0 if (bu==bu[_n-1])
-save "$workingDir\\ukhls_wealthtemp1.dta", replace
+save "ukhls_wealthtemp1.dta", replace
 keep if (treat==0)
-save "$workingDir\\ukhls_wealthtemp2.dta", replace
+save "ukhls_wealthtemp2.dta", replace
 
 * identify reference population and append WAS data
-use "$workingDir\\ukhls_wealthtemp1.dta", clear
+use "ukhls_wealthtemp1.dta", clear
 keep if (treat == 1)
-append using "$workingDir/tempWAS2.dta"
+append using "was_wealthdata.dta"
+drop if (bu_rp==0)
+*keep if (year==$yearWealth)
+keep if (year>=$yearWealth-1 & year<=$yearWealth+1)
+
+* limit sample
 gen chk = 0
 sort bu
 replace chk = 1 if (bu==bu[_n-1] & treat==0)
@@ -306,17 +290,18 @@ qui {
 	local nn = r(mean) * r(N)
 }
 forval kk = 1/`nn' {
+// loop over each reference person in dataset to match to 
 
-	* local kk = 6
 	qui {
-		gen chk = 1-treat
+		gen chk = 1-treat 		// consider data points in "from" dataset
 		local rnk = 1
-		foreach vv in tt grad gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp gradsp {
-			replace chk = 0 if (`vv'!=`vv'[`kk'])
+		foreach vv in tt grad gradsp gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp {
+			replace chk = 0 if (`vv'!=`vv'[`kk'])  // limit data point in from dataset to those with the same discrete characteristics
 		}
 		sum chk, mean
 	}
 	if (r(mean)==0) {
+	// no match obtained to rnk 1 coarse matching criteria - consider rnk 2 criteria
 
 		qui {
 			drop chk
@@ -328,6 +313,7 @@ forval kk = 1/`nn' {
 			sum chk, mean
 		}
 		if (r(mean)==0) {
+		// no match obtained to rnk 2 coarse matching criteria - consider rnk 3 criteria
 			
 			qui {
 				drop chk
@@ -347,6 +333,8 @@ forval kk = 1/`nn' {
 	qui {
 		replace smp = r(mean)*r(N) if (_n==`kk')
 		if (r(mean)>0) {
+		// the matching pool is not empty
+		
 			local ee = ee2[`kk']
 			preserve
 			keep if (chk==1)
@@ -379,57 +367,58 @@ keep if (treat)
 
 
 /**********************************************************************
-*	analyse imputations
-**********************************************************************/
-
-/*
-preserve
-drop if (rnk==4)
-gen wealth5 = asinh(wealthi)
-
-gen dwt2 = round(dwt/na, 1)
-sum wealth5 [fweight=dwt2] if (single_woman & dvage17>4), detail
-sum wealth5 [fweight=dwt2] if (single_man & dvage17>4), detail
-sum wealth5 [fweight=dwt2] if (single & dvage17>4), detail
-sum wealth5 [fweight=dwt2] if (couple & dvage17>4), detail
-
-*sum wealth [fweight=dwt2] if (single_woman & dvage17>4), detail
-*sum wealth [fweight=dwt2] if (single_man & dvage17>4), detail
-*sum wealth [fweight=dwt2] if (single & dvage17>4), detail
-*sum wealth [fweight=dwt2] if (couple & dvage17>4), detail
-restore
-*/
-
-/**********************************************************************
 *	append non-reference population
 **********************************************************************/
-append using "$workingDir\\ukhls_wealthtemp2.dta"
+append using "ukhls_wealthtemp2.dta"
 sort bu
 recode wealthi (mis=0)
 by bu: egen liquid_wealth = sum(wealthi)
+recode liquid_wealth (-9=0)
 save ukhls_wealthtemp3, replace
+
+/*
+sum liquid_wealth [fweight=dwt2] if (single_woman & rnk<4), detail
+sum liquid_wealth [fweight=dwt2] if (single_man & rnk<4), detail
+sum liquid_wealth [fweight=dwt2] if (couple_ref & rnk<4), detail
+sum liquid_wealth [fweight=dwt2] if (rnk<4), detail
+
+sum liquid_wealth [fweight=dwt2] if (single_woman), detail
+sum liquid_wealth [fweight=dwt2] if (single_man), detail
+sum liquid_wealth [fweight=dwt2] if (couple_ref), detail
+sum liquid_wealth [fweight=dwt2], detail
+*/
+
 
 /**********************************************************************
 *	clean data and save
 **********************************************************************/
 use ukhls_wealthtemp3, clear
-drop dvage17 gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct treat person_id edage w earnings p_earnings xs_wgt wo wo2 not_id nempi p_nempi tot_open tot_pp spen_fam student pcr_s op_memb isa_fam bus_assets semp db_pen healths p_healths dlltsdsp wealth wealth1 chk1 tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi chk year month
+drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi
+recode rnk smp mtc (missing = -9)
 label var rnk "matching level: 1 = most fine, 2, 3 = most coarse, 4=no match"
 label var smp "matching sample - number of matched candidates to choose from"
 label var mtc "benefit unit id (bu) of matched observation"
 label var liquid_wealth "total wealth including housing, business and private (personal and occupational) pensions" 
-save "$workingDir\\$imputeWealthToDataset", replace
-
-drop rnk smp mtc
-sort idperson
-export delimited using "$workingDir/input data\\$imputeWealthToDataset.csv", nolabel replace
+save "population_initial_fs_UK_$yearWealth", replace
 
 
 /**************************************************************************************
-*	clean-up
+* clean-up and exit
 **************************************************************************************/
-rm "ukhls_wealthtemp0.dta"
-rm "ukhls_wealthtemp1.dta"
-rm "ukhls_wealthtemp2.dta"
-rm "ukhls_wealthtemp3.dta"
+#delimit ;
+local files_to_drop 
+	ukhls_wealthtemp.dta
+	ukhls_wealthtemp1.dta
+	ukhls_wealthtemp2.dta
+	ukhls_wealthtemp3.dta
+	;
+#delimit cr // cr stands for carriage return
 
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}
+
+
+/**************************************************************************************
+*	fin
+**************************************************************************************/

@@ -1202,7 +1202,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				int colorCounter = 0;
 				for(Education edu: Education.values()) {
 					FlexibleInLabourSupplyByEducationFilter eduFilter = new FlexibleInLabourSupplyByEducationFilter(edu);
-					Weighted_CrossSection.Double supplyCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getLabourSupplyYearly", true);
+					Weighted_CrossSection.Double supplyCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getLabourSupplyHoursYearly", true);
 					supplyCS.setFilter(eduFilter);
 					supplyPlotter.addSeries(edu.toString(), new Weighted_MeanArrayFunction(supplyCS), null, colorArrayList.get(colorCounter), false);
 					supplyPlotter.addSeries("Validation " + edu.toString(), validator, Validator.DoublesVariables.valueOf("labour_supply_"+edu), colorArrayList.get(colorCounter), true);
@@ -1291,7 +1291,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				hoursOfWorkByGenderPlotter = new TimeSeriesSimulationPlotter("Hours of Work Weekly by Gender", "Hours");
 				for (Gender gender : Gender.values()) {
 					GenderWorkingCSfilter genderWorkingFilter = new GenderWorkingCSfilter(gender);
-					Weighted_CrossSection.Double hoursCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyWeeklyHours", true); // Note: these are nominal values for each simulated year
+					Weighted_CrossSection.Double hoursCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyHoursWeekly", true); // Note: these are nominal values for each simulated year
 					hoursCS.setFilter(genderWorkingFilter);
 					hoursOfWorkByGenderPlotter.addSeries(gender.toString(), new Weighted_MeanArrayFunction(hoursCS), null, colorArrayList.get(colorCounter), false);
 					hoursOfWorkByGenderPlotter.addSeries("Validation " + gender, validator, Validator.DoublesVariables.valueOf("lhw_"+ gender), colorArrayList.get(colorCounter), true);
@@ -1452,22 +1452,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				updateChartSet.add(DispIncByGenderAndEducationPlotter);
 				tabSet.add(DispIncByGenderAndEducationPlotter);
 			}
-
-			if (incomeHistograms) {
-				/*
-				Note that the variable isDisposableIncomeMonthlyImputedFlag is set to false at the beginning of each year, so this statistic reflects imputations done in a given year
-				 */
-				TimeSeriesSimulationPlotter ratioVsImputedConversionPlotter;
-				int colorCounter = 0;
-				ratioVsImputedConversionPlotter = new TimeSeriesSimulationPlotter("Share of BUs with imputed income", "Share");
-				Weighted_CrossSection.Double imputedCS = new Weighted_CrossSection.Double(model.getBenefitUnits(), BenefitUnit.class, "isDisposableIncomeMonthlyImputedFlag", true);
-				ratioVsImputedConversionPlotter.addSeries("Share imputed", new Weighted_MeanArrayFunction(imputedCS), null, colorArrayList.get(colorCounter), false);
-				colorCounter++;
-				ratioVsImputedConversionPlotter.setName("Share of BUs with imputed income");
-				updateChartSet.add(ratioVsImputedConversionPlotter);
-				tabSet.add(ratioVsImputedConversionPlotter);
-			}
-
 
 		    if (securityIndex) {
 

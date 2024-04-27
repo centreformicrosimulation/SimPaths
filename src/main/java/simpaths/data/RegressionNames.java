@@ -27,6 +27,10 @@ public enum RegressionNames implements IntegerValuedEnum {
     WagesFemales(3),
     WagesFemalesE(3),
     WagesFemalesNE(3),
+    UnemploymentU1a(1),
+    UnemploymentU1b(1),
+    UnemploymentU1c(1),
+    UnemploymentU1d(1),
     ChildcareC1b(3),
     RMSE(9);
 

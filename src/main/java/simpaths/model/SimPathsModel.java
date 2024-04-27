@@ -2,6 +2,7 @@
 package simpaths.model;
 
 // import Java packages
+import java.io.File;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.random.RandomGenerator;
-import java.util.concurrent.TimeUnit;
 
 // import plug-in packages
 import jakarta.persistence.EntityManager;
@@ -49,12 +49,13 @@ import microsim.matching.MatchingScoreClosure;
 
 // import LABOURsim packages
 import simpaths.data.Parameters;
-import simpaths.model.decisions.DecisionTests;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
+import simpaths.model.taxes.Match;
+import simpaths.model.taxes.Matches;
 
 
 /**
@@ -81,13 +82,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private Country country; // = Country.UK;
 
 	@GUIparameter(description = "Simulated population size (base year)")
-	private Integer popSize = 25000;
+	private Integer popSize = 170000;
 
 	@GUIparameter(description = "Simulation first year [valid range 2011-2017]")
 	private Integer startYear = 2011;
 
 	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
-	private Integer endYear = 2020;
+	private Integer endYear = 2026;
 
 	@GUIparameter(description = "Maximum simulated age")
 	private Integer maxAge = 130;
@@ -134,10 +135,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Value of saving rate (s). The default value is based on average % of household disposable income saved between 2000 - 2019 reported by the OECD")
 	private Double savingRate = 0.056;
 
+	private double interestRateInnov = 0.0;		// used to explore behavioural sensitivity to assumed interest rates
+
 //	@GUIparameter(description = "Force recreation of input database based on the data provided by the population_[country].csv file")
 //	private boolean refreshInputDatabase = false;		//Tables can be constructed in GUI dialog in launch, before JAS-mine GUI appears.  However, if skipping that, and manually altering the EUROMODpolicySchedule.xlsx file, this will need to be set to true to build new input database before simulation is run (though the new input database will only be viewable in the output/input/input.h2.db file).
 
-	@GUIparameter(description = "If true, set initial earnings from data in input population, otherwise, set using the wage equation regression estimates")
+//	@GUIparameter(description = "If true, set initial earnings from data in input population, otherwise, set using the wage equation regression estimates")
 	private boolean initialisePotentialEarningsFromDatabase = true;
 
 	//	@GUIparameter(description = "If unchecked, will expand population and not use weights")
@@ -233,7 +236,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	EventGroup yearlySchedule = new EventGroup();
 
 	@GUIparameter(description = "tick to project social care")
-	private boolean projectSocialCare = false;
+	private boolean projectSocialCare = true;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
 	private boolean enableIntertemporalOptimisations = false;
@@ -242,7 +245,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean useSavedBehaviour = false;
 
 	@GUIparameter(description = "simulation name to read in grids from:")
-	private String readGrid = "laptop serial";
+	private String readGrid = "test1";
 
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;
@@ -255,6 +258,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	@GUIparameter(description = "whether to include student and education status in state space for IO behavioural solutions")
 	private boolean responsesToEducation = true;
+
+	@GUIparameter(description = "whether to include private pensions in the state space for IO behavioural solutions")
+	private boolean responsesToPension = false;
+
+	@GUIparameter(description = "whether to include low wage offers (unemployment) in the state space for IO behavioural solutions")
+	private boolean responsesToLowWageOffer = false;
 
 	@GUIparameter(description = "whether to include retirement (and private pensions) in the state space for IO behavioural solutions")
 	private boolean responsesToRetirement = false;
@@ -317,13 +326,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		popAlignInnov = new Random(SimulationEngine.getRnd().nextLong());
 
 		// load model parameters
-		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear);
+		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear, interestRateInnov);
 		if (enableIntertemporalOptimisations) {
 
+			alignEmployment = false;
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
-					responsesToRetirement, readGrid, getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
+					responsesToPension, responsesToLowWageOffer, responsesToRetirement, readGrid,
+					getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
 			//DecisionTests.compareGrids();
+			//DatabaseExtension.extendInputData();
 		}
 
         log.debug("Parameters loaded");
@@ -331,6 +343,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// populate tax donor references
 		populateTaxdbReferences();
 		//TestTaxRoutine.run();
+
 
 		if (fixRandomSeed) Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().reseedRandomGenerator(randomSeedIfFixed);
 
@@ -418,112 +431,119 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		addEventToAllYears(Processes.UpdateParameters);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
+		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateLags);
 
-		//1 - DEMOGRAPHIC MODULE
-		// A: Ageing
+		// DEMOGRAPHIC MODULE
+		// Ageing
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.Ageing, false);        //Read only mode as agents are removed when they become older than Parameters.getMAX_AGE();
 		addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
 
-		// B: Population Alignment - adjust population to projections by Gender and Age, and creates new population for minimum age
+		// Population Alignment - adjust population to projections by Gender and Age, and creates new population for minimum age
 		addEventToAllYears(Processes.PopulationAlignment);
 
-		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Update);
+		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
-		// C: Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
+		// Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
 		//Turned off for now as health determined below based on individual characteristics
 		//yearlySchedule.addEvent(this, Processes.HealthAlignment);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
-		// D: Check whether persons have reached retirement Age
+		// Check whether persons have reached retirement Age
 		addCollectionEventToAllYears(persons, Person.Processes.ConsiderRetirement, false);
 
-		//2 - EDUCATION MODULE
-		// A: Check In School - check whether still in education, and if leaving school, reset Education Level
+		// EDUCATION MODULE
+		// Check In School - check whether still in education, and if leaving school, reset Education Level
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.InSchool);
 
-		// B: In School alignment
+		// In School alignment
 		addEventToAllYears(Processes.InSchoolAlignment);
 		addCollectionEventToAllYears(persons, Person.Processes.LeavingSchool);
 
-		// C: Align the level of education if required
+		// Align the level of education if required
 		addEventToAllYears(Processes.EducationLevelAlignment);
 
-		// 3 A: Homeownership status
+		// Homeownership status
 		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Homeownership);
 
-		//4 - HEALTH MODULE
-		// 4A: Update Health - determine health (continuous) based on regression models: done here because health depends on education
+		// HEALTH MODULE
+		// Update Health - determine health (continuous) based on regression models: done here because health depends on education
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.Health);
 
-		// 4B: Update mental health - determine (continuous) mental health level based on regression models
+		// Update mental health - determine (continuous) mental health level based on regression models
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
 
-		//5 - HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
+		// HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
 
-		// A: Update potential earnings so that as up to date as possible to decide partner in union matching.
+		// Update potential earnings so that as up to date as possible to decide partner in union matching.
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.UpdatePotentialHourlyEarnings);
 
-		// B: Consider whether in consensual union (cohabiting)
+		// Consider whether in consensual union (cohabiting)
 		yearlySchedule.addEvent(this, Processes.CohabitationRegressionAlignment);
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderCohabitation);
 
-		// C: Union matching
+		// Union matching
 		yearlySchedule.addEvent(this, Processes.UnionMatching);
 		yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateOccupancy);
 		//yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 		//yearlySchedule.addEvent(this, Processes.Timer);
 
-		// D: Fertility
+		// Fertility
 		yearlySchedule.addEvent(this, Processes.FertilityAlignment);        //Align to fertility rates implied by projected population statistics.
 		yearlySchedule.addCollectionEvent(persons, Person.Processes.GiveBirth, false);        //Cannot use read-only collection schedule as newborn children cause concurrent modification exception.  Need to specify false in last argument of Collection event.
 
+		// TIME USE MODULE
 		// Social care
 		if (projectSocialCare) {
 			yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareIncidence);
 			//yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
 		}
 
-		// UPDATE REFERENCES FOR OPTIMISING BEHAVIOUR (IF NECESSARY)
+		// Unemployment
+		addCollectionEventToAllYears(persons, Person.Processes.Unemployment);
+
+		// update references for optimising behaviour
 		// needs to be positioned after all decision states for the current period have been simulated
 		if (enableIntertemporalOptimisations)
 			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateStates, false);
 
-		//7 - TIME USE MODULE
 		addEventToAllYears(Processes.LabourMarketAndIncomeUpdate);
 
-		//Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
+		// Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
-		//8 - UPDATE CONSUMPTION FOR THE SECURITY INDEX
+		// CONSUMPTION AND SAVINGS MODULE
 		if (Parameters.projectWealth)
 			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
 		addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
 
-		//8B - UPDATE EQUIVALISED DISPOSABLE INCOME AND CALCULATE CHANGE SINCE LAST YEAR
+		// equivalised disposable income
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
 
-		//9: MENTAL HEALTH MODULE
-		//9A: Update mental health - determine (continuous) mental health level based on regression models + caseness
+		// MENTAL HEALTH MODULE
+		// Update mental health - determine (continuous) mental health level based on regression models + caseness
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
-		//9B: - UPDATE MENTAL HELATH: STEP 2: modify the outcome of Step 1 depending on individual's exposures + caseness
+		// modify the outcome of Step 1 depending on individual's exposures + caseness
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
-		//9C: UPDATE CASE-BASED MEASURE (STEPS 1 AND 2 TOGETHER)
+		// update case-based measure
 		addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
-		//9 - END OF YEAR PROCESSES
+		// REPORTING OF IMPERFECT TAX DATABASE MATCHES
+		addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
+
+		// END OF YEAR PROCESSES
 		addEventToAllYears(Processes.CheckForEmptyBenefitUnits); //Check all household before the end of the year
 		addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
 		addEventToAllYears(Processes.EndYear);
 
-		//10 - UPDATE YEAR
+		// UPDATE YEAR
 		addEventToAllYears(Processes.UpdateYear);
 
 		// UPDATE EVENT QUEUE
 		getEngine().getEventQueue().scheduleOnce(firstYearSched, startYear, ordering);
 		getEngine().getEventQueue().scheduleRepeat(yearlySchedule, startYear+1, ordering, 1.);
 
-		//For termination of simulation
+		// at termination of simulation
 		int orderEarlier = -1;            //Set less than order so that this is called before the yearlySchedule in the endYear.
 		SystemEvent end = new SystemEvent(SimulationEngine.getInstance(), SystemEventType.End);
 		getEngine().getEventQueue().scheduleOnce(end, endYear+1, orderEarlier);
@@ -584,6 +604,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		RationalOptimisation,
 		UpdateYear,
 		CheckForEmptyBenefitUnits,
+		CheckForImperfectTaxDBMatches,
 	}
 
 	@Override
@@ -693,11 +714,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				for (BenefitUnit benefitUnit: benefitUnits) {
 					if (benefitUnit.getMale() == null && benefitUnit.getFemale() == null) {
 						benefitUnitsWithoutAdult.add(benefitUnit);
-					} else if (benefitUnit.getSize() <= 0) {
-						benefitUnit.updateSizeAndWeight();
-						if (benefitUnit.getSize() <= 0) {
-							benefitUnitsWithoutAdult.add(benefitUnit);
-						}
 					}
 				}
 				for (BenefitUnit benefitUnit: benefitUnitsWithoutAdult) {
@@ -710,6 +726,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 					removeBenefitUnit(benefitUnit);
 				}
 				break;
+			case CheckForImperfectTaxDBMatches:
+				if (Parameters.SAVE_IMPERFECT_TAXDB_MATCHES) {
+					screenForImperfectTaxDbMatches();
+				}
 			default:
 				break;
 		}
@@ -721,6 +741,28 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	 * METHODS IMPLEMENTING PROCESS LEVEL COMPUTATIONS
 	 *
 	 */
+
+
+	/**
+	 *
+	 * PROCESS - SCREEN FOR IMPERFECT TAX DATABASE MATCHES
+	 *
+	 */
+	private void screenForImperfectTaxDbMatches() {
+
+		Matches imperfectMatches = new Matches();
+		for (BenefitUnit benefitUnit: benefitUnits) {
+
+			Match match = benefitUnit.getTaxDbMatch();
+			if (match.getMatchCriterion()>Parameters.IMPERFECT_THRESHOLD) {
+				imperfectMatches.addMatch(match);
+			}
+		}
+		if (!imperfectMatches.isEmpty()) {
+			String dir = getEngine().getCurrentExperiment().getOutputFolder() + File.separator + "csv";
+			imperfectMatches.write(dir, "poor_taxmatch_year_" + year + ".csv");
+		}
+	}
 
 
 	/**
@@ -755,12 +797,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			int age = Math.min(person.getDag(), maxAlignAge);
 			double weight = ((Number)weightsByGenderRegionAndAge.get(gender, region, age)).doubleValue();
 			person.setWeight(weight);
-		}
-		for (BenefitUnit benefitUnit : benefitUnits) {
-			benefitUnit.updateSizeAndWeight();
-		}
-		for (Household household : households) {
-			household.updateSizeAndWeight();
 		}
 	}
 
@@ -822,7 +858,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		}
 		for (Person person : persons) {
 			int age = Math.min(person.getDag(), maxAlignAge);
-			personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age).add(person);
+			List<Person> listHere = personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age);
+			if (listHere==null)
+				throw new RuntimeException("failed to identify requested person alignment list");
+			listHere.add(person);
 		}
 
 		// order subgroup lists by id
@@ -2190,7 +2229,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//With new fertility alignment for the target number instead of fertility rate
 
 		for (Region region: Parameters.getCountryRegions()) {
-			double fertilityRate = ((Number)Parameters.getFertilityRateByRegionYear().get(region, year)).doubleValue();
+			double fertilityRate = Parameters.getFertilityRateByRegionYear(region, year) / 1000.0;
 
 			int numberNewbornsProjected = 0;
 			for (Gender gender : Gender.values()) {
@@ -2339,12 +2378,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				}
 				catch (SQLException e) {
 					log.info(e.getMessage());
-					System.out.print("... failed! Retrying in 2s\n");
-					if (conn != null) { conn.close(); }
-					TimeUnit.SECONDS.sleep(2);
-					retry = true;
-					continue;
-//					throw new RuntimeException("SQL Exception! " + e.getMessage());
+					throw new RuntimeException("SQL Exception! " + e.getMessage());
 				}
 //        	//Create input database from input file (population_[country].csv)
 //			if(refreshInputDatabase) {
@@ -2456,8 +2490,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		double aggregatePersonsWeight = 0.;            //Aggregate Weight of simulated individuals (a weighted sum of the simulated individuals)
 		double aggregateHouseholdsWeight = 0.;        //Aggregate Weight of simulated benefitUnits (a weighted sum of the simulated households)
-		int minAgeInInitialPopulation = Integer.MAX_VALUE;
-		int maxAgeInInitialPopulation = Integer.MIN_VALUE;
 
 
         /*
@@ -2490,9 +2522,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		Double minWeight = null;
 		for (Household household : inputHouseholdList) {
 
-			if (minWeight == null || household.getWeight() < minWeight) {
-				minWeight = household.getWeight();
-			}
 			Iterator<BenefitUnit> benefitUnitIterator = benefitUnitsToAllocate.iterator();
 			LinkedList<Person> orphans = new LinkedList<>();
 			while (benefitUnitIterator.hasNext()) {
@@ -2544,9 +2573,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 						benefitUnit.initializeFields();
 					}
 				}
-			}
-			if (household.getSize() < 1) {
-				throw new RuntimeException("Empty household included at population load.");
 			}
 			if (!orphans.isEmpty()) {
 
@@ -2602,6 +2628,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			}
 			if (!orphans.isEmpty()) {
 				throw new RuntimeException("Children not associated with a qualifying benefit unit included in population load.");
+			}
+			if (minWeight == null || household.getWeight() < minWeight) {
+				minWeight = household.getWeight();
 			}
 		}
 		if (!benefitUnitsToAllocate.isEmpty()) {
@@ -2887,6 +2916,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	public void setRandomSeedIfFixed(Long randomSeedIfFixed) {
 		this.randomSeedIfFixed = randomSeedIfFixed;
+	}
+
+	public void setInterestRateInnov(double innov) {
+		interestRateInnov = innov;
 	}
 
 	public Integer getsIndexTimeWindow() {
@@ -3218,8 +3251,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		this.responsesToRegion = responsesToRegion;
 	}
 
+	public boolean getResponsesToLowWageOffer() { return responsesToLowWageOffer; }
+	public void setResponsesToLowWageOffer(boolean val) { responsesToLowWageOffer = val; }
 	public boolean getResponsesToRetirement() { return responsesToRetirement;}
 	public void setResponsesToRetirement(boolean val) { responsesToRetirement = val;}
+	public boolean getResponsesToPension() { return responsesToPension;}
+	public void setResponsesToPension(boolean val) { responsesToPension = val;}
 
 	public Map<String, Double> getPolicyNameIncomeMedianMap() {
 		return policyNameIncomeMedianMap;
@@ -3350,9 +3387,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 
 					// collect data for populating MahalanobisDistance objects
-					double originalIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedOriginalIncome();
-					double secondIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedSecondIncome();
-					double childcareCost = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedChildcareCost();;
+					double originalIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedOriginalIncomePerMonth();
+					double secondIncome = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedSecondIncomePerMonth();
+					double childcareCost = donor.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getNormalisedChildcareCostPerMonth();;
 					if (secondIncome > 0.01 && childcareCost < 0.01) {
 						double[] datum = {originalIncome, secondIncome};
 						dataDualIncome = ArrayUtils.add(dataDualIncome, datum);

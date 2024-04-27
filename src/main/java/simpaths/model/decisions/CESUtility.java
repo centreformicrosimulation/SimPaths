@@ -18,16 +18,17 @@ public class CESUtility implements IEvaluation {
     Grid valueFunction;            // storage of preceding solutions for value function
 
     // CES utility options
-    public static final double EPSILON = 0.6;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_SINGLES = 2.2 * 0.01756;                      // utility price of leisure for single adults
-    public static final double ALPHA_COUPLES = 2.2 * 0.47 * 0.01756;               // utility price of leisure for couples
-    public static final double GAMMA = 1.55;                                       // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
-    public static final double ZETA0_SINGLES = 1000;                               // warm-glow bequests parameter for singles - additive
-    public static final double ZETA1_SINGLES = 0;                                  // warm-glow bequests parameter for singles - slope
-    public static final double ZETA0_COUPLES = 1000;                               // warm-glow bequests parameter for couples - additive
-    public static final double ZETA1_COUPLES = 0;                                  // warm-glow bequests parameter for couples - slope
-    public static final double DELTA_SINGLES = 0.97;                               // exponential intertemporal discount factor for singles
-    public static final double DELTA_COUPLES = 0.93;                               // exponential intertemporal discount factor for couples
+    public static final double ANNUAL_CONSUMPTION_NORMALISATION_FACTOR = 15600.0;  // used to improve the curvature of the utility function with respect to consumption
+    public static final double EPSILON = 0.8;                                      // elasticity of substitution between equivalised consumption and leisure within each year
+    public static final double ALPHA_SINGLES = 1.9;                                // utility price of leisure for single adults
+    public static final double ALPHA_COUPLES = 1.9;                                // utility price of leisure for couples
+    public static final double GAMMA = 1.25;                                       // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
+    public static final double ZETA0_SINGLES = 52000;                              // warm-glow bequests parameter for singles - additive
+    public static final double ZETA1_SINGLES = 1879.745;                           // warm-glow bequests parameter for singles - slope
+    public static final double ZETA0_COUPLES = 52000;                              // warm-glow bequests parameter for couples - additive
+    public static final double ZETA1_COUPLES = 268.535;                            // warm-glow bequests parameter for couples - slope
+    public static final double DELTA_SINGLES = 0.99;                               // exponential intertemporal discount factor for singles
+    public static final double DELTA_COUPLES = 0.98;                               // exponential intertemporal discount factor for couples
 
     /**
      * CONSTRUCTOR
@@ -60,15 +61,16 @@ public class CESUtility implements IEvaluation {
 
         // evaluate within period utility
         double consumptionAnnual = args[0];
-        double consumptionComponent = Math.pow(consumptionAnnual/expectations.equivalenceScale, 1 - 1/ EPSILON);
-        double leisureComponent = Math.pow(expectations.leisureTime, 1 - 1/ EPSILON);
+        double consumptionNormalised = consumptionAnnual / ANNUAL_CONSUMPTION_NORMALISATION_FACTOR;
+        double consumptionComponent = Math.pow(consumptionNormalised/expectations.equivalenceScale, 1.0 - 1.0/EPSILON);
+        double leisureComponent = Math.pow(expectations.leisureTime, 1.0 - 1.0/EPSILON);
         double priceOfLeisure;
         if (expectations.cohabitation) {
-            priceOfLeisure = Math.pow(ALPHA_COUPLES, 1/ EPSILON);
+            priceOfLeisure = Math.pow(ALPHA_COUPLES, 1.0/EPSILON);
         } else {
-            priceOfLeisure = Math.pow(ALPHA_SINGLES, 1/ EPSILON);
+            priceOfLeisure = Math.pow(ALPHA_SINGLES, 1.0/EPSILON);
         }
-        double periodUtility = Math.pow(consumptionComponent + priceOfLeisure * leisureComponent, (1- GAMMA)/(1-1/ EPSILON));
+        double periodUtility = Math.pow(consumptionComponent + priceOfLeisure * leisureComponent, (1.0 - GAMMA)/(1.0 - 1.0/EPSILON));
 
         // adjust expectations array
         int dim;
@@ -77,7 +79,7 @@ public class CESUtility implements IEvaluation {
             dim = 0;
             // allow for liquid wealth
             numeraire = expectations.liquidWealth + expectations.disposableIncomeAnnual - consumptionAnnual;
-            gridValue = Math.log(numeraire + DecisionParams.C_LIQUID_WEALTH);
+            gridValue = Math.log( Math.max(1.0, numeraire + DecisionParams.C_LIQUID_WEALTH) );
             if (expectations.ageIndexNextPeriod < valueFunction.scale.axes.length) {
                 gridValue = Math.max(gridValue, valueFunction.scale.axes[expectations.ageIndexNextPeriod][0][1]);
                 gridValue = Math.min(gridValue, valueFunction.scale.axes[expectations.ageIndexNextPeriod][0][2]);
@@ -92,7 +94,7 @@ public class CESUtility implements IEvaluation {
             probThreshold = DecisionParams.MIN_FACTOR_PROBABILITY / (double) expectations.probability.length;
         else
             probThreshold = 1.0E-12;
-        double expectedUtility = 0.0;
+        Double expectedUtility = 0.0;
         double expectedV;
         double zeta0, zeta1;
         if (expectations.cohabitation) {
@@ -110,12 +112,16 @@ public class CESUtility implements IEvaluation {
                     if ( 1.0 - expectations.mortalityProbability > probThreshold ) {
                         expectedV = valueFunction.interpolateAll(expectations.anticipated[ii], true);
                         expectedUtility += expectations.probability[ii] *
-                                (1.0 - expectations.mortalityProbability) * Math.pow(expectedV, 1 - GAMMA);
+                                (1.0 - expectations.mortalityProbability) * Math.pow(expectedV, 1.0 - GAMMA);
+                        if (expectedUtility.isNaN())
+                            throw new RuntimeException("expected utility expected utility 1");
                     }
                     if (expectations.mortalityProbability > probThreshold && zeta1 > 0) {
                         bequest = Math.max(0, Math.exp(expectations.anticipated[ii].states[0])- DecisionParams.C_LIQUID_WEALTH);
-                        expectedUtility += expectations.probability[ii] *
-                                        expectations.mortalityProbability * Math.pow(zeta1 * (zeta0 + bequest), 1 - GAMMA);
+                        expectedUtility += expectations.probability[ii] * expectations.mortalityProbability *
+                                zeta1 * Math.pow((zeta0 + bequest), 1.0 - GAMMA);
+                        if (expectedUtility.isNaN())
+                            throw new RuntimeException("expected utility expected utility 2");
                     }
                 }
             }
@@ -133,9 +139,12 @@ public class CESUtility implements IEvaluation {
         } else {
             discountFactor = DELTA_SINGLES;
         }
-        double totalUtility = Math.pow(periodUtility + discountFactor * expectedUtility, 1/(1- GAMMA));
+        Double totalUtility = Math.pow(periodUtility + discountFactor * expectedUtility, 1.0/(1.0 - GAMMA));
+
+        if (totalUtility.isNaN())
+            throw new RuntimeException("failed to evaluate lifetime utility");
 
         // return
-        return - totalUtility;
+        return -totalUtility;
     }
 }
