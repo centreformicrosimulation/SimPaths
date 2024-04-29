@@ -156,11 +156,8 @@ public class Statistics2 {
     private double expenditure55to74;
 
     //consumption to leisure ratios
-    @Column(name = "cons_to_leis_non_grad")
-    private double consToLeisNonGrad;
-
-    @Column(name = "cons_to_leis_grad")
-    private double consToLeisGrad;
+    @Column(name = "cons_to_leis_ratio")
+    private double consToLeisRatio;
 
     //wealth
     @Column(name = "wealth_18_29")
@@ -196,20 +193,12 @@ public class Statistics2 {
     @Column(name = "utility_adj_factor_couples")
     private double utilityAdjustmentFactorCouples;
 
-    public double getConsToLeisNonGrad() {
-        return consToLeisNonGrad;
+    public double getConsToLeisRatio() {
+        return consToLeisRatio;
     }
 
-    public void setConsToLeisNonGrad(double consToLeisNonGrad) {
-        this.consToLeisNonGrad = consToLeisNonGrad;
-    }
-
-    public double getConsToLeisGrad() {
-        return consToLeisGrad;
-    }
-
-    public void setConsToLeisGrad(double consToLeisGrad) {
-        this.consToLeisGrad = consToLeisGrad;
+    public void setConsToLeisRatio(double consToLeis) {
+        this.consToLeisRatio = consToLeis;
     }
 
     public double getPartnershipAdjustmentFactor() {
@@ -737,6 +726,22 @@ public class Statistics2 {
             }
         }
 
+        // update calibration statistics as differences to target moments
+        workFT[0] -= 0.5274865;
+        workFT[1] -= 0.6195412;
+        workFT[2] -= 0.2535846;
+
+        workPT[0] -= 0.1975203;
+        workPT[1] -= 0.2230833;
+        workPT[2] -= 0.1891631;
+
+        expen[0] -= 165.8951 * Parameters.WEEKS_PER_MONTH;
+        expen[1] -= 309.2464 * Parameters.WEEKS_PER_MONTH;
+        expen[2] -= 323.1081 * Parameters.WEEKS_PER_MONTH;
+
+        double ctlRatio = ctlG / ctlNG - 1.361384;
+
+
         // map statistics to outputs
         setPrMarried18to29(prMarr[0]);
         setPrMarried30to54(prMarr[1]);
@@ -794,8 +799,7 @@ public class Statistics2 {
         setExpenditure30to54(expen[1]);
         setExpenditure55to74(expen[2]);
 
-        setConsToLeisNonGrad(ctlNG);
-        setConsToLeisGrad(ctlG);
+        setConsToLeisRatio(ctlRatio);
 
         setWealth18to29(wealth[0]);
         setWealth30to54(wealth[1]);
