@@ -706,12 +706,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhesp_lag1 = originalPerson.dhesp_lag1;
         this.hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
         this.labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
-        this.fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
-        if (originalPerson.L1_fullTimeHourlyEarningsPotential != null) {
-            this.L1_fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.L1_fullTimeHourlyEarningsPotential));
-        } else {
-            this.L1_fullTimeHourlyEarningsPotential = this.fullTimeHourlyEarningsPotential;
-        }
         this.desiredAgeDiff = originalPerson.desiredAgeDiff;
         this.desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
         this.scoreMale = originalPerson.scoreMale;
@@ -731,6 +725,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhh_owned = originalPerson.dhh_owned;
         this.receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         this.receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
+
+        if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
+            this.fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
+        } else {
+            updateFullTimeHourlyEarnings();
+        }
+        if (originalPerson.L1_fullTimeHourlyEarningsPotential!=null && originalPerson.L1_fullTimeHourlyEarningsPotential>Parameters.MIN_HOURLY_WAGE_RATE) {
+            this.L1_fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.L1_fullTimeHourlyEarningsPotential));
+        } else {
+            this.L1_fullTimeHourlyEarningsPotential = this.fullTimeHourlyEarningsPotential;
+        }
     }
 
 
@@ -1457,7 +1462,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void updateFullTimeHourlyEarnings() {
 
         double rmse;
-        if (les_c4_lag1.equals(Les_c4.EmployedOrSelfEmployed)) {
+        if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
             if (wageRegressionRandomComponentE == null || !model.fixRegressionStochasticComponent) {
                 if (Gender.Male.equals(dgn)) {
                     rmse = Parameters.getRMSEForRegression("Wages_MalesE");
@@ -4205,28 +4210,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildrenAll_lag1() != null) ? benefitUnit.getNumberChildrenAll_lag1() : 0;
         } else {
-            return numberChildrenAllLocal_lag1;
+            return (numberChildrenAllLocal_lag1==null) ? 0 : numberChildrenAllLocal_lag1;
         }
     }
     private Integer getNumberChildrenAll() {
         if (benefitUnit != null) {
             return benefitUnit.getNumberChildrenAll();
         } else {
-            return numberChildrenAllLocal;
+            return (numberChildrenAllLocal==null) ? 0 : numberChildrenAllLocal;
         }
     }
     private Integer getNumberChildren02_lag1() {
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildren02_lag1() != null) ? benefitUnit.getNumberChildren02_lag1() : 0;
         } else {
-            return numberChildren02Local_lag1;
+            return (numberChildren02Local_lag1==null) ? 0 : numberChildren02Local_lag1;
         }
     }
     private Integer getNumberChildren017() {
         if (benefitUnit != null) {
             return benefitUnit.getNumberChildren(0,17);
         } else {
-            return numberChildren017Local;
+            return (numberChildren017Local==null) ? 0 : numberChildren017Local;
         }
     }
     private double getInverseMillsRatio() {
