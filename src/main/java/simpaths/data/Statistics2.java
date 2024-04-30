@@ -59,31 +59,31 @@ public class Statistics2 {
 
     //average labour status by age and gender
     @Column(name = "work_fulltime_18_29")
-    private double workFulltime18to29;
+    private double aworkFulltime18to29;
 
     @Column(name = "work_fulltime_30_54")
-    private double workFulltime30to54;
+    private double aworkFulltime30to54;
 
     @Column(name = "work_fulltime_55_74")
-    private double workFulltime55to74;
+    private double aworkFulltime55to74;
 
     @Column(name = "work_parttime_18_29")
-    private double workParttime18to29;
+    private double aworkParttime18to29;
 
     @Column(name = "work_parttime_30_54")
-    private double workParttime30to54;
+    private double aworkParttime30to54;
 
     @Column(name = "work_parttime_55_74")
-    private double workParttime55to74;
+    private double aworkParttime55to74;
 
     @Column(name = "work_none_18_29")
-    private double workNone18to29;
+    private double aaworkNone18to29;
 
     @Column(name = "work_none_30_54")
-    private double workNone30to54;
+    private double aaworkNone30to54;
 
     @Column(name = "work_none_55_74")
-    private double workNone55to74;
+    private double aaworkNone55to74;
 
     //employment income
     @Column(name = "labourIncome_18_29")
@@ -117,13 +117,13 @@ public class Statistics2 {
 
     //disposable income
     @Column(name = "disposableIncome_18_29")
-    private double disposableIncome18to29;
+    private double aadisposableIncome18to29;
 
     @Column(name = "disposableIncome_30_54")
-    private double disposableIncome30to54;
+    private double aadisposableIncome30to54;
 
     @Column(name = "disposableIncome_55_74")
-    private double disposableIncome55to74;
+    private double aadisposableIncome55to74;
 
     //investment losses
     @Column(name = "investmentLosses_18_29")
@@ -147,17 +147,17 @@ public class Statistics2 {
 
     //expenditure
     @Column(name = "expenditure_18_29")
-    private double expenditure18to29;
+    private double aaexpenditure18to29;
 
     @Column(name = "expenditure_30_54")
-    private double expenditure30to54;
+    private double aaexpenditure30to54;
 
     @Column(name = "expenditure_55_74")
-    private double expenditure55to74;
+    private double aaexpenditure55to74;
 
     //consumption to leisure ratios
     @Column(name = "cons_to_leis_ratio")
-    private double consToLeisRatio;
+    private double aaconsToLeisRatio;
 
     //wealth
     @Column(name = "wealth_18_29")
@@ -193,12 +193,12 @@ public class Statistics2 {
     @Column(name = "utility_adj_factor_couples")
     private double utilityAdjustmentFactorCouples;
 
-    public double getConsToLeisRatio() {
-        return consToLeisRatio;
+    public double getAaconsToLeisRatio() {
+        return aaconsToLeisRatio;
     }
 
-    public void setConsToLeisRatio(double consToLeis) {
-        this.consToLeisRatio = consToLeis;
+    public void setAaconsToLeisRatio(double consToLeis) {
+        this.aaconsToLeisRatio = consToLeis;
     }
 
     public double getPartnershipAdjustmentFactor() {
@@ -428,28 +428,28 @@ public class Statistics2 {
         this.pensionIncome55to74 = pensionIncome55to74;
     }
 
-    public double getDisposableIncome18to29() {
-        return disposableIncome18to29;
+    public double getAadisposableIncome18to29() {
+        return aadisposableIncome18to29;
     }
 
-    public void setDisposableIncome18to29(double disposableIncome18to29) {
-        this.disposableIncome18to29 = disposableIncome18to29;
+    public void setAadisposableIncome18to29(double aadisposableIncome18to29) {
+        this.aadisposableIncome18to29 = aadisposableIncome18to29;
     }
 
-    public double getDisposableIncome30to54() {
-        return disposableIncome30to54;
+    public double getAadisposableIncome30to54() {
+        return aadisposableIncome30to54;
     }
 
-    public void setDisposableIncome30to54(double disposableIncome30to54) {
-        this.disposableIncome30to54 = disposableIncome30to54;
+    public void setAadisposableIncome30to54(double aadisposableIncome30to54) {
+        this.aadisposableIncome30to54 = aadisposableIncome30to54;
     }
 
-    public double getDisposableIncome55to74() {
-        return disposableIncome55to74;
+    public double getAadisposableIncome55to74() {
+        return aadisposableIncome55to74;
     }
 
-    public void setDisposableIncome55to74(double disposableIncome55to74) {
-        this.disposableIncome55to74 = disposableIncome55to74;
+    public void setAadisposableIncome55to74(double aadisposableIncome55to74) {
+        this.aadisposableIncome55to74 = aadisposableIncome55to74;
     }
 
     public double getInvestmentLosses18to29() {
@@ -500,28 +500,28 @@ public class Statistics2 {
         this.dispIncomeGrossOfLosses55to74 = dispIncomeGrossOfLosses55to74;
     }
 
-    public double getExpenditure18to29() {
-        return expenditure18to29;
+    public double getAaexpenditure18to29() {
+        return aaexpenditure18to29;
     }
 
-    public void setExpenditure18to29(double expenditure18to29) {
-        this.expenditure18to29 = expenditure18to29;
+    public void setAaexpenditure18to29(double aaexpenditure18to29) {
+        this.aaexpenditure18to29 = aaexpenditure18to29;
     }
 
-    public double getExpenditure30to54() {
-        return expenditure30to54;
+    public double getAaexpenditure30to54() {
+        return aaexpenditure30to54;
     }
 
-    public void setExpenditure30to54(double expenditure30to54) {
-        this.expenditure30to54 = expenditure30to54;
+    public void setAaexpenditure30to54(double aaexpenditure30to54) {
+        this.aaexpenditure30to54 = aaexpenditure30to54;
     }
 
-    public double getExpenditure55to74() {
-        return expenditure55to74;
+    public double getAaexpenditure55to74() {
+        return aaexpenditure55to74;
     }
 
-    public void setExpenditure55to74(double expenditure55to74) {
-        this.expenditure55to74 = expenditure55to74;
+    public void setAaexpenditure55to74(double aaexpenditure55to74) {
+        this.aaexpenditure55to74 = aaexpenditure55to74;
     }
 
     public double getWealth18to29() {
@@ -548,76 +548,76 @@ public class Statistics2 {
         this.wealth55to74 = wealth55to74;
     }
 
-    public double getWorkFulltime18to29() {
-        return workFulltime18to29;
+    public double getAworkFulltime18to29() {
+        return aworkFulltime18to29;
     }
 
-    public void setWorkFulltime18to29(double workFulltime18to29) {
-        this.workFulltime18to29 = workFulltime18to29;
+    public void setAworkFulltime18to29(double aworkFulltime18to29) {
+        this.aworkFulltime18to29 = aworkFulltime18to29;
     }
 
-    public double getWorkFulltime30to54() {
-        return workFulltime30to54;
+    public double getAworkFulltime30to54() {
+        return aworkFulltime30to54;
     }
 
-    public void setWorkFulltime30to54(double workFulltime30to54) {
-        this.workFulltime30to54 = workFulltime30to54;
+    public void setAworkFulltime30to54(double aworkFulltime30to54) {
+        this.aworkFulltime30to54 = aworkFulltime30to54;
     }
 
-    public double getWorkFulltime55to74() {
-        return workFulltime55to74;
+    public double getAworkFulltime55to74() {
+        return aworkFulltime55to74;
     }
 
-    public void setWorkFulltime55to74(double workFulltime55to74) {
-        this.workFulltime55to74 = workFulltime55to74;
+    public void setAworkFulltime55to74(double aworkFulltime55to74) {
+        this.aworkFulltime55to74 = aworkFulltime55to74;
     }
 
-    public double getWorkParttime18to29() {
-        return workParttime18to29;
+    public double getAworkParttime18to29() {
+        return aworkParttime18to29;
     }
 
-    public void setWorkParttime18to29(double workParttime18to29) {
-        this.workParttime18to29 = workParttime18to29;
+    public void setAworkParttime18to29(double aworkParttime18to29) {
+        this.aworkParttime18to29 = aworkParttime18to29;
     }
 
-    public double getWorkParttime30to54() {
-        return workParttime30to54;
+    public double getAworkParttime30to54() {
+        return aworkParttime30to54;
     }
 
-    public void setWorkParttime30to54(double workParttime30to54) {
-        this.workParttime30to54 = workParttime30to54;
+    public void setAworkParttime30to54(double aworkParttime30to54) {
+        this.aworkParttime30to54 = aworkParttime30to54;
     }
 
-    public double getWorkParttime55to74() {
-        return workParttime55to74;
+    public double getAworkParttime55to74() {
+        return aworkParttime55to74;
     }
 
-    public void setWorkParttime55to74(double workParttime55to74) {
-        this.workParttime55to74 = workParttime55to74;
+    public void setAworkParttime55to74(double aworkParttime55to74) {
+        this.aworkParttime55to74 = aworkParttime55to74;
     }
 
-    public double getWorkNone18to29() {
-        return workNone18to29;
+    public double getAaworkNone18to29() {
+        return aaworkNone18to29;
     }
 
-    public void setWorkNone18to29(double workNone18to29) {
-        this.workNone18to29 = workNone18to29;
+    public void setAaworkNone18to29(double aaworkNone18to29) {
+        this.aaworkNone18to29 = aaworkNone18to29;
     }
 
-    public double getWorkNone30to54() {
-        return workNone30to54;
+    public double getAaworkNone30to54() {
+        return aaworkNone30to54;
     }
 
-    public void setWorkNone30to54(double workNone30to54) {
-        this.workNone30to54 = workNone30to54;
+    public void setAaworkNone30to54(double aaworkNone30to54) {
+        this.aaworkNone30to54 = aaworkNone30to54;
     }
 
-    public double getWorkNone55to74() {
-        return workNone55to74;
+    public double getAaworkNone55to74() {
+        return aaworkNone55to74;
     }
 
-    public void setWorkNone55to74(double workNone55to74) {
-        this.workNone55to74 = workNone55to74;
+    public void setAaworkNone55to74(double aaworkNone55to74) {
+        this.aaworkNone55to74 = aaworkNone55to74;
     }
 
     public void update(SimPathsModel model) {
@@ -735,9 +735,17 @@ public class Statistics2 {
         workPT[1] -= 0.2230833;
         workPT[2] -= 0.1891631;
 
+        workNn[0] -= (1.0 - 0.5274865 - 0.1975203);
+        workNn[1] -= (1.0 - 0.6195412 - 0.2230833);
+        workNn[2] -= (1.0 - 0.2535846 - 0.1891631);
+
         expen[0] -= 165.8951 * Parameters.WEEKS_PER_MONTH;
         expen[1] -= 309.2464 * Parameters.WEEKS_PER_MONTH;
         expen[2] -= 323.1081 * Parameters.WEEKS_PER_MONTH;
+
+        disInc[0] -= 295.8024 * Parameters.WEEKS_PER_MONTH;
+        disInc[1] -= 482.8467 * Parameters.WEEKS_PER_MONTH;
+        disInc[2] -= 478.0918 * Parameters.WEEKS_PER_MONTH;
 
         double ctlRatio = ctlG / ctlNG - 1.361384;
 
@@ -759,17 +767,17 @@ public class Statistics2 {
         setPrDisabled30to54(prDisa[1]);
         setPrDisabled55to74(prDisa[2]);
 
-        setWorkFulltime18to29(workFT[0]);
-        setWorkFulltime30to54(workFT[1]);
-        setWorkFulltime55to74(workFT[2]);
+        setAworkFulltime18to29(workFT[0]);
+        setAworkFulltime30to54(workFT[1]);
+        setAworkFulltime55to74(workFT[2]);
 
-        setWorkParttime18to29(workPT[0]);
-        setWorkParttime30to54(workPT[1]);
-        setWorkParttime55to74(workPT[2]);
+        setAworkParttime18to29(workPT[0]);
+        setAworkParttime30to54(workPT[1]);
+        setAworkParttime55to74(workPT[2]);
 
-        setWorkNone18to29(workNn[0]);
-        setWorkNone30to54(workNn[1]);
-        setWorkNone55to74(workNn[2]);
+        setAaworkNone18to29(workNn[0]);
+        setAaworkNone30to54(workNn[1]);
+        setAaworkNone55to74(workNn[2]);
 
         setLabourIncome18to29(labInc[0]);
         setLabourIncome30to54(labInc[1]);
@@ -783,9 +791,9 @@ public class Statistics2 {
         setPensionIncome30to54(penInc[1]);
         setPensionIncome55to74(penInc[2]);
 
-        setDisposableIncome18to29(disInc[0]);
-        setDisposableIncome30to54(disInc[1]);
-        setDisposableIncome55to74(disInc[2]);
+        setAadisposableIncome18to29(disInc[0]);
+        setAadisposableIncome30to54(disInc[1]);
+        setAadisposableIncome55to74(disInc[2]);
 
         setInvestmentLosses18to29(invLosses[0]);
         setInvestmentLosses30to54(invLosses[1]);
@@ -795,11 +803,11 @@ public class Statistics2 {
         setDispIncomeGrossOfLosses30to54(grossDisInc[1]);
         setDispIncomeGrossOfLosses55to74(grossDisInc[2]);
 
-        setExpenditure18to29(expen[0]);
-        setExpenditure30to54(expen[1]);
-        setExpenditure55to74(expen[2]);
+        setAaexpenditure18to29(expen[0]);
+        setAaexpenditure30to54(expen[1]);
+        setAaexpenditure55to74(expen[2]);
 
-        setConsToLeisRatio(ctlRatio);
+        setAaconsToLeisRatio(ctlRatio);
 
         setWealth18to29(wealth[0]);
         setWealth30to54(wealth[1]);

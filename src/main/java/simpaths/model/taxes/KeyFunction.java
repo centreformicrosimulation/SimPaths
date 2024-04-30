@@ -66,8 +66,6 @@ public class KeyFunction {
             throw new RuntimeException("Key function supplied odd disability status for man and woman: " + dlltsdMan);
         if (careProvision<0)
             throw new RuntimeException("Key function supplied odd care provision indicator: " + careProvision);
-        if (originalIncomePerWeek<-40000.0 || originalIncomePerWeek>300000.0)
-            throw new RuntimeException("Key function supplied odd original income per week: " + originalIncomePerWeek);
 
         // set attributes
         this.simYear = simYear;

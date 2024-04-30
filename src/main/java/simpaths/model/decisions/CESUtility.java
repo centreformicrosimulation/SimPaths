@@ -19,16 +19,16 @@ public class CESUtility implements IEvaluation {
 
     // CES utility options
     public static final double ANNUAL_CONSUMPTION_NORMALISATION_FACTOR = 15600.0;  // used to improve the curvature of the utility function with respect to consumption
-    public static final double EPSILON = 0.8;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_SINGLES = 1.9;                                // utility price of leisure for single adults
-    public static final double ALPHA_COUPLES = 1.9;                                // utility price of leisure for couples
+    public static final double EPSILON = 0.3;                                      // elasticity of substitution between equivalised consumption and leisure within each year
+    public static final double ALPHA_SINGLES = 0.8;                                // utility price of leisure for single adults
+    public static final double ALPHA_COUPLES = 0.8;                                // utility price of leisure for couples
     public static final double GAMMA = 1.25;                                       // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
-    public static final double ZETA0_SINGLES = 52000;                              // warm-glow bequests parameter for singles - additive
-    public static final double ZETA1_SINGLES = 1879.745;                           // warm-glow bequests parameter for singles - slope
-    public static final double ZETA0_COUPLES = 52000;                              // warm-glow bequests parameter for couples - additive
-    public static final double ZETA1_COUPLES = 268.535;                            // warm-glow bequests parameter for couples - slope
+    public static final double ZETA0_SINGLES = 52000.0;                            // warm-glow bequests parameter for singles - additive
+    public static final double ZETA1_SINGLES = 1500.0;                             // warm-glow bequests parameter for singles - slope
+    public static final double ZETA0_COUPLES = 52000.0;                            // warm-glow bequests parameter for couples - additive
+    public static final double ZETA1_COUPLES = 1500.0;                             // warm-glow bequests parameter for couples - slope
     public static final double DELTA_SINGLES = 0.99;                               // exponential intertemporal discount factor for singles
-    public static final double DELTA_COUPLES = 0.98;                               // exponential intertemporal discount factor for couples
+    public static final double DELTA_COUPLES = 0.99;                               // exponential intertemporal discount factor for couples
 
     /**
      * CONSTRUCTOR

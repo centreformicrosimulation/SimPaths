@@ -3534,7 +3534,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.SavingReturns) +
 						Parameters.interestRateInnov) * liquidWealth;
 			}
-			if ((investmentIncomeAnnual < -2000000.0) || (investmentIncomeAnnual > 20000000.0))
+			if ((investmentIncomeAnnual < -20000000.0) || (investmentIncomeAnnual > 200000000.0))
 				throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
 
 			// update person level variables
