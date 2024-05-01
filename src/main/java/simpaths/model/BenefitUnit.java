@@ -758,15 +758,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 	}
 
-	protected void updateFullTimeHourlyEarnings() {
+	protected void resetLabourStates() {
 
 		if(male != null) {
 			male.setLabourSupplyWeekly(null);
-			male.updateFullTimeHourlyEarnings();
 		}
 		if(female != null) {
 			female.setLabourSupplyWeekly(null);
-			female.updateFullTimeHourlyEarnings();
 		}
 	}
 
@@ -1262,8 +1260,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			randomDrawLabourSupply = labourInnov.nextDouble();
 		}
 
-		//Update potential earnings
-		updateFullTimeHourlyEarnings();
+		resetLabourStates();
 		if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
 			// intertemporal optimisations enabled
 

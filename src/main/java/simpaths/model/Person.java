@@ -729,6 +729,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
             this.fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
         } else {
+            this.les_c4 = Les_c4.NotEmployed;
+            this.les_c4_lag1 = les_c4;
             updateFullTimeHourlyEarnings();
         }
         if (originalPerson.L1_fullTimeHourlyEarningsPotential!=null && originalPerson.L1_fullTimeHourlyEarningsPotential>Parameters.MIN_HOURLY_WAGE_RATE) {
@@ -1372,7 +1374,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void inSchool() {
 
         //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
-        if(les_c4.equals(Les_c4.Retired) || dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
+        if(Les_c4.Retired.equals(les_c4) || dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
             return;
         }
 
@@ -1486,15 +1488,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if(Gender.Male.equals(dgn)) {
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesMalesE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentE;
-            }
-            else {
+            } else {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesMalesNE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentNE;
             }
         } else {
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesFemalesE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentE;
-            }
-            else {
+            } else {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesFemalesNE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentNE;
             }
         }

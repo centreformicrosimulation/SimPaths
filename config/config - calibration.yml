@@ -30,6 +30,7 @@ model_args:
     alignEmployment: false
     projectSocialCare: false
     enableIntertemporalOptimisations: true
+    responsesToLowWageOffer: false
 #    useSavedBehaviour: false
 #    readGrid: "laptop serial"
 #    saveBehaviour: true

@@ -475,14 +475,10 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceFertilityF1; //Probit fertility for Italy
 
     //Income
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI1a; //Linear regression non-employment non-benefit income if in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI1b; //Linear regression non-employment non-benefit income if not in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a; //Capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b; //Capital income if not in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI3c; //Pension income for those aged over 50 who are not in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4a, coeffCovarianceIncomeI4b; // Pension income for those moving from employment to retirement (I4a) and those already retired (I4b)
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4b; // Pension income for those moving from employment to retirement (I4a) and those already retired (I4b)
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI5a_selection, coeffCovarianceIncomeI5b_amount; // Selection equation for receiving pension income for those moving from employment to retirement (I5a) and amount in levels (I5b)
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI6a_selection, coeffCovarianceIncomeI6b_amount; // Selection equation for receiving pension income for those in retirement (I6a) and amount in levels (I6b), in the initial simulated year
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a_selection; //Probability of receiving capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b_selection; //Probability of receiving capital income if not in continuous education
 
@@ -490,12 +486,12 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHomeownership; //Probit regression assigning homeownership status
 
     //Wages
-    private static MultiKeyCoefficientMap coeffCovarianceWagesMales, coeffCovarianceWagesMalesNE, coeffCovarianceWagesMalesE;
-    private static MultiKeyCoefficientMap coeffCovarianceWagesFemales, coeffCovarianceWagesFemalesNE, coeffCovarianceWagesFemalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceWagesMalesNE, coeffCovarianceWagesMalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceWagesFemalesNE, coeffCovarianceWagesFemalesE;
 
     //Labour Market
-    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionMales, coeffCovarianceEmploymentSelectionMalesNE, coeffCovarianceEmploymentSelectionMalesE;
-    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionFemales, coeffCovarianceEmploymentSelectionFemalesNE, coeffCovarianceEmploymentSelectionFemalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionMalesNE, coeffCovarianceEmploymentSelectionMalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionFemalesNE, coeffCovarianceEmploymentSelectionFemalesE;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMalesWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
@@ -1291,17 +1287,11 @@ public class Parameters {
         }
 
         //Income
-        //coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1a", 1, columnsIncomeI1a);
-        //coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I1b", 1, columnsIncomeI1b);
         coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a", 1, columnsIncomeI3a);
         coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b", 1, columnsIncomeI3b);
-        //coeffCovarianceIncomeI3c = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3c", 1, columnsIncomeI3c);
-        //coeffCovarianceIncomeI4a = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4a", 1, columnsIncomeI4a);
         coeffCovarianceIncomeI4b = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I4b", 1, columnsIncomeI4b);
         coeffCovarianceIncomeI5a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5a", 1, columnsIncomeI5a);
         coeffCovarianceIncomeI5b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I5b", 1, columnsIncomeI5b);
-        //coeffCovarianceIncomeI6a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6a_selection", 1, columnsIncomeI6a);
-        //coeffCovarianceIncomeI6b_amount = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I6b_amount", 1, columnsIncomeI6b);
         coeffCovarianceIncomeI3a_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3a_selection", 1, columnsIncomeI3a_selection);
         coeffCovarianceIncomeI3b_selection = ExcelAssistant.loadCoefficientMap("input/reg_income.xlsx", countryString + "_I3b_selection", 1, columnsIncomeI3b_selection);
 
@@ -2203,10 +2193,8 @@ public class Parameters {
 
     public static MultiKeyCoefficientMap getCoeffCovarianceHealthH1b() { return coeffCovarianceHealthH1b; }
 
-    public static MultiKeyCoefficientMap getCoeffCovarianceWagesMales() { return coeffCovarianceWagesMales; }
     public static MultiKeyCoefficientMap getCoeffCovarianceWagesMalesE() { return coeffCovarianceWagesMalesE; }
     public static MultiKeyCoefficientMap getCoeffCovarianceWagesMalesNE() { return coeffCovarianceWagesMalesNE; }
-    public static MultiKeyCoefficientMap getCoeffCovarianceWagesFemales() { return coeffCovarianceWagesFemales; }
     public static MultiKeyCoefficientMap getCoeffCovarianceWagesFemalesE() { return coeffCovarianceWagesFemalesE; }
     public static MultiKeyCoefficientMap getCoeffCovarianceWagesFemalesNE() { return coeffCovarianceWagesFemalesNE; }
     public static MultiKeyCoefficientMap getCoefficientMapRMSE() { return coefficientMapRMSE; }

@@ -100,7 +100,7 @@ public class LabourMarket {
 				benefitUnit.covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.clear(); // Clear ArrayList storing monthly outcomes for female member of the benefit unit (labour market states and gross incomes)
 
 				// Update fields of benefit units entering Covid-19 module:
-				benefitUnit.updateFullTimeHourlyEarnings(); // Update potential earnings which are then used to calculate gross income in the Covid-19 module
+				benefitUnit.resetLabourStates(); // Update potential earnings which are then used to calculate gross income in the Covid-19 module
 
 				// TODO: At the end of the year, having saved monthly states and corresponding gross incomes, sample one at random that will be the "yearly" value. This recreates the way in which FRS data underlying EUROMOD is sampled.
 				/*
@@ -270,8 +270,11 @@ public class LabourMarket {
 			}
 
 			//Update Labour Supply
-			benefitUnitsAllRegions.parallelStream()
-					.forEach(BenefitUnit::updateLabourSupplyAndIncome);
+			for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
+				benefitUnit.updateLabourSupplyAndIncome();
+			}
+//			benefitUnitsAllRegions.parallelStream()
+//					.forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
 			Map<Education, Double> potentialHourlyEarningsByEdu = new LinkedHashMap<Education, Double>();
 			Map<Education, Integer> countByEdu = new LinkedHashMap<Education, Integer>();
