@@ -561,8 +561,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				updateLagFields();
 				break;
 			case Update:
-				updateChildrenFields();
 				updateOccupancy();
+				updateChildrenFields();
 				updateComposition(); //Update household composition
 				break;
 			case CalculateChangeInEDI:
@@ -640,6 +640,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 
 	protected void updateChildrenFields() {
+
+		if (getNumberChildrenAll()==0)
+			childcareCostPerWeek = 0.0;
 
 		//Reset child age variables to update
 		n_children_0 = 0;
@@ -736,7 +739,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 
 		//Use household occupancy and number of children to set dhhtp_c4
-		if (occupancy != null) {
+		updateDhhtp_c4();
+		if (dhhtp_c4_lag1 == null) {
+			dhhtp_c4_lag1 = dhhtp_c4;
+		}
+	}
+
+	protected void updateDhhtp_c4() {
+
+		if (occupancy==null)
+			updateOccupancy();
+
+		if (occupancy!=null) {
 			if(Occupancy.Couple.equals(occupancy)) {
 				if(getNumberChildrenAll() > 0) {
 					dhhtp_c4 = Dhhtp_c4.CoupleChildren; //If household is occupied by a couple and number of children is positive, set dhhtp_c4 to "Couple with Children"
@@ -750,11 +764,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					dhhtp_c4 = Dhhtp_c4.SingleNoChildren; //Otherwise, set dhhtp_c4 to "Single without children"
 				}
 			}
-		} else if (male == null && female == null) {
-			throw new IllegalArgumentException("No responsible adult in benefit unit at composition update.");
-		}
-		if (dhhtp_c4_lag1 == null) {
-			dhhtp_c4_lag1 = dhhtp_c4;
+		} else {
+			dhhtp_c4 = null;
 		}
 	}
 
@@ -774,29 +785,35 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	 */
 	public LinkedHashSet<MultiKey<Labour>> findPossibleLabourCombinations() {
 		LinkedHashSet<MultiKey<Labour>> combinationsToReturn = new LinkedHashSet<>();
-		if(Occupancy.Couple.equals(occupancy)) {        //Need to use both partners individual characteristics to determine similar benefitUnits
-
-			//Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
+		if (Occupancy.Couple.equals(occupancy)) {
+			//Need to use both partners individual characteristics to determine similar benefitUnits
+			//Sometimes one of the occupants of the couple will be retired (or even under the age to work,
+			// which is currently the age to leave home).  For this case, the person (not at risk of work)'s
+			// labour supply will always be zero, while the other person at risk of work has a choice over the
+			// single person Labour Supply set.
 			Labour[] labourMaleValues;
-			if(male.atRiskOfWork()) {
+			if (male.atRiskOfWork()) {
 				labourMaleValues = Labour.values();
 			} else {
 				labourMaleValues = new Labour[]{Labour.ZERO};
 			}
 
 			Labour[] labourFemaleValues;
-			if(female.atRiskOfWork()) {
+			if (female.atRiskOfWork()) {
 				labourFemaleValues = Labour.values();
 			} else {
 				labourFemaleValues = new Labour[]{Labour.ZERO};
 			}
 
-			for(Labour labourMale: labourMaleValues) {
+			for (Labour labourMale: labourMaleValues) {
 				for(Labour labourFemale: labourFemaleValues) {
 					combinationsToReturn.add(new MultiKey<>(labourMale, labourFemale));
 				}
 			}
-		} else {        //For single benefitUnits, no need to check for at risk of work (i.e. retired, sick or student activity status), as this has already been done when passing this household to the labour supply module (see first loop over benefitUnits in LabourMarket#update()).
+		} else {
+			//For single benefitUnits, no need to check for at risk of work (i.e. retired, sick or student activity status),
+			// as this has already been done when passing this household to the labour supply module (see first loop over benefitUnits
+			// in LabourMarket#update()).
 			if (Occupancy.Single_Male.equals(occupancy)) {
 				for (Labour labour : Labour.values()) {
 					combinationsToReturn.add(new MultiKey<>(labour, Labour.ZERO));
@@ -1716,7 +1733,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			setMale(null);
 			removed = true;
 		} else if (children.contains(person)) {
-			removed = children.remove(person);
+			removed = removeChild(person);
 		}
 		if (!removed) {
 			throw new IllegalArgumentException("Person " + person.getKey().getId() + " could not be removed from benefit unit");
@@ -1724,9 +1741,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		person.setBenefitUnit(null);
 		if (male == null && female == null) {
 			model.removeBenefitUnit(this);
-		} else {
-			updateChildrenFields();
 		}
+	}
+
+	private boolean removeChild(Person child) {
+
+		if (!children.contains(child))
+			throw new RuntimeException("attempt to remove child from benefit unit in which they are not currently recorded as a child");
+
+		boolean removed = children.remove(child);
+		updateChildrenFields();
+		updateDhhtp_c4();
+
+		return removed;
 	}
 
 
@@ -2588,7 +2615,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		if (female == null && male == null) {
 
-			throw new IllegalArgumentException("Error - update occupancy for benefit unit with no adult");
+			return;
 		} else if (female!=null && male!=null) {
 
 			occupancy = Occupancy.Couple;
@@ -2629,7 +2656,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				female.setPartner(null);
 			}
 		}
-		updateChildrenFields();
 	}
 
 	/*
@@ -2853,12 +2879,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if (male != null) {
 				male.setPartner(null);
 				occupancy = Occupancy.Single_Male;
-				if (male.getSocialCareProvision().equals(SocialCareProvision.OnlyPartner))
-					male.setSocialCareProvision(SocialCareProvision.None);
-				else if (male.getSocialCareProvision().equals(SocialCareProvision.PartnerAndOther))
-					male.setSocialCareProvision(SocialCareProvision.OnlyOther);
-				if (male.getCareHoursFromPartnerWeekly() > 0.0)
-					male.setCareHoursFromPartnerWeekly(0.0);
 			}
 			for (Person child : children) {
 				child.setIdMother((Person)null);
@@ -2899,12 +2919,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if (female != null) {
 				female.setPartner(null);
 				occupancy = Occupancy.Single_Female;
-				if (female.getSocialCareProvision().equals(SocialCareProvision.OnlyPartner))
-					female.setSocialCareProvision(SocialCareProvision.None);
-				else if (female.getSocialCareProvision().equals(SocialCareProvision.PartnerAndOther))
-					female.setSocialCareProvision(SocialCareProvision.OnlyOther);
-				if (female.getCareHoursFromPartnerWeekly() > 0.0)
-					female.setCareHoursFromPartnerWeekly(0.0);
 			}
 			for (Person child : children) {
 				child.setIdFather((Person)null);

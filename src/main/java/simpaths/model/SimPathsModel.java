@@ -1057,14 +1057,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				}
 				Iterator<Person> personIterator = personsByAlignmentGroup.get(gender, region, age).iterator();
 				while (targetNumber < simulatedNumber && personIterator.hasNext()) {
-					// simulate death
+					// simulate death - may be of any age
 
 					Person candidate = personIterator.next();
-					if (candidate.getBenefitUnit() == null) {
+					BenefitUnit benefitUnit = candidate.getBenefitUnit();
+					if ( benefitUnit == null ) {
 						throw new RuntimeException("Missing benefit unit for candidate to kill in population alignment.");
 					}
-					if (candidate.getBenefitUnit().getOccupancy().equals(Occupancy.Couple) ||
-							candidate.getBenefitUnit().getPersonsInBU().size() == 1) {
+					if ( (!candidate.equals(benefitUnit.getMale()) && !candidate.equals(benefitUnit.getFemale())) ||
+						benefitUnit.getOccupancy().equals(Occupancy.Couple) || benefitUnit.getPersonsInBU().size() == 1 ) {
 						// death of person should not affect existence of any other person in model
 
 						candidate.death();
