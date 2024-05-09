@@ -3461,6 +3461,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return labourSupplyWeekly;
     }
 
+    public int getL1LabourSupplyHoursWeekly() {
+        return (labourSupplyWeekly_L1 != null) ? labourSupplyWeekly_L1.getHours(this) : 0;
+    }
+
     public int getLabourSupplyHoursWeekly() {
         return (labourSupplyWeekly != null) ? labourSupplyWeekly.getHours(this) : 0;
     }

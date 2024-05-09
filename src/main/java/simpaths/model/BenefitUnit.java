@@ -1852,7 +1852,27 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		FixedCostFemale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
 		FixedCostFemale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
 
-		//Other
+		// Additional variables for re-estimated LS processes
+		FixedCost_Male,
+		IncomeDiv100_MaleAgeDiv100,
+		IncomeDiv100_MaleAgeSqDiv10000,
+		IncomeDiv100_dnc,
+		IncomeDiv100_dnc02,
+		L1_lhw_1,
+		L1_lhw_10,
+		L1_lhw_2,
+		L1_lhw_20,
+		L1_lhw_3,
+		L1_lhw_30,
+		L1_lhw_4,
+		L1_lhw_40,
+		MaleLeisure_dnc,
+		FemaleLeisure_dnc,
+		MaleLeisure_dnc02,
+		FemaleLeisure_dnc02,
+		IncomeDiv100_FemaleAgeDiv100,
+		IncomeDiv100_FemaleAgeSqDiv10000,
+				//Other
 		Homeownership_D, // Indicator: does the benefit unit own home?
 
 		//Enums for use with the tax-benefit matching method
@@ -1914,6 +1934,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		Cut8,
 		Cut9,
 		Cut10,
+
 	}
 
 	public int getIntValue(Enum<?> variableID) {
@@ -1997,10 +2018,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					double meanAge = (female.getDag() + male.getDag()) * 0.5;
 					return getDisposableIncomeMonthlyUpratedToBasePriceYear() * meanAge * meanAge * 1.e-6;
 				}
-			case IncomeDiv100_NChildren017:                 //Income divided by 100 interacted with the number of children aged 0-17
-				return getDisposableIncomeMonthlyUpratedToBasePriceYear() * (double)getNumberChildren(0,17) * 1.e-2;
+			case IncomeDiv100_NChildren017, IncomeDiv100_dnc:                 //Income divided by 100 interacted with the number of children aged 0-17
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * (double)getNumberChildren(0,17) * 1.e-2;
 			case IncomeDiv100_DChildren2Under:            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
-				return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getIndicatorChildren(0,2).ordinal() * 1.e-2;
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,2).ordinal() * 1.e-2;
 			case MaleLeisure:                            //24*7 - labour supply weekly for male
 				return Parameters.HOURS_IN_WEEK - male.getLabourSupplyHoursWeekly();
 			case MaleLeisureSq:
@@ -2011,7 +2034,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				return (Parameters.HOURS_IN_WEEK - male.getLabourSupplyHoursWeekly()) * male.getDag() * 1.e-2;
 			case MaleLeisure_MaleAgeSqDiv10000:
 				return (Parameters.HOURS_IN_WEEK - male.getLabourSupplyHoursWeekly()) * male.getDag() * male.getDag() * 1.e-4;
-			case MaleLeisure_NChildren017:
+			case MaleLeisure_NChildren017, MaleLeisure_dnc:
 				return (Parameters.HOURS_IN_WEEK - male.getLabourSupplyHoursWeekly()) * (double)getNumberChildren(0,17);
 			case MaleLeisure_DChildren2Under:
 				return (Parameters.HOURS_IN_WEEK - male.getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
@@ -2105,7 +2128,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly()) * female.getDag() * 1.e-2;
 			case FemaleLeisure_FemaleAgeSqDiv10000:
 				return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly()) * female.getDag() * female.getDag() * 1.e-4;
-			case FemaleLeisure_NChildren017:
+			case FemaleLeisure_NChildren017, FemaleLeisure_dnc:
 				return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly()) * (double)getNumberChildren(0,17);
 			case FemaleLeisure_DChildren2Under:
 				return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
@@ -2188,7 +2211,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly());
 				} else return 0.;
 				//Note: In the previous version of the model, Fixed Cost was returning -1 to match the regression coefficients
-			case FixedCostMale:
+			case FixedCostMale, FixedCost_Male:
 				if(male.getLabourSupplyHoursWeekly() > 0) {
 					return 1.;
 				} else return 0.;
@@ -2384,7 +2407,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 				//The following regressors only apply when the female hours worked is greater than 0
 
-
 			case FixedCostFemaleByNumberChildren:
 				if(female.getLabourSupplyHoursWeekly() > 0) {
 					return - children.size();        //Return negative as costs appear negative in utility function equation
@@ -2406,6 +2428,46 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						return female.getDeh_c3().equals(Education.High) ? -1. : 0.;
 					} else return 0.;
 				} else throw new IllegalArgumentException("Error - FixedCostByHighEducation regressor should only be called for Households containing single people (with or without children), however household " + key.getId() + " has a couple, with male " + male.getKey().getId() + " and female " + female.getKey().getId());
+
+				// Additional variables for re-estimated LS processes
+			case IncomeDiv100_MaleAgeDiv100:
+					return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+							getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * male.getDag() * 1.e-4;
+			case IncomeDiv100_MaleAgeSqDiv10000:
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * male.getDag() * 1.e-6;
+			case IncomeDiv100_FemaleAgeDiv100:
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * female.getDag() * 1.e-4;
+			case IncomeDiv100_FemaleAgeSqDiv10000:
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * female.getDag() * 1.e-6;
+			case IncomeDiv100_dnc02:
+				return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+						getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,1).ordinal() * 1.e-2;
+			case L1_lhw_1:
+				// Coefficient to be applied to lagged hours of work of female member of BU interacted with "alternative 1" of hours of labour supply
+				// Note: labour supply value for person under evaluation is set to the alternative being considered in the update labour supply process
+				return (female.getLabourSupplyWeekly().equals(Labour.TEN)) ? female.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_10:
+				return (male.getLabourSupplyWeekly().equals(Labour.TEN)) ? male.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_2:
+				return (female.getLabourSupplyWeekly().equals(Labour.TWENTY)) ? female.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_20:
+				return (male.getLabourSupplyWeekly().equals(Labour.TWENTY)) ? male.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_3:
+				return (female.getLabourSupplyWeekly().equals(Labour.THIRTY)) ? female.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_30:
+				return (male.getLabourSupplyWeekly().equals(Labour.THIRTY)) ? male.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_4:
+				return (female.getLabourSupplyWeekly().equals(Labour.FORTY)) ? female.getL1LabourSupplyHoursWeekly() : 0.;
+			case L1_lhw_40:
+				return (male.getLabourSupplyWeekly().equals(Labour.FORTY)) ? male.getL1LabourSupplyHoursWeekly() : 0.;
+            case MaleLeisure_dnc02:
+				return (Parameters.HOURS_IN_WEEK - male.getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
+			case FemaleLeisure_dnc02:
+				return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
+
 			case Homeownership_D:
 				return isDhh_owned()? 1. : 0.;
 			case Constant:
