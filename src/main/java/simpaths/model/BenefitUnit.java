@@ -1345,7 +1345,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			MultiKeyMap<Labour, Double> grossIncomeMonthlyByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 			MultiKeyMap<Labour, Match> taxDbMatchByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 			LinkedHashSet<MultiKey<Labour>> possibleLabourCombinations = findPossibleLabourCombinations(); // Find possible labour combinations for this benefit unit
-			MultiKeyMap<Labour, Double> labourSupplyUtilityExponentialRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+			MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
 
 			//Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
 			if(Occupancy.Couple.equals(occupancy)) {
@@ -1369,22 +1370,22 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
 
 					//Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
-					double exponentialRegressionScore = 0.;
+					double regressionScore = 0.;
 					if(male.atRiskOfWork()) { //If male has flexible labour supply
 						if(female.atRiskOfWork()) { //And female has flexible labour supply
 							//Follow utility process for couples
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class));
+							regressionScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
 						} else if (!female.atRiskOfWork()) { //Male has flexible labour supply, female doesn't
 							//Follow utility process for single males for the UK
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityMalesWithDependent().getScore(this, BenefitUnit.Regressors.class));
+							regressionScore = Parameters.getRegLabourSupplyUtilityMalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
 							//In Italy, this should follow a separate set of estimates. One way is to differentiate between countries here; another would be to add a set of estimates for both countries, but for the UK have the same number as for singles
 							//Introduced a new category of estimates, Males/Females with Dependent to be used when only one of the couple is flexible in labour supply. In Italy, these have a separate set of estimates; in the UK they use the same estimates as "independent" singles
 						}
 					} else if(female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
 						//Follow utility process for single female
-						exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class));
+						regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
 					} else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
-					if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
+					if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
 						throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
 					}
 
@@ -1392,7 +1393,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
 					grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
 					taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
-					labourSupplyUtilityExponentialRegressionScoresByLabourPairs.put(labourKey, exponentialRegressionScore); //XXX: Adult children could contribute their income to the hh, but then utility would have to be joint for a household with adult children, and they couldn't be treated separately as they are at the moment?
+					labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, regressionScore); //XXX: Adult children could contribute their income to the hh, but then utility would have to be joint for a household with adult children, and they couldn't be treated separately as they are at the moment?
 				}
 			} else {
 				// single adult
@@ -1409,13 +1410,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
 						grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
 
-						double exponentialRegressionScore;
+						double regressionScore = 0.;
 						if (male.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for male adult children
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class));
+							regressionScore = Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class);
 						} else {
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class));
+							regressionScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
 						}
-						if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
+						if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
 							throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
 						}
 
@@ -1423,7 +1424,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
 						grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
 						taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
-						labourSupplyUtilityExponentialRegressionScoresByLabourPairs.put(labourKey, exponentialRegressionScore);
+						labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, regressionScore);
 					}
 				} else if (Occupancy.Single_Female.equals(occupancy)) {        //Occupant must be a single female
 
@@ -1437,24 +1438,24 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 						benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
 						grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
 
-						double exponentialRegressionScore;
+						double regressionScore = 0.;
 						if (female.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for female adult children
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class));
+							regressionScore = Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class);
 						} else {
-							exponentialRegressionScore = Math.exp(Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class));
+							regressionScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
 						}
-						if (Double.isNaN(exponentialRegressionScore) || Double.isInfinite(exponentialRegressionScore)) {
+						if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
 							throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
 						}
 						disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
 						benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
 						grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
 						taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
-						labourSupplyUtilityExponentialRegressionScoresByLabourPairs.put(labourKey, exponentialRegressionScore);
+						labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, regressionScore);
 					}
 				}
 			}
-			if(labourSupplyUtilityExponentialRegressionScoresByLabourPairs.isEmpty()) {
+			if(labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
 				// error check
 
 				System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
@@ -1468,8 +1469,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 
 			//Sample labour supply from possible labour (pairs of) values
-			labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityExponentialRegressionScoresByLabourPairs, randomDrawLabourSupply);
-
+			try {
+				MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
+				labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, randomDrawLabourSupply);
+			} catch (RuntimeException e) {
+				System.out.print("Could not determine labour supply choice for BU with ID: " + getKey().getId());
+			}
 			// populate labour supply
 			if(model.debugCommentsOn && labourSupplyChoice!=null) {
 				log.trace("labour supply choice " + labourSupplyChoice);
@@ -1505,6 +1510,41 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		calculateBUIncome();
 	}
 
+	private MultiKeyMap<Labour, Double> convertRegressionScoresToProbabilities(MultiKeyMap<Labour, Double> regressionScoresMap) {
+        MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>()); // Output map to update and return
+		double logSumExp = getLogSumExp(regressionScoresMap);
+
+		// Transform using the log-sum-exp
+		for (MultiKey<? extends Labour> key : regressionScoresMap.keySet()) {
+			double regressionScore = regressionScoresMap.get(key);
+			double regressionProbability = Math.exp(regressionScore - logSumExp);
+			labourSupplyUtilityRegressionProbabilitiesByLabourPairs.put(key, regressionProbability);
+		}
+
+		return labourSupplyUtilityRegressionProbabilitiesByLabourPairs;
+	}
+
+	private static double getLogSumExp(MultiKeyMap<Labour, Double> regressionScoresMap) {
+		double maxRegressionScore = Double.NEGATIVE_INFINITY;
+		double sumExpRegScoreMinusMax = 0.;
+		double logSumExp = 0.;
+
+		// Find maximum of regression scores
+		for (double val : regressionScoresMap.values()) {
+			if(val > maxRegressionScore){
+				maxRegressionScore = val;
+			}
+		}
+
+		// Calculate sum of exp() differences between each element and max
+		for (double val : regressionScoresMap.values()) {
+			sumExpRegScoreMinusMax += Math.exp(val - maxRegressionScore);
+		}
+
+		// Calculate log sum exp
+		logSumExp = maxRegressionScore + Math.log(sumExpRegScoreMinusMax);
+		return logSumExp;
+	}
 
 	/////////////////////////////////////////////////////////////////////////////////
 	//
@@ -2212,7 +2252,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				} else return 0.;
 				//Note: In the previous version of the model, Fixed Cost was returning -1 to match the regression coefficients
 			case FixedCostMale, FixedCost_Male:
-				if(male.getLabourSupplyHoursWeekly() > 0) {
+				if(male != null && male.getLabourSupplyHoursWeekly() > 0) {
 					return 1.;
 				} else return 0.;
 			case FixedCostMale_NorthernRegions:
