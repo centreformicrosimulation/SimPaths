@@ -88,7 +88,9 @@ public class Parameters {
 		"dhhtp_c4",			//household composition
 		"ydses_c5",			//household income quantile
 		"dhh_owned",		//flag indicating if benefit unit owns a house
-		"liquid_wealth"		//benefit unit net wealth to finance consumption
+		"liquid_wealth",	//benefit unit net wealth non-pension non-housing wealth
+        "tot_pen",	        //benefit unit net pension wealth
+        "nvmhome",	        //benefit unit net housing wealth
     };
 
     public static final String[] PERSON_VARIABLES_INITIAL = new String[] {
@@ -181,7 +183,11 @@ public class Parameters {
     public static final double RateOfConvergenceFactor = 0.9;
 
     // parameters to manage simulation of optimised decisions
-    public static boolean projectWealth = false;
+    public static boolean projectLiquidWealth = false;
+    public static boolean projectPensionWealth = false;
+    public static boolean projectHousingWealth = false;
+    public static double pensionWealthDiscount = 0.0;
+    public static double housingWealthDiscount = 0.0;
     public static boolean enableIntertemporalOptimisations = false;
     public static Grids grids = null;
 
@@ -793,7 +799,7 @@ public class Parameters {
         populationInitialisationInputFileName = "population_initial_" + country;
         setCountryRegions(country);
         setEnableIntertemporalOptimisations(enableIntertemporalOptimisations);
-        setProjectWealth();
+        setProjectLiquidWealth();
         String countryString = country.toString();
         loadTimeSeriesFactorMaps(country);
 
@@ -2760,11 +2766,11 @@ public class Parameters {
     public static void setEnableIntertemporalOptimisations(boolean val) {
         enableIntertemporalOptimisations = val;
     }
-    public static void setProjectWealth() {
-        setProjectWealth(enableIntertemporalOptimisations);
+    public static void setProjectLiquidWealth() {
+        setProjectLiquidWealth(enableIntertemporalOptimisations);
     }
-    public static void setProjectWealth(boolean val) {
-        projectWealth = val;
+    public static void setProjectLiquidWealth(boolean val) {
+        projectLiquidWealth = val;
     }
 
     public static double getTargetShare(int year, TargetShares targetShareType) {

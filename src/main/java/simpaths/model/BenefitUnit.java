@@ -90,6 +90,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Column(name="liquid_wealth")
 	private Double liquidWealth;
 
+	@Column(name="tot_pen")
+	private Double pensionWealth;
+
+	@Column(name="nvmhome")
+	private Double housingWealth;
+
 	@Enumerated(EnumType.STRING)
 	Occupancy occupancy;
 
@@ -387,7 +393,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.equivalisedDisposableIncomeYearly = 0.;
 		this.benefitsReceivedPerMonth = 0.;
 		this.createdByConstructor = "LongID";
-		if (Parameters.projectWealth)
+		if (Parameters.projectLiquidWealth)
 			setLiquidWealth(0.);
 	}
 
@@ -397,7 +403,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this(benefitUnitIdCounter++);
 		region = person.getRegion();
 
-		if (Parameters.projectWealth) {
+		if (Parameters.projectLiquidWealth) {
 			// transfer wealth between benefit units
 
 			BenefitUnit fromBenefitUnit = person.getBenefitUnit();
@@ -429,7 +435,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			throw new RuntimeException("ERROR - region of responsible male and female must match!");
 		}
 
-		if (Parameters.projectWealth) {
+		if (Parameters.projectLiquidWealth) {
 			// transfer wealth between benefit units
 
 			setLiquidWealth(p1.getLiquidWealth() + p2.getLiquidWealth());
@@ -494,8 +500,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		} else {
 			this.atRiskOfPoverty_lag1 = originalBenefitUnit.atRiskOfPoverty;
 		}
-		if (Parameters.projectWealth)
-			setLiquidWealth(originalBenefitUnit.getLiquidWealth());
+		if (Parameters.projectLiquidWealth)
+			initialiseLiquidWealth(
+					originalBenefitUnit.getLiquidWealth(),
+					originalBenefitUnit.getPensionWealth(false),
+					originalBenefitUnit.getHousingWealth(false)
+			);
 		this.children = new LinkedHashSet<>();
 		this.n_children_0 = originalBenefitUnit.n_children_0;
 		this.n_children_1 = originalBenefitUnit.n_children_1;
@@ -2790,6 +2800,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return new PanelEntityKey(key.getId());
 	}
 
+	public void initialiseLiquidWealth(double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
+		double wealth = donorLiquidWealth;
+		if (!Parameters.projectPensionWealth)
+			wealth += (1.0 - Parameters.pensionWealthDiscount) * donorPensionWealth;
+		if (!Parameters.projectHousingWealth)
+			wealth += (1.0 - Parameters.housingWealthDiscount) * donorHousingWealth;
+		setLiquidWealth(wealth);
+	}
+
 	public double getLiquidWealth() {
 		return getLiquidWealth(true);
 	}
@@ -2797,7 +2816,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	public double getLiquidWealth(boolean throwError) {
 		if (throwError) {
 			if (liquidWealth == null)
-				throw new RuntimeException("Call to get benefit unit wealth before it is initialised.");
+				throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
 			return liquidWealth;
 		} else {
 			if (liquidWealth==null) {
@@ -2808,8 +2827,52 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 	}
 
-	public void setLiquidWealth(double liquidWealth) {
+	public void setLiquidWealth(Double liquidWealth) {
 		this.liquidWealth = liquidWealth;
+	}
+
+	public double getPensionWealth() {
+		return getPensionWealth(true);
+	}
+
+	public double getPensionWealth(boolean throwError) {
+		if (throwError) {
+			if (pensionWealth == null)
+				throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
+			return pensionWealth;
+		} else {
+			if (pensionWealth==null) {
+				return 0.0;
+			} else {
+				return pensionWealth;
+			}
+		}
+	}
+
+	public void setPensionWealth(Double pensionWealth) {
+		this.pensionWealth = pensionWealth;
+	}
+
+	public double getHousingWealth() {
+		return getHousingWealth(true);
+	}
+
+	public double getHousingWealth(boolean throwError) {
+		if (throwError) {
+			if (housingWealth == null)
+				throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
+			return housingWealth;
+		} else {
+			if (housingWealth==null) {
+				return 0.0;
+			} else {
+				return housingWealth;
+			}
+		}
+	}
+
+	public void setHousingWealth(Double wealth) {
+		housingWealth = wealth;
 	}
 
 	public double getChildcareCostPerWeek() {
@@ -3471,7 +3534,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	public void updateNonLabourIncome() {
 
-		if (Parameters.projectWealth) {
+		if (Parameters.projectLiquidWealth) {
 
 			updateRetirementPensions();
 			setInvestmentIncomeAnnual();

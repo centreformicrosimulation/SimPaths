@@ -513,7 +513,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
 		// CONSUMPTION AND SAVINGS MODULE
-		if (Parameters.projectWealth)
+		if (Parameters.projectLiquidWealth)
 			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
 		addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
 
