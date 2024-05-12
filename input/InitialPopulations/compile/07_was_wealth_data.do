@@ -432,6 +432,10 @@ foreach file in "$dir_was_data\was_round_5_person_eul_oct_2020.dta" ///
 		// wealth, omitting value of state pension rights
 		gen wealth = ww + isa_fam + bus_assets + tot_open + tot_pp
 		label var wealth "total net wealth"
+		
+		// net value of main home
+		gen nvmhome = dvhvalue - main_mort
+		label var nvmhome "net value of main home"
 
 		// regression variables
 		gen idnk04 = (nk04>0)
@@ -473,7 +477,7 @@ foreach file in "$dir_was_data\was_round_5_person_eul_oct_2020.dta" ///
 		drop pct1
 
 		// save control data
-		keep case person_id bu bu_rp year sex grad gradsp dvage17 na nk* single_man single_woman couple couple_ref gor2 dhe2 healths p_healths dlltsd dlltsdsp idnk04 pct emp empsp wealth inc was dwt
+		keep case person_id bu bu_rp year sex grad gradsp dvage17 na nk* single_man single_woman couple couple_ref gor2 dhe2 healths p_healths dlltsd dlltsdsp idnk04 pct emp empsp wealth tot_pen nvmhome inc was dwt
 		if (`ww' > `ww0') {
 			append using "$dir_data\was_wealthdata.dta"
 		}
