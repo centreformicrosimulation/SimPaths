@@ -51,7 +51,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 	private static Map<String, Object> collectorArgs;
 
-	public static String configFile = "config.yml";
+	public static String configFile = "config - calibration.yml";
 
 
 	/**

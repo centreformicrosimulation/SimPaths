@@ -502,6 +502,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		if (Parameters.projectLiquidWealth)
 			initialiseLiquidWealth(
+					originalBenefitUnit.getRefPersonForDecisions().getDag(),
 					originalBenefitUnit.getLiquidWealth(),
 					originalBenefitUnit.getPensionWealth(false),
 					originalBenefitUnit.getHousingWealth(false)
@@ -2800,12 +2801,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return new PanelEntityKey(key.getId());
 	}
 
-	public void initialiseLiquidWealth(double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
-		double wealth = donorLiquidWealth;
+	public void initialiseLiquidWealth(int age, double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
+		double wealth = (1.0 - Parameters.getLiquidWealthDiscount()) * donorLiquidWealth;
 		if (!Parameters.projectPensionWealth)
-			wealth += (1.0 - Parameters.pensionWealthDiscount) * donorPensionWealth;
+			wealth += (1.0 - Parameters.getPensionWealthDiscount(age)) * donorPensionWealth;
 		if (!Parameters.projectHousingWealth)
-			wealth += (1.0 - Parameters.housingWealthDiscount) * donorHousingWealth;
+			wealth += (1.0 - Parameters.getHousingWealthDiscount(age)) * donorHousingWealth;
 		setLiquidWealth(wealth);
 	}
 

@@ -186,8 +186,6 @@ public class Parameters {
     public static boolean projectLiquidWealth = false;
     public static boolean projectPensionWealth = false;
     public static boolean projectHousingWealth = false;
-    public static double pensionWealthDiscount = 0.0;
-    public static double housingWealthDiscount = 0.0;
     public static boolean enableIntertemporalOptimisations = false;
     public static Grids grids = null;
 
@@ -1009,8 +1007,6 @@ public class Parameters {
             columnsPartnershipU1 = 21;
             columnsPartnershipU2 = 27;
             columnsFertilityF1 = 22;
-            columnsIncomeI1a = 13;
-            columnsIncomeI1b = 22;
             columnsIncomeI3a = 13;
             columnsIncomeI3b = 22;
             columnsIncomeI3c = 23;
@@ -1043,10 +1039,18 @@ public class Parameters {
             columnsWagesMalesE = 31;
             columnsWagesFemalesNE = 30;
             columnsWagesFemalesE = 31;
+            columnsWagesMalesNE = 34;
+            columnsWagesMalesE = 35;
+            columnsWagesFemalesNE = 34;
+            columnsWagesFemalesE = 35;
             columnsEmploymentSelectionMalesNE = 30;
             columnsEmploymentSelectionMalesE = 29;
             columnsEmploymentSelectionFemalesNE = 30;
             columnsEmploymentSelectionFemalesE = 29;
+            columnsEmploymentSelectionMalesNE = 32;
+            columnsEmploymentSelectionMalesE = 31;
+            columnsEmploymentSelectionFemalesNE = 32;
+            columnsEmploymentSelectionFemalesE = 31;
             columnsLabourSupplyUtilityMales = 6;
             columnsLabourSupplyUtilityFemales = 6;
             columnsLabourSupplyUtilityMalesWithDependent = 6;
@@ -1092,19 +1096,19 @@ public class Parameters {
             columnsPartnershipU2b = 38;
             columnsFertilityF1a = 11;
             columnsFertilityF1b = 34;
-            columnsIncomeI1a = 19;  //*
-            columnsIncomeI1b = 31;  //*
             columnsIncomeI3a = 20;
             columnsIncomeI3b = 29;
-            columnsIncomeI3c = 28;  //*
-            columnsIncomeI4a = 24;  //*
             columnsIncomeI4b = 25;
             columnsIncomeI5a = 25;
             columnsIncomeI5b = 25;
-            columnsIncomeI6a = 22;  //*
-            columnsIncomeI6b = 22;  //*
             columnsIncomeI3a_selection = 20;
             columnsIncomeI3b_selection = 29;
+            columnsIncomeI3a = 19;
+            columnsIncomeI3b = 28;
+            columnsIncomeI5a = 24;
+            columnsIncomeI5b = 24;
+            columnsIncomeI3a_selection = 19;
+            columnsIncomeI3b_selection = 28;
             columnsLeaveHomeP1a = 25;
             columnsHomeownership = 33;
             columnsRetirementR1a = 26;
@@ -3040,5 +3044,35 @@ public class Parameters {
 
     public static void setCoeffLabourSupplyUtilityCouples(MultiKeyCoefficientMap coeffLabourSupplyUtilityCouples) {
         Parameters.coeffLabourSupplyUtilityCouples = coeffLabourSupplyUtilityCouples;
+    }
+
+    public static double getLiquidWealthDiscount() {
+        return 0.0;
+    }
+
+    public static double getPensionWealthDiscount(int age) {
+        int youngAgeCeiling = 55, oldAgeFloor = 65;
+        double discountYoung = 0.9, discountOld = 0.2;
+        if (age <= youngAgeCeiling) {
+            return discountYoung;
+        } else if (age >= oldAgeFloor) {
+            return discountOld;
+        } else {
+            return (discountYoung * (double)(oldAgeFloor-age) + discountOld * (double)(age - youngAgeCeiling)) /
+                    (double)(oldAgeFloor - youngAgeCeiling);
+        }
+    }
+
+    public static double getHousingWealthDiscount(int age) {
+        int youngAgeCeiling = 55, oldAgeFloor = 65;
+        double discountYoung = 0.8, discountOld = 0.2;
+        if (age <= youngAgeCeiling) {
+            return discountYoung;
+        } else if (age >= oldAgeFloor) {
+            return discountOld;
+        } else {
+            return (discountYoung * (double)(oldAgeFloor-age) + discountOld * (double)(age - youngAgeCeiling)) /
+                    (double)(oldAgeFloor - youngAgeCeiling);
+        }
     }
 }
