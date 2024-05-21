@@ -35,7 +35,9 @@ public class SimPathsMultiRun extends MultiRun {
 	private static int endYear = 2020;
 	private static boolean randomSeedInnov = true;
 	private static boolean intertemporalElasticityInnov = false;
+	private static boolean labourSupplyElasticityInnov = false;
 	private static double interestRateInnov = 0.0;
+	private static double disposableIncomeInnov = 0.0;
 
 	private Long counter = 0L;
 
@@ -364,6 +366,7 @@ public class SimPathsMultiRun extends MultiRun {
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
 		model.setInterestRateInnov(interestRateInnov);
+		model.setDisposableIncomeInnov(disposableIncomeInnov);
 	}
 
 	private void iterateParameters(Long counter) {
@@ -377,6 +380,12 @@ public class SimPathsMultiRun extends MultiRun {
 				interestRateInnov = 0.005;
 			else if (counter==2)
 				interestRateInnov = -0.005;
+		}
+		if (labourSupplyElasticityInnov) {
+			if (counter==1)
+				disposableIncomeInnov = 0.01;
+			else if (counter==2)
+				disposableIncomeInnov = -0.01;
 		}
 	}
 	

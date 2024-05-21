@@ -145,9 +145,9 @@ public class DecisionParams {
                                       boolean responsesToLowWageOffer, boolean respondToRetirement, String readGrid,
                                       String outputDir, Integer startYearInit, Integer endYear) {
 
-        rSafeAssets = Parameters.getSampleAverageRate(TimeVaryingRate.SavingReturns);
-        rDebtLow = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostLow);
-        rDebtHi = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostHigh);
+        rSafeAssets = Parameters.getSampleAverageRate(TimeVaryingRate.SavingReturns) + Parameters.interestRateInnov;
+        rDebtLow = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostLow) + Parameters.interestRateInnov;
+        rDebtHi = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostHigh) + Parameters.interestRateInnov;
 
         // directory structure
         setGridsInputDirectory(readGrid);
