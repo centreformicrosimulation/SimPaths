@@ -482,10 +482,14 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceFertilityF1; //Probit fertility for Italy
 
     //Income
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI1a; //Linear regression non-employment non-benefit income if in continuous education
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI1b; //Linear regression non-employment non-benefit income if not in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a; //Capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b; //Capital income if not in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4b; // Pension income for those moving from employment to retirement (I4a) and those already retired (I4b)
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI3c; //Pension income for those aged over 50 who are not in continuous education
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4a, coeffCovarianceIncomeI4b; // Pension income for those moving from employment to retirement (I4a) and those already retired (I4b)
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI5a_selection, coeffCovarianceIncomeI5b_amount; // Selection equation for receiving pension income for those moving from employment to retirement (I5a) and amount in levels (I5b)
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI6a_selection, coeffCovarianceIncomeI6b_amount; // Selection equation for receiving pension income for those in retirement (I6a) and amount in levels (I6b), in the initial simulated year
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a_selection; //Probability of receiving capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b_selection; //Probability of receiving capital income if not in continuous education
 
@@ -493,12 +497,12 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHomeownership; //Probit regression assigning homeownership status
 
     //Wages
-    private static MultiKeyCoefficientMap coeffCovarianceWagesMalesNE, coeffCovarianceWagesMalesE;
-    private static MultiKeyCoefficientMap coeffCovarianceWagesFemalesNE, coeffCovarianceWagesFemalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceWagesMales, coeffCovarianceWagesMalesNE, coeffCovarianceWagesMalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceWagesFemales, coeffCovarianceWagesFemalesNE, coeffCovarianceWagesFemalesE;
 
     //Labour Market
-    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionMalesNE, coeffCovarianceEmploymentSelectionMalesE;
-    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionFemalesNE, coeffCovarianceEmploymentSelectionFemalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionMales, coeffCovarianceEmploymentSelectionMalesNE, coeffCovarianceEmploymentSelectionMalesE;
+    private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionFemales, coeffCovarianceEmploymentSelectionFemalesNE, coeffCovarianceEmploymentSelectionFemalesE;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMalesWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
@@ -686,7 +690,6 @@ public class Parameters {
     //Fertility
     private static ProbitRegression regFertilityF1a;
     private static ProbitRegression regFertilityF1b;
-
     private static ProbitRegression regFertilityF1;
 
     //Income
@@ -696,7 +699,6 @@ public class Parameters {
     private static LinearRegression regIncomeI3b;
     private static LinearRegression regIncomeI3c;
     private static LinearRegression regIncomeI4a;
-
     private static LinearRegression regIncomeI4b;
     private static LinearRegression regIncomeI5b_amount;
     private static LinearRegression regIncomeI6b_amount;
@@ -704,6 +706,7 @@ public class Parameters {
     private static LogitRegression regIncomeI3b_selection;
     private static LogitRegression regIncomeI5a_selection;
     private static LogitRegression regIncomeI6a_selection;
+
     //Homeownership
     private static ProbitRegression regHomeownershipHO1a;
 
@@ -1018,6 +1021,8 @@ public class Parameters {
             columnsPartnershipU1 = 21;
             columnsPartnershipU2 = 27;
             columnsFertilityF1 = 22;
+            columnsIncomeI1a = 13;
+            columnsIncomeI1b = 22;
             columnsIncomeI3a = 13;
             columnsIncomeI3b = 22;
             columnsIncomeI3c = 23;
@@ -1050,21 +1055,17 @@ public class Parameters {
             columnsWagesMalesE = 31;
             columnsWagesFemalesNE = 30;
             columnsWagesFemalesE = 31;
-            columnsWagesMalesNE = 34;
-            columnsWagesMalesE = 35;
-            columnsWagesFemalesNE = 34;
-            columnsWagesFemalesE = 35;
-            columnsEmploymentSelectionMalesNE = 32;
-            columnsEmploymentSelectionMalesE = 31;
-            columnsEmploymentSelectionFemalesNE = 32;
-            columnsEmploymentSelectionFemalesE = 31;
-            columnsLabourSupplyUtilityMales = 6;
-            columnsLabourSupplyUtilityFemales = 6;
-            columnsLabourSupplyUtilityMalesWithDependent = 6;
-            columnsLabourSupplyUtilityFemalesWithDependent = 6;
-            columnsLabourSupplyUtilityACMales = 6;
-            columnsLabourSupplyUtilityACFemales = 6;
-            columnsLabourSupplyUtilityCouples = 12;
+            columnsEmploymentSelectionMalesNE = 30;
+            columnsEmploymentSelectionMalesE = 29;
+            columnsEmploymentSelectionFemalesNE = 30;
+            columnsEmploymentSelectionFemalesE = 29;
+            columnsLabourSupplyUtilityMales = 18;
+            columnsLabourSupplyUtilityFemales = 12;
+            columnsLabourSupplyUtilityMalesWithDependent = 23;
+            columnsLabourSupplyUtilityFemalesWithDependent = 23;
+            columnsLabourSupplyUtilityACMales = 17;
+            columnsLabourSupplyUtilityACFemales = 17;
+            columnsLabourSupplyUtilityCouples = 14;
             columnsLabourCovid19_SE = 1;
             columnsLabourCovid19_2a_processes = 1;
             columnsHealthH1a = 28;
@@ -1103,19 +1104,19 @@ public class Parameters {
             columnsPartnershipU2b = 38;
             columnsFertilityF1a = 11;
             columnsFertilityF1b = 34;
+            columnsIncomeI1a = 19;  //*
+            columnsIncomeI1b = 31;  //*
             columnsIncomeI3a = 20;
             columnsIncomeI3b = 29;
+            columnsIncomeI3c = 28;  //*
+            columnsIncomeI4a = 24;  //*
             columnsIncomeI4b = 25;
             columnsIncomeI5a = 25;
             columnsIncomeI5b = 25;
+            columnsIncomeI6a = 22;  //*
+            columnsIncomeI6b = 22;  //*
             columnsIncomeI3a_selection = 20;
             columnsIncomeI3b_selection = 29;
-            columnsIncomeI3a = 19;
-            columnsIncomeI3b = 28;
-            columnsIncomeI5a = 24;
-            columnsIncomeI5b = 24;
-            columnsIncomeI3a_selection = 19;
-            columnsIncomeI3b_selection = 28;
             columnsLeaveHomeP1a = 25;
             columnsHomeownership = 33;
             columnsRetirementR1a = 26;
