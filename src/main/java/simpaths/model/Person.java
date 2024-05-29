@@ -1680,11 +1680,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
 //		if( activity_status.equals(Les_c4.Student) && toLeaveSchool) {
 
-            //TODO: Need to see if it is possible to change MultiProbitRegression, so that we don't have to pass the Education class below, as it could
-            // potentially cause problems if this variable would ever be set as a different class to the type that MultiProbitRegression has been
-            // initialised with (i.e. the T type in the classes).
-
-
             Map<Education,Double> probs = Parameters.getRegEducationE2a().getProbabilities(this, Person.DoublesVariables.class);
             Education newEducationLevel = ManagerRegressions.multiEvent(probs, educationInnov.nextDouble());
 
@@ -3469,6 +3464,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public Labour getLabourSupplyWeekly() {
         return labourSupplyWeekly;
+    }
+
+    public int getL1LabourSupplyHoursWeekly() {
+        return (labourSupplyWeekly_L1 != null) ? labourSupplyWeekly_L1.getHours(this) : 0;
     }
 
     public int getLabourSupplyHoursWeekly() {
