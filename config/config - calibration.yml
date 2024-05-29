@@ -30,8 +30,9 @@ model_args:
     alignEmployment: false
     projectSocialCare: false
     enableIntertemporalOptimisations: true
-    responsesToLowWageOffer: false
-#    useSavedBehaviour: false
+    responsesToLowWageOffer: true
+    saveImperfectTaxDBMatches: false
+    useSavedBehaviour: false
 #    readGrid: "laptop serial"
 #    saveBehaviour: true
 #    employmentOptionsOfPrincipalWorker: 3
@@ -46,6 +47,7 @@ model_args:
 innovation_args:
 #  randomSeedInnov: false
 #  intertemporalElasticityInnov: false
+#  labourSupplyElasticityInnov: true
 
 collector_args:
 #    calculateGiniCoefficients: false

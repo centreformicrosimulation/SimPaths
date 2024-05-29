@@ -332,12 +332,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private double desiredAgeDiff;
     @Transient
     private double desiredEarningsPotentialDiff;
-    @Column(name="original_id_person")
-    private Long id_original;
-    @Transient
-    private Long id_bu_original;
-    @Transient
-    private Long id_hh_original;
+    @Column(name="id_original_person")
+    private Long idOriginalPerson;
+    @Column(name="id_original_bu")
+    private Long idOriginalBU;
+    @Column(name="id_original_hh")
+    private Long idOriginalHH;
     @Transient
     private Person originalPartner;
     @Transient
@@ -559,9 +559,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         this(personIdCounter++);
 
-        this.id_hh_original = originalPerson.idHousehold;
-        this.id_bu_original = originalPerson.idBenefitUnit;
-        this.id_original = originalPerson.key.getId();
+        this.idOriginalHH = originalPerson.idHousehold;
+        this.idOriginalBU = originalPerson.idBenefitUnit;
+        this.idOriginalPerson = originalPerson.key.getId();
 
         this.dag = originalPerson.dag;
         this.ageGroup = originalPerson.ageGroup;
@@ -3663,12 +3663,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.der = der;
     }
 
-    public Long getId_original() {
-        return id_original;
+    public Long getIdOriginalPerson() {
+        return idOriginalPerson;
     }
 
-    public Long getId_bu_original() {
-        return id_bu_original;
+    public Long getIdOriginalBU() {
+        return idOriginalBU;
     }
 
     public int getAgeGroup() {

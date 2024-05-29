@@ -178,6 +178,7 @@ public class ManagerFileGrids {
                 bean.setEducation(currentStates.getEducation());
                 bean.setStudent(currentStates.getStudent());
                 bean.setHealth(currentStates.getHealthVal());
+                bean.setWageOffer(currentStates.getWageOffer());
                 bean.setLiquidWealth(currentStates.getLiquidWealth());
                 bean.setWagePotentialperHour(currentStates.getFullTimeHourlyEarningsPotential());
                 bean.setPensionIncomePerYear(currentStates.getPensionPerYear());
@@ -215,6 +216,7 @@ public class ManagerFileGrids {
                 record.add(bean.getNk1String());
                 record.add(bean.getNk2String());
                 record.add(bean.getHealthString());
+                record.add(bean.getWageOfferString());
                 record.add(bean.getLiquidWealthString());
                 record.add(bean.getWagePotentialperHourString());
                 record.add(bean.getPensionIncomePerYearString());

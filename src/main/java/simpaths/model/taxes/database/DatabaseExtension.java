@@ -16,17 +16,32 @@ public class DatabaseExtension {
 
     /**
      * METHOD TO EXTEND UKMOD INPUT DATA TO FILL GAPS
+     *
+     * BEFORE USING THIS METHOD NEED TO ENSURE THAT THE "DATABASE SPECIFIC VARIABLES" ARE
+     * DEFINED AS DESIRED
      */
     public static void extendInputData() {
+        String ukmodInputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
+        String ukmodInputFilename = "UK_2019_b1";
+        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\intertemp2";
+        extendInputData(ukmodInputDirectory, ukmodInputFilename, imperfectMatchesSimPath);
+    }
+
+    public static void extendInputData(String imperfectMatchesSimPath) {
+        String ukmodInputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
+        String ukmodInputFilename = "UK_2019_b1";
+        extendInputData(ukmodInputDirectory, ukmodInputFilename, imperfectMatchesSimPath);
+    }
+
+    public static void extendInputData(String ukmodInputDirectory, String ukmodInputFilename, String imperfectMatchesSimPath) {
 
         // database specific variables
         String[] variablesAll = Variables2019b.listAll();
         String[] variablesLong = Variables2019b.listLong();
         String[] variablesInt = Variables2019b.listInt();
-        String datasetPath = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input\\UK_2019_b1.txt";
-        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\test0";
-        String outputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
-        String outputFilename = "UK_2019_b1 - augmented.txt";
+        String datasetPath = ukmodInputDirectory + File.separator + ukmodInputFilename + ".txt";
+        String outputDirectory = ukmodInputDirectory;
+        String outputFilename = ukmodInputFilename + " - augmented.txt";
         boolean flagReadScreenedIndices = false;
 
         // compile data that identify database gaps
@@ -53,7 +68,7 @@ public class DatabaseExtension {
         int pop = imperfectMatchIndices.getSet().size();
         System.out.println("Expanding input data to account for additional " + pop + " benefit units");
         int no = 0, dec=1;
-        long newHouseholdId = 999000000;
+        long newHouseholdId = Double.valueOf(dataset.getMaxValue("idhh")).longValue() + 1;
         for (MatchIndices imperfectMatch : imperfectMatchIndices.getSet()) {
 
             if (pop>5000) {
@@ -114,13 +129,16 @@ public class DatabaseExtension {
         // read and screen
         Matches imperfectMatches = new Matches();
         try {
-            for (int aa=18; aa<131; aa++) {
-                String filePath = dir + File.separator + "grids\\poor_taxmatch_age_" + aa + ".csv";
-                File file = new File(filePath);
-                if (file.exists())
-                    imperfectMatches.read(true, aa, filePath);
+            if (Parameters.enableIntertemporalOptimisations) {
+
+                for (int aa=Parameters.AGE_TO_BECOME_RESPONSIBLE; aa<=Parameters.maxAge; aa++) {
+                    String filePath = dir + File.separator + "grids\\poor_taxmatch_age_" + aa + ".csv";
+                    File file = new File(filePath);
+                    if (file.exists())
+                        imperfectMatches.read(true, aa, filePath);
+                }
             }
-            for (int yy=2016; yy<=2026; yy++) {
+            for (int yy=Parameters.startYear; yy<=Parameters.endYear; yy++) {
                 String filePath = dir + File.separator + "csv\\poor_taxmatch_year_" + yy + ".csv";
                 File file = new File(filePath);
                 if (file.exists())

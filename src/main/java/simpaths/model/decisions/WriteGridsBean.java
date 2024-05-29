@@ -18,6 +18,7 @@ public class WriteGridsBean {
     private int education;
     private int health;
     private int cohabitation;
+    private int wageOffer;
     private int nk0;
     private int nk1;
     private int nk2;
@@ -60,6 +61,10 @@ public class WriteGridsBean {
 
     public void setCohabitation(int cohabitation) {
         this.cohabitation = cohabitation;
+    }
+
+    public void setWageOffer(int wageOffer) {
+        this.wageOffer = wageOffer;
     }
 
     public void setNk0(int nk0) {
@@ -127,6 +132,10 @@ public class WriteGridsBean {
 
     public int getCohabitation() {
         return cohabitation;
+    }
+
+    public int getWageOffer() {
+        return wageOffer;
     }
 
     public int getNk0() {
@@ -206,6 +215,9 @@ public class WriteGridsBean {
     }
     public String getCohabitationString() {
         return String.valueOf(cohabitation);
+    }
+    public String getWageOfferString() {
+        return String.valueOf(wageOffer);
     }
     public String getNk0String() {
         return String.valueOf(nk0);

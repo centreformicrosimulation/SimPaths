@@ -57,6 +57,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Id
 	private final PanelEntityKey key;
 
+	@Column(name="id_original_bu")
+	private Long idOriginalBU;
+
+	@Column(name="id_original_hh")
+	private Long idOriginalHH;
+
 	@Column(name="idfemale")    //XXX: This column is not present in the household table of the input database
 	private Long idFemale;
 
@@ -467,6 +473,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 		this(benefitUnitIdCounter++);
 
+		this.idOriginalHH = originalBenefitUnit.idHousehold;
+		this.idOriginalBU = originalBenefitUnit.key.getId();
+
 		this.log = originalBenefitUnit.log;
 		this.occupancy = originalBenefitUnit.occupancy;
 		if (originalBenefitUnit.getDisposableIncomeMonthly() != null) {
@@ -502,6 +511,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		if (Parameters.projectLiquidWealth)
 			initialiseLiquidWealth(
+					originalBenefitUnit.getRefPersonForDecisions().getDag(),
 					originalBenefitUnit.getLiquidWealth(),
 					originalBenefitUnit.getPensionWealth(false),
 					originalBenefitUnit.getHousingWealth(false)
@@ -2902,12 +2912,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return new PanelEntityKey(key.getId());
 	}
 
-	public void initialiseLiquidWealth(double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
-		double wealth = donorLiquidWealth;
+	public void initialiseLiquidWealth(int age, double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
+		double wealth = (1.0 - Parameters.getLiquidWealthDiscount()) * donorLiquidWealth;
 		if (!Parameters.projectPensionWealth)
-			wealth += (1.0 - Parameters.pensionWealthDiscount) * donorPensionWealth;
+			wealth += (1.0 - Parameters.getPensionWealthDiscount(age)) * donorPensionWealth;
 		if (!Parameters.projectHousingWealth)
-			wealth += (1.0 - Parameters.housingWealthDiscount) * donorHousingWealth;
+			wealth += (1.0 - Parameters.getHousingWealthDiscount(age)) * donorHousingWealth;
 		setLiquidWealth(wealth);
 	}
 
@@ -3703,12 +3713,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					phi = - liquidWealth / wageFactor;
 				}
 				phi = Math.min(phi, 1.0);
-				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostLow)*(1.0-phi) +
-						Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostHigh)*phi +
-						Parameters.interestRateInnov) * liquidWealth;
+				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostLow)*(1.0-phi) +
+						Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostHigh)*phi +
+						Parameters.realInterestRateInnov) * liquidWealth;
 			} else {
-				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.SavingReturns) +
-						Parameters.interestRateInnov) * liquidWealth;
+				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealSavingReturns) +
+						Parameters.realInterestRateInnov) * liquidWealth;
 			}
 			if ((investmentIncomeAnnual < -20000000.0) || (investmentIncomeAnnual > 200000000.0))
 				throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
