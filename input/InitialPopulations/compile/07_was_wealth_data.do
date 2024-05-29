@@ -475,7 +475,42 @@ foreach file in "$dir_was_data\was_round_5_person_eul_oct_2020.dta" ///
 		xtile pct1 = inc [fweight=dwt] if (couple_ref & grad==0), nq(10)
 		replace pct = pct1 if (pct1<.)
 		drop pct1
+		
+		// adjust for inflation
+		/*CPIH INDEX 00: ALL ITEMS 2015=100
 
+		TAKEN FROM 02_create_ukhls_variables.do
+
+		CDID	L522
+		Source dataset ID	MM23
+		PreUnit	
+		Unit	Index, base year = 100
+		Release date	20-03-2024
+		Next release	17 April 2024
+		https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/l522/mm23
+		*/
+		gen CPI = .
+		replace CPI = 0.879 if year == 2009
+		replace CPI = 0.901 if year == 2010
+		replace CPI = 0.936 if year == 2011
+		replace CPI = 0.96  if year == 2012
+		replace CPI = 0.982 if year == 2013
+		replace CPI = 0.996 if year == 2014
+		replace CPI = 1     if year == 2015
+		replace CPI = 1.01  if year == 2016
+		replace CPI = 1.036 if year == 2017
+		replace CPI = 1.06  if year == 2018
+		replace CPI = 1.078 if year == 2019
+		replace CPI = 1.089 if year == 2020
+		replace CPI = 1.116 if year == 2021
+		replace CPI = 1.205 if year == 2022
+		replace CPI = 1.286 if year == 2023
+		
+		replace wealth = wealth / CPI
+		replace tot_pen = tot_pen / CPI
+		replace nvmhome = nvmhome / CPI
+		replace inc = inc / CPI
+		
 		// save control data
 		keep case person_id bu bu_rp year sex grad gradsp dvage17 na nk* single_man single_woman couple couple_ref gor2 dhe2 healths p_healths dlltsd dlltsdsp idnk04 pct emp empsp wealth tot_pen nvmhome inc was dwt
 		if (`ww' > `ww0') {

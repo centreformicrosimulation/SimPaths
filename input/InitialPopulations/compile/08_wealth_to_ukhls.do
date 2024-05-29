@@ -370,6 +370,7 @@ forval kk = 1/`nn' {
 	if (mod(`kk',100)==0) disp "matched to observation `kk'"
 }
 keep if (treat)
+drop wealth tot_pen nvmhome
 
 
 /**********************************************************************
