@@ -20,11 +20,11 @@ public class CESUtility implements IEvaluation {
     // CES utility options
     public static final double ANNUAL_CONSUMPTION_NORMALISATION_FACTOR = 15600.0;  // used to improve the curvature of the utility function with respect to consumption
     public static final double BEQUEST_NORMALISATION_FACTOR = 250000.0;
-    public static final double EPSILON = 0.43;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_SINGLES = 1.5;                                // utility price of leisure for single adults
-    public static final double ALPHA_COUPLES = 1.5;                                // utility price of leisure for couples
-    public static final double GAMMA = 2.5;                                        // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
-    public static final double ZETA0 = 14.0;                            // warm-glow bequests parameter for singles - additive
+    public static final double EPSILON = 0.6;                                      // elasticity of substitution between equivalised consumption and leisure within each year
+    public static final double ALPHA_SINGLES = 1.9;                                // utility price of leisure for single adults
+    public static final double ALPHA_COUPLES = 1.9;                                // utility price of leisure for couples
+    public static final double GAMMA = 1.7;                                        // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
+    public static final double ZETA0 = 13.0;                            // warm-glow bequests parameter for singles - additive
     public static final double ZETA1 = 0.4;                             // warm-glow bequests parameter for singles - slope
     public static final double DELTA_SINGLES = 0.995;                               // exponential intertemporal discount factor for singles
     public static final double DELTA_COUPLES = 0.995;                               // exponential intertemporal discount factor for couples

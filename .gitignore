@@ -198,3 +198,7 @@ input/input.mv.db.old
 input/input.mv.db.original
 dependency-reduced-pom.xml
 .idea/vcs.xml
+input/EUROMODoutput/augmented1/
+input/EUROMODoutput/original/
+*.stswp
+~$*.*

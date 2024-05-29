@@ -267,8 +267,8 @@ public class Parameters {
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
     private static final int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
-    private static int startYear;
-    private static int endYear;
+    public static int startYear;
+    public static int endYear;
     private static final int MIN_START_YEAR_TRAINING = 2017;
     private static final int MAX_START_YEAR_TRAINING = 2017; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
@@ -332,7 +332,7 @@ public class Parameters {
     private static String populationInitialisationInputFileName;
     private static MultiKeyMap<Object, Double> populationGrowthRatiosByRegionYear;
 
-    public static final boolean SAVE_IMPERFECT_TAXDB_MATCHES = false;
+    public static boolean saveImperfectTaxDBMatches = false;
     public static final int IMPERFECT_THRESHOLD = 5999;
 
 
@@ -352,8 +352,11 @@ public class Parameters {
     private static MultiKeyCoefficientMap coefficientMapRMSE;
 
     //Uprating factor
-    private static MultiKeyCoefficientMap upratingIndexMapGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            partnershipTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentCouples, upratingIndexMapWageGrowth, priceMapSavingReturns, priceMapDebtCostLow, priceMapDebtCostHigh,
+    private static boolean flagDefaultToTimeSeriesAverages;
+    private static Double averageSavingReturns, averageDebtCostLow, averageDebtCostHigh;
+    private static MultiKeyCoefficientMap upratingIndexMapRealGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
+            partnershipTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentCouples,
+            upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
             wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
@@ -773,7 +776,7 @@ public class Parameters {
     public static boolean flagSocialCare;
     public static boolean donorPoolAveraging;
 
-    public static double interestRateInnov;
+    public static double realInterestRateInnov;
     public static double disposableIncomeInnov;
 
 
@@ -783,7 +786,11 @@ public class Parameters {
      * @param country
      *
      */
-    public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations, boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1, boolean fixTimeTrend, Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1, double disposableIncomeInnov1) {
+    public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations,
+                                      boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
+                                      boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
+                                      Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
+                                      double disposableIncomeInnov1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -808,13 +815,15 @@ public class Parameters {
         } else {
             SAVINGS_RATE = 0.056;
         }
+        saveImperfectTaxDBMatches = taxDBMatches;
 
+        flagDefaultToTimeSeriesAverages = defaultToTimeSeriesAverages;
         isFixTimeTrend = fixTimeTrend;
         timeTrendStopsIn = timeTrendStops;
         flagFormalChildcare = projectFormalChildcare;
         flagSocialCare = projectSocialCare;
         donorPoolAveraging = donorPoolAveraging1;
-        interestRateInnov = interestRateInnov1;
+        realInterestRateInnov = interestRateInnov1;
         disposableIncomeInnov = disposableIncomeInnov1;
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
@@ -2459,17 +2468,17 @@ public class Parameters {
     public static void loadTimeSeriesFactorMaps(Country country) {
 
         // load time varying rates
-        priceMapSavingReturns = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_saving_returns", 1, 1);
-        priceMapDebtCostLow = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_debt_cost_low", 1, 1);
-        priceMapDebtCostHigh = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_debt_cost_hi", 1, 1);
+        priceMapRealSavingReturns = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_saving_returns", 1, 1);
+        priceMapRealDebtCostLow = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_debt_cost_low", 1, 1);
+        priceMapRealDebtCostHigh = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_debt_cost_hi", 1, 1);
 
         // load time varying wage rates
         wageRateFormalSocialCare = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_carer_hourly_wage", 1, 1);
 
         // load time varying indices
-        upratingIndexMapGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
+        upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
         upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
-        upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
+        upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
         socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
         utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_smales", 1, 1);
@@ -2497,11 +2506,11 @@ public class Parameters {
         TimeSeriesVariable index = getTimeSeriesVariable(UpratingCase.TaxDonor);
         switch (index) {
             case GDP:
-                upratingIndexMapGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
+                upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
                 rebaseIndexMap(TimeSeriesVariable.GDP);
                 break;
             case WageGrowth:
-                upratingIndexMapWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
+                upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
                 rebaseIndexMap(TimeSeriesVariable.WageGrowth);
                 break;
             case Inflation:
@@ -2535,13 +2544,13 @@ public class Parameters {
         MultiKeyCoefficientMap map = null;
         switch (variableType) {
             case GDP:
-                map = upratingIndexMapGDP;
+                map = upratingIndexMapRealGDP;
                 break;
             case Inflation:
                 map = upratingIndexMapInflation;
                 break;
             case WageGrowth:
-                map = upratingIndexMapWageGrowth;
+                map = upratingIndexMapRealWageGrowth;
                 break;
             case CarerWageRate:
                 map = wageRateFormalSocialCare;
@@ -2686,27 +2695,60 @@ public class Parameters {
 
         MultiKeyCoefficientMap map = null;
         switch (rateType) {
-            case SavingReturns:
-                map = priceMapSavingReturns;
+            case RealSavingReturns:
+                map = priceMapRealSavingReturns;
                 break;
-            case DebtCostLow:
-                map = priceMapDebtCostLow;
+            case RealDebtCostLow:
+                map = priceMapRealDebtCostLow;
                 break;
-            case DebtCostHigh:
-                map = priceMapDebtCostHigh;
+            case RealDebtCostHigh:
+                map = priceMapRealDebtCostHigh;
                 break;
         }
 
         return map;
     }
 
+    private static Double getTimeSeriesRateParameter(TimeVaryingRate rateType) {
+
+        switch (rateType) {
+            case RealSavingReturns:
+                return averageSavingReturns;
+            case RealDebtCostLow:
+                return averageDebtCostLow;
+            case RealDebtCostHigh:
+                return averageDebtCostHigh;
+        }
+        throw new RuntimeException("failed to find requested time varying rate");
+    }
+
+    private static void setTimeSeriesRateParameter(TimeVaryingRate rateType, double val) {
+
+        switch (rateType) {
+            case RealSavingReturns:
+                averageSavingReturns = val;
+                return;
+            case RealDebtCostLow:
+                averageDebtCostLow = val;
+                return;
+            case RealDebtCostHigh:
+                averageDebtCostHigh = val;
+                return;
+        }
+        throw new RuntimeException("failed to find requested time varying rate");
+    }
+
     public static double getTimeSeriesRate(int year, TimeVaryingRate rateType) {
 
-        MultiKeyCoefficientMap rateMap = getTimeSeriesRateMap(rateType);
-        Object val = rateMap.getValue(year);
-        if (val == null)
-            val = extendRateTimeSeries(year, rateMap);
-        return ((Number) val).doubleValue();
+        if (flagDefaultToTimeSeriesAverages) {
+            return getSampleAverageRate(rateType);
+        } else {
+            MultiKeyCoefficientMap rateMap = getTimeSeriesRateMap(rateType);
+            Object val = rateMap.getValue(year);
+            if (val == null)
+                val = extendRateTimeSeries(year, rateMap);
+            return ((Number) val).doubleValue();
+        }
     }
 
     private synchronized static Object extendRateTimeSeries(int year, MultiKeyCoefficientMap mapToExtend) {
@@ -2756,16 +2798,21 @@ public class Parameters {
 
     public static double getSampleAverageRate(TimeVaryingRate rateType) {
 
-        double nn = 0.0;
-        double val = 0.0;
-        MultiKeyCoefficientMap rateMapToUse = getTimeSeriesRateMap(rateType);
-        for (Object key: rateMapToUse.keySet()) {
-            // loop over all existing keys to obtain sample average
+        Double val = getTimeSeriesRateParameter(rateType);
+        if (val==null) {
 
-            nn ++;
-            val += ((Number) rateMapToUse.getValue(key)).doubleValue();
+            val = 0.0;
+            double nn = 0.0;
+            MultiKeyCoefficientMap rateMapToUse = getTimeSeriesRateMap(rateType);
+            for (Object key: rateMapToUse.keySet()) {
+                // loop over all existing keys to obtain sample average
+
+                nn ++;
+                val += ((Number) rateMapToUse.getValue(key)).doubleValue();
+            }
+            val /= nn;
+            setTimeSeriesRateParameter(rateType, val);
         }
-        val /= nn;
         return val;
     }
 
@@ -3077,4 +3124,5 @@ public class Parameters {
                     (double)(oldAgeFloor - youngAgeCeiling);
         }
     }
+
 }

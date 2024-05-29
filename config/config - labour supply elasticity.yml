@@ -3,7 +3,7 @@
 
 maxNumberOfRuns: 3
 executeWithGui: false
-randomSeed: 12345
+randomSeed: 606
 startYear: 2019
 endYear: 2020
 popSize: 170000
@@ -23,15 +23,11 @@ model_args:
 #    useWeights: false
 #    useSBAMMatching:
 #    projectMortality: true
-#    alignFertility: true
 #    labourMarketCovid19On: false
 #    projectFormalChildcare: true
 #    donorPoolAveraging: true
-#    projectSocialCare: false
-#    enableIntertemporalOptimisations: false
 #    useSavedBehaviour: false
 #    readGrid: "laptop serial"
-#    saveBehaviour: true
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true
@@ -40,10 +36,20 @@ model_args:
 #    responsesToDisability: false
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
+    alignPopulation: false
+    alignCohabitation: false
+    alignFertility: false
+    alignEducation: false
+    alignInSchool: false
+    alignEmployment: false
+    projectSocialCare: false
+    enableIntertemporalOptimisations: true
+    responsesToLowWageOffer: true
+    flagDefaultToTimeSeriesAverages: true
+    saveBehaviour: false
 
 innovation_args:
     randomSeedInnov: false
-    intertemporalElasticityInnov: false
     labourSupplyElasticityInnov: true
 
 collector_args:

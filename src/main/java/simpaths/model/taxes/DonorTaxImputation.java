@@ -87,7 +87,7 @@ public class DonorTaxImputation {
 
 
         //------------------------------------------------------------
-        // extract candidate pool from database
+        // use keys to extract candidate pool from database
         //------------------------------------------------------------
         List<Integer> candidatePool = null;
         int matchRegime = -1;

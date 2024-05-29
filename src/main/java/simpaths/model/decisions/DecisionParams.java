@@ -13,8 +13,8 @@ public class DecisionParams {
 
     // RUNNING OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static final boolean SAVE_GRID_SLICES_TO_CSV = true;
-    public static final boolean SAVE_INTERMEDIATE_SOLUTIONS = false;
+    public static boolean saveGridSlicesToCSV = true;
+    public static boolean saveIntermediateSolutions = false;
     public static boolean saveImperfectTaxDbMatches = false;
 
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
@@ -142,12 +142,19 @@ public class DecisionParams {
     public static void loadParameters(Integer employmentOptionsOfPrincipalWorker, Integer employmentOptionsOfSecondaryWorker,
                                       boolean respondToHealth, int minAgeForPoorHealth1, boolean respondToDisability,
                                       boolean responsesToRegion, boolean responsesToEducation, boolean responsesToPension,
-                                      boolean responsesToLowWageOffer, boolean respondToRetirement, String readGrid,
-                                      String outputDir, Integer startYearInit, Integer endYear) {
+                                      boolean responsesToLowWageOffer, boolean respondToRetirement,
+                                      boolean saveBehaviour, String readGrid, String outputDir, Integer startYearInit, Integer endYear) {
 
-        rSafeAssets = Parameters.getSampleAverageRate(TimeVaryingRate.SavingReturns) + Parameters.interestRateInnov;
-        rDebtLow = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostLow) + Parameters.interestRateInnov;
-        rDebtHi = Parameters.getSampleAverageRate(TimeVaryingRate.DebtCostHigh) + Parameters.interestRateInnov;
+        // read/write flags
+        if (!saveBehaviour) {
+            saveGridSlicesToCSV = false;
+            saveIntermediateSolutions = false;
+        }
+
+        // asset returns
+        rSafeAssets = Parameters.getSampleAverageRate(TimeVaryingRate.RealSavingReturns) + Parameters.realInterestRateInnov;
+        rDebtLow = Parameters.getSampleAverageRate(TimeVaryingRate.RealDebtCostLow) + Parameters.realInterestRateInnov;
+        rDebtHi = Parameters.getSampleAverageRate(TimeVaryingRate.RealDebtCostHigh) + Parameters.realInterestRateInnov;
 
         // directory structure
         setGridsInputDirectory(readGrid);
@@ -188,7 +195,7 @@ public class DecisionParams {
         Parameters.annuityRates = new AnnuityRates();
         maxPensionPYear = getMaxWealthByAge(Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                 Parameters.annuityRates.getAnnuityRate(Occupancy.Couple, minBirthYear, 65);
-        if (Parameters.SAVE_IMPERFECT_TAXDB_MATCHES)
+        if (Parameters.saveImperfectTaxDBMatches)
             saveImperfectTaxDbMatches = true;
     }
 

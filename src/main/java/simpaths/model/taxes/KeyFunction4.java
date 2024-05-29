@@ -215,7 +215,7 @@ public class KeyFunction4 {
         double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
                 Parameters.getTimeSeriesIndex(priceYear, UpratingCase.TaxDonor);
         if (originalIncomePerWeekAdjusted < -LO_INCOME) {
-            // low income
+            // substantial negative income
             localMap.put(0,0);
             localMap.put(1,0);
             localMap.put(2,0);
