@@ -332,12 +332,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private double desiredAgeDiff;
     @Transient
     private double desiredEarningsPotentialDiff;
-    @Column(name="original_id_person")
-    private Long id_original;
-    @Transient
-    private Long id_bu_original;
-    @Transient
-    private Long id_hh_original;
+    @Column(name="id_original_person")
+    private Long idOriginalPerson;
+    @Column(name="id_original_bu")
+    private Long idOriginalBU;
+    @Column(name="id_original_hh")
+    private Long idOriginalHH;
     @Transient
     private Person originalPartner;
     @Transient
@@ -559,9 +559,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         this(personIdCounter++);
 
-        this.id_hh_original = originalPerson.idHousehold;
-        this.id_bu_original = originalPerson.idBenefitUnit;
-        this.id_original = originalPerson.key.getId();
+        this.idOriginalHH = originalPerson.idHousehold;
+        this.idOriginalBU = originalPerson.idBenefitUnit;
+        this.idOriginalPerson = originalPerson.key.getId();
 
         this.dag = originalPerson.dag;
         this.ageGroup = originalPerson.ageGroup;
@@ -706,12 +706,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhesp_lag1 = originalPerson.dhesp_lag1;
         this.hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
         this.labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
-        this.fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
-        if (originalPerson.L1_fullTimeHourlyEarningsPotential != null) {
-            this.L1_fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.L1_fullTimeHourlyEarningsPotential));
-        } else {
-            this.L1_fullTimeHourlyEarningsPotential = this.fullTimeHourlyEarningsPotential;
-        }
         this.desiredAgeDiff = originalPerson.desiredAgeDiff;
         this.desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
         this.scoreMale = originalPerson.scoreMale;
@@ -731,6 +725,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhh_owned = originalPerson.dhh_owned;
         this.receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         this.receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
+
+        if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
+            this.fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
+        } else {
+            if (Les_c4.EmployedOrSelfEmployed.equals(les_c4)) {
+                les_c4 = Les_c4.NotEmployed;
+                les_c4_lag1 = les_c4;
+            }
+            updateFullTimeHourlyEarnings();
+        }
+        if (originalPerson.L1_fullTimeHourlyEarningsPotential!=null && originalPerson.L1_fullTimeHourlyEarningsPotential>Parameters.MIN_HOURLY_WAGE_RATE) {
+            this.L1_fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.L1_fullTimeHourlyEarningsPotential));
+        } else {
+            this.L1_fullTimeHourlyEarningsPotential = this.fullTimeHourlyEarningsPotential;
+        }
     }
 
 
@@ -994,8 +1003,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public boolean considerRetirement() {
         boolean toRetire = false;
         if (dag >= Parameters.MIN_AGE_TO_RETIRE && !Les_c4.Retired.equals(les_c4) && !Les_c4.Retired.equals(les_c4_lag1)) {
-            if (Parameters.enableIntertemporalOptimisations) {
-                if (Labour.ZERO.equals(getLabourSupplyWeekly())) {
+            if (Parameters.enableIntertemporalOptimisations && DecisionParams.flagRetirement) {
+                if (Labour.ZERO.equals(labourSupplyWeekly_L1)) {
                     toRetire = true;
                 }
            } else {
@@ -1007,7 +1016,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             if (toRetire) {
                 setLes_c4(Les_c4.Retired);
-                labourSupplyWeekly = Labour.ZERO;
             }
         }
         return toRetire;
@@ -1367,14 +1375,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void inSchool() {
 
         //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
-        if(les_c4.equals(Les_c4.Retired) || dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
+        if (Les_c4.Retired.equals(les_c4) || dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
             return;
         }
 
         //If age is between 16 - 29 and individual has always been in education, follow process E1a:
-        else if(les_c4.equals(Les_c4.Student) && !leftEducation && dag >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
+        else if (Les_c4.Student.equals(les_c4) && !leftEducation && dag >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
             if (dag <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
-                double toStayAtSchoolScore = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
                 toLeaveSchool = (labourInnov.nextDouble() >= Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class)); //If event is true, stay in school.  If event is false, leave school.
             } else {
                 toLeaveSchool = true; //Hasn't left education until 30 - force out
@@ -1383,7 +1390,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         //If age is between 16 - 45 and individual has not continuously been in education, follow process E1b:
         //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
-        else if(dag <= 45 && (!les_c4.equals(Les_c4.Student) || leftEducation)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
+        else if (dag <= 45 && (!Les_c4.Student.equals(les_c4) || leftEducation)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
             //TODO: If regression outcome of process E1b is true, set activity status to student and der (return to education indicator) to true?
             if (labourInnov.nextDouble() < Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class)) { //If event is true, re-enter education.  If event is false, leave school
 
@@ -1392,9 +1399,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 setLes_c4(Les_c4.Student);
                 setDer(Indicator.True);
                 setDed(Indicator.True);
-                labourSupplyWeekly = Labour.ZERO; //Assume no part-time work while studying
             }
-            else if (les_c4.equals(Les_c4.Student)){ //If activity status is student but regression to be in education was evaluated to false, remove student status
+            else if (Les_c4.Student.equals(les_c4)){ //If activity status is student but regression to be in education was evaluated to false, remove student status
                 setLes_c4(Les_c4.NotEmployed);
                 setDed(Indicator.False);
                 toLeaveSchool = true; //Test what happens if people who returned to education leave again
@@ -1403,11 +1409,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         else if (dag > 45 && les_c4.equals(Les_c4.Student)) { //People above 45 shouldn't be in education, so if someone re-entered at 45 in previous step, force out
             setLes_c4(Les_c4.NotEmployed);
             setDed(Indicator.False);
-        }
-
-
-
-    }
+        }    }
 
     protected void leavingSchool() {
         if(toLeaveSchool) {
@@ -1457,7 +1459,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void updateFullTimeHourlyEarnings() {
 
         double rmse;
-        if (les_c4_lag1.equals(Les_c4.EmployedOrSelfEmployed)) {
+        if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
             if (wageRegressionRandomComponentE == null || !model.fixRegressionStochasticComponent) {
                 if (Gender.Male.equals(dgn)) {
                     rmse = Parameters.getRMSEForRegression("Wages_MalesE");
@@ -1481,15 +1483,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if(Gender.Male.equals(dgn)) {
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesMalesE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentE;
-            }
-            else {
+            } else {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesMalesNE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentNE;
             }
         } else {
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesFemalesE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentE;
-            }
-            else {
+            } else {
                 logFullTimeHourlyEarnings = Parameters.getRegWagesFemalesNE().getScore(this, Person.DoublesVariables.class) + wageRegressionRandomComponentNE;
             }
         }
@@ -1654,19 +1654,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (dag > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY)
             return false;
-        if (les_c4.equals(Les_c4.Retired))
+        if (les_c4.equals(Les_c4.Retired) && !Parameters.enableIntertemporalOptimisations)
             return false;
-        if (les_c4.equals(Les_c4.Student))
+        if (les_c4.equals(Les_c4.Student) && !Parameters.enableIntertemporalOptimisations)
             return false;
         if (dlltsd.equals(Indicator.True))
             return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.
         //These people will not work for any wage (their activity status will be set to Nonwork in the Labour Market Module
-        double inverseMillsRatio = getDoubleValue(DoublesVariables.InverseMillsRatio);
-        if(!Double.isFinite(inverseMillsRatio)) {
+        Double inverseMillsRatio = getInverseMillsRatio();
+        if (!Double.isFinite(inverseMillsRatio))
             return false;
-        }
 
         return true;		//Else return true
     }
@@ -1818,18 +1817,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         L1_fullTimeHourlyEarningsPotential = fullTimeHourlyEarningsPotential; // Lag(1) of potential hourly earnings
 
         if(Les_c4.Student.equals(les_c4)) {
-            labourSupplyWeekly = Labour.ZERO;			//Number of hours of labour supplied each week
-            fullTimeHourlyEarningsPotential = 0.;
             setDed(Indicator.True); //Indicator if in school set to true
-        }
-
-        if (Les_c4.Retired.equals(les_c4)) {
-            labourSupplyWeekly = Labour.ZERO;
-            fullTimeHourlyEarningsPotential = 0.;
-        }
-
-        if (Les_c4.NotEmployed.equals(les_c4)) {
-            labourSupplyWeekly = Labour.ZERO;
         }
 
         if(Les_c4.EmployedOrSelfEmployed.equals(les_c4)) {
@@ -2770,21 +2758,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return partner.dlltsd_lag1.equals(Indicator.True)? 1. : 0.;
             } else { return 0.;}
         case Retired:
-            if (les_c4 != null) {
-                return les_c4.equals(Les_c4.Retired)? 1. : 0.;
-            } else return 0.;
+            return Les_c4.Retired.equals(les_c4)? 1. : 0.;
         case Lesdf_c4_EmployedSpouseNotEmployed_L1: 					//Own and partner's activity status lag(1)
-            if(lesdf_c4_lag1 != null) {
-                return lesdf_c4_lag1.equals(Lesdf_c4.EmployedSpouseNotEmployed)? 1. : 0.;
-            } else {
-                return 0.;
-            }
+            return (Lesdf_c4.EmployedSpouseNotEmployed.equals(lesdf_c4_lag1)) ? 1. : 0.;
         case Lesdf_c4_NotEmployedSpouseEmployed_L1:
-            if(lesdf_c4_lag1 != null) {
-                return lesdf_c4_lag1.equals(Lesdf_c4.NotEmployedSpouseEmployed)? 1. : 0.;
-            } else {
-                return 0.;
-            }
+            return (Lesdf_c4.NotEmployedSpouseEmployed.equals(lesdf_c4_lag1))? 1. : 0.;
         case Lesdf_c4_BothNotEmployed_L1:
             if(lesdf_c4_lag1 != null) {
                 return lesdf_c4_lag1.equals(Lesdf_c4.BothNotEmployed)? 1. : 0.;
@@ -3163,14 +3141,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return les_c4;
     }
 
-    public int getStudent()
-    {
-        if (les_c4 != null) {
-            return les_c4.equals(Les_c4.Student)? 1 : 0;
-        }
-        else {
-            return 0;
-        }
+    public int getStudent() {
+        return Les_c4.Student.equals(les_c4)? 1 : 0;
     }
 
     public int getEducation() {
@@ -3337,17 +3309,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public int getEmployed() {
-        if(les_c4.equals(Les_c4.EmployedOrSelfEmployed) ) {
-            return 1;
-        }
-        else return 0;
+        return (Les_c4.EmployedOrSelfEmployed.equals(les_c4)) ? 1 : 0;
     }
 
     public int getNonwork() {
-        if(les_c4.equals(Les_c4.NotEmployed)) {
-            return 1;
-        }
-        else return 0;
+        return (Les_c4.NotEmployed.equals(les_c4)) ? 1 : 0;
     }
 
     public Region getRegion() {
@@ -3431,12 +3397,56 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return partner;
     }
 
-    public void setPartner(Person partner) {
-        this.partner = partner;
-        if(partner == null) {
-            idPartner = null;
+    public void setPartner(Person newPartner) {
+
+        if (newPartner==null) {
+
+            nullPartnerVariables();
         } else {
-            this.idPartner = partner.getKey().getId();		//Update partnerId to ensure consistency
+
+            newPartnerVariables(newPartner);
+        }
+    }
+
+    private void nullPartnerVariables() {
+
+        careHoursFromPartnerWeekly = 0.0;
+        if (Dcpst.Partnered.equals(dcpst))
+            dcpst = Dcpst.PreviouslyPartnered;
+        dcpyy = 0;
+        dehsp_c3 = null;
+        dhesp = null;
+        household_status = Household_status.Single;
+        lesdf_c4 = null;
+        lessp_c4 = null;
+        partnership_samesex = null;
+        if (SocialCareProvision.OnlyPartner.equals(socialCareProvision))
+            socialCareProvision = SocialCareProvision.None;
+        else if (SocialCareProvision.PartnerAndOther.equals(socialCareProvision))
+            socialCareProvision = SocialCareProvision.OnlyOther;
+        ynbcpdf_dv = 0.0;
+        partner = null;
+        idPartner = null;
+    }
+
+    private void newPartnerVariables(Person newPartner) {
+
+        if (newPartner==null) {
+
+            nullPartnerVariables();
+        } else {
+
+            dcpst = Dcpst.Partnered;
+            dcpyy = 0;
+            dehsp_c3 = newPartner.getDeh_c3();
+            dhesp = newPartner.getDhe();
+            household_status = Household_status.Couple;
+            lesdf_c4 = Lesdf_c4.getCode(this, newPartner);
+            lessp_c4 = newPartner.getLes_c4();
+            partnership_samesex = (dgn.equals(newPartner.getDgn())) ? Indicator.True : Indicator.False;
+            ynbcpdf_dv = ypnbihs_dv - newPartner.getYpnbihs_dv();
+            partner = newPartner;
+            idPartner = newPartner.getKey().getId();
         }
     }
 
@@ -3653,12 +3663,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.der = der;
     }
 
-    public Long getId_original() {
-        return id_original;
+    public Long getIdOriginalPerson() {
+        return idOriginalPerson;
     }
 
-    public Long getId_bu_original() {
-        return id_bu_original;
+    public Long getIdOriginalBU() {
+        return idOriginalBU;
     }
 
     public int getAgeGroup() {
@@ -4149,9 +4159,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         benefitUnit.removePerson(this);
         model.removePerson(this);
     }
+
     public void setYearLocal(Integer yearLocal) {
         this.yearLocal = yearLocal;
     }
+
     private int getYear() {
         if (model != null) {
             return model.getYear();
@@ -4204,31 +4216,31 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildrenAll_lag1() != null) ? benefitUnit.getNumberChildrenAll_lag1() : 0;
         } else {
-            return numberChildrenAllLocal_lag1;
+            return (numberChildrenAllLocal_lag1==null) ? 0 : numberChildrenAllLocal_lag1;
         }
     }
     private Integer getNumberChildrenAll() {
         if (benefitUnit != null) {
             return benefitUnit.getNumberChildrenAll();
         } else {
-            return numberChildrenAllLocal;
+            return (numberChildrenAllLocal==null) ? 0 : numberChildrenAllLocal;
         }
     }
     private Integer getNumberChildren02_lag1() {
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildren02_lag1() != null) ? benefitUnit.getNumberChildren02_lag1() : 0;
         } else {
-            return numberChildren02Local_lag1;
+            return (numberChildren02Local_lag1==null) ? 0 : numberChildren02Local_lag1;
         }
     }
     private Integer getNumberChildren017() {
         if (benefitUnit != null) {
             return benefitUnit.getNumberChildren(0,17);
         } else {
-            return numberChildren017Local;
+            return (numberChildren017Local==null) ? 0 : numberChildren017Local;
         }
     }
-    private double getInverseMillsRatio() {
+    private Double getInverseMillsRatio() {
 
         double score;
         if(Gender.Male.equals(dgn)) {
@@ -4245,7 +4257,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 score = Parameters.getRegEmploymentSelectionFemaleNE().getScore(this, Person.DoublesVariables.class);
             }
         }
-        double inverseMillsRatio; //IMR is the PDF(x) / CDF(x) where x is score of probit of employment
+        Double inverseMillsRatio; //IMR is the PDF(x) / CDF(x) where x is score of probit of employment
         double cdf = Parameters.getStandardNormalDistribution().cumulativeProbability(score);
         if(cdf != 0.) {
             String pdfString = Double.toString(Parameters.getStandardNormalDistribution().density(score));
@@ -4257,19 +4269,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             throw new RuntimeException("problem evaluating inverse Mills ratio for wage rate projections");
         }
-        if(Double.isFinite(inverseMillsRatio)) {
+        if (Double.isFinite(inverseMillsRatio)) {
             if(Gender.Male.equals(dgn)) {
-                if(inverseMillsRatio > inverseMillsRatioMaxMale) {
+                if (inverseMillsRatio > inverseMillsRatioMaxMale) {
                     inverseMillsRatioMaxMale = inverseMillsRatio;
                 }
-                if(inverseMillsRatio < inverseMillsRatioMinMale) {
+                if (inverseMillsRatio < inverseMillsRatioMinMale) {
                     inverseMillsRatioMinMale = inverseMillsRatio;
                 }
             } else {
-                if(inverseMillsRatio > inverseMillsRatioMaxFemale) {
+                if (inverseMillsRatio > inverseMillsRatioMaxFemale) {
                     inverseMillsRatioMaxFemale = inverseMillsRatio;
                 }
-                if(inverseMillsRatio < inverseMillsRatioMinFemale) {
+                if (inverseMillsRatio < inverseMillsRatioMinFemale) {
                     inverseMillsRatioMinFemale = inverseMillsRatio;
                 }
             }

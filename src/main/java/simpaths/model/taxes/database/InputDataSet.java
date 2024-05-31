@@ -76,4 +76,21 @@ public class InputDataSet {
         writer.flush();
         writer.close();
     }
+    public double getMaxValue(String variable) {
+
+        Double val = null;
+        for(Map obs : set) {
+
+            Object oo = obs.get(variable);
+            if (oo==null)
+                throw new RuntimeException("problem identifying data set value for variable " + variable);
+
+            Double valHere = Double.valueOf((double)oo);
+            if (val==null || (valHere!=null && valHere > val))
+                val = valHere;
+        }
+        if (val.equals(null))
+            throw new RuntimeException("Failed to identify maximum value for variable " + variable);
+        return val;
+    }
 }

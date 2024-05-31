@@ -1473,6 +1473,8 @@ replace l1_potential_earnings_hourly = 0 if missing(l1_potential_earnings_hourly
 		
 * initialise wealth to missing 
 gen liquid_wealth = -9
+gen tot_pen = -9
+gen nvmhome = -9
 gen smp = -9
 gen rnk = -9
 gen mtc = -9

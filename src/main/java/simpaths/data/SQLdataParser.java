@@ -331,6 +331,8 @@ public class SQLdataParser {
 
 				//WEALTH
 				+ "UPDATE " + benefitUnitTable + " SET liquid_wealth = 0.0 WHERE liquid_wealth = -9.0;"
+				+ "UPDATE " + benefitUnitTable + " SET tot_pen = 0.0 WHERE tot_pen = -9.0;"
+				+ "UPDATE " + benefitUnitTable + " SET nvmhome = 0.0 WHERE nvmhome = -9.0;"
 
 				//Rename id column
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idbenefitunit RENAME TO id;"

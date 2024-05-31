@@ -41,6 +41,9 @@ public class Household implements EventListener, IDoubleSource {
     @Id
     private final PanelEntityKey key;
 
+    @Column(name="id_original_hh")
+    private Long idOriginalHH;
+
     @Transient
     private Set<BenefitUnit> benefitUnitSet;
 
@@ -56,6 +59,11 @@ public class Household implements EventListener, IDoubleSource {
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdIdCounter++);
         benefitUnitSet = new LinkedHashSet<BenefitUnit>();
+    }
+
+    public Household(Household originalHousehold) {
+        this();
+        this.idOriginalHH = originalHousehold.key.getId();
     }
 
     public Household(long householdId) {

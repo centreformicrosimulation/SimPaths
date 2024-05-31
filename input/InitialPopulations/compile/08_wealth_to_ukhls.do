@@ -30,7 +30,7 @@ global seedAdjust = 0
 **********************************************************************/
 use "population_initial_fs_UK_$yearWealth", clear
 sort idperson
-drop liquid_wealth smp rnk mtc
+drop liquid_wealth tot_pen nvmhome smp rnk mtc
 
 
 /**********************************************************************
@@ -285,6 +285,8 @@ gen smp = 0
 gen rnk = 0
 gen mtc = 0
 gen wealthi = -9
+gen tot_peni = -9
+gen nvmhomei = -9
 qui {
 	sum treat, mean
 	local nn = r(mean) * r(N)
@@ -353,10 +355,14 @@ forval kk = 1/`nn' {
 				keep if slct==1
 			}
 			local mtc = bu[1]
-			local ww = wealth[1]
+			local wealth = wealth[1]
+			local tot_pen = tot_pen[1]
+			local nvmhome = nvmhome[1]
 			restore
 			replace mtc=`mtc' if (_n==`kk')
-			replace wealthi = `ww' if (_n==`kk')
+			replace wealthi = `wealth' if (_n==`kk')
+			replace tot_peni = `tot_pen' if (_n==`kk')
+			replace nvmhomei = `nvmhome' if (_n==`kk')
 		}
 		replace rnk=`rnk' if (_n==`kk')
 		drop chk
@@ -364,6 +370,7 @@ forval kk = 1/`nn' {
 	if (mod(`kk',100)==0) disp "matched to observation `kk'"
 }
 keep if (treat)
+drop wealth tot_pen nvmhome
 
 
 /**********************************************************************
@@ -371,9 +378,12 @@ keep if (treat)
 **********************************************************************/
 append using "ukhls_wealthtemp2.dta"
 sort bu
-recode wealthi (mis=0)
-by bu: egen liquid_wealth = sum(wealthi)
-recode liquid_wealth (-9=0)
+recode wealthi tot_peni nvmhomei (mis=0)
+by bu: egen wealth = sum(wealthi)
+by bu: egen tot_pen = sum(tot_peni)
+by bu: egen nvmhome = sum(nvmhomei)
+gen liquid_wealth = wealth - tot_pen - nvmhome
+recode liquid_wealth tot_pen nvmhome (-9=0)
 save ukhls_wealthtemp3, replace
 
 /*
@@ -393,12 +403,14 @@ sum liquid_wealth [fweight=dwt2], detail
 *	clean data and save
 **********************************************************************/
 use ukhls_wealthtemp3, clear
-drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi
+drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi wealth
 recode rnk smp mtc (missing = -9)
 label var rnk "matching level: 1 = most fine, 2, 3 = most coarse, 4=no match"
 label var smp "matching sample - number of matched candidates to choose from"
 label var mtc "benefit unit id (bu) of matched observation"
-label var liquid_wealth "total wealth including housing, business and private (personal and occupational) pensions" 
+label var tot_pen "total private (personal and occupational) pension wealth"
+label var nvmhome "value of main home net of all mortage debts"
+label var liquid_wealth "net wealth excluding private pensions and main home" 
 save "population_initial_fs_UK_$yearWealth", replace
 
 

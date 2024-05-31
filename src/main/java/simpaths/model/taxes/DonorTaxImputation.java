@@ -42,6 +42,7 @@ public class DonorTaxImputation {
     private double grossIncomePerWeek;
     private double targetNormalisedOriginalIncome;
 
+
     /**
      * CONSTRUCTORS
      */
@@ -86,7 +87,7 @@ public class DonorTaxImputation {
 
 
         //------------------------------------------------------------
-        // extract candidate pool from database
+        // use keys to extract candidate pool from database
         //------------------------------------------------------------
         List<Integer> candidatePool = null;
         int matchRegime = -1;
@@ -293,6 +294,8 @@ public class DonorTaxImputation {
             disposableIncomePerWeek *= keys.getOriginalIncomePerWeek();
             benefitsReceivedPerWeek *= keys.getOriginalIncomePerWeek();
         }
+        disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeInnov);
+        benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeInnov);
     }
 
     private int getSystemYear(int simYear) {

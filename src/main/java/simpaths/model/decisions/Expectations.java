@@ -686,6 +686,8 @@ public class Expectations {
     /**
      * METHOD TO CALL TO TAX AND BENEFIT FUNCTION
      * @return disposable income per annum of benefitUnit
+     *
+     * NOTE: ALL FINANCIALS ARE DEFINED HERE IN PRICES OF ASSUMED BASE YEAR (Parameters.BASE_PRICE_YEAR)
      */
     public double taxBenefitFunction(Integer labourHours1Weekly,
                                      Integer disability1,

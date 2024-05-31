@@ -62,4 +62,4 @@ jobs:
         files: 'input/input.mv.db, input/EUROMODpolicySchedule.xlsx, input/DatabaseCountryYear.xlsx'
 
     - name: Do one run
-      run: java -jar multirun.jar -p 20000 -s 2017 -e 2020 -r 100 -n 2 -g false
+      run: java -jar multirun.jar -p 20000 -s 2019 -e 2022 -r 100 -n 2 -g false

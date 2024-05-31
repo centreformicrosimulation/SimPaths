@@ -57,6 +57,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	@Id
 	private final PanelEntityKey key;
 
+	@Column(name="id_original_bu")
+	private Long idOriginalBU;
+
+	@Column(name="id_original_hh")
+	private Long idOriginalHH;
+
 	@Column(name="idfemale")    //XXX: This column is not present in the household table of the input database
 	private Long idFemale;
 
@@ -89,6 +95,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	@Column(name="liquid_wealth")
 	private Double liquidWealth;
+
+	@Column(name="tot_pen")
+	private Double pensionWealth;
+
+	@Column(name="nvmhome")
+	private Double housingWealth;
 
 	@Enumerated(EnumType.STRING)
 	Occupancy occupancy;
@@ -387,7 +399,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this.equivalisedDisposableIncomeYearly = 0.;
 		this.benefitsReceivedPerMonth = 0.;
 		this.createdByConstructor = "LongID";
-		if (Parameters.projectWealth)
+		if (Parameters.projectLiquidWealth)
 			setLiquidWealth(0.);
 	}
 
@@ -397,7 +409,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		this(benefitUnitIdCounter++);
 		region = person.getRegion();
 
-		if (Parameters.projectWealth) {
+		if (Parameters.projectLiquidWealth) {
 			// transfer wealth between benefit units
 
 			BenefitUnit fromBenefitUnit = person.getBenefitUnit();
@@ -429,7 +441,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			throw new RuntimeException("ERROR - region of responsible male and female must match!");
 		}
 
-		if (Parameters.projectWealth) {
+		if (Parameters.projectLiquidWealth) {
 			// transfer wealth between benefit units
 
 			setLiquidWealth(p1.getLiquidWealth() + p2.getLiquidWealth());
@@ -460,6 +472,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	public BenefitUnit(BenefitUnit originalBenefitUnit) {
 
 		this(benefitUnitIdCounter++);
+
+		this.idOriginalHH = originalBenefitUnit.idHousehold;
+		this.idOriginalBU = originalBenefitUnit.key.getId();
 
 		this.log = originalBenefitUnit.log;
 		this.occupancy = originalBenefitUnit.occupancy;
@@ -494,8 +509,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		} else {
 			this.atRiskOfPoverty_lag1 = originalBenefitUnit.atRiskOfPoverty;
 		}
-		if (Parameters.projectWealth)
-			setLiquidWealth(originalBenefitUnit.getLiquidWealth());
+		if (Parameters.projectLiquidWealth)
+			initialiseLiquidWealth(
+					originalBenefitUnit.getRefPersonForDecisions().getDag(),
+					originalBenefitUnit.getLiquidWealth(),
+					originalBenefitUnit.getPensionWealth(false),
+					originalBenefitUnit.getHousingWealth(false)
+			);
 		this.children = new LinkedHashSet<>();
 		this.n_children_0 = originalBenefitUnit.n_children_0;
 		this.n_children_1 = originalBenefitUnit.n_children_1;
@@ -561,8 +581,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				updateLagFields();
 				break;
 			case Update:
-				updateChildrenFields();
 				updateOccupancy();
+				updateChildrenFields();
 				updateComposition(); //Update household composition
 				break;
 			case CalculateChangeInEDI:
@@ -640,6 +660,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 
 	protected void updateChildrenFields() {
+
+		if (getNumberChildrenAll()==0)
+			childcareCostPerWeek = 0.0;
 
 		//Reset child age variables to update
 		n_children_0 = 0;
@@ -736,7 +759,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 
 		//Use household occupancy and number of children to set dhhtp_c4
-		if (occupancy != null) {
+		updateDhhtp_c4();
+		if (dhhtp_c4_lag1 == null) {
+			dhhtp_c4_lag1 = dhhtp_c4;
+		}
+	}
+
+	protected void updateDhhtp_c4() {
+
+		if (occupancy==null)
+			updateOccupancy();
+
+		if (occupancy!=null) {
 			if(Occupancy.Couple.equals(occupancy)) {
 				if(getNumberChildrenAll() > 0) {
 					dhhtp_c4 = Dhhtp_c4.CoupleChildren; //If household is occupied by a couple and number of children is positive, set dhhtp_c4 to "Couple with Children"
@@ -750,23 +784,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					dhhtp_c4 = Dhhtp_c4.SingleNoChildren; //Otherwise, set dhhtp_c4 to "Single without children"
 				}
 			}
-		} else if (male == null && female == null) {
-			throw new IllegalArgumentException("No responsible adult in benefit unit at composition update.");
-		}
-		if (dhhtp_c4_lag1 == null) {
-			dhhtp_c4_lag1 = dhhtp_c4;
+		} else {
+			dhhtp_c4 = null;
 		}
 	}
 
-	protected void updateFullTimeHourlyEarnings() {
+	protected void resetLabourStates() {
 
 		if(male != null) {
 			male.setLabourSupplyWeekly(null);
-			male.updateFullTimeHourlyEarnings();
 		}
 		if(female != null) {
 			female.setLabourSupplyWeekly(null);
-			female.updateFullTimeHourlyEarnings();
 		}
 	}
 
@@ -776,29 +805,35 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	 */
 	public LinkedHashSet<MultiKey<Labour>> findPossibleLabourCombinations() {
 		LinkedHashSet<MultiKey<Labour>> combinationsToReturn = new LinkedHashSet<>();
-		if(Occupancy.Couple.equals(occupancy)) {        //Need to use both partners individual characteristics to determine similar benefitUnits
-
-			//Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
+		if (Occupancy.Couple.equals(occupancy)) {
+			//Need to use both partners individual characteristics to determine similar benefitUnits
+			//Sometimes one of the occupants of the couple will be retired (or even under the age to work,
+			// which is currently the age to leave home).  For this case, the person (not at risk of work)'s
+			// labour supply will always be zero, while the other person at risk of work has a choice over the
+			// single person Labour Supply set.
 			Labour[] labourMaleValues;
-			if(male.atRiskOfWork()) {
+			if (male.atRiskOfWork()) {
 				labourMaleValues = Labour.values();
 			} else {
 				labourMaleValues = new Labour[]{Labour.ZERO};
 			}
 
 			Labour[] labourFemaleValues;
-			if(female.atRiskOfWork()) {
+			if (female.atRiskOfWork()) {
 				labourFemaleValues = Labour.values();
 			} else {
 				labourFemaleValues = new Labour[]{Labour.ZERO};
 			}
 
-			for(Labour labourMale: labourMaleValues) {
+			for (Labour labourMale: labourMaleValues) {
 				for(Labour labourFemale: labourFemaleValues) {
 					combinationsToReturn.add(new MultiKey<>(labourMale, labourFemale));
 				}
 			}
-		} else {        //For single benefitUnits, no need to check for at risk of work (i.e. retired, sick or student activity status), as this has already been done when passing this household to the labour supply module (see first loop over benefitUnits in LabourMarket#update()).
+		} else {
+			//For single benefitUnits, no need to check for at risk of work (i.e. retired, sick or student activity status),
+			// as this has already been done when passing this household to the labour supply module (see first loop over benefitUnits
+			// in LabourMarket#update()).
 			if (Occupancy.Single_Male.equals(occupancy)) {
 				for (Labour labour : Labour.values()) {
 					combinationsToReturn.add(new MultiKey<>(labour, Labour.ZERO));
@@ -1262,8 +1297,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			randomDrawLabourSupply = labourInnov.nextDouble();
 		}
 
-		//Update potential earnings
-		updateFullTimeHourlyEarnings();
+		resetLabourStates();
 		if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
 			// intertemporal optimisations enabled
 
@@ -1759,7 +1793,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			setMale(null);
 			removed = true;
 		} else if (children.contains(person)) {
-			removed = children.remove(person);
+			removed = removeChild(person);
 		}
 		if (!removed) {
 			throw new IllegalArgumentException("Person " + person.getKey().getId() + " could not be removed from benefit unit");
@@ -1767,9 +1801,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		person.setBenefitUnit(null);
 		if (male == null && female == null) {
 			model.removeBenefitUnit(this);
-		} else {
-			updateChildrenFields();
 		}
+	}
+
+	private boolean removeChild(Person child) {
+
+		if (!children.contains(child))
+			throw new RuntimeException("attempt to remove child from benefit unit in which they are not currently recorded as a child");
+
+		boolean removed = children.remove(child);
+		updateChildrenFields();
+		updateDhhtp_c4();
+
+		return removed;
 	}
 
 
@@ -2693,7 +2737,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 		if (female == null && male == null) {
 
-			throw new IllegalArgumentException("Error - update occupancy for benefit unit with no adult");
+			return;
 		} else if (female!=null && male!=null) {
 
 			occupancy = Occupancy.Couple;
@@ -2734,7 +2778,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				female.setPartner(null);
 			}
 		}
-		updateChildrenFields();
 	}
 
 	/*
@@ -2869,6 +2912,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		return new PanelEntityKey(key.getId());
 	}
 
+	public void initialiseLiquidWealth(int age, double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
+		double wealth = (1.0 - Parameters.getLiquidWealthDiscount()) * donorLiquidWealth;
+		if (!Parameters.projectPensionWealth)
+			wealth += (1.0 - Parameters.getPensionWealthDiscount(age)) * donorPensionWealth;
+		if (!Parameters.projectHousingWealth)
+			wealth += (1.0 - Parameters.getHousingWealthDiscount(age)) * donorHousingWealth;
+		setLiquidWealth(wealth);
+	}
+
 	public double getLiquidWealth() {
 		return getLiquidWealth(true);
 	}
@@ -2876,7 +2928,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	public double getLiquidWealth(boolean throwError) {
 		if (throwError) {
 			if (liquidWealth == null)
-				throw new RuntimeException("Call to get benefit unit wealth before it is initialised.");
+				throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
 			return liquidWealth;
 		} else {
 			if (liquidWealth==null) {
@@ -2887,8 +2939,52 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		}
 	}
 
-	public void setLiquidWealth(double liquidWealth) {
+	public void setLiquidWealth(Double liquidWealth) {
 		this.liquidWealth = liquidWealth;
+	}
+
+	public double getPensionWealth() {
+		return getPensionWealth(true);
+	}
+
+	public double getPensionWealth(boolean throwError) {
+		if (throwError) {
+			if (pensionWealth == null)
+				throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
+			return pensionWealth;
+		} else {
+			if (pensionWealth==null) {
+				return 0.0;
+			} else {
+				return pensionWealth;
+			}
+		}
+	}
+
+	public void setPensionWealth(Double pensionWealth) {
+		this.pensionWealth = pensionWealth;
+	}
+
+	public double getHousingWealth() {
+		return getHousingWealth(true);
+	}
+
+	public double getHousingWealth(boolean throwError) {
+		if (throwError) {
+			if (housingWealth == null)
+				throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
+			return housingWealth;
+		} else {
+			if (housingWealth==null) {
+				return 0.0;
+			} else {
+				return housingWealth;
+			}
+		}
+	}
+
+	public void setHousingWealth(Double wealth) {
+		housingWealth = wealth;
 	}
 
 	public double getChildcareCostPerWeek() {
@@ -2958,12 +3054,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if (male != null) {
 				male.setPartner(null);
 				occupancy = Occupancy.Single_Male;
-				if (male.getSocialCareProvision().equals(SocialCareProvision.OnlyPartner))
-					male.setSocialCareProvision(SocialCareProvision.None);
-				else if (male.getSocialCareProvision().equals(SocialCareProvision.PartnerAndOther))
-					male.setSocialCareProvision(SocialCareProvision.OnlyOther);
-				if (male.getCareHoursFromPartnerWeekly() > 0.0)
-					male.setCareHoursFromPartnerWeekly(0.0);
 			}
 			for (Person child : children) {
 				child.setIdMother((Person)null);
@@ -3004,12 +3094,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			if (female != null) {
 				female.setPartner(null);
 				occupancy = Occupancy.Single_Female;
-				if (female.getSocialCareProvision().equals(SocialCareProvision.OnlyPartner))
-					female.setSocialCareProvision(SocialCareProvision.None);
-				else if (female.getSocialCareProvision().equals(SocialCareProvision.PartnerAndOther))
-					female.setSocialCareProvision(SocialCareProvision.OnlyOther);
-				if (female.getCareHoursFromPartnerWeekly() > 0.0)
-					female.setCareHoursFromPartnerWeekly(0.0);
 			}
 			for (Person child : children) {
 				child.setIdFather((Person)null);
@@ -3562,7 +3646,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 	public void updateNonLabourIncome() {
 
-		if (Parameters.projectWealth) {
+		if (Parameters.projectLiquidWealth) {
 
 			updateRetirementPensions();
 			setInvestmentIncomeAnnual();
@@ -3629,14 +3713,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 					phi = - liquidWealth / wageFactor;
 				}
 				phi = Math.min(phi, 1.0);
-				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostLow)*(1.0-phi) +
-						Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.DebtCostHigh)*phi +
-						Parameters.interestRateInnov) * liquidWealth;
+				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostLow)*(1.0-phi) +
+						Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostHigh)*phi +
+						Parameters.realInterestRateInnov) * liquidWealth;
 			} else {
-				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.SavingReturns) +
-						Parameters.interestRateInnov) * liquidWealth;
+				investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealSavingReturns) +
+						Parameters.realInterestRateInnov) * liquidWealth;
 			}
-			if ((investmentIncomeAnnual < -2000000.0) || (investmentIncomeAnnual > 20000000.0))
+			if ((investmentIncomeAnnual < -20000000.0) || (investmentIncomeAnnual > 200000000.0))
 				throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
 
 			// update person level variables

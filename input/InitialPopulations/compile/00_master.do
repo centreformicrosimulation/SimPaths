@@ -53,7 +53,7 @@ global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls"
 global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
 
 * Directory which contains original initial popultions 
-global dir_ipop_orig "${dir_work}/original_initial_populations"
+global dir_ipop_orig "${dir_work}/daria_data"
 
 
 /**************************************************************************************

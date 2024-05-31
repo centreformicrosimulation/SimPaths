@@ -56,6 +56,7 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
+import simpaths.model.taxes.database.DatabaseExtension;
 
 
 /**
@@ -84,7 +85,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Simulated population size (base year)")
 	private Integer popSize = 170000;
 
-	@GUIparameter(description = "Simulation first year [valid range 2011-2017]")
+	@GUIparameter(description = "Simulation first year [valid range 2011-2019]")
 	private Integer startYear = 2011;
 
 	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
@@ -97,9 +98,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean fixTimeTrend = true;
 
 	@GUIparameter(description = "Fix year used in the regressions to")
-	private Integer timeTrendStopsIn = 2017;
+	private Integer timeTrendStopsIn = 2021;
 
-	private Integer timeTrendStopsInMonetaryProcesses = 2017; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
+	private Integer timeTrendStopsInMonetaryProcesses = 2021; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
 
 //	@GUIparameter(description="Age at which people in initial population who are not employed are forced to retire")
 //	private Integer ageNonWorkPeopleRetire = 65;	//The problem is that it is difficult to find donor benefitUnits for non-zero labour supply for older people who are in the Nonwork category but not Retired.  They should, in theory, still enter the Labour Market Module, but if we cannot find donor benefitUnits, how should we proceed?  We avoid this problem by defining that people over the age specified here are retired off if they have activity_status equal to Nonwork.
@@ -135,7 +136,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Value of saving rate (s). The default value is based on average % of household disposable income saved between 2000 - 2019 reported by the OECD")
 	private Double savingRate = 0.056;
 
-	private double interestRateInnov = 0.0;		// used to explore behavioural sensitivity to assumed interest rates
+	private double interestRateInnov = 0.0;			// used to explore behavioural sensitivity to assumed interest rates (intertemporal elasticity of substitution)
+
+	private double disposableIncomeInnov = 0.0;		// used to explore behavioural sensitivity to disposable income (Marshallian labour supply elasticity)
 
 //	@GUIparameter(description = "Force recreation of input database based on the data provided by the population_[country].csv file")
 //	private boolean refreshInputDatabase = false;		//Tables can be constructed in GUI dialog in launch, before JAS-mine GUI appears.  However, if skipping that, and manually altering the EUROMODpolicySchedule.xlsx file, this will need to be set to true to build new input database before simulation is run (though the new input database will only be viewable in the output/input/input.h2.db file).
@@ -152,6 +155,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	@GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
 	private boolean projectMortality = true;
+
+	private boolean alignPopulation = true; //Set to true to align employment share
 
 	//	@GUIparameter(description = "If checked, will align fertility")
 	private boolean alignFertility = true;
@@ -247,8 +252,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "simulation name to read in grids from:")
 	private String readGrid = "test1";
 
+	// flag to project population using time series average statistics (dampens temporal variation)
+	private boolean flagDefaultToTimeSeriesAverages = false;
+
 	//	@GUIparameter(description = "tick to save behavioural solutions assumed for simulation")
 	private boolean saveBehaviour = true;
+
+	// save imperfect tax database matches to potentially expand input database
+	private boolean saveImperfectTaxDBMatches = false;
 
 	//	@GUIparameter(description = "the number of employment options from which a household's principal wage earner can choose")
 	private Integer employmentOptionsOfPrincipalWorker = 3;
@@ -263,7 +274,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean responsesToPension = false;
 
 	@GUIparameter(description = "whether to include low wage offers (unemployment) in the state space for IO behavioural solutions")
-	private boolean responsesToLowWageOffer = false;
+	private boolean responsesToLowWageOffer = true;
 
 	@GUIparameter(description = "whether to include retirement (and private pensions) in the state space for IO behavioural solutions")
 	private boolean responsesToRetirement = false;
@@ -326,14 +337,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		popAlignInnov = new Random(SimulationEngine.getRnd().nextLong());
 
 		// load model parameters
-		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare, projectSocialCare, donorPoolAveraging, fixTimeTrend, timeTrendStopsIn, startYear, endYear, interestRateInnov);
+		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
+				projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
+				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeInnov);
 		if (enableIntertemporalOptimisations) {
 
 			alignEmployment = false;
 			DecisionParams.loadParameters(employmentOptionsOfPrincipalWorker, employmentOptionsOfSecondaryWorker,
 					responsesToHealth, minAgeForPoorHealth, responsesToDisability, responsesToRegion, responsesToEducation,
-					responsesToPension, responsesToLowWageOffer, responsesToRetirement, readGrid,
-					getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
+					responsesToPension, responsesToLowWageOffer, responsesToRetirement, saveBehaviour,
+					readGrid, getEngine().getCurrentExperiment().getOutputFolder(), startYear, endYear);
 			//DecisionTests.compareGrids();
 			//DatabaseExtension.extendInputData();
 		}
@@ -513,7 +526,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
 		// CONSUMPTION AND SAVINGS MODULE
-		if (Parameters.projectWealth)
+		if (Parameters.projectLiquidWealth)
 			addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
 		addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
 
@@ -538,6 +551,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		// UPDATE YEAR
 		addEventToAllYears(Processes.UpdateYear);
+
+		// FINAL EVENTS
+		addEventToAllYears(Processes.TaxDBExtension);
 
 		// UPDATE EVENT QUEUE
 		getEngine().getEventQueue().scheduleOnce(firstYearSched, startYear, ordering);
@@ -605,6 +621,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		UpdateYear,
 		CheckForEmptyBenefitUnits,
 		CheckForImperfectTaxDBMatches,
+		TaxDBExtension,
 	}
 
 	@Override
@@ -623,24 +640,28 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				if (commentsOn) log.info("Finished year " + year + " (in " + timerForYear + " seconds)");
 				break;
 			case PopulationAlignment:
-				if ( year <= Parameters.getPopulationProjectionsMaxYear() ) {
 
-					if (!useWeights) {
-						populationAlignmentUnweighted();
+				if (alignPopulation) {
+
+					if ( year <= Parameters.getPopulationProjectionsMaxYear() ) {
+
+						if (!useWeights) {
+							populationAlignmentUnweighted();
+						} else {
+							populationAlignmentWeighted();
+						}
+						if (commentsOn) log.info("Population alignment complete.");
 					} else {
-						populationAlignmentWeighted();
-					}
-					if (commentsOn) log.info("Population alignment complete.");
-				} else {
 
-					if (commentsOn) log.info("Population alignment skipped as simulated year exceeds period covered by population projections.");
+						if (commentsOn) log.info("Population alignment skipped as simulated year exceeds period covered by population projections.");
+					}
 				}
 				break;
 			case CohabitationRegressionAlignment:
 				if (alignCohabitation) {
 					partnershipAlignment();
+					if (commentsOn) log.info("Cohabitation alignment complete.");
 				}
-				if (commentsOn) log.info("Cohabitation alignment complete.");
 				break;
 //			case HealthAlignment:
 //				healthAlignment();
@@ -661,11 +682,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				socialCareMarketClearning();
 				break;
 			case FertilityAlignment:
-				if(alignFertility) {
-					fertility(); //First determine which individuals should give birth according to our processes
+				fertility(); //First determine which individuals should give birth according to our processes
+				if (alignFertility) {
 					fertilityAlignment(); //Then align to meet the numbers implied by population projections by region
-				} else {
-					fertility();
 				}
 				if (commentsOn) log.info("Fertility alignment complete.");
 				break;
@@ -727,9 +746,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				}
 				break;
 			case CheckForImperfectTaxDBMatches:
-				if (Parameters.SAVE_IMPERFECT_TAXDB_MATCHES) {
+				if (Parameters.saveImperfectTaxDBMatches) {
 					screenForImperfectTaxDbMatches();
 				}
+			case TaxDBExtension:
+				if (Parameters.saveImperfectTaxDBMatches && getYear()==endYear)
+					DatabaseExtension.extendInputData(getEngine().getCurrentExperiment().getOutputFolder());
+				break;
 			default:
 				break;
 		}
@@ -1057,14 +1080,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				}
 				Iterator<Person> personIterator = personsByAlignmentGroup.get(gender, region, age).iterator();
 				while (targetNumber < simulatedNumber && personIterator.hasNext()) {
-					// simulate death
+					// simulate death - may be of any age
 
 					Person candidate = personIterator.next();
-					if (candidate.getBenefitUnit() == null) {
+					BenefitUnit benefitUnit = candidate.getBenefitUnit();
+					if ( benefitUnit == null ) {
 						throw new RuntimeException("Missing benefit unit for candidate to kill in population alignment.");
 					}
-					if (candidate.getBenefitUnit().getOccupancy().equals(Occupancy.Couple) ||
-							candidate.getBenefitUnit().getPersonsInBU().size() == 1) {
+					if ( (!candidate.equals(benefitUnit.getMale()) && !candidate.equals(benefitUnit.getFemale())) ||
+						benefitUnit.getOccupancy().equals(Occupancy.Couple) || benefitUnit.getPersonsInBU().size() == 1 ) {
 						// death of person should not affect existence of any other person in model
 
 						candidate.death();
@@ -1123,7 +1147,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	 *********************************************************/
 	private Household cloneHousehold(Household originalHousehold) {
 
-		Household newHousehold = new Household();
+		Household newHousehold = new Household(originalHousehold);
 		households.add(newHousehold);
 		for (BenefitUnit originalBenefitUnit : originalHousehold.getBenefitUnitSet()) {
 			cloneBenefitUnit(originalBenefitUnit, newHousehold);
@@ -2922,6 +2946,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		interestRateInnov = innov;
 	}
 
+	public void setDisposableIncomeInnov(double innov) {
+		disposableIncomeInnov = innov;
+	}
+
 	public Integer getsIndexTimeWindow() {
 		return sIndexTimeWindow;
 	}
@@ -3173,6 +3201,25 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		this.alignFertility = alignFertility;
 	}
 
+	public void setSaveImperfectTaxDBMatches(boolean flag) {
+		saveImperfectTaxDBMatches = flag;
+	}
+
+	public void setAlignPopulation(boolean flag) {
+		alignPopulation = flag;
+	}
+
+	public void setAlignCohabitation(boolean flag) {
+		alignCohabitation = flag;
+	}
+
+	public void setAlignEducation(boolean flag) {
+		alignEducation = flag;
+	}
+
+	public void setAlignInSchool(boolean flag) {
+		alignInSchool = flag;
+	}
 
 	public void setYear(int year) {
 		this.year = year;
@@ -3251,6 +3298,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		this.responsesToRegion = responsesToRegion;
 	}
 
+	public boolean getFlagDefaultToTimeSeriesAverages() { return flagDefaultToTimeSeriesAverages; }
+	public void setFlagDefaultToTimeSeriesAverages(boolean val) { flagDefaultToTimeSeriesAverages = val; }
 	public boolean getResponsesToLowWageOffer() { return responsesToLowWageOffer; }
 	public void setResponsesToLowWageOffer(boolean val) { responsesToLowWageOffer = val; }
 	public boolean getResponsesToRetirement() { return responsesToRetirement;}

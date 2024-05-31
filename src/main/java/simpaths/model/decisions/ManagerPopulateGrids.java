@@ -45,7 +45,7 @@ public class ManagerPopulateGrids {
         }
 
         // save populated grids if necessary
-        if (saveGrids || DecisionParams.SAVE_INTERMEDIATE_SOLUTIONS)
+        if (saveGrids || DecisionParams.saveIntermediateSolutions)
             ManagerFileGrids.unformattedWrite(grids);
 
         // reporting
