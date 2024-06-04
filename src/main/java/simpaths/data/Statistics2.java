@@ -85,6 +85,9 @@ public class Statistics2 {
     @Column(name = "work_none_55_74")
     private double aaworkNone55to74;
 
+    @Column(name = "work_none_18_74")
+    private double aaworkNone18to74;
+
     //employment income
     @Column(name = "labourIncome_18_29")
     private double labourIncome18to29;
@@ -154,6 +157,9 @@ public class Statistics2 {
 
     @Column(name = "expenditure_55_74")
     private double aaexpenditure55to74;
+
+    @Column(name = "expenditure_18_54")
+    private double aaexpenditure18to54;
 
     //consumption to leisure ratios
     @Column(name = "cons_to_leis_ratio")
@@ -524,6 +530,22 @@ public class Statistics2 {
         this.aaexpenditure55to74 = aaexpenditure55to74;
     }
 
+    public double getAaworkNone18to74() {
+        return aaworkNone18to74;
+    }
+
+    public void setAaworkNone18to74(double aaworkNone18to74) {
+        this.aaworkNone18to74 = aaworkNone18to74;
+    }
+
+    public double getAaexpenditure18to54() {
+        return aaexpenditure18to54;
+    }
+
+    public void setAaexpenditure18to54(double aaexpenditure18to54) {
+        this.aaexpenditure18to54 = aaexpenditure18to54;
+    }
+
     public double getWealth18to29() {
         return wealth18to29;
     }
@@ -629,14 +651,14 @@ public class Statistics2 {
         double[] prDisa = {0.,0.,0.};
         double[] workFT = {0.,0.,0.};
         double[] workPT = {0.,0.,0.};
-        double[] workNn = {0.,0.,0.};
+        double[] workNn = {0.,0.,0.,0.};
         double[] labInc = {0.,0.,0.};
         double[] invInc = {0.,0.,0.};
         double[] invLosses = {0.,0.,0.};
         double[] penInc = {0.,0.,0.};
         double[] disInc = {0.,0.,0.};
         double[] grossDisInc = {0.,0.,0.};
-        double[] expen = {0.,0.,0.};
+        double[] expen = {0.,0.,0.,0.};
         double[] wealth = {0.,0.,0.};
         double[] popula = {0.,0.,0.};
         double ctlNG = 0.0, ctlG = 0.0;
@@ -665,8 +687,11 @@ public class Statistics2 {
                     workFT[ii] += 1.0;
                 else if ((double)person.getLabourSupplyHoursWeekly() > 1.0)
                     workPT[ii] += 1.0;
-                else
+                else {
                     workNn[ii] += 1.0;
+                    workNn[3] += 1.0;
+                }
+
                 invInc[ii] += person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0 / es;
                 penInc[ii] += person.getBenefitUnit().getPensionIncomeAnnual() / 12.0 / es;
                 disInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthly() / es;
@@ -683,6 +708,9 @@ public class Statistics2 {
                 if (expenditurePerMonth > 0.0) {
                     expenditurePerMonth /= es;
                     expen[ii] += Math.log(expenditurePerMonth);
+                    if (person.getDag()>=18 && person.getDag()<=54) {
+                        expen[3] += Math.log(expenditurePerMonth);
+                    }
                 }
                 if (person.getDag()>=55 && person.getDag()<=60) {
 
@@ -725,23 +753,19 @@ public class Statistics2 {
                 wealth[ii] /= popula[ii];
             }
         }
+        workNn[3] /= (popula[0]+popula[1]+popula[2]);
+        expen[3] = Math.exp(expen[3] / (popula[0]+popula[1]));
 
         // update calibration statistics as differences to target moments
-        workFT[0] -= 0.5274865;
-        workFT[1] -= 0.6195412;
-        workFT[2] -= 0.2535846;
-
-        workPT[0] -= 0.1975203;
-        workPT[1] -= 0.2230833;
-        workPT[2] -= 0.1891631;
-
-        workNn[0] -= (1.0 - 0.5274865 - 0.1975203);
-        workNn[1] -= (1.0 - 0.6195412 - 0.2230833);
-        workNn[2] -= (1.0 - 0.2535846 - 0.1891631);
+        workNn[0] -= 0.3427271; //2019 - pooled UKHLS data (ukhls_pooled_all_obs_02.dta)
+        workNn[1] -= 0.2045448;
+        workNn[2] -= 0.6011462;
+        workNn[3] -= 0.3808046;
 
         expen[0] -= 165.8951 * Parameters.WEEKS_PER_MONTH;
         expen[1] -= 309.2464 * Parameters.WEEKS_PER_MONTH;
         expen[2] -= 323.1081 * Parameters.WEEKS_PER_MONTH;
+        expen[3] -= 255.13679 * Parameters.WEEKS_PER_MONTH;
 
         disInc[0] -= 295.8024 * Parameters.WEEKS_PER_MONTH;
         disInc[1] -= 482.8467 * Parameters.WEEKS_PER_MONTH;
@@ -778,6 +802,7 @@ public class Statistics2 {
         setAaworkNone18to29(workNn[0]);
         setAaworkNone30to54(workNn[1]);
         setAaworkNone55to74(workNn[2]);
+        setAaworkNone18to74(workNn[3]);
 
         setLabourIncome18to29(labInc[0]);
         setLabourIncome30to54(labInc[1]);
@@ -806,6 +831,7 @@ public class Statistics2 {
         setAaexpenditure18to29(expen[0]);
         setAaexpenditure30to54(expen[1]);
         setAaexpenditure55to74(expen[2]);
+        setAaexpenditure18to54(expen[3]);
 
         setAaconsToLeisRatio(ctlRatio);
 

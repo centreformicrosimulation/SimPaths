@@ -26,6 +26,12 @@ model_args:
 #    labourMarketCovid19On: false
 #    projectFormalChildcare: true
 #    donorPoolAveraging: true
+    alignEmployment: false
+    projectSocialCare: false
+    enableIntertemporalOptimisations: true
+    responsesToLowWageOffer: true
+    saveBehaviour: false
+#    saveImperfectTaxDBMatches: false
 #    useSavedBehaviour: false
 #    readGrid: "laptop serial"
 #    employmentOptionsOfPrincipalWorker: 3
@@ -36,17 +42,12 @@ model_args:
 #    responsesToDisability: false
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
-    alignPopulation: false
-    alignCohabitation: false
-    alignFertility: false
-    alignEducation: false
-    alignInSchool: false
-    alignEmployment: false
-    projectSocialCare: false
-    enableIntertemporalOptimisations: true
-    responsesToLowWageOffer: true
-    flagDefaultToTimeSeriesAverages: true
-    saveBehaviour: false
+#    alignPopulation: false
+#    alignCohabitation: false
+#    alignFertility: false
+#    alignEducation: false
+#    alignInSchool: false
+#    flagDefaultToTimeSeriesAverages: true
 
 innovation_args:
     randomSeedInnov: false
