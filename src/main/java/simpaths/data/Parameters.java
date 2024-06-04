@@ -3097,28 +3097,34 @@ public class Parameters {
     }
 
     public static double getPensionWealthDiscount(int age) {
-        int youngAgeCeiling = 55, oldAgeFloor = 65;
-        double discountYoung = 0.9, discountOld = 0.2;
+        int youngAgeCeiling = 45, midAgeFloor = 55, oldAgeFloor = 65;
+        double discountYoung = 0.9, discountMid = 0.9, discountOld = 0.0;
         if (age <= youngAgeCeiling) {
             return discountYoung;
-        } else if (age >= oldAgeFloor) {
-            return discountOld;
+        } else if (age <= midAgeFloor) {
+            return (discountYoung * (double)(midAgeFloor - age) + discountMid * (double)(age - youngAgeCeiling)) /
+                    (double)(midAgeFloor - youngAgeCeiling);
+        } else if (age < oldAgeFloor) {
+            return (discountMid * (double)(oldAgeFloor-age) + discountOld * (double)(age - midAgeFloor)) /
+                    (double)(oldAgeFloor - midAgeFloor);
         } else {
-            return (discountYoung * (double)(oldAgeFloor-age) + discountOld * (double)(age - youngAgeCeiling)) /
-                    (double)(oldAgeFloor - youngAgeCeiling);
+            return discountOld;
         }
     }
 
     public static double getHousingWealthDiscount(int age) {
-        int youngAgeCeiling = 55, oldAgeFloor = 65;
-        double discountYoung = 0.8, discountOld = 0.2;
+        int youngAgeCeiling = 45, midAgeFloor = 55, oldAgeFloor = 65;
+        double discountYoung = 0.9, discountMid = 0.9, discountOld = 0.0;
         if (age <= youngAgeCeiling) {
             return discountYoung;
-        } else if (age >= oldAgeFloor) {
-            return discountOld;
+        } else if (age <= midAgeFloor) {
+            return (discountYoung * (double)(midAgeFloor - age) + discountMid * (double)(age - youngAgeCeiling)) /
+                    (double)(midAgeFloor - youngAgeCeiling);
+        } else if (age < oldAgeFloor) {
+            return (discountMid * (double)(oldAgeFloor-age) + discountOld * (double)(age - midAgeFloor)) /
+                    (double)(oldAgeFloor - midAgeFloor);
         } else {
-            return (discountYoung * (double)(oldAgeFloor-age) + discountOld * (double)(age - youngAgeCeiling)) /
-                    (double)(oldAgeFloor - youngAgeCeiling);
+            return discountOld;
         }
     }
 

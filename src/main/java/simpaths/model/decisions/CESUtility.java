@@ -20,11 +20,12 @@ public class CESUtility implements IEvaluation {
     // CES utility options
     public static final double ANNUAL_CONSUMPTION_NORMALISATION_FACTOR = 15600.0;  // used to improve the curvature of the utility function with respect to consumption
     public static final double BEQUEST_NORMALISATION_FACTOR = 250000.0;
-    public static final double EPSILON = 0.6;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_SINGLES = 1.9;                                // utility price of leisure for single adults
-    public static final double ALPHA_COUPLES = 1.9;                                // utility price of leisure for couples
-    public static final double GAMMA = 1.7;                                        // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
-    public static final double ZETA0 = 13.0;                            // warm-glow bequests parameter for singles - additive
+    public static final double EPSILON = 0.35;                                      // elasticity of substitution between equivalised consumption and leisure within each year
+    public static final double ALPHA_YOUNG = 1.3;                                // utility price of leisure for single adults
+    public static final double ALPHA_MID = 1.3;                                // utility price of leisure for single adults
+    public static final double ALPHA_OLD = 1.3;                                // utility price of leisure for couples
+    public static final double GAMMA = 1.9;                                        // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
+    public static final double ZETA0 = 17.0;                            // warm-glow bequests parameter for singles - additive
     public static final double ZETA1 = 0.4;                             // warm-glow bequests parameter for singles - slope
     public static final double DELTA_SINGLES = 0.995;                               // exponential intertemporal discount factor for singles
     public static final double DELTA_COUPLES = 0.995;                               // exponential intertemporal discount factor for couples
@@ -64,12 +65,19 @@ public class CESUtility implements IEvaluation {
         double consumptionNormalised = consumptionAnnual / ANNUAL_CONSUMPTION_NORMALISATION_FACTOR;
         double consumptionComponent = Math.pow(consumptionNormalised/expectations.equivalenceScale, 1.0 - 1.0/EPSILON);
         double leisureComponent = Math.pow(expectations.leisureTime, 1.0 - 1.0/EPSILON);
-        double priceOfLeisure;
-        if (expectations.cohabitation) {
-            priceOfLeisure = Math.pow(ALPHA_COUPLES, 1.0/EPSILON);
+        double alpha;
+        if (expectations.ageYearsThisPeriod<30) {
+            alpha = ALPHA_YOUNG;
+        } else if (expectations.ageYearsThisPeriod<40) {
+            alpha = (ALPHA_YOUNG * (double) (40 - expectations.ageYearsThisPeriod) + ALPHA_MID * (double) (expectations.ageYearsThisPeriod - 30)) / 10.0;
+        } else if (expectations.ageYearsThisPeriod<55) {
+            alpha = ALPHA_MID;
+        } else if (expectations.ageYearsThisPeriod<65) {
+            alpha = (ALPHA_MID * (double) (65 - expectations.ageYearsThisPeriod) + ALPHA_OLD * (double) (expectations.ageYearsThisPeriod - 55)) / 10.0;
         } else {
-            priceOfLeisure = Math.pow(ALPHA_SINGLES, 1.0/EPSILON);
+            alpha = ALPHA_OLD;
         }
+        double priceOfLeisure = Math.pow(alpha, 1.0/EPSILON);
         double periodUtility = Math.pow(consumptionComponent + priceOfLeisure * leisureComponent, (1.0 - GAMMA)/(1.0 - 1.0/EPSILON));
         periodUtility /= (1.0 - GAMMA);
 
