@@ -13,8 +13,8 @@ public class DecisionParams {
 
     // RUNNING OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static boolean saveGridSlicesToCSV = true;
-    public static boolean saveIntermediateSolutions = false;
+    public static boolean saveGridSlicesToCSV = false;
+    public static boolean saveIntermediateSolutions = true;
     public static boolean saveImperfectTaxDbMatches = false;
 
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
@@ -251,5 +251,12 @@ public class DecisionParams {
             }
         }
         return value;
+    }
+
+    public static int maxAgeForDisability() {
+        int val = DecisionParams.maxAgeFlexibleLabourSupply;
+        if (Parameters.flagSocialCare && val >= DecisionParams.minAgeReceiveFormalCare)
+            val = DecisionParams.minAgeReceiveFormalCare - 1;
+        return val;
     }
 }

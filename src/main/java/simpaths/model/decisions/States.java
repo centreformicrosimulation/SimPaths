@@ -99,16 +99,16 @@ public class States {
             populate(Axis.Health, Math.min(Math.max(benefitUnit.getHealthValForBehaviour(), DecisionParams.MIN_HEALTH), DecisionParams.MAX_HEALTH));
 
         // disability
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth)
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth && ageYears <= DecisionParams.maxAgeForDisability())
             populate(Axis.Disability, (double)refPerson.getDisability());
 
         // social care receipt
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptAll().getValue());
+            populate(Axis.SocialCareReceiptState, (double)refPerson.getSocialCareReceiptState().getValue());
 
         // social care provision
         if (Parameters.flagSocialCare)
-            populate(Axis.SocialCareProvision, refPerson.getSocialCareProvision().getValue());
+            populate(Axis.SocialCareProvision, refPerson.getSocialCareProvisionState());
 
         // region
         if ( DecisionParams.flagRegion )
@@ -613,7 +613,7 @@ public class States {
      * @return integer (0 not disabled, 1 disabled)
      */
     int getDisability() {
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) {
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth && ageYears <= DecisionParams.maxAgeForDisability()) {
             return (int)states[scale.getIndex(Axis.Disability, ageYears)];
         } else {
             return 0;
@@ -626,10 +626,22 @@ public class States {
      */
     int getSocialCareReceipt() {
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
-            return (int)states[scale.getIndex(Axis.SocialCareReceipt, ageYears)];
+            return (int)states[scale.getIndex(Axis.SocialCareReceiptState, ageYears)];
         } else {
             return 0;
         }
+    }
+
+    /**
+     * METHOD TO INDICATE IF PRINCIPAL IS ELIGIBLE FOR WORK
+     * @return boolean
+     */
+    public boolean getPrincipalEligibleForWork() {
+        if (getDisability()==1)
+            return false;
+        if (getSocialCareReceipt()>0)
+            return false;
+        return true;
     }
 
     /**
@@ -786,7 +798,7 @@ public class States {
      */
     Indicator getDlltsd() {
         Indicator code;
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) {
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth && ageYears <= DecisionParams.maxAgeForDisability()) {
             if (getDisability()==0) {
                 code = Indicator.False;
             } else {
@@ -871,14 +883,26 @@ public class States {
     }
 
     /**
-     * METHOD TO IDENTIFY SOCIAL CARE RECEIPT CODE IMPLIED BY STATE COMBINATION
+     * METHOD TO IDENTIFY SOCIAL CARE RECEIPT STATE CODE IMPLIED BY STATE COMBINATION
      */
-    SocialCareReceiptAll getSocialCareReceiptCode() {
-        SocialCareReceiptAll code;
+    SocialCareReceiptState getSocialCareReceiptStateCode() {
+        SocialCareReceiptState code;
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            code = SocialCareReceiptAll.getCode((int)getVal(Axis.SocialCareReceipt));
+            code = SocialCareReceiptState.getCode((int)getVal(Axis.SocialCareReceiptState));
         else
-            code = SocialCareReceiptAll.None;
+            code = SocialCareReceiptState.NoneNeeded;
+        return code;
+    }
+
+    /**
+     * METHOD TO IDENTIFY SOCIAL CARE RECEIPT STATE CODE IMPLIED BY STATE COMBINATION
+     */
+    SocialCareReceipt getSocialCareReceiptCode() {
+        SocialCareReceipt code;
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+            code = SocialCareReceipt.getCode((int)getVal(Axis.SocialCareReceiptState));
+        else
+            code = SocialCareReceipt.None;
         return code;
     }
 
@@ -999,7 +1023,7 @@ public class States {
         }
 
         // disability
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) {
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth && ageYears <= DecisionParams.maxAgeForDisability()) {
             stateIndex = scale.getIndex(Axis.Disability, ageYears);
             printOutOfBounds(stateIndex);
             msg = "disability: " + String.format(fmtIndicator,states[stateIndex]);
@@ -1008,7 +1032,7 @@ public class States {
 
         // social care receipt
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
-            stateIndex = scale.getIndex(Axis.SocialCareReceipt, ageYears);
+            stateIndex = scale.getIndex(Axis.SocialCareReceiptState, ageYears);
             printOutOfBounds(stateIndex);
             msg = "social care receipt: " + String.format(fmtIndicator,states[stateIndex]);
             System.out.println(msg);

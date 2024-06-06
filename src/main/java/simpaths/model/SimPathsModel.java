@@ -2,7 +2,11 @@
 package simpaths.model;
 
 // import Java packages
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -286,7 +290,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean responsesToDisability = false;
 
 	@GUIparameter(description = "minimum age for expecting less than perfect health in IO solutions")
-	private Integer minAgeForPoorHealth = 50;
+	private Integer minAgeForPoorHealth = 45;
 
 	@GUIparameter(description = "whether to include geographic region in state space for IO behavioural solutions")
 	private boolean responsesToRegion = false;
@@ -407,10 +411,129 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		//Set up tests class
 		tests = new Tests();
 
+		// save current simulation parameters
+		saveRunParameters();
+
 		// finalise
 		log.debug("Time to build objects: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 		System.out.println("Time to complete initialisation " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 		elapsedTime = System.currentTimeMillis();
+	}
+
+	private void saveRunParameters() {
+
+		String dir = getEngine().getCurrentExperiment().getOutputFolder() + File.separator + "options";
+		File fileDir = new File(dir);
+		if (!fileDir.exists())
+			fileDir.mkdir();
+		String filePath = dir + File.separator + "options.txt";
+		try {
+
+			BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
+			String line;
+			line = "country: " + country + "\n";
+			writer.write(line);
+			line = "startYear: " + startYear + "\n";
+			writer.write(line);
+			line = "endYear: " + endYear + "\n";
+			writer.write(line);
+			line = "popSize: " + popSize + "\n";
+			writer.write(line);
+			line = "maxAge: " + maxAge + "\n";
+			writer.write(line);
+			line = "fixTimeTrend: " + fixTimeTrend + "\n";
+			writer.write(line);
+			line = "timeTrendStopsIn: " + timeTrendStopsIn + "\n";
+			writer.write(line);
+			line = "timeTrendStopsInMonetaryProcesses: " + timeTrendStopsInMonetaryProcesses + "\n";
+			writer.write(line);
+			line = "flagDefaultToTimeSeriesAverages: " + flagDefaultToTimeSeriesAverages + "\n";
+			writer.write(line);
+			line = "fixRandomSeed: " + fixRandomSeed + "\n";
+			writer.write(line);
+			line = "randomSeedIfFixed: " + randomSeedIfFixed + "\n";
+			writer.write(line);
+			line = "sIndexAlpha: " + sIndexAlpha + "\n";
+			writer.write(line);
+			line = "sIndexDelta: " + sIndexDelta + "\n";
+			writer.write(line);
+			line = "savingRate: " + savingRate + "\n";
+			writer.write(line);
+			line = "addRegressionStochasticComponent: " + addRegressionStochasticComponent + "\n";
+			writer.write(line);
+			line = "fixRegressionStochasticComponent: " + fixRegressionStochasticComponent + "\n";
+			writer.write(line);
+			line = "commentsOn: " + commentsOn + "\n";
+			writer.write(line);
+			line = "debugCommentsOn: " + debugCommentsOn + "\n";
+			writer.write(line);
+			line = "donorFinderCommentsOn: " + donorFinderCommentsOn + "\n";
+			writer.write(line);
+			line = "labourMarketCovid19On: " + labourMarketCovid19On + "\n";
+			writer.write(line);
+			line = "projectFormalChildcare: " + projectFormalChildcare + "\n";
+			writer.write(line);
+			line = "donorPoolAveraging: " + donorPoolAveraging + "\n";
+			writer.write(line);
+			line = "initialisePotentialEarningsFromDatabase: " + initialisePotentialEarningsFromDatabase + "\n";
+			writer.write(line);
+			line = "useWeights: " + useWeights + "\n";
+			writer.write(line);
+			line = "projectMortality: " + projectMortality + "\n";
+			writer.write(line);
+			line = "alignPopulation: " + alignPopulation + "\n";
+			writer.write(line);
+			line = "alignFertility: " + alignFertility + "\n";
+			writer.write(line);
+			line = "alignEducation: " + alignEducation + "\n";
+			writer.write(line);
+			line = "alignInSchool: " + alignInSchool + "\n";
+			writer.write(line);
+			line = "alignCohabitation: " + alignCohabitation + "\n";
+			writer.write(line);
+			line = "alignEmployment: " + alignEmployment + "\n";
+			writer.write(line);
+			line = "saveImperfectTaxDBMatches: " + saveImperfectTaxDBMatches + "\n";
+			writer.write(line);
+			line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations + "\n";
+			writer.write(line);
+			line = "readGrid: " + useSavedBehaviour + "\n";
+			writer.write(line);
+			line = "readGrid: " + readGrid + "\n";
+			writer.write(line);
+			line = "saveBehaviour: " + saveBehaviour + "\n";
+			writer.write(line);
+			line = "employmentOptionsOfPrincipalWorker: " + employmentOptionsOfPrincipalWorker + "\n";
+			writer.write(line);
+			line = "employmentOptionsOfSecondaryWorker: " + employmentOptionsOfSecondaryWorker + "\n";
+			writer.write(line);
+			line = "responsesToLowWageOffer: " + responsesToLowWageOffer + "\n";
+			writer.write(line);
+			line = "responsesToEducation: " + responsesToEducation + "\n";
+			writer.write(line);
+			line = "responsesToHealth: " + responsesToHealth + "\n";
+			writer.write(line);
+			line = "minAgeForPoorHealth: " + minAgeForPoorHealth + "\n";
+			writer.write(line);
+			line = "responsesToDisability: " + responsesToDisability + "\n";
+			writer.write(line);
+			line = "projectSocialCare: " + projectSocialCare + "\n";
+			writer.write(line);
+			line = "responsesToRegion: " + responsesToRegion + "\n";
+			writer.write(line);
+			line = "responsesToPension: " + responsesToPension + "\n";
+			writer.write(line);
+			line = "responsesToRetirement: " + responsesToRetirement + "\n";
+			writer.write(line);
+			line = "interestRateInnov: " + interestRateInnov + "\n";
+			writer.write(line);
+			line = "disposableIncomeInnov: " + disposableIncomeInnov + "\n";
+			writer.write(line);
+			writer.flush();
+			writer.close();
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
 	}
 
 
