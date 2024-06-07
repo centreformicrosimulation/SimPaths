@@ -624,7 +624,7 @@ public class States {
      * METHOD TO RETURN SOCIAL CARE RECEIPT
      * @return integer (0 no care, 1 only informal, 2 formal and informal, 3 only formal
      */
-    int getSocialCareReceipt() {
+    int getSocialCareReceiptState() {
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
             return (int)states[scale.getIndex(Axis.SocialCareReceiptState, ageYears)];
         } else {
@@ -639,7 +639,7 @@ public class States {
     public boolean getPrincipalEligibleForWork() {
         if (getDisability()==1)
             return false;
-        if (getSocialCareReceipt()>0)
+        if (getSocialCareReceiptState()>0)
             return false;
         return true;
     }
