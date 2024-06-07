@@ -36,6 +36,7 @@ public class ManagerSolveState {
         double emp2End = 0;
         double emp2Step = 1;
         if (states.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply) {
+
             // principal earner
             if (DecisionParams.FLAG_IO_EMPLOYMENT1) {
                 emp1End = 1;
@@ -50,6 +51,7 @@ public class ManagerSolveState {
             }
             if (states.getCohabitation()) {
                 // secondary earner
+
                 if (DecisionParams.FLAG_IO_EMPLOYMENT2) {
                     emp2End = 1;
                     if (DecisionParams.optionsEmployment2 > 1) {
@@ -72,55 +74,59 @@ public class ManagerSolveState {
         for (double emp1Pr=emp1Start; emp1Pr<=(emp1End+1.0E-7); emp1Pr+=emp1Step) {
             for (double emp2Pr=emp2Start; emp2Pr<=(emp2End+1.0E-7); emp2Pr+=emp2Step) {
 
-                // instantiate local expectations, populated with expectations for states invariant to agent decisions
-                Expectations expectations = new Expectations(invariantExpectations);
+                boolean loopConsider = checkDecisionFeasible(states, emp1Pr, emp2Pr);
+                if (loopConsider) {
 
-                // evaluate solution for current control combination
-                UtilityMaximisation solutionHere = new UtilityMaximisation(grids.valueFunction, states, expectations, emp1Pr, emp2Pr);
+                    // instantiate local expectations, populated with expectations for states invariant to agent decisions
+                    Expectations expectations = new Expectations(invariantExpectations);
 
-                // check for imperfect matches
-                if ( DecisionParams.saveImperfectTaxDbMatches && !expectations.imperfectMatches.isEmpty()) {
-                    localImperfectMatches.addSet(expectations.imperfectMatches.getSet());
-                }
+                    // evaluate solution for current control combination
+                    UtilityMaximisation solutionHere = new UtilityMaximisation(grids.valueFunction, states, expectations, emp1Pr, emp2Pr);
 
-                // check for wage offer solutions for both principal and secondary earner
-                if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 &&
-                        emp2End > emp2Start && DecisionParams.FLAG_WAGE_OFFER2 &&
-                        emp1Pr < 1.0E-5 && emp2Pr < 1.0E-5) {
-                    States targetStates = new States(states);
-                    targetStates.setWageOffer1(0);
-                    targetStates.setWageOffer2(0);
-                    grids.populate(targetStates, solutionHere);
-                }
+                    // check for imperfect matches
+                    if ( DecisionParams.saveImperfectTaxDbMatches && !expectations.imperfectMatches.isEmpty()) {
+                        localImperfectMatches.addSet(expectations.imperfectMatches.getSet());
+                    }
 
-                // check wage offer solutions for principal earner
-                if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 && emp1Pr < 1.0E-5) {
-                    if (solutionMaxEmp1==null) {
-                        solutionMaxEmp1 = solutionHere;
-                    } else {
-                        if (solutionMaxEmp1.optimisedUtility < solutionHere.optimisedUtility) {
+                    // check for wage offer solutions for both principal and secondary earner
+                    if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 &&
+                            emp2End > emp2Start && DecisionParams.FLAG_WAGE_OFFER2 &&
+                            emp1Pr < 1.0E-5 && emp2Pr < 1.0E-5) {
+                        States targetStates = new States(states);
+                        targetStates.setWageOffer1(0);
+                        targetStates.setWageOffer2(0);
+                        grids.populate(targetStates, solutionHere);
+                    }
+
+                    // check wage offer solutions for principal earner
+                    if (emp1End > emp1Start && DecisionParams.flagLowWageOffer1 && emp1Pr < 1.0E-5) {
+                        if (solutionMaxEmp1==null) {
                             solutionMaxEmp1 = solutionHere;
+                        } else {
+                            if (solutionMaxEmp1.optimisedUtility < solutionHere.optimisedUtility) {
+                                solutionMaxEmp1 = solutionHere;
+                            }
                         }
                     }
-                }
 
-                // check wage offer solutions for secondary earner
-                if (emp2End > emp2Start && DecisionParams.FLAG_WAGE_OFFER2 && emp2Pr < 1.0E-5) {
-                    if (solutionMaxEmp2==null) {
-                        solutionMaxEmp2 = solutionHere;
-                    } else {
-                        if (solutionMaxEmp2.optimisedUtility < solutionHere.optimisedUtility) {
+                    // check wage offer solutions for secondary earner
+                    if (emp2End > emp2Start && DecisionParams.FLAG_WAGE_OFFER2 && emp2Pr < 1.0E-5) {
+                        if (solutionMaxEmp2==null) {
                             solutionMaxEmp2 = solutionHere;
+                        } else {
+                            if (solutionMaxEmp2.optimisedUtility < solutionHere.optimisedUtility) {
+                                solutionMaxEmp2 = solutionHere;
+                            }
                         }
                     }
-                }
 
-                // track state optimum
-                if (solutionMax==null) {
-                    solutionMax = solutionHere;
-                } else {
-                    if (solutionMax.optimisedUtility < solutionHere.optimisedUtility) {
+                    // track state optimum
+                    if (solutionMax==null) {
                         solutionMax = solutionHere;
+                    } else {
+                        if (solutionMax.optimisedUtility < solutionHere.optimisedUtility) {
+                            solutionMax = solutionHere;
+                        }
                     }
                 }
             }
@@ -147,5 +153,12 @@ public class ManagerSolveState {
             int ageSpecificIndex = (int)states.returnAgeSpecificIndex();
             imperfectMatchStore.set(ageSpecificIndex, localImperfectMatches);
         }
+    }
+
+    private static boolean checkDecisionFeasible(States states, double emp1Pr, double emp2Pr) {
+
+        if (emp1Pr>1.0E-5 && !states.getPrincipalEligibleForWork())
+            return false;
+        return true;
     }
 }

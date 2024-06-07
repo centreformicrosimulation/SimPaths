@@ -440,7 +440,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3c;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3d;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3e;
-    private static Map<SocialCareReceipt, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2cMap;
+    private static Map<SocialCareReceiptS2c, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2cMap;
     private static Map<PartnerSupplementaryCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2eMap;
     private static Map<NotPartnerInformalCarer, MultiKeyCoefficientMap> coeffCovarianceSocialCareS2fMap;
     private static Map<SocialCareProvision, MultiKeyCoefficientMap> coeffCovarianceSocialCareS3dMap;
@@ -644,7 +644,7 @@ public class Parameters {
     private static LinearRegression regCareHoursS1b;
     private static ProbitRegression regNeedCareS2a;
     private static ProbitRegression regReceiveCareS2b;
-    private static MultiLogitRegression<SocialCareReceipt> regSocialCareMarketS2c;
+    private static MultiLogitRegression<SocialCareReceiptS2c> regSocialCareMarketS2c;
     private static ProbitRegression regReceiveCarePartnerS2d;
     private static MultiLogitRegression<PartnerSupplementaryCarer> regPartnerSupplementaryCareS2e;
     private static MultiLogitRegression<NotPartnerInformalCarer> regNotPartnerInformalCareS2f;
@@ -1446,7 +1446,7 @@ public class Parameters {
         regHealthH2b = new ProbitRegression(coeffCovarianceHealthH2b);
 
         //Social care
-        coeffCovarianceSocialCareS2cMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareReceipt.class, coeffCovarianceSocialCareS2c);
+        coeffCovarianceSocialCareS2cMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2c);
         coeffCovarianceSocialCareS2eMap = MultiLogitRegression.populateMultinomialCoefficientMap(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2e);
         coeffCovarianceSocialCareS2fMap = MultiLogitRegression.populateMultinomialCoefficientMap(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f);
         coeffCovarianceSocialCareS3dMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareProvision.class, coeffCovarianceSocialCareS3d);
@@ -1454,7 +1454,7 @@ public class Parameters {
         regCareHoursS1b = new ProbitRegression(coeffCovarianceSocialCareS1b);
         regNeedCareS2a = new ProbitRegression(coeffCovarianceSocialCareS2a);
         regReceiveCareS2b = new ProbitRegression(coeffCovarianceSocialCareS2b);
-        regSocialCareMarketS2c = new MultiLogitRegression<>(SocialCareReceipt.class, coeffCovarianceSocialCareS2cMap);
+        regSocialCareMarketS2c = new MultiLogitRegression<>(SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2cMap);
         regReceiveCarePartnerS2d = new ProbitRegression(coeffCovarianceSocialCareS2d);
         regPartnerSupplementaryCareS2e = new MultiLogitRegression<>(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2eMap);
         regNotPartnerInformalCareS2f = new MultiLogitRegression<>(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2fMap);

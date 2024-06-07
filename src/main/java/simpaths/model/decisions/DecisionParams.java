@@ -13,7 +13,7 @@ public class DecisionParams {
 
     // RUNNING OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static boolean saveGridSlicesToCSV = true;
+    public static boolean saveGridSlicesToCSV = false;
     public static boolean saveIntermediateSolutions = false;
     public static boolean saveImperfectTaxDbMatches = false;
 
@@ -113,7 +113,7 @@ public class DecisionParams {
     public static int minAgeReceiveFormalCare;
 
     // MAXIMUM AGE FOR COHABITATION
-    public static final int MAX_AGE_COHABITATION = 100;
+    public static final int MAX_AGE_COHABITATION = 115;
 
     // REGION STATE
     public static final int PTS_REGION = 12;                          // number of regions, starting at value 1
@@ -251,5 +251,12 @@ public class DecisionParams {
             }
         }
         return value;
+    }
+
+    public static int maxAgeForDisability() {
+        int val = DecisionParams.maxAgeFlexibleLabourSupply;
+        if (Parameters.flagSocialCare && val >= DecisionParams.minAgeReceiveFormalCare)
+            val = DecisionParams.minAgeReceiveFormalCare - 1;
+        return val;
     }
 }

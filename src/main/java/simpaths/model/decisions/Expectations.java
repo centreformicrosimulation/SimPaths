@@ -185,9 +185,7 @@ public class Expectations {
         personProxyThisPeriod.setDeh_c3(currentStates.getEducationCode());
         personProxyThisPeriod.setDcpst(currentStates.getDcpst());
         personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
-        if (SocialCareReceiptAll.Informal.equals(currentStates.getSocialCareReceiptCode()) ||
-                SocialCareReceiptAll.Mixed.equals(currentStates.getSocialCareReceiptCode()))
-            personProxyThisPeriod.setSocialCareFromOther(true);
+        personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
 
         // add person proxy for next period expectations
         personProxyNextPeriod = new Person(true);
@@ -204,12 +202,7 @@ public class Expectations {
         personProxyNextPeriod.setDlltsd_lag1(currentStates.getDlltsd());
         personProxyNextPeriod.setDhe(currentStates.getHealthCode());
         personProxyNextPeriod.setDhe_lag1(currentStates.getHealthCode());
-        if (SocialCareReceiptAll.Informal.equals(currentStates.getSocialCareReceiptCode()) ||
-                SocialCareReceiptAll.Mixed.equals(currentStates.getSocialCareReceiptCode()))
-            personProxyNextPeriod.setCareHoursFromOtherWeekly_lag1(10.0);
-        if (SocialCareReceiptAll.Formal.equals(currentStates.getSocialCareReceiptCode()) ||
-                SocialCareReceiptAll.Mixed.equals(currentStates.getSocialCareReceiptCode()))
-            personProxyNextPeriod.setCareHoursFromFormalWeekly_lag1(10.0);
+        personProxyNextPeriod.populateSocialCareReceipt_lag1(currentStates.getSocialCareReceiptStateCode());
         personProxyNextPeriod.setSocialCareProvision_lag1(currentStates.getSocialCareProvisionCode());
         personProxyNextPeriod.setDed(currentStates.getStudentIndicator());
         personProxyNextPeriod.setDeh_c3(currentStates.getEducationCode());
@@ -494,10 +487,9 @@ public class Expectations {
             }
 
             // disability
-            if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
+            if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth && ageYearsNextPeriod <= DecisionParams.maxAgeForDisability()) {
                 updateExpectations(Axis.Disability, RegressionNames.HealthH2b);
                 flagDisabilityVaries = true;
-                throw new RuntimeException("Please validate code for disability in expectations object");
             }
 
             // cohabitation (1 = cohabiting)
@@ -565,7 +557,7 @@ public class Expectations {
 
             // social care receipt
             if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
-                updateExpectations(Axis.SocialCareReceipt, 4);
+                updateExpectations(Axis.SocialCareReceiptState, 4);
                 flagSocialCareReceiptVaries = true;
             }
 
@@ -655,8 +647,8 @@ public class Expectations {
         double socialCareCostWeekly = 0.0;
         if (Parameters.flagSocialCare && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
 
-            SocialCareReceiptAll market = currentStates.getSocialCareReceiptCode();
-            if (SocialCareReceiptAll.Mixed.equals(market) || SocialCareReceiptAll.Formal.equals(market)) {
+            SocialCareReceiptState market = currentStates.getSocialCareReceiptStateCode();
+            if (SocialCareReceiptState.Mixed.equals(market) || SocialCareReceiptState.Formal.equals(market)) {
 
                 double score = Parameters.getRegFormalCareHoursS2k().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
                 double rmse = Parameters.getRMSEForRegression("S2k");
@@ -919,7 +911,7 @@ public class Expectations {
             if (flagChange) flagEval = true;
         }
         if (flagSocialCareReceiptVaries) {
-            flagChange = updatePersonNextPeriod(anticipated[ii], Axis.SocialCareReceipt);
+            flagChange = updatePersonNextPeriod(anticipated[ii], Axis.SocialCareReceiptState);
             if (flagChange) flagEval = true;
         }
         if (flagSocialCareProvisionVaries) {
@@ -956,8 +948,8 @@ public class Expectations {
         } else if (Axis.Disability.equals(axis)) {
             val0 = personProxyNextPeriod.getDlltsd();
             val1 = states.getDlltsd();
-        } else if (Axis.SocialCareReceipt.equals(axis)) {
-            val0 = personProxyNextPeriod.getSocialCareReceiptAll();
+        } else if (Axis.SocialCareReceiptState.equals(axis)) {
+            val0 = personProxyNextPeriod.getSocialCareReceipt();
             val1 = states.getSocialCareReceiptCode();
         } else if (Axis.SocialCareProvision.equals(axis)) {
             val0 = personProxyNextPeriod.getSocialCareProvision();
@@ -991,8 +983,8 @@ public class Expectations {
                 personProxyNextPeriod.setDhe(states.getHealthCode());
             } else if (Axis.Disability.equals(axis)) {
                 personProxyNextPeriod.setDlltsd(states.getDlltsd());
-            } else if (Axis.SocialCareReceipt.equals(axis)) {
-                personProxyNextPeriod.setSocialCareReceiptAll(states.getSocialCareReceiptCode());
+            } else if (Axis.SocialCareReceiptState.equals(axis)) {
+                personProxyNextPeriod.setSocialCareReceipt(states.getSocialCareReceiptCode());
             } else if (Axis.SocialCareProvision.equals(axis)) {
                 personProxyNextPeriod.setSocialCareProvision(states.getSocialCareProvisionCode());
             } else if (Axis.Cohabitation.equals(axis)) {
@@ -1127,25 +1119,43 @@ public class Expectations {
     private LocalExpectations compileSocialCareReceiptProbs() {
 
         // raw inputs
-        double prob0 = Parameters.getRegReceiveCareS2b().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
-        Map<SocialCareReceipt,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(personProxyNextPeriod, Person.DoublesVariables.class);
+        double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
+        double probRecCare = Parameters.getRegReceiveCareS2b().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
+        Map<SocialCareReceiptS2c,Double> probsCareFrom = Parameters.getRegSocialCareMarketS2c().getProbabilites(personProxyNextPeriod, Person.DoublesVariables.class);
 
         // compile and package outputs
+        int ii = 0;
         double probHere, probCheck = 0.0;
-        double[] probs = new double[SocialCareReceiptAll.values().length];
-        double[] vals = new double[SocialCareReceiptAll.values().length];
-        probHere = 1.0 - prob0;
-        probs[0] = probHere;
-        vals[0] = SocialCareReceiptAll.None.getValue();
+        double[] probs = new double[SocialCareReceiptState.values().length];
+        double[] vals = new double[SocialCareReceiptState.values().length];
+
+        // no care needed
+        probHere = 1.0 - probNeedCare;
+        probs[ii] = probHere;
+        vals[ii] = SocialCareReceiptState.NoneNeeded.getValue();
         probCheck += probHere;
-        int ii = 1;
-        for (SocialCareReceipt key : SocialCareReceipt.values()) {
-            probHere = probs1.get(key) * prob0;
-            probs[ii] = probHere;
-            vals[ii] = SocialCareReceiptAll.getCode(key).getValue();
-            probCheck += probHere;
-            ii++;
-        }
+        ii++;
+
+        // no formal care
+        probHere = probNeedCare * ((1.0 - probRecCare) + probRecCare * probsCareFrom.get(SocialCareReceiptS2c.Informal));
+        probs[ii] = probHere;
+        vals[ii] = SocialCareReceiptState.NoFormal.getValue();
+        probCheck += probHere;
+        ii++;
+
+        // mixed care
+        probHere = probNeedCare * probRecCare * probsCareFrom.get(SocialCareReceiptS2c.Mixed);
+        probs[ii] = probHere;
+        vals[ii] = SocialCareReceiptState.Mixed.getValue();
+        probCheck += probHere;
+        ii++;
+
+        // formal care
+        probHere = probNeedCare * probRecCare * probsCareFrom.get(SocialCareReceiptS2c.Formal);
+        probs[ii] = probHere;
+        vals[ii] = SocialCareReceiptState.Formal.getValue();
+        probCheck += probHere;
+        ii++;
 
         // check results
         if (Math.abs(probCheck-1.0)>1.0E-5)

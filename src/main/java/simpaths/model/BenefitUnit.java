@@ -3463,21 +3463,27 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		Person ref;
 		if (Occupancy.Couple.equals(occupancy)) {
 			// reference person defined as:
-			//	woman if man is disabled (even if woman is also disabled)
-			//	man if woman is disabled and man is not
+			//	man if man is disabled (even if woman is also disabled)
+			//	woman if woman is disabled and man is not
+			//  man if man is in need of social care
+			//  woman if woman is in need of social care and man is not
 			//	person with highest age if both retired
 			//	person retired if one is retired
 			//	student if one is student (and under maximum age threshold)
-			//	person with highest full-time wage potential if neither is disabled and both not retired
+			//	person with highest full-time wage potential if neither is disabled or receiving social care and both not retired or students
 
 			if (male==null) {
 				throw new IllegalStateException("ERROR - benefit unit identified as couple, but missing male adult");
 			} else if (female==null) {
 				throw new IllegalStateException("ERROR - benefit unit identified as couple, but missing female adult");
 			} else if (male.getDlltsd() == Indicator.True) {
-				ref = female;
-			} else if (female.getDlltsd() == Indicator.True) {
 				ref = male;
+			} else if (female.getDlltsd() == Indicator.True) {
+				ref = female;
+			} else if (Indicator.True.equals(male.getNeedSocialCare())) {
+				ref = male;
+			} else if (Indicator.True.equals(female.getNeedSocialCare())) {
+				ref = female;
 			} else if (male.getLes_c4()==Les_c4.Retired && female.getLes_c4()==Les_c4.Retired) {
 				if (male.getDag() >= female.getDag()) {
 					ref = male;
