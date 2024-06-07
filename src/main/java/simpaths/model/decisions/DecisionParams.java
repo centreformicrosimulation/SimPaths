@@ -14,7 +14,7 @@ public class DecisionParams {
     // RUNNING OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
     public static boolean saveGridSlicesToCSV = false;
-    public static boolean saveIntermediateSolutions = true;
+    public static boolean saveIntermediateSolutions = false;
     public static boolean saveImperfectTaxDbMatches = false;
 
     public static final boolean FILTER_LOCAL_EXPECTATIONS = true;    // screens expectations to omit low probability events
@@ -113,7 +113,7 @@ public class DecisionParams {
     public static int minAgeReceiveFormalCare;
 
     // MAXIMUM AGE FOR COHABITATION
-    public static final int MAX_AGE_COHABITATION = 100;
+    public static final int MAX_AGE_COHABITATION = 115;
 
     // REGION STATE
     public static final int PTS_REGION = 12;                          // number of regions, starting at value 1
