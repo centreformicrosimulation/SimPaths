@@ -632,7 +632,7 @@ public class Expectations {
     private double evalChildcareCostWeekly() {
 
         double childcareCostWeekly = 0.0;
-        if (Parameters.flagFormalChildcare && currentStates.hasChildrenEligibleForCare()) {
+        if (Parameters.flagFormalChildcare && !Parameters.flagSuppressCareCosts && currentStates.hasChildrenEligibleForCare()) {
 
             double probFormalChildCare = Parameters.getRegChildcareC1a().getProbability(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
             double logChildcareCostScore = Parameters.getRegChildcareC1b().getScore(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
@@ -645,7 +645,7 @@ public class Expectations {
     private double evalSocialCareCostWeekly() {
 
         double socialCareCostWeekly = 0.0;
-        if (Parameters.flagSocialCare && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
 
             SocialCareReceiptState market = currentStates.getSocialCareReceiptStateCode();
             if (SocialCareReceiptState.Mixed.equals(market) || SocialCareReceiptState.Formal.equals(market)) {
@@ -662,7 +662,7 @@ public class Expectations {
     private double evalSocialCareHoursProvidedWeekly() {
 
         double socialCareHoursProvidedWeekly = 0.0;
-        if (Parameters.flagSocialCare) {
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts) {
 
             SocialCareProvision status = currentStates.getSocialCareProvisionCode();
             if (!SocialCareProvision.None.equals(status)) {

@@ -777,6 +777,7 @@ public class Parameters {
     public static Integer timeTrendStopsIn;
     public static boolean flagFormalChildcare;
     public static boolean flagSocialCare;
+    public static boolean flagSuppressCareCosts = false;
     public static boolean donorPoolAveraging;
 
     public static double realInterestRateInnov;
@@ -793,7 +794,7 @@ public class Parameters {
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
-                                      double disposableIncomeInnov1) {
+                                      double disposableIncomeInnov1, boolean flagSuppressCareCosts1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -825,6 +826,7 @@ public class Parameters {
         timeTrendStopsIn = timeTrendStops;
         flagFormalChildcare = projectFormalChildcare;
         flagSocialCare = projectSocialCare;
+        flagSuppressCareCosts = flagSuppressCareCosts1;
         donorPoolAveraging = donorPoolAveraging1;
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeInnov = disposableIncomeInnov1;

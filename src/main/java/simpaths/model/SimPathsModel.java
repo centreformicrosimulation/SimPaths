@@ -3,8 +3,6 @@ package simpaths.model;
 
 // import Java packages
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -245,6 +243,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "tick to project social care")
 	private boolean projectSocialCare = true;
 
+	private boolean flagSuppressCareCosts = false;	// multiplicative factor applied to all financial and time costs associated with child and social care
+
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
 	private boolean enableIntertemporalOptimisations = false;
 
@@ -341,7 +341,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// load model parameters
 		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
 				projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
-				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeInnov);
+				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeInnov, flagSuppressCareCosts);
 		if (enableIntertemporalOptimisations) {
 
 			alignEmployment = false;

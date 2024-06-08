@@ -32,6 +32,7 @@ model_args:
     responsesToLowWageOffer: true
     saveBehaviour: true
     saveImperfectTaxDBMatches: true
+    careCostFactor: false
 #    useSavedBehaviour: false
 #    readGrid: "laptop serial"
 #    employmentOptionsOfPrincipalWorker: 3

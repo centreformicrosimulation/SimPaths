@@ -1252,7 +1252,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegFormalCareHoursS2k().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2k");
                     careHoursFromFormalWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
-                    careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
+                    if (!Parameters.flagSuppressCareCosts)
+                        careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
                 }
             }
         }
@@ -1307,12 +1308,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else {
                     socialCareProvision = SocialCareProvision.OnlyOther;
                 }
-                if (SocialCareProvision.OnlyPartner.equals(socialCareProvision)) {
-                    careHoursProvidedWeekly = careHoursToPartner;
-                } else {
-                    double score = Parameters.getRegCareHoursProvS3e().getScore(this,Person.DoublesVariables.class);
-                    double rmse = Parameters.getRMSEForRegression("S3e");
-                    careHoursProvidedWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.max(careHoursToPartner + 1.0, Math.exp(score + rmse * drawProvCareHours)));
+                if (!Parameters.flagSuppressCareCosts) {
+                    if (SocialCareProvision.OnlyPartner.equals(socialCareProvision)) {
+                        careHoursProvidedWeekly = careHoursToPartner;
+                    } else {
+                        double score = Parameters.getRegCareHoursProvS3e().getScore(this,Person.DoublesVariables.class);
+                        double rmse = Parameters.getRMSEForRegression("S3e");
+                        careHoursProvidedWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.max(careHoursToPartner + 1.0, Math.exp(score + rmse * drawProvCareHours)));
+                    }
                 }
             }
         }
@@ -1678,7 +1681,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (les_c4.equals(Les_c4.Student) && !Parameters.enableIntertemporalOptimisations)
             return false;
-        if (dlltsd.equals(Indicator.True))
+        if (dlltsd.equals(Indicator.True) && !Parameters.flagSuppressCareCosts)
             return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.
