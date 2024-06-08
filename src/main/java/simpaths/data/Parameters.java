@@ -1894,12 +1894,6 @@ public class Parameters {
 
     public static MultiKeyCoefficientMap getStudentShareProjections() { return studentShareProjections; }
 
-    public static MultiKeyCoefficientMap getHighEducationRateInYear() { return projectionsHighEdu; }
-
-    public static MultiKeyCoefficientMap getLowEducationRateInYear() {
-        return projectionsLowEdu;
-    }
-
     public static MultiLogitRegression<Education> getRegEducationLevel() {
         return regEducationLevel;
     }
@@ -2205,10 +2199,6 @@ public class Parameters {
         return marriageTypesFrequency;
     }
 
-    public static MultiKeyCoefficientMap getEmploymentAlignment() {
-        return employmentAlignment;
-    }
-
     public static MultiKeyCoefficientMap getCoeffCovarianceHealthH1a() { return coeffCovarianceHealthH1a; }
 
     public static MultiKeyCoefficientMap getCoeffCovarianceHealthH1b() { return coeffCovarianceHealthH1b; }
@@ -2240,7 +2230,8 @@ public class Parameters {
         int yearEval = Math.min(populationProjectionsMaxYear, Math.max(populationProjectionsMinYear, year));
         int ageEval = Math.min(populationProjectionsMaxAge, age);
         Number val = ((Number)populationProjections.getValue(gender.toString(), region.toString(), ageEval, yearEval));
-        if (val==null) throw new IllegalAccessError("ERROR - problem evaluating population projection for year: " + yearEval + ", age: " + ageEval + ", region: " + region.toString() + " and gender: " + gender.toString());
+        if (val==null)
+            throw new IllegalAccessError("ERROR - problem evaluating population projection for year: " + yearEval + ", age: " + ageEval + ", region: " + region.toString() + " and gender: " + gender.toString());
         populationProjection = val.doubleValue();
 
         return populationProjection;
@@ -2569,6 +2560,12 @@ public class Parameters {
             case UtilityAdjustmentCouples:
                 map = utilityTimeAdjustmentCouples;
                 break;
+            case HighEducationRate:
+                map = projectionsHighEdu;
+            case LowEducationRate:
+                map = projectionsLowEdu;
+            case EmploymentAlignment:
+                map = employmentAlignment;
         }
 
         return map;
@@ -2625,69 +2622,116 @@ public class Parameters {
     }
 
     public static double getTimeSeriesValue(int year, TimeSeriesVariable variableType) {
+        return getTimeSeriesValue(year, null, null, variableType);
+    }
+
+    public static double getTimeSeriesValue(int year, String stringKey1, TimeSeriesVariable variableType) {
+        return getTimeSeriesValue(year, stringKey1, null, variableType);
+    }
+
+    public static double getTimeSeriesValue(int year, String stringKey1, String stringKey2, TimeSeriesVariable variableType) {
 
         MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(variableType);
-        Object val = valueMap.getValue(year);
+        Object val = getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, valueMap);
         if (val == null)
-            val = extendValueTimeSeries(year, valueMap);
+            val = extendValueTimeSeries(year, stringKey1, stringKey2, valueMap);
         return ((Number) val).doubleValue();
     }
 
+    private static Object getObjectFromTimeSeriesValueMap(int year, String stringKey1, String stringKey2, MultiKeyCoefficientMap map) {
+        if (stringKey1==null)
+            return map.getValue(year);
+        else if (stringKey2==null)
+            return map.getValue(year, stringKey1);
+        else
+            return map.getValue(stringKey1, stringKey2, year);
+    }
+
     public static void putTimeSeriesValue(int year, Object valPut, TimeSeriesVariable variableType) {
+        putTimeSeriesValue(year, null, null, valPut, variableType);
+    }
+
+    public static void putTimeSeriesValue(int year, String stringKey1, Object valPut, TimeSeriesVariable variableType) {
+        putTimeSeriesValue(year, stringKey1, null, valPut, variableType);
+    }
+
+    public static void putTimeSeriesValue(int year, String stringKey1, String stringKey2, Object valPut, TimeSeriesVariable variableType) {
 
         MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(variableType);
-        Object val = valueMap.getValue(year);
+        putTimeSeriesValue(year, stringKey1, stringKey2, valPut, valueMap);
+    }
+
+    public static void putTimeSeriesValue(int year, String stringKey1, String stringKey2, Object valPut, MultiKeyCoefficientMap valueMap) {
+
+        Object val = getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, valueMap);
         if (val == null) {
-            valueMap.putValue(year, valPut);
+            if (stringKey1==null)
+                valueMap.putValue(year, valPut);
+            else if (stringKey2==null)
+                valueMap.putValue(year, stringKey1, valPut);
+            else
+                valueMap.putValue(stringKey1, stringKey2, year, valPut);
         } else {
-            valueMap.replaceValue(year, valPut);
+            if (stringKey1==null)
+                valueMap.replaceValue(year, valPut);
+            else if (stringKey2==null)
+                valueMap.replaceValue(year, stringKey1, valPut);
+            else
+                valueMap.replaceValue(stringKey1, stringKey2, year, valPut);
         }
     }
 
-    private synchronized static Object extendValueTimeSeries(int year, MultiKeyCoefficientMap mapToExtend) {
+    private synchronized static Object extendValueTimeSeries(int year, String stringKey1, String stringKey2, MultiKeyCoefficientMap mapToExtend) {
 
-        Object val = mapToExtend.getValue(year);
-        if (val == null) {
+        Object valObj = getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, mapToExtend);
+        if (valObj == null) {
             // assume that series is capped at end by assumed geometric growth rate
 
-            Integer yearMin = null, yearMax = null;
-            for (Object key: mapToExtend.keySet()) {
-                // loop over all existing keys to search for min and max
+            int mapYear = year;
+            while (valObj == null) {
 
-                int yearHere = key.hashCode();
-                if (yearMin == null) {
-                    yearMin = yearHere;
-                    yearMax = yearHere;
+                if ( year < getMinStartYear() ) {
+                    // year must be below lower bound of series - search up
+                    mapYear++;
+                } else {
+                    // year must be above upper bound of series - search down
+                    mapYear--;
                 }
-                if (yearHere < yearMin) yearMin = yearHere;
-                if (yearHere > yearMax) yearMax = yearHere;
+                valObj = getObjectFromTimeSeriesValueMap(mapYear, stringKey1, stringKey2, mapToExtend);
             }
-            if (year > yearMax) {
+            double val = ((Number)valObj).doubleValue();
+            double growthFactor = 0.0;
+            if (year > mapYear) {
                 // extend series forward through time
 
-                double growthFactor = ((Number) mapToExtend.getValue(yearMax)).doubleValue() /
-                        ((Number) mapToExtend.getValue(yearMax-1)).doubleValue();
-                double valHere = ((Number) mapToExtend.getValue(yearMax)).doubleValue();
-                for (int yy = yearMax + 1; yy <= year; yy++) {
-                    valHere *= growthFactor;
-                    mapToExtend.putValue(yy, valHere);
+                if (Math.abs(val)>1.0E-9) {
+                    // assume constant exponential growth rate
+
+                    Object valObj1 = getObjectFromTimeSeriesValueMap(mapYear-1, stringKey1, stringKey2, mapToExtend);
+                    double val1 = ((Number)valObj1).doubleValue();
+                    growthFactor = val / val1;
                 }
-                val = valHere;
-            }
-            if (year < yearMin) {
+                for (int yy = mapYear + 1; yy <= year; yy++) {
+                    val *= growthFactor;
+                    putTimeSeriesValue(yy, stringKey1, stringKey2, val, mapToExtend);
+                }
+            } else {
                 // extend series backward through time
 
-                double growthFactor = ((Number) mapToExtend.getValue(yearMin+1)).doubleValue() /
-                        ((Number) mapToExtend.getValue(yearMin)).doubleValue();
-                double valHere = ((Number) mapToExtend.getValue(yearMin)).doubleValue();
-                for (int yy = yearMin - 1; yy >= year; yy--) {
-                    valHere /= growthFactor;
-                    mapToExtend.putValue(yy, valHere);
+                if (Math.abs(val)>1.0E-9) {
+                    // assume constant exponential growth rate
+
+                    Object valObj1 = getObjectFromTimeSeriesValueMap(mapYear+1, stringKey1, stringKey2, mapToExtend);
+                    double val1 = ((Number)valObj1).doubleValue();
+                    growthFactor = val / val1;
                 }
-                val = valHere;
+                for (int yy = mapYear - 1; yy >= year; yy--) {
+                    val *= growthFactor;
+                    putTimeSeriesValue(yy, stringKey1, stringKey2, val, mapToExtend);
+                }
             }
         }
-        return val;
+        return valObj;
     }
 
     private static MultiKeyCoefficientMap getTimeSeriesRateMap(TimeVaryingRate rateType) {

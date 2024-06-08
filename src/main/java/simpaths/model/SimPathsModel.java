@@ -2162,7 +2162,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				double sizeSimulatedSet = personsToIterateOver.size();
 
 				double shareEmployedSimulated = numberEmployed/sizeSimulatedSet;
-				double shareEmployedTargeted = ((Number) Parameters.getEmploymentAlignment().getValue(gender.toString(), region.toString(), year)).doubleValue();
+				double shareEmployedTargeted = Parameters.getTimeSeriesValue(year, gender.toString(), region.toString(), TimeSeriesVariable.EmploymentAlignment);
 
 				int targetNumberEmployed = (int) (shareEmployedTargeted*sizeSimulatedSet);
 
@@ -2297,10 +2297,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 			//Calculate alignment targets
 			//High Education
-			double highEducationRateTarget = ((Number)Parameters.getHighEducationRateInYear().getValue(year, gender.toString())).doubleValue();
+			double highEducationRateTarget = Parameters.getTimeSeriesValue(year, gender.toString(), TimeSeriesVariable.HighEducationRate);
 			int numPersonsWithHighEduAlignmentTarget = (int) (highEducationRateTarget * (double)numPersonsOfThisGender);
 			//Medium Education
-			double lowEducationRateTarget = ((Number)Parameters.getLowEducationRateInYear().getValue(year, gender.toString())).doubleValue();
+			double lowEducationRateTarget = Parameters.getTimeSeriesValue(year, gender.toString(), TimeSeriesVariable.LowEducationRate);
 //			int numPersonsWithLowEduAlignmentTarget = (int) (proportionInitialPopWithMediumEdu * numPersonsOfThisGender);		//Based on initial population - this ensures that proportion of medium educated people can never decrease below initial values
 			int numPersonsWithLowEduAlignmentTarget = (int) (lowEducationRateTarget * (double)numPersonsOfThisGender);
 			if(Parameters.systemOut) {
