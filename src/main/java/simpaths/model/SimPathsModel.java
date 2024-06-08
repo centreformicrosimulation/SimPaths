@@ -88,7 +88,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Simulation first year [valid range 2011-2019]")
 	private Integer startYear = 2011;
 
-	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
+	@GUIparameter(description = "Simulation ends at year")
 	private Integer endYear = 2026;
 
 	@GUIparameter(description = "Maximum simulated age")
