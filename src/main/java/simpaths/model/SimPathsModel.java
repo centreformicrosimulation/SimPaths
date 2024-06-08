@@ -517,6 +517,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			pw.println(line);
 			line = "projectSocialCare: " + projectSocialCare;
 			pw.println(line);
+			line = "flagSuppressCareCosts: " + flagSuppressCareCosts;
+			pw.println(line);
 			line = "responsesToRegion: " + responsesToRegion;
 			pw.println(line);
 			line = "responsesToPension: " + responsesToPension;

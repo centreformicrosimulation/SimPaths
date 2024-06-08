@@ -32,9 +32,9 @@ model_args:
     responsesToLowWageOffer: true
     saveBehaviour: true
     saveImperfectTaxDBMatches: true
-    careCostFactor: false
-#    useSavedBehaviour: false
-#    readGrid: "laptop serial"
+    flagSuppressCareCosts: false
+    useSavedBehaviour: false
+    readGrid: "base simulation"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true

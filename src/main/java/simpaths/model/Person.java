@@ -291,7 +291,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private Integer dcpagdf_lag1; //Lag(1) of difference between ages of partners in union
     @Column(name="ypnbihs_dv")
-    private Double ypnbihs_dv; // asinh of personal non-benefit income per month
+    private Double ypnbihs_dv = 0.; // asinh of personal non-benefit income per month
     @Transient
     private Double ypnbihs_dv_lag1 = 0.; //Lag(1) of gross personal non-benefit income
     @Column(name="yptciihs_dv")
@@ -3480,7 +3480,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             lesdf_c4 = Lesdf_c4.getCode(this, newPartner);
             lessp_c4 = newPartner.getLes_c4();
             partnership_samesex = (dgn.equals(newPartner.getDgn())) ? Indicator.True : Indicator.False;
-            ynbcpdf_dv = ypnbihs_dv - newPartner.getYpnbihs_dv();
+            if (ypnbihs_dv!=null && newPartner.getYpnbihs_dv()!=null)
+                ynbcpdf_dv = ypnbihs_dv - newPartner.getYpnbihs_dv();
             partner = newPartner;
             idPartner = newPartner.getKey().getId();
         }
