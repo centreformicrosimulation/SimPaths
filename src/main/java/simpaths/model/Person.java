@@ -402,7 +402,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     RandomGenerator healthInnov;
     @Transient
+    RandomGenerator healthInnov2;
+    @Transient
     RandomGenerator socialCareInnov;
+    @Transient
+    RandomGenerator socialCarePInnov;
     @Transient
     RandomGenerator wagesInnov;
     @Transient
@@ -462,7 +466,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         clonedFlag = false;
 
         healthInnov = new Random(SimulationEngine.getRnd().nextLong());
+        healthInnov2 = new Random(SimulationEngine.getRnd().nextLong());
         socialCareInnov = new Random(SimulationEngine.getRnd().nextLong());
+        socialCarePInnov = new Random(SimulationEngine.getRnd().nextLong());
         wagesInnov = new Random(SimulationEngine.getRnd().nextLong());
         capitalInnov = new Random(SimulationEngine.getRnd().nextLong());
         resStanDevInnov = new Random(SimulationEngine.getRnd().nextLong());
@@ -496,29 +502,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dcpex = Indicator.False;
         this.dlltsd = Indicator.False;
         this.dlltsd_lag1 = Indicator.False;
-        this.needSocialCare = Indicator.False;
-        this.careHoursFromFormalWeekly = -9.0;
-        this.careHoursFromPartnerWeekly = -9.0;
-        this.careHoursFromParentWeekly = -9.0;
-        this.careHoursFromDaughterWeekly = -9.0;
-        this.careHoursFromSonWeekly = -9.0;
-        this.careHoursFromOtherWeekly = -9.0;
-        this.careHoursProvidedWeekly = -9.0;
-        this.careFormalExpenditureWeekly = -9.0;
-        this.socialCareReceipt = SocialCareReceipt.None;
-        this.socialCareFromFormal = false;
-        this.socialCareFromPartner = false;
-        this.socialCareFromDaughter = false;
-        this.socialCareFromSon = false;
-        this.socialCareFromOther = false;
-        this.socialCareProvision = SocialCareProvision.None;
-        this.needSocialCare_lag1 = Indicator.False;
-        this.careHoursFromFormalWeekly_lag1 = -9.0;
-        this.careHoursFromPartnerWeekly_lag1 = -9.0;
-        this.careHoursFromDaughterWeekly_lag1 = -9.0;
-        this.careHoursFromSonWeekly_lag1 = -9.0;
-        this.careHoursFromOtherWeekly_lag1 = -9.0;
-        this.socialCareProvision_lag1 = SocialCareProvision.None;
+        setAllSocialCareVariablesToFalse();
         this.lowWageOffer = false;
         this.lowWageOffer_lag1 = false;
         this.women_fertility = Indicator.False;
@@ -552,6 +536,32 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.receivesBenefitsFlag = false;
         this.receivesBenefitsFlag_L1 = receivesBenefitsFlag;
         updateVariables(false);
+    }
+
+    private void setAllSocialCareVariablesToFalse() {
+        needSocialCare = Indicator.False;
+        careHoursFromFormalWeekly = -9.0;
+        careHoursFromPartnerWeekly = -9.0;
+        careHoursFromParentWeekly = -9.0;
+        careHoursFromDaughterWeekly = -9.0;
+        careHoursFromSonWeekly = -9.0;
+        careHoursFromOtherWeekly = -9.0;
+        careHoursProvidedWeekly = -9.0;
+        careFormalExpenditureWeekly = -9.0;
+        socialCareReceipt = SocialCareReceipt.None;
+        socialCareFromFormal = false;
+        socialCareFromPartner = false;
+        socialCareFromDaughter = false;
+        socialCareFromSon = false;
+        socialCareFromOther = false;
+        socialCareProvision = SocialCareProvision.None;
+        needSocialCare_lag1 = Indicator.False;
+        careHoursFromFormalWeekly_lag1 = -9.0;
+        careHoursFromPartnerWeekly_lag1 = -9.0;
+        careHoursFromDaughterWeekly_lag1 = -9.0;
+        careHoursFromSonWeekly_lag1 = -9.0;
+        careHoursFromOtherWeekly_lag1 = -9.0;
+        socialCareProvision_lag1 = SocialCareProvision.None;
     }
 
     //Below is a "copy constructor" for persons: it takes an original person as input, changes the ID, copies the rest of the person's properties, and creates a new person.
@@ -641,29 +651,33 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dlltsd = originalPerson.dlltsd;
         this.liwwh = originalPerson.liwwh;
         this.dlltsd_lag1 = originalPerson.dlltsd_lag1;
-        this.needSocialCare = originalPerson.needSocialCare;
-        this.careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
-        this.careFormalExpenditureWeekly = originalPerson.careFormalExpenditureWeekly;
-        this.careHoursFromPartnerWeekly = originalPerson.careHoursFromPartnerWeekly;
-        this.careHoursFromParentWeekly = originalPerson.careHoursFromParentWeekly;
-        this.careHoursFromDaughterWeekly = originalPerson.careHoursFromDaughterWeekly;
-        this.careHoursFromSonWeekly = originalPerson.careHoursFromSonWeekly;
-        this.careHoursFromOtherWeekly = originalPerson.careHoursFromOtherWeekly;
-        this.socialCareReceipt = originalPerson.socialCareReceipt;
-        this.socialCareFromFormal = originalPerson.socialCareFromFormal;
-        this.socialCareFromPartner = originalPerson.socialCareFromPartner;
-        this.socialCareFromDaughter = originalPerson.socialCareFromDaughter;
-        this.socialCareFromSon = originalPerson.socialCareFromSon;
-        this.socialCareFromOther = originalPerson.socialCareFromOther;
-        this.careHoursProvidedWeekly = originalPerson.careHoursProvidedWeekly;
-        this.socialCareProvision = originalPerson.socialCareProvision;
-        this.needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
-        this.careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
-        this.careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
-        this.careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
-        this.careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
-        this.careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
-        this.socialCareProvision_lag1 = originalPerson.socialCareProvision_lag1;
+        if (Parameters.flagSocialCare) {
+            this.needSocialCare = originalPerson.needSocialCare;
+            this.careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
+            this.careFormalExpenditureWeekly = originalPerson.careFormalExpenditureWeekly;
+            this.careHoursFromPartnerWeekly = originalPerson.careHoursFromPartnerWeekly;
+            this.careHoursFromParentWeekly = originalPerson.careHoursFromParentWeekly;
+            this.careHoursFromDaughterWeekly = originalPerson.careHoursFromDaughterWeekly;
+            this.careHoursFromSonWeekly = originalPerson.careHoursFromSonWeekly;
+            this.careHoursFromOtherWeekly = originalPerson.careHoursFromOtherWeekly;
+            this.socialCareReceipt = originalPerson.socialCareReceipt;
+            this.socialCareFromFormal = originalPerson.socialCareFromFormal;
+            this.socialCareFromPartner = originalPerson.socialCareFromPartner;
+            this.socialCareFromDaughter = originalPerson.socialCareFromDaughter;
+            this.socialCareFromSon = originalPerson.socialCareFromSon;
+            this.socialCareFromOther = originalPerson.socialCareFromOther;
+            this.careHoursProvidedWeekly = originalPerson.careHoursProvidedWeekly;
+            this.socialCareProvision = originalPerson.socialCareProvision;
+            this.needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
+            this.careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
+            this.careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
+            this.careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
+            this.careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
+            this.careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
+            this.socialCareProvision_lag1 = originalPerson.socialCareProvision_lag1;
+        } else {
+            setAllSocialCareVariablesToFalse();
+        }
         this.lowWageOffer = originalPerson.lowWageOffer;
         this.lowWageOffer_lag1 = originalPerson.lowWageOffer_lag1;
         this.sedex = originalPerson.sedex;
@@ -967,7 +981,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // exclude single parents with dependent children from death
 
                 double mortalityProbability = Parameters.getMortalityProbability(dgn, dag, model.getYear());
-                if (model.getEngine().getRandom().nextDouble() < mortalityProbability) {
+                if (healthInnov.nextDouble() < mortalityProbability) {
                     flagDies = true;
                 }
             }
@@ -1028,7 +1042,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 		if (dag >= 16) {
 			double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("HM1");
-            double gauss = healthInnov.nextGaussian();
+            double gauss = healthInnov2.nextGaussian();
 			dhm = constrainDhmEstimate(score + rmse*gauss);
 		}
 	}
@@ -1076,7 +1090,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 			// 2. Convert to probability
 			tmp_probability = 1.0 / (1.0 + Math.exp(-tmp_total_score));
 			// 3. Get event outcome
-			tmp_outcome = model.getEngine().getRandom().nextDouble() < tmp_probability;
+			tmp_outcome = healthInnov2.nextDouble() < tmp_probability;
 			// 4. Set dhm_ghq dummy
 			setDhm_ghq(tmp_outcome);
 		}
@@ -1155,7 +1169,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
 
-            if (socialCareInnov.nextDouble() < probRecCare) {
+            double rnd1 = socialCareInnov.nextDouble();
+            if (rnd1 < probRecCare) {
                 // receive social care
 
                 double score = Parameters.getRegCareHoursS1b().getScore(this,Person.DoublesVariables.class);
@@ -1189,7 +1204,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // receive care
 
                 Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(this, Person.DoublesVariables.class);
-                SocialCareReceiptS2c socialCareReceiptS2c = ManagerRegressions.multiEvent(probs1, socialCareInnov.nextDouble());
+                double rnd2 = socialCareInnov.nextDouble();
+                SocialCareReceiptS2c socialCareReceiptS2c = ManagerRegressions.multiEvent(probs1, rnd2);
                 socialCareReceipt = SocialCareReceipt.getCode(socialCareReceiptS2c);
                 if (SocialCareReceipt.Mixed.equals(socialCareReceipt) || SocialCareReceipt.Formal.equals(socialCareReceipt))
                     socialCareFromFormal = true;
@@ -1219,7 +1235,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         // no care from partner - identify who supplies informal care
 
                         Map<NotPartnerInformalCarer,Double> probs2 = Parameters.getRegNotPartnerInformalCareS2f().getProbabilites(this, Person.DoublesVariables.class);
-                        NotPartnerInformalCarer cc = ManagerRegressions.multiEvent(probs2, socialCareInnov.nextDouble());
+                        double rnd3 = socialCareInnov.nextDouble();
+                        NotPartnerInformalCarer cc = ManagerRegressions.multiEvent(probs2, rnd3);
                         if (NotPartnerInformalCarer.DaughterOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))
                             socialCareFromDaughter = true;
                         if (NotPartnerInformalCarer.SonOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.SonAndOther.equals(cc))
@@ -1271,8 +1288,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         boolean careToOther = false;
         double careHoursToPartner = 0.0;
         if (drawProvCareIncidence < 0.) {
-            drawProvCareIncidence = socialCareInnov.nextDouble();
-            drawProvCareHours = socialCareInnov.nextGaussian();
+            drawProvCareIncidence = socialCarePInnov.nextDouble();
+            drawProvCareHours = socialCarePInnov.nextGaussian();
         }
         if (dag >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
 
@@ -2630,9 +2647,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Dgn:
             return (Gender.Male.equals(dgn)) ? 1.0 : 0.0;
         case Dhe:
-            return dhe.getValue();
+            return (double)dhe.getValue();
         case Dhe_L1:
-            return dhe_lag1.getValue();
+            return (double)dhe_lag1.getValue();
         case Dhe_Excellent:
             return (Dhe.Excellent.equals(dhe)) ? 1. : 0.;
         case Dhe_VeryGood:
@@ -2691,7 +2708,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Dhmghq_L1:
             return (dhm_ghq_lag1)? 1. : 0.;
         case Dhesp_L1:
-            return (dhesp_lag1 != null) ? dhesp_lag1.getValue() : 0.0;
+            return (dhesp_lag1 != null) ? (double)dhesp_lag1.getValue() : 0.0;
         case Ded:
             return (Indicator.True.equals(ded)) ? 1.0 : 0.0;
         case Deh_c3_High:
@@ -3637,7 +3654,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public double getDheValue() {
-        return dhe.getValue();
+        return (double)dhe.getValue();
     }
     public double getDhm() {
         double val;
@@ -4229,10 +4246,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public double getSocialCareProvisionState() {
-        double val = getSocialCareProvision().getValue();
-        if (dag>DecisionParams.MAX_AGE_COHABITATION && val > 0.1 && val < 2.1)
-            val = 3.0;
-        return val;
+//        double val = getSocialCareProvision().getValue();
+//        if (dag>DecisionParams.MAX_AGE_COHABITATION && val > 0.1 && val < 2.1)
+//            val = 3.0;
+        return (double)getSocialCareProvision().getValue();
     }
 
     public SocialCareProvision getSocialCareProvision() {
@@ -4578,10 +4595,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (careFormalExpenditureWeekly >0.0)
                 cost = careFormalExpenditureWeekly;
         return cost;
-    }
-
-    public RandomGenerator getSocialCareInnov() {
-        return socialCareInnov;
     }
 
     public boolean hasTestPartner() {

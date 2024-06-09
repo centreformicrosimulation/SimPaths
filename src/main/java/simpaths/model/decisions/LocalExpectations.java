@@ -126,7 +126,7 @@ public class LocalExpectations {
         int ii = 0;
         for (E key : probsMap.keySet()) {
             probs[ii] = probsMap.get(key);
-            vals[ii] = key.getValue();
+            vals[ii] = (double)key.getValue();
             ii++;
         }
         screenAndAssign(probs, vals);

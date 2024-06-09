@@ -417,123 +417,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		elapsedTime = System.currentTimeMillis();
 	}
 
-	private void saveRunParameters() {
-
-		String filePath = DatabaseUtils.databaseInputUrl;
-		filePath = filePath.substring(0, filePath.length()-5) + "options.txt";
-		try ( FileWriter fw = new FileWriter(filePath, true);
-			  BufferedWriter bw = new BufferedWriter(fw);
-			  PrintWriter pw = new PrintWriter(bw)
-		) {
-
-			String line;
-			line = "---------------------------------------------------";
-			pw.println(line);
-			line = "country: " + country;
-			pw.println(line);
-			line = "startYear: " + startYear;
-			pw.println(line);
-			line = "endYear: " + endYear;
-			pw.println(line);
-			line = "popSize: " + popSize;
-			pw.println(line);
-			line = "maxAge: " + maxAge;
-			pw.println(line);
-			line = "fixTimeTrend: " + fixTimeTrend;
-			pw.println(line);
-			line = "timeTrendStopsIn: " + timeTrendStopsIn;
-			pw.println(line);
-			line = "timeTrendStopsInMonetaryProcesses: " + timeTrendStopsInMonetaryProcesses;
-			pw.println(line);
-			line = "flagDefaultToTimeSeriesAverages: " + flagDefaultToTimeSeriesAverages;
-			pw.println(line);
-			line = "fixRandomSeed: " + fixRandomSeed;
-			pw.println(line);
-			line = "randomSeedIfFixed: " + randomSeedIfFixed;
-			pw.println(line);
-			line = "sIndexAlpha: " + sIndexAlpha;
-			pw.println(line);
-			line = "sIndexDelta: " + sIndexDelta;
-			pw.println(line);
-			line = "savingRate: " + savingRate;
-			pw.println(line);
-			line = "addRegressionStochasticComponent: " + addRegressionStochasticComponent;
-			pw.println(line);
-			line = "fixRegressionStochasticComponent: " + fixRegressionStochasticComponent;
-			pw.println(line);
-			line = "commentsOn: " + commentsOn;
-			pw.println(line);
-			line = "debugCommentsOn: " + debugCommentsOn;
-			pw.println(line);
-			line = "donorFinderCommentsOn: " + donorFinderCommentsOn;
-			pw.println(line);
-			line = "labourMarketCovid19On: " + labourMarketCovid19On;
-			pw.println(line);
-			line = "projectFormalChildcare: " + projectFormalChildcare;
-			pw.println(line);
-			line = "donorPoolAveraging: " + donorPoolAveraging;
-			pw.println(line);
-			line = "initialisePotentialEarningsFromDatabase: " + initialisePotentialEarningsFromDatabase;
-			pw.println(line);
-			line = "useWeights: " + useWeights;
-			pw.println(line);
-			line = "projectMortality: " + projectMortality;
-			pw.println(line);
-			line = "alignPopulation: " + alignPopulation;
-			pw.println(line);
-			line = "alignFertility: " + alignFertility;
-			pw.println(line);
-			line = "alignEducation: " + alignEducation;
-			pw.println(line);
-			line = "alignInSchool: " + alignInSchool;
-			pw.println(line);
-			line = "alignCohabitation: " + alignCohabitation;
-			pw.println(line);
-			line = "alignEmployment: " + alignEmployment;
-			pw.println(line);
-			line = "saveImperfectTaxDBMatches: " + saveImperfectTaxDBMatches;
-			pw.println(line);
-			line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations;
-			pw.println(line);
-			line = "readGrid: " + useSavedBehaviour;
-			pw.println(line);
-			line = "readGrid: " + readGrid;
-			pw.println(line);
-			line = "saveBehaviour: " + saveBehaviour;
-			pw.println(line);
-			line = "employmentOptionsOfPrincipalWorker: " + employmentOptionsOfPrincipalWorker;
-			pw.println(line);
-			line = "employmentOptionsOfSecondaryWorker: " + employmentOptionsOfSecondaryWorker;
-			pw.println(line);
-			line = "responsesToLowWageOffer: " + responsesToLowWageOffer;
-			pw.println(line);
-			line = "responsesToEducation: " + responsesToEducation;
-			pw.println(line);
-			line = "responsesToHealth: " + responsesToHealth;
-			pw.println(line);
-			line = "minAgeForPoorHealth: " + minAgeForPoorHealth;
-			pw.println(line);
-			line = "responsesToDisability: " + responsesToDisability;
-			pw.println(line);
-			line = "projectSocialCare: " + projectSocialCare;
-			pw.println(line);
-			line = "flagSuppressCareCosts: " + flagSuppressCareCosts;
-			pw.println(line);
-			line = "responsesToRegion: " + responsesToRegion;
-			pw.println(line);
-			line = "responsesToPension: " + responsesToPension;
-			pw.println(line);
-			line = "responsesToRetirement: " + responsesToRetirement;
-			pw.println(line);
-			line = "interestRateInnov: " + interestRateInnov;
-			pw.println(line);
-			line = "disposableIncomeInnov: " + disposableIncomeInnov;
-			pw.println(line);
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
-	}
-
 
 	/**
 	 *
@@ -711,6 +594,123 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		firstYearSched.addCollectionEvent(set, ee);
 		yearlySchedule.addCollectionEvent(set, ee);
+	}
+
+	private void saveRunParameters() {
+
+		String filePath = DatabaseUtils.databaseInputUrl;
+		filePath = filePath.substring(0, filePath.length()-5) + "options.txt";
+		try ( FileWriter fw = new FileWriter(filePath, true);
+			  BufferedWriter bw = new BufferedWriter(fw);
+			  PrintWriter pw = new PrintWriter(bw)
+		) {
+
+			String line;
+			line = "---------------------------------------------------";
+			pw.println(line);
+			line = "country: " + country;
+			pw.println(line);
+			line = "startYear: " + startYear;
+			pw.println(line);
+			line = "endYear: " + endYear;
+			pw.println(line);
+			line = "popSize: " + popSize;
+			pw.println(line);
+			line = "maxAge: " + maxAge;
+			pw.println(line);
+			line = "fixTimeTrend: " + fixTimeTrend;
+			pw.println(line);
+			line = "timeTrendStopsIn: " + timeTrendStopsIn;
+			pw.println(line);
+			line = "timeTrendStopsInMonetaryProcesses: " + timeTrendStopsInMonetaryProcesses;
+			pw.println(line);
+			line = "flagDefaultToTimeSeriesAverages: " + flagDefaultToTimeSeriesAverages;
+			pw.println(line);
+			line = "fixRandomSeed: " + fixRandomSeed;
+			pw.println(line);
+			line = "randomSeedIfFixed: " + randomSeedIfFixed;
+			pw.println(line);
+			line = "sIndexAlpha: " + sIndexAlpha;
+			pw.println(line);
+			line = "sIndexDelta: " + sIndexDelta;
+			pw.println(line);
+			line = "savingRate: " + savingRate;
+			pw.println(line);
+			line = "addRegressionStochasticComponent: " + addRegressionStochasticComponent;
+			pw.println(line);
+			line = "fixRegressionStochasticComponent: " + fixRegressionStochasticComponent;
+			pw.println(line);
+			line = "commentsOn: " + commentsOn;
+			pw.println(line);
+			line = "debugCommentsOn: " + debugCommentsOn;
+			pw.println(line);
+			line = "donorFinderCommentsOn: " + donorFinderCommentsOn;
+			pw.println(line);
+			line = "labourMarketCovid19On: " + labourMarketCovid19On;
+			pw.println(line);
+			line = "projectFormalChildcare: " + projectFormalChildcare;
+			pw.println(line);
+			line = "donorPoolAveraging: " + donorPoolAveraging;
+			pw.println(line);
+			line = "initialisePotentialEarningsFromDatabase: " + initialisePotentialEarningsFromDatabase;
+			pw.println(line);
+			line = "useWeights: " + useWeights;
+			pw.println(line);
+			line = "projectMortality: " + projectMortality;
+			pw.println(line);
+			line = "alignPopulation: " + alignPopulation;
+			pw.println(line);
+			line = "alignFertility: " + alignFertility;
+			pw.println(line);
+			line = "alignEducation: " + alignEducation;
+			pw.println(line);
+			line = "alignInSchool: " + alignInSchool;
+			pw.println(line);
+			line = "alignCohabitation: " + alignCohabitation;
+			pw.println(line);
+			line = "alignEmployment: " + alignEmployment;
+			pw.println(line);
+			line = "saveImperfectTaxDBMatches: " + saveImperfectTaxDBMatches;
+			pw.println(line);
+			line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations;
+			pw.println(line);
+			line = "readGrid: " + useSavedBehaviour;
+			pw.println(line);
+			line = "readGrid: " + readGrid;
+			pw.println(line);
+			line = "saveBehaviour: " + saveBehaviour;
+			pw.println(line);
+			line = "employmentOptionsOfPrincipalWorker: " + employmentOptionsOfPrincipalWorker;
+			pw.println(line);
+			line = "employmentOptionsOfSecondaryWorker: " + employmentOptionsOfSecondaryWorker;
+			pw.println(line);
+			line = "responsesToLowWageOffer: " + responsesToLowWageOffer;
+			pw.println(line);
+			line = "responsesToEducation: " + responsesToEducation;
+			pw.println(line);
+			line = "responsesToHealth: " + responsesToHealth;
+			pw.println(line);
+			line = "minAgeForPoorHealth: " + minAgeForPoorHealth;
+			pw.println(line);
+			line = "responsesToDisability: " + responsesToDisability;
+			pw.println(line);
+			line = "projectSocialCare: " + projectSocialCare;
+			pw.println(line);
+			line = "flagSuppressCareCosts: " + flagSuppressCareCosts;
+			pw.println(line);
+			line = "responsesToRegion: " + responsesToRegion;
+			pw.println(line);
+			line = "responsesToPension: " + responsesToPension;
+			pw.println(line);
+			line = "responsesToRetirement: " + responsesToRetirement;
+			pw.println(line);
+			line = "interestRateInnov: " + interestRateInnov;
+			pw.println(line);
+			line = "disposableIncomeInnov: " + disposableIncomeInnov;
+			pw.println(line);
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
 	}
 
 

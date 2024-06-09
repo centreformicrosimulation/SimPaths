@@ -738,19 +738,6 @@ public class Expectations {
         return disposableIncomeAnnual;
     }
 
-    private <E extends Enum<E> & DoubleValuedEnum> void expandExpectationsSingleIndex(int expandIndex, int stateIndex, Map<E, Double> probs) {
-
-        double[] probabilities = new double[probs.size()];
-        double[] values = new double[probs.size()];
-        int ii = 0;
-        for (E key : probs.keySet()) {
-            probabilities[ii] = probs.get(key);
-            values[ii] = key.getValue();
-            ii++;
-        }
-        expandExpectationsSingleIndex(expandIndex, stateIndex, probabilities, values);
-    }
-
     private void expandExpectationsSingleIndex(int expandIndex, int stateIndex, LocalExpectations lexpect) {
         expandExpectationsSingleIndex(expandIndex, stateIndex, lexpect.probabilities, lexpect.values);
     }
@@ -846,19 +833,6 @@ public class Expectations {
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
         personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll);
         personProxyNextPeriod.setNumberChildren02Local_lag1(children02);
-    }
-
-    private <E extends Enum<E> & DoubleValuedEnum> void expandExpectationsAllIndices(int stateIndex, Map<E, Double> probs) {
-
-        double[] probabilities = new double[probs.size()];
-        double[] values = new double[probs.size()];
-        int ii = 0;
-        for (E key : probs.keySet()) {
-            probabilities[ii] = probs.get(key);
-            values[ii] = key.getValue();
-            ii++;
-        }
-        expandExpectationsAllIndices(stateIndex, probabilities, values);
     }
 
     private void expandExpectationsAllIndices(int stateIndex, LocalExpectations lexpect) {
@@ -1132,28 +1106,28 @@ public class Expectations {
         // no care needed
         probHere = 1.0 - probNeedCare;
         probs[ii] = probHere;
-        vals[ii] = SocialCareReceiptState.NoneNeeded.getValue();
+        vals[ii] = (double)SocialCareReceiptState.NoneNeeded.getValue();
         probCheck += probHere;
         ii++;
 
         // no formal care
         probHere = probNeedCare * ((1.0 - probRecCare) + probRecCare * probsCareFrom.get(SocialCareReceiptS2c.Informal));
         probs[ii] = probHere;
-        vals[ii] = SocialCareReceiptState.NoFormal.getValue();
+        vals[ii] = (double)SocialCareReceiptState.NoFormal.getValue();
         probCheck += probHere;
         ii++;
 
         // mixed care
         probHere = probNeedCare * probRecCare * probsCareFrom.get(SocialCareReceiptS2c.Mixed);
         probs[ii] = probHere;
-        vals[ii] = SocialCareReceiptState.Mixed.getValue();
+        vals[ii] = (double)SocialCareReceiptState.Mixed.getValue();
         probCheck += probHere;
         ii++;
 
         // formal care
         probHere = probNeedCare * probRecCare * probsCareFrom.get(SocialCareReceiptS2c.Formal);
         probs[ii] = probHere;
-        vals[ii] = SocialCareReceiptState.Formal.getValue();
+        vals[ii] = (double)SocialCareReceiptState.Formal.getValue();
         probCheck += probHere;
         ii++;
 

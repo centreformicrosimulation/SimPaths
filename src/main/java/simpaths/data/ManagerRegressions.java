@@ -2,11 +2,15 @@ package simpaths.data;
 
 
 import microsim.statistics.IDoubleSource;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import simpaths.model.Person;
 import simpaths.model.enums.DoubleValuedEnum;
+import simpaths.model.enums.IntegerValuedEnum;
+import simpaths.model.enums.Labour;
 
 import java.security.InvalidParameterException;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -192,24 +196,76 @@ public class ManagerRegressions {
         }
     }
 
-    public static <T> T multiEvent(Map<T, Double> probs, double rand) {
+    public static <E extends IntegerValuedEnum> E multiEvent(Map<E, Double> probs, double rand) {
 
         double cprob = 0.0;
-        for (T tt : probs.keySet()) {
-            if (probs.get(tt) != null) {
-                cprob += probs.get(tt);
+        List<E> keys = new ArrayList<>();
+        for (E ee : probs.keySet()) {
+            if (probs.get(ee) != null) {
+                cprob += probs.get(ee);
+                for (int ii=0; ii<keys.size(); ii++) {
+                    E ee1 = keys.get(ii);
+                    if (ee1.getValue() > ee.getValue()) {
+                        keys.add(ii, ee);
+                        break;
+                    }
+                }
+                if (!keys.contains(ee))
+                    keys.add(ee);
             } else {
                 throw new RuntimeException("problem identifying probabilities for multinomial object (2)");
             }
         }
 
         double prob = 0.0;
-        for (T tt : probs.keySet()) {
-            prob += probs.get(tt) / cprob;
+        for (E ee : keys) {
+            prob += probs.get(ee) / cprob;
             if (rand < prob) {
-                return tt;
+                return ee;
             }
         }
         throw new RuntimeException("failed to identify new enumerator for multi-event (2)");
+    }
+
+    public static MultiKey<? extends Labour> multiEvent(MultiKeyMap<Labour, Double> probs, double rand) {
+
+        double cprob = 0.0;
+        List<MultiKey<? extends Labour>> keys = new ArrayList<>();
+        for (MultiKey<? extends Labour> ee : probs.keySet()) {
+            if (probs.get(ee) != null) {
+                cprob += probs.get(ee);
+                int eeVal = getMultiKeyValue(ee);
+                for (int ii=0; ii<keys.size(); ii++) {
+                    MultiKey<? extends Labour> ee1 = keys.get(ii);
+                    int ee1Val = getMultiKeyValue(ee1);
+                    if (ee1Val > eeVal) {
+                        keys.add(ii, ee);
+                        break;
+                    }
+                }
+                if (!keys.contains(ee))
+                    keys.add(ee);
+            } else {
+                throw new RuntimeException("problem identifying probabilities for multinomial object (3)");
+            }
+        }
+
+        double prob = 0.0;
+        for (MultiKey<? extends Labour> ee : keys) {
+            prob += probs.get(ee) / cprob;
+            if (rand < prob) {
+                return ee;
+            }
+        }
+        throw new RuntimeException("failed to identify new enumerator for multi-event (3)");
+    }
+    private static int getMultiKeyValue(MultiKey<? extends Labour> ee) {
+        int val = 0;
+        int fctr = 1;
+        for (int ii=0; ii<ee.size(); ii++) {
+            val += ee.getKey(ii).getValue() * fctr;
+            fctr *= 100;
+        }
+        return val;
     }
 }

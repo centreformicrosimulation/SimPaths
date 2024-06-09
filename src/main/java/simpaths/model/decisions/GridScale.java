@@ -216,7 +216,7 @@ public class GridScale {
 
             // social care provision
             if (Parameters.flagSocialCare) {
-                axes[aa][dimIndex][0] = 4; // none, partner only, partner and non-partner, non-partner only (see Enum SocialCareProvidedTo)
+                axes[aa][dimIndex][0] = 4; // none, partner only, partner and non-partner, non-partner only (see Enum SocialCareProvision)
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 3;
                 axes[aa][dimIndex][3] = 0;
