@@ -4,8 +4,7 @@ package simpaths.model.decisions;
 import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.RegressionNames;
-import simpaths.model.enums.DoubleValuedEnum;
-import simpaths.model.enums.Education;
+import simpaths.model.enums.IntegerValuedEnum;
 
 import java.util.Map;
 
@@ -115,7 +114,7 @@ public class LocalExpectations {
         screenAndAssign(probs, vals);
     }
 
-    private <E extends Enum<E> & DoubleValuedEnum> void evaluateMultinomial(IDoubleSource obj, RegressionNames regression) {
+    private <E extends Enum<E> & IntegerValuedEnum> void evaluateMultinomial(IDoubleSource obj, RegressionNames regression) {
         double[] probs, vals;
         Map<E,Double> probsMap = ManagerRegressions.getMultinomialProbabilities(obj, regression);
         int nn = probsMap.size();

@@ -27,9 +27,11 @@ model_args:
 #    projectFormalChildcare: true
 #    donorPoolAveraging: true
     alignEmployment: false
-    projectSocialCare: true
+    alignCohabitation: false
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
+    responsesToDisability: true
+    projectSocialCare: true
     saveBehaviour: true
     saveImperfectTaxDBMatches: true
     flagSuppressCareCosts: false
@@ -40,11 +42,9 @@ model_args:
 #    responsesToEducation: true
 #    responsesToRetirement: false
 #    responsesToHealth: true
-    responsesToDisability: true
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
 #    alignPopulation: false
-#    alignCohabitation: false
 #    alignFertility: false
 #    alignEducation: false
 #    alignInSchool: false

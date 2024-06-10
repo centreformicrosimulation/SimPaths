@@ -5,7 +5,6 @@ import microsim.statistics.IDoubleSource;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import simpaths.model.Person;
-import simpaths.model.enums.DoubleValuedEnum;
 import simpaths.model.enums.IntegerValuedEnum;
 import simpaths.model.enums.Labour;
 
@@ -141,7 +140,7 @@ public class ManagerRegressions {
         return probability;
     }
 
-    public static <E extends Enum<E> & DoubleValuedEnum> Map<E, Double> getMultinomialProbabilities(IDoubleSource obj, RegressionNames regression) {
+    public static <E extends Enum<E> & IntegerValuedEnum> Map<E, Double> getMultinomialProbabilities(IDoubleSource obj, RegressionNames regression) {
 
         if (regression.getValue()!=2)
             throw new RuntimeException("probabilities requested from non multinomial equation");
