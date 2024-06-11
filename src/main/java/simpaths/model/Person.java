@@ -605,7 +605,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             this.les_c4 = originalPerson.les_c4;
         } else if (originalPerson.dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION) {
             this.les_c4 = Les_c4.Student;
-        } else if (originalPerson.dag > Parameters.getFixedRetireAge(model.getYear(), originalPerson.getDgn())) {
+        } else if (originalPerson.dag > (int)Parameters.getTimeSeriesValue(model.getYear(), originalPerson.getDgn().toString(), TimeSeriesVariable.FixedRetirementAge)) {
             this.les_c4 = Les_c4.Retired;
         } else if (originalPerson.getLabourSupplyWeekly() != null && originalPerson.getLabourSupplyWeekly().getHours(originalPerson) > 0) {
             this.les_c4 = Les_c4.EmployedOrSelfEmployed;
@@ -2921,26 +2921,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Reached_Retirement_Age:
             int retirementAge;
             if (dgn.equals(Gender.Female)) {
-                retirementAge = Parameters.getFixedRetireAge(getYear(), Gender.Female);
+                retirementAge = (int)Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
             } else {
-                retirementAge = Parameters.getFixedRetireAge(getYear(), Gender.Male);
+                retirementAge = (int)Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
             }
             return (dag >= retirementAge)? 1. : 0.;
         case Reached_Retirement_Age_Sp:
             int retirementAgePartner;
             if (partner != null) {
                 if (partner.dgn.equals(Gender.Female)) {
-                    retirementAgePartner = Parameters.getFixedRetireAge(getYear(), Gender.Female);
+                    retirementAgePartner = (int)Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
                 } else {
-                    retirementAgePartner = Parameters.getFixedRetireAge(getYear(), Gender.Male);
+                    retirementAgePartner = (int)Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
                 }
                 return (partner.dag >= retirementAgePartner)? 1. : 0.;
             } else {return 0.;}
         case Reached_Retirement_Age_Les_c3_NotEmployed_L1: //Reached retirement age and was not employed in the previous year
             if (dgn.equals(Gender.Female)) {
-                retirementAge = Parameters.getFixedRetireAge(getYear(), Gender.Female);
+                retirementAge = (int)Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
             } else {
-                retirementAge = Parameters.getFixedRetireAge(getYear(), Gender.Male);
+                retirementAge = (int)Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
             }
             return ((dag >= retirementAge) && (les_c4_lag1.equals(Les_c4.NotEmployed) || les_c4_lag1.equals(Les_c4.Retired)))? 1. : 0.;
         case EquivalisedIncomeYearly:
