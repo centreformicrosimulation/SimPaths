@@ -202,3 +202,8 @@ input/EUROMODoutput/augmented1/
 input/EUROMODoutput/original/
 *.stswp
 ~$*.*
+input/programming test database/DatabaseCountryYear.xlsx
+input/programming test database/EUROMODpolicySchedule.xlsx
+input/programming test database/input.mv.db
+/input/databases
+/input/EUROMODoutput/base

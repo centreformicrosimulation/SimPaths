@@ -934,7 +934,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 		childcareCostPerWeek = 0.0;
 		double childcareCostPerMonth = 0.0;
-		if (Parameters.flagFormalChildcare) {
+		if (Parameters.flagFormalChildcare && !Parameters.flagSuppressCareCosts) {
 			updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
 			childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 		}
@@ -942,7 +942,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		socialCareCostPerWeek = 0.0;
 		socialCareProvision = 0;
 		double socialCareCostPerMonth = 0.0;
-		if (Parameters.flagSocialCare) {
+		if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts) {
 			updateSocialCareProvision();
 			updateSocialCareCostPerWeek();
 			socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
@@ -999,7 +999,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				if(female.atRiskOfWork()) {
 					// both male and female have flexible labour supply
 					if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0 && covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
-						int randomIndex = model.getEngine().getRandom().nextInt(min(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size())); // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
+						int randomIndex = labourInnov.nextInt(min(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size())); // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
 						Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
 						Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 
@@ -1030,7 +1030,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				} else {
 					// male has flexible labour supply, female doesn't
 					if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0) {
-						int randomIndex = model.getEngine().getRandom().nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size()); // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
+						int randomIndex = labourInnov.nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size()); // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
 						Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
 
 						male.setLes_c7_covid(selectedValueMale.getLeft()); // Set labour force status for male
@@ -1058,7 +1058,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			} else if (female.atRiskOfWork()) {
 				// female has flexible labour supply, male doesn't
 				if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
-					int randomIndex = model.getEngine().getRandom().nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size()); // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
+					int randomIndex = labourInnov.nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size()); // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
 					Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 
 					female.setLes_c7_covid(selectedValueFemale.getLeft()); // Set labour force status for female
@@ -1088,7 +1088,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 		} else if (Occupancy.Single_Male.equals(occupancy)) {
 			if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0) {
-				int randomIndex = model.getEngine().getRandom().nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size()); // Get random int which indicates which monthly value to use
+				int randomIndex = labourInnov.nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size()); // Get random int which indicates which monthly value to use
 				Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
 				male.setLes_c7_covid(selectedValueMale.getLeft()); // Set labour force status for male
 				male.setLabourSupplyWeekly(Labour.convertHoursToLabour(selectedValueMale.getRight()));
@@ -1111,7 +1111,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 		} else {
 			if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
-				int randomIndex = model.getEngine().getRandom().nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size());
+				int randomIndex = labourInnov.nextInt(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size());
 				Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 				female.setLes_c7_covid(selectedValueFemale.getLeft()); // Set labour force status for female
 				female.setLabourSupplyWeekly(Labour.convertHoursToLabour(selectedValueFemale.getRight()));
@@ -1525,10 +1525,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 
 			// allow for formal childcare costs
-			if (Parameters.flagFormalChildcare) {
+			if (Parameters.flagFormalChildcare && !Parameters.flagSuppressCareCosts) {
 				updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
 			}
-			if (Parameters.flagSocialCare) {
+			if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts) {
 				updateSocialCareCostPerWeek();
 			}
 
@@ -3522,7 +3522,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	public double getHealthValForBehaviour() {
 		// health is ordered from poorest (low) to best (high)
 
-		double health = 999.0;
+		int health = 999;
 		if (male != null) {
 			if (male.getDhe() != null) {
 				health = male.getDhe().getValue();
@@ -3533,7 +3533,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 				if (female.getDhe().getValue() < health) health = female.getDhe().getValue();
 			}
 		}
-		return health;
+		return (double)health;
 	}
 
 	public double getRegionIndex() {

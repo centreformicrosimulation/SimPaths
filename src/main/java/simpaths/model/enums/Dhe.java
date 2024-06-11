@@ -1,18 +1,17 @@
 package simpaths.model.enums;
 
-public enum Dhe implements DoubleValuedEnum {
-    Poor(1.0),
-    Fair(2.0),
-    Good(3.0),
-    VeryGood(4.0),
-    Excellent(5.0);
+public enum Dhe implements IntegerValuedEnum {
+    Poor(1),
+    Fair(2),
+    Good(3),
+    VeryGood(4),
+    Excellent(5);
 
-    private final double value;
+    private final int value;
+    Dhe(int val) { value = val; }
 
-    Dhe(double val) {
-        value = val;}
     @Override
-    public double getValue() {return value;}
+    public int getValue() {return value;}
     public static Dhe getCode(double val) {
         if (val < 1.5)
             return Dhe.Poor;

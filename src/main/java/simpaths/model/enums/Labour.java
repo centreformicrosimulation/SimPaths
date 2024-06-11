@@ -7,7 +7,7 @@ import simpaths.model.Person;
  * An enumeration representing different categories of weekly labour supply (work hours) provided by persons.
  */
 
-public enum Labour {
+public enum Labour implements IntegerValuedEnum {
 
     //Represents hours of work per week that a Person will supply to firms
     ZERO(0, 0, 5), // Note: ZERO always returns 0 continuous hours but maxBound is specified as 5 here to remain consistent with the discretization used in the data
@@ -16,14 +16,15 @@ public enum Labour {
 	THIRTY(30, 26, 35),
 	FORTY(40, 36, Parameters.MAX_LABOUR_HOURS_IN_WEEK);
 
-
     private final int hours, minBound, maxBound;
-
     Labour(int hours, int minBound, int maxBound) {
         this.hours = hours;
         this.minBound = minBound;
         this.maxBound = maxBound;
     }
+
+    @Override
+    public int getValue() {return hours;}
 
 	/**
 	 * Converts hours worked (int) to the corresponding labour category.

@@ -637,10 +637,12 @@ public class States {
      * @return boolean
      */
     public boolean getPrincipalEligibleForWork() {
-        if (getDisability()==1)
-            return false;
-        if (getSocialCareReceiptState()>0)
-            return false;
+        if (!Parameters.flagSuppressCareCosts) {
+            if (getDisability()==1)
+                return false;
+            if (getSocialCareReceiptState()>0)
+                return false;
+        }
         return true;
     }
 
@@ -888,7 +890,7 @@ public class States {
     SocialCareReceiptState getSocialCareReceiptStateCode() {
         SocialCareReceiptState code;
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            code = SocialCareReceiptState.getCode((int)getVal(Axis.SocialCareReceiptState));
+            code = SocialCareReceiptState.getCode(getVal(Axis.SocialCareReceiptState));
         else
             code = SocialCareReceiptState.NoneNeeded;
         return code;
@@ -900,7 +902,7 @@ public class States {
     SocialCareReceipt getSocialCareReceiptCode() {
         SocialCareReceipt code;
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            code = SocialCareReceipt.getCode((int)getVal(Axis.SocialCareReceiptState));
+            code = SocialCareReceipt.getCode(getVal(Axis.SocialCareReceiptState));
         else
             code = SocialCareReceipt.None;
         return code;
@@ -912,7 +914,7 @@ public class States {
     SocialCareProvision getSocialCareProvisionCode() {
         SocialCareProvision code;
         if (Parameters.flagSocialCare)
-            code = SocialCareProvision.getCode((int)getVal(Axis.SocialCareProvision));
+            code = SocialCareProvision.getCode(getVal(Axis.SocialCareProvision));
         else
             code = SocialCareProvision.None;
         return code;

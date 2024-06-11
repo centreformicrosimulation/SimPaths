@@ -3,8 +3,6 @@ package simpaths.model;
 
 // import Java packages
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -90,7 +88,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "Simulation first year [valid range 2011-2019]")
 	private Integer startYear = 2011;
 
-	@GUIparameter(description = "Simulation ends at year [valid range 2011-2050]")
+	@GUIparameter(description = "Simulation ends at year")
 	private Integer endYear = 2026;
 
 	@GUIparameter(description = "Maximum simulated age")
@@ -245,6 +243,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "tick to project social care")
 	private boolean projectSocialCare = true;
 
+	private boolean flagSuppressCareCosts = false;	// multiplicative factor applied to all financial and time costs associated with child and social care
+
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
 	private boolean enableIntertemporalOptimisations = false;
 
@@ -341,7 +341,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// load model parameters
 		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
 				projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
-				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeInnov);
+				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeInnov, flagSuppressCareCosts);
 		if (enableIntertemporalOptimisations) {
 
 			alignEmployment = false;
@@ -415,121 +415,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		log.debug("Time to build objects: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 		System.out.println("Time to complete initialisation " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 		elapsedTime = System.currentTimeMillis();
-	}
-
-	private void saveRunParameters() {
-
-		String filePath = DatabaseUtils.databaseInputUrl;
-		filePath = filePath.substring(0, filePath.length()-5) + "options.txt";
-		try ( FileWriter fw = new FileWriter(filePath, true);
-			  BufferedWriter bw = new BufferedWriter(fw);
-			  PrintWriter pw = new PrintWriter(bw)
-		) {
-
-			String line;
-			line = "---------------------------------------------------";
-			pw.println(line);
-			line = "country: " + country;
-			pw.println(line);
-			line = "startYear: " + startYear;
-			pw.println(line);
-			line = "endYear: " + endYear;
-			pw.println(line);
-			line = "popSize: " + popSize;
-			pw.println(line);
-			line = "maxAge: " + maxAge;
-			pw.println(line);
-			line = "fixTimeTrend: " + fixTimeTrend;
-			pw.println(line);
-			line = "timeTrendStopsIn: " + timeTrendStopsIn;
-			pw.println(line);
-			line = "timeTrendStopsInMonetaryProcesses: " + timeTrendStopsInMonetaryProcesses;
-			pw.println(line);
-			line = "flagDefaultToTimeSeriesAverages: " + flagDefaultToTimeSeriesAverages;
-			pw.println(line);
-			line = "fixRandomSeed: " + fixRandomSeed;
-			pw.println(line);
-			line = "randomSeedIfFixed: " + randomSeedIfFixed;
-			pw.println(line);
-			line = "sIndexAlpha: " + sIndexAlpha;
-			pw.println(line);
-			line = "sIndexDelta: " + sIndexDelta;
-			pw.println(line);
-			line = "savingRate: " + savingRate;
-			pw.println(line);
-			line = "addRegressionStochasticComponent: " + addRegressionStochasticComponent;
-			pw.println(line);
-			line = "fixRegressionStochasticComponent: " + fixRegressionStochasticComponent;
-			pw.println(line);
-			line = "commentsOn: " + commentsOn;
-			pw.println(line);
-			line = "debugCommentsOn: " + debugCommentsOn;
-			pw.println(line);
-			line = "donorFinderCommentsOn: " + donorFinderCommentsOn;
-			pw.println(line);
-			line = "labourMarketCovid19On: " + labourMarketCovid19On;
-			pw.println(line);
-			line = "projectFormalChildcare: " + projectFormalChildcare;
-			pw.println(line);
-			line = "donorPoolAveraging: " + donorPoolAveraging;
-			pw.println(line);
-			line = "initialisePotentialEarningsFromDatabase: " + initialisePotentialEarningsFromDatabase;
-			pw.println(line);
-			line = "useWeights: " + useWeights;
-			pw.println(line);
-			line = "projectMortality: " + projectMortality;
-			pw.println(line);
-			line = "alignPopulation: " + alignPopulation;
-			pw.println(line);
-			line = "alignFertility: " + alignFertility;
-			pw.println(line);
-			line = "alignEducation: " + alignEducation;
-			pw.println(line);
-			line = "alignInSchool: " + alignInSchool;
-			pw.println(line);
-			line = "alignCohabitation: " + alignCohabitation;
-			pw.println(line);
-			line = "alignEmployment: " + alignEmployment;
-			pw.println(line);
-			line = "saveImperfectTaxDBMatches: " + saveImperfectTaxDBMatches;
-			pw.println(line);
-			line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations;
-			pw.println(line);
-			line = "readGrid: " + useSavedBehaviour;
-			pw.println(line);
-			line = "readGrid: " + readGrid;
-			pw.println(line);
-			line = "saveBehaviour: " + saveBehaviour;
-			pw.println(line);
-			line = "employmentOptionsOfPrincipalWorker: " + employmentOptionsOfPrincipalWorker;
-			pw.println(line);
-			line = "employmentOptionsOfSecondaryWorker: " + employmentOptionsOfSecondaryWorker;
-			pw.println(line);
-			line = "responsesToLowWageOffer: " + responsesToLowWageOffer;
-			pw.println(line);
-			line = "responsesToEducation: " + responsesToEducation;
-			pw.println(line);
-			line = "responsesToHealth: " + responsesToHealth;
-			pw.println(line);
-			line = "minAgeForPoorHealth: " + minAgeForPoorHealth;
-			pw.println(line);
-			line = "responsesToDisability: " + responsesToDisability;
-			pw.println(line);
-			line = "projectSocialCare: " + projectSocialCare;
-			pw.println(line);
-			line = "responsesToRegion: " + responsesToRegion;
-			pw.println(line);
-			line = "responsesToPension: " + responsesToPension;
-			pw.println(line);
-			line = "responsesToRetirement: " + responsesToRetirement;
-			pw.println(line);
-			line = "interestRateInnov: " + interestRateInnov;
-			pw.println(line);
-			line = "disposableIncomeInnov: " + disposableIncomeInnov;
-			pw.println(line);
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
 	}
 
 
@@ -709,6 +594,123 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 		firstYearSched.addCollectionEvent(set, ee);
 		yearlySchedule.addCollectionEvent(set, ee);
+	}
+
+	private void saveRunParameters() {
+
+		String filePath = DatabaseUtils.databaseInputUrl;
+		filePath = filePath.substring(0, filePath.length()-5) + "options.txt";
+		try ( FileWriter fw = new FileWriter(filePath, true);
+			  BufferedWriter bw = new BufferedWriter(fw);
+			  PrintWriter pw = new PrintWriter(bw)
+		) {
+
+			String line;
+			line = "---------------------------------------------------";
+			pw.println(line);
+			line = "country: " + country;
+			pw.println(line);
+			line = "startYear: " + startYear;
+			pw.println(line);
+			line = "endYear: " + endYear;
+			pw.println(line);
+			line = "popSize: " + popSize;
+			pw.println(line);
+			line = "maxAge: " + maxAge;
+			pw.println(line);
+			line = "fixTimeTrend: " + fixTimeTrend;
+			pw.println(line);
+			line = "timeTrendStopsIn: " + timeTrendStopsIn;
+			pw.println(line);
+			line = "timeTrendStopsInMonetaryProcesses: " + timeTrendStopsInMonetaryProcesses;
+			pw.println(line);
+			line = "flagDefaultToTimeSeriesAverages: " + flagDefaultToTimeSeriesAverages;
+			pw.println(line);
+			line = "fixRandomSeed: " + fixRandomSeed;
+			pw.println(line);
+			line = "randomSeedIfFixed: " + randomSeedIfFixed;
+			pw.println(line);
+			line = "sIndexAlpha: " + sIndexAlpha;
+			pw.println(line);
+			line = "sIndexDelta: " + sIndexDelta;
+			pw.println(line);
+			line = "savingRate: " + savingRate;
+			pw.println(line);
+			line = "addRegressionStochasticComponent: " + addRegressionStochasticComponent;
+			pw.println(line);
+			line = "fixRegressionStochasticComponent: " + fixRegressionStochasticComponent;
+			pw.println(line);
+			line = "commentsOn: " + commentsOn;
+			pw.println(line);
+			line = "debugCommentsOn: " + debugCommentsOn;
+			pw.println(line);
+			line = "donorFinderCommentsOn: " + donorFinderCommentsOn;
+			pw.println(line);
+			line = "labourMarketCovid19On: " + labourMarketCovid19On;
+			pw.println(line);
+			line = "projectFormalChildcare: " + projectFormalChildcare;
+			pw.println(line);
+			line = "donorPoolAveraging: " + donorPoolAveraging;
+			pw.println(line);
+			line = "initialisePotentialEarningsFromDatabase: " + initialisePotentialEarningsFromDatabase;
+			pw.println(line);
+			line = "useWeights: " + useWeights;
+			pw.println(line);
+			line = "projectMortality: " + projectMortality;
+			pw.println(line);
+			line = "alignPopulation: " + alignPopulation;
+			pw.println(line);
+			line = "alignFertility: " + alignFertility;
+			pw.println(line);
+			line = "alignEducation: " + alignEducation;
+			pw.println(line);
+			line = "alignInSchool: " + alignInSchool;
+			pw.println(line);
+			line = "alignCohabitation: " + alignCohabitation;
+			pw.println(line);
+			line = "alignEmployment: " + alignEmployment;
+			pw.println(line);
+			line = "saveImperfectTaxDBMatches: " + saveImperfectTaxDBMatches;
+			pw.println(line);
+			line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations;
+			pw.println(line);
+			line = "readGrid: " + useSavedBehaviour;
+			pw.println(line);
+			line = "readGrid: " + readGrid;
+			pw.println(line);
+			line = "saveBehaviour: " + saveBehaviour;
+			pw.println(line);
+			line = "employmentOptionsOfPrincipalWorker: " + employmentOptionsOfPrincipalWorker;
+			pw.println(line);
+			line = "employmentOptionsOfSecondaryWorker: " + employmentOptionsOfSecondaryWorker;
+			pw.println(line);
+			line = "responsesToLowWageOffer: " + responsesToLowWageOffer;
+			pw.println(line);
+			line = "responsesToEducation: " + responsesToEducation;
+			pw.println(line);
+			line = "responsesToHealth: " + responsesToHealth;
+			pw.println(line);
+			line = "minAgeForPoorHealth: " + minAgeForPoorHealth;
+			pw.println(line);
+			line = "responsesToDisability: " + responsesToDisability;
+			pw.println(line);
+			line = "projectSocialCare: " + projectSocialCare;
+			pw.println(line);
+			line = "flagSuppressCareCosts: " + flagSuppressCareCosts;
+			pw.println(line);
+			line = "responsesToRegion: " + responsesToRegion;
+			pw.println(line);
+			line = "responsesToPension: " + responsesToPension;
+			pw.println(line);
+			line = "responsesToRetirement: " + responsesToRetirement;
+			pw.println(line);
+			line = "interestRateInnov: " + interestRateInnov;
+			pw.println(line);
+			line = "disposableIncomeInnov: " + disposableIncomeInnov;
+			pw.println(line);
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
 	}
 
 
@@ -2160,7 +2162,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				double sizeSimulatedSet = personsToIterateOver.size();
 
 				double shareEmployedSimulated = numberEmployed/sizeSimulatedSet;
-				double shareEmployedTargeted = ((Number) Parameters.getEmploymentAlignment().getValue(gender.toString(), region.toString(), year)).doubleValue();
+				double shareEmployedTargeted = Parameters.getTimeSeriesValue(year, gender.toString(), region.toString(), TimeSeriesVariable.EmploymentAlignment);
 
 				int targetNumberEmployed = (int) (shareEmployedTargeted*sizeSimulatedSet);
 
@@ -2295,10 +2297,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 			//Calculate alignment targets
 			//High Education
-			double highEducationRateTarget = ((Number)Parameters.getHighEducationRateInYear().getValue(year, gender.toString())).doubleValue();
+			double highEducationRateTarget = Parameters.getTimeSeriesValue(year, gender.toString(), TimeSeriesVariable.HighEducationRate);
 			int numPersonsWithHighEduAlignmentTarget = (int) (highEducationRateTarget * (double)numPersonsOfThisGender);
 			//Medium Education
-			double lowEducationRateTarget = ((Number)Parameters.getLowEducationRateInYear().getValue(year, gender.toString())).doubleValue();
+			double lowEducationRateTarget = Parameters.getTimeSeriesValue(year, gender.toString(), TimeSeriesVariable.LowEducationRate);
 //			int numPersonsWithLowEduAlignmentTarget = (int) (proportionInitialPopWithMediumEdu * numPersonsOfThisGender);		//Based on initial population - this ensures that proportion of medium educated people can never decrease below initial values
 			int numPersonsWithLowEduAlignmentTarget = (int) (lowEducationRateTarget * (double)numPersonsOfThisGender);
 			if(Parameters.systemOut) {

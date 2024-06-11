@@ -176,7 +176,7 @@ public class KeyFunction4 {
 
         // long-term sick and disabled
         localMap = new HashMap<>();
-        if (dlltsdMan > 0 || dlltsdWoman > 0) {
+        if ((dlltsdMan > 0 || dlltsdWoman > 0) && !Parameters.flagSuppressCareCosts) {
             // one adult disabled and one able-bodied
             localMap.put(0,1);
             localMap.put(1,1);
@@ -195,7 +195,7 @@ public class KeyFunction4 {
 
         // social care provision
         localMap = new HashMap<>();
-        if (careProvision > 0) {
+        if (careProvision > 0 && !Parameters.flagSuppressCareCosts) {
             localMap.put(0,1);
             localMap.put(1,1);
             localMap.put(2,1);

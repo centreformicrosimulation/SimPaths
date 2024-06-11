@@ -1,16 +1,16 @@
 package simpaths.model.enums;
 
-public enum SocialCareReceipt implements DoubleValuedEnum {
-    None(0.),
-    Informal(1.),
-    Mixed(2.),
-    Formal(3.);
+public enum SocialCareReceipt implements IntegerValuedEnum {
+    None(0),
+    Informal(1),
+    Mixed(2),
+    Formal(3);
 
-    private final double value;
+    private final int value;
+    SocialCareReceipt(int val) {value = val;}
 
-    SocialCareReceipt(double val) {value = val;}
     @Override
-    public double getValue() {return value;}
+    public int getValue() {return value;}
     public static SocialCareReceipt getCode(double val) {
         if (val<0.5)
             return SocialCareReceipt.None;
