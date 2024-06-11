@@ -31,6 +31,7 @@ model_args:
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
     saveBehaviour: false
+    alignCohabitation: false
 #    saveImperfectTaxDBMatches: false
 #    useSavedBehaviour: false
 #    readGrid: "laptop serial"
@@ -43,14 +44,13 @@ model_args:
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
 #    alignPopulation: false
-#    alignCohabitation: false
 #    alignFertility: false
 #    alignEducation: false
 #    alignInSchool: false
 #    flagDefaultToTimeSeriesAverages: true
 
 innovation_args:
-  randomSeedInnov: false
+#  randomSeedInnov: false
 #  intertemporalElasticityInnov: false
 #  labourSupplyElasticityInnov: true
 
