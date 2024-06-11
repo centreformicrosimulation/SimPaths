@@ -1,16 +1,17 @@
 package simpaths.model.enums;
 
 public enum TimeSeriesVariable {
-    GDP,
-    Inflation,
-    WageGrowth,
-    CarerWageRate,
     CareProvisionAdjustment,
+    CarerWageRate,
+    EmploymentAlignment,
+    FixedRetirementAge,
+    GDP,
+    HighEducationRate,
+    Inflation,
+    LowEducationRate,
     PartnershipAdjustment,
     UtilityAdjustmentSingleMales,
     UtilityAdjustmentSingleFemales,
     UtilityAdjustmentCouples,
-    HighEducationRate,
-    LowEducationRate,
-    EmploymentAlignment,
+    WageGrowth,
 }

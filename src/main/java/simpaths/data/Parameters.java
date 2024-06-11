@@ -2179,11 +2179,6 @@ public class Parameters {
         return getEUROMODpolicyForThisYear(year, EUROMODpolicySchedule);
     }
 
-    public static int getFixedRetireAge(int year, Gender gender) {
-        return ((Number)fixedRetireAge.getValue(year, gender.toString())).intValue();
-    }
-
-
     /*
     public static MultiKeyMap getProbSick() {
         return probSick;
@@ -2566,6 +2561,8 @@ public class Parameters {
                 map = projectionsLowEdu;
             case EmploymentAlignment:
                 map = employmentAlignment;
+            case FixedRetirementAge:
+                map = fixedRetireAge;
         }
 
         return map;
