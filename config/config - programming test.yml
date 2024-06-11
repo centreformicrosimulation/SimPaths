@@ -28,7 +28,7 @@ model_args:
 #    donorPoolAveraging: true
 #    alignFertility: true
 #    alignEmployment: false
-#    alignCohabitation: false
+    alignCohabitation: false
 #    alignPopulation: false
 #    projectSocialCare: false
 #    enableIntertemporalOptimisations: true
