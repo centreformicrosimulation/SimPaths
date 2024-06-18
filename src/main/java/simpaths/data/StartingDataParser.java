@@ -1,6 +1,8 @@
 package simpaths.data;
 
+import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -12,13 +14,15 @@ import java.util.Set;
 import simpaths.model.enums.Country;
 import simpaths.model.enums.Region;
 
-public class SQLdataParser {
+import javax.swing.*;
+
+public class StartingDataParser {
 
 	public static void createDatabaseForPopulationInitialisationByYearFromCSV(Country country, String initialInputFilename, int startYear, int endYear, Connection conn) {
 
 		//Construct tables for Simulated Persons & Households (initial population)
 		for (int year = startYear; year <= endYear; year++) {
-			SQLdataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+			StartingDataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
 		}
 	}
 
@@ -395,4 +399,64 @@ public class SQLdataParser {
 		return sb.toString();
 	}
 
+
+
+	/**
+	 *
+	 * GENERATE DATABASE TABLES TO INITIALISE SIMULATED POPULATION CROSS-SECTION FROM CSV FILES
+	 * @param country
+	 *
+	 */
+	public static void createPopulationCrossSectionDatabaseTables(Country country, boolean showGui) {
+
+		String title = "Building database tables for starting populations";
+		JFrame databaseFrame = null;
+		if (showGui) {
+			// display a dialog box to let the user know what is happening
+			String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
+					+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
+					+ "</h2></html>";
+
+			databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+		}
+		System.out.println(title);
+
+		// start work
+		Connection conn = null;
+		Statement stat = null;
+		try {
+			Class.forName("org.h2.Driver");
+			conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;CACHE_SIZE=2097152;AUTO_SERVER=TRUE", "sa", "");
+
+			Parameters.setPopulationInitialisationInputFileName("population_initial_" + country.toString());
+
+			//This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
+			StartingDataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
+
+			conn.close();
+		}
+		catch(ClassNotFoundException|SQLException e){
+			if(e instanceof ClassNotFoundException) {
+				System.out.println( "ERROR: Class not found: " + e.getMessage() + "\nCheck that the input.h2.db "
+						+ "exists in the input folder.  If not, unzip the input.h2.zip file and store the resulting "
+						+ "input.h2.db in the input folder!\n");
+			}
+			else {
+				throw new IllegalArgumentException("SQL Exception thrown! " + e.getMessage());
+			}
+		}
+		finally {
+			try {
+				if (stat != null) { stat.close(); }
+				if (conn != null) { conn.close(); }
+			} catch (SQLException e) {
+
+				e.printStackTrace();
+			}
+		}
+
+		// finish off
+		if (databaseFrame != null)
+			databaseFrame.setVisible(false);
+	}
 }

@@ -1,5 +1,5 @@
 # This file can be used to override defaults for multirun arguments.
-# These will be overridden by command-line arguments
+# Arguments of the SimPathsMultiRun object overridden by the command-line
 
 maxNumberOfRuns: 3
 executeWithGui: false
@@ -8,8 +8,7 @@ startYear: 2019
 endYear: 2019
 popSize: 170000
 
-# For arguments to pass to the SimPathsModel itself:
-# Current model defaults can be overridden by uncommenting/changing
+# Arguments passed to the SimPathsModel
 model_args:
 #    maxAge: 130
 #    fixTimeTrend: true
@@ -49,6 +48,7 @@ model_args:
 #    alignEducation: false
 #    alignInSchool: false
 
+# Arguments that alter processing of the SimPathsMultiRun object
 innovation_args:
     randomSeedInnov: false
 #    intertemporalElasticityInnov: true

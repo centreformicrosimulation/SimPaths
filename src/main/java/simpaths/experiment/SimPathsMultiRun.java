@@ -11,6 +11,8 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import simpaths.data.Parameters;
+import simpaths.data.StartingDataParser;
+import simpaths.data.TaxDonorDataParser;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
@@ -28,32 +30,33 @@ import java.io.*;
 
 public class SimPathsMultiRun extends MultiRun {
 
-	public static boolean executeWithGui = true;
-	private static int maxNumberOfRuns = 25;
+	// command line args
 	private static String countryString;
+	private static Integer popSize = 25000;
 	private static int startYear;
 	private static int endYear = 2020;
+	private static int maxNumberOfRuns = 25;
+	private static Long randomSeed = 615L;
+	public static boolean executeWithGui = true;
+
+	// innovation args
 	private static boolean randomSeedInnov = true;
 	private static boolean intertemporalElasticityInnov = false;
 	private static boolean labourSupplyElasticityInnov = false;
+	private static boolean flagDatabaseSetup = false;
+
+	// passing args for config file
+	private static Map<String, Object> modelArgs;
+	private static Map<String, Object> innovationArgs;
+	private static Map<String, Object> collectorArgs;
+	public static String configFile = "create database.yml";
+
+	// other working variables
+	private static Country country;
 	private static double interestRateInnov = 0.0;
 	private static double disposableIncomeFromLabourInnov = 0.0;
-
 	private Long counter = 0L;
-
-	private static Integer popSize = 25000;
-	
-	private static Long randomSeed = 615L;
-
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
-
-	private static Map<String, Object> modelArgs;
-
-	private static Map<String, Object> innovationArgs;
-
-	private static Map<String, Object> collectorArgs;
-
-	public static String configFile = "create database.yml";
 
 
 	/**
@@ -63,14 +66,15 @@ public class SimPathsMultiRun extends MultiRun {
 	 */
 	public static void main(String[] args) {
 
-		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
+		// set default values for country and start year
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
 		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
 			countryString = "Italy";
 		} else {
 			countryString = "United Kingdom";
 		}
-		String valueYear = lastDatabaseCountryAndYear.getValue(Country.getCountryFromNameString(countryString).toString()).toString();
+		country = Country.getCountryFromNameString(countryString);
+		String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
 		// process Yaml config file
@@ -86,20 +90,27 @@ public class SimPathsMultiRun extends MultiRun {
 			// If parseCommandLineArgs returns false (indicating help option is provided), exit main
 			return;
 		}
+		country = Country.getCountryFromNameString(countryString);
 
-		log.info("Starting run with seed = " + randomSeed);
-		
-		SimulationEngine engine = SimulationEngine.getInstance();
-		
-		SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
-//		engine.setBuilderClass(SimPathsMultiRun.class);			//This works but is deprecated
-		engine.setExperimentBuilder(experimentBuilder);					//This replaces the above line... but does it work?
-		engine.setup();													//Do we need this?  Worked fine without it...
+		if (flagDatabaseSetup) {
 
-		if (executeWithGui)
-			new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
-		else
-			experimentBuilder.start();
+			databaseSetup();
+		} else {
+			// standard simulation
+
+			log.info("Starting run with seed = " + randomSeed);
+
+			SimulationEngine engine = SimulationEngine.getInstance();
+
+			SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
+			engine.setExperimentBuilder(experimentBuilder);
+			engine.setup();		//This is needed to update model attributes (from model_args in config file)
+
+			if (executeWithGui)
+				new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
+			else
+				experimentBuilder.start();
+		}
 	}
 
 	private static boolean parseCommandLineArgs(String[] args) {
@@ -117,6 +128,9 @@ public class SimPathsMultiRun extends MultiRun {
 		Option endYearOption = new Option("e", "endYear",true, "End year");
 		endYearOption.setArgName("year");
 		options.addOption(endYearOption);
+
+		Option setupOption = new Option("DBSetup", "Setup only");
+		options.addOption(setupOption);
 
 		Option maxRunsOption = new Option("n", "maxNumberOfRuns", true, "Maximum number of runs");
 		maxRunsOption.setArgName("int");
@@ -169,6 +183,10 @@ public class SimPathsMultiRun extends MultiRun {
 
 			if (cmd.hasOption("e")) {
 				endYear = Integer.parseInt(cmd.getOptionValue("e"));
+			}
+
+			if (cmd.hasOption("DBSetup")) {
+				flagDatabaseSetup = true;
 			}
 
 			if (cmd.hasOption("p")) {
@@ -404,5 +422,19 @@ public class SimPathsMultiRun extends MultiRun {
 	@Override
 	public String setupRunLabel() {
 		return counter.toString();
+	}
+
+	private static void databaseSetup() {
+
+		// remove database file if it exists
+
+		//
+		String taxDonorInputFilename = "tax_donor_population_" + country;
+		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
+		StartingDataParser.createPopulationCrossSectionDatabaseTables(country, executeWithGui); // Initial database tables
+		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
+		TaxDonorDataParser.run(country, startYear, true); // Donor database tables
+		Parameters.loadTimeSeriesFactorForTaxDonor(country);
+		TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
 	}
 }
