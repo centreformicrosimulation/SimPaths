@@ -5,7 +5,7 @@ maxNumberOfRuns: 1
 executeWithGui: false
 randomSeed: 606
 startYear: 2019
-endYear: 2020
+endYear: 2069
 popSize: 170000
 
 # Arguments passed to the SimPathsModel
@@ -26,20 +26,22 @@ model_args:
 #    projectFormalChildcare: true
 #    donorPoolAveraging: true
     alignEmployment: false
-    projectSocialCare: false
+    alignCohabitation: false
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
-    saveBehaviour: false
-    alignCohabitation: false
-    saveImperfectTaxDBMatches: false
-#    useSavedBehaviour: false
-#    readGrid: "laptop serial"
+    projectSocialCare: true
+    saveBehaviour: true
+    flagDefaultToTimeSeriesAverages: false
+    responsesToDisability: true
+    saveImperfectTaxDBMatches: true
+    flagSuppressCareCosts: true
+    useSavedBehaviour: false
+    readGrid: "base simulation"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true
 #    responsesToRetirement: false
 #    responsesToHealth: true
-#    responsesToDisability: false
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
 #    alignPopulation: false

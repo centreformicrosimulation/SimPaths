@@ -42,14 +42,16 @@ public class TaxDonorDataParser {
      *
      * THE MANAGER IS 'run' FROM SimPathsStart
      */
-    public static void run(Country country, int startYear, boolean isVisible) {
+    public static void databaseFromCSV(Country country, int startYear, boolean isVisible) {
 
         // display a dialog box to let the user know what is happening
         String title = "Creating donor database tables";
-        String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
-                + "Constructing donor database tables for imputing tax and benefit payments</h2></html>";
         JFrame csvFrame = null;
-        if (isVisible) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, isVisible);
+        if (isVisible) {
+            String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
+                    + "Constructing donor database tables for imputing tax and benefit payments</h2></html>";
+            if (isVisible) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, isVisible);
+        }
 
         System.out.println(title);
 
@@ -91,7 +93,8 @@ public class TaxDonorDataParser {
         }
 
         // remove message box
-        if (csvFrame != null) csvFrame.setVisible(false);
+        if (csvFrame != null)
+            csvFrame.setVisible(false);
     }
 
 

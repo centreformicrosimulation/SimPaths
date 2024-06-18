@@ -434,9 +434,9 @@ public class SimPathsMultiRun extends MultiRun {
 		// populate new database
 		String taxDonorInputFilename = "tax_donor_population_" + country;
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
-		StartingDataParser.createPopulationCrossSectionDatabaseTables(country, executeWithGui); // Initial database tables
+		StartingDataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
 		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
-		TaxDonorDataParser.run(country, startYear, true); // Donor database tables
+		TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables
 		Parameters.loadTimeSeriesFactorForTaxDonor(country);
 		TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
 	}

@@ -407,7 +407,7 @@ public class StartingDataParser {
 	 * @param country
 	 *
 	 */
-	public static void createPopulationCrossSectionDatabaseTables(Country country, boolean showGui) {
+	public static void databaseFromCSV(Country country, boolean showGui) {
 
 		String title = "Building database tables for starting populations";
 		JFrame databaseFrame = null;

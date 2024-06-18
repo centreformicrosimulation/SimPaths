@@ -6,28 +6,17 @@ import java.awt.Dimension;
 import org.apache.commons.cli.*;
 import java.awt.Toolkit;
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import javax.swing.JPanel;
 
 // third-party packages
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import simpaths.model.SimPathsModel;
 import org.apache.commons.io.FileUtils;
 
@@ -41,8 +30,6 @@ import microsim.gui.shell.MicrosimShell;
 // import SimPaths packages
 import simpaths.model.enums.Country;
 import simpaths.data.*;
-import simpaths.model.HibernateUtil;
-import simpaths.model.taxes.*;
 
 
 /**
@@ -247,8 +234,8 @@ public class SimPathsStart implements ExperimentBuilder {
 		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, showGui);
 
 		// Create initial and donor population database tables
-		StartingDataParser.createPopulationCrossSectionDatabaseTables(country, showGui);
-		TaxDonorDataParser.run(country, startYear, false);
+		StartingDataParser.databaseFromCSV(country, showGui);
+		TaxDonorDataParser.databaseFromCSV(country, startYear, false);
 		Parameters.loadTimeSeriesFactorForTaxDonor(country);
 		TaxDonorDataParser.populateDonorTaxUnitTables(country, showGui);
 
@@ -349,7 +336,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		if (choices[0] || choices[1]) {
 			// rebuild databases for population cross-section used to initialise simulated population
-			StartingDataParser.createPopulationCrossSectionDatabaseTables(country, showGui); // Initial database tables
+			StartingDataParser.databaseFromCSV(country, showGui); // Initial database tables
 		}
 
 		if (choices[2]) {
@@ -426,7 +413,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		if(choices[0] || choices[2] || choices[3] || choices[4]) {
 			// call to import new tax data
 			TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, showGui);
-			TaxDonorDataParser.run(country, startYear, true); // Donor database tables
+			TaxDonorDataParser.databaseFromCSV(country, startYear, true); // Donor database tables
 			Parameters.loadTimeSeriesFactorForTaxDonor(country);
 			TaxDonorDataParser.populateDonorTaxUnitTables(country, showGui); // Populate tax unit donor tables from person data
 		}
