@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.util.Map;
 
 import simpaths.data.Parameters;
@@ -427,8 +428,10 @@ public class SimPathsMultiRun extends MultiRun {
 	private static void databaseSetup() {
 
 		// remove database file if it exists
+		String filePath = "./input" + File.separator + "input.mv.db";
+		safeDelete(filePath);
 
-		//
+		// populate new database
 		String taxDonorInputFilename = "tax_donor_population_" + country;
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
 		StartingDataParser.createPopulationCrossSectionDatabaseTables(country, executeWithGui); // Initial database tables
@@ -436,5 +439,16 @@ public class SimPathsMultiRun extends MultiRun {
 		TaxDonorDataParser.run(country, startYear, true); // Donor database tables
 		Parameters.loadTimeSeriesFactorForTaxDonor(country);
 		TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
+	}
+	private static void safeDelete(String filePath) {
+		File file = new File(filePath);
+		try {
+			Files.deleteIfExists(file.toPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Throwable e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 }
