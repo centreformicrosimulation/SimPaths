@@ -23,17 +23,17 @@ public class DatabaseExtension {
     public static void extendInputData() {
         String ukmodInputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
         String ukmodInputFilename = "UK_2019_b1";
-        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\intertemp2";
-        extendInputData(ukmodInputDirectory, ukmodInputFilename, imperfectMatchesSimPath);
+        String imperfectMatchesSimPath = "C:\\MyFiles\\99 DEV ENV\\JAS-MINE\\SimPaths\\output\\base0";
+        extendInputData(ukmodInputDirectory, ukmodInputFilename, imperfectMatchesSimPath, true);
     }
 
     public static void extendInputData(String imperfectMatchesSimPath) {
         String ukmodInputDirectory = "C:\\MyFiles\\99 DEV ENV\\UKMOD\\MODELS\\PRIVATE\\Input";
         String ukmodInputFilename = "UK_2019_b1";
-        extendInputData(ukmodInputDirectory, ukmodInputFilename, imperfectMatchesSimPath);
+        extendInputData(ukmodInputDirectory, ukmodInputFilename, imperfectMatchesSimPath, false);
     }
 
-    public static void extendInputData(String ukmodInputDirectory, String ukmodInputFilename, String imperfectMatchesSimPath) {
+    public static void extendInputData(String ukmodInputDirectory, String ukmodInputFilename, String imperfectMatchesSimPath, boolean flagReadScreenedIndices) {
 
         // database specific variables
         String[] variablesAll = Variables2019b.listAll();
@@ -42,7 +42,6 @@ public class DatabaseExtension {
         String datasetPath = ukmodInputDirectory + File.separator + ukmodInputFilename + ".txt";
         String outputDirectory = ukmodInputDirectory;
         String outputFilename = ukmodInputFilename + " - augmented.txt";
-        boolean flagReadScreenedIndices = false;
 
         // compile data that identify database gaps
         MatchIndicesSet imperfectMatchIndices;

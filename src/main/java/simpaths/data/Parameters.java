@@ -781,7 +781,7 @@ public class Parameters {
     public static boolean donorPoolAveraging;
 
     public static double realInterestRateInnov;
-    public static double disposableIncomeInnov;
+    public static double disposableIncomeFromLabourInnov;
 
 
     /**
@@ -794,7 +794,7 @@ public class Parameters {
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
-                                      double disposableIncomeInnov1, boolean flagSuppressCareCosts1) {
+                                      double disposableIncomeFromLabourInnov1, boolean flagSuppressCareCosts1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -829,7 +829,7 @@ public class Parameters {
         flagSuppressCareCosts = flagSuppressCareCosts1;
         donorPoolAveraging = donorPoolAveraging1;
         realInterestRateInnov = interestRateInnov1;
-        disposableIncomeInnov = disposableIncomeInnov1;
+        disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
 //		unemploymentRates = ExcelAssistant.loadCoefficientMap("input/scenario_unemploymentRates.xlsx", countryString, 1, 46);

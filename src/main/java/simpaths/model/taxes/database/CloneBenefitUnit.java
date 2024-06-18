@@ -392,6 +392,7 @@ public class CloneBenefitUnit {
                 members.remove(spouse);
                 spouse = null;
                 target.replace("dms",1.0);
+                target.replace("idpartner",0.0);
                 for (Map child : children) {
                     if (getInteger(target,"dgn")==0) {
                         child.replace("idfather",0.0);

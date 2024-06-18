@@ -37,7 +37,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static boolean intertemporalElasticityInnov = false;
 	private static boolean labourSupplyElasticityInnov = false;
 	private static double interestRateInnov = 0.0;
-	private static double disposableIncomeInnov = 0.0;
+	private static double disposableIncomeFromLabourInnov = 0.0;
 
 	private Long counter = 0L;
 
@@ -53,7 +53,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 	private static Map<String, Object> collectorArgs;
 
-	public static String configFile = "config.yml";
+	public static String configFile = "create database.yml";
 
 
 	/**
@@ -73,6 +73,7 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(Country.getCountryFromNameString(countryString).toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
+		// process Yaml config file
 		if (!parseYamlConfig(args)) {
 			// if parseYamlConfig returns false (indicating bad filename passed), exit main
 			return;
@@ -129,7 +130,7 @@ public class SimPathsMultiRun extends MultiRun {
 		guiOption.setArgName("true/false");
 		options.addOption(guiOption);
 
-		Option configOption = new Option("config", true, "Specify custom config file (default: config.yml)");
+		Option configOption = new Option("config", true, "Specify custom config file (default: default.yml)");
 		configOption.setArgName("file");
 		options.addOption(configOption);
 
@@ -366,7 +367,7 @@ public class SimPathsMultiRun extends MultiRun {
 		model.setPopSize(popSize);
 		model.setRandomSeedIfFixed(randomSeed);
 		model.setInterestRateInnov(interestRateInnov);
-		model.setDisposableIncomeInnov(disposableIncomeInnov);
+		model.setDisposableIncomeFromLabourInnov(disposableIncomeFromLabourInnov);
 	}
 
 	private void iterateParameters(Long counter) {
@@ -383,9 +384,9 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 		if (labourSupplyElasticityInnov) {
 			if (counter==1)
-				disposableIncomeInnov = 0.01;
+				disposableIncomeFromLabourInnov = 0.01;
 			else if (counter==2)
-				disposableIncomeInnov = -0.01;
+				disposableIncomeFromLabourInnov = -0.01;
 		}
 	}
 	

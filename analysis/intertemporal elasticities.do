@@ -8,15 +8,18 @@
 *	report 242 estimates for the intertemporal elasticity of substitution calculated on UK data, 
 *	with a mean of 0.487 and a standard deviation of 1.09
 *
+*	NOTE: results exhibit substantial volatility
+*
 *	Last version:  Justin van de Ven, 21 May 2024
-*	First version: Justin van de Ven, 21 May 2024
+*	First version: Justin van de Ven, 13 Jun 2024
 *
 **************************************************************************************/
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemp3\csv"
-global outdir = "C:\MyFiles\99 DEV ENV\temp\"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal - 4runs p005\csv"
+global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
+local dr = 0.005	// delta interest rate (from SimPathsMultiRun object)
 
 
 /**************************************************************************************
@@ -74,7 +77,6 @@ save temp4, replace
 **************************************************************************************/
 use temp4, clear
 local r1 = 0.046	// starting average rate of return to saving (slight difference with cost of debt)
-local dr = 0.0075	// delta interest rate (from SimPathsMultiRun object)
 local lr1 = ln(1.0 + `r1')
 local lr2 = ln(1.0 + `r1' + `dr')
 local lr3 = ln(1.0 + `r1' - `dr')
@@ -88,3 +90,21 @@ local elas3 = r(mean)
 
 local elasAv = (`elas2' + `elas3') / 2.0
 disp `elasAv'
+
+
+/**************************************************************************************
+*	clean-up
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	temp0.dta
+	temp1.dta
+	temp2.dta
+	temp3.dta
+	temp4.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "`file'"
+}

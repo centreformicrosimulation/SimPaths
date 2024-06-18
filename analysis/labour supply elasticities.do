@@ -8,21 +8,23 @@
 *	estimates for the Marshallian labour supply elasticity between -0.12 and 0.28
 *	
 *	Last version:  Justin van de Ven, 23 May 2024
-*	First version: Justin van de Ven, 23 May 2024
+*	First version: Justin van de Ven, 13 Jun 2024
 *
 **************************************************************************************/
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\labsupply\csv"
-global outdir = "C:\MyFiles\99 DEV ENV\temp\"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\labsupply - 3runs p01 not averages\csv"
+global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
+local dinc = 0.01	// assumed adjustment factor for disposable income of employed people (from SimPathsMultiRun object)
 
 
 /**************************************************************************************
 *	start
 **************************************************************************************/
 cd "$outdir"
-import delimited using "$moddir/BenefitUnit.csv"
+import delimited using "$moddir/Person.csv"
+drop if (time!=2019)
 save temp0, replace
 
 
@@ -34,21 +36,32 @@ forvalues ii = 1/3 {
 	use temp0, clear
 	keep if (run==`ii')
 	if (`ii'==1) {
-		sum id_benefitunit
-		local id0 = r(min)
+		sum id_person
+		local idp0 = r(min)
+		sum idbenefitunit
+		local idb0 = r(min)
 	} 
 	else {
-		sum id_benefitunit
-		local id1 = r(min)
-		replace id_benefitunit = id_benefitunit - `id1' + `id0'
+		sum id_person
+		local idp1 = r(min)
+		replace id_person = id_person - `idp1' + `idp0'
+		sum idbenefitunit
+		local idb1 = r(min)
+		replace idbenefitunit = idbenefitunit - `idb1' + `idb0'
 	}
-	xtset id_benefitunit time
-	gen eqs = disposableincomemonthly * 12 / equivaliseddisposableincomeyearl
-	gen tcons = discretionaryconsumptionperyear + (childcarecostperweek + socialcarecostperweek) * 364.25/7 
-	gen econs = tcons/eqs
-	gen lrecons`ii' = ln(econs / l.econs)
-	keep if (!missing(lrecons))
-	keep id_benefitunit lrecons
+	gsort idbenefitunit id_person
+	gen hoursworked = real(hoursworkedweekly)
+	recode hoursworked (missing=0)
+	by idbenefitunit: egen thours = sum(hoursworked)
+	gen chk = 0
+	replace chk = 1 if (idbenefitunit!=idbenefitunit[_n-1])
+	keep if (chk==1)
+	drop chk
+	gen lhours = ln(thours)
+	keep if (!missing(lhours))
+	keep idbenefitunit idoriginalbu lhours
+	rename idoriginalbu idorigbu`ii'
+	rename lhours lhours`ii'
 	save temp`ii', replace
 }
 
@@ -57,21 +70,20 @@ forvalues ii = 1/3 {
 *	compile statistics over runs
 **************************************************************************************/
 use temp1, clear
-merge 1:1 id_benefitunit using temp2, keep(3) nogen
-merge 1:1 id_benefitunit using temp3, keep(3) nogen
+merge 1:1 idbenefitunit using temp2, keep(3) nogen
+merge 1:1 idbenefitunit using temp3, keep(3) nogen
+gen chk = (idorigbu1!=idorigbu2) | (idorigbu2!=idorigbu3)
+tab chk
+drop if (chk==1)
 save temp4, replace
 
 
 /**************************************************************************************
 *	evaluate individual specific elasticities
 **************************************************************************************/
-local r1 = 0.046	// starting average rate of return to saving (slight difference with cost of debt)
-local dr = 0.005	// delta interest rate
-local lr1 = ln(1.0 + `r1')
-local lr2 = ln(1.0 + `r1' + `dr')
-local lr2 = ln(1.0 + `r1' - `dr')
-gen elas2 = (lrecons2 - lrecons1) / (`lr2' - `lr1')
-gen elas3 = (lrecons3 - lrecons1) / (`lr3' - `lr1')
+local dinc = 0.01	// factor adjustment to disposable income of employed people assumed for analysis
+gen elas2 = (lhours2 - lhours1) / `dinc'
+gen elas3 = (lhours3 - lhours1) / -`dinc'
 
 sum elas2
 local elas2 = r(mean)
@@ -80,3 +92,22 @@ local elas3 = r(mean)
 
 local elasAv = (`elas2' + `elas3') / 2.0
 disp `elasAv'
+
+
+/**************************************************************************************
+*	clean-up
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	temp0.dta
+	temp1.dta
+	temp2.dta
+	temp3.dta
+	temp4.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "`file'"
+}
+

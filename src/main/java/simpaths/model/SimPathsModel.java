@@ -138,7 +138,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 	private double interestRateInnov = 0.0;			// used to explore behavioural sensitivity to assumed interest rates (intertemporal elasticity of substitution)
 
-	private double disposableIncomeInnov = 0.0;		// used to explore behavioural sensitivity to disposable income (Marshallian labour supply elasticity)
+	private double disposableIncomeFromLabourInnov = 0.0;		// used to explore behavioural sensitivity to disposable income (Marshallian labour supply elasticity)
 
 //	@GUIparameter(description = "Force recreation of input database based on the data provided by the population_[country].csv file")
 //	private boolean refreshInputDatabase = false;		//Tables can be constructed in GUI dialog in launch, before JAS-mine GUI appears.  However, if skipping that, and manually altering the EUROMODpolicySchedule.xlsx file, this will need to be set to true to build new input database before simulation is run (though the new input database will only be viewable in the output/input/input.h2.db file).
@@ -341,7 +341,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// load model parameters
 		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
 				projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
-				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeInnov, flagSuppressCareCosts);
+				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressCareCosts);
 		if (enableIntertemporalOptimisations) {
 
 			alignEmployment = false;
@@ -674,7 +674,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			pw.println(line);
 			line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations;
 			pw.println(line);
-			line = "readGrid: " + useSavedBehaviour;
+			line = "useSavedBehaviour: " + useSavedBehaviour;
 			pw.println(line);
 			line = "readGrid: " + readGrid;
 			pw.println(line);
@@ -706,7 +706,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			pw.println(line);
 			line = "interestRateInnov: " + interestRateInnov;
 			pw.println(line);
-			line = "disposableIncomeInnov: " + disposableIncomeInnov;
+			line = "disposableIncomeInnov: " + disposableIncomeFromLabourInnov;
 			pw.println(line);
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe);
@@ -3067,8 +3067,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		interestRateInnov = innov;
 	}
 
-	public void setDisposableIncomeInnov(double innov) {
-		disposableIncomeInnov = innov;
+	public void setDisposableIncomeFromLabourInnov(double innov) {
+		disposableIncomeFromLabourInnov = innov;
 	}
 
 	public Integer getsIndexTimeWindow() {
