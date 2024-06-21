@@ -1417,42 +1417,48 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
         if (Les_c4.Retired.equals(les_c4) || dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
             return;
-        }
+        } else if (Les_c4.Student.equals(les_c4) && !leftEducation && dag >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
+            //If age is between 16 - 29 and individual has always been in education, follow process E1a:
 
-        //If age is between 16 - 29 and individual has always been in education, follow process E1a:
-        else if (Les_c4.Student.equals(les_c4) && !leftEducation && dag >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
             if (dag <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
-                toLeaveSchool = (labourInnov.nextDouble() >= Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class)); //If event is true, stay in school.  If event is false, leave school.
+                double rnd = labourInnov.nextDouble();
+                double prb = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
+                toLeaveSchool = (rnd >= prb); //If event is true, stay in school.  If event is false, leave school.
             } else {
                 toLeaveSchool = true; //Hasn't left education until 30 - force out
             }
-        }
-
-        //If age is between 16 - 45 and individual has not continuously been in education, follow process E1b:
-        //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
-        else if (dag <= 45 && (!Les_c4.Student.equals(les_c4) || leftEducation)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
+        } else if (dag <= 45 && (!Les_c4.Student.equals(les_c4) || leftEducation)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
+            //If age is between 16 - 45 and individual has not continuously been in education, follow process E1b:
+            //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
             //TODO: If regression outcome of process E1b is true, set activity status to student and der (return to education indicator) to true?
-            if (labourInnov.nextDouble() < Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class)) { //If event is true, re-enter education.  If event is false, leave school
 
-//				System.out.println("Persid " + getKey().getId() + " Aged: " + dag + " With activity status: " + les_c4 + " Assigned to the E1b process");
+            double rnd = labourInnov.nextDouble();
+            double prb = Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class);
+            if (rnd < prb) {
+                //If event is true, re-enter education.  If event is false, leave school
 
                 setLes_c4(Les_c4.Student);
                 setDer(Indicator.True);
                 setDed(Indicator.True);
-            }
-            else if (Les_c4.Student.equals(les_c4)){ //If activity status is student but regression to be in education was evaluated to false, remove student status
+            } else if (Les_c4.Student.equals(les_c4)){
+                //If activity status is student but regression to be in education was evaluated to false, remove student status
+
                 setLes_c4(Les_c4.NotEmployed);
                 setDed(Indicator.False);
                 toLeaveSchool = true; //Test what happens if people who returned to education leave again
             }
-        }
-        else if (dag > 45 && les_c4.equals(Les_c4.Student)) { //People above 45 shouldn't be in education, so if someone re-entered at 45 in previous step, force out
+        } else if (dag > 45 && les_c4.equals(Les_c4.Student)) {
+            //People above 45 shouldn't be in education, so if someone re-entered at 45 in previous step, force out
+
             setLes_c4(Les_c4.NotEmployed);
             setDed(Indicator.False);
-        }    }
+        }
+    }
 
     protected void leavingSchool() {
-        if(toLeaveSchool) {
+
+        if (toLeaveSchool) {
+
             setEducationLevel(); //If individual leaves school follow process E2a to assign level of education
             setSedex(Indicator.True); //Set variable left education (sedex) if leaving school
             setDed(Indicator.False); //Set variable in education (ded) to false if leaving school
