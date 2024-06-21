@@ -36,7 +36,7 @@ model_args:
     saveImperfectTaxDBMatches: true
     flagSuppressCareCosts: false
     useSavedBehaviour: false
-    readGrid: "base simulation"
+    readGrid: "base1"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true
