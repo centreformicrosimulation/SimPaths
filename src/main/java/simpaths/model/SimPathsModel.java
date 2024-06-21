@@ -556,18 +556,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// UPDATE YEAR
 		addEventToAllYears(Processes.UpdateYear);
 
-		// FINAL EVENTS
-		addEventToAllYears(Processes.TaxDBExtension);
-
 		// UPDATE EVENT QUEUE
 		getEngine().getEventQueue().scheduleOnce(firstYearSched, startYear, ordering);
 		getEngine().getEventQueue().scheduleRepeat(yearlySchedule, startYear+1, ordering, 1.);
 
 		// at termination of simulation
 		int orderEarlier = -1;            //Set less than order so that this is called before the yearlySchedule in the endYear.
+		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.CleanUp), endYear+1, orderEarlier);
 		SystemEvent end = new SystemEvent(SimulationEngine.getInstance(), SystemEventType.End);
 		getEngine().getEventQueue().scheduleOnce(end, endYear+1, orderEarlier);
-//		getEngine().getEventQueue().scheduleOnce(new SingleTargetEvent(this, Processes.Stop), endYear, orderEarlier);
 
 		log.debug("Time to build schedule " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 		elapsedTime = System.currentTimeMillis();
@@ -742,7 +739,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		UpdateYear,
 		CheckForEmptyBenefitUnits,
 		CheckForImperfectTaxDBMatches,
-		TaxDBExtension,
+		CleanUp,
 	}
 
 	@Override
@@ -870,8 +867,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 				if (Parameters.saveImperfectTaxDBMatches) {
 					screenForImperfectTaxDbMatches();
 				}
-			case TaxDBExtension:
-				if (Parameters.saveImperfectTaxDBMatches && getYear()==endYear)
+				break;
+			case CleanUp:
+				if (Parameters.saveImperfectTaxDBMatches)
 					DatabaseExtension.extendInputData(getEngine().getCurrentExperiment().getOutputFolder());
 				break;
 			default:
