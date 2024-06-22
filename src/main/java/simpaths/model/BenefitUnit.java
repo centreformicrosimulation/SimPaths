@@ -1726,11 +1726,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 	}
 
 	private void updateActivity(Person person) {
-		if (person != null && person.getLabourSupplyHoursWeekly() > 0) {
-			person.setLes_c4(Les_c4.EmployedOrSelfEmployed);
-		} else if (person != null && !person.getLes_c4().equals(Les_c4.Student) && !person.getLes_c4().equals(Les_c4.Retired)) {
-			// No need to reset Retiree status
-			person.setLes_c4(Les_c4.NotEmployed);
+
+		if (person!=null && !Les_c4.Student.equals(person.getLes_c4()) && !Les_c4.Retired.equals(person.getLes_c4())) {
+			if (person.getLabourSupplyHoursWeekly() > 0) {
+				person.setLes_c4(Les_c4.EmployedOrSelfEmployed);
+			} else  {
+				person.setLes_c4(Les_c4.NotEmployed);
+			}
 		}
 	}
 
