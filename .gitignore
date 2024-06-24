@@ -207,3 +207,5 @@ input/programming test database/EUROMODpolicySchedule.xlsx
 input/programming test database/input.mv.db
 /input/databases
 /input/EUROMODoutput/base
+analysis/temp0.dta
+analysis/temp1.dta

@@ -512,7 +512,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// TIME USE MODULE
 		// Social care
 		if (projectSocialCare) {
-			yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareIncidence);
+			addCollectionEventToAllYears(persons, Person.Processes.SocialCareIncidence);
 			//yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
 		}
 

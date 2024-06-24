@@ -8,7 +8,6 @@
 **************************************************************************************/
 
 clear all
-
 global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base1\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
@@ -17,7 +16,6 @@ cd "$outdir"
 /**************************************************************************************
 *	start
 **************************************************************************************/
-
 
 /**************************************************************************************
 *	load data
@@ -101,9 +99,9 @@ forvalues yy = 2019/2069 {
 matlist store1
 
 
-/**************************************************************************************
-*	social care receipt
-**************************************************************************************/
+/*******************************************************************************
+*	social care need
+*******************************************************************************/
 use "$outdir/temp1", clear
 gen needSCare = (needsocialcare=="True")
 tab time if (dag>44 & dag<64)
@@ -122,17 +120,157 @@ replace dhev = 3 if (dhe=="Good")
 replace dhev = 4 if (dhe=="VeryGood")
 replace dhev = 5 if (dhe=="Excellent")
 
+gen led = (deh_c3=="Low")
+gen med = (deh_c3=="Medium")
+gen hed = (deh_c3=="High")
+
+gen male = (dgn=="Male")
+
+gen partnered = (dcpst=="Partnered")
+
+/*************** aged 45 to 64 ******************/
 matrix store1 = J(2069-2018,1,.)
+forvalues yy = 2019/2069 {
+	sum male if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum hed if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum led if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum led if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum partnered if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum dag if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum dhev if (time==`yy' & dag>44 & dag<65), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+/*************** aged 65 to 79 ******************/
+forvalues yy = 2019/2069 {
+	sum male if (time==`yy' & dag>64 & dag<80), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum hed if (time==`yy' & dag>64 & dag<80), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum led if (time==`yy' & dag>64 & dag<80), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum led if (time==`yy' & dag>64 & dag<80), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum partnered if (time==`yy' & dag>64 & dag<80), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum dag if (time==`yy' & dag>64 & dag<80), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
 forvalues yy = 2019/2069 {
 	sum dhev if (time==`yy' & dag>64 & dag<80), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
 matlist store1
 
+/*************** aged 80 and over ******************/
+forvalues yy = 2019/2069 {
+	sum male if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
 
-/**************************************************************************************
+forvalues yy = 2019/2069 {
+	sum hed if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum led if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum led if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum partnered if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum dag if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum dhev if (time==`yy' & dag>79), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+
+/*******************************************************************************
+*	social care receipt
+*******************************************************************************/
+use "$outdir/temp1", clear
+gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly + carehoursfromsonweekly + carehoursfromotherweekly
+gen totalCareHours = informalCareHours + carehoursfromformalweekly
+
+
+
+/*******************************************************************************
 *	clean-up
-**************************************************************************************/
+*******************************************************************************/
 #delimit ;
 local files_to_drop 
 	temp0.dta

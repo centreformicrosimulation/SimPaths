@@ -501,10 +501,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dcpen = Indicator.False;
         this.dcpex = Indicator.False;
         this.dlltsd = Indicator.False;
-        this.dlltsd_lag1 = Indicator.False;
         setAllSocialCareVariablesToFalse();
         this.lowWageOffer = false;
-        this.lowWageOffer_lag1 = false;
         this.women_fertility = Indicator.False;
         this.idBenefitUnit = mother.getIdBenefitUnit();
         this.benefitUnit = mother.benefitUnit;
@@ -513,17 +511,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.weight = mother.getWeight();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         this.dhe = Dhe.VeryGood;
         this.dhm = 9.;			//Set to median for under 18's as a placeholder
-        this.dhe_lag1 = dhe;
-        this.dhm_lag1 = dhm;
         this.deh_c3 = Education.Low;
         this.les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
         this.leftEducation = false;
-        this.les_c4_lag1 = les_c4;
         this.les_c7_covid = Les_c7_covid.Student;
-        this.les_c7_covid_lag1 = les_c7_covid;
         this.household_status = Household_status.Parents;
         this.labourSupplyWeekly = Labour.ZERO;			//Will be updated in Labour Market Module when the person stops being a student
-        this.labourSupplyWeekly_L1 = Labour.ZERO;
         this.hoursWorkedWeekly = getLabourSupplyWeekly().getHours(this);
         this.idHousehold = mother.getBenefitUnit().getIdHousehold();
 //		setDeviationFromMeanRetirementAge();			//This would normally be done within initialisation, but the line above has been commented out for reasons given...
@@ -534,7 +527,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.bornInSimulation = true;
         this.dhh_owned = false;
         this.receivesBenefitsFlag = false;
-        this.receivesBenefitsFlag_L1 = receivesBenefitsFlag;
         updateVariables(false);
     }
 
@@ -1133,29 +1125,34 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void evaluateSocialCareReceipt() {
 
-        needSocialCare = Indicator.False;
-        careHoursFromFormalWeekly = 0.0;
-        careFormalExpenditureWeekly = 0.0;
-        careHoursFromPartnerWeekly = 0.0;
-        careHoursFromParentWeekly = 0.0;
-        careHoursFromDaughterWeekly = 0.0;
-        careHoursFromSonWeekly = 0.0;
-        careHoursFromOtherWeekly = 0.0;
-        socialCareReceipt = SocialCareReceipt.None;
-        socialCareFromFormal = false;
-        socialCareFromPartner = false;
-        socialCareFromDaughter = false;
-        socialCareFromSon = false;
-        socialCareFromOther = false;
-        drawProvCareIncidence = -9.;
-        drawProvCareHours = -9.;
+        if (dag < Parameters.MIN_AGE_FORMAL_SOCARE || getYear()>getStartYear()) {
+
+            needSocialCare = Indicator.False;
+            careHoursFromFormalWeekly = 0.0;
+            careFormalExpenditureWeekly = 0.0;
+            careHoursFromPartnerWeekly = 0.0;
+            careHoursFromParentWeekly = 0.0;
+            careHoursFromDaughterWeekly = 0.0;
+            careHoursFromSonWeekly = 0.0;
+            careHoursFromOtherWeekly = 0.0;
+            socialCareReceipt = SocialCareReceipt.None;
+            socialCareFromFormal = false;
+            socialCareFromPartner = false;
+            socialCareFromDaughter = false;
+            socialCareFromSon = false;
+            socialCareFromOther = false;
+            drawProvCareIncidence = -9.;
+            drawProvCareHours = -9.;
+        }
+        if (careHoursFromParentWeekly==null)
+            careHoursFromParentWeekly = 0.0;
 
         if ((dag < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(dlltsd)) {
             // under 65 years old with disability
 
             needSocialCare = Indicator.True;
             double probRecCare;
-            if (Indicator.False.equals(dlltsd_lag1)) {
+            if (Indicator.False.equals(dlltsd_lag1) || getYear()==getStartYear()) {
                 // need to identify receipt of social care
 
                 probRecCare = Parameters.getRegReceiveCareS1a().getProbability(this, Person.DoublesVariables.class);
@@ -1189,7 +1186,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         }
 
-        if (dag >= Parameters.MIN_AGE_FORMAL_SOCARE) {
+        if (dag >= Parameters.MIN_AGE_FORMAL_SOCARE && getYear()>getStartYear()) {
             // need care only projected for 65 and over due to limitations of data used for parameterisation
 
             double rnd1 = socialCareInnov.nextDouble();
@@ -4292,6 +4289,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return yearLocal;
         }
     }
+    private int getStartYear() {
+        if (model != null) {
+            return model.getStartYear();
+        } else {
+            return 0;
+        }
+    }
+
     public void setRegionLocal(Region region) {
         regionLocal = region;
     }
@@ -4501,7 +4506,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public double getHoursInformalSocialCare() {
-        return getCareHoursFromPartnerWeekly() + getCareHoursFromDaughterWeekly() + getCareHoursFromSonWeekly() + getCareHoursFromOtherWeekly();
+        return getCareHoursFromPartnerWeekly() + getCareHoursFromDaughterWeekly() + getCareHoursFromSonWeekly() + getCareHoursFromOtherWeekly() + getCareHoursFromParentWeekly();
     }
 
     public double getCareHoursFromPartnerWeekly() {
@@ -4556,11 +4561,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public double getHoursInformalSocialCare_L1() {
-        return getCareHoursFromPartner_L1() + getCareHoursFromDaughter_L1() + getCareHoursFromSon_L1() + getCareHoursFromOther_L1();
+        return getCareHoursFromPartner_L1() + getCareHoursFromDaughter_L1() + getCareHoursFromSon_L1() + getCareHoursFromOther_L1() + getCareHoursFromParent_L1();
     }
 
     public double getTotalHoursSocialCare_L1() {
         return getHoursFormalSocialCare_L1() + getHoursInformalSocialCare_L1();
+    }
+
+    public double getCareHoursFromParent_L1() {
+        double hours = 0.0;
+        if (careHoursFromParentWeekly_lag1 !=null)
+            if (careHoursFromParentWeekly_lag1 >0.0)
+                hours = careHoursFromParentWeekly_lag1;
+        return hours;
     }
 
     public double getCareHoursFromPartner_L1() {
