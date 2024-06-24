@@ -64,12 +64,13 @@ foreach waveid in $scRecWaves {
 
 		gen swv = `waveno'
 
-		gen need_socare = 0
+		gen nbrNeeded = 0
 		// need care if indicate they can only manage with help or not at all
 		foreach vv of varlist adla adlb adlc adld adle adlf adlg adlh adli adlj adlk adll adlm adln {
 
-			replace need_socare = 1 if (`vv'>1)
+			replace nbrNeeded = nbrNeeded + 1 if (`vv'>1)
 		}
+		gen need_socare = (nbrNeeded > 1)
 
 		gen formal_socare_hrs = 0
 		gen hourInfCare = 0

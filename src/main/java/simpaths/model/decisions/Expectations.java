@@ -1103,7 +1103,7 @@ public class Expectations {
         double[] probs = new double[SocialCareReceiptState.values().length];
         double[] vals = new double[SocialCareReceiptState.values().length];
 
-        // no care needed
+        // no care needed (may work; otherwise work may be limited)
         probHere = 1.0 - probNeedCare;
         probs[ii] = probHere;
         vals[ii] = (double)SocialCareReceiptState.NoneNeeded.getValue();

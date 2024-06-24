@@ -87,13 +87,13 @@ forvalues yy = 2019/2069 {
 matlist store1
 
 forvalues yy = 2019/2069 {
-	sum chk if (time==`yy' & maxAge<55 & refbenefitunit), mean
+	sum chk if (time==`yy' & nk>0 & refbenefitunit), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
 matlist store1
 
 forvalues yy = 2019/2069 {
-	sum chk if (time==`yy' & nk>0 & refbenefitunit), mean
+	sum chk if (time==`yy' & maxAge<55 & refbenefitunit), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
 matlist store1
@@ -104,8 +104,8 @@ matlist store1
 *******************************************************************************/
 use "$outdir/temp1", clear
 gen needSCare = (needsocialcare=="True")
-tab time if (dag>44 & dag<64)
-tab time if (needSCare==1 & dag>44 & dag<64)
+tab time if (dag>44 & dag<65)
+tab time if (needSCare==1 & dag>44 & dag<65)
 
 tab time if (dag>64 & dag<80)
 tab time if (needSCare==1 & dag>64 & dag<80)
@@ -263,9 +263,38 @@ matlist store1
 *	social care receipt
 *******************************************************************************/
 use "$outdir/temp1", clear
-gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly + carehoursfromsonweekly + carehoursfromotherweekly
+foreach vv of varlist carehoursfrompartnerweekly carehoursfromdaughterweekly carehoursfromsonweekly carehoursfromotherweekly carehoursfromparentweekly carehoursfromformalweekly {
+	destring `vv', replace force
+	recode `vv' (missing=0)
+}
+gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly + carehoursfromsonweekly + carehoursfromotherweekly + carehoursfromparentweekly
 gen totalCareHours = informalCareHours + carehoursfromformalweekly
+gen recCare = (totalCareHours>0.01)
 
+tab time if (recCare & dag>44 & dag<65)
+tab time if (recCare & dag>64 & dag<80)
+tab time if (recCare & dag>79)
+tab time if (recCare & needSCare & dag>79)
+
+
+matrix store1 = J(2069-2018,1,.)
+forvalues yy = 2019/2069 {
+	sum totalCareHours if (time==`yy' & dag>44 & dag<65 & recCare), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum totalCareHours if (time==`yy' & dag>64 & dag<80 & recCare), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+forvalues yy = 2019/2069 {
+	sum totalCareHours if (time==`yy' & dag>79 & recCare), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
 
 
 /*******************************************************************************
