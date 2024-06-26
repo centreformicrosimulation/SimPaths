@@ -1697,11 +1697,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (dag > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY)
             return false;
-        if (les_c4.equals(Les_c4.Retired) && !Parameters.enableIntertemporalOptimisations)
+        if (Les_c4.Retired.equals(les_c4) && !Parameters.enableIntertemporalOptimisations)
             return false;
-        if (les_c4.equals(Les_c4.Student) && !Parameters.enableIntertemporalOptimisations)
+        if (Les_c4.Student.equals(les_c4) && !Parameters.enableIntertemporalOptimisations)
             return false;
-        if (dlltsd.equals(Indicator.True) && !Parameters.flagSuppressCareCosts)
+        if (Indicator.True.equals(dlltsd) && !Parameters.flagSuppressCareCosts)
+            return false;
+        if (Indicator.True.equals(needSocialCare) && !Parameters.flagSuppressCareCosts)
             return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.

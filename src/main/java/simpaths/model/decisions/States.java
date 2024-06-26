@@ -622,7 +622,7 @@ public class States {
 
     /**
      * METHOD TO RETURN SOCIAL CARE RECEIPT
-     * @return integer (0 no care, 1 only informal, 2 formal and informal, 3 only formal
+     * @return integer (0 none needed, 1 no formal (needed but not received or only informal), 2 formal and informal, 3 only formal
      */
     int getSocialCareReceiptState() {
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
