@@ -38,6 +38,29 @@ merge m:1 idbenefitunit time using temp0
 gsort time idbenefitunit idperson
 gen refbenefitunit = 0
 replace refbenefitunit = 1 if (idbenefitunit != idbenefitunit[_n-1])
+
+foreach vv of varlist carehoursfrompartnerweekly carehoursfromdaughterweekly carehoursfromsonweekly carehoursfromotherweekly carehoursfromparentweekly carehoursfromformalweekly {
+	destring `vv', replace force
+	recode `vv' (missing=0)
+}
+
+destring hoursworkedweekly, replace force
+recode hoursworkedweekly (missing=0)
+gen idNotEmployedAdult = (hoursworkedweekly<0.1 & dag>17)
+
+gen led = (deh_c3=="Low")
+gen med = (deh_c3=="Medium")
+gen hed = (deh_c3=="High")
+
+gen male = (dgn=="Male")
+
+gen partnered = (dcpst=="Partnered")
+
+gen needCare = (needsocialcare=="True")
+gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly + carehoursfromsonweekly + carehoursfromotherweekly + carehoursfromparentweekly
+gen totalCareHours = informalCareHours + carehoursfromformalweekly
+gen recCare = (totalCareHours>0.01)
+
 save "$outdir/temp1", replace
 
 
@@ -72,9 +95,6 @@ forvalues yy = 2019/2069 {
 }
 matlist store1
 
-destring hoursworkedweekly, replace force
-recode hoursworkedweekly (missing=0)
-gen idNotEmployedAdult = (hoursworkedweekly<0.1 & dag>17)
 by time idbenefitunit: egen nNotEmpAdult = sum(idNotEmployedAdult)
 by time idbenefitunit: egen maxAge = max(dag)
 
@@ -103,15 +123,14 @@ matlist store1
 *	social care need
 *******************************************************************************/
 use "$outdir/temp1", clear
-gen needSCare = (needsocialcare=="True")
 tab time if (dag>44 & dag<65)
-tab time if (needSCare==1 & dag>44 & dag<65)
+tab time if (needCare==1 & dag>44 & dag<65)
 
 tab time if (dag>64 & dag<80)
-tab time if (needSCare==1 & dag>64 & dag<80)
+tab time if (needCare==1 & dag>64 & dag<80)
 
 tab time if (dag>79)
-tab time if (needSCare==1 & dag>79)
+tab time if (needCare==1 & dag>79)
 
 gen dhev = 0
 replace dhev = 1 if (dhe=="Poor")
@@ -119,14 +138,6 @@ replace dhev = 2 if (dhe=="Fair")
 replace dhev = 3 if (dhe=="Good")
 replace dhev = 4 if (dhe=="VeryGood")
 replace dhev = 5 if (dhe=="Excellent")
-
-gen led = (deh_c3=="Low")
-gen med = (deh_c3=="Medium")
-gen hed = (deh_c3=="High")
-
-gen male = (dgn=="Male")
-
-gen partnered = (dcpst=="Partnered")
 
 /*************** aged 45 to 64 ******************/
 matrix store1 = J(2069-2018,1,.)
@@ -138,12 +149,6 @@ matlist store1
 
 forvalues yy = 2019/2069 {
 	sum hed if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum led if (time==`yy' & dag>44 & dag<65), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
 matlist store1
@@ -192,12 +197,6 @@ forvalues yy = 2019/2069 {
 matlist store1
 
 forvalues yy = 2019/2069 {
-	sum led if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
 	sum partnered if (time==`yy' & dag>64 & dag<80), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
@@ -235,12 +234,6 @@ forvalues yy = 2019/2069 {
 matlist store1
 
 forvalues yy = 2019/2069 {
-	sum led if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
 	sum partnered if (time==`yy' & dag>79), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
@@ -263,19 +256,13 @@ matlist store1
 *	social care receipt
 *******************************************************************************/
 use "$outdir/temp1", clear
-foreach vv of varlist carehoursfrompartnerweekly carehoursfromdaughterweekly carehoursfromsonweekly carehoursfromotherweekly carehoursfromparentweekly carehoursfromformalweekly {
-	destring `vv', replace force
-	recode `vv' (missing=0)
-}
-gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly + carehoursfromsonweekly + carehoursfromotherweekly + carehoursfromparentweekly
-gen totalCareHours = informalCareHours + carehoursfromformalweekly
-gen recCare = (totalCareHours>0.01)
 
 tab time if (recCare & dag>44 & dag<65)
 tab time if (recCare & dag>64 & dag<80)
-tab time if (recCare & dag>79)
-tab time if (recCare & needSCare & dag>79)
+tab time if (recCare & needCare & dag>64 & dag<80)
 
+tab time if (recCare & dag>79)
+tab time if (recCare & needCare & dag>79)
 
 matrix store1 = J(2069-2018,1,.)
 forvalues yy = 2019/2069 {
@@ -292,6 +279,46 @@ matlist store1
 
 forvalues yy = 2019/2069 {
 	sum totalCareHours if (time==`yy' & dag>79 & recCare), mean
+	mat store1[`yy'-2018,1] = r(mean)
+}
+matlist store1
+
+tab time if (informalCareHours>0.1 & carehoursfromformalweekly<0.1)
+tab time if (informalCareHours>0.1 & carehoursfromformalweekly>0.1)
+tab time if (informalCareHours<0.1 & carehoursfromformalweekly>0.1)
+
+matrix store1 = J(2069-2018,6,.)
+gen chk = (dag>44)
+forvalues yy = 2019/2069 {
+	sum carehoursfromparentweekly if (time==`yy' & chk), mean
+	mat store1[`yy'-2018,1] = r(mean)
+	sum carehoursfrompartnerweekly if (time==`yy' & chk), mean
+	mat store1[`yy'-2018,2] = r(mean)
+	sum carehoursfromdaughterweekly if (time==`yy' & chk), mean
+	mat store1[`yy'-2018,3] = r(mean)
+	sum carehoursfromsonweekly if (time==`yy' & chk), mean
+	mat store1[`yy'-2018,4] = r(mean)
+	sum carehoursfromotherweekly if (time==`yy' & chk), mean
+	mat store1[`yy'-2018,5] = r(mean)
+	sum carehoursfromformalweekly if (time==`yy' & chk), mean
+	mat store1[`yy'-2018,6] = r(mean)
+}
+drop chk
+matlist store1
+
+
+/*******************************************************************************
+*	social care provision
+*******************************************************************************/
+use "$outdir/temp1", clear
+
+tab time if (socialcareprovision_p=="OnlyOther")
+tab time if (socialcareprovision_p=="OnlyPartner")
+tab time if (socialcareprovision_p=="PartnerAndOther")
+
+matrix store1 = J(2069-2018,1,.)
+forvalues yy = 2019/2069 {
+	sum carehoursprovidedweekly if (time==`yy' & socialcareprovision_p!="None"), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
 matlist store1

@@ -209,3 +209,7 @@ input/programming test database/input.mv.db
 /input/EUROMODoutput/base
 analysis/temp0.dta
 analysis/temp1.dta
+analysis/zero0.dta
+analysis/zero1.dta
+analysis/base1.dta
+analysis/base0.dta
