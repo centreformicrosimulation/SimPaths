@@ -948,6 +948,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 		}
 
+		if (Parameters.flagSuppressCareCosts) {
+			dlltsdF = 0;
+			dlltsdM = 0;
+		}
+
 		// update disposable income
 		TaxEvaluation evaluatedTransfers;
 		if (Parameters.donorPoolAveraging) {

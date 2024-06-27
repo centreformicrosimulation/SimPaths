@@ -213,3 +213,9 @@ analysis/zero0.dta
 analysis/zero1.dta
 analysis/base1.dta
 analysis/base0.dta
+analysis/childcarebase.dta
+analysis/childcarenaive.dta
+analysis/childcarezero.dta
+analysis/link.dta
+analysis/naive0.dta
+analysis/naive1.dta

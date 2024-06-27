@@ -352,7 +352,11 @@ public class Expectations {
         double socialCareCostAnnual = evalSocialCareCostWeekly() * Parameters.WEEKS_PER_YEAR;
 
         // disability
-        int disability1 = currentStates.getDisability(), disability2 = -1;
+        int disability1 = 0, disability2;
+        if (!Parameters.flagSuppressCareCosts) {
+
+            disability1 = currentStates.getDisability();
+        }
         if (cohabitation) {
             disability2 = 0;
         } else {
