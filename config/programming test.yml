@@ -28,8 +28,8 @@ model_args:
 #    alignFertility: true
 #    alignEmployment: false
     alignCohabitation: false
-#    alignPopulation: false
-#    projectSocialCare: false
+    alignPopulation: false
+    projectSocialCare: true
 #    enableIntertemporalOptimisations: true
 #    responsesToLowWageOffer: false
 #    saveImperfectTaxDBMatches: false

@@ -171,10 +171,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private Double careHoursFromOtherWeekly_lag1 = 0.0;
     @Transient
-    private double drawProvCareIncidence;
-    @Transient
-    private double drawProvCareHours;
-    @Transient
     private double drawPartnershipFormation, drawPartnershipDissolution; // Used with the partnership alignment process
 
     //Sedex is an indicator for leaving education in that year
@@ -1148,8 +1144,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             socialCareFromDaughter = false;
             socialCareFromSon = false;
             socialCareFromOther = false;
-            drawProvCareIncidence = -9.;
-            drawProvCareHours = -9.;
         }
         if (careHoursFromParentWeekly==null)
             careHoursFromParentWeekly = 0.0;
@@ -1273,11 +1267,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegFormalCareHoursS2k().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2k");
                     careHoursFromFormalWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
-                    if (!Parameters.flagSuppressSocialCareCosts)
-                        careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
+                    careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
                 }
             }
         }
+        if (Parameters.flagSuppressSocialCareCosts)
+            careFormalExpenditureWeekly = 0.0;
     }
 
     protected void evaluateSocialCareProvision() {
@@ -1291,11 +1286,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         boolean careToPartner = false;
         boolean careToOther = false;
         double careHoursToPartner = 0.0;
-        if (drawProvCareIncidence < 0.) {
-            drawProvCareIncidence = socialCarePInnov.nextDouble();
-            drawProvCareHours = socialCarePInnov.nextGaussian();
-        }
         if (dag >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+
+            // random draws
+            double carerIncidenceRnd = socialCarePInnov.nextDouble();
+            double carerQuantRnd = socialCarePInnov.nextGaussian();
 
             // check if care provided to partner
             // identified in method evaluateSocialCareReceipt
@@ -1310,12 +1305,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (careToPartner) {
                 double score = Parameters.getRegCarePartnerProvCareToOtherS3a().getScore(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegCarePartnerProvCareToOtherS3a().getProbability(score + probitAdjustment);
-                if (drawProvCareIncidence < prob)
+                if (carerIncidenceRnd < prob)
                     careToOther = true;
             } else {
                 double score = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getScore(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getProbability(score + probitAdjustment);
-                if (drawProvCareIncidence < prob)
+                if (carerIncidenceRnd < prob)
                     careToOther = true;
             }
 
@@ -1335,7 +1330,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     } else {
                         double score = Parameters.getRegCareHoursProvS3e().getScore(this,Person.DoublesVariables.class);
                         double rmse = Parameters.getRMSEForRegression("S3e");
-                        careHoursProvidedWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.max(careHoursToPartner + 1.0, Math.exp(score + rmse * drawProvCareHours)));
+                        careHoursProvidedWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.max(careHoursToPartner + 1.0, Math.exp(score + rmse * carerQuantRnd)));
                     }
                 }
             }
