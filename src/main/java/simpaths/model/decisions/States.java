@@ -637,7 +637,7 @@ public class States {
      * @return boolean
      */
     public boolean getPrincipalEligibleForWork() {
-        if (!Parameters.flagSuppressCareCosts) {
+        if (!Parameters.flagSuppressSocialCareCosts) {
             if (getDisability()==1)
                 return false;
             if (getSocialCareReceiptState()>0)

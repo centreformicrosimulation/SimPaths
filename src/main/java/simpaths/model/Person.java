@@ -640,9 +640,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.ypnoab_lag2 = originalPerson.ypnoab_lag2;
         this.ypnoab_lag1 = originalPerson.ypnoab_lag1;
 
-        this.dlltsd = originalPerson.dlltsd;
         this.liwwh = originalPerson.liwwh;
-        this.dlltsd_lag1 = originalPerson.dlltsd_lag1;
+        if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
+            this.dlltsd = Indicator.False;
+            this.dlltsd_lag1 = Indicator.False;
+        } else {
+            this.dlltsd = originalPerson.dlltsd;
+            this.dlltsd_lag1 = originalPerson.dlltsd_lag1;
+        }
         if (Parameters.flagSocialCare) {
             this.needSocialCare = originalPerson.needSocialCare;
             this.careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
@@ -1114,7 +1119,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhe = ManagerRegressions.multiEvent(probs, healthInnov.nextDouble());
 
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
-            boolean becomeLTSickDisabled = (healthInnov.nextDouble() < Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class));
+            boolean becomeLTSickDisabled = false;
+            if (!Parameters.enableIntertemporalOptimisations || DecisionParams.flagDisability)
+                becomeLTSickDisabled = (healthInnov.nextDouble() < Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class));
             if (becomeLTSickDisabled) {
                 dlltsd = Indicator.True;
             } else {
@@ -1266,7 +1273,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegFormalCareHoursS2k().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2k");
                     careHoursFromFormalWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
-                    if (!Parameters.flagSuppressCareCosts)
+                    if (!Parameters.flagSuppressSocialCareCosts)
                         careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
                 }
             }
@@ -1322,7 +1329,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else {
                     socialCareProvision = SocialCareProvision.OnlyOther;
                 }
-                if (!Parameters.flagSuppressCareCosts) {
+                if (!Parameters.flagSuppressSocialCareCosts) {
                     if (SocialCareProvision.OnlyPartner.equals(socialCareProvision)) {
                         careHoursProvidedWeekly = careHoursToPartner;
                     } else {
@@ -1701,9 +1708,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (Les_c4.Student.equals(les_c4) && !Parameters.enableIntertemporalOptimisations)
             return false;
-        if (Indicator.True.equals(dlltsd) && !Parameters.flagSuppressCareCosts)
+        if (Indicator.True.equals(dlltsd) && !Parameters.flagSuppressSocialCareCosts)
             return false;
-        if (Indicator.True.equals(needSocialCare) && !Parameters.flagSuppressCareCosts)
+        if (Indicator.True.equals(needSocialCare) && !Parameters.flagSuppressSocialCareCosts)
             return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.

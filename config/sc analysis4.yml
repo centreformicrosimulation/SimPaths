@@ -29,15 +29,15 @@ model_args:
     alignCohabitation: false
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
-    projectSocialCare: true
+    projectSocialCare: false
     saveBehaviour: true
     flagDefaultToTimeSeriesAverages: false
-    responsesToDisability: true
-    saveImperfectTaxDBMatches: true
+    responsesToDisability: false
+    saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: false
     flagSuppressChildcareCosts: false
     useSavedBehaviour: false
-    readGrid: "base1"
+    readGrid: "childcarebase"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true

@@ -243,7 +243,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	@GUIparameter(description = "tick to project social care")
 	private boolean projectSocialCare = true;
 
-	private boolean flagSuppressCareCosts = false;	// multiplicative factor applied to all financial and time costs associated with child and social care
+	private boolean flagSuppressChildcareCosts = false;
+
+	private boolean flagSuppressSocialCareCosts = false;
 
 	@GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
 	private boolean enableIntertemporalOptimisations = false;
@@ -285,7 +287,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 	private boolean responsesToHealth = true;
 
 	@GUIparameter(description = "whether to include disability in state space for IO behavioural solutions")
-	private boolean responsesToDisability = false;
+	private boolean responsesToDisability = true;
 
 	@GUIparameter(description = "minimum age for expecting less than perfect health in IO solutions")
 	private Integer minAgeForPoorHealth = 45;
@@ -341,7 +343,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 		// load model parameters
 		Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
 				projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
-				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressCareCosts);
+				timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
+				flagSuppressSocialCareCosts);
 		if (enableIntertemporalOptimisations) {
 
 			alignEmployment = false;
@@ -693,7 +696,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 			pw.println(line);
 			line = "projectSocialCare: " + projectSocialCare;
 			pw.println(line);
-			line = "flagSuppressCareCosts: " + flagSuppressCareCosts;
+			line = "flagSuppressChildcareCosts: " + flagSuppressChildcareCosts;
+			pw.println(line);
+			line = "flagSuppressSocialCareCosts: " + flagSuppressSocialCareCosts;
 			pw.println(line);
 			line = "responsesToRegion: " + responsesToRegion;
 			pw.println(line);

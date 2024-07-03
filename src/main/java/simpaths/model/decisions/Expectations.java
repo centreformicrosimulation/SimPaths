@@ -353,7 +353,7 @@ public class Expectations {
 
         // disability
         int disability1 = 0, disability2;
-        if (!Parameters.flagSuppressCareCosts) {
+        if (!Parameters.flagSuppressSocialCareCosts) {
 
             disability1 = currentStates.getDisability();
         }
@@ -636,7 +636,7 @@ public class Expectations {
     private double evalChildcareCostWeekly() {
 
         double childcareCostWeekly = 0.0;
-        if (Parameters.flagFormalChildcare && !Parameters.flagSuppressCareCosts && currentStates.hasChildrenEligibleForCare()) {
+        if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts && currentStates.hasChildrenEligibleForCare()) {
 
             double probFormalChildCare = Parameters.getRegChildcareC1a().getProbability(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
             double logChildcareCostScore = Parameters.getRegChildcareC1b().getScore(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
@@ -649,7 +649,7 @@ public class Expectations {
     private double evalSocialCareCostWeekly() {
 
         double socialCareCostWeekly = 0.0;
-        if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
 
             SocialCareReceiptState market = currentStates.getSocialCareReceiptStateCode();
             if (SocialCareReceiptState.Mixed.equals(market) || SocialCareReceiptState.Formal.equals(market)) {
@@ -666,7 +666,7 @@ public class Expectations {
     private double evalSocialCareHoursProvidedWeekly() {
 
         double socialCareHoursProvidedWeekly = 0.0;
-        if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts) {
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
 
             SocialCareProvision status = currentStates.getSocialCareProvisionCode();
             if (!SocialCareProvision.None.equals(status)) {

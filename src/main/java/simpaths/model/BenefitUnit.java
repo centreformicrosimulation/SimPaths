@@ -934,7 +934,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 		childcareCostPerWeek = 0.0;
 		double childcareCostPerMonth = 0.0;
-		if (Parameters.flagFormalChildcare && !Parameters.flagSuppressCareCosts) {
+		if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
 			updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
 			childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 		}
@@ -942,13 +942,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 		socialCareCostPerWeek = 0.0;
 		socialCareProvision = 0;
 		double socialCareCostPerMonth = 0.0;
-		if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts) {
+		if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
 			updateSocialCareProvision();
 			updateSocialCareCostPerWeek();
 			socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
 		}
 
-		if (Parameters.flagSuppressCareCosts) {
+		if (Parameters.flagSuppressSocialCareCosts) {
 			dlltsdF = 0;
 			dlltsdM = 0;
 		}
@@ -1530,10 +1530,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 			}
 
 			// allow for formal childcare costs
-			if (Parameters.flagFormalChildcare && !Parameters.flagSuppressCareCosts) {
+			if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
 				updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
 			}
-			if (Parameters.flagSocialCare && !Parameters.flagSuppressCareCosts) {
+			if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
 				updateSocialCareCostPerWeek();
 			}
 
