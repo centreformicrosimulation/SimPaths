@@ -219,3 +219,5 @@ analysis/childcarezero.dta
 analysis/link.dta
 analysis/naive0.dta
 analysis/naive1.dta
+analysis/ignore0.dta
+analysis/ignore1.dta
