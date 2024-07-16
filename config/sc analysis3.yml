@@ -37,7 +37,7 @@ model_args:
     flagSuppressSocialCareCosts: false
     flagSuppressChildcareCosts: false
     useSavedBehaviour: true
-    readGrid: "zero costs"
+    readGrid: "zerocosts"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true

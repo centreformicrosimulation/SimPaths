@@ -36,8 +36,8 @@ model_args:
     saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: true
     flagSuppressChildcareCosts: true
-    useSavedBehaviour: false
-    readGrid: "zero costs"
+    useSavedBehaviour: true
+    readGrid: "zerocosts"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true

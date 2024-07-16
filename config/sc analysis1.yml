@@ -33,11 +33,11 @@ model_args:
     saveBehaviour: true
     flagDefaultToTimeSeriesAverages: false
     responsesToDisability: true
-    saveImperfectTaxDBMatches: true
+    saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: false
     flagSuppressChildcareCosts: false
-    useSavedBehaviour: false
-    readGrid: "base1"
+    useSavedBehaviour: true
+    readGrid: "base"
 #    employmentOptionsOfPrincipalWorker: 3
 #    employmentOptionsOfSecondaryWorker: 3
 #    responsesToEducation: true
