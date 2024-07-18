@@ -44,16 +44,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @EmbeddedId
     private final PanelEntityKey key;
     private int dag; //Age
-    @Column(name="flag_dies")
-    private Boolean flagDies;
-    @Column(name="flag_immigrate")
-    private Boolean flagImmigrate;  //entry to sample via international immigration
-    @Column(name="flag_emigrate")
-    private Boolean flagEmigrate;   //exit sample via international emigration
-    @Column(name="flag_align_entry")
-    private Boolean flagAlignEntry; //entry to sample via population alignment
-    @Column(name="flag_align_exit")
-    private Boolean flagAlignExit;  //exit sample via population aligment
+    @Column(name="sampleentry")
+    private SampleEntry sampleEntry;
+    @Column(name="sampleexit")
+    private SampleExit sampleExit = SampleExit.NotYet;  //entry to sample via international immigration
     @Transient
     private boolean ioFlag;         // true if a dummy person instantiated for IO decision solution
     @Transient
@@ -446,6 +440,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         key = new PanelEntityKey();
     }
 
+    // used by expectations object when creating dummy person to interact with regression functions
     public Person(boolean regressionModel) {
         if (regressionModel) {
             model = null;
@@ -455,35 +450,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public Person(Long id) {
-        super();
-        key = new PanelEntityKey(id);
-        model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
-        clonedFlag = false;
-
-        healthInnov = new Random(SimulationEngine.getRnd().nextLong());
-        healthInnov2 = new Random(SimulationEngine.getRnd().nextLong());
-        socialCareInnov = new Random(SimulationEngine.getRnd().nextLong());
-        socialCarePInnov = new Random(SimulationEngine.getRnd().nextLong());
-        wagesInnov = new Random(SimulationEngine.getRnd().nextLong());
-        capitalInnov = new Random(SimulationEngine.getRnd().nextLong());
-        resStanDevInnov = new Random(SimulationEngine.getRnd().nextLong());
-        housingInnov = new Random(SimulationEngine.getRnd().nextLong());
-        labourInnov = new Random(SimulationEngine.getRnd().nextLong());
-        cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
-        fertilityInnov = new Random(SimulationEngine.getRnd().nextLong());
-        educationInnov = new Random(SimulationEngine.getRnd().nextLong());
-        labourSupplyInnov = new Random(SimulationEngine.getRnd().nextLong());
-        labourSupplySingleDraw = labourSupplyInnov.nextDouble();
-        drawPartnershipFormation = -9;
-        drawPartnershipDissolution = -9;
-    }
-
-    //For use with creating new people at the minimum Age who enter the simulation during UpdateMaternityStatus after fertility has been aligned
+    // used to create new people who enter the simulation during UpdateMaternityStatus
     public Person(Gender gender, Person mother) {
 
         this(personIdCounter++);
 
+        this.sampleEntry = SampleEntry.Birth;
         this.dgn = gender;
         this.idMother = mother.getKey().getId();
         this.dehm_c3 = mother.getDeh_c3();
@@ -526,37 +498,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         updateVariables(false);
     }
 
-    private void setAllSocialCareVariablesToFalse() {
-        needSocialCare = Indicator.False;
-        careHoursFromFormalWeekly = -9.0;
-        careHoursFromPartnerWeekly = -9.0;
-        careHoursFromParentWeekly = -9.0;
-        careHoursFromDaughterWeekly = -9.0;
-        careHoursFromSonWeekly = -9.0;
-        careHoursFromOtherWeekly = -9.0;
-        careHoursProvidedWeekly = -9.0;
-        careFormalExpenditureWeekly = -9.0;
-        socialCareReceipt = SocialCareReceipt.None;
-        socialCareFromFormal = false;
-        socialCareFromPartner = false;
-        socialCareFromDaughter = false;
-        socialCareFromSon = false;
-        socialCareFromOther = false;
-        socialCareProvision = SocialCareProvision.None;
-        needSocialCare_lag1 = Indicator.False;
-        careHoursFromFormalWeekly_lag1 = -9.0;
-        careHoursFromPartnerWeekly_lag1 = -9.0;
-        careHoursFromDaughterWeekly_lag1 = -9.0;
-        careHoursFromSonWeekly_lag1 = -9.0;
-        careHoursFromOtherWeekly_lag1 = -9.0;
-        socialCareProvision_lag1 = SocialCareProvision.None;
-    }
-
-    //Below is a "copy constructor" for persons: it takes an original person as input, changes the ID, copies the rest of the person's properties, and creates a new person.
-    public Person (Person originalPerson) {
+    // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
+    // used to generate clones both at population load (to un-weight data) and to generate international immigrants
+    public Person (Person originalPerson, SampleEntry sampleEntry) {
 
         this(personIdCounter++);
 
+        this.sampleEntry = sampleEntry;
         this.idOriginalHH = originalPerson.idHousehold;
         this.idOriginalBU = originalPerson.idBenefitUnit;
         this.idOriginalPerson = originalPerson.key.getId();
@@ -749,10 +697,61 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    // used by other constructors
+    public Person(Long id) {
+        super();
+        key = new PanelEntityKey(id);
+        model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+        clonedFlag = false;
+
+        healthInnov = new Random(SimulationEngine.getRnd().nextLong());
+        healthInnov2 = new Random(SimulationEngine.getRnd().nextLong());
+        socialCareInnov = new Random(SimulationEngine.getRnd().nextLong());
+        socialCarePInnov = new Random(SimulationEngine.getRnd().nextLong());
+        wagesInnov = new Random(SimulationEngine.getRnd().nextLong());
+        capitalInnov = new Random(SimulationEngine.getRnd().nextLong());
+        resStanDevInnov = new Random(SimulationEngine.getRnd().nextLong());
+        housingInnov = new Random(SimulationEngine.getRnd().nextLong());
+        labourInnov = new Random(SimulationEngine.getRnd().nextLong());
+        cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
+        fertilityInnov = new Random(SimulationEngine.getRnd().nextLong());
+        educationInnov = new Random(SimulationEngine.getRnd().nextLong());
+        labourSupplyInnov = new Random(SimulationEngine.getRnd().nextLong());
+        labourSupplySingleDraw = labourSupplyInnov.nextDouble();
+        drawPartnershipFormation = -9;
+        drawPartnershipDissolution = -9;
+    }
+
 
     // ---------------------------------------------------------------------
     // Initialisation methods
     // ---------------------------------------------------------------------
+
+    private void setAllSocialCareVariablesToFalse() {
+        needSocialCare = Indicator.False;
+        careHoursFromFormalWeekly = -9.0;
+        careHoursFromPartnerWeekly = -9.0;
+        careHoursFromParentWeekly = -9.0;
+        careHoursFromDaughterWeekly = -9.0;
+        careHoursFromSonWeekly = -9.0;
+        careHoursFromOtherWeekly = -9.0;
+        careHoursProvidedWeekly = -9.0;
+        careFormalExpenditureWeekly = -9.0;
+        socialCareReceipt = SocialCareReceipt.None;
+        socialCareFromFormal = false;
+        socialCareFromPartner = false;
+        socialCareFromDaughter = false;
+        socialCareFromSon = false;
+        socialCareFromOther = false;
+        socialCareProvision = SocialCareProvision.None;
+        needSocialCare_lag1 = Indicator.False;
+        careHoursFromFormalWeekly_lag1 = -9.0;
+        careHoursFromPartnerWeekly_lag1 = -9.0;
+        careHoursFromDaughterWeekly_lag1 = -9.0;
+        careHoursFromSonWeekly_lag1 = -9.0;
+        careHoursFromOtherWeekly_lag1 = -9.0;
+        socialCareProvision_lag1 = SocialCareProvision.None;
+    }
 
     public void setAdditionalFieldsInInitialPopulation() {
 

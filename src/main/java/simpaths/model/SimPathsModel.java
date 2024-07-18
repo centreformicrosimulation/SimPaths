@@ -1247,7 +1247,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     Person immigrant = migrantPoolIterator.next();
                     Household newHousehold = new Household();
                     households.add(newHousehold);
-                    BenefitUnit immigrantBU = cloneBenefitUnit(immigrant.getBenefitUnit(), newHousehold);
+                    BenefitUnit immigrantBU = cloneBenefitUnit(immigrant.getBenefitUnit(), newHousehold, SampleEntry.ImmigrationAlignment);
                     immigrantBU.setRegion(region);
 
                     // update counters and references
@@ -1269,12 +1269,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * METHOD TO CLONE EXISTING HOUSEHOLD AND ADD TO SIMULATED POPULATION
      *
      *********************************************************/
-    private Household cloneHousehold(Household originalHousehold) {
+    private Household cloneHousehold(Household originalHousehold, SampleEntry sampleEntry) {
 
         Household newHousehold = new Household(originalHousehold);
         households.add(newHousehold);
         for (BenefitUnit originalBenefitUnit : originalHousehold.getBenefitUnitSet()) {
-            cloneBenefitUnit(originalBenefitUnit, newHousehold);
+            cloneBenefitUnit(originalBenefitUnit, newHousehold, sampleEntry);
         }
         return newHousehold;
     }
@@ -1285,7 +1285,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * METHOD TO CLONE EXISTING BENEFIT UNIT AND ADD TO SIMULATED POPULATION
      *
      *********************************************************/
-    private BenefitUnit cloneBenefitUnit(BenefitUnit originalBenefitUnit, Household newHousehold) {
+    private BenefitUnit cloneBenefitUnit(BenefitUnit originalBenefitUnit, Household newHousehold, SampleEntry sampleEntry) {
 
         // initialise objects
         BenefitUnit newBenefitUnit = new BenefitUnit(originalBenefitUnit);
@@ -1295,7 +1295,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Set<Person> originalPersons = originalBenefitUnit.getPersonsInBU();
         for (Person originalPerson : originalPersons) {
 
-            Person newPerson = new Person(originalPerson);
+            Person newPerson = new Person(originalPerson, sampleEntry);
             newPerson.setBenefitUnit(newBenefitUnit);
             persons.add(newPerson);
         }
@@ -2817,7 +2817,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             while (randomHouseholdSampleListIterator.hasNext()) {
 
                 Household originalHousehold = randomHouseholdSampleListIterator.next();
-                Household newHousehold = cloneHousehold(originalHousehold);
+                Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
                 newHousehold.resetWeights(1.0d);
                 if (persons.size() >= popSize ) break;
             }
