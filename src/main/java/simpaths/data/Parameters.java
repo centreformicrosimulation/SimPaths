@@ -1107,8 +1107,8 @@ public class Parameters {
             columnsPartnershipU1a = 27;
             columnsPartnershipU1b = 31;
             columnsPartnershipU2b = 38;
-            columnsFertilityF1a = 11;
-            columnsFertilityF1b = 34;
+            columnsFertilityF1a = 6;
+            columnsFertilityF1b = 26;
             columnsIncomeI1a = 19;  //*
             columnsIncomeI1b = 31;  //*
             columnsIncomeI3a = 20;
