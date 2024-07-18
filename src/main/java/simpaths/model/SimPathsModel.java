@@ -447,22 +447,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         addEventToAllYears(Processes.StartYear);
 
-        if (enableIntertemporalOptimisations) firstYearSched.addEvent(this, Processes.RationalOptimisation);
+        if (enableIntertemporalOptimisations)
+            firstYearSched.addEvent(this, Processes.RationalOptimisation);
 
         addEventToAllYears(Processes.UpdateParameters);
-        //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateLags);
+        addEventToAllYears(Processes.CheckForExitingPersons);
+        addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
 
         // DEMOGRAPHIC MODULE
-        // Ageing
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Ageing, false);        //Read only mode as agents are removed when they become older than Parameters.getMAX_AGE();
-        addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
-
-        // Population Alignment - adjust population to projections by Gender and Age, and creates new population for minimum age
-        addEventToAllYears(Processes.PopulationAlignment);
-
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
-        //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
         // Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
         //Turned off for now as health determined below based on individual characteristics
@@ -548,11 +542,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // update case-based measure
         addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
-        // REPORTING OF IMPERFECT TAX DATABASE MATCHES
-        addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
+        // mortality (migration) and population alignment at year's end
+        addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
+        addEventToAllYears(Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
-        addEventToAllYears(Processes.CheckForEmptyBenefitUnits); //Check all household before the end of the year
+        addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
         addEventToAllYears(Processes.EndYear);
 
@@ -743,6 +738,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         RationalOptimisation,
         UpdateYear,
         CheckForEmptyBenefitUnits,
+        CheckForExitingPersons,
         CheckForImperfectTaxDBMatches,
         CleanUp,
     }
@@ -850,6 +846,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 }
                 year++;
                 break;
+            case CheckForExitingPersons:
+
+                screenForExitingPersons();
+                break;
             case CheckForEmptyBenefitUnits:
 
                 List<BenefitUnit> benefitUnitsWithoutAdult = new ArrayList<>();
@@ -895,6 +895,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * PROCESS - SCREEN FOR IMPERFECT TAX DATABASE MATCHES
      *
      */
+    private void screenForExitingPersons() {
+
+        List<Person> personsExiting = new ArrayList<>();
+        for (Person person: persons) {
+            if (!SampleExit.NotYet.equals(person.getSampleExit()))
+                personsExiting.add(person);
+        }
+        for (Person person: personsExiting) {
+            removePerson(person);
+        }
+    }
+
     private void screenForImperfectTaxDbMatches() {
 
         Matches imperfectMatches = new Matches();
@@ -939,11 +951,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         //Re-weight simulation
         for (Person person : persons) {
-            Gender gender = person.getDgn();
-            Region region = person.getRegion();
-            int age = Math.min(person.getDag(), maxAlignAge);
-            double weight = ((Number)weightsByGenderRegionAndAge.get(gender, region, age)).doubleValue();
-            person.setWeight(weight);
+            if (SampleExit.NotYet.equals(person.getSampleExit())) {
+
+                Gender gender = person.getDgn();
+                Region region = person.getRegion();
+                int age = Math.min(person.getDag(), maxAlignAge);
+                double weight = ((Number)weightsByGenderRegionAndAge.get(gender, region, age)).doubleValue();
+                person.setWeight(weight);
+            }
         }
     }
 
@@ -977,7 +992,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             for (Gender gender : Gender.values()) {
 
                 boolean flagSufficientMigrants = populationAlignmentDomesticMigration(age, gender, maxAlignAge, personsByAlignmentGroup, migrantPoolByAlignmentGroup);
-                populationAlignmentInternationalMigration(age, gender, maxAlignAge, personsByAlignmentGroup, flagSufficientMigrants, migrantPoolByAlignmentGroup);
+                populationAlignmentResidual(age, gender, maxAlignAge, personsByAlignmentGroup, flagSufficientMigrants, migrantPoolByAlignmentGroup);
             }
         }
     }
@@ -1004,11 +1019,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
         }
         for (Person person : persons) {
-            int age = Math.min(person.getDag(), maxAlignAge);
-            List<Person> listHere = personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age);
-            if (listHere==null)
-                throw new RuntimeException("failed to identify requested person alignment list");
-            listHere.add(person);
+
+            if (SampleExit.NotYet.equals(person.getSampleExit())) {
+
+                int age = Math.min(person.getDag(), maxAlignAge);
+                List<Person> listHere = personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age);
+                if (listHere==null)
+                    throw new RuntimeException("failed to identify requested person alignment list");
+                listHere.add(person);
+            }
         }
 
         // order subgroup lists by id
@@ -1033,8 +1052,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * 	their respective benefit units and are in households comprised of a single benefit unit
      *
      **************************************************************/
-    private MultiKeyMap<Object, List<Person>>
-    migrantPoolByAlignmentGroupInit(int maxAlignAge, MultiKeyMap<Object, List<Person>> personsByAlignmentGroup) {
+    private MultiKeyMap<Object, List<Person>> migrantPoolByAlignmentGroupInit(int maxAlignAge, MultiKeyMap<Object,
+            List<Person>> personsByAlignmentGroup) {
 
         MultiKeyMap<Object, List<Person>> migrantsByAlignmentGroup;
 
@@ -1124,15 +1143,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             // update working references
             for (Person person : migrants) {
 
-                int ageHere = Math.min(person.getDag(), maxAlignAge);
-                Gender genderHere = person.getDgn();
+                if (SampleExit.NotYet.equals(person.getSampleExit())) {
 
-                personsByAlignmentGroup.get(genderHere, fromRegion, ageHere).remove(person);
-                personsByAlignmentGroup.get(genderHere, toRegion, ageHere).add(person);
-                if (ageHere == age) {
+                    int ageHere = Math.min(person.getDag(), maxAlignAge);
+                    Gender genderHere = person.getDgn();
 
-                    migrantPoolByAlignmentGroup.get(genderHere, fromRegion, age).remove(person);
-                    migrantPoolByAlignmentGroup.get(genderHere, toRegion, age).add(person);
+                    personsByAlignmentGroup.get(genderHere, fromRegion, ageHere).remove(person);
+                    personsByAlignmentGroup.get(genderHere, toRegion, ageHere).add(person);
+                    if (ageHere == age) {
+
+                        migrantPoolByAlignmentGroup.get(genderHere, fromRegion, age).remove(person);
+                        migrantPoolByAlignmentGroup.get(genderHere, toRegion, age).add(person);
+                    }
                 }
             }
 
@@ -1156,10 +1178,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * @param migrantPoolByAlignmentGroup as for personsByAlignmentGroup, but limited to youngest benefit unit members
      *
      *********************************************/
-    private void populationAlignmentInternationalMigration(int age, Gender gender, int maxAlignAge,
-                                                           MultiKeyMap<Object, List<Person>> personsByAlignmentGroup,
-                                                           boolean flagSufficientMigrants,
-                                                           MultiKeyMap<Object, List<Person>> migrantPoolByAlignmentGroup) {
+    private void populationAlignmentResidual(int age, Gender gender, int maxAlignAge,
+                                             MultiKeyMap<Object, List<Person>> personsByAlignmentGroup,
+                                             boolean flagSufficientMigrants,
+                                             MultiKeyMap<Object, List<Person>> migrantPoolByAlignmentGroup) {
 
         int indicatorError = 0;
         List<Region> regions = new LinkedList<>(Parameters.getCountryRegions());
@@ -1186,16 +1208,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         Person emigrant = migrantPoolByAlignmentGroupIterator.next();
                         BenefitUnit emigrantBU = emigrant.getBenefitUnit();
                         Set<Person> emigrants = emigrantBU.getPersonsInBU();
-                        removeBenefitUnit(emigrantBU);
 
                         // update working references
                         for (Person person : emigrants) {
 
-                            int ageHere = Math.min(person.getDag(), maxAlignAge);
-                            Gender genderHere = person.getDgn();
-                            personsByAlignmentGroup.get(genderHere, region, ageHere).remove(person);
-                            if (ageHere == age && person!=emigrant) {
-                                migrantPoolByAlignmentGroup.get(genderHere, region, age).remove(person);
+                            if (SampleExit.NotYet.equals(person.getSampleExit())) {
+
+                                int ageHere = Math.min(person.getDag(), maxAlignAge);
+                                Gender genderHere = person.getDgn();
+                                personsByAlignmentGroup.get(genderHere, region, ageHere).remove(person);
+                                if (ageHere == age && person!=emigrant) {
+                                    migrantPoolByAlignmentGroup.get(genderHere, region, age).remove(person);
+                                }
+                                person.setSampleExit(SampleExit.EmigrationAlignment);
                             }
                         }
                         migrantPoolByAlignmentGroupIterator.remove();
@@ -1215,7 +1240,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         benefitUnit.getOccupancy().equals(Occupancy.Couple) || benefitUnit.getPersonsInBU().size() == 1 ) {
                         // death of person should not affect existence of any other person in model
 
-                        candidate.death();
+                        candidate.setSampleExit(SampleExit.DeathAlignment);
 
                         // update counters and references
                         personIterator.remove();
@@ -3113,7 +3138,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void removePerson(Person person) {
 
         // remove from benefit unit
-        if (person.getBenefitUnit() != null) person.getBenefitUnit().removePerson(person);
+        if (person.getBenefitUnit() != null)
+            person.getBenefitUnit().removePerson(person);
 
         // remove person from model
         if (persons.contains(person)) {
@@ -3129,12 +3155,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // remove all benefit unit members from model
         for (Person person : benefitUnit.getPersonsInBU()) {
-            person.setBenefitUnit(null);
             removePerson(person);
         }
 
         // remove benefit unit from the household
-        if (benefitUnit.getHousehold() != null) benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
+        if (benefitUnit.getHousehold() != null)
+            benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
 
         // remove benefit unit from model
         if ( benefitUnits.contains(benefitUnit) ) {

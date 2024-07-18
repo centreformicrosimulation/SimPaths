@@ -114,18 +114,18 @@ public class Household implements EventListener, IDoubleSource {
     //Remove a benefitUnit from the household
     public void removeBenefitUnit(BenefitUnit benefitUnit) {
 
-        if(benefitUnitSet.contains(benefitUnit)) {
+        if (benefitUnitSet.contains(benefitUnit)) {
 
             boolean removed = benefitUnitSet.remove(benefitUnit);
             if (!removed)
                 throw new IllegalArgumentException("BenefitUnit " + benefitUnit.getKey().getId() + " could not be removed from household");
         }
-        if (benefitUnit.getHousehold() == this) benefitUnit.setHousehold(null);
+        if (benefitUnit.getHousehold() == this)
+            benefitUnit.setHousehold(null);
 
         //Check for benefit units remaining in the household - if none, remove the household
-        if (benefitUnitSet.isEmpty()) {
+        if (benefitUnitSet.isEmpty())
             model.removeHousehold(this);
-        }
     }
 
     @Override

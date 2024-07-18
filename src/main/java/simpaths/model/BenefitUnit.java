@@ -563,7 +563,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 
     public enum Processes {
-        UpdateLags,
         Update,        //This updates the household fields, such as number of children of a certain age
         CalculateChangeInEDI, //Calculate change in equivalised disposable income
         Homeownership,
@@ -577,10 +576,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-            case UpdateLags:
-                updateLagFields();
-                break;
             case Update:
+				updateLagFields();
                 updateOccupancy();
                 updateChildrenFields();
                 updateComposition(); //Update household composition

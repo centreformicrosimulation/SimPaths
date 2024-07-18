@@ -831,6 +831,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Ageing,
         ProjectEquivConsumption,
         ConsiderCohabitation,
+        ConsiderMortality,
         ConsiderRetirement,
         GiveBirth,
         Health,
@@ -857,6 +858,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case ConsiderCohabitation:
 //			log.debug("BenefitUnit Formation for person " + this.getKey().getId());
             considerCohabitation();
+            break;
+        case ConsiderMortality:
+            considerMortality();
             break;
         case ConsiderRetirement:
             considerRetirement();
@@ -934,13 +938,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private void ageing() {
 
         dag++;
-        boolean flagDies = considerMortality();
         dag_sq = dag*dag;
         benefitUnit.clearStates(); // states object used to manage optimised decisions
-        if (flagDies) {
-
-            death();
-        } else if (dag == Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+        if (dag == Parameters.AGE_TO_BECOME_RESPONSIBLE) {
 
             setupNewBenefitUnit(true);
             considerLeavingHome();
@@ -964,7 +964,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         updateAgeGroup();   //Update ageGroup as person ages
     }
 
-    private boolean considerMortality() {
+    private void considerMortality() {
 
         boolean flagDies = false;
         if (model.getProjectMortality()) {
@@ -978,9 +978,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
         }
-        if (dag > Parameters.maxAge) flagDies = true;
-
-        return flagDies;
+        if (flagDies || dag > Parameters.maxAge)
+            sampleExit = SampleExit.Death;
     }
 
     //This process should be applied to those at the age to become responsible / leave home OR above if they have the adultChildFlag set to True (i.e. people can move out, but not move back in).
@@ -4269,15 +4268,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (Les_c4.Retired.equals(getLes_c4())) ? 1.0 : 0.0;
     }
 
-    public void death() {
-
-        if (benefitUnit == null) {
-            throw new RuntimeException("simulated death of person without a benefit unit.");
-        }
-        benefitUnit.removePerson(this);
-        model.removePerson(this);
-    }
-
     public void setYearLocal(Integer yearLocal) {
         this.yearLocal = yearLocal;
     }
@@ -4662,4 +4652,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getLeisureHoursPerWeek() {
         return Parameters.HOURS_IN_WEEK - getCareHoursProvidedWeekly() - getHoursWorkedWeekly();
     }
+
+    public void setSampleExit(SampleExit sampleExit) {
+        if (!SampleExit.NotYet.equals(this.sampleExit))
+            throw new RuntimeException("Attempt to exit person from the simulated sample twice");
+        this.sampleExit = sampleExit;
+    }
+    public SampleExit getSampleExit() {return sampleExit;}
 }
