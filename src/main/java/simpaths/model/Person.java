@@ -453,7 +453,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // used to create new people who enter the simulation during UpdateMaternityStatus
     public Person(Gender gender, Person mother) {
 
-        this(personIdCounter++);
+        this(personIdCounter++, mother.getFertilityInnov().nextLong());
 
         this.sampleEntry = SampleEntry.Birth;
         this.dgn = gender;
@@ -500,9 +500,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
     // used to generate clones both at population load (to un-weight data) and to generate international immigrants
-    public Person (Person originalPerson, SampleEntry sampleEntry) {
+    public Person (Person originalPerson, Long seed, SampleEntry sampleEntry) {
 
-        this(personIdCounter++);
+        this(personIdCounter++, seed);
 
         this.sampleEntry = sampleEntry;
         this.idOriginalHH = originalPerson.idHousehold;
@@ -698,25 +698,37 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     // used by other constructors
-    public Person(Long id) {
+    public Person(Long id, Long seed) {
         super();
         key = new PanelEntityKey(id);
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         clonedFlag = false;
 
-        healthInnov = new Random(SimulationEngine.getRnd().nextLong());
-        healthInnov2 = new Random(SimulationEngine.getRnd().nextLong());
-        socialCareInnov = new Random(SimulationEngine.getRnd().nextLong());
-        socialCarePInnov = new Random(SimulationEngine.getRnd().nextLong());
-        wagesInnov = new Random(SimulationEngine.getRnd().nextLong());
-        capitalInnov = new Random(SimulationEngine.getRnd().nextLong());
-        resStanDevInnov = new Random(SimulationEngine.getRnd().nextLong());
-        housingInnov = new Random(SimulationEngine.getRnd().nextLong());
-        labourInnov = new Random(SimulationEngine.getRnd().nextLong());
-        cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
-        fertilityInnov = new Random(SimulationEngine.getRnd().nextLong());
-        educationInnov = new Random(SimulationEngine.getRnd().nextLong());
-        labourSupplyInnov = new Random(SimulationEngine.getRnd().nextLong());
+        healthInnov = new Random(seed);
+        seed = seed + 10000;
+        healthInnov2 = new Random(seed);
+        seed = seed + 10000;
+        socialCareInnov = new Random(seed);
+        seed = seed + 10000;
+        socialCarePInnov = new Random(seed);
+        seed = seed + 10000;
+        wagesInnov = new Random(seed);
+        seed = seed + 10000;
+        capitalInnov = new Random(seed);
+        seed = seed + 10000;
+        resStanDevInnov = new Random(seed);
+        seed = seed + 10000;
+        housingInnov = new Random(seed);
+        seed = seed + 10000;
+        labourInnov = new Random(seed);
+        seed = seed + 10000;
+        cohabitInnov = new Random(seed);
+        seed = seed + 10000;
+        fertilityInnov = new Random(seed);
+        seed = seed + 10000;
+        educationInnov = new Random(seed);
+        seed = seed + 10000;
+        labourSupplyInnov = new Random(seed);
         labourSupplySingleDraw = labourSupplyInnov.nextDouble();
         drawPartnershipFormation = -9;
         drawPartnershipDissolution = -9;
@@ -4659,4 +4671,5 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.sampleExit = sampleExit;
     }
     public SampleExit getSampleExit() {return sampleExit;}
+    public RandomGenerator getFertilityInnov() {return fertilityInnov;}
 }

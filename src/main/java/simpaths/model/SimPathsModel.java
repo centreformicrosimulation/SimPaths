@@ -156,16 +156,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = true; //Set to true to align employment share
+    private boolean alignPopulation = false; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = true;
+    private boolean alignFertility = false;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -764,10 +764,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                     if ( year <= Parameters.getPopulationProjectionsMaxYear() ) {
 
-                        if (!useWeights) {
-                            populationAlignmentUnweighted();
-                        } else {
+                        if (useWeights) {
                             populationAlignmentWeighted();
+                        } else {
+                            populationAlignmentUnweighted();
                         }
                         if (commentsOn) log.info("Population alignment complete.");
                     } else {
@@ -1320,7 +1320,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Set<Person> originalPersons = originalBenefitUnit.getPersonsInBU();
         for (Person originalPerson : originalPersons) {
 
-            Person newPerson = new Person(originalPerson, sampleEntry);
+            Person newPerson = new Person(originalPerson, SimulationEngine.getRnd().nextLong(), sampleEntry);
             newPerson.setBenefitUnit(newBenefitUnit);
             persons.add(newPerson);
         }
@@ -2486,23 +2486,27 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      *
      */
     private void fertility() {
-        for (Region region: Parameters.getCountryRegions()) { //Select fertile persons from each region and determine if they give birth
-            List<Person> fertilePersons = new ArrayList<Person>();
-            CollectionUtils.select(getPersons(), new FertileFilter<Person>(region), fertilePersons);
 
+        for (Region region: Parameters.getCountryRegions()) {
+
+            List<Person> fertilePersons = new ArrayList<>();
+            CollectionUtils.select(getPersons(), new FertileFilter<>(region), fertilePersons);
             for (Person person : fertilePersons) {
 
                 if (country.equals(Country.UK)) {
 
-                    if (person.getDag() <= 29 && person.getLes_c4().equals(Les_c4.Student) && person.isLeftEducation() == false) { //If age below or equal to 29 and in continuous education follow process F1a
-                        person.setToGiveBirth(fertilityInnov.nextDouble() < Parameters.getRegFertilityF1a().getProbability(person, Person.DoublesVariables.class)); //If regression event true, give birth
-//					System.out.println("Followed process F1a");
-                    } else { //Otherwise if not in continuous education, follow process F1b
-                        person.setToGiveBirth(fertilityInnov.nextDouble() < Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class)); //If regression event true, give birth
-//					System.out.println("Followed process F1b");
+                    double prob;
+                    if (person.getDag() <= 29 && person.getLes_c4().equals(Les_c4.Student) && !person.isLeftEducation()) {
+                        //If age below or equal to 29 and in continuous education follow process F1a
+                        prob = Parameters.getRegFertilityF1a().getProbability(person, Person.DoublesVariables.class);
+                    } else {
+                        //Otherwise if not in continuous education, follow process F1b
+                        prob =  Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
                     }
-                } else if (country.equals(Country.IT)) { //In Italy, there is a single fertiltiy process
-                    person.setToGiveBirth(fertilityInnov.nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
+                    person.setToGiveBirth(person.getFertilityInnov().nextDouble() < prob);
+                } else if (country.equals(Country.IT)) {
+
+                    person.setToGiveBirth(person.getFertilityInnov().nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
                 }
             }
         }

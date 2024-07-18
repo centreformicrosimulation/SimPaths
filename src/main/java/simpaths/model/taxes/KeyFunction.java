@@ -50,9 +50,9 @@ public class KeyFunction {
             throw new RuntimeException("Key function supplied odd number of adults: " + numberMembersOver17);
         if (numberChildrenUnder5<0 || numberChildrenUnder5>8)
             throw new RuntimeException("Key function supplied odd number of children under 5: " + numberChildrenUnder5);
-        if (numberChildren5To9<0 || numberChildren5To9>8)
+        if (numberChildren5To9<0 || numberChildren5To9>10)
             throw new RuntimeException("Key function supplied odd number of children aged between 5 and 9: " + numberChildren5To9);
-        if (numberChildren10To17<0 || numberChildren10To17>11)
+        if (numberChildren10To17<0 || numberChildren10To17>14)
             throw new RuntimeException("Key function supplied odd number of children aged between 10 and 17: " + numberChildren10To17);
         if (hoursWorkedPerWeekMan<0.0 || hoursWorkedPerWeekMan>200.0)
             throw new RuntimeException("Key function supplied odd hours worked by man: " + hoursWorkedPerWeekMan);
