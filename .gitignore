@@ -221,3 +221,5 @@ analysis/naive0.dta
 analysis/naive1.dta
 analysis/ignore0.dta
 analysis/ignore1.dta
+analysis/test_base.dta
+analysis/test_naive.dta

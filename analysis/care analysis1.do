@@ -8,7 +8,7 @@
 **************************************************************************************/
 
 clear all
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base1\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
 

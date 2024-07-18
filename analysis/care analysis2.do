@@ -8,9 +8,9 @@
 **************************************************************************************/
 
 clear all
-global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base1\csv"
-global zerocostsdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\zero costs\csv"
-global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\naive expectations\csv"
+global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base\csv"
+global zerocostsdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\zero\csv"
+global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\ignore\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
 

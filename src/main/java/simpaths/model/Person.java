@@ -219,16 +219,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Long idFather;
     @Transient
     private BenefitUnit benefitUnit;
-	@Column(name="dhm_ghq")
-	private boolean dhm_ghq; //Psychological distress case-based
-	@Transient
-	private boolean dhm_ghq_lag1;
-	@Transient
-	private Dhe dhe_lag1;
+    @Column(name="dhm_ghq")
+    private boolean dhm_ghq; //Psychological distress case-based
+    @Transient
+    private boolean dhm_ghq_lag1;
+    @Transient
+    private Dhe dhe_lag1;
     @Enumerated(EnumType.STRING)
-	private Dhe dhesp;
-	@Transient
-	private Dhe dhesp_lag1;
+    private Dhe dhesp;
+    @Transient
+    private Dhe dhesp_lag1;
     @Column(name=Parameters.BENEFIT_UNIT_VARIABLE_NAME)
     private Long idBenefitUnit;
     @Column(name="idhh")
@@ -700,14 +700,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             this.dhm_lag1 = originalPerson.dhm;
         }
 
-		this.dhm_ghq = originalPerson.dhm_ghq;
-		this.dhm_ghq_lag1 = originalPerson.dhm_ghq_lag1;
+        this.dhm_ghq = originalPerson.dhm_ghq;
+        this.dhm_ghq_lag1 = originalPerson.dhm_ghq_lag1;
 
-		if (originalPerson.labourSupplyWeekly_L1 != null) {
-			this.labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
-		} else {
-			this.labourSupplyWeekly_L1 = originalPerson.getLabourSupplyWeekly();
-		}
+        if (originalPerson.labourSupplyWeekly_L1 != null) {
+            this.labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
+        } else {
+            this.labourSupplyWeekly_L1 = originalPerson.getLabourSupplyWeekly();
+        }
 
         this.dhesp = originalPerson.dhesp; //Is it fine to assign here?
         this.dhesp_lag1 = originalPerson.dhesp_lag1;
@@ -868,22 +868,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             break;
         case Health:
 //			log.debug("Health for person " + this.getKey().getId());
-			health();
-			break;
+            health();
+            break;
         case SocialCareIncidence:
             evaluateSocialCareReceipt();
             evaluateSocialCareProvision();
             break;
-		case HealthMentalHM1:
-			healthMentalHM1Level();
-			break;
-		case HealthMentalHM2:
-			healthMentalHM2Level();
-			break;
-		case HealthMentalHM1HM2Cases:
-			healthMentalHM1HM2Cases();
-			break;
-		case InSchool:
+        case HealthMentalHM1:
+            healthMentalHM1Level();
+            break;
+        case HealthMentalHM2:
+            healthMentalHM2Level();
+            break;
+        case HealthMentalHM1HM2Cases:
+            healthMentalHM1HM2Cases();
+            break;
+        case InSchool:
 //			log.debug("In Education for person " + this.getKey().getId());
             inSchool();
             break;
@@ -1028,83 +1028,83 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return toRetire;
     }
     
-	/*
-	This method corresponds to Step 1 of the mental health evaluation: predict level of mental health on the GHQ-12 Likert scale based on observable characteristics
-	 */
-	protected void healthMentalHM1Level() {
-		if (dag >= 16) {
-			double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
+    /*
+    This method corresponds to Step 1 of the mental health evaluation: predict level of mental health on the GHQ-12 Likert scale based on observable characteristics
+     */
+    protected void healthMentalHM1Level() {
+        if (dag >= 16) {
+            double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("HM1");
             double gauss = healthInnov2.nextGaussian();
-			dhm = constrainDhmEstimate(score + rmse*gauss);
-		}
-	}
+            dhm = constrainDhmEstimate(score + rmse*gauss);
+        }
+    }
 
-	/*
-	This method corresponds to Step 2 of the mental health evaluation: increment / decrement the outcome of Step 1 depending on exposures that individual experienced.
-	Filtering: only applies to those with Age>=16 & Age<=64. Different estimates for males and females.
-	 */
-	protected void healthMentalHM2Level() {
+    /*
+    This method corresponds to Step 2 of the mental health evaluation: increment / decrement the outcome of Step 1 depending on exposures that individual experienced.
+    Filtering: only applies to those with Age>=16 & Age<=64. Different estimates for males and females.
+     */
+    protected void healthMentalHM2Level() {
 
-		double dhmPrediction;
-		if (dag >= 25 && dag <= 64) {
-			if (Gender.Male.equals(getDgn())) {
-				dhmPrediction = Parameters.getRegHealthHM2LevelMales().getScore(this, Person.DoublesVariables.class);
-				dhm = constrainDhmEstimate(dhmPrediction+dhm);
-			} else if (Gender.Female.equals(getDgn())) {
-				dhmPrediction = Parameters.getRegHealthHM2LevelFemales().getScore(this, Person.DoublesVariables.class);
-				dhm = constrainDhmEstimate(dhmPrediction+dhm);
-			} else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
-		}
-	}
+        double dhmPrediction;
+        if (dag >= 25 && dag <= 64) {
+            if (Gender.Male.equals(getDgn())) {
+                dhmPrediction = Parameters.getRegHealthHM2LevelMales().getScore(this, Person.DoublesVariables.class);
+                dhm = constrainDhmEstimate(dhmPrediction+dhm);
+            } else if (Gender.Female.equals(getDgn())) {
+                dhmPrediction = Parameters.getRegHealthHM2LevelFemales().getScore(this, Person.DoublesVariables.class);
+                dhm = constrainDhmEstimate(dhmPrediction+dhm);
+            } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
+        }
+    }
 
-	/*
-	Case-based measure of psychological distress, Steps 1 and 2 modelled together
- 	*/
-	protected void healthMentalHM1HM2Cases() {
+    /*
+    Case-based measure of psychological distress, Steps 1 and 2 modelled together
+    */
+    protected void healthMentalHM1HM2Cases() {
 
-		if (dag >= 16) {
-			double tmp_step1_score = 0, tmp_step2_score = 0, tmp_total_score = 0, tmp_probability = 0;
-			boolean tmp_outcome;
+        if (dag >= 16) {
+            double tmp_step1_score = 0, tmp_step2_score = 0, tmp_total_score = 0, tmp_probability = 0;
+            boolean tmp_outcome;
 
-			tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 1 of case-based psychological distress model
+            tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 1 of case-based psychological distress model
 
-			if (dag >= 25 && dag <= 64) {
-				if (Gender.Male.equals(getDgn())) {
-					tmp_step2_score = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
-				} else if (Gender.Female.equals(getDgn())) {
-					tmp_step2_score = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
-				} else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
-			}
+            if (dag >= 25 && dag <= 64) {
+                if (Gender.Male.equals(getDgn())) {
+                    tmp_step2_score = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
+                } else if (Gender.Female.equals(getDgn())) {
+                    tmp_step2_score = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
+                } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
+            }
 
-			//Put together: get total score, convert to probability, get event, set dummy
-			// 1. Sum scores from Step 1 and 2. This produces the basic score modified by the effect of transitions modelled in Step 2.
-			tmp_total_score = tmp_step1_score + tmp_step2_score;
-			// 2. Convert to probability
-			tmp_probability = 1.0 / (1.0 + Math.exp(-tmp_total_score));
-			// 3. Get event outcome
-			tmp_outcome = healthInnov2.nextDouble() < tmp_probability;
-			// 4. Set dhm_ghq dummy
-			setDhm_ghq(tmp_outcome);
-		}
-	}
+            //Put together: get total score, convert to probability, get event, set dummy
+            // 1. Sum scores from Step 1 and 2. This produces the basic score modified by the effect of transitions modelled in Step 2.
+            tmp_total_score = tmp_step1_score + tmp_step2_score;
+            // 2. Convert to probability
+            tmp_probability = 1.0 / (1.0 + Math.exp(-tmp_total_score));
+            // 3. Get event outcome
+            tmp_outcome = healthInnov2.nextDouble() < tmp_probability;
+            // 4. Set dhm_ghq dummy
+            setDhm_ghq(tmp_outcome);
+        }
+    }
 
-	/*
-	Psychological distress on the GHQ-12 scale has no meaning outside of the original values between 0 and 36, but we model this variable on a continuous scale. If the predicted value is outside of this interval, limit it to fall within these values.
-	 */
-	protected Double constrainDhmEstimate(Double dhm) {
-		if (dhm < 0.) {
-			dhm = 0.;
-		} else if (dhm > 36.) {
-			dhm = 36.;
-		}
-		return dhm;
-	}
+    /*
+    Psychological distress on the GHQ-12 scale has no meaning outside of the original values between 0 and 36, but we model this variable on a continuous scale. If the predicted value is outside of this interval, limit it to fall within these values.
+     */
+    protected Double constrainDhmEstimate(Double dhm) {
+        if (dhm < 0.) {
+            dhm = 0.;
+        } else if (dhm > 36.) {
+            dhm = 36.;
+        }
+        return dhm;
+    }
 
-	//Health process defines health using H1a or H1b process
-	protected void health() {		
+    //Health process defines health using H1a or H1b process
+    protected void health() {
 
-		if((dag >= 16 && dag <= 29) && Les_c4.Student.equals(les_c4) && leftEducation == false) {
+        if((dag >= 16 && dag <= 29) && Les_c4.Student.equals(les_c4) && leftEducation == false) {
             //If age is between 16 - 29 and individual has always been in education, follow process H1a:
 
             Map<Dhe,Double> probs = Parameters.getRegHealthH1a().getProbabilities(this, Person.DoublesVariables.class);
