@@ -1481,7 +1481,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (toGiveBirth) {		//toGiveBirth is determined by fertility process
 
-            Gender babyGender = (fertilityInnov.nextDouble() < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
+            double innov = fertilityInnov.nextDouble();
+            Gender babyGender = (innov < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
 
             //Give birth to new person and add them to benefitUnit.
             Person child = new Person(babyGender, this);
@@ -2379,6 +2380,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         L1_hourly_wage,
         L1_log_hourly_wage,
         L1_log_hourly_wage_sq,
+        Ld_children_2under,
         Ld_children_3under,
         Ld_children_3underIT,
         Ld_children_4_12,
@@ -2786,6 +2788,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return getCovidModuleGrossLabourIncome_Baseline();
         case InverseMillsRatio:
             return getInverseMillsRatio();
+        case Ld_children_2under:
+            return (getNumberChildren02_lag1()>0) ? 1.0 : 0.0;
         case Ld_children_3under:
             return benefitUnit.getIndicatorChildren03_lag1().ordinal();
         case Ld_children_4_12:

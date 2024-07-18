@@ -2495,6 +2495,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 if (country.equals(Country.UK)) {
 
+                    double innov = person.getFertilityInnov().nextDouble();
                     double prob;
                     if (person.getDag() <= 29 && person.getLes_c4().equals(Les_c4.Student) && !person.isLeftEducation()) {
                         //If age below or equal to 29 and in continuous education follow process F1a
@@ -2503,7 +2504,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         //Otherwise if not in continuous education, follow process F1b
                         prob =  Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
                     }
-                    person.setToGiveBirth(person.getFertilityInnov().nextDouble() < prob);
+                    person.setToGiveBirth(innov < prob);
                 } else if (country.equals(Country.IT)) {
 
                     person.setToGiveBirth(person.getFertilityInnov().nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
