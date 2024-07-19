@@ -9,7 +9,7 @@
 
 clear all
 global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test_base_noalign\csv"
-global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test_naive\csv"
+global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test_naive_noalign\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
 
@@ -76,13 +76,13 @@ foreach vv of varlist carehoursfrompartnerweekly carehoursfromdaughterweekly car
 
 destring hoursworkedweekly, replace force
 recode hoursworkedweekly (missing=0)
-save "$outdir/test_naive", replace
+save "$outdir/test_naive_noalign", replace
 
 
 /**************************************************************************************
 *	analysis
 **************************************************************************************/
-use "$outdir/test_base", clear
+use "$outdir/test_base_noalign", clear
 order time idhousehold idbenefitunit idperson dag sampleentry sampleexit dcpst
 gsort idhousehold idbenefitunit time idperson
 drop run

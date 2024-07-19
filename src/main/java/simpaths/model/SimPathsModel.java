@@ -390,7 +390,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         createDataStructuresForMarriageMatching();
 
         // earnings potential
-        labourMarket = new LabourMarket(persons, benefitUnits);
+        labourMarket = new LabourMarket(benefitUnits);
         if (!initialisePotentialEarningsFromDatabase) initialisePotentialEarningsByWageEquationAndEmployerSocialInsurance();
 
         // calculate the scaling factor for population alignment

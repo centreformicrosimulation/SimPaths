@@ -32,7 +32,6 @@ public class LabourMarket {
 
     private Map<Region, Double> disposableIncomesByRegion;
 
-    Set<Person> persons;
     Set<BenefitUnit> benefitUnits;
 
     private int covid19TransitionsMonth;
@@ -41,11 +40,10 @@ public class LabourMarket {
 
 
     //Constructor:
-    LabourMarket(Set<Person> persons, Set<BenefitUnit> benefitUnits) {
+    LabourMarket(Set<BenefitUnit> benefitUnits) {
 
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
 //		observer = (SimPathsObserver) SimulationEngine.getInstance().getManager(SimPathsObserver.class.getCanonicalName());	//To allow intra-time-step updates of convergence plots
-        this.persons = persons;
         this.benefitUnits = benefitUnits;
         EUROMODpolicyNameForThisYear = Parameters.getEUROMODpolicyForThisYear(model.getYear());
 
