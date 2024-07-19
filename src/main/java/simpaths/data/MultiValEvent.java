@@ -17,7 +17,7 @@ public class MultiValEvent <E extends IntegerValuedEnum> {
 
 
     // CONSTRUCTOR
-    MultiValEvent(Map<E, Double> probs, double randomDrawInitial) {
+    public MultiValEvent(Map<E, Double> probs, double randomDrawInitial) {
         this.probs = probs;
         this.randomDrawInitial = randomDrawInitial;
     }
