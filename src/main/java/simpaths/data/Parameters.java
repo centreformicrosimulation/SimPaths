@@ -278,7 +278,7 @@ public class Parameters {
 
     public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
-    public static double PROB_NEWBORN_IS_MALE = 0.5;
+    public static double PROB_NEWBORN_IS_MALE = 0.5;            // Must be strictly greater than 0.0 and less than 1.0
 
     public static final boolean systemOut = true;
 

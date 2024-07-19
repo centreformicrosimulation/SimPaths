@@ -412,6 +412,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     RandomGenerator fertilityInnov;
     @Transient
+    double fertilityPseudoInnov;
+    @Transient
     RandomGenerator educationInnov;
     @Transient
     RandomGenerator labourSupplyInnov;
@@ -453,7 +455,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // used to create new people who enter the simulation during UpdateMaternityStatus
     public Person(Gender gender, Person mother) {
 
-        this(personIdCounter++, mother.getFertilityInnov().nextLong());
+        this(personIdCounter++, mother.getFertilityPseudoInnov());
 
         this.sampleEntry = SampleEntry.Birth;
         this.dgn = gender;
@@ -500,7 +502,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
     // used to generate clones both at population load (to un-weight data) and to generate international immigrants
-    public Person (Person originalPerson, Long seed, SampleEntry sampleEntry) {
+    public Person (Person originalPerson, double seed, SampleEntry sampleEntry) {
 
         this(personIdCounter++, seed);
 
@@ -698,37 +700,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     // used by other constructors
-    public Person(Long id, Long seed) {
+    public Person(Long id, double seed) {
         super();
         key = new PanelEntityKey(id);
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         clonedFlag = false;
 
-        healthInnov = new Random(seed);
-        seed = seed + 10000;
-        healthInnov2 = new Random(seed);
-        seed = seed + 10000;
-        socialCareInnov = new Random(seed);
-        seed = seed + 10000;
-        socialCarePInnov = new Random(seed);
-        seed = seed + 10000;
-        wagesInnov = new Random(seed);
-        seed = seed + 10000;
-        capitalInnov = new Random(seed);
-        seed = seed + 10000;
-        resStanDevInnov = new Random(seed);
-        seed = seed + 10000;
-        housingInnov = new Random(seed);
-        seed = seed + 10000;
-        labourInnov = new Random(seed);
-        seed = seed + 10000;
-        cohabitInnov = new Random(seed);
-        seed = seed + 10000;
-        fertilityInnov = new Random(seed);
-        seed = seed + 10000;
-        educationInnov = new Random(seed);
-        seed = seed + 10000;
-        labourSupplyInnov = new Random(seed);
+        long seedTemp = (long)(seed*100000);
+        RandomGenerator rndTemp = new Random(seedTemp);
+        healthInnov = new Random(rndTemp.nextLong());
+        healthInnov2 = new Random(rndTemp.nextLong());
+        socialCareInnov = new Random(rndTemp.nextLong());
+        socialCarePInnov = new Random(rndTemp.nextLong());
+        wagesInnov = new Random(rndTemp.nextLong());
+        capitalInnov = new Random(rndTemp.nextLong());
+        resStanDevInnov = new Random(rndTemp.nextLong());
+        housingInnov = new Random(rndTemp.nextLong());
+        labourInnov = new Random(rndTemp.nextLong());
+        cohabitInnov = new Random(rndTemp.nextLong());
+        fertilityInnov = new Random(rndTemp.nextLong());
+        educationInnov = new Random(rndTemp.nextLong());
+        labourSupplyInnov = new Random(rndTemp.nextLong());
         labourSupplySingleDraw = labourSupplyInnov.nextDouble();
         drawPartnershipFormation = -9;
         drawPartnershipDissolution = -9;
@@ -1481,8 +1473,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (toGiveBirth) {		//toGiveBirth is determined by fertility process
 
-            double innov = fertilityInnov.nextDouble();
-            Gender babyGender = (innov < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
+            Gender babyGender;
+            if (fertilityPseudoInnov<0.0 || fertilityPseudoInnov>1.0)
+                throw new RuntimeException("Problem with propogated value of fertilityPseudoInnov");
+            if (fertilityPseudoInnov < Parameters.PROB_NEWBORN_IS_MALE) {
+                fertilityPseudoInnov /= Parameters.PROB_NEWBORN_IS_MALE;
+                babyGender = Gender.Male;
+            } else {
+                fertilityPseudoInnov = (1.0 - fertilityPseudoInnov) / (1.0 - Parameters.PROB_NEWBORN_IS_MALE);
+                babyGender = Gender.Female;
+            }
 
             //Give birth to new person and add them to benefitUnit.
             Person child = new Person(babyGender, this);
@@ -4676,4 +4676,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
     public SampleExit getSampleExit() {return sampleExit;}
     public RandomGenerator getFertilityInnov() {return fertilityInnov;}
+    public double getFertilityPseudoInnov() { return fertilityPseudoInnov; }
+    public void setFertilityPseudoInnov(Double val) {
+        fertilityPseudoInnov = Objects.requireNonNullElse(val, 0.5);
+    }
 }

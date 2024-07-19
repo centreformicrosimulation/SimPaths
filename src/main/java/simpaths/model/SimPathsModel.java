@@ -1320,7 +1320,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Set<Person> originalPersons = originalBenefitUnit.getPersonsInBU();
         for (Person originalPerson : originalPersons) {
 
-            Person newPerson = new Person(originalPerson, SimulationEngine.getRnd().nextLong(), sampleEntry);
+            Person newPerson = new Person(originalPerson, SimulationEngine.getRnd().nextDouble(), sampleEntry);
             newPerson.setBenefitUnit(newBenefitUnit);
             persons.add(newPerson);
         }
@@ -2505,6 +2505,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         prob =  Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
                     }
                     person.setToGiveBirth(innov < prob);
+                    person.setFertilityPseudoInnov(innov/prob);
                 } else if (country.equals(Country.IT)) {
 
                     person.setToGiveBirth(person.getFertilityInnov().nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
