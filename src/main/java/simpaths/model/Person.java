@@ -389,36 +389,66 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Integer numberChildren017Local;
     @Transient
     private Indicator indicatorChildren02Local;
+
     @Transient
-    RandomGenerator healthInnov;
+    RandomGenerator healthRandomGen;
     @Transient
-    RandomGenerator healthInnov2;
+    RandomGenerator healthRandomGen2;
     @Transient
-    RandomGenerator socialCareInnov;
+    RandomGenerator socialCareRandomGen;
     @Transient
-    RandomGenerator socialCarePInnov;
+    RandomGenerator socialCarePRandomGen;
     @Transient
-    RandomGenerator wagesInnov;
+    RandomGenerator wagesRandomGen;
     @Transient
-    RandomGenerator capitalInnov;
+    RandomGenerator capitalRandomGen;
     @Transient
-    RandomGenerator resStanDevInnov;
+    RandomGenerator resStanDevRandomGen;
     @Transient
-    RandomGenerator housingInnov;
+    RandomGenerator housingRandomGen;
     @Transient
-    RandomGenerator labourInnov;
+    RandomGenerator labourRandomGen;
     @Transient
-    RandomGenerator cohabitInnov;
+    RandomGenerator cohabitRandomGen;
     @Transient
-    RandomGenerator fertilityInnov;
+    RandomGenerator fertilityRandomGen;
     @Transient
-    double fertilityPseudoInnov;
+    RandomGenerator educationRandomGen;
     @Transient
-    RandomGenerator educationInnov;
+    RandomGenerator labourSupplyRandomGen;
     @Transient
-    RandomGenerator labourSupplyInnov;
+    RandomGenerator benefitUnitRandomGen;
+
+    @Transient
+    double healthInnov;
+    @Transient
+    double healthInnov2;
+    @Transient
+    double socialCareInnov;
+    @Transient
+    double socialCarePInnov;
+    @Transient
+    double wagesInnov;
+    @Transient
+    double capitalInnov;
+    @Transient
+    double resStanDevInnov;
+    @Transient
+    double housingInnov;
+    @Transient
+    double labourInnov;
+    @Transient
+    double cohabitInnov;
+    @Transient
+    double fertilityInnov;
+    @Transient
+    double educationInnov;
+    @Transient
+    double labourSupplyInnov;
     @Transient
     double labourSupplySingleDraw;
+    @Transient
+    double benefitUnitInnov;
     @Transient
     private Map<Labour, Integer> personContinuousHoursLabourSupplyMap = new EnumMap<>(Labour.class);
 
@@ -455,7 +485,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // used to create new people who enter the simulation during UpdateMaternityStatus
     public Person(Gender gender, Person mother) {
 
-        this(personIdCounter++, mother.getFertilityPseudoInnov());
+        this(personIdCounter++, mother.getFertilityInnov());
 
         this.sampleEntry = SampleEntry.Birth;
         this.dgn = gender;
@@ -708,20 +738,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         long seedTemp = (long)(seed*100000);
         RandomGenerator rndTemp = new Random(seedTemp);
-        healthInnov = new Random(rndTemp.nextLong());
-        healthInnov2 = new Random(rndTemp.nextLong());
-        socialCareInnov = new Random(rndTemp.nextLong());
-        socialCarePInnov = new Random(rndTemp.nextLong());
-        wagesInnov = new Random(rndTemp.nextLong());
-        capitalInnov = new Random(rndTemp.nextLong());
-        resStanDevInnov = new Random(rndTemp.nextLong());
-        housingInnov = new Random(rndTemp.nextLong());
-        labourInnov = new Random(rndTemp.nextLong());
-        cohabitInnov = new Random(rndTemp.nextLong());
-        fertilityInnov = new Random(rndTemp.nextLong());
-        educationInnov = new Random(rndTemp.nextLong());
-        labourSupplyInnov = new Random(rndTemp.nextLong());
-        labourSupplySingleDraw = labourSupplyInnov.nextDouble();
+        healthRandomGen = new Random(rndTemp.nextLong());
+        healthRandomGen2 = new Random(rndTemp.nextLong());
+        socialCareRandomGen = new Random(rndTemp.nextLong());
+        socialCarePRandomGen = new Random(rndTemp.nextLong());
+        wagesRandomGen = new Random(rndTemp.nextLong());
+        capitalRandomGen = new Random(rndTemp.nextLong());
+        resStanDevRandomGen = new Random(rndTemp.nextLong());
+        housingRandomGen = new Random(rndTemp.nextLong());
+        labourRandomGen = new Random(rndTemp.nextLong());
+        cohabitRandomGen = new Random(rndTemp.nextLong());
+        fertilityRandomGen = new Random(rndTemp.nextLong());
+        educationRandomGen = new Random(rndTemp.nextLong());
+        labourSupplyRandomGen = new Random(rndTemp.nextLong());
+        labourSupplySingleDraw = labourSupplyRandomGen.nextDouble();
+        benefitUnitRandomGen = new Random(rndTemp.nextLong());
         drawPartnershipFormation = -9;
         drawPartnershipDissolution = -9;
     }
@@ -832,7 +863,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // Event Listener
     // ---------------------------------------------------------------------
     public enum Processes {
-        Ageing,
+        Update,
         ProjectEquivConsumption,
         ConsiderCohabitation,
         ConsiderMortality,
@@ -852,9 +883,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-        case Ageing:
+        case Update:
 //			log.debug("Ageing for person " + this.getKey().getId());
-            ageing();
+            update();
             break;
         case ProjectEquivConsumption:
             projectEquivConsumption();
@@ -919,7 +950,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (this == benefitUnit.getRefPersonForDecisions()) {
                 // unemployment currently limited to reference person for decisions
 
-                double draw = labourInnov.nextDouble();
+                double draw = labourRandomGen.nextDouble();
                 double prob;
                 if (dgn.equals(Gender.Male)) {
                     if (deh_c3.equals(Education.High)) {
@@ -939,11 +970,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    private void ageing() {
+    //********************************************************
+    // method to update person attributes for a new year
+    //********************************************************
+    private void update() {
 
         dag++;
         dag_sq = dag*dag;
-        benefitUnit.clearStates(); // states object used to manage optimised decisions
         if (dag == Parameters.AGE_TO_BECOME_RESPONSIBLE) {
 
             setupNewBenefitUnit(true);
@@ -955,13 +988,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         //Update years in partnership (before the lagged value is updated)
         dcpyy_lag1 = dcpyy; //Update lag value outside of updateVariables() method
-        if(partner != null) {
+        if (partner != null) {
 
-            if(Objects.equals(idPartner, idPartnerLag1)) {
-
+            if (Objects.equals(idPartner, idPartnerLag1))
                 dcpyy++;
-            } else dcpyy = 0;
-        } else dcpyy = 0; //If no partner, set years in partnership to 0 TODO: or should this be set to null?
+            else
+                dcpyy = 0;
+        } else
+            dcpyy = 0; //If no partner, set years in partnership to 0 TODO: or should this be set to null?
 
         //Update variables
         updateVariables(false);	//This also sets the lagged values
@@ -977,8 +1011,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // exclude single parents with dependent children from death
 
                 double mortalityProbability = Parameters.getMortalityProbability(dgn, dag, model.getYear());
-                if (healthInnov.nextDouble() < mortalityProbability) {
+                if (healthInnov < mortalityProbability) {
                     flagDies = true;
+                    healthInnov = healthInnov / mortalityProbability;
+                } else {
+                    healthInnov = (1- healthInnov) / (1 - mortalityProbability);
                 }
             }
         }
@@ -991,7 +1028,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         //For those who are moving out, evaluate whether they should have stayed with parents and if yes, set the adultchildflag to true
 
-        boolean toLeaveHome = (housingInnov.nextDouble() < Parameters.getRegLeaveHomeP1a().getProbability(this, Person.DoublesVariables.class)); //If true, should leave home
+        boolean toLeaveHome = (housingRandomGen.nextDouble() < Parameters.getRegLeaveHomeP1a().getProbability(this, Person.DoublesVariables.class)); //If true, should leave home
         if (Les_c4.Student.equals(les_c4)) {
 
             adultchildflag = Indicator.True; //Students not allowed to leave home to match filtering conditon
@@ -1018,9 +1055,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
            } else {
                 if (partner != null) { //Follow process R1b (couple) for retirement
-                    toRetire = (labourInnov.nextDouble() < Parameters.getRegRetirementR1b().getProbability(this, Person.DoublesVariables.class));
+                    toRetire = (labourRandomGen.nextDouble() < Parameters.getRegRetirementR1b().getProbability(this, Person.DoublesVariables.class));
                 } else { //Follow process R1a (single) for retirement
-                    toRetire = (labourInnov.nextDouble() < Parameters.getRegRetirementR1a().getProbability(this, Person.DoublesVariables.class));
+                    toRetire = (labourRandomGen.nextDouble() < Parameters.getRegRetirementR1a().getProbability(this, Person.DoublesVariables.class));
                 }
             }
             if (toRetire) {
@@ -1037,7 +1074,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (dag >= 16) {
             double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("HM1");
-            double gauss = healthInnov2.nextGaussian();
+            double gauss = healthRandomGen2.nextGaussian();
             dhm = constrainDhmEstimate(score + rmse*gauss);
         }
     }
@@ -1085,7 +1122,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             // 2. Convert to probability
             tmp_probability = 1.0 / (1.0 + Math.exp(-tmp_total_score));
             // 3. Get event outcome
-            tmp_outcome = healthInnov2.nextDouble() < tmp_probability;
+            tmp_outcome = healthRandomGen2.nextDouble() < tmp_probability;
             // 4. Set dhm_ghq dummy
             setDhm_ghq(tmp_outcome);
         }
@@ -1110,16 +1147,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             //If age is between 16 - 29 and individual has always been in education, follow process H1a:
 
             Map<Dhe,Double> probs = Parameters.getRegHealthH1a().getProbabilities(this, Person.DoublesVariables.class);
-            dhe = ManagerRegressions.multiEvent(probs, healthInnov.nextDouble());
+            dhe = ManagerRegressions.multiEvent(probs, healthRandomGen.nextDouble());
         } else if (dag >= 16) {
 
             Map<Dhe,Double> probs = Parameters.getRegHealthH1b().getProbabilities(this, Person.DoublesVariables.class);
-            dhe = ManagerRegressions.multiEvent(probs, healthInnov.nextDouble());
+            dhe = ManagerRegressions.multiEvent(probs, healthRandomGen.nextDouble());
 
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
             boolean becomeLTSickDisabled = false;
             if (!Parameters.enableIntertemporalOptimisations || DecisionParams.flagDisability)
-                becomeLTSickDisabled = (healthInnov.nextDouble() < Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class));
+                becomeLTSickDisabled = (healthRandomGen.nextDouble() < Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class));
             if (becomeLTSickDisabled) {
                 dlltsd = Indicator.True;
             } else {
@@ -1169,13 +1206,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
 
-            double rnd1 = socialCareInnov.nextDouble();
+            double rnd1 = socialCareRandomGen.nextDouble();
             if (rnd1 < probRecCare) {
                 // receive social care
 
                 double score = Parameters.getRegCareHoursS1b().getScore(this,Person.DoublesVariables.class);
                 double rmse = Parameters.getRMSEForRegression("S1b");
-                double careHours = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+                double careHours = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareRandomGen.nextGaussian()));
                 if (partner!=null && partner.getDag() < 75) {
                     socialCareFromPartner = true;
                     careHoursFromPartnerWeekly = careHours;
@@ -1192,7 +1229,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (dag >= Parameters.MIN_AGE_FORMAL_SOCARE && getYear()>getStartYear()) {
             // need care only projected for 65 and over due to limitations of data used for parameterisation
 
-            double rnd1 = socialCareInnov.nextDouble();
+            double rnd1 = socialCareRandomGen.nextDouble();
             double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(this, Person.DoublesVariables.class);
             if (rnd1 < probNeedCare) {
                 // need care
@@ -1204,7 +1241,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // receive care
 
                 Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(this, Person.DoublesVariables.class);
-                double rnd2 = socialCareInnov.nextDouble();
+                double rnd2 = socialCareRandomGen.nextDouble();
                 SocialCareReceiptS2c socialCareReceiptS2c = ManagerRegressions.multiEvent(probs1, rnd2);
                 socialCareReceipt = SocialCareReceipt.getCode(socialCareReceiptS2c);
                 if (SocialCareReceipt.Mixed.equals(socialCareReceipt) || SocialCareReceipt.Formal.equals(socialCareReceipt))
@@ -1217,12 +1254,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         // check if receive care from partner
 
                         double probPartnerCare = Parameters.getRegReceiveCarePartnerS2d().getProbability(this, Person.DoublesVariables.class);
-                        if (socialCareInnov.nextDouble() < probPartnerCare) {
+                        if (socialCareRandomGen.nextDouble() < probPartnerCare) {
                             // receive care from partner - check for supplementary carers
 
                             socialCareFromPartner = true;
                             Map<PartnerSupplementaryCarer,Double> probs2 = Parameters.getRegPartnerSupplementaryCareS2e().getProbabilites(this, Person.DoublesVariables.class);
-                            PartnerSupplementaryCarer cc = ManagerRegressions.multiEvent(probs2, socialCareInnov.nextDouble());
+                            PartnerSupplementaryCarer cc = ManagerRegressions.multiEvent(probs2, socialCareRandomGen.nextDouble());
                             if (PartnerSupplementaryCarer.Daughter.equals(cc))
                                 socialCareFromDaughter = true;
                             if (PartnerSupplementaryCarer.Son.equals(cc))
@@ -1235,7 +1272,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         // no care from partner - identify who supplies informal care
 
                         Map<NotPartnerInformalCarer,Double> probs2 = Parameters.getRegNotPartnerInformalCareS2f().getProbabilites(this, Person.DoublesVariables.class);
-                        double rnd3 = socialCareInnov.nextDouble();
+                        double rnd3 = socialCareRandomGen.nextDouble();
                         NotPartnerInformalCarer cc = ManagerRegressions.multiEvent(probs2, rnd3);
                         if (NotPartnerInformalCarer.DaughterOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))
                             socialCareFromDaughter = true;
@@ -1248,27 +1285,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 if (socialCareFromPartner) {
                     double score = Parameters.getRegPartnerCareHoursS2g().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2g");
-                    careHoursFromPartnerWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+                    careHoursFromPartnerWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareRandomGen.nextGaussian()));
                 }
                 if (socialCareFromDaughter) {
                     double score = Parameters.getRegDaughterCareHoursS2h().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2h");
-                    careHoursFromDaughterWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+                    careHoursFromDaughterWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareRandomGen.nextGaussian()));
                 }
                 if (socialCareFromSon) {
                     double score = Parameters.getRegSonCareHoursS2i().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2i");
-                    careHoursFromSonWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+                    careHoursFromSonWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareRandomGen.nextGaussian()));
                 }
                 if (socialCareFromOther) {
                     double score = Parameters.getRegOtherCareHoursS2j().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2j");
-                    careHoursFromOtherWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+                    careHoursFromOtherWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * socialCareRandomGen.nextGaussian()));
                 }
                 if (socialCareFromFormal) {
                     double score = Parameters.getRegFormalCareHoursS2k().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2k");
-                    careHoursFromFormalWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse * socialCareInnov.nextGaussian()));
+                    careHoursFromFormalWeekly = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse * socialCareRandomGen.nextGaussian()));
                     careFormalExpenditureWeekly = careHoursFromFormalWeekly * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
                 }
             }
@@ -1291,8 +1328,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (dag >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
 
             // random draws
-            double carerIncidenceRnd = socialCarePInnov.nextDouble();
-            double carerQuantRnd = socialCarePInnov.nextGaussian();
+            double carerIncidenceRnd = socialCarePRandomGen.nextDouble();
+            double carerQuantRnd = socialCarePRandomGen.nextGaussian();
 
             // check if care provided to partner
             // identified in method evaluateSocialCareReceipt
@@ -1340,38 +1377,47 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     protected void considerCohabitation() {
-        toBePartnered = false;
-        double probitAdjustment = 0.;
-        if (drawPartnershipFormation < 0.) {
-            drawPartnershipFormation = cohabitInnov.nextDouble();
-        }
-        if (model.isAlignCohabitation()) {
-            probitAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
-        }
 
-        if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION) {
-            if (partner == null) {
-                if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
-                    double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
-                    double prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
-                    toBePartnered = drawPartnershipFormation < prob;
-                } else if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
-                    double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
-                    double prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
-                    toBePartnered = drawPartnershipFormation < prob;
+        toBePartnered = false;
+        double probitAdjustment = (model.isAlignCohabitation()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment) : 0.;
+        if (dag >= Parameters.MIN_AGE_COHABITATION) {
+            // cohabitation possible
+
+            double prob, innov = cohabitRandomGen.nextDouble();
+            if (model.getCountry() == Country.UK) {
+
+                if (partner == null) {
+                    // partnership formation
+
+                    if (dag <= 29 && les_c4 == Les_c4.Student && !leftEducation) {
+
+                        double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
+                        prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
+                    } else {
+
+                        double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
+                        prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
+                    }
+                    toBePartnered = (innov < prob);
+                    if (toBePartnered)
+                        model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+                } else if (dgn == Gender.Female && (dag > 29 || !Les_c4.Student.equals(les_c4) || leftEducation)) {
+                    // partnership dissolution
+
+                    prob = Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class);
+                    if (innov < prob)
+                        leavePartner();
                 }
-                if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
-            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
-                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) leavePartner();
-            }
-        } else if (model.getCountry() == Country.IT && dag >= Parameters.MIN_AGE_COHABITATION) {
-            if (partner == null) {
-                if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
-                    toBePartnered = (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class));
-                    if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+            } else if (model.getCountry() == Country.IT) {
+
+                if (partner == null) {
+                    if ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student)) {
+                        toBePartnered = (cohabitRandomGen.nextDouble() < Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class));
+                        if (toBePartnered) model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
+                    }
+                } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
+                    if (cohabitRandomGen.nextDouble() < Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class)) leavePartner();
                 }
-            } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
-                if (cohabitInnov.nextDouble() < Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class)) leavePartner();
             }
         }
     }
@@ -1380,7 +1426,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         toBePartnered = false; // Reset variable indicating if individual wants to find a partner
         hasTestPartner = false; // Reset variable indicating if individual has partner for the purpose of matching
         if (drawPartnershipFormation < 0.) {
-            drawPartnershipFormation = cohabitInnov.nextDouble();
+            drawPartnershipFormation = cohabitRandomGen.nextDouble();
         }
 
         if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION && partner == null) {
@@ -1403,7 +1449,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void evaluatePartnershipDissolution() {
         leftPartnerTest = false;
         if (drawPartnershipDissolution < 0.) {
-            drawPartnershipDissolution = cohabitInnov.nextDouble();
+            drawPartnershipDissolution = cohabitRandomGen.nextDouble();
         }
         if ((partner != null) && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
             if (drawPartnershipDissolution < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class)) {
@@ -1422,7 +1468,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             //If age is between 16 - 29 and individual has always been in education, follow process E1a:
 
             if (dag <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
-                double rnd = labourInnov.nextDouble();
+                double rnd = labourRandomGen.nextDouble();
                 double prb = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
                 toLeaveSchool = (rnd >= prb); //If event is true, stay in school.  If event is false, leave school.
             } else {
@@ -1433,7 +1479,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
             //TODO: If regression outcome of process E1b is true, set activity status to student and der (return to education indicator) to true?
 
-            double rnd = labourInnov.nextDouble();
+            double rnd = labourRandomGen.nextDouble();
             double prb = Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class);
             if (rnd < prb) {
                 //If event is true, re-enter education.  If event is false, leave school
@@ -1474,13 +1520,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (toGiveBirth) {		//toGiveBirth is determined by fertility process
 
             Gender babyGender;
-            if (fertilityPseudoInnov<0.0 || fertilityPseudoInnov>1.0)
+            if (fertilityInnov <0.0 || fertilityInnov >1.0)
                 throw new RuntimeException("Problem with propogated value of fertilityPseudoInnov");
-            if (fertilityPseudoInnov < Parameters.PROB_NEWBORN_IS_MALE) {
-                fertilityPseudoInnov /= Parameters.PROB_NEWBORN_IS_MALE;
+            if (fertilityInnov < Parameters.PROB_NEWBORN_IS_MALE) {
+                fertilityInnov /= Parameters.PROB_NEWBORN_IS_MALE;
                 babyGender = Gender.Male;
             } else {
-                fertilityPseudoInnov = (1.0 - fertilityPseudoInnov) / (1.0 - Parameters.PROB_NEWBORN_IS_MALE);
+                fertilityInnov = (1.0 - fertilityInnov) / (1.0 - Parameters.PROB_NEWBORN_IS_MALE);
                 babyGender = Gender.Female;
             }
 
@@ -1497,7 +1543,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void initialisePotentialHourlyEarnings() {
 
-        double logPotentialHourlyEarnings, score, rmse, gauss = wagesInnov.nextGaussian();
+        double logPotentialHourlyEarnings, score, rmse, gauss = wagesRandomGen.nextGaussian();
         if (dgn.equals(Gender.Male)) {
             score = Parameters.getRegWagesMales().getScore(this, Person.DoublesVariables.class);
             rmse = Parameters.getRMSEForRegression("Wages_Males");
@@ -1522,7 +1568,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else {
                     rmse = Parameters.getRMSEForRegression("Wages_FemalesE");
                 }
-                wageRegressionRandomComponentE = rmse * wagesInnov.nextGaussian();
+                wageRegressionRandomComponentE = rmse * wagesRandomGen.nextGaussian();
             }
         } else {
             if (wageRegressionRandomComponentNE == null || !model.fixRegressionStochasticComponent) {
@@ -1531,7 +1577,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else {
                     rmse = Parameters.getRMSEForRegression("Wages_FemalesNE");
                 }
-                wageRegressionRandomComponentNE = rmse * wagesInnov.nextGaussian();
+                wageRegressionRandomComponentNE = rmse * wagesRandomGen.nextGaussian();
             }
         }
 
@@ -1583,7 +1629,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             throw new RuntimeException("source not recognised for setting income");
         }
         while (redraw) {
-            gauss = capitalInnov.nextGaussian();
+            gauss = capitalRandomGen.nextGaussian();
             double incomeVal = 0.;
 
             if (RegressionScoreType.Asinh.equals(scoreType)) {
@@ -1612,7 +1658,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             // variables updated with labour supply when enableIntertemporalOptimisations (as retirement can affect wealth and pension income)
             if (dag >= Parameters.MIN_AGE_TO_HAVE_INCOME) {
                 if (dag <= 29 && Les_c4.Student.equals(les_c4) && leftEducation == false) {
-                    boolean hasCapitalIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI3a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
+                    boolean hasCapitalIncome = (capitalRandomGen.nextDouble() < Parameters.getRegIncomeI3a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
                     if (hasCapitalIncome) {
                         double score = Parameters.getRegIncomeI3a().getScore(this, Person.DoublesVariables.class);
                         double rmse = Parameters.getRMSEForRegression("I3a");
@@ -1621,7 +1667,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     }
                     else ypncp = 0.; //If no capital income, set amount to 0
                 } else if ((Les_c4.Student.equals(les_c4) && leftEducation == true) || !les_c4.equals(Les_c4.Student)) {
-                    boolean hasCapitalIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI3b_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
+                    boolean hasCapitalIncome = (capitalRandomGen.nextDouble() < Parameters.getRegIncomeI3b_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives capital income ypncp. Amount modelled in the next step.
                     if (hasCapitalIncome) {
                         double score = Parameters.getRegIncomeI3b().getScore(this, Person.DoublesVariables.class);
                         double rmse = Parameters.getRMSEForRegression("I3b");
@@ -1648,7 +1694,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                             pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
                     } else {
                         // For individuals in the first year of retirement, use processes I5a_selection and I5b_amount
-                        boolean hasPrivatePensionIncome = (capitalInnov.nextDouble() < Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives private pension income. Amount modelled in the next step.
+                        boolean hasPrivatePensionIncome = (capitalRandomGen.nextDouble() < Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class)); // If true, individual receives private pension income. Amount modelled in the next step.
                         if (hasPrivatePensionIncome) {
                             score = Parameters.getRegIncomeI5b_amount().getScore(this, Person.DoublesVariables.class);
                             rmse = Parameters.getRMSEForRegression("I5b");
@@ -1739,7 +1785,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 //		if( activity_status.equals(Les_c4.Student) && toLeaveSchool) {
 
             Map<Education,Double> probs = Parameters.getRegEducationE2a().getProbabilities(this, Person.DoublesVariables.class);
-            Education newEducationLevel = ManagerRegressions.multiEvent(probs, educationInnov.nextDouble());
+            Education newEducationLevel = ManagerRegressions.multiEvent(probs, educationRandomGen.nextDouble());
 
 //			System.out.println("Persid " + getKey().getId() + " Aged: " + dag + " With activity status: " + les_c4 + " Was set to leave school?  " + toLeaveSchool +  " Predicted education level "
 //					+ " by process E2a is " + newEducationLevel + " And previous level was " + deh_c3);
@@ -1950,6 +1996,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             desiredAgeDiff = sampledDifferentials[0];
             desiredEarningsPotentialDiff = sampledDifferentials[1];
         }
+
+        // generate year specific random draws
+        healthInnov = healthRandomGen.nextDouble();
+        healthInnov2 = healthRandomGen2.nextDouble();
+        socialCareInnov = socialCareRandomGen.nextDouble();
+        socialCarePInnov = socialCarePRandomGen.nextDouble();
+        wagesInnov = wagesRandomGen.nextDouble();
+        capitalInnov = capitalRandomGen.nextDouble();
+        resStanDevInnov = resStanDevRandomGen.nextDouble();
+        housingInnov = housingRandomGen.nextDouble();
+        labourInnov = labourRandomGen.nextDouble();
+        cohabitInnov = cohabitRandomGen.nextDouble();
+        fertilityInnov = fertilityRandomGen.nextDouble();
+        educationInnov = educationRandomGen.nextDouble();
+        labourSupplyInnov = labourSupplyRandomGen.nextDouble();
+        benefitUnitInnov = benefitUnitRandomGen.nextDouble();
     }
 
     protected void leavePartner() {
@@ -2857,7 +2919,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return household_status.equals(Household_status.Parents)? 1. : 0.;
         case ResStanDev:        //Draw from standard normal distribution will be multiplied by the value in the .xls file, which represents the standard deviation
             //If model.addRegressionStochasticComponent set to true, return a draw from standard normal distribution, if false return 0.
-            return (model.addRegressionStochasticComponent) ? resStanDevInnov.nextGaussian() : 0.0;
+            return (model.addRegressionStochasticComponent) ? resStanDevRandomGen.nextGaussian() : 0.0;
         case Single:
             return household_status.equals(Household_status.Single)? 1. : 0.;
         case Single_kids:		//TODO: Is this sufficient, or do we need to take children aged over 12 into account as well?
@@ -4485,18 +4547,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setPersonContinuousHoursLabourSupplyMap(Map<Labour, Integer> personContinuousHoursLabourSupplyMap) {
         this.personContinuousHoursLabourSupplyMap = personContinuousHoursLabourSupplyMap;
     }
-
-    public RandomGenerator getLabourSupplyInnov() {
-        return labourSupplyInnov;
+    public RandomGenerator getLabourSupplyRandomGen() {
+        return labourSupplyRandomGen;
     }
-
     public double getLabourSupplySingleDraw() {
         return labourSupplySingleDraw;
     }
-
     public void setLabourSupplySingleDraw(double labourSupplySingleDraw) {
         this.labourSupplySingleDraw = labourSupplySingleDraw;
     }
+    public double getBenefitUnitInnov() {return benefitUnitInnov;}
 
     public double getHoursFormalSocialCare_L1() {
         double hours = 0.0;
@@ -4675,9 +4735,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.sampleExit = sampleExit;
     }
     public SampleExit getSampleExit() {return sampleExit;}
-    public RandomGenerator getFertilityInnov() {return fertilityInnov;}
-    public double getFertilityPseudoInnov() { return fertilityPseudoInnov; }
-    public void setFertilityPseudoInnov(Double val) {
-        fertilityPseudoInnov = Objects.requireNonNullElse(val, 0.5);
+    public RandomGenerator getFertilityRandomGen() {return fertilityRandomGen;}
+    public double getFertilityInnov() { return fertilityInnov; }
+    public void setFertilityInnov(Double val) {
+        fertilityInnov = Objects.requireNonNullElse(val, 0.5);
     }
 }

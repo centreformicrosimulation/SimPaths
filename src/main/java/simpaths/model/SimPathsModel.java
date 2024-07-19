@@ -454,9 +454,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.CheckForExitingPersons);
         addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
-
-        // DEMOGRAPHIC MODULE
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.Ageing, false);        //Read only mode as agents are removed when they become older than Parameters.getMAX_AGE();
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Update);
 
         // Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
         //Turned off for now as health determined below based on individual characteristics
@@ -1313,7 +1311,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private BenefitUnit cloneBenefitUnit(BenefitUnit originalBenefitUnit, Household newHousehold, SampleEntry sampleEntry) {
 
         // initialise objects
-        BenefitUnit newBenefitUnit = new BenefitUnit(originalBenefitUnit);
+        BenefitUnit newBenefitUnit = new BenefitUnit(originalBenefitUnit, SimulationEngine.getRnd().nextDouble());
         newBenefitUnit.setHousehold(newHousehold);
         benefitUnits.add(newBenefitUnit);
 
@@ -2082,8 +2080,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     private void partnershipAlignment() {
-        double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment); // Initial values of adjustment to be applied to considerCohabitation probit
+
+        // Initial values of adjustment to be applied to considerCohabitation probit
+        double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
+
+
         PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
+
+
         RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2, 4); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
@@ -2495,7 +2499,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 if (country.equals(Country.UK)) {
 
-                    double innov = person.getFertilityInnov().nextDouble();
+                    double innov = person.getFertilityRandomGen().nextDouble();
                     double prob;
                     if (person.getDag() <= 29 && person.getLes_c4().equals(Les_c4.Student) && !person.isLeftEducation()) {
                         //If age below or equal to 29 and in continuous education follow process F1a
@@ -2505,10 +2509,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         prob =  Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
                     }
                     person.setToGiveBirth(innov < prob);
-                    person.setFertilityPseudoInnov(innov/prob);
+                    person.setFertilityInnov(innov/prob);
                 } else if (country.equals(Country.IT)) {
 
-                    person.setToGiveBirth(person.getFertilityInnov().nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
+                    person.setToGiveBirth(person.getFertilityRandomGen().nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
                 }
             }
         }

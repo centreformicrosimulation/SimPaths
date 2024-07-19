@@ -8,17 +8,17 @@ import simpaths.model.enums.TargetShares;
 
 import java.util.Set;
 
+
 /**
- * PartnershipAlignment adjusts the probability of individuals forming a union to values observed in the data.
- * It modifies the intercept of the "considerCohabitation" probit model.
+ * PartnershipAlignment adjusts the probability of individuals forming a union to match the simulated proportion of the
+ * population in a partnership to values observed in the data. It modifies the intercept of the "considerCohabitation" probit model.
  *
  * To find the value by which the intercept should be adjusted, it uses a search routine.
- * The routine adjusts probabilities, and performs union matching separate from the real matching in the model. If the
- * results differ from the targets based on the data by more than a specified threshold, the adjustment is repeated.
+ * The routine adjusts probabilities, and performs union matching separate from the actual simulation. If the projected
+ * share of the population in a partnership differs from the desired target by more than a specified threshold, the adjustment is repeated.
  *
  * Importantly, the adjustment needs to be only found once. Modified intercepts can then be used in subsequent simulations.
  */
-
 public class PartnershipAlignment implements IEvaluation {
 
     private double targetAggregateShareOfPartneredPersons;
@@ -27,12 +27,15 @@ public class PartnershipAlignment implements IEvaluation {
     private Set<Person> persons;
     private SimPathsModel model;
 
+
+    // CONSTRUCTOR
     public PartnershipAlignment(Set<Person> persons, double partnershipAdjustment) {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         this.persons = persons;
         this.partnershipAdjustment = partnershipAdjustment;
         targetAggregateShareOfPartneredPersons = Parameters.getTargetShare(model.getYear(), TargetShares.Partnership);
     }
+
 
     /**
      * Evaluates the discrepancy between the simulated and target aggregate share of partnered persons and adjusts partnerships if necessary.
@@ -59,6 +62,7 @@ public class PartnershipAlignment implements IEvaluation {
         double error = targetAggregateShareOfPartneredPersons - evalAggregateShareOfPartneredPersons();
         return error;
     }
+
 
     /**
      * Evaluates the aggregate share of persons with partners assigned in a test run of union matching among those eligible for partnership.
