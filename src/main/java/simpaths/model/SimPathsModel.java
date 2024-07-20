@@ -1763,8 +1763,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         Set<Person> matches = new LinkedHashSet<Person>();
 
-        int countAttempts = 0;
         unmatchedSize = 0;
+        int toMatchSize = 0, allMatchesSize = 0;
         for (Region region : Parameters.getCountryRegions()) {
 
             double initialMalesSize = personsToMatch.get(Gender.Male).get(region).size();
@@ -1775,12 +1775,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
             unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
             unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
-
-            ageDiffBound = Parameters.AGE_DIFFERENCE_INITIAL_BOUND;
-            potentialHourlyEarningsDiffBound = Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
-
-            // System.out.println("There are " + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the start");
             Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
+
+            toMatchSize += initialMalesSize;
+
+
+            int countAttempts = 0;
             do {
 
                 // unmatched = IterativeSimpleMatching.getInstance().matching(
@@ -1788,7 +1788,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                         unmatched.getFirst(),    //Males.  Allows to iterate (initially it is personsToMatch.get(Gender.Male).get(region))
                         null,                     //No need for filter sub-population as group is already filtered by gender and region.
-                        null,                     //By not declaring a Comparator, the 'natural ordering' of the Persons will be used to determine the priority with which they get to choose their match.  In the case of Person, there is no natural ordering, so the Matching algorithm randomizes the males, so their priority to choose is random.
+                        new Comparator<Person>(){
+                            @Override
+                            public int compare(Person person1, Person person2) {
+                                double valD = (person1.getCohabitRandomUniform() - person2.getCohabitRandomUniform())*10000.0;
+                                return (int)valD;
+                            }
+                        },                     //By not declaring a Comparator, the 'natural ordering' of the Persons will be used to determine the priority with which they get to choose their match.  In the case of Person, there is no natural ordering, so the Matching algorithm randomizes the males, so their priority to choose is random.
                         unmatched.getSecond(),   //Females. Allows to iterate (initially it is personsToMatch.get(Gender.Female).get(region))
                         null,                     //No need for filter sub-population as group is already filtered by gender and region.
 
@@ -1796,10 +1802,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                             @Override
                             public Double getValue(Person male, Person female) {
 
-                                if (!male.getDgn().equals(Gender.Male))
+                                if (!male.getDgn().equals(Gender.Male)) {
+
                                     throw new RuntimeException("Error - male in getValue() does not actually have the Male gender type!");
-                                if (!female.getDgn().equals(Gender.Female))
+                                }
+                                if (!female.getDgn().equals(Gender.Female)) {
+
                                     throw new RuntimeException("Error - female in getValue() does not actually have the Female gender type!");
+                                }
 
                                 // Differentials are defined in a way that (in case we break symmetry later), a higher
                                 // ageDiff and a higher earningsPotentialDiff favours this person, on the assumption that we
@@ -1810,8 +1820,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                 double potentialHourlyEarningsDiff = male.getFullTimeHourlyEarningsPotential() - female.getFullTimeHourlyEarningsPotential();        //If female.getDesiredEarningPotential > 0, favours wealthier men
                                 double earningsMatch = (potentialHourlyEarningsDiff - female.getDesiredEarningsPotentialDiff());
                                 double ageMatch = (ageDiff - male.getDesiredAgeDiff());
-                                // term to enhance replication of simulated projections
-                                //double rndMatch = (male.getCohabitRandomUniform() - female.getCohabitRandomUniform()) * 10.0;
 
                                 if (ageMatch < ageDiffBound && earningsMatch < potentialHourlyEarningsDiffBound) {
 
@@ -1878,6 +1886,26 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                             Parameters.UNMATCHED_TOLERANCE_THRESHOLD) &&
                             (countAttempts < Parameters.MAXIMUM_ATTEMPTS_MATCHING));
 
+
+
+//            UnionMatching unionMatching = new UnionMatching(unmatched);
+//            unionMatching.evaluate(alignmentRun);
+//            unmatched = unionMatching.getUnmatched();
+//            unmatchedFemales = unionMatching.getUnmatchedFemales();
+//            unmatchedMales = unionMatching.getUnmatchedMales();
+//            Set<Person> maleMatches = unionMatching.getMaleMatches();
+//            Set<Person> femaleMatches = unionMatching.getFemaleMatches();
+//            for (Person person : maleMatches) {
+//                personsToMatch.get(person.getDgn()).get(region).remove(person);
+//            }
+//            for (Person person : femaleMatches) {
+//                personsToMatch.get(person.getDgn()).get(region).remove(person);
+//            }
+//            matches.addAll(maleMatches);
+
+
+
+
             // System.out.println("There are (overall stock of)" + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made for " + region + " is " + matches.size());
             if (!alignmentRun) {
 
@@ -1888,15 +1916,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     unmatchedSize += personsToMatch.get(gender).get(region).size();
                 }
 
-                yearMatches = matches.size();
-                allMatches += matches.size();
-                // System.out.println("Total number of matches made in the year " + matches.size() + " and total number of matches in all years is " + allMatches);
+                //System.out.println("Total number of matches made in the year " + matches.size() + " from a pool to match of size " + toMatchSize);
                 if (commentsOn) log.debug("Marriage matched.");
                 for (BenefitUnit benefitUnit : benefitUnits) {
                     benefitUnit.updateOccupancy();
                 }
             }
         }
+        yearMatches = matches.size();
+        allMatches += matches.size();
+        System.out.println("Total number of matches made in the year " + yearMatches + " from a pool to match of size " + toMatchSize);
     }
 
 
