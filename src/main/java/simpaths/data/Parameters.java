@@ -3174,4 +3174,17 @@ public class Parameters {
         }
     }
 
+    public static double updateProbability(double init, double threshold) {
+
+        if (init<0.0 || init>1.0)
+            throw new RuntimeException("call to update probability that is not strictly within range of 0 and 1");
+        if (threshold<0.0 || threshold>1.0)
+            throw new RuntimeException("call to update probability where threshold is not strictly within range of 0 and 1");
+
+        return (init<threshold) ? init/threshold : (1.0-init)/(1.0-threshold);
+    }
+    public static double updateProbability(double init) {
+
+        return (init<0.5) ? init/0.5 : (1-init) / 0.5;
+    }
 }

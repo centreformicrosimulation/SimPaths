@@ -291,8 +291,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient
     double childCareRandomUniform;
     @Transient
-    double childCareRandomGaussian;
-    @Transient
     double labourRandomUniform;
     @Transient
     double homeOwnerRandomUniform;
@@ -307,9 +305,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Integer labourHoursWeekly1Local;
     @Transient
     private Integer labourHoursWeekly2Local;
-
-    @Transient
-    double randomDrawLabourSupply = -9;
 
 
     /*********************************************************************
@@ -385,7 +380,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         labourRandomGen = new Random(rndTemp.nextLong());
         homeOwnerRandomGen = new Random(rndTemp.nextLong());
         taxRandomGen = new Random(rndTemp.nextLong());
-        randomDrawLabourSupply = -9;
 
         this.n_children_0 = 0;
         this.n_children_1 = 0;
@@ -426,7 +420,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public BenefitUnit(Person person, Set<Person> childrenToNewBenefitUnit, Household newHousehold) {
 
         // initialise benefit unit
-        this(benefitUnitIdCounter++, person.getBenefitUnitInnov());
+        this(benefitUnitIdCounter++, person.getBenefitUnitRandomUniform());
         region = person.getRegion();
 
         if (Parameters.projectLiquidWealth) {
@@ -454,7 +448,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public BenefitUnit(Person p1, Person p2, Set<Person> childrenToNewBenefitUnit, Household newHousehold) {
 
         // initialise benefit unit
-        this(benefitUnitIdCounter++, p1.getBenefitUnitInnov());
+        this(benefitUnitIdCounter++, p1.getBenefitUnitRandomUniform());
         region = p1.getRegion();
 
         if (region != p2.getRegion()) {
@@ -597,7 +591,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
             case Update:
-				updateAtributes();
+				updateAttributes();
                 updateOccupancy();
                 updateChildrenFields();
                 updateComposition(); //Update household composition
@@ -662,7 +656,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    protected void updateAtributes() {
+    protected void updateAttributes() {
 
         // lags
         indicatorChildren03_lag1 = getIndicatorChildren(0,3);
@@ -677,7 +671,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // random draws
         childCareRandomUniform = childCareRandomGen.nextDouble();
-        childCareRandomGaussian = childCareRandomGen.nextGaussian();
         labourRandomUniform = labourRandomGen.nextDouble();
         homeOwnerRandomUniform = homeOwnerRandomGen.nextDouble();
         taxRandomUniform = taxRandomGen.nextDouble();
@@ -984,7 +977,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         TaxEvaluation evaluatedTransfers;
         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
         evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDag(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
-        taxRandomUniform = randomUniformRedraw(taxRandomUniform);
 
         return evaluatedTransfers;
     }
@@ -1025,9 +1017,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private int intFromUniform(int min, int max, double uniform) {
         return (int) Math.round(uniform * (max - min) + min);
     }
-    private double randomUniformRedraw(double uniform) {
-        return (uniform<0.5) ? uniform/0.5 : (1-uniform) / 0.5;
-    }
     protected void chooseRandomMonthlyOutcomeCovid19() {
 
         if (Occupancy.Couple.equals(occupancy)) {
@@ -1038,7 +1027,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                         // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
                         int randomIndex = intFromUniform(0, min(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size()), labourRandomUniform);
-                        labourRandomUniform = randomUniformRedraw(labourRandomUniform);
+                        labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
                         Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
                         Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 
@@ -1058,7 +1047,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                         evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                        taxRandomUniform = randomUniformRedraw(taxRandomUniform);
 
                         disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                         benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
@@ -1070,7 +1058,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     // male has flexible labour supply, female doesn't
                     if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0) {
                         int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), labourRandomUniform);
-                        labourRandomUniform = randomUniformRedraw(labourRandomUniform);
+                        labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
                         Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
 
                         male.setLes_c7_covid(selectedValueMale.getLeft()); // Set labour force status for male
@@ -1085,7 +1073,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         TaxEvaluation evaluatedTransfers;
                         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                         evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                        taxRandomUniform = randomUniformRedraw(taxRandomUniform);
                         disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                         benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                         grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
@@ -1097,7 +1084,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 // female has flexible labour supply, male doesn't
                 if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
                     int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size(), labourRandomUniform);
-                    labourRandomUniform = randomUniformRedraw(labourRandomUniform);
+                    labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
                     Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 
                     female.setLes_c7_covid(selectedValueFemale.getLeft()); // Set labour force status for female
@@ -1113,7 +1100,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     TaxEvaluation evaluatedTransfers;
                     double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                     evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                    taxRandomUniform = randomUniformRedraw(taxRandomUniform);
                     disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                     benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                     grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
@@ -1126,7 +1112,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         } else if (Occupancy.Single_Male.equals(occupancy)) {
             if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0) {
                 int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), labourRandomUniform);
-                labourRandomUniform = randomUniformRedraw(labourRandomUniform);
+                labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
                 Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
                 male.setLes_c7_covid(selectedValueMale.getLeft()); // Set labour force status for male
                 male.setLabourSupplyWeekly(Labour.convertHoursToLabour(selectedValueMale.getRight()));
@@ -1138,7 +1124,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 TaxEvaluation evaluatedTransfers;
                 double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                 evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), -1, 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                taxRandomUniform = randomUniformRedraw(taxRandomUniform);
                 disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                 benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                 grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
@@ -1148,7 +1133,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         } else {
             if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
                 int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size(), labourRandomUniform);
-                labourRandomUniform = randomUniformRedraw(labourRandomUniform);
+                labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
                 Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
                 female.setLes_c7_covid(selectedValueFemale.getLeft()); // Set labour force status for female
                 female.setLabourSupplyWeekly(Labour.convertHoursToLabour(selectedValueFemale.getRight()));
@@ -1160,7 +1145,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 TaxEvaluation evaluatedTransfers;
                 double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                 evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), -1, female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                taxRandomUniform = randomUniformRedraw(taxRandomUniform);
                 disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                 benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                 grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
@@ -1294,12 +1278,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     if (labourRandomUniform < prob) {
                         // receives SEISS
 
-                        labourRandomUniform /= prob;
                         person.setCovidModuleReceivesSEISS(Indicator.True);
                         grossMonthlyIncomeToReturn = 0.8 * person.getCovidModuleGrossLabourIncome_lag1();
-                    } else {
-                        labourRandomUniform = (1 - labourRandomUniform) / (1.0 - prob);
                     }
+                    labourRandomUniform = Parameters.updateProbability(labourRandomUniform, prob);
                 }
             } else if (transitionTo.equals(Les_transitions_S1.NotEmployed)) {
                 newWorkHours = 0;
@@ -1342,10 +1324,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     protected void updateLabourSupplyAndIncome() {
-
-        if (randomDrawLabourSupply < 0) {
-            randomDrawLabourSupply = labourRandomUniform.nextDouble();
-        }
 
         resetLabourStates();
         if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
@@ -1555,7 +1533,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             //Sample labour supply from possible labour (pairs of) values
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
-                labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, randomDrawLabourSupply);
+                labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourRandomUniform);
+                // labourRandomUniform is not updated here to avoid issues with search routine for labour market alignment
             } catch (RuntimeException e) {
                 System.out.print("Could not determine labour supply choice for BU with ID: " + getKey().getId());
             }
@@ -3041,22 +3020,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                 double prob = Parameters.getRegHomeownershipHO1a().getProbability(male, Person.DoublesVariables.class);
                 if (homeOwnerRandomUniform < prob) {
-                    homeOwnerRandomUniform /= prob;
                     male_homeowner = true;
-                } else {
-                    homeOwnerRandomUniform = (1.0 - homeOwnerRandomUniform) / (1.0 - prob);
                 }
+                homeOwnerRandomUniform = Parameters.updateProbability(homeOwnerRandomUniform, prob);
                 male.setDhh_owned(male_homeowner);
             }
             if (female!=null) {
 
                 double prob = Parameters.getRegHomeownershipHO1a().getProbability(female, Person.DoublesVariables.class);
                 if (homeOwnerRandomUniform < prob) {
-                    homeOwnerRandomUniform /= prob;
                     female_homeowner = true;
-                } else {
-                    homeOwnerRandomUniform = (1.0 - homeOwnerRandomUniform) / (1.0 - prob);
                 }
+                homeOwnerRandomUniform = Parameters.updateProbability(homeOwnerRandomUniform, prob);
                 female.setDhh_owned(female_homeowner);
             }
             if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
@@ -4053,17 +4028,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             double prob = Parameters.getRegChildcareC1a().getProbability(this, Regressors.class);
             if (childCareRandomUniform < prob) {
 
-                childCareRandomUniform /= prob;
+                childCareRandomUniform = childCareRandomUniform / prob;
                 double score = Parameters.getRegChildcareC1b().getScore(this, Regressors.class);
                 double rmse = Parameters.getRMSEForRegression("C1b");
-                double gauss = childCareRandomGaussian;
+                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(childCareRandomUniform);
+                childCareRandomUniform = Parameters.updateProbability(childCareRandomUniform);
                 childcareCostPerWeek = Math.exp(score + rmse * gauss);
                 double costCap = childCareCostCapWeekly();
                 if (costCap > 0.0 && costCap < getChildcareCostPerWeek()) {
                     childcareCostPerWeek = costCap;
                 }
             } else {
-
                 childCareRandomUniform = (1.0 - childCareRandomUniform) / (1.0 - prob);
             }
         }

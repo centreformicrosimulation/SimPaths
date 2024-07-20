@@ -8,8 +8,8 @@
 **************************************************************************************/
 
 clear all
-global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test_base_noalign\csv"
-global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test_naive_noalign\csv"
+global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test1\csv"
+global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\test2\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
 
@@ -47,7 +47,7 @@ foreach vv of varlist carehoursfrompartnerweekly carehoursfromdaughterweekly car
 
 destring hoursworkedweekly, replace force
 recode hoursworkedweekly (missing=0)
-save "$outdir/test_base_noalign", replace
+save "$outdir/test1", replace
 
 
 import delimited using "$naivedir/BenefitUnit.csv", clear
@@ -76,7 +76,7 @@ foreach vv of varlist carehoursfrompartnerweekly carehoursfromdaughterweekly car
 
 destring hoursworkedweekly, replace force
 recode hoursworkedweekly (missing=0)
-save "$outdir/test_naive_noalign", replace
+save "$outdir/test2", replace
 
 
 /**************************************************************************************

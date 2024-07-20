@@ -225,3 +225,5 @@ analysis/test_base.dta
 analysis/test_naive.dta
 analysis/test_base_noalign.dta
 analysis/test_naive_noalign.dta
+analysis/test1.dta
+analysis/test2.dta

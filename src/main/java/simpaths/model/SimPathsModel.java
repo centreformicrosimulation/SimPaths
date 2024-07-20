@@ -454,7 +454,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.CheckForExitingPersons);
         addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.Update);
+        addCollectionEventToAllYears(persons, Person.Processes.Update);
+
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Aging);
 
         // Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
         //Turned off for now as health determined below based on individual characteristics
@@ -785,9 +787,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 //				if (commentsOn) log.info("Health alignment complete.");
 //				break;
             case UnionMatching:
-                if(unionMatchingMethod.equals(UnionMatchingMethod.SBAM)) {
+                if(UnionMatchingMethod.SBAM.equals(unionMatchingMethod)) {
                     unionMatchingSBAM();
-                } else if (unionMatchingMethod.equals(UnionMatchingMethod.Parametric)) {
+                } else if (UnionMatchingMethod.Parametric.equals(unionMatchingMethod)) {
                     unionMatching(false);
                 } else {
                     unionMatching(false);
@@ -1755,6 +1757,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     /**
      *
      * @param alignmentRun If true, real unions will not be formed. Instead, flags will be set for individual to indicate those who would have formed a union.
+     *
      */
     protected void unionMatching(boolean alignmentRun) {
 
@@ -1764,14 +1767,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         unmatchedSize = 0;
         for (Region region : Parameters.getCountryRegions()) {
 
-            log.debug("Number of females to match: " + personsToMatch.get(Gender.Female).get(region).size() +
-                    ", number of males to match: " + personsToMatch.get(Gender.Male).get(region).size());
             double initialMalesSize = personsToMatch.get(Gender.Male).get(region).size();
             double initialFemalesSize = personsToMatch.get(Gender.Female).get(region).size();
+            log.debug("Number of females to match: " + initialFemalesSize + ", number of males to match: " + initialMalesSize);
+
             Set<Person> unmatchedMales = new LinkedHashSet<Person>();
             Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
             unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
             unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
+
             ageDiffBound = Parameters.AGE_DIFFERENCE_INITIAL_BOUND;
             potentialHourlyEarningsDiffBound = Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
 
@@ -1792,14 +1796,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                             @Override
                             public Double getValue(Person male, Person female) {
 
-                                if (!male.getDgn().equals(Gender.Male)) {
-
+                                if (!male.getDgn().equals(Gender.Male))
                                     throw new RuntimeException("Error - male in getValue() does not actually have the Male gender type!");
-                                }
-                                if (!female.getDgn().equals(Gender.Female)) {
-
+                                if (!female.getDgn().equals(Gender.Female))
                                     throw new RuntimeException("Error - female in getValue() does not actually have the Female gender type!");
-                                }
 
                                 // Differentials are defined in a way that (in case we break symmetry later), a higher
                                 // ageDiff and a higher earningsPotentialDiff favours this person, on the assumption that we
@@ -1810,6 +1810,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                 double potentialHourlyEarningsDiff = male.getFullTimeHourlyEarningsPotential() - female.getFullTimeHourlyEarningsPotential();        //If female.getDesiredEarningPotential > 0, favours wealthier men
                                 double earningsMatch = (potentialHourlyEarningsDiff - female.getDesiredEarningsPotentialDiff());
                                 double ageMatch = (ageDiff - male.getDesiredAgeDiff());
+                                // term to enhance replication of simulated projections
+                                //double rndMatch = (male.getCohabitRandomUniform() - female.getCohabitRandomUniform()) * 10.0;
 
                                 if (ageMatch < ageDiffBound && earningsMatch < potentialHourlyEarningsDiffBound) {
 
@@ -1878,6 +1880,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             // System.out.println("There are (overall stock of)" + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made for " + region + " is " + matches.size());
             if (!alignmentRun) {
+
                 for (Gender gender : Gender.values()) {
 
                     // Turned off to allow unmatched people try again next year without the need to go through considerCohabitation process
@@ -1895,6 +1898,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
         }
     }
+
 
     /**
      * PROCESS - UNION MATCHING WITH REGION RELAXED
@@ -2497,10 +2501,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             CollectionUtils.select(getPersons(), new FertileFilter<>(region), fertilePersons);
             for (Person person : fertilePersons) {
 
+                double prob;
                 if (country.equals(Country.UK)) {
 
-                    double innov = person.getFertilityRandomGen().nextDouble();
-                    double prob;
                     if (person.getDag() <= 29 && person.getLes_c4().equals(Les_c4.Student) && !person.isLeftEducation()) {
                         //If age below or equal to 29 and in continuous education follow process F1a
                         prob = Parameters.getRegFertilityF1a().getProbability(person, Person.DoublesVariables.class);
@@ -2508,12 +2511,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         //Otherwise if not in continuous education, follow process F1b
                         prob =  Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
                     }
-                    person.setToGiveBirth(innov < prob);
-                    person.setFertilityInnov(innov/prob);
                 } else if (country.equals(Country.IT)) {
 
-                    person.setToGiveBirth(person.getFertilityRandomGen().nextDouble() < Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class));
-                }
+                    prob = Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class);
+                } else
+                    throw new RuntimeException("Country not recognised when evaluating fertility status");
+
+                double innov = person.getFertilityRandomUniform();
+                person.setToGiveBirth(innov < prob);
+                innov = Parameters.updateProbability(innov, prob);
+                person.setFertilityRandomUniform(innov);
             }
         }
     }
