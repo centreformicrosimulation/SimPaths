@@ -42,7 +42,6 @@ import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
 import microsim.engine.SimulationEngine;
-import microsim.matching.IterativeRandomMatching;
 import microsim.matching.IterativeSimpleMatching;
 import microsim.matching.MatchingClosure;
 import microsim.matching.MatchingScoreClosure;
@@ -1780,7 +1779,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             toMatchSize += initialMalesSize;
 
             UnionMatching unionMatching = new UnionMatching(unmatched);
-            unionMatching.evaluate(alignmentRun);
+            unionMatching.evaluateGM(alignmentRun);
             unmatched = unionMatching.getUnmatched();
             unmatchedFemales = unionMatching.getUnmatchedFemales();
             unmatchedMales = unionMatching.getUnmatchedMales();
@@ -1813,8 +1812,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
         yearMatches = matches.size();
         allMatches += matches.size();
-        if (!alignmentRun)
-            System.out.println("Total number of matches made in the year " + yearMatches + " from a pool to match of size " + toMatchSize);
+//        if (!alignmentRun)
+//            System.out.println("Total number of matches made in the year " + yearMatches + " from a pool to match of size " + toMatchSize);
     }
 
 
@@ -1837,7 +1836,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
 
         UnionMatching unionMatching = new UnionMatching(unmatched);
-        unionMatching.evaluate(alignmentRun);
+        unionMatching.evaluateGM(alignmentRun);
         unmatched = unionMatching.getUnmatched();
         unmatchedFemales = unionMatching.getUnmatchedFemales();
         unmatchedMales = unionMatching.getUnmatchedMales();
