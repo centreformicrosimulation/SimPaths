@@ -43,100 +43,88 @@ public class UnionMatching {
     // EVALUATE MATCHES
     public void evaluate(boolean alignmentRun) {
 
-        int countAttempts = 0;
-        do {
+        // unmatched = IterativeSimpleMatching.getInstance().matching(
+        unmatched = IterativeRandomMatching.getInstance().matching(
 
-            // unmatched = IterativeSimpleMatching.getInstance().matching(
-            unmatched = IterativeRandomMatching.getInstance().matching(
+                unmatched.getFirst(),    //Males.  Allows to iterate (initially it is personsToMatch.get(Gender.Male).get(region))
+                null,                    //No need for filter sub-population as group is already filtered by gender and region.
+                new Comparator<Person>(){
+                    @Override
+                    public int compare(Person person1, Person person2) {
+                        double valD = (person1.getCohabitRandomUniform() - person2.getCohabitRandomUniform())*10000.0;
+                        return (int)valD;
+                    }
+                },
+                unmatched.getSecond(),   //Females. Allows to iterate (initially it is personsToMatch.get(Gender.Female).get(region))
+                null,                    //No need for filter sub-population as group is already filtered by gender and region.
 
-                    unmatched.getFirst(),    //Males.  Allows to iterate (initially it is personsToMatch.get(Gender.Male).get(region))
-                    null,                     //No need for filter sub-population as group is already filtered by gender and region.
-                    new Comparator<Person>(){
-                        @Override
-                        public int compare(Person person1, Person person2) {
-                            double valD = (person1.getCohabitRandomUniform() - person2.getCohabitRandomUniform())*10000.0;
-                            return (int)valD;
-                        }
-                    },                     //By not declaring a Comparator, the 'natural ordering' of the Persons will be used to determine the priority with which they get to choose their match.  In the case of Person, there is no natural ordering, so the Matching algorithm randomizes the males, so their priority to choose is random.
-                    unmatched.getSecond(),   //Females. Allows to iterate (initially it is personsToMatch.get(Gender.Female).get(region))
-                    null,                     //No need for filter sub-population as group is already filtered by gender and region.
+                new MatchingScoreClosure<Person>() {
+                    @Override
+                    public Double getValue(Person male, Person female) {
 
-                    new MatchingScoreClosure<Person>() {
-                        @Override
-                        public Double getValue(Person male, Person female) {
+                        if (!male.getDgn().equals(Gender.Male))
+                            throw new RuntimeException("male in getValue() of UnionMatching.evaluate does not actually have the Male gender type");
+                        if (!female.getDgn().equals(Gender.Female))
+                            throw new RuntimeException("female in getValue() of UnionMatching.evaluate does not actually have the Female gender type");
 
-                            if (!male.getDgn().equals(Gender.Male))
-                                throw new RuntimeException("male in getValue() of UnionMatching.evaluate does not actually have the Male gender type");
-                            if (!female.getDgn().equals(Gender.Female))
-                                throw new RuntimeException("female in getValue() of UnionMatching.evaluate does not actually have the Female gender type");
+                        // Differentials are defined in a way that (in case we break symmetry later), a higher
+                        // ageDiff and a higher earningsPotentialDiff favours this person, on the assumption that we
+                        // all want younger, wealthier partners.  However, it is probably not going to be used as we
+                        // will probably end up just trying to minimise the square difference between that observed
+                        // in data and here.
+                        double ageDiff = male.getDag() - female.getDag();            //If male.getDesiredAgeDiff > 0, favours younger women
+                        double potentialHourlyEarningsDiff = male.getFullTimeHourlyEarningsPotential() - female.getFullTimeHourlyEarningsPotential();        //If female.getDesiredEarningPotential > 0, favours wealthier men
+                        double earningsMatch = (potentialHourlyEarningsDiff - female.getDesiredEarningsPotentialDiff());
+                        double ageMatch = (ageDiff - male.getDesiredAgeDiff());
+                        // term to enhance replication of simulated projections
+                        //double rndMatch = (male.getCohabitRandomUniform() - female.getCohabitRandomUniform()) * 10.0;
 
-                            // Differentials are defined in a way that (in case we break symmetry later), a higher
-                            // ageDiff and a higher earningsPotentialDiff favours this person, on the assumption that we
-                            // all want younger, wealthier partners.  However, it is probably not going to be used as we
-                            // will probably end up just trying to minimise the square difference between that observed
-                            // in data and here.
-                            double ageDiff = male.getDag() - female.getDag();            //If male.getDesiredAgeDiff > 0, favours younger women
-                            double potentialHourlyEarningsDiff = male.getFullTimeHourlyEarningsPotential() - female.getFullTimeHourlyEarningsPotential();        //If female.getDesiredEarningPotential > 0, favours wealthier men
-                            double earningsMatch = (potentialHourlyEarningsDiff - female.getDesiredEarningsPotentialDiff());
-                            double ageMatch = (ageDiff - male.getDesiredAgeDiff());
-                            // term to enhance replication of simulated projections
-                            //double rndMatch = (male.getCohabitRandomUniform() - female.getCohabitRandomUniform()) * 10.0;
+                        if (ageMatch < ageDiffBound && earningsMatch < potentialHourlyEarningsDiffBound) {
 
-                            if (ageMatch < ageDiffBound && earningsMatch < potentialHourlyEarningsDiffBound) {
+                            // Score currently based on an equally weighted measure.  The Iterative (Simple and Random) Matching algorithm prioritises matching to the potential partner that returns the lowest score from this method (therefore, on aggregate we are trying to minimize the value below).
+                            return earningsMatch * earningsMatch + ageMatch * ageMatch;
+                        } else return Double.POSITIVE_INFINITY;        //Not to be included in possible partners
+                    }
+                },
 
-                                // Score currently based on an equally weighted measure.  The Iterative (Simple and Random) Matching algorithm prioritises matching to the potential partner that returns the lowest score from this method (therefore, on aggregate we are trying to minimize the value below).
-                                return earningsMatch * earningsMatch + ageMatch * ageMatch;
-                            } else return Double.POSITIVE_INFINITY;        //Not to be included in possible partners
-                        }
-                    },
+                new MatchingClosure<Person>() {
+                    @Override
+                    public void match(Person male, Person female) {        //The SimpleMatching.getInstance().matching() assumes the first collection in the argument (males in this case) is also the collection that the first argument of the MatchingClosure.match() is sampled from.
 
-                    new MatchingClosure<Person>() {
-                        @Override
-                        public void match(Person male, Person female) {        //The SimpleMatching.getInstance().matching() assumes the first collection in the argument (males in this case) is also the collection that the first argument of the MatchingClosure.match() is sampled from.
+                        if (!male.getDgn().equals(Gender.Male))
+                            throw new RuntimeException("male in match() of UnionMatching.evaluate does not actually have the Male gender type");
+                        if (!female.getDgn().equals(Gender.Female))
+                            throw new RuntimeException("female in match() of UnionMatching.evaluate does not actually have the Female gender type");
 
-                            if (!male.getDgn().equals(Gender.Male))
-                                throw new RuntimeException("male in match() of UnionMatching.evaluate does not actually have the Male gender type");
-                            if (!female.getDgn().equals(Gender.Female))
-                                throw new RuntimeException("female in match() of UnionMatching.evaluate does not actually have the Female gender type");
+                        unmatchedMales.remove(male);
+                        unmatchedFemales.remove(female);
+                        maleMatches.add(male);
+                        femaleMatches.add(female);
 
-                            unmatchedMales.remove(male);
-                            unmatchedFemales.remove(female);
-                            maleMatches.add(male);
-                            femaleMatches.add(female);
+                        if (alignmentRun) {
 
-                            if (alignmentRun) {
+                            male.setHasTestPartner(true);
+                            female.setHasTestPartner(true);
+                        } else {
 
-                                male.setHasTestPartner(true);
-                                female.setHasTestPartner(true);
-                            } else {
+                            if (!male.getRegion().equals(female.getRegion()))
+                                female.setRegion(male.getRegion());
 
-                                if (!male.getRegion().equals(female.getRegion()))
-                                    female.setRegion(male.getRegion());
+                            male.setPartner(female);
+                            female.setPartner(male);
+                            male.setHousehold_status(Household_status.Couple);
+                            female.setHousehold_status(Household_status.Couple);
+                            male.setDcpyy(0); //Set years in partnership to 0
+                            female.setDcpyy(0);
+                            male.setDcpst(Dcpst.Partnered);
+                            female.setDcpst(Dcpst.Partnered);
 
-                                male.setPartner(female);
-                                female.setPartner(male);
-                                male.setHousehold_status(Household_status.Couple);
-                                female.setHousehold_status(Household_status.Couple);
-                                male.setDcpyy(0); //Set years in partnership to 0
-                                female.setDcpyy(0);
-                                male.setDcpst(Dcpst.Partnered);
-                                female.setDcpst(Dcpst.Partnered);
-
-                                //Update household
-                                male.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both male and female.  Note need to have partner reference before calling setupNewHome!
-                            }
+                            //Update household
+                            male.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both male and female.  Note need to have partner reference before calling setupNewHome!
                         }
                     }
-            );
-
-            // Relax differential bounds for next iteration (in the case where there has not been a high enough proportion of matches)
-            ageDiffBound *= Parameters.RELAXATION_FACTOR;
-            potentialHourlyEarningsDiffBound *= Parameters.RELAXATION_FACTOR;
-            countAttempts++;
-            // System.out.println("unmatched males proportion " + unmatchedMales.size() / (double) initialMalesSize);
-            // System.out.println("unmatched females proportion " + unmatchedFemales.size() / (double) initialFemalesSize);
-        } while ( (Math.min((unmatchedMales.size()/(double) initialMaleSize), (unmatchedFemales.size()/(double) initialFemaleSize)) >
-                        Parameters.UNMATCHED_TOLERANCE_THRESHOLD) && (countAttempts < Parameters.MAXIMUM_ATTEMPTS_MATCHING));
+                }
+        );
     }
 
     /**
