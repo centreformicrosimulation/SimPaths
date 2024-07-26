@@ -787,9 +787,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				toBePartneredFemales.setFilter(new GenderCSfilter(Gender.Female));
 				cohabitationDesireByGender.addSeries("Males", new Weighted_SumArrayFunction.Integer(toBePartneredMales), null, colorArrayList.get(0), false);
 				cohabitationDesireByGender.addSeries("Females", new Weighted_SumArrayFunction.Integer(toBePartneredFemales), null, colorArrayList.get(1), false);
-			//	cohabitationDesireByGender.addSeries("Total matches", model, "getAllMatches", true);
-				cohabitationDesireByGender.addSeries("Year matches", model, "getYearMatches", true);
-				cohabitationDesireByGender.addSeries("Total unmatched", model, "getUnmatchedSize", true);
 				cohabitationDesireByGender.setName("Individuals looking for partner");
 				updateChartSet.add(cohabitationDesireByGender);
 				tabSet.add(cohabitationDesireByGender);

@@ -1749,9 +1749,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * (option C in Lia & Matteo's document 'BenefitUnit formation')
      *
      */
-    int allMatches = 0;
-    int yearMatches = 0;
-    int unmatchedSize = 0;
+    List<Pair<Person,Person>> matches = new ArrayList<>();
+
 
     /**
      *
@@ -1760,15 +1759,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      */
     protected void unionMatching(boolean alignmentRun) {
 
-        Set<Person> matches = new LinkedHashSet<>();
-
-        unmatchedSize = 0;
-        int toMatchSize = 0;
+        matches.clear();
         for (Region region : Parameters.getCountryRegions()) {
-
-            double initialMalesSize = personsToMatch.get(Gender.Male).get(region).size();
-            double initialFemalesSize = personsToMatch.get(Gender.Female).get(region).size();
-            log.debug("Number of females to match: " + initialFemalesSize + ", number of males to match: " + initialMalesSize);
 
             Set<Person> unmatchedMales = new LinkedHashSet<Person>();
             Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
@@ -1776,85 +1768,31 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
             Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
 
-            toMatchSize += initialMalesSize;
+            evalMatches(unmatched, alignmentRun);
 
-            UnionMatching unionMatching = new UnionMatching(unmatched);
-            unionMatching.evaluateGM(alignmentRun);
-            unmatched = unionMatching.getUnmatched();
-            unmatchedFemales = unionMatching.getUnmatchedFemales();
-            unmatchedMales = unionMatching.getUnmatchedMales();
-            Set<Person> maleMatches = unionMatching.getMaleMatches();
-            Set<Person> femaleMatches = unionMatching.getFemaleMatches();
-            for (Person person : maleMatches) {
-                personsToMatch.get(person.getDgn()).get(region).remove(person);
-            }
-            for (Person person : femaleMatches) {
-                personsToMatch.get(person.getDgn()).get(region).remove(person);
-            }
-            matches.addAll(maleMatches);
-
-            // System.out.println("There are (overall stock of)" + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made for " + region + " is " + matches.size());
             if (!alignmentRun) {
 
-                for (Gender gender : Gender.values()) {
-
-                    // Turned off to allow unmatched people try again next year without the need to go through considerCohabitation process
-                    // personsToMatch.get(gender).get(region).clear();		//Nothing happens to unmatched people.  The next time they considerCohabitation, they will (probabilistically) have the opportunity to enter the matching pool again.
-                    unmatchedSize += personsToMatch.get(gender).get(region).size();
-                }
-
-                //System.out.println("Total number of matches made in the year " + matches.size() + " from a pool to match of size " + toMatchSize);
                 if (commentsOn) log.debug("Marriage matched.");
                 for (BenefitUnit benefitUnit : benefitUnits) {
                     benefitUnit.updateOccupancy();
                 }
             }
         }
-        yearMatches = matches.size();
-        allMatches += matches.size();
-//        if (!alignmentRun)
-//            System.out.println("Total number of matches made in the year " + yearMatches + " from a pool to match of size " + toMatchSize);
     }
 
-
-    /**
-     * PROCESS - UNION MATCHING WITH REGION RELAXED
-     */
     protected void unionMatchingNoRegion(boolean alignmentRun) {
 
         Set<Person> unmatchedMales = new LinkedHashSet<Person>();
         Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
-
-        Set<Person> matches = new LinkedHashSet<Person>();
-
         for (Region region : Parameters.getCountryRegions()) {
-
             unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
             unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
         }
-
         Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
 
-        UnionMatching unionMatching = new UnionMatching(unmatched);
-        unionMatching.evaluateGM(alignmentRun);
-        unmatched = unionMatching.getUnmatched();
-        unmatchedFemales = unionMatching.getUnmatchedFemales();
-        unmatchedMales = unionMatching.getUnmatchedMales();
-        Set<Person> maleMatches = unionMatching.getMaleMatches();
-        Set<Person> femaleMatches = unionMatching.getFemaleMatches();
-        for (Person person : maleMatches) {
-            personsToMatch.get(person.getDgn()).get(person.getRegion()).remove(person);
-        }
-        for (Person person : femaleMatches) {
-            for (Region region : Parameters.getCountryRegions()) {
-                personsToMatch.get(person.getDgn()).get(region).remove(person);
-            }
-        }
-        matches.addAll(maleMatches);
+        evalMatches(unmatched, alignmentRun);
 
-        if (!alignmentRun) {
-            allMatches += matches.size();
-        } else {
+        if (alignmentRun) {
             // Clear set if used within the matching procedure
             for (Gender gender : Gender.values()) {
                 for (Region region : Region.values()) {
@@ -1862,7 +1800,22 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 }
             }
         }
-//		System.out.println("There are " + unmatchedMales.size() + " unmatched males and " + unmatchedFemales.size() + " unmatched females at the end. Number of matches made " + matches.size() + " and total number of matches in all years is " + allMatches);
+    }
+
+    private void evalMatches(Pair<Set<Person>, Set<Person>> unmatched, boolean alignmentRun) {
+
+        UnionMatching unionMatching = new UnionMatching(unmatched, alignmentRun);
+        unionMatching.evaluateGM();
+        List<Pair<Person,Person>> matchesHere = unionMatching.getMatches();
+        for (Pair<Person,Person> match : matchesHere) {
+            Person male = match.getFirst();
+            Person female = match.getSecond();
+            personsToMatch.get(male.getDgn()).get(male.getRegion()).remove(male);
+            for (Region region : Parameters.getCountryRegions()) {
+                personsToMatch.get(female.getDgn()).get(region).remove(female);
+            }
+        }
+        matches.addAll(matchesHere);
     }
 
     private void socialCareMarketClearning() {
@@ -3319,18 +3272,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setLabourMarketCovid19On(boolean labourMarketCovid19On) {
         this.labourMarketCovid19On = labourMarketCovid19On;
-    }
-
-    public int getAllMatches() {
-        return allMatches;
-    }
-
-    public int getUnmatchedSize() {
-        return unmatchedSize;
-    }
-
-    public int getYearMatches() {
-        return yearMatches;
     }
 
     public SimPathsCollector getCollector() {
