@@ -289,11 +289,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     RandomGenerator taxRandomGen;
 
     @Transient
-    double childCareRandomUniform;
+    double childCareRandomUniform1;
     @Transient
-    double labourRandomUniform;
+    double childCareRandomUniform2;
     @Transient
-    double homeOwnerRandomUniform;
+    double labourRandomUniform1;
+    @Transient
+    double labourRandomUniform2;
+    @Transient
+    double labourRandomUniform3;
+    @Transient
+    double labourRandomUniform4;
+    @Transient
+    double homeOwnerRandomUniform1;
+    @Transient
+    double homeOwnerRandomUniform2;
     @Transient
     double taxRandomUniform;
 
@@ -670,9 +680,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         ydses_c5_lag1 = getYdses_c5();
 
         // random draws
-        childCareRandomUniform = childCareRandomGen.nextDouble();
-        labourRandomUniform = labourRandomGen.nextDouble();
-        homeOwnerRandomUniform = homeOwnerRandomGen.nextDouble();
+        childCareRandomUniform1 = childCareRandomGen.nextDouble();
+        childCareRandomUniform2 = childCareRandomGen.nextDouble();
+        labourRandomUniform1 = labourRandomGen.nextDouble();
+        labourRandomUniform2 = labourRandomGen.nextDouble();
+        labourRandomUniform3 = labourRandomGen.nextDouble();
+        labourRandomUniform4 = labourRandomGen.nextDouble();
+        homeOwnerRandomUniform1 = homeOwnerRandomGen.nextDouble();
+        homeOwnerRandomUniform2 = homeOwnerRandomGen.nextDouble();
         taxRandomUniform = taxRandomGen.nextDouble();
 
     }
@@ -1019,6 +1034,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
     protected void chooseRandomMonthlyOutcomeCovid19() {
 
+        double labourInnov = labourRandomUniform1;
         if (Occupancy.Couple.equals(occupancy)) {
             if(male.atRiskOfWork()) {
                 if(female.atRiskOfWork()) {
@@ -1026,8 +1042,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0 && covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
 
                         // Get random int which indicates which monthly value to use. Use smaller value in case male and female lists were of different length.
-                        int randomIndex = intFromUniform(0, min(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size()), labourRandomUniform);
-                        labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
+                        int randomIndex = intFromUniform(0, min(covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size()), labourInnov);
                         Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
                         Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 
@@ -1057,8 +1072,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     // male has flexible labour supply, female doesn't
                     if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0) {
-                        int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), labourRandomUniform);
-                        labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
+                        int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), labourInnov);
                         Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
 
                         male.setLes_c7_covid(selectedValueMale.getLeft()); // Set labour force status for male
@@ -1083,8 +1097,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else if (female.atRiskOfWork()) {
                 // female has flexible labour supply, male doesn't
                 if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
-                    int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size(), labourRandomUniform);
-                    labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
+                    int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size(), labourInnov);
                     Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
 
                     female.setLes_c7_covid(selectedValueFemale.getLeft()); // Set labour force status for female
@@ -1111,8 +1124,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
         } else if (Occupancy.Single_Male.equals(occupancy)) {
             if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size() > 0) {
-                int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), labourRandomUniform);
-                labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
+                int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.size(), labourInnov);
                 Triple<Les_c7_covid, Double, Integer> selectedValueMale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale.get(randomIndex);
                 male.setLes_c7_covid(selectedValueMale.getLeft()); // Set labour force status for male
                 male.setLabourSupplyWeekly(Labour.convertHoursToLabour(selectedValueMale.getRight()));
@@ -1132,8 +1144,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
         } else {
             if (covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size() > 0) {
-                int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size(), labourRandomUniform);
-                labourRandomUniform = Parameters.updateProbability(labourRandomUniform);
+                int randomIndex = intFromUniform(0, covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.size(), labourInnov);
                 Triple<Les_c7_covid, Double, Integer> selectedValueFemale = covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale.get(randomIndex);
                 female.setLes_c7_covid(selectedValueFemale.getLeft()); // Set labour force status for female
                 female.setLabourSupplyWeekly(Labour.convertHoursToLabour(selectedValueFemale.getRight()));
@@ -1182,11 +1193,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         double grossMonthlyIncomeToReturn = 0; // Gross income to return to updateLabourSupplyCovid19() method
 
         // Transitions from employment
+        double labourInnov2 = labourRandomUniform2, labourInnov3 = labourRandomUniform3;
         if (Les_c7_covid.Employee.equals(stateFrom)) {
             Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_E1.class);
-            MultiValEvent event = new MultiValEvent(probs, labourRandomUniform);
+            MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_E1 transitionTo = (Les_transitions_E1) event.eval();
-            labourRandomUniform = event.getRandomDrawAdjusted();
             stateTo = transitionTo.convertToLes_c7_covid();
             person.setLes_c7_covid(stateTo); // Use convert to les c6 covid method from the enum to convert the outcome to the les c6 scale and update the variable
 
@@ -1210,9 +1221,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             // Transitions from furlough full
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFull)) {
             Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FF1.class);
-            MultiValEvent event = new MultiValEvent(probs, labourRandomUniform);
+            MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FF1 transitionTo = (Les_transitions_FF1) event.eval();
-            labourRandomUniform = event.getRandomDrawAdjusted();
 
             stateTo = transitionTo.convertToLes_c7_covid();
             person.setLes_c7_covid(stateTo); // Use convert to les c7 covid method from the enum to convert the outcome to the les c7 scale and update the variable
@@ -1236,9 +1246,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             // Transitions from furlough flex
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFlex)) {
             Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FX1.class);
-            MultiValEvent event = new MultiValEvent(probs, labourRandomUniform);
+            MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FX1 transitionTo = (Les_transitions_FX1) event.eval();
-            labourRandomUniform = event.getRandomDrawAdjusted();
             stateTo = transitionTo.convertToLes_c7_covid();
             person.setLes_c7_covid(stateTo); // Use convert to les c7 covid method from the enum to convert the outcome to the les c7 scale and update the variable
 
@@ -1261,9 +1270,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             // Transitions from self-employment
         } else if (stateFrom.equals(Les_c7_covid.SelfEmployed)) {
             Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_S1.class);
-            MultiValEvent event = new MultiValEvent(probs, labourRandomUniform);
+            MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_S1 transitionTo = (Les_transitions_S1) event.eval();
-            labourRandomUniform = event.getRandomDrawAdjusted();
             stateTo = transitionTo.convertToLes_c7_covid();
             person.setLes_c7_covid(stateTo); // Use convert to les c6 covid method from the enum to convert the outcome to the les c6 scale and update the variable
 
@@ -1275,13 +1283,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (transitionTo.equals(Les_transitions_S1.SelfEmployed) && grossMonthlyIncomeToReturn < person.getCovidModuleGrossLabourIncome_lag1()) {
 
                     double prob = Parameters.getRegC19LS_S3().getProbability(person, Person.DoublesVariables.class);
-                    if (labourRandomUniform < prob) {
+                    if (labourInnov3 < prob) {
                         // receives SEISS
 
                         person.setCovidModuleReceivesSEISS(Indicator.True);
                         grossMonthlyIncomeToReturn = 0.8 * person.getCovidModuleGrossLabourIncome_lag1();
                     }
-                    labourRandomUniform = Parameters.updateProbability(labourRandomUniform, prob);
                 }
             } else if (transitionTo.equals(Les_transitions_S1.NotEmployed)) {
                 newWorkHours = 0;
@@ -1291,9 +1298,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             // Transitions from non-employment
         } else if (stateFrom.equals(Les_c7_covid.NotEmployed)) {
             Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_U1.class);
-            MultiValEvent event = new MultiValEvent(probs, labourRandomUniform);
+            MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_U1 transitionTo = (Les_transitions_U1) event.eval();
-            labourRandomUniform = event.getRandomDrawAdjusted();
             stateTo = transitionTo.convertToLes_c7_covid();
             person.setLes_c7_covid(stateTo); // Use convert to les c6 covid method from the enum to convert the outcome to the les c6 scale and update the variable
 
@@ -1531,9 +1537,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
 
             //Sample labour supply from possible labour (pairs of) values
+            double labourInnov = labourRandomUniform4;
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
-                labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourRandomUniform);
+                labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
                 // labourRandomUniform is not updated here to avoid issues with search routine for labour market alignment
             } catch (RuntimeException e) {
                 System.out.print("Could not determine labour supply choice for BU with ID: " + getKey().getId());
@@ -3019,19 +3026,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if (male!=null) {
 
                 double prob = Parameters.getRegHomeownershipHO1a().getProbability(male, Person.DoublesVariables.class);
-                if (homeOwnerRandomUniform < prob) {
+                if (homeOwnerRandomUniform1 < prob) {
                     male_homeowner = true;
                 }
-                homeOwnerRandomUniform = Parameters.updateProbability(homeOwnerRandomUniform, prob);
                 male.setDhh_owned(male_homeowner);
             }
             if (female!=null) {
 
                 double prob = Parameters.getRegHomeownershipHO1a().getProbability(female, Person.DoublesVariables.class);
-                if (homeOwnerRandomUniform < prob) {
+                if (homeOwnerRandomUniform2 < prob) {
                     female_homeowner = true;
                 }
-                homeOwnerRandomUniform = Parameters.updateProbability(homeOwnerRandomUniform, prob);
                 female.setDhh_owned(female_homeowner);
             }
             if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
@@ -4026,20 +4031,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (hasChildrenEligibleForCare() && (age < Parameters.getStatePensionAge(year, age))) {
 
             double prob = Parameters.getRegChildcareC1a().getProbability(this, Regressors.class);
-            if (childCareRandomUniform < prob) {
+            if (childCareRandomUniform1 < prob) {
 
-                childCareRandomUniform = childCareRandomUniform / prob;
                 double score = Parameters.getRegChildcareC1b().getScore(this, Regressors.class);
                 double rmse = Parameters.getRMSEForRegression("C1b");
-                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(childCareRandomUniform);
-                childCareRandomUniform = Parameters.updateProbability(childCareRandomUniform);
+                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(childCareRandomUniform2);
                 childcareCostPerWeek = Math.exp(score + rmse * gauss);
                 double costCap = childCareCostCapWeekly();
                 if (costCap > 0.0 && costCap < getChildcareCostPerWeek()) {
                     childcareCostPerWeek = costCap;
                 }
-            } else {
-                childCareRandomUniform = (1.0 - childCareRandomUniform) / (1.0 - prob);
             }
         }
     }

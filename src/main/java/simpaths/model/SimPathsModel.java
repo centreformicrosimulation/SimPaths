@@ -2344,10 +2344,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 } else
                     throw new RuntimeException("Country not recognised when evaluating fertility status");
 
-                double innov = person.getFertilityRandomUniform();
+                double innov = person.getFertilityRandomUniform3();
                 person.setToGiveBirth(innov < prob);
-                innov = Parameters.updateProbability(innov, prob);
-                person.setFertilityRandomUniform(innov);
             }
         }
     }
