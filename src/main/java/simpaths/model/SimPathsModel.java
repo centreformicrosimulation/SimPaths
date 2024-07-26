@@ -1804,18 +1804,21 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private void evalMatches(Pair<Set<Person>, Set<Person>> unmatched, boolean alignmentRun) {
 
-        UnionMatching unionMatching = new UnionMatching(unmatched, alignmentRun);
-        unionMatching.evaluateGM();
-        List<Pair<Person,Person>> matchesHere = unionMatching.getMatches();
-        for (Pair<Person,Person> match : matchesHere) {
-            Person male = match.getFirst();
-            Person female = match.getSecond();
-            personsToMatch.get(male.getDgn()).get(male.getRegion()).remove(male);
-            for (Region region : Parameters.getCountryRegions()) {
-                personsToMatch.get(female.getDgn()).get(region).remove(female);
+        if (!unmatched.getFirst().isEmpty() && !unmatched.getSecond().isEmpty()) {
+
+            UnionMatching unionMatching = new UnionMatching(unmatched, alignmentRun);
+            unionMatching.evaluateGM();
+            List<Pair<Person,Person>> matchesHere = unionMatching.getMatches();
+            for (Pair<Person,Person> match : matchesHere) {
+                Person male = match.getFirst();
+                Person female = match.getSecond();
+                personsToMatch.get(male.getDgn()).get(male.getRegion()).remove(male);
+                for (Region region : Parameters.getCountryRegions()) {
+                    personsToMatch.get(female.getDgn()).get(region).remove(female);
+                }
             }
+            matches.addAll(matchesHere);
         }
-        matches.addAll(matchesHere);
     }
 
     private void socialCareMarketClearning() {

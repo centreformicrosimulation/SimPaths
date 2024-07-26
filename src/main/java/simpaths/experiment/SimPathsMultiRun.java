@@ -59,7 +59,6 @@ public class SimPathsMultiRun extends MultiRun {
 	private Long counter = 0L;
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 
-
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
