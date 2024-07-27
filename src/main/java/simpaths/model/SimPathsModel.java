@@ -158,13 +158,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean alignPopulation = false; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = false;
+    private boolean alignFertility = true;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -797,7 +797,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 if (commentsOn) log.info("Union matching complete.");
                 break;
             case SocialCareMarketClearing:
-                socialCareMarketClearning();
+                socialCareMarketClearing();
                 break;
             case FertilityAlignment:
                 fertility(); //First determine which individuals should give birth according to our processes
@@ -1762,28 +1762,20 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         matches.clear();
         for (Region region : Parameters.getCountryRegions()) {
 
-            Set<Person> unmatchedMales = new LinkedHashSet<Person>();
-            Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
+            Set<Person> unmatchedMales = new LinkedHashSet<>();
+            Set<Person> unmatchedFemales = new LinkedHashSet<>();
             unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
             unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
             Pair<Set<Person>, Set<Person>> unmatched = new Pair<>(unmatchedMales, unmatchedFemales);
 
             evalMatches(unmatched, alignmentRun);
-
-            if (!alignmentRun) {
-
-                if (commentsOn) log.debug("Marriage matched.");
-                for (BenefitUnit benefitUnit : benefitUnits) {
-                    benefitUnit.updateOccupancy();
-                }
-            }
         }
     }
 
     protected void unionMatchingNoRegion(boolean alignmentRun) {
 
-        Set<Person> unmatchedMales = new LinkedHashSet<Person>();
-        Set<Person> unmatchedFemales = new LinkedHashSet<Person>();
+        Set<Person> unmatchedMales = new LinkedHashSet<>();
+        Set<Person> unmatchedFemales = new LinkedHashSet<>();
         for (Region region : Parameters.getCountryRegions()) {
             unmatchedMales.addAll(personsToMatch.get(Gender.Male).get(region));
             unmatchedFemales.addAll(personsToMatch.get(Gender.Female).get(region));
@@ -1792,12 +1784,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         evalMatches(unmatched, alignmentRun);
 
-        if (alignmentRun) {
-            // Clear set if used within the matching procedure
-            for (Gender gender : Gender.values()) {
-                for (Region region : Region.values()) {
-                    personsToMatch.get(gender).get(region).clear();
-                }
+        if (!alignmentRun) {
+
+            if (commentsOn) log.debug("Marriage matched");
+            for (BenefitUnit benefitUnit : benefitUnits) {
+                benefitUnit.updateOccupancy();
             }
         }
     }
@@ -1821,7 +1812,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
-    private void socialCareMarketClearning() {
+    private void socialCareMarketClearing() {
 
         // adjust provision so that aggregate provision broadly matches aggregate receipt
         double careProvisionAdjustment = Parameters.getTimeSeriesValue(getYear(),TimeSeriesVariable.CareProvisionAdjustment);
@@ -1871,10 +1862,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // Initial values of adjustment to be applied to considerCohabitation probit
         double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
 
-
+        // Instantiate alignment object
         PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
 
-
+        // Run search algorithm
         RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2, 4); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
@@ -2184,16 +2175,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 
     /**
-     *
      * PROCESS - FERTILITY ALIGNMENT OF SIMULATED POPULATION
      *
+     * Process aligns to period fertility rate. This ensures "sensible" numbers of children per simulated woman
+     * Population alignment is at the end of the simulated schedule, which ensures that population aggregates
+     * match official estimates.
      */
     private void fertilityAlignment() {
 
         //With new fertility alignment for the target number instead of fertility rate
 
         for (Region region: Parameters.getCountryRegions()) {
-            double fertilityRate = Parameters.getFertilityRateByRegionYear(region, year) / 1000.0;
+
+            double targetFertilityRate = Parameters.getFertilityRateByRegionYear(region, year) / 1000.0;
 
             int numberNewbornsProjected = 0;
             for (Gender gender : Gender.values()) {
@@ -3420,8 +3414,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
         for (Gender gender : Gender.values()) {
             for (Region region : Region.values()) {
-                for(Education education: Education.values()) {
-                    for(int ageGroup = 0; ageGroup <= 6; ageGroup++) { //Age groups with numerical values are created in Person class setAdditionalFieldsInInitialPopulation() method and must match Excel marriageTypes2.xlsx file.
+                for (Education education: Education.values()) {
+                    for (int ageGroup = 0; ageGroup <= 6; ageGroup++) { //Age groups with numerical values are created in Person class setAdditionalFieldsInInitialPopulation() method and must match Excel marriageTypes2.xlsx file.
                         String tmpKey = gender + " " + region + " " + education + " " + ageGroup;
                         personsToMatch2.get(tmpKey).clear();
                     }

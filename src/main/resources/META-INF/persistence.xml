@@ -43,6 +43,7 @@
 		<class>simpaths.model.BenefitUnit</class>
 		<class>simpaths.data.Statistics</class>
 		<class>simpaths.data.Statistics2</class>
+		<class>simpaths.data.Statistics3</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />

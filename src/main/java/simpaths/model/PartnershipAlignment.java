@@ -82,10 +82,10 @@ public class PartnershipAlignment implements IEvaluation {
                 .filter(person -> (person.hasTestPartner() || (person.getDcpst().equals(Dcpst.Partnered)) && !person.hasLeftPartnerTest()))
                 .count();
 
-        return numPersonsWhoCanHavePartner > 0
-                ? (double) numPersonsPartnered / numPersonsWhoCanHavePartner
-                : 0.0;
+        return numPersonsWhoCanHavePartner > 0 ?
+                (double) numPersonsPartnered / numPersonsWhoCanHavePartner : 0.0;
     }
+
 
     /**
      * Adjusts the probit regression used for partnership evaluation and re-evaluates the score for all eligible persons.
@@ -94,7 +94,6 @@ public class PartnershipAlignment implements IEvaluation {
      * This method performs the following steps:
      * 1. Runs the cohabitation probit model.
      * 2. Matches individuals within this method.
-     * TODO: the loops over persons calculating cohabitation probability should be paralellised
      * @param newPartnershipAdjustment The new adjustment value for the partnership probit regression.
      */
     private void adjustPartnerships(double newPartnershipAdjustment) {

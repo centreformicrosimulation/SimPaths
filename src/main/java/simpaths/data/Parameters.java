@@ -1757,21 +1757,21 @@ public class Parameters {
 
         fertilityRateByRegionYear = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
-        for(int year = startYear; year <= endYear; year++) {
+        for (int year = startYear; year <= endYear; year++) {
 
-            for(Region region : countryRegions) {
+            for (Region region : countryRegions) {
 
                 double projectedNumFertileWomen = 0.;
-                for(int age = MIN_AGE_MATERNITY; age <= MAX_AGE_MATERNITY; age++) {
+                for (int age = MIN_AGE_MATERNITY; age <= MAX_AGE_MATERNITY; age++) {
                     projectedNumFertileWomen += getPopulationProjections(Gender.Female, region, age, year);
                 }
 
                 double numNewBorn = 0.;
-                for(Gender gender: Gender.values()) {
+                for (Gender gender: Gender.values()) {
                     numNewBorn += getPopulationProjections(gender, region, 0, year);		//Number of people aged 0 in projected years
                 }
 
-                if(projectedNumFertileWomen <= 0.) {
+                if (projectedNumFertileWomen <= 0.) {
                     throw new IllegalArgumentException("Projected Number of Females of Fertile Age is not positive!");
                 }
                 else {
