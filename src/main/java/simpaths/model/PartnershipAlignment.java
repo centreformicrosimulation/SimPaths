@@ -5,6 +5,7 @@ import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Dcpst;
 import simpaths.model.enums.TargetShares;
+import simpaths.model.enums.TimeSeriesVariable;
 
 import java.util.Set;
 
@@ -22,17 +23,14 @@ import java.util.Set;
 public class PartnershipAlignment implements IEvaluation {
 
     private double targetAggregateShareOfPartneredPersons;
-    private double partnershipAdjustment;
-    boolean partnershipAdjustmentChanged;
     private Set<Person> persons;
     private SimPathsModel model;
 
 
     // CONSTRUCTOR
-    public PartnershipAlignment(Set<Person> persons, double partnershipAdjustment) {
+    public PartnershipAlignment(Set<Person> persons) {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         this.persons = persons;
-        this.partnershipAdjustment = partnershipAdjustment;
         targetAggregateShareOfPartneredPersons = Parameters.getTargetShare(model.getYear(), TargetShares.Partnership);
     }
 
@@ -53,14 +51,16 @@ public class PartnershipAlignment implements IEvaluation {
     public double evaluate(double[] args) {
 
         model.clearPersonsToMatch();
-        persons.stream()
+        double newAlignAdjustment = args[0] + Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.PartnershipAdjustment);
+        persons.parallelStream()
                 .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
-                .forEach(person -> person.evaluatePartnershipDissolution());
+                .forEach(person -> person.cohabitation(true, newAlignAdjustment));
 
-        adjustPartnerships(args[0]);
+        // "Fake" union matching (not modifying household structure) here
+        model.unionMatching(true);
+        model.unionMatchingNoRegion(true);
 
-        double error = targetAggregateShareOfPartneredPersons - evalAggregateShareOfPartneredPersons();
-        return error;
+        return targetAggregateShareOfPartneredPersons - evalAggregateShareOfPartneredPersons();
     }
 
 
@@ -79,34 +79,10 @@ public class PartnershipAlignment implements IEvaluation {
                 .count();
 
         long numPersonsPartnered = persons.stream()
-                .filter(person -> (person.hasTestPartner() || (person.getDcpst().equals(Dcpst.Partnered)) && !person.hasLeftPartnerTest()))
+                .filter(person -> (person.getTestPartner() || (person.getDcpst().equals(Dcpst.Partnered)) && !person.getLeftPartner()))
                 .count();
 
         return numPersonsWhoCanHavePartner > 0 ?
                 (double) numPersonsPartnered / numPersonsWhoCanHavePartner : 0.0;
     }
-
-
-    /**
-     * Adjusts the probit regression used for partnership evaluation and re-evaluates the score for all eligible persons.
-     * Then, creates "test" unions between individuals.
-     *
-     * This method performs the following steps:
-     * 1. Runs the cohabitation probit model.
-     * 2. Matches individuals within this method.
-     * @param newPartnershipAdjustment The new adjustment value for the partnership probit regression.
-     */
-    private void adjustPartnerships(double newPartnershipAdjustment) {
-        persons.parallelStream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
-                .forEach(person -> person.evaluatePartnershipFormation(newPartnershipAdjustment));
-
-        // "Fake" union matching (not modifying household structure) here
-        model.unionMatching(true);
-        model.unionMatchingNoRegion(true);
-
-        partnershipAdjustment = newPartnershipAdjustment;
-        partnershipAdjustmentChanged = true;
-    }
-
 }

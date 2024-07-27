@@ -492,8 +492,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.UpdatePotentialHourlyEarnings);
 
         // Consider whether in consensual union (cohabiting)
-        yearlySchedule.addEvent(this, Processes.CohabitationRegressionAlignment);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderCohabitation);
+        yearlySchedule.addEvent(this, Processes.CohabitationAlignment);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Cohabitation);
 
         // Union matching
         yearlySchedule.addEvent(this, Processes.UnionMatching);
@@ -503,6 +503,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // Fertility
         yearlySchedule.addEvent(this, Processes.FertilityAlignment);        //Align to fertility rates implied by projected population statistics.
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Fertility);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.GiveBirth, false);        //Cannot use read-only collection schedule as newborn children cause concurrent modification exception.  Need to specify false in last argument of Collection event.
 
         // TIME USE MODULE
@@ -726,7 +727,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //Alignment Processes
         FertilityAlignment,
         PopulationAlignment,
-        CohabitationRegressionAlignment,
+        CohabitationAlignment,
         // HealthAlignment,
         InSchoolAlignment,
         EducationLevelAlignment,
@@ -745,19 +746,20 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
+            case StartYear -> {
 
-            case StartYear:
                 timerYearStart = System.currentTimeMillis();
                 if (year==startYear) timerStartSim = timerYearStart;
                 System.out.println("Starting year " + year);
                 if (commentsOn) log.info("Starting year " + year);
-                break;
-            case EndYear:
+            }
+            case EndYear -> {
+
                 double timerForYear = (System.currentTimeMillis() - timerYearStart)/1000.0;
                 System.out.println("Finished year " + year + " (in " + timerForYear + " seconds)");
                 if (commentsOn) log.info("Finished year " + year + " (in " + timerForYear + " seconds)");
-                break;
-            case PopulationAlignment:
+            }
+            case PopulationAlignment -> {
 
                 if (alignPopulation) {
 
@@ -774,18 +776,21 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         if (commentsOn) log.info("Population alignment skipped as simulated year exceeds period covered by population projections.");
                     }
                 }
-                break;
-            case CohabitationRegressionAlignment:
+            }
+            case CohabitationAlignment -> {
+
                 if (alignCohabitation) {
                     partnershipAlignment();
                     if (commentsOn) log.info("Cohabitation alignment complete.");
                 }
-                break;
-//			case HealthAlignment:
+                clearPersonsToMatch();
+            }
+//			case HealthAlignment -> {
 //				healthAlignment();
 //				if (commentsOn) log.info("Health alignment complete.");
-//				break;
-            case UnionMatching:
+//			}
+            case UnionMatching -> {
+
                 if(UnionMatchingMethod.SBAM.equals(unionMatchingMethod)) {
                     unionMatchingSBAM();
                 } else if (UnionMatchingMethod.Parametric.equals(unionMatchingMethod)) {
@@ -795,61 +800,62 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     unionMatchingNoRegion(false); //Run matching again relaxing regions this time
                 }
                 if (commentsOn) log.info("Union matching complete.");
-                break;
-            case SocialCareMarketClearing:
+            }
+            case SocialCareMarketClearing -> {
                 socialCareMarketClearing();
-                break;
-            case FertilityAlignment:
-                fertility(); //First determine which individuals should give birth according to our processes
+            }
+            case FertilityAlignment -> {
+
                 if (alignFertility) {
                     fertilityAlignment(); //Then align to meet the numbers implied by population projections by region
+                    if (commentsOn) log.info("Fertility alignment complete.");
                 }
-                if (commentsOn) log.info("Fertility alignment complete.");
-                break;
-            case InSchoolAlignment:
+            }
+            case InSchoolAlignment -> {
+
                 if (alignInSchool) {
                     inSchoolAlignment();
                     System.out.println("Proportion of students will be aligned.");
                 }
-                break;
-            case EducationLevelAlignment:
+            }
+            case EducationLevelAlignment -> {
+
                 if (alignEducation) {
                     educationLevelAlignment();
                     System.out.println("Education levels will be aligned.");
                 }
-                break;
-            case LabourMarketAndIncomeUpdate:
+            }
+            case LabourMarketAndIncomeUpdate -> {
+
                 labourMarket.update(year);
                 if (commentsOn) log.info("Labour market update complete.");
-                break;
-            case Timer:
+            }
+            case Timer -> {
                 printElapsedTime();
-                break;
-            case RationalOptimisation:
-                // injection point to allow for intertemporal optimisation decisions
-                // this needs to be after the labourMarket object is instantiated, to permit evaluation of taxes and benefits
+            }
+            case RationalOptimisation -> {
                 Parameters.grids = ManagerPopulateGrids.run(this, useSavedBehaviour, saveBehaviour);
-                break;
-            case UpdateParameters:
+            }
+            case UpdateParameters -> {
                 updateParameters();
-                clearPersonsToMatch();
                 if (commentsOn) log.info("Update Parameters Complete.");
-                break;
-            case UpdateYear:
+            }
+            case UpdateYear -> {
+
                 if (commentsOn) log.info("It's New Year's Eve of " + year);
                 System.out.println("It's New Year's Eve of " + year);
                 if (year==endYear) {
+
                     double timerForSim = (System.currentTimeMillis() - timerStartSim)/1000.0/60.0;
                     System.out.println("Finished simulating population in " + timerForSim + " minutes");
                     if (commentsOn) log.info("Finished simulating population in " + timerForSim + " minutes");
                 }
                 year++;
-                break;
-            case CheckForExitingPersons:
-
+            }
+            case CheckForExitingPersons -> {
                 screenForExitingPersons();
-                break;
-            case CheckForEmptyBenefitUnits:
+            }
+            case CheckForEmptyBenefitUnits -> {
 
                 List<BenefitUnit> benefitUnitsWithoutAdult = new ArrayList<>();
                 for (BenefitUnit benefitUnit: benefitUnits) {
@@ -866,18 +872,21 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 for (BenefitUnit benefitUnit : benefitUnitsWithoutAdult) {
                     removeBenefitUnit(benefitUnit);
                 }
-                break;
-            case CheckForImperfectTaxDBMatches:
+            }
+            case CheckForImperfectTaxDBMatches -> {
+
                 if (Parameters.saveImperfectTaxDBMatches) {
                     screenForImperfectTaxDbMatches();
                 }
-                break;
-            case CleanUp:
+            }
+            case CleanUp -> {
+
                 if (Parameters.saveImperfectTaxDBMatches)
                     DatabaseExtension.extendInputData(getEngine().getCurrentExperiment().getOutputFolder());
-                break;
-            default:
-                break;
+            }
+            default -> {
+                throw new RuntimeException("failed to identify process type in SimPathsModel.onEvent");
+            }
         }
     }
 
@@ -1859,25 +1868,36 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private void partnershipAlignment() {
 
-        // Initial values of adjustment to be applied to considerCohabitation probit
-        double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
-
         // Instantiate alignment object
-        PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons, partnershipAdjustment);
+        PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons);
 
-        // Run search algorithm
-        RootSearch search = getRootSearch(partnershipAdjustment, partnershipAlignment, 1.0E-2, 1.0E-2, 4); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+        // define limits of search algorithm
+        double partnershipAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
+        double minVal = Math.max(-4.0, - partnershipAdjustment - 4.0);
+        double maxVal = Math.min(4.0, - partnershipAdjustment + 4.0);
+
+        // run search
+        RootSearch search = getRootSearch(0.0, minVal, maxVal, partnershipAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+
+        // update and exit
         if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.PartnershipAdjustment); // If adjustment is altered from the initial value, update the map
+            Parameters.setAlignmentValue(getYear(), search.getTarget()[0], AlignmentVariable.PartnershipAlignment); // If adjustment is altered from the initial value, update the map
             System.out.println("Partnership adjustment value was " + search.getTarget()[0]);
         }
     }
 
     @NotNull
     private static RootSearch getRootSearch(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction, double modifier) {
+        double minVal = initialAdjustment - modifier;
+        double maxVal = initialAdjustment + modifier;
+        return getRootSearch(initialAdjustment, minVal, maxVal, alignmentClass, epsOrdinates, epsFunction);
+    }
+
+    @NotNull
+    private static RootSearch getRootSearch(double initialAdjustment, double minVal, double maxVal, IEvaluation alignmentClass, double epsOrdinates, double epsFunction) {
         double[] startVal = new double[] {initialAdjustment}; // Starting values for the adjustment
-        double[] lowerBound = new double[] {initialAdjustment - modifier};
-        double[] upperBound = new double[] {initialAdjustment + modifier};
+        double[] lowerBound = new double[] {minVal};
+        double[] upperBound = new double[] {maxVal};
         RootSearch search = new RootSearch(lowerBound, upperBound, startVal, alignmentClass, epsOrdinates, epsFunction);
         search.evaluate();
         return search;
@@ -2183,120 +2203,21 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      */
     private void fertilityAlignment() {
 
-        //With new fertility alignment for the target number instead of fertility rate
+        // Instantiate alignment object
+        FertilityAlignment fertilityAlignment = new FertilityAlignment(persons);
 
-        for (Region region: Parameters.getCountryRegions()) {
+        // define limits of search algorithm
+        double fertiityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.FertilityAdjustment);
+        double minVal = Math.max(-4.0, - fertiityAdjustment - 4.0);
+        double maxVal = Math.min(4.0, - fertiityAdjustment + 4.0);
 
-            double targetFertilityRate = Parameters.getFertilityRateByRegionYear(region, year) / 1000.0;
+        // run search
+        RootSearch search = getRootSearch(0.0, minVal, maxVal, fertilityAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
 
-            int numberNewbornsProjected = 0;
-            for (Gender gender : Gender.values()) {
-                numberNewbornsProjected += Parameters.getPopulationProjections(gender, region, 0, year);
-            }
-
-            int simNewborns = 0;
-            for (Person person : persons) {
-                if (person.getRegion().equals(region) && person.isToGiveBirth()) {
-                    simNewborns++;
-                }
-            }
-
-            int targetNumberNewborns = (int) Math.round(numberNewbornsProjected/scalingFactor);
-
-            new ResamplingAlignment<Person>().align(
-                    getPersons(),
-                    new FertileFilter<Person>(region),
-                    new AlignmentOutcomeClosure<Person>() {
-                        @Override
-                        public boolean getOutcome(Person agent) {
-                            //Note: fertility method runs before the alignment
-                            return agent.isToGiveBirth(); //Returns either true or false to be used by the closure getOutcome
-                        }
-
-                        @Override
-                        public void resample(Person agent) {
-                            if (!agent.isToGiveBirth()) {
-                                agent.setToGiveBirth(true);
-                            } else {
-                                agent.setToGiveBirth(false);
-                            }
-                        }
-                    },
-                    targetNumberNewborns,//align to this number of newborns per region
-                    20
-            );
-
-/*
-            //Type of alignment performed depends on whether weights are used, or not
-            AbstractProbabilityAlignment<Person> alignmentProcedure;
-
-            if(useWeights) { //If using weights use Logit Scaling Binary Weighted Alignment
-                alignmentProcedure = new LogitScalingBinaryWeightedAlignment<Person>();
-            }
-            else { //Otherwise, use unweighted Logit Scaling Binary Alignment
-                alignmentProcedure = new LogitScalingBinaryAlignment<Person>();
-            }
-
-            alignmentProcedure.align(
-                    getPersons(), //Collection to align: persons from person set (but note the filter applied below)
-                    new FertileFilter<Person>(region), 		//New restriction is that the Female needs to have a partner to be 'fertile' (i.e. considered in the fertility alignment process). This filters the collection specified above.
-                    new AlignmentProbabilityClosure<Person>() { //a piece of code that i) for each element of the filtered collection computes a probability for the event (in the case that the alignment method is aligning probabilities, as in the SBD algorithm)
-
-                        @Override
-                        public double getProbability(Person agent) { //i) calculate probability for each element of the filtered collection
-                            if(agent.getDag() <= 29 && agent.getLes_c3().equals(Les_c4.Student) && agent.isLeftEducation() == false) { //If age below or equal to 29 and in continuous education follow process F1a
-                                return Parameters.getRegFertilityF1a().getProbability(agent, Person.DoublesVariables.class);
-                            }
-                            else { //Otherwise if not in continuous education, follow process F1b
-                                return Parameters.getRegFertilityF1b().getProbability(agent, Person.DoublesVariables.class);
-                            }
-                        }
-
-                        @Override
-                        public void align(Person agent, double alignedProabability) {
-                            if ( RegressionUtils.event( alignedProabability, SimulationEngine.getRnd() ) ) { //RegressionUtils.event samples an event where all events have equal probability
-                                agent.setToGiveBirth(true);
-                            } else agent.setToGiveBirth(false);
-                        }
-                    },
-                    fertilityRate //the share or number of elements in the filtered collection that are expected to experience the transition. In this case, fertility rate by region and year
-            );
-*/
-        }
-    }
-
-    /**
-     *
-     * PROCESS TO DETERMINE FERTILITY WITHOUT ALIGNMENT TO TARGET FERTILITY RATES
-     *
-     */
-    private void fertility() {
-
-        for (Region region: Parameters.getCountryRegions()) {
-
-            List<Person> fertilePersons = new ArrayList<>();
-            CollectionUtils.select(getPersons(), new FertileFilter<>(region), fertilePersons);
-            for (Person person : fertilePersons) {
-
-                double prob;
-                if (country.equals(Country.UK)) {
-
-                    if (person.getDag() <= 29 && person.getLes_c4().equals(Les_c4.Student) && !person.isLeftEducation()) {
-                        //If age below or equal to 29 and in continuous education follow process F1a
-                        prob = Parameters.getRegFertilityF1a().getProbability(person, Person.DoublesVariables.class);
-                    } else {
-                        //Otherwise if not in continuous education, follow process F1b
-                        prob =  Parameters.getRegFertilityF1b().getProbability(person, Person.DoublesVariables.class);
-                    }
-                } else if (country.equals(Country.IT)) {
-
-                    prob = Parameters.getRegFertilityF1().getProbability(person, Person.DoublesVariables.class);
-                } else
-                    throw new RuntimeException("Country not recognised when evaluating fertility status");
-
-                double innov = person.getFertilityRandomUniform3();
-                person.setToGiveBirth(innov < prob);
-            }
+        // update and exit
+        if (search.isTargetAltered()) {
+            Parameters.setAlignmentValue(getYear(), search.getTarget()[0], AlignmentVariable.FertilityAlignment); // If adjustment is altered from the initial value, update the map
+            System.out.println("Fertility adjustment value was " + search.getTarget()[0]);
         }
     }
 

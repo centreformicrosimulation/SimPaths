@@ -23,15 +23,23 @@ public class CheckBoundsForRoot {
         }
         f2 = function.evaluate(x2);
         if (f2 < 0.0) {
-            if (xn!=null)
+            if (xn==null) {
+                xn = x2;
+                fn = f2;
+            } else {
                 bracketed = false;
-            xn = x2;
-            fn = f2;
+                xp = x2;
+                fp = f2;
+            }
         } else {
-            if (xp!=null)
+            if (xp==null) {
+                xp = x2;
+                fp = f2;
+            } else {
                 bracketed = false;
-            xp = x2;
-            fp = f2;
+                xn = x2;
+                fn = f2;
+            }
         }
     }
 

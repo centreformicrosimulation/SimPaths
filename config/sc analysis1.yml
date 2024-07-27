@@ -11,7 +11,7 @@ popSize: 5000
 # Arguments passed to the SimPathsModel
 model_args:
     alignEmployment: false
-    alignCohabitation: true
+    alignCohabitation: false
     alignFertility: false
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true

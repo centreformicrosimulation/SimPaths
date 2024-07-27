@@ -83,7 +83,7 @@ save "$outdir/test2", replace
 *	analysis
 **************************************************************************************/
 use "$outdir/test_base_noalign", clear
-order time idhousehold idbenefitunit idperson dag sampleentry sampleexit dcpst
+order time idhousehold idbenefitunit idperson dag sampleentry sampleexit dcpst idpartner nk
 gsort idhousehold idbenefitunit time idperson
 drop run
 

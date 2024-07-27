@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.data.RegressionNames;
+import simpaths.data.filters.FertileFilter;
 import simpaths.model.enums.*;
 import microsim.statistics.Series;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -190,7 +191,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient
     private boolean hasTestPartner;
     @Transient
-    private boolean leftPartnerTest; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    private boolean leftPartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Transient
     private Person partner;
     @Column(name="idpartner")
@@ -466,10 +467,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     double cohabitRandomUniform1;
     @Transient
     double cohabitRandomUniform2;
-    @Transient
-    double cohabitRandomUniform3;
-    @Transient
-    double cohabitRandomUniform4;
     @Transient
     double fertilityRandomUniform1;
     @Transient
@@ -895,9 +892,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Update,
         Aging,
         ProjectEquivConsumption,
-        ConsiderCohabitation,
+        Cohabitation,
         ConsiderMortality,
         ConsiderRetirement,
+        Fertility,
         GiveBirth,
         Health,
         SocialCareIncidence,
@@ -913,60 +911,66 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-            case Aging:
+            case Aging -> {
                 aging();
-                break;
-            case Update:
+            }
+            case Update -> {
                 updateVariables(false);
-                break;
-            case ProjectEquivConsumption:
+            }
+            case ProjectEquivConsumption -> {
                 projectEquivConsumption();
-                break;
-            case ConsiderCohabitation:
+            }
+            case Cohabitation -> {
     //			log.debug("BenefitUnit Formation for person " + this.getKey().getId());
-                considerCohabitation();
-                break;
-            case ConsiderMortality:
+                cohabitation();
+            }
+            case ConsiderMortality -> {
                 considerMortality();
-                break;
-            case ConsiderRetirement:
+            }
+            case ConsiderRetirement -> {
                 considerRetirement();
-                break;
-            case GiveBirth:
+            }
+            case Fertility -> {
+                fertility();
+            }
+            case GiveBirth -> {
     //			log.debug("Check whether to give birth for person " + this.getKey().getId());
                 giveBirth();
-                break;
-            case Health:
+            }
+            case Health -> {
     //			log.debug("Health for person " + this.getKey().getId());
                 health();
-                break;
-            case SocialCareIncidence:
+            }
+            case SocialCareIncidence -> {
                 evaluateSocialCareReceipt();
                 evaluateSocialCareProvision();
-                break;
-            case HealthMentalHM1:
+            }
+            case HealthMentalHM1 -> {
                 healthMentalHM1Level();
-                break;
-            case HealthMentalHM2:
+            }
+            case HealthMentalHM2 -> {
                 healthMentalHM2Level();
-                break;
-            case HealthMentalHM1HM2Cases:
+            }
+            case HealthMentalHM1HM2Cases -> {
                 healthMentalHM1HM2Cases();
-                break;
-            case InSchool:
+            }
+            case InSchool -> {
     //			log.debug("In Education for person " + this.getKey().getId());
                 inSchool();
-                break;
-            case LeavingSchool:
+            }
+            case LeavingSchool -> {
                 leavingSchool();
-                break;
-            case UpdatePotentialHourlyEarnings:
+            }
+            case UpdatePotentialHourlyEarnings -> {
     //			System.out.println("Update wage equation for person " + this.getKey().getId() + " with age " + age + " with activity_status " + activity_status + " and activity_status_lag " + activity_status_lag + " and toLeaveSchool " + toLeaveSchool + " with education " + education);
                 updateFullTimeHourlyEarnings();
-                break;
-            case Unemployment:
+            }
+            case Unemployment -> {
                 updateUnemploymentState();
-                break;
+            }
+            default -> {
+                throw new RuntimeException("failed to identify process type in Person.onEvent");
+            }
         }
     }
 
@@ -974,6 +978,41 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // ---------------------------------------------------------------------
     // Processes
     // ---------------------------------------------------------------------
+
+    public void fertility() {
+        double probitAdjustment = (model.isAlignFertility()) ? Parameters.getAlignmentValue(getYear(), AlignmentVariable.FertilityAlignment) : 0.0;
+        probitAdjustment += Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.FertilityAdjustment);
+        fertility(probitAdjustment);
+    }
+
+    public void fertility(double probitAdjustment) {
+
+        toGiveBirth = false;
+        FertileFilter filter = new FertileFilter();
+        if (filter.evaluate(this)) {
+
+            double prob;
+            if (model.getCountry().equals(Country.UK)) {
+
+                if (getDag() <= 29 && getLes_c4().equals(Les_c4.Student) && !isLeftEducation()) {
+                    //If age below or equal to 29 and in continuous education follow process F1a
+                    double score = Parameters.getRegFertilityF1a().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegFertilityF1a().getProbability(score + probitAdjustment);
+                } else {
+                    //Otherwise if not in continuous education, follow process F1b
+                    double score = Parameters.getRegFertilityF1b().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegFertilityF1b().getProbability(score + probitAdjustment);
+                }
+            } else if (model.getCountry().equals(Country.IT)) {
+
+                prob = Parameters.getRegFertilityF1().getProbability(this, Person.DoublesVariables.class);
+            } else
+                throw new RuntimeException("Country not recognised when evaluating fertility status");
+
+            if (fertilityRandomUniform3<prob)
+                toGiveBirth = true;
+        }
+    }
 
     private void updateUnemploymentState() {
         lowWageOffer = false;
@@ -1422,11 +1461,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void considerCohabitation() {
+    public void cohabitation() {
+        double probitAdjustment = (model.isAlignCohabitation()) ? Parameters.getAlignmentValue(getYear(), AlignmentVariable.PartnershipAlignment) : 0.0;
+        probitAdjustment += Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
+        cohabitation(false, probitAdjustment);
+    }
+
+    protected void cohabitation(boolean alignmentRun, double probitAdjustment) {
+
+        // parameter check
+        if (probitAdjustment>(4.0+1.0E-5) || probitAdjustment<(-4.0-1.0E-5))
+            throw new RuntimeException("odd value for probit adjustment supplied to considerCohabitation method: " + probitAdjustment);
 
         toBePartnered = false;
+        leftPartner = false;
+        hasTestPartner = false;
         double cohabitInnov = cohabitRandomUniform1;
-        double probitAdjustment = (model.isAlignCohabitation()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment) : 0.;
         if (dag >= Parameters.MIN_AGE_COHABITATION) {
             // cohabitation possible
 
@@ -1452,8 +1502,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     // partnership dissolution
 
                     prob = Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class);
-                    if (cohabitInnov < prob)
-                        leavePartner();
+                    if (cohabitInnov < prob) {
+                        leftPartner = true;
+                        if (!alignmentRun)
+                            leavePartner();
+                    }
                 }
             } else if (model.getCountry() == Country.IT) {
 
@@ -1468,47 +1521,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else if (partner != null && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
 
                     double prob = Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class);
-                    if (cohabitInnov < prob)
-                        leavePartner();
+                    if (cohabitInnov < prob) {
+                        leftPartner = true;
+                        if (!alignmentRun)
+                            leavePartner();
+                    }
                 }
             }
         }
     }
-
-    // used by process for cohabitation alignment - no updating of random draws
-    public void evaluatePartnershipFormation(double probitAdjustment) {
-
-        toBePartnered = false; // Reset variable indicating if individual wants to find a partner
-        hasTestPartner = false; // Reset variable indicating if individual has partner for the purpose of matching
-        double cohabitInnov = cohabitRandomUniform2;
-        if (model.getCountry() == Country.UK && dag >= Parameters.MIN_AGE_COHABITATION && partner == null) {
-
-            if (dag <= 29 && Les_c4.Student.equals(les_c4) && !leftEducation) {
-
-                double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
-                double prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
-                toBePartnered = cohabitInnov < prob;
-            } else if (leftEducation || !les_c4.equals(Les_c4.Student)) {
-
-                double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
-                double prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
-                toBePartnered = cohabitInnov < prob;
-            }
-        }
-        if (toBePartnered)
-            model.getPersonsToMatch().get(dgn).get(getRegion()).add(this);
-    }
-
-    public void evaluatePartnershipDissolution() {
-
-        leftPartnerTest = false;
-        if ((partner != null) && dgn == Gender.Female && ((les_c4 == Les_c4.Student && leftEducation) || !les_c4.equals(Les_c4.Student))) {
-
-            if (cohabitRandomUniform3 < Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class))
-                setLeftPartnerTest(true);
-        }
-    }
-
 
     protected void inSchool() {
 
@@ -2059,8 +2080,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             labourRandomUniform3 = labourRandomGen.nextDouble();
             cohabitRandomUniform1 = cohabitRandomGen.nextDouble();
             cohabitRandomUniform2 = cohabitRandomGen.nextDouble();
-            cohabitRandomUniform3 = cohabitRandomGen.nextDouble();
-            cohabitRandomUniform4 = cohabitRandomGen.nextDouble();
             fertilityRandomUniform1 = fertilityRandomGen.nextDouble();
             fertilityRandomUniform2 = fertilityRandomGen.nextDouble();
             fertilityRandomUniform3 = fertilityRandomGen.nextDouble();
@@ -4735,7 +4754,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return cost;
     }
 
-    public boolean hasTestPartner() {
+    public boolean getTestPartner() {
         return hasTestPartner;
     }
 
@@ -4743,12 +4762,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.hasTestPartner = hasTestPartner;
     }
 
-    public boolean hasLeftPartnerTest() {
-        return leftPartnerTest;
+    public boolean getLeftPartner() {
+        return leftPartner;
     }
 
-    public void setLeftPartnerTest(boolean leftPartnerTest) {
-        this.leftPartnerTest = leftPartnerTest;
+    public void setLeftPartner(boolean leftPartner) {
+        this.leftPartner = leftPartner;
     }
 
     public boolean getLowWageOffer() {
@@ -4787,5 +4806,5 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public SampleExit getSampleExit() {return sampleExit;}
     public double getFertilityRandomUniform2() { return fertilityRandomUniform2; }
     public double getFertilityRandomUniform3() { return fertilityRandomUniform3; }
-    public double getCohabitRandomUniform4() { return cohabitRandomUniform4; }
+    public double getCohabitRandomUniform2() { return cohabitRandomUniform2; }
 }

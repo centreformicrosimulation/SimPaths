@@ -231,6 +231,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		// load uprating factors
 		Parameters.loadTimeSeriesFactorMaps(country);
+		Parameters.instantiateAlignmentMaps();
 		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, showGui);
 
 		// Create initial and donor population database tables

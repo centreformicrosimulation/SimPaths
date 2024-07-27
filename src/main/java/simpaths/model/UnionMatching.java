@@ -55,7 +55,7 @@ public class UnionMatching {
             new Comparator<Person>(){
                 @Override
                 public int compare(Person person1, Person person2) {
-                    double valD = (person1.getCohabitRandomUniform4() - person2.getCohabitRandomUniform4())*10000.0;
+                    double valD = (person1.getCohabitRandomUniform2() - person2.getCohabitRandomUniform2())*10000.0;
                     return (int)valD;
                 }
             },

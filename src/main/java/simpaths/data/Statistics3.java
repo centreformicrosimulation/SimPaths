@@ -4,7 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import microsim.data.db.PanelEntityKey;
+import simpaths.data.filters.FertileFilter;
 import simpaths.model.SimPathsModel;
+import simpaths.model.enums.AlignmentVariable;
+import simpaths.model.enums.Dcpst;
 import simpaths.model.enums.TimeSeriesVariable;
 
 @Entity
@@ -18,6 +21,18 @@ public class Statistics3 {
 
     @Column(name = "partnership_adj_factor")
     private double partnershipAdjustmentFactor;
+
+    @Column(name = "share_cohabiting")
+    private double shareCohabiting;
+
+    @Column(name = "fertility_adj_factor")
+    private double fertilityAdjustmentFactor;
+
+    @Column(name = "fertiilty_rate_sim")
+    private double fertilityRateSimulated;
+
+    @Column(name = "fertiilty_rate_tgt")
+    private double fertilityRateTarget;
 
     @Column(name = "utility_adj_factor_smales")
     private double utilityAdjustmentFactorSmales;
@@ -34,6 +49,14 @@ public class Statistics3 {
 
     public void setPartnershipAdjustmentFactor(double partnershipAdjustmentFactor) {
         this.partnershipAdjustmentFactor = partnershipAdjustmentFactor;
+    }
+
+    public double getFertilityAdjustmentFactor() {
+        return fertilityAdjustmentFactor;
+    }
+
+    public void setFertilityAdjustmentFactor(double factor) {
+        this.fertilityAdjustmentFactor = factor;
     }
 
     public double getUtilityAdjustmentFactorSmales() {
@@ -64,10 +87,57 @@ public class Statistics3 {
 
     public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
 
+    public double getShareCohabiting() {return shareCohabiting;}
+
+    public void setShareCohabiting(double shareCohabiting) { this.shareCohabiting = shareCohabiting; }
+
+    public double getFertilityRateSimulated() {
+        return fertilityRateSimulated;
+    }
+
+    public void setFertilityRateSimulated(double fertilityRateSimulated) {
+        this.fertilityRateSimulated = fertilityRateSimulated;
+    }
+
+    public double getFertilityRateTarget() {
+        return fertilityRateTarget;
+    }
+
+    public void setFertilityRateTarget(double fertilityRateTarget) {
+        this.fertilityRateTarget = fertilityRateTarget;
+    }
+
     public void update(SimPathsModel model) {
 
+        // cohabitation
+        double val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.PartnershipAdjustment) +
+                Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.PartnershipAlignment);
+        setPartnershipAdjustmentFactor(val);
+        long numPersonsWhoCanHavePartner = model.getPersons().stream()
+                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
+                .count();
+        long numPersonsPartnered = model.getPersons().stream()
+                .filter(person -> (person.getDcpst().equals(Dcpst.Partnered)))
+                .count();
+        val = (numPersonsWhoCanHavePartner > 0) ? (double) numPersonsPartnered / numPersonsWhoCanHavePartner : 0.0;
+        setShareCohabiting(val);
+
+        // fertility
+        val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.FertilityAdjustment) +
+                Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.FertilityAlignment);
+        setFertilityAdjustmentFactor(val);
+        FertileFilter filter = new FertileFilter();
+        long numFertilePersons = model.getPersons().stream()
+                .filter(person -> filter.evaluate(person))
+                .count();
+        long numBirths = model.getPersons().stream()
+                .filter(person -> (person.getDag() < 1))
+                .count();
+        val = (numFertilePersons > 0) ? (double) numBirths / numFertilePersons : 0.0;
+        setFertilityRateSimulated(val);
+        setFertilityRateTarget(Parameters.getFertilityRateByYear(model.getYear()-1));
+
         setSocialCareAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.CareProvisionAdjustment));
-        setPartnershipAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.PartnershipAdjustment));
         setUtilityAdjustmentFactorSmales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentSingleMales));
         setUtilityAdjustmentFactorSfemales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentSingleFemales));
         setUtilityAdjustmentFactorCouples(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentCouples));
