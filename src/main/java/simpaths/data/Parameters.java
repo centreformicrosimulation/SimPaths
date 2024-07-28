@@ -223,6 +223,7 @@ public class Parameters {
     public static final double UNMATCHED_TOLERANCE_THRESHOLD = 0.1;		//Smallest proportion of a gender left unmatched (we take the minimum of the male proportion and female proportions).  If there are more than this, we will relax the constraints (e.g. the bounds on age difference and potential earnings difference) until this target has been reached
     public static final int MAXIMUM_ATTEMPTS_MATCHING = 10;
     public static final double RELAXATION_FACTOR = 1.5;
+
     public static final int AGE_DIFFERENCE_INITIAL_BOUND = 999;
     public static final double POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND = 999.;
 

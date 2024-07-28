@@ -158,13 +158,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean alignPopulation = true; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = true;
+    private boolean alignFertility = false;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -211,10 +211,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Map<Gender, LinkedHashMap<Region, Set<Person>>> personsToMatch;
 
     private LinkedHashMap<String, Set<Person>> personsToMatch2;
-
-    private double ageDiffBound = Parameters.AGE_DIFFERENCE_INITIAL_BOUND;
-
-    private double potentialHourlyEarningsDiffBound = Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
 
     private double scalingFactor;
 
@@ -1807,7 +1803,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         if (!unmatched.getFirst().isEmpty() && !unmatched.getSecond().isEmpty()) {
 
             UnionMatching unionMatching = new UnionMatching(unmatched, alignmentRun);
-            unionMatching.evaluateGM();
+            unionMatching.evaluate("GM");
             List<Pair<Person,Person>> matchesHere = unionMatching.getMatches();
             for (Pair<Person,Person> match : matchesHere) {
                 Person male = match.getFirst();
@@ -2542,7 +2538,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             // so that replicating by a factor adjustment on weight of each observation may result in none of the
             // observations being included in the simulated sample (unless the simulated sample was very large).
             List<Household> randomHouseholdSampleList = new LinkedList<>();
-            double replicationFactor = 1.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
+            double replicationFactor = 5.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
             for (Household household : inputHouseholdList) {
 
                 int numberOfClones = (int) Math.round(household.getWeight() * replicationFactor);
@@ -2552,14 +2548,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
             Collections.shuffle(randomHouseholdSampleList, initialiseInnov);
             ListIterator<Household> randomHouseholdSampleListIterator = randomHouseholdSampleList.listIterator();
+            InitialPopulationFilter filter = new InitialPopulationFilter(popSize, startYear, maxAge);
             while (randomHouseholdSampleListIterator.hasNext()) {
 
                 Household originalHousehold = randomHouseholdSampleListIterator.next();
-                Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
-                newHousehold.resetWeights(1.0d);
-                if (persons.size() >= popSize ) break;
-            }
+                if (filter.evaluate(originalHousehold)) {
 
+                    Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
+                    newHousehold.resetWeights(1.0d);
+                    if (persons.size() >= popSize ) break;
+                }
+            }
+            //filter.getRemainingVacancies();
             stopwatch.stop();
             System.out.println("Time elapsed " + stopwatch.getTime() + " milliseconds");
         } else {

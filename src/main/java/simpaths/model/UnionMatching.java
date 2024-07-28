@@ -21,9 +21,7 @@ public class UnionMatching {
     Set<Person> unmatchedMales;
     Set<Person> unmatchedFemales;
     List<Pair<Person,Person>> matches = new ArrayList<>();
-    int ageDiffBound = Parameters.AGE_DIFFERENCE_INITIAL_BOUND;
     boolean alignmentRun = false;
-    double potentialHourlyEarningsDiffBound = Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
 
 
     // CONSTRUCTOR
@@ -45,6 +43,29 @@ public class UnionMatching {
 
 
     // EVALUATE MATCHES BY ITERATIVE RANDOM MATCHING
+    public void evaluate(String typ) {
+
+        if (alignmentRun && Parameters.AGE_DIFFERENCE_INITIAL_BOUND > 100 && Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND > 100) {
+            // skip explicit consideration of union matching as only interested in numbers matched
+
+            Person[] unmatchedMalesList = unmatchedMales.toArray(new Person[0]);
+            Person[] unmatchedFemalesList = unmatchedFemales.toArray(new Person[0]);
+            int nn = Math.min(unmatchedMales.size(), unmatchedFemales.size());
+            for (int ii=0; ii < nn; ii++) {
+
+                Person male = unmatchedMalesList[ii];
+                Person female = unmatchedFemalesList[ii];
+                localMatch(male, female);
+            }
+        } else {
+
+            if ("IRM".equals(typ))
+                evaluateIRM();
+            else
+                evaluateGM();
+        }
+    }
+
     public void evaluateIRM() {
 
         // unmatched = IterativeSimpleMatching.getInstance().matching(
@@ -154,7 +175,8 @@ public class UnionMatching {
         // term to enhance replication of simulated projections
         //double rndMatch = (male.getCohabitRandomUniform() - female.getCohabitRandomUniform()) * 10.0;
 
-        if (ageMatch < ageDiffBound && earningsMatch < potentialHourlyEarningsDiffBound) {
+        if (Math.abs(ageMatch) < Parameters.AGE_DIFFERENCE_INITIAL_BOUND &&
+                Math.abs(earningsMatch) < Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND) {
 
             // Score currently based on an equally weighted measure.  The Iterative (Simple and Random) Matching algorithm prioritises matching to the potential partner that returns the lowest score from this method (therefore, on aggregate we are trying to minimize the value below).
             return earningsMatch * earningsMatch + ageMatch * ageMatch;

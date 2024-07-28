@@ -1,23 +1,21 @@
-# This file can be used to override defaults for multirun arguments.
-# Arguments of the SimPathsMultiRun object overridden by the command-line
-
+# CONFIG FILE TO RUN BASE SIMULATION FOR SOCIAL CARE ANALYSIS
+# MODEL INCLUDES RATIONAL RESPONSES TO CARE AND POPULATION ALIGNMENT
 maxNumberOfRuns: 1
 executeWithGui: false
 randomSeed: 606
 startYear: 2019
 endYear: 2069
-popSize: 5000
+popSize: 170000
 
 # Arguments passed to the SimPathsModel
 model_args:
-    alignEmployment: false
-    alignCohabitation: false
-    alignFertility: false
+    alignFertility: true
+    alignCohabitation: true
+    alignPopulation: true
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
     projectSocialCare: true
     saveBehaviour: true
-    flagDefaultToTimeSeriesAverages: false
     responsesToDisability: true
     saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: false
