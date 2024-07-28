@@ -9,8 +9,8 @@ popSize: 170000
 
 # Arguments passed to the SimPathsModel
 model_args:
-    alignFertility: true
-    alignCohabitation: true
+    alignFertility: false
+    alignCohabitation: false
     alignPopulation: true
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
@@ -20,7 +20,7 @@ model_args:
     saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: false
     flagSuppressChildcareCosts: false
-    useSavedBehaviour: true
+    useSavedBehaviour: false
     readGrid: "base"
 
 # Arguments that alter processing of the SimPathsMultiRun object

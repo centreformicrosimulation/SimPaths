@@ -52,8 +52,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private SampleExit sampleExit = SampleExit.NotYet;  //entry to sample via international immigration
     @Transient
     private boolean ioFlag;         // true if a dummy person instantiated for IO decision solution
-    @Transient
-    private int dag_sq;             //Age squared
     @Enumerated(EnumType.STRING)
     private Gender dgn;             // gender
     @Enumerated(EnumType.STRING)
@@ -88,8 +86,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Les_c7_covid les_c7_covid_lag1;     //Lag(1) of 7-category activity status
     @Enumerated(EnumType.STRING)
     private Les_c4 lessp_c4;
-    @Transient
-    private Les_c4 activity_status_partner_lag; //Lag(1) of partner activity status
     @Enumerated(EnumType.STRING)
     private Lesdf_c4 lesdf_c4;                  //Own and partner's activity status
     @Transient
@@ -329,8 +325,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="id_original_hh")
     private Long idOriginalHH;
     @Transient
-    private Person originalPartner;
-    @Transient
     private int ageGroup;
 
 //	private int personType;
@@ -353,10 +347,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     //This is set to true at the point when individual leaves partnership and never reset. So if true, individual has been / is in a partnership
     @Transient
     private boolean leftPartnership;
-    @Transient
-    private int originalNumberChildren;
-    @Transient
-    private Household_status originalHHStatus;
     @Transient
     private Integer newWorkHours_lag1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
     @Transient
@@ -628,7 +618,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.lesdf_c4 = originalPerson.lesdf_c4;
         this.lesdf_c4_lag1 = originalPerson.lesdf_c4_lag1;
         this.lessp_c4 = originalPerson.lessp_c4;
-        this.activity_status_partner_lag = originalPerson.activity_status_partner_lag;
         this.dcpst = originalPerson.dcpst;
         this.dcpst_lag1 = originalPerson.dcpst_lag1;
         this.dcpen = originalPerson.dcpen;
@@ -749,8 +738,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4)) {
                 les_c4 = Les_c4.NotEmployed;
-                les_c4_lag1 = les_c4;
             }
+            les_c4_lag1 = les_c4;
             updateFullTimeHourlyEarnings();
         }
         if (originalPerson.L1_fullTimeHourlyEarningsPotential!=null && originalPerson.L1_fullTimeHourlyEarningsPotential>Parameters.MIN_HOURLY_WAGE_RATE) {
@@ -1062,7 +1051,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // iterate age and update for maturity
         dag++;
-        dag_sq = dag*dag;
         if (dag == Parameters.AGE_TO_BECOME_RESPONSIBLE) {
 
             setupNewBenefitUnit(true);
@@ -3147,10 +3135,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         case Pt:
             return (getLabourSupplyHoursWeekly() > 0 && getLabourSupplyHoursWeekly() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)? 1. : 0.;
         case L1_log_hourly_wage:
-            if (L1_fullTimeHourlyEarningsPotential > 0) {
-                return Math.log(L1_fullTimeHourlyEarningsPotential);
-            } else {
+            if (L1_fullTimeHourlyEarningsPotential==null) {
                 throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
+            } else {
+                return Math.log(L1_fullTimeHourlyEarningsPotential);
             }
         case L1_log_hourly_wage_sq:
             if (L1_fullTimeHourlyEarningsPotential > 0) {
@@ -3332,7 +3320,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setDag(Integer dag) {
         this.dag = dag;
-        this.dag_sq = dag*dag;
     }
 
     public Gender getDgn() {
@@ -3388,14 +3375,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setLessp_c4(Les_c4 lessp_c4) {
         this.lessp_c4 = lessp_c4;
-    }
-
-    public Les_c4 getActivity_status_partner_lag() {
-        return activity_status_partner_lag;
-    }
-
-    public void setActivity_status_partner_lag(Les_c4 activity_status_partner_lag) {
-        this.activity_status_partner_lag = activity_status_partner_lag;
     }
 
     public Household_status getHousehold_status() {
@@ -3932,14 +3911,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.clonedFlag = clonedFlag;
     }
 
-    public int getOriginalNumberChildren() {
-        return originalNumberChildren;
-    }
-
-    public Household_status getOriginalHHStatus() {
-        return originalHHStatus;
-    }
-
     public Dcpst getDcpst() {
         return dcpst;
     }
@@ -4214,10 +4185,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             else return 0;
         }
         else return 0;
-    }
-
-    public Person getOriginalPartner() {
-        return originalPartner;
     }
 
     public Long getIdHousehold() {

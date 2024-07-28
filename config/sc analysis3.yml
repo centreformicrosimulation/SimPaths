@@ -9,13 +9,13 @@ popSize: 5000
 
 # Arguments passed to the SimPathsModel
 model_args:
-    alignEmployment: false
+    alignFertility: false
     alignCohabitation: false
+    alignPopulation: true
     enableIntertemporalOptimisations: true
     responsesToLowWageOffer: true
     projectSocialCare: true
     saveBehaviour: true
-    flagDefaultToTimeSeriesAverages: false
     responsesToDisability: true
     saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: false
