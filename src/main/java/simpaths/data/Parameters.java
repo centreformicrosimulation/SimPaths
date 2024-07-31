@@ -2528,10 +2528,10 @@ public class Parameters {
         rebaseIndexMap(indexType, BASE_PRICE_YEAR, true);
     }
 
-    private static void rebaseIndexMap(TimeSeriesVariable indexType, int baseYear, boolean ratioAdjust) {
+    private static void rebaseIndexMap(TimeSeriesVariable timeSeriesVariable, int baseYear, boolean ratioAdjust) {
 
-        MultiKeyCoefficientMap map = getTimeSeriesValueMap(indexType);
-        double valueBase = getTimeSeriesValue(baseYear, indexType);
+        MultiKeyCoefficientMap map = getTimeSeriesValueMap(timeSeriesVariable);
+        double valueBase = getTimeSeriesValue(baseYear, timeSeriesVariable);
         for (Object key: map.keySet()) {
 
             double valueHere = ((Number) map.getValue(key)).doubleValue();
@@ -2543,10 +2543,10 @@ public class Parameters {
         }
     }
 
-    private static MultiKeyCoefficientMap getTimeSeriesValueMap(TimeSeriesVariable variableType) {
+    private static MultiKeyCoefficientMap getTimeSeriesValueMap(TimeSeriesVariable timeSeriesVariable) {
 
         MultiKeyCoefficientMap map = null;
-        switch (variableType) {
+        switch (timeSeriesVariable) {
             case GDP -> {
                 map = upratingIndexMapRealGDP;
             }
@@ -2614,46 +2614,40 @@ public class Parameters {
         return map;
     }
 
-    public static Double getTimeSeriesIndex(int year, UpratingCase upratingCase ) {
+    public static Double getTimeSeriesIndex(int year, UpratingCase upratingCase) {
 
-        TimeSeriesVariable indexType = getTimeSeriesVariable(upratingCase);
-        return getTimeSeriesValue(year, indexType);
+        TimeSeriesVariable timeSeriesVariable = getTimeSeriesVariable(upratingCase);
+        return getTimeSeriesValue(year, timeSeriesVariable);
     }
 
-    private static TimeSeriesVariable getTimeSeriesVariable(UpratingCase upratingCase ) {
+    private static TimeSeriesVariable getTimeSeriesVariable(UpratingCase upratingCase) {
 
-        TimeSeriesVariable indexType = null;
+        TimeSeriesVariable timeSeriesVariable = null;
         switch (upratingCase) {
-            case Capital -> {
-                indexType = TimeSeriesVariable.GDP;
+            case Capital, ModelInitialise, Pension -> {
+                timeSeriesVariable = TimeSeriesVariable.GDP;
             }
             case Earnings -> {
-                indexType = TimeSeriesVariable.WageGrowth;
-            }
-            case ModelInitialise -> {
-                indexType = TimeSeriesVariable.GDP;
-            }
-            case Pension -> {
-                indexType = TimeSeriesVariable.GDP;
+                timeSeriesVariable = TimeSeriesVariable.WageGrowth;
             }
             case TaxDonor -> {
-                indexType = TimeSeriesVariable.Inflation;
+                timeSeriesVariable = TimeSeriesVariable.Inflation;
             }
         }
-        return indexType;
+        return timeSeriesVariable;
     }
 
-    public static double getTimeSeriesValue(int year, TimeSeriesVariable variableType) {
-        return getTimeSeriesValue(year, null, null, variableType);
+    public static double getTimeSeriesValue(int year, TimeSeriesVariable timeSeriesVariable) {
+        return getTimeSeriesValue(year, null, null, timeSeriesVariable);
     }
 
-    public static double getTimeSeriesValue(int year, String stringKey1, TimeSeriesVariable variableType) {
-        return getTimeSeriesValue(year, stringKey1, null, variableType);
+    public static double getTimeSeriesValue(int year, String stringKey1, TimeSeriesVariable timeSeriesVariable) {
+        return getTimeSeriesValue(year, stringKey1, null, timeSeriesVariable);
     }
 
-    public static double getTimeSeriesValue(int year, String stringKey1, String stringKey2, TimeSeriesVariable variableType) {
+    public static double getTimeSeriesValue(int year, String stringKey1, String stringKey2, TimeSeriesVariable timeSeriesVariable) {
 
-        MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(variableType);
+        MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(timeSeriesVariable);
         Object val = getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, valueMap);
         if (val == null)
             val = extendValueTimeSeries(year, stringKey1, stringKey2, valueMap);
@@ -2753,7 +2747,7 @@ public class Parameters {
                 }
             }
         }
-        return valObj;
+        return getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, mapToExtend);
     }
 
     private static MultiKeyCoefficientMap getTimeSeriesRateMap(TimeVaryingRate rateType) {

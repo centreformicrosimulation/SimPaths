@@ -50,7 +50,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
-	public static String configFile = "sc calibration.yml";
+	public static String configFile = "programming test.yml";
 
 	// other working variables
 	private static Country country;

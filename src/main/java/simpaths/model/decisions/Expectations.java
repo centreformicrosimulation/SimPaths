@@ -5,7 +5,7 @@ import java.util.*;
 
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
-import simpaths.data.RegressionNames;
+import simpaths.data.RegressionName;
 import simpaths.model.enums.*;
 import simpaths.model.BenefitUnit;
 import simpaths.model.Person;
@@ -390,6 +390,9 @@ public class Expectations {
                 personProxyNextPeriod.setYnbcpdf_dv_lag1(0.0);
             }
 
+            // instantiate expectations factory
+            ExpectationsFactory futures = new ExpectationsFactory(anticipated, probability, personProxyNextPeriod, scale, ageYearsThisPeriod, currentStates, pensionIncomePerYear);
+
             // region
             if (DecisionParams.flagRegion) {
                 // assume that expect to remain in current region as placeholder
@@ -400,6 +403,7 @@ public class Expectations {
                     anticipated[ii].states[stateIndexNextPeriod] = currentStates.states[stateIndexCurrPeriod];
                 }
                 personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
+                futures.updateRegion();
                 throw new RuntimeException("Please validate code for regions in expectations object");
             }
 
@@ -417,6 +421,7 @@ public class Expectations {
                         anticipated[ii].states[stateIndexNextPeriod] = currentStates.getRetirement();
                     }
                 }
+                futures.updateRetirement(retiring);
                 throw new RuntimeException("Please validate code for retirement in expectations object");
             }
 
@@ -428,12 +433,12 @@ public class Expectations {
                 if (anyVaries() && currentStates.getStudent()==1) {
                     int numberExpectedInitial = numberExpected;
                     boolean flagEval;
-                    lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE1a);
+                    lexpect = new LocalExpectations(personProxyNextPeriod, RegressionName.EducationE1a);
                     for (int ii=0; ii<numberExpectedInitial; ii++) {
 
                         flagEval = updatePersonNextPeriod(ii);
                         if (flagEval) {
-                            lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE1a);
+                            lexpect = new LocalExpectations(personProxyNextPeriod, RegressionName.EducationE1a);
                         }
                         expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect);
                     }
@@ -441,12 +446,13 @@ public class Expectations {
                     if (currentStates.getStudent() == 0) {
                         lexpect = new LocalExpectations(currentStates.states[stateIndexCurrPeriod]);
                     } else {
-                        lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE1a);
+                        lexpect = new LocalExpectations(personProxyNextPeriod, RegressionName.EducationE1a);
                     }
                     expandExpectationsAllIndices(stateIndexNextPeriod, lexpect);
                 }
                 if (currentStates.getStudent()==1)
                     flagEducationVaries = true;
+                futures.updateStudent();
             }
 
             // education
@@ -463,14 +469,14 @@ public class Expectations {
 
                     int numberExpectedInitial = numberExpected;
                     boolean flagEval = false;
-                    LocalExpectations lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE2a);
+                    LocalExpectations lexpect = new LocalExpectations(personProxyNextPeriod, RegressionName.EducationE2a);
                     for (int ii = 0; ii < numberExpectedInitial; ii++) {
 
                         if (anyVaries()) {
                             flagEval = updatePersonNextPeriod(ii);
                         }
                         if (flagEval) {
-                            lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE2a);
+                            lexpect = new LocalExpectations(personProxyNextPeriod, RegressionName.EducationE2a);
                         }
 
                         if (anticipated[ii].getStudent() == 1) {
@@ -482,29 +488,33 @@ public class Expectations {
                         }
                     }
                 }
+                futures.updateEducation();
             }
 
             // health
             if (DecisionParams.flagHealth && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
-                updateExpectations(Axis.Health, RegressionNames.HealthH1b);
+                updateExpectations(Axis.Health, RegressionName.HealthH1b);
                 flagHealthVaries = true;
+                futures.updateHealth();
             }
 
             // disability
             if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth && ageYearsNextPeriod <= DecisionParams.maxAgeForDisability()) {
-                updateExpectations(Axis.Disability, RegressionNames.HealthH2b);
+                updateExpectations(Axis.Disability, RegressionName.HealthH2b);
                 flagDisabilityVaries = true;
+                futures.updateDisability();
             }
 
             // cohabitation (1 = cohabiting)
             if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
 
                 if (cohabitation) {
-                    updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU2b, 0.0);
+                    updateExpectations(Axis.Cohabitation, RegressionName.PartnershipU2b, 0.0);
                 } else {
-                    updateExpectations(Axis.Cohabitation, RegressionNames.PartnershipU1b, RegressionNames.PartnershipU1a);
+                    updateExpectations(Axis.Cohabitation, RegressionName.PartnershipU1b, RegressionName.PartnershipU1a);
                 }
                 flagCohabitationVaries = true;
+                futures.updateCohabitation();
             }
 
             // dependent children
@@ -534,9 +544,9 @@ public class Expectations {
                                 // birth possible
 
                                 if (anticipated[ii].getStudent()==1) {
-                                    expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionNames.FertilityF1a);
+                                    expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1a);
                                 } else {
-                                    expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionNames.FertilityF1b);
+                                    expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
                                 }
                             } else {
                                 // birth not possible
@@ -558,17 +568,20 @@ public class Expectations {
                     }
                 }
             }
+            futures.updateChildren();
 
             // social care receipt
             if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
                 updateExpectations(Axis.SocialCareReceiptState, 4);
                 flagSocialCareReceiptVaries = true;
+                futures.updateSocialCareReceipt();
             }
 
             // social care provision
             if (Parameters.flagSocialCare) {
-                updateExpectations(Axis.SocialCareProvision, RegressionNames.SocialCareS3c, RegressionNames.SocialCareS3d, 5);
+                updateExpectations(Axis.SocialCareProvision, RegressionName.SocialCareS3c, RegressionName.SocialCareS3d, 5);
                 flagSocialCareProvisionVaries = true;
+                futures.updateSocialCareProvision();
             }
 
             // full-time wage potential
@@ -576,10 +589,11 @@ public class Expectations {
                 double minValue = Math.log(DecisionParams.MIN_WAGE_PHOUR);
                 double maxValue = Math.log(DecisionParams.MAX_WAGE_PHOUR);
                 if (Gender.Male.equals(currentStates.getGenderCode()))
-                    updateExpectations(Axis.WagePotential, RegressionNames.WagesMalesE, minValue, maxValue, DecisionParams.C_WAGE_POTENTIAL);
+                    updateExpectations(Axis.WagePotential, RegressionName.WagesMalesE, minValue, maxValue, DecisionParams.C_WAGE_POTENTIAL);
                 else
-                    updateExpectations(Axis.WagePotential, RegressionNames.WagesFemalesE, minValue, maxValue, DecisionParams.C_WAGE_POTENTIAL);
+                    updateExpectations(Axis.WagePotential, RegressionName.WagesFemalesE, minValue, maxValue, DecisionParams.C_WAGE_POTENTIAL);
                 flagWageVaries = true;
+                futures.updateWagePotential();
             }
 
             // pension income
@@ -598,13 +612,31 @@ public class Expectations {
                     val = Math.log(val + DecisionParams.C_PENSION);
                     anticipated[ii].states[stateIndexNextPeriod] = val;
                 }
+                futures.updatePensionIncome();
             }
 
             // wage offer
             if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
                 updateExpectations(Axis.WageOffer1, getUnemploymentRegressionName(), 0.0);
                 flagUnemploymentVaries = true;
+                futures.updateWageOffer1();
             }
+
+            // check results
+            double[] probability2 = futures.getProbability();
+            States[] anticipated2 = futures.getAnticipated();
+            numberExpected = futures.getNumberExpected();
+            for (int ii = 0; ii< numberExpected; ii++) {
+
+                if (Math.abs(probability[ii]-probability2[ii]) > 1.0E-6)
+                    throw new RuntimeException("problem!");
+                for (int jj=0; jj<anticipated[ii].states.length; jj++) {
+
+                    if (Math.abs(anticipated[ii].states[jj] - anticipated2[ii].states[jj]) > 1.0E-6)
+                        throw new RuntimeException("problem!");
+                }
+            }
+
 
             // check evaluated probabilities
             double probabilityCheck = 0;
@@ -617,18 +649,18 @@ public class Expectations {
         }
     }
 
-    private RegressionNames getUnemploymentRegressionName() {
+    private RegressionName getUnemploymentRegressionName() {
         if (currentStates.getGenderCode().equals(Gender.Male)) {
             if (currentStates.getEducationCode().equals(Education.High)) {
-                return RegressionNames.UnemploymentU1a;
+                return RegressionName.UnemploymentU1a;
             } else {
-                return RegressionNames.UnemploymentU1b;
+                return RegressionName.UnemploymentU1b;
             }
         } else {
             if (currentStates.getEducationCode().equals(Education.High)) {
-                return RegressionNames.UnemploymentU1c;
+                return RegressionName.UnemploymentU1c;
             } else {
-                return RegressionNames.UnemploymentU1d;
+                return RegressionName.UnemploymentU1d;
             }
         }
     }
@@ -640,7 +672,7 @@ public class Expectations {
 
             double probFormalChildCare = Parameters.getRegChildcareC1a().getProbability(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
             double logChildcareCostScore = Parameters.getRegChildcareC1b().getScore(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
-            double logChildcareRSME = ManagerRegressions.getRmse(RegressionNames.ChildcareC1b);
+            double logChildcareRSME = ManagerRegressions.getRmse(RegressionName.ChildcareC1b);
             childcareCostWeekly = Math.exp(logChildcareCostScore + logChildcareRSME*logChildcareRSME/2.0) * probFormalChildCare;
         }
         return childcareCostWeekly;
@@ -788,7 +820,7 @@ public class Expectations {
      * @param options the number of potential alternatives at birth age (= max no. births + 1)
      * @param regression the regression equation used to update probabilities
      */
-    private void expandExpectationsFertility(int expandIndex, int stateIndex, int birthYear, int options, RegressionNames regression) {
+    private void expandExpectationsFertility(int expandIndex, int stateIndex, int birthYear, int options, RegressionName regression) {
 
         // initialise storage arrays - 100% probability to zero children at birth year
         double[] probabilities = new double[options];
@@ -860,9 +892,9 @@ public class Expectations {
         } else {
             double ptPremium;
             if (currentStates.getGenderCode()==Gender.Male) {
-                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesMalesE, "Pt");
+                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesMalesE, "Pt");
             } else {
-                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesFemalesE, "Pt");
+                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesFemalesE, "Pt");
             }
             return Math.exp( Math.log(fullTimeHourlyEarningsPotential) + ptPremium);
         }
@@ -985,23 +1017,23 @@ public class Expectations {
     }
 
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName) {
+    private void updateExpectations(Axis axis, RegressionName regressionName) {
         updateExpectations(axis, regressionName, null, 1.0, null, null, null, 0);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName, Double valueTrue) {
+    private void updateExpectations(Axis axis, RegressionName regressionName, Double valueTrue) {
         updateExpectations(axis, regressionName, null, valueTrue, null, null, null, 1);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2) {
+    private void updateExpectations(Axis axis, RegressionName regressionName1, RegressionName regressionName2) {
         updateExpectations(axis, regressionName1, regressionName2, 1.0, null, null, null, 2);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2, int method) {
+    private void updateExpectations(Axis axis, RegressionName regressionName1, RegressionName regressionName2, int method) {
         updateExpectations(axis, regressionName1, regressionName2, 3.0, null, null, null, method);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName, double minValue, double maxValue, double cTransform) {
+    private void updateExpectations(Axis axis, RegressionName regressionName, double minValue, double maxValue, double cTransform) {
         updateExpectations(axis, regressionName, null, 1.0, minValue, maxValue, cTransform, 3);
     }
 
@@ -1009,7 +1041,7 @@ public class Expectations {
         updateExpectations(axis, null, null, 1.0, null, null, null, method);
     }
 
-    private void updateExpectations(Axis axis, RegressionNames regressionName1, RegressionNames regressionName2,
+    private void updateExpectations(Axis axis, RegressionName regressionName1, RegressionName regressionName2,
                                     Double valueTrue, Double minValue, Double maxValue, Double cTransform,
                                     int method) {
 
@@ -1038,7 +1070,7 @@ public class Expectations {
         }
     }
 
-    private void checkParameterConsistency(RegressionNames regressionName1, RegressionNames regressionName2, Double valueTrue, Double minValue,
+    private void checkParameterConsistency(RegressionName regressionName1, RegressionName regressionName2, Double valueTrue, Double minValue,
                                            Double maxValue, Double cTransform, int method) {
         if (method==0) {
             if (regressionName1==null || regressionName2!=null || (Math.abs(valueTrue-1.0)>1.0E-5) || minValue!=null || maxValue!=null || cTransform!=null )
@@ -1063,7 +1095,7 @@ public class Expectations {
     }
 
 
-    private LocalExpectations lexpectEval(RegressionNames regressionName1, RegressionNames regressionName2,
+    private LocalExpectations lexpectEval(RegressionName regressionName1, RegressionName regressionName2,
                                           Double valueTrue, Double minValue, Double maxValue, Double cTransform, int method) {
         // method = 0 default
         //          1 reverse polarity

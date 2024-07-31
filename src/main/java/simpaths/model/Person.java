@@ -9,8 +9,9 @@ import jakarta.persistence.*;
 
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
-import simpaths.data.RegressionNames;
+import simpaths.data.RegressionName;
 import simpaths.data.filters.FertileFilter;
+import simpaths.model.decisions.Axis;
 import simpaths.model.enums.*;
 import microsim.statistics.Series;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -4392,11 +4393,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.yearLocal = yearLocal;
     }
 
-    private int getYear() {
+    public int getYear() {
         if (model != null) {
             return model.getYear();
         } else {
-            if (yearLocal ==null) {
+            if (yearLocal == null) {
                 throw new RuntimeException("call to get uninitialised year in benefit unit");
             }
             return yearLocal;
@@ -4549,15 +4550,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             double ptPremium;
             if (les_c4_lag1.equals(Les_c4.EmployedOrSelfEmployed)) {
                 if (Gender.Male.equals(dgn)) {
-                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesMalesE, "Pt");
+                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesMalesE, "Pt");
                 } else {
-                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesFemalesE, "Pt");
+                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesFemalesE, "Pt");
                 }
             } else {
                 if (Gender.Male.equals(dgn)) {
-                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesMalesNE, "Pt");
+                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesMalesNE, "Pt");
                 } else {
-                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesFemalesNE, "Pt");
+                    ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesFemalesNE, "Pt");
                 }
             }
             return Math.exp( Math.log(fullTimeHourlyEarningsPotential) + ptPremium);
@@ -4772,6 +4773,51 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
     public SampleExit getSampleExit() {return sampleExit;}
     public double getFertilityRandomUniform2() { return fertilityRandomUniform2; }
-    public double getFertilityRandomUniform3() { return fertilityRandomUniform3; }
     public double getCohabitRandomUniform2() { return cohabitRandomUniform2; }
+    public RegressionName getRegressionName(Axis axis) {
+        switch (axis) {
+            case Student -> {return RegressionName.EducationE1a;}
+            case Education -> {return RegressionName.EducationE2a;}
+            case Health -> {return RegressionName.HealthH1b;}
+            case Disability -> {return RegressionName.HealthH2b;}
+            case Cohabitation -> {
+                if (Dcpst.Partnered.equals(dcpst_lag1))
+                    return RegressionName.PartnershipU2b;
+                else if (getStudent()==0)
+                    return RegressionName.PartnershipU1b;
+                else
+                    return RegressionName.PartnershipU1a;
+            }
+            case SocialCareProvision -> {
+                if (Dcpst.Partnered.equals(dcpst))
+                    return RegressionName.SocialCareS3d;
+                else
+                    return RegressionName.SocialCareS3c;
+            }
+            case WagePotential -> {
+                if (Gender.Male.equals(dgn))
+                    return RegressionName.WagesMalesE;
+                else
+                    return RegressionName.WagesFemalesE;
+            }
+            case WageOffer1 -> {
+                if (Gender.Male.equals(dgn)) {
+                    if (Education.High.equals(deh_c3_lag1)) {
+                        return RegressionName.UnemploymentU1a;
+                    } else {
+                        return RegressionName.UnemploymentU1b;
+                    }
+                } else {
+                    if (Education.High.equals(deh_c3_lag1)) {
+                        return RegressionName.UnemploymentU1c;
+                    } else {
+                        return RegressionName.UnemploymentU1d;
+                    }
+                }
+            }
+            default -> {
+                throw new RuntimeException("failed to recognise axis for regression identification");
+            }
+        }
+    }
 }

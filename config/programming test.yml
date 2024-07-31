@@ -10,40 +10,15 @@ popSize: 5000
 
 # Arguments passed to the SimPathsModel
 model_args:
-#    maxAge: 130
-#    fixTimeTrend: true
-#    timeTrendStopsIn: 2017
-#    fixRandomSeed: true
-#    sIndexTimeWindow: 5
-#    sIndexAlpha: 2
-#    sIndexDelta: 0
-#    savingRate: 0
-#    initialisePotentialEarningsFromDatabase: true
-#    useWeights: false
-#    useSBAMMatching:
-#    projectMortality: true
-#    labourMarketCovid19On: false
-#    projectFormalChildcare: true
-#    donorPoolAveraging: true
-#    alignFertility: true
-#    alignEmployment: false
-    alignCohabitation: false
-    alignPopulation: false
-    projectSocialCare: true
-#    enableIntertemporalOptimisations: true
-#    responsesToLowWageOffer: false
-#    saveImperfectTaxDBMatches: false
-#    useSavedBehaviour: false
-#    readGrid: "laptop serial"
-#    saveBehaviour: true
-#    employmentOptionsOfPrincipalWorker: 3
-#    employmentOptionsOfSecondaryWorker: 3
-#    responsesToEducation: true
-#    responsesToRetirement: false
-#    responsesToHealth: true
-#    responsesToDisability: false
-#    minAgeForPoorHealth: 50
-#    responsesToRegion: false
+    projectSocialCare: false
+    enableIntertemporalOptimisations: true
+    responsesToLowWageOffer: true
+    responsesToEducation: true
+    responsesToHealth: true
+    responsesToDisability: false
+    useSavedBehaviour: false
+    readGrid: "first"
+
 
 # Arguments that alter processing of the SimPathsMultiRun object
 innovation_args:

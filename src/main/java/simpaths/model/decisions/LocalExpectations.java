@@ -3,7 +3,8 @@ package simpaths.model.decisions;
 
 import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
-import simpaths.data.RegressionNames;
+import simpaths.data.RegressionName;
+import simpaths.data.RegressionType;
 import simpaths.model.enums.IntegerValuedEnum;
 
 import java.util.Map;
@@ -19,11 +20,13 @@ public class LocalExpectations {
         screenAndAssign(probs, vals);
     }
 
-    public LocalExpectations(IDoubleSource obj, RegressionNames regression) {
-        if (regression.getValue()==1) {
+    public LocalExpectations(IDoubleSource obj, RegressionName regression) {
+        if (RegressionType.StandardBinomial.equals(regression.getType()) || RegressionType.AdjustedStandardBinomial.equals(regression.getType())) {
             // binomial regression
             evaluateIndicator(obj, regression);
-        } else if (regression.getValue()==2) {
+        } else if (RegressionType.ReversedBinomial.equals(regression.getType())) {
+            evaluateIndicator(obj, regression, 0.0);
+        } else if (RegressionType.Multinomial.equals(regression.getType())) {
             // multinomial regression
             evaluateMultinomial(obj, regression);
         } else {
@@ -31,8 +34,8 @@ public class LocalExpectations {
         }
     }
 
-    public LocalExpectations(IDoubleSource obj, RegressionNames regression, double minValue, double maxValue, double cTransform) {
-        if (regression.getValue()==3) {
+    public LocalExpectations(IDoubleSource obj, RegressionName regression, double minValue, double maxValue, double cTransform) {
+        if (RegressionType.Gaussian.equals(regression.getType())) {
             // gaussian regression
             evaluateGaussian(obj, regression, minValue, maxValue, cTransform);
         } else {
@@ -40,7 +43,7 @@ public class LocalExpectations {
         }
     }
 
-    public LocalExpectations(IDoubleSource obj, RegressionNames regression, Double valueTrue) {
+    public LocalExpectations(IDoubleSource obj, RegressionName regression, Double valueTrue) {
         evaluateIndicator(obj, regression, valueTrue);
     }
 
@@ -99,11 +102,11 @@ public class LocalExpectations {
         }
     }
 
-    private void evaluateIndicator(IDoubleSource obj, RegressionNames regression) {
+    private void evaluateIndicator(IDoubleSource obj, RegressionName regression) {
         evaluateIndicator(obj, regression, 1.0);
     }
 
-    private void evaluateIndicator(IDoubleSource obj, RegressionNames regression, Double valueTrue) {
+    private void evaluateIndicator(IDoubleSource obj, RegressionName regression, Double valueTrue) {
         double[] probs, vals;
         double prob = ManagerRegressions.getProbability(obj, regression);
         probs = new double[] {1.0-prob, prob};
@@ -114,7 +117,7 @@ public class LocalExpectations {
         screenAndAssign(probs, vals);
     }
 
-    private <E extends Enum<E> & IntegerValuedEnum> void evaluateMultinomial(IDoubleSource obj, RegressionNames regression) {
+    private <E extends Enum<E> & IntegerValuedEnum> void evaluateMultinomial(IDoubleSource obj, RegressionName regression) {
         double[] probs, vals;
         Map<E,Double> probsMap = ManagerRegressions.getMultinomialProbabilities(obj, regression);
         int nn = probsMap.size();
@@ -131,7 +134,7 @@ public class LocalExpectations {
         screenAndAssign(probs, vals);
     }
 
-    private void evaluateGaussian(IDoubleSource obj, RegressionNames regression, double minValue, double maxValue, double cTransform) {
+    private void evaluateGaussian(IDoubleSource obj, RegressionName regression, double minValue, double maxValue, double cTransform) {
         double[] probs, vals;
         Double rmse = ManagerRegressions.getRmse(regression);
         Double score = ManagerRegressions.getScore(obj, regression);
