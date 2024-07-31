@@ -285,8 +285,14 @@ public class KeyFunction4 {
         for (int ii=0; ii<Parameters.TAXDB_REGIMES; ii++) {
             int index=0;
             for (MatchFeature feature : MatchFeature.values()) {
-                if (units.containsKey(feature))
+                if (units.containsKey(feature)) {
+
+                    Integer aa = units.get(feature).get(ii);
+                    Integer bb = taxdbCounter.get(feature).get(ii);
+                    if (aa==null || bb==null)
+                        throw new RuntimeException("problem evaluating key function");
                     index += units.get(feature).get(ii) * taxdbCounter.get(feature).get(ii);
+                }
             }
             result[ii] = index;
         }

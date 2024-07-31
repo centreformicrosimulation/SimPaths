@@ -1,10 +1,11 @@
 package simpaths.data;
 
 public enum RegressionType {
-    StandardBinomial,           // binary (0,1)
-    AdjustedStandardBinomial,   // binary (0,1) with adjusted intercept
-    ReversedBinomial,           // binary (1,0)
-    Multinomial,
-    Gaussian,
+    StandardProbit,           // binary (0,1)
+    AdjustedStandardProbit,   // binary (0,1) with adjusted intercept
+    ReversedProbit,           // binary (1,0)
+    MultinomialLogit,
+    Linear,
     RMSE,
+    OrderedProbit,
 }

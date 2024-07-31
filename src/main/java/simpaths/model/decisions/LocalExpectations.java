@@ -3,9 +3,12 @@ package simpaths.model.decisions;
 
 import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
+import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
 import simpaths.data.RegressionType;
+import simpaths.model.Person;
 import simpaths.model.enums.IntegerValuedEnum;
+import simpaths.model.enums.TimeSeriesVariable;
 
 import java.util.Map;
 
@@ -16,57 +19,13 @@ public class LocalExpectations {
     double[] values;                // array of values
 
 
-    public LocalExpectations(double[] probs, double[] vals) {
-        screenAndAssign(probs, vals);
-    }
-
-    public LocalExpectations(IDoubleSource obj, RegressionName regression) {
-        if (RegressionType.StandardBinomial.equals(regression.getType()) || RegressionType.AdjustedStandardBinomial.equals(regression.getType())) {
-            // binomial regression
-            evaluateIndicator(obj, regression);
-        } else if (RegressionType.ReversedBinomial.equals(regression.getType())) {
-            evaluateIndicator(obj, regression, 0.0);
-        } else if (RegressionType.Multinomial.equals(regression.getType())) {
-            // multinomial regression
-            evaluateMultinomial(obj, regression);
-        } else {
-            throw new RuntimeException("unexpected regression specification submitted for evaluation of local expectations");
-        }
-    }
-
-    public LocalExpectations(IDoubleSource obj, RegressionName regression, double minValue, double maxValue, double cTransform) {
-        if (RegressionType.Gaussian.equals(regression.getType())) {
-            // gaussian regression
-            evaluateGaussian(obj, regression, minValue, maxValue, cTransform);
-        } else {
-            throw new RuntimeException("unexpected regression specification submitted for evaluation of local expectations");
-        }
-    }
-
-    public LocalExpectations(IDoubleSource obj, RegressionName regression, Double valueTrue) {
-        evaluateIndicator(obj, regression, valueTrue);
-    }
-
-    public LocalExpectations(double valueTrue) {
-        this(valueTrue, 0.0, 1.0);
-    }
-
-    public LocalExpectations(double valueTrue, double valueFalse, double probabilityTrue) {
-        if (Math.abs(probabilityTrue-1.0)<1.0E-5) {
-            probabilities = new double[] {1.0};
-            values = new double[] {valueTrue};
-        } else {
-            double[] vals = new double[] {valueFalse, valueTrue};
-            double[] probs = new double[] {1.0-probabilityTrue, probabilityTrue};
-            screenAndAssign(probs, vals);
-        }
-    }
+    public LocalExpectations(){}
 
 
     /**
      * WORKER METHODS
      */
-    private void screenAndAssign(double[] probs, double[] vals) {
+    public void screenAndAssign(double[] probs, double[] vals) {
 
         double sumProbs = 0.0, delProbs = 0.0;
         int drop = 0;
@@ -102,13 +61,39 @@ public class LocalExpectations {
         }
     }
 
-    private void evaluateIndicator(IDoubleSource obj, RegressionName regression) {
-        evaluateIndicator(obj, regression, 1.0);
+    public void evaluate(Person person, RegressionName regression) {
+
+        if (RegressionType.StandardProbit.equals(regression.getType()) || RegressionType.AdjustedStandardProbit.equals(regression.getType())) {
+            // binomial regression
+            evaluateIndicator(person, regression);
+        } else if (RegressionType.ReversedProbit.equals(regression.getType())) {
+            evaluateIndicator(person, regression, 0.0);
+        } else if (RegressionType.MultinomialLogit.equals(regression.getType()) || RegressionType.OrderedProbit.equals(regression.getType())) {
+            // multinomial regression
+            evaluateMultinomial(person, regression);
+        } else {
+            throw new RuntimeException("unexpected regression specification submitted for evaluation of local expectations");
+        }
     }
 
-    private void evaluateIndicator(IDoubleSource obj, RegressionName regression, Double valueTrue) {
+    public void assignValue(double value) {
+        probabilities = new double[] {1.0};
+        values = new double[] {value};
+    }
+
+    public void evaluateIndicator(Person person, RegressionName regression) {
+        evaluateIndicator(person, regression, 1.0);
+    }
+
+    public void evaluateIndicator(Person person, RegressionName regression, Double valueTrue) {
         double[] probs, vals;
-        double prob = ManagerRegressions.getProbability(obj, regression);
+        double score = ManagerRegressions.getScore(person, regression);
+        double adj = 0.0;
+        if (RegressionType.AdjustedStandardProbit.equals(regression.getType())) {
+           adj = Parameters.getTimeSeriesValue(person.getYear(), TimeSeriesVariable.FertilityAdjustment);
+        }
+
+        double prob = ManagerRegressions.getProbability(score + adj, regression);
         probs = new double[] {1.0-prob, prob};
         if (Math.abs(valueTrue)<1.0E-5)
             vals = new double[] {1.0, 0.0};
@@ -117,9 +102,9 @@ public class LocalExpectations {
         screenAndAssign(probs, vals);
     }
 
-    private <E extends Enum<E> & IntegerValuedEnum> void evaluateMultinomial(IDoubleSource obj, RegressionName regression) {
+    private <E extends Enum<E> & IntegerValuedEnum> void evaluateMultinomial(Person person, RegressionName regression) {
         double[] probs, vals;
-        Map<E,Double> probsMap = ManagerRegressions.getMultinomialProbabilities(obj, regression);
+        Map<E,Double> probsMap = ManagerRegressions.getMultinomialProbabilities(person, regression);
         int nn = probsMap.size();
         if (nn<2)
             throw new RuntimeException("call to evaluate multinomial probabilities returned fewer than 2 results");
@@ -134,10 +119,14 @@ public class LocalExpectations {
         screenAndAssign(probs, vals);
     }
 
-    private void evaluateGaussian(IDoubleSource obj, RegressionName regression, double minValue, double maxValue, double cTransform) {
+    public void evaluateGaussian(Person person, RegressionName regression, double minValue, double maxValue, double cTransform) {
+
+        if (!RegressionType.Linear.equals(regression.getType()))
+            throw new RuntimeException("unexpected regression specification submitted for evaluation of local expectations");
+
         double[] probs, vals;
         Double rmse = ManagerRegressions.getRmse(regression);
-        Double score = ManagerRegressions.getScore(obj, regression);
+        Double score = ManagerRegressions.getScore(person, regression);
         probs = new double[DecisionParams.PTS_IN_QUADRATURE];
         vals = new double[DecisionParams.PTS_IN_QUADRATURE];
         for (int ii = 0; ii< DecisionParams.PTS_IN_QUADRATURE; ii++) {
