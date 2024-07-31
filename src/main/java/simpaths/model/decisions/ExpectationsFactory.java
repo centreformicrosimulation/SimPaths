@@ -39,6 +39,7 @@ public class ExpectationsFactory {
     boolean flagCohabitationVaries;
     boolean flagChildrenVaries;
 
+
     /**
      * CONSTRUCTOR
      */
