@@ -148,6 +148,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
     private boolean useWeights = false;
 
+    private boolean ignoreTargetsAtPopulationLoad = true;
+
     @GUIparameter(description = "If unchecked, will use the standard matching method")
 //	private boolean useSBAMMatching = false;
     private UnionMatchingMethod unionMatchingMethod = UnionMatchingMethod.ParametricNoRegion;
@@ -2552,7 +2554,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             while (randomHouseholdSampleListIterator.hasNext()) {
 
                 Household originalHousehold = randomHouseholdSampleListIterator.next();
-                if (filter.evaluate(originalHousehold)) {
+                if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
 
                     Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
                     newHousehold.resetWeights(1.0d);

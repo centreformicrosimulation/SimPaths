@@ -10,10 +10,10 @@ popSize: 5000
 
 # Arguments passed to the SimPathsModel
 model_args:
-    projectSocialCare: true
-    enableIntertemporalOptimisations: true
-    responsesToLowWageOffer: true
-    responsesToEducation: true
+    projectSocialCare: false
+    enableIntertemporalOptimisations: false
+    responsesToLowWageOffer: false
+    responsesToEducation: false
     responsesToHealth: true
     responsesToDisability: true
     useSavedBehaviour: false

@@ -1700,6 +1700,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             income = Math.max(minInc, incomeVal);
             if (income < maxInc) {
                 redraw = false;
+            } else {
+                capitalRandomUniform1 /= 2.0;
             }
         }
         return income;
