@@ -14,19 +14,20 @@ import java.util.random.RandomGenerator;
 // import plug-in packages
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import simpaths.data.IEvaluation;
 import simpaths.data.MahalanobisDistance;
 import simpaths.data.RootSearch;
+import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
 import microsim.alignment.outcome.ResamplingAlignment;
 import microsim.event.*;
 import microsim.event.EventListener;
 import org.apache.commons.collections4.keyvalue.MultiKey;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapIterator;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.commons.collections4.map.MultiKeyMap;
@@ -51,7 +52,6 @@ import simpaths.data.Parameters;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
-import simpaths.data.filters.FertileFilter;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
@@ -1073,7 +1073,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     for (Person person : personsInGroup) {
 
                         boolean flagAccept = true;
-                        if ( person.getBenefitUnit().getHousehold().getBenefitUnitSet().size() != 1) {
+                        if ( person.getBenefitUnit().getHousehold().getBenefitUnits().size() != 1) {
                             flagAccept = false;
                         } else {
                             for (Person member : person.getBenefitUnit().getPersonsInBU()) {
@@ -1304,7 +1304,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         Household newHousehold = new Household(originalHousehold);
         households.add(newHousehold);
-        for (BenefitUnit originalBenefitUnit : originalHousehold.getBenefitUnitSet()) {
+        for (BenefitUnit originalBenefitUnit : originalHousehold.getBenefitUnits()) {
             cloneBenefitUnit(originalBenefitUnit, newHousehold, sampleEntry);
         }
         return newHousehold;
@@ -2264,10 +2264,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     log.info(e.getMessage());
                     throw new RuntimeException("SQL Exception! " + e.getMessage());
                 }
-//        	//Create input database from input file (population_[country].csv)
-//			if(refreshInputDatabase) {
-//				SQLdataParser.createDatabaseTablesFromCSVfile(country, Parameters.getInputFileName(), startYear, conn);
-//			}
+
                 System.out.print("... Success!\n");
                 retry = false;
 
@@ -2278,13 +2275,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 if (isFirstRun) {
                     //Create database tables to be used in simulation from country-specific tables
-                    String[] tableNames = new String[]{"PERSON", "DONORPERSON", "BENEFITUNIT", "DONORTAXUNIT", "HOUSEHOLD"};
-                    String[] tableNamesInitial = new String[]{"PERSON", "BENEFITUNIT", "HOUSEHOLD"};
-                    String[] tableNamesDonor = new String[]{"DONORPERSON", "DONORTAXUNIT"};
+                    String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
                     for (String tableName : tableNamesDonor) {
                         stat.execute("DROP TABLE IF EXISTS " + tableName);
                         stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
                     }
+                    String[] tableNamesInitial = new String[]{"HOUSEHOLD", "BENEFITUNIT", "PERSON"};
                     for (String tableName : tableNamesInitial) {
                         stat.execute("DROP TABLE IF EXISTS " + tableName);
                         if (uprateInitialPopulation) {
@@ -2362,12 +2358,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      */
     private void createInitialPopulationDataStructures() {
 
+        // initialisations
         System.out.println("Creating population structures");
-
-
-        /*
-         * initialisations
-         */
         persons = new LinkedHashSet<Person>();
         benefitUnits = new LinkedHashSet<BenefitUnit>();
         households = new LinkedHashSet<Household>(); //Also initialise set of families to which benefitUnits belong
@@ -2375,201 +2367,210 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double aggregatePersonsWeight = 0.;            //Aggregate Weight of simulated individuals (a weighted sum of the simulated individuals)
         double aggregateHouseholdsWeight = 0.;        //Aggregate Weight of simulated benefitUnits (a weighted sum of the simulated households)
 
+//        Processed repository = new Processed(country, startYear, popSize);
+//        households = repository.getHouseholds();
+        if (!households.isEmpty()) {
 
-        /*
-         * load data from the input database
-         * NOTE: don't need to worry about duplicates, as database ensures all items are unique
-         * NOTE: use lists to ensure that simulated population is replicable
-         */
+//            benefitUnits = repository.getBenefitUnits();
+//            persons = repository.getPersons();
+        } else {
 
-        //Persons
-        List<Person> inputPersonList = (List<Person>) DatabaseUtils.loadTable(Person.class);               //RHS returns an ArrayList
-        if (inputPersonList.isEmpty()) {
-            throw new RuntimeException("Error - there are no Persons for country " + country + " in the input database");
-        }
 
-        //Benefit units
-        List<BenefitUnit> inputBenefitUnitList = (List<BenefitUnit>) DatabaseUtils.loadTable(BenefitUnit.class);    //RHS returns an ArrayList
-        if (inputBenefitUnitList.isEmpty()) {
-            throw new RuntimeException("Error - there are no Benefit Units for country " + country + " in the input database");
-        }
+            /*
+             * load data from the input database
+             * NOTE: don't need to worry about duplicates, as database ensures all items are unique
+             * NOTE: use lists to ensure that simulated population is replicable
+             */
 
-        //Households
-        List<Household> inputHouseholdList = (List<Household>) DatabaseUtils.loadTable(Household.class);
-        if (inputHouseholdList.isEmpty()) {
-            throw new RuntimeException("Error - there are no Households for country " + country + " in the input database");
-        }
-
-        // establish links between units
-        LinkedList<BenefitUnit> benefitUnitsToAllocate = new LinkedList<>(inputBenefitUnitList);
-        LinkedList<Person> personsToAllocate = new LinkedList<>(inputPersonList);
-        Double minWeight = null;
-        for (Household household : inputHouseholdList) {
-
-            Iterator<BenefitUnit> benefitUnitIterator = benefitUnitsToAllocate.iterator();
-            LinkedList<Person> orphans = new LinkedList<>();
-            while (benefitUnitIterator.hasNext()) {
-
-                BenefitUnit benefitUnit = benefitUnitIterator.next();
-                if (benefitUnit.getIdHousehold().equals(household.getId())) {
-                    // found benefit unit in household
-
-                    benefitUnit.setHousehold(household);
-                    benefitUnitIterator.remove();
-                    Iterator<Person> personIterator = personsToAllocate.iterator();
-                    while(personIterator.hasNext()) {
-
-                        Person person = personIterator.next();
-                        if (person.getIdBenefitUnit().equals(benefitUnit.getId())) {
-                            // found member of benefit unit
-
-                            person.setBenefitUnit(benefitUnit);
-                            if (!person.getBenefitUnit().getPersonsInBU().contains(person)) {
-                                orphans.add(person);
-                            }
-                            personIterator.remove();
-                        }
-                    }
-
-                    // establish responsible adults and relationship status
-                    if ( benefitUnit.getMale() == null && benefitUnit.getFemale() == null ) {
-                        household.removeBenefitUnit(benefitUnit);
-                        for (Person person : benefitUnit.getChildren()) {
-                            orphans.add(person);
-                        }
-                    } else {
-                        for (Person person : benefitUnit.getPersonsInBU()) {
-                            if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-                                if (person.getIdPartner() != null) {
-                                    orphans.add(person);
-                                } else {
-                                    checkChildRelations(benefitUnit, person);
-                                }
-                            } else if (person.getIdPartner()!=null) {
-                                for (Person partner : benefitUnit.getPersonsInBU()) {
-                                    if (person.getIdPartner().equals(partner.getKey().getId())) person.setPartner(partner);
-                                }
-                            }
-                            if (!orphans.contains(person)) {
-                                person.setAdditionalFieldsInInitialPopulation();
-                            }
-                        }
-                        benefitUnit.initializeFields();
-                    }
-                }
+            //Persons
+            List<Person> inputPersonList = (List<Person>) DatabaseUtils.loadTable(Person.class);               //RHS returns an ArrayList
+            if (inputPersonList.isEmpty()) {
+                throw new RuntimeException("Error - there are no Persons for country " + country + " in the input database");
             }
-            if (!orphans.isEmpty()) {
 
-                Iterator<Person> orphansIterator = orphans.iterator();
-                while (orphansIterator.hasNext()) {
-
-                    Person orphan = orphansIterator.next();
-                    Person partner = null;
-                    Person parent = null;
-                    for(BenefitUnit benefitUnit : household.getBenefitUnitSet()) {
-
-                        for (Person person : benefitUnit.getPersonsInBU()) {
-
-                            if (person != orphan) {
-                                if (orphan.getIdPartner() != null && orphan.getIdPartner().equals(person.getKey().getId())) {
-                                    partner = person;
-                                }
-                                if (orphan.getIdMother() != null && orphan.getIdMother().equals(person.getKey().getId())) {
-                                    parent = person;
-                                }
-                                if (orphan.getIdFather() != null && orphan.getIdFather().equals(person.getKey().getId())) {
-                                    parent = person;
-                                }
-                            }
-                        }
-                    }
-                    if (parent != null) {
-
-                        orphansIterator.remove();
-                        if (orphan.getIdPartner() != null) {
-                            orphan.setPartner(null);
-                        }
-                        if (partner != null) {
-                            partner.setPartner(null);
-                        }
-                        orphan.setBenefitUnit(null);
-                        orphan.setBenefitUnit(parent.getBenefitUnit());
-                        checkChildRelations(parent.getBenefitUnit(), orphan);
-                        orphan.setAdditionalFieldsInInitialPopulation();
-                        parent.getBenefitUnit().initializeFields();
-                    } else if (partner != null) {
-
-                        orphansIterator.remove();
-                        orphan.setIdMother((Person)null);
-                        orphan.setIdFather((Person)null);
-                        orphan.setDag(Parameters.AGE_TO_BECOME_RESPONSIBLE);
-                        orphan.setBenefitUnit(null);
-                        orphan.setBenefitUnit(partner.getBenefitUnit());
-                        orphan.setAdditionalFieldsInInitialPopulation();
-                        partner.getBenefitUnit().initializeFields();
-                    }
-                }
+            //Benefit units
+            List<BenefitUnit> inputBenefitUnitList = (List<BenefitUnit>) DatabaseUtils.loadTable(BenefitUnit.class);    //RHS returns an ArrayList
+            if (inputBenefitUnitList.isEmpty()) {
+                throw new RuntimeException("Error - there are no Benefit Units for country " + country + " in the input database");
             }
-            if (!orphans.isEmpty()) {
-                throw new RuntimeException("Children not associated with a qualifying benefit unit included in population load.");
+
+            //Households
+            List<Household> inputHouseholdList = (List<Household>) DatabaseUtils.loadTable(Household.class);
+            if (inputHouseholdList.isEmpty()) {
+                throw new RuntimeException("Error - there are no Households for country " + country + " in the input database");
             }
-            if (minWeight == null || household.getWeight() < minWeight) {
-                minWeight = household.getWeight();
-            }
-        }
-        if (!benefitUnitsToAllocate.isEmpty()) {
-            throw new RuntimeException("Not all benefit units associated with a household at population load.");
-        }
-        if (!personsToAllocate.isEmpty()) {
-            throw new RuntimeException("Not all persons associated with a benefit unit at population load.");
-        }
 
-
-        /**********************************************************
-         * instantiate simulated population
-         **********************************************************/
-        if (!useWeights) {
-            // Expand population, sample, and remove weights
-
-            StopWatch stopwatch = new StopWatch();
-            stopwatch.start();
-            System.out.println("Will expand the initial population to " + popSize + " individuals, each of whom has an equal weight.");
-
-            // approach to resampling considered here is designed to allow for surveys that over-sample some population
-            // subgroups. In this case you may have many similar observations in the sample all with low survey weights
-            // so that replicating by a factor adjustment on weight of each observation may result in none of the
-            // observations being included in the simulated sample (unless the simulated sample was very large).
-            List<Household> randomHouseholdSampleList = new LinkedList<>();
-            double replicationFactor = 5.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
+            // establish links between units
+            LinkedList<BenefitUnit> benefitUnitsToAllocate = new LinkedList<>(inputBenefitUnitList);
+            LinkedList<Person> personsToAllocate = new LinkedList<>(inputPersonList);
+            Double minWeight = null;
             for (Household household : inputHouseholdList) {
 
-                int numberOfClones = (int) Math.round(household.getWeight() * replicationFactor);
-                for (int ii=0; ii<numberOfClones; ii++) {
-                    randomHouseholdSampleList.add(household);
+                Iterator<BenefitUnit> benefitUnitIterator = benefitUnitsToAllocate.iterator();
+                LinkedList<Person> orphans = new LinkedList<>();
+                while (benefitUnitIterator.hasNext()) {
+
+                    BenefitUnit benefitUnit = benefitUnitIterator.next();
+                    if (benefitUnit.getIdHousehold().equals(household.getId())) {
+                        // found benefit unit in household
+
+                        benefitUnit.setHousehold(household);
+                        benefitUnitIterator.remove();
+                        Iterator<Person> personIterator = personsToAllocate.iterator();
+                        while(personIterator.hasNext()) {
+
+                            Person person = personIterator.next();
+                            if (person.getIdBenefitUnit().equals(benefitUnit.getId())) {
+                                // found member of benefit unit
+
+                                person.setBenefitUnit(benefitUnit);
+                                if (!person.getBenefitUnit().getPersonsInBU().contains(person)) {
+                                    orphans.add(person);
+                                }
+                                personIterator.remove();
+                            }
+                        }
+
+                        // establish responsible adults and relationship status
+                        if ( benefitUnit.getMale() == null && benefitUnit.getFemale() == null ) {
+                            household.removeBenefitUnit(benefitUnit);
+                            for (Person person : benefitUnit.getChildren()) {
+                                orphans.add(person);
+                            }
+                        } else {
+                            for (Person person : benefitUnit.getPersonsInBU()) {
+                                if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+                                    if (person.getIdPartner() != null) {
+                                        orphans.add(person);
+                                    } else {
+                                        checkChildRelations(benefitUnit, person);
+                                    }
+                                } else if (person.getIdPartner()!=null) {
+                                    for (Person partner : benefitUnit.getPersonsInBU()) {
+                                        if (person.getIdPartner().equals(partner.getKey().getId())) person.setPartner(partner);
+                                    }
+                                }
+                                if (!orphans.contains(person)) {
+                                    person.setAdditionalFieldsInInitialPopulation();
+                                }
+                            }
+                            benefitUnit.initializeFields();
+                        }
+                    }
+                }
+                if (!orphans.isEmpty()) {
+
+                    Iterator<Person> orphansIterator = orphans.iterator();
+                    while (orphansIterator.hasNext()) {
+
+                        Person orphan = orphansIterator.next();
+                        Person partner = null;
+                        Person parent = null;
+                        for(BenefitUnit benefitUnit : household.getBenefitUnits()) {
+
+                            for (Person person : benefitUnit.getPersonsInBU()) {
+
+                                if (person != orphan) {
+                                    if (orphan.getIdPartner() != null && orphan.getIdPartner().equals(person.getKey().getId())) {
+                                        partner = person;
+                                    }
+                                    if (orphan.getIdMother() != null && orphan.getIdMother().equals(person.getKey().getId())) {
+                                        parent = person;
+                                    }
+                                    if (orphan.getIdFather() != null && orphan.getIdFather().equals(person.getKey().getId())) {
+                                        parent = person;
+                                    }
+                                }
+                            }
+                        }
+                        if (parent != null) {
+
+                            orphansIterator.remove();
+                            if (orphan.getIdPartner() != null) {
+                                orphan.setPartner(null);
+                            }
+                            if (partner != null) {
+                                partner.setPartner(null);
+                            }
+                            orphan.setBenefitUnit(null);
+                            orphan.setBenefitUnit(parent.getBenefitUnit());
+                            checkChildRelations(parent.getBenefitUnit(), orphan);
+                            orphan.setAdditionalFieldsInInitialPopulation();
+                            parent.getBenefitUnit().initializeFields();
+                        } else if (partner != null) {
+
+                            orphansIterator.remove();
+                            orphan.setIdMother((Person)null);
+                            orphan.setIdFather((Person)null);
+                            orphan.setDag(Parameters.AGE_TO_BECOME_RESPONSIBLE);
+                            orphan.setBenefitUnit(null);
+                            orphan.setBenefitUnit(partner.getBenefitUnit());
+                            orphan.setAdditionalFieldsInInitialPopulation();
+                            partner.getBenefitUnit().initializeFields();
+                        }
+                    }
+                }
+                if (!orphans.isEmpty()) {
+                    throw new RuntimeException("Children not associated with a qualifying benefit unit included in population load.");
+                }
+                if (minWeight == null || household.getWeight() < minWeight) {
+                    minWeight = household.getWeight();
                 }
             }
-            Collections.shuffle(randomHouseholdSampleList, initialiseInnov);
-            ListIterator<Household> randomHouseholdSampleListIterator = randomHouseholdSampleList.listIterator();
-            InitialPopulationFilter filter = new InitialPopulationFilter(popSize, startYear, maxAge);
-            while (randomHouseholdSampleListIterator.hasNext()) {
-
-                Household originalHousehold = randomHouseholdSampleListIterator.next();
-                if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
-
-                    Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
-                    newHousehold.resetWeights(1.0d);
-                    if (persons.size() >= popSize ) break;
-                }
+            if (!benefitUnitsToAllocate.isEmpty()) {
+                throw new RuntimeException("Not all benefit units associated with a household at population load.");
             }
-            //filter.getRemainingVacancies();
-            stopwatch.stop();
-            System.out.println("Time elapsed " + stopwatch.getTime() + " milliseconds");
-        } else {
-            // use population weights
+            if (!personsToAllocate.isEmpty()) {
+                throw new RuntimeException("Not all persons associated with a benefit unit at population load.");
+            }
 
-            households.addAll(inputHouseholdList);
-            benefitUnits.addAll(inputBenefitUnitList);
-            persons.addAll(inputPersonList);
+
+            /**********************************************************
+             * instantiate simulated population
+             **********************************************************/
+            if (!useWeights) {
+                // Expand population, sample, and remove weights
+
+                StopWatch stopwatch = new StopWatch();
+                stopwatch.start();
+                System.out.println("Will expand the initial population to " + popSize + " individuals, each of whom has an equal weight.");
+
+                // approach to resampling considered here is designed to allow for surveys that over-sample some population
+                // subgroups. In this case you may have many similar observations in the sample all with low survey weights
+                // so that replicating by a factor adjustment on weight of each observation may result in none of the
+                // observations being included in the simulated sample (unless the simulated sample was very large).
+                List<Household> randomHouseholdSampleList = new LinkedList<>();
+                double replicationFactor = 5.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
+                for (Household household : inputHouseholdList) {
+
+                    int numberOfClones = (int) Math.round(household.getWeight() * replicationFactor);
+                    for (int ii=0; ii<numberOfClones; ii++) {
+                        randomHouseholdSampleList.add(household);
+                    }
+                }
+                Collections.shuffle(randomHouseholdSampleList, initialiseInnov);
+                ListIterator<Household> randomHouseholdSampleListIterator = randomHouseholdSampleList.listIterator();
+                InitialPopulationFilter filter = new InitialPopulationFilter(popSize, startYear, maxAge);
+                while (randomHouseholdSampleListIterator.hasNext()) {
+
+                    Household originalHousehold = randomHouseholdSampleListIterator.next();
+                    if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
+
+                        Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
+                        newHousehold.resetWeights(1.0d);
+                        if (persons.size() >= popSize ) break;
+                    }
+                }
+                //filter.getRemainingVacancies();
+                stopwatch.stop();
+                System.out.println("Time elapsed " + stopwatch.getTime() + " milliseconds");
+            } else {
+                // use population weights
+
+                households.addAll(inputHouseholdList);
+                benefitUnits.addAll(inputBenefitUnitList);
+                persons.addAll(inputPersonList);
+            }
         }
 
         // finalise
@@ -2890,7 +2891,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void removeHousehold(Household household) {
 
         // remove any child benefit units
-        for (BenefitUnit benefitUnit : household.getBenefitUnitSet()) {
+        for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
             benefitUnit.setHousehold(null);
             removeBenefitUnit(benefitUnit);
         }
@@ -3233,7 +3234,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // access database and obtain donor pool
                 Map propertyMap = new HashMap();
                 propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
-                EntityManager em = HibernateUtil.getEntityManagerFactory(propertyMap).createEntityManager();
+                EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
                 String query = "SELECT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";

@@ -1,5 +1,7 @@
 package simpaths.model;
 
+import jakarta.persistence.*;
+import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
@@ -7,10 +9,6 @@ import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import org.apache.log4j.Logger;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -26,26 +24,18 @@ from the data, on the basis of the idhh.
 @Entity
 public class Household implements EventListener, IDoubleSource {
 
+    @Transient private static Logger log = Logger.getLogger(Household.class);
+    @Transient private final SimPathsModel model;
+    @Transient private final SimPathsCollector collector;
+    @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
+
+    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
+//    @OneToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy = "household")
     @Transient
-    private static Logger log = Logger.getLogger(Household.class);
+    private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
+//    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy = "households") private Set<Processed> processed = new LinkedHashSet<>();
 
-    @Transient
-    private final SimPathsModel model;
-
-    @Transient
-    private final SimPathsCollector collector;
-
-    @Transient
-    public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
-
-    @Id
-    private final PanelEntityKey key;
-
-    @Column(name="id_original_hh")
     private Long idOriginalHH;
-
-    @Transient
-    private Set<BenefitUnit> benefitUnitSet;
 
 
     /*
@@ -58,7 +48,6 @@ public class Household implements EventListener, IDoubleSource {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdIdCounter++);
-        benefitUnitSet = new LinkedHashSet<BenefitUnit>();
     }
 
     public Household(Household originalHousehold) {
@@ -72,7 +61,6 @@ public class Household implements EventListener, IDoubleSource {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdId);
-        benefitUnitSet = new LinkedHashSet<BenefitUnit>();
     }
 
     public Household(LinkedHashSet<BenefitUnit> benefitUnitsToAdd) {
@@ -94,7 +82,7 @@ public class Household implements EventListener, IDoubleSource {
 
     public void resetWeights(double newWeight) {
 
-        for (BenefitUnit benefitUnit : benefitUnitSet) {
+        for (BenefitUnit benefitUnit : benefitUnits) {
             for( Person person : benefitUnit.getPersonsInBU()) {
                 person.setWeight(newWeight);
             }
@@ -103,7 +91,7 @@ public class Household implements EventListener, IDoubleSource {
 
     public void addBenefitUnit(BenefitUnit benefitUnit) {
 
-        benefitUnitSet.add(benefitUnit);
+        benefitUnits.add(benefitUnit);
         if ( benefitUnit.getHousehold() != this ) {
             if ( benefitUnit.getHousehold() != null )
                 benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
@@ -114,9 +102,9 @@ public class Household implements EventListener, IDoubleSource {
     //Remove a benefitUnit from the household
     public void removeBenefitUnit(BenefitUnit benefitUnit) {
 
-        if (benefitUnitSet.contains(benefitUnit)) {
+        if (benefitUnits.contains(benefitUnit)) {
 
-            boolean removed = benefitUnitSet.remove(benefitUnit);
+            boolean removed = benefitUnits.remove(benefitUnit);
             if (!removed)
                 throw new IllegalArgumentException("BenefitUnit " + benefitUnit.getKey().getId() + " could not be removed from household");
         }
@@ -124,7 +112,7 @@ public class Household implements EventListener, IDoubleSource {
             benefitUnit.setHousehold(null);
 
         //Check for benefit units remaining in the household - if none, remove the household
-        if (benefitUnitSet.isEmpty())
+        if (benefitUnits.isEmpty())
             model.removeHousehold(this);
     }
 
@@ -141,7 +129,7 @@ public class Household implements EventListener, IDoubleSource {
     public double getWeight() {
         double cumulativeWeight = 0.0;
         double size = 0.0;
-        for (BenefitUnit benefitUnit : benefitUnitSet) {
+        for (BenefitUnit benefitUnit : benefitUnits) {
             for( Person person : benefitUnit.getPersonsInBU()) {
                 cumulativeWeight += person.getWeight();
                 size++;
@@ -154,5 +142,5 @@ public class Household implements EventListener, IDoubleSource {
         return key.getId();
     }
 
-    public Set<BenefitUnit> getBenefitUnitSet() { return benefitUnitSet; }
+    public Set<BenefitUnit> getBenefitUnits() { return benefitUnits; }
 }

@@ -1,4 +1,4 @@
-package simpaths.data;
+package simpaths.data.statistics;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

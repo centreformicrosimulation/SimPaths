@@ -1,4 +1,4 @@
-package simpaths.data;
+package simpaths.data.startingpop;
 
 import java.io.File;
 import java.sql.Connection;
@@ -11,18 +11,44 @@ import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import simpaths.data.FormattedDialogBox;
+import simpaths.data.Parameters;
 import simpaths.model.enums.Country;
 import simpaths.model.enums.Region;
 
 import javax.swing.*;
 
-public class StartingDataParser {
+public class DataParser {
 
 	public static void createDatabaseForPopulationInitialisationByYearFromCSV(Country country, String initialInputFilename, int startYear, int endYear, Connection conn) {
 
+		//Initialise repository table for country-year-population size combinations
+		initialiseRepository(conn, startYear);
+
 		//Construct tables for Simulated Persons & Households (initial population)
 		for (int year = startYear; year <= endYear; year++) {
-			StartingDataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+			DataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+		}
+	}
+
+	private static void initialiseRepository(Connection conn, int startYear) {
+
+		Statement stat = null;
+		try {
+			stat = conn.createStatement();
+			stat.execute( "DROP TABLE IF EXISTS processed;");
+			stat.execute( "CREATE TABLE processed (COUNTRY VARCHAR_IGNORECASE DEFAULT 'UK', START_YEAR INT DEFAULT " + startYear + ", SIZE INT DEFAULT 0);");
+		} catch(Exception e){
+			//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				if(stat != null)
+					stat.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -56,16 +82,6 @@ public class StartingDataParser {
 				//Add rest of PanelEntityKey
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-
-				//Rename EUROMOD variables
-				//Age of partner
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN dagsp RENAME TO age_partner;"
-
-				//Reclassify EUROMOD variables - may need to change data structure type otherwise SQL conversion error, so create new column of the correct type, map data from old column and drop old column
-				//Country
-				+ "ALTER TABLE " + personTable + " ADD country VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET country = \'" + country + "\' WHERE dct = " + country.getEuromodCountryCode() + ";"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dct;"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -279,8 +295,7 @@ public class StartingDataParser {
 
 				//Rename idbenefitunit to BU_ID
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO " + Parameters.BENEFIT_UNIT_VARIABLE_NAME + ";"
-
-				//Id of the household is loaded from the input population without any modification as idhh
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 
 				//Re-order by id
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"
@@ -292,6 +307,7 @@ public class StartingDataParser {
 				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
 			);
@@ -431,7 +447,7 @@ public class StartingDataParser {
 			Parameters.setPopulationInitialisationInputFileName("population_initial_" + country.toString());
 
 			//This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
-			StartingDataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
+			DataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
 
 			conn.close();
 		}

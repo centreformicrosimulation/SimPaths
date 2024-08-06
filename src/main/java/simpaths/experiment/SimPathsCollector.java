@@ -29,9 +29,9 @@ import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 // import LABOURsim packages
 import simpaths.data.Parameters;
-import simpaths.data.Statistics;
-import simpaths.data.Statistics2;
-import simpaths.data.Statistics3;
+import simpaths.data.statistics.Statistics;
+import simpaths.data.statistics.Statistics2;
+import simpaths.data.statistics.Statistics3;
 import simpaths.model.Person;
 import simpaths.model.enums.Region;
 

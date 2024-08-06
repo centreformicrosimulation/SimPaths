@@ -3,7 +3,7 @@ package simpaths.model;
 import java.util.*;
 import java.util.random.RandomGenerator;
 
-import simpaths.data.Statistics;
+import simpaths.data.statistics.Statistics;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.enums.*;
 

@@ -12,8 +12,8 @@ import java.nio.file.Files;
 import java.util.Map;
 
 import simpaths.data.Parameters;
-import simpaths.data.StartingDataParser;
-import simpaths.data.TaxDonorDataParser;
+import simpaths.data.startingpop.DataParser;
+import simpaths.model.taxes.database.TaxDonorDataParser;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
@@ -50,7 +50,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
-	public static String configFile = "sc calibration.yml";
+	public static String configFile = "programming test.yml";
 
 	// other working variables
 	private static Country country;
@@ -433,7 +433,7 @@ public class SimPathsMultiRun extends MultiRun {
 		// populate new database
 		String taxDonorInputFilename = "tax_donor_population_" + country;
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
-		StartingDataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+		DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
 		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
 		TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables
 		Parameters.loadTimeSeriesFactorForTaxDonor(country);

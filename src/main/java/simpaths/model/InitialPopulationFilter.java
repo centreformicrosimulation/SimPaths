@@ -82,7 +82,7 @@ public class InitialPopulationFilter {
     public boolean evaluate(Household household) {
 
         // check thresholds
-        for (BenefitUnit benefitUnit : household.getBenefitUnitSet()) {
+        for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
             for (Person person : benefitUnit.getPersonsInBU()) {
 
@@ -96,7 +96,7 @@ public class InitialPopulationFilter {
         }
 
         // update thresholds
-        for (BenefitUnit benefitUnit : household.getBenefitUnitSet()) {
+        for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
             for (Person person : benefitUnit.getPersonsInBU()) {
 

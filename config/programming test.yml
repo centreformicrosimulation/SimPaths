@@ -14,8 +14,8 @@ model_args:
     enableIntertemporalOptimisations: false
     responsesToLowWageOffer: false
     responsesToEducation: false
-    responsesToHealth: true
-    responsesToDisability: true
+    responsesToHealth: false
+    responsesToDisability: false
     useSavedBehaviour: false
     readGrid: "first"
 

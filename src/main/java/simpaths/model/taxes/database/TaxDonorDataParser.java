@@ -1,4 +1,4 @@
-package simpaths.data;
+package simpaths.model.taxes.database;
 
 
 import javax.swing.*;
@@ -17,6 +17,9 @@ import java.util.*;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import simpaths.data.FormattedDialogBox;
+import simpaths.data.Parameters;
 import simpaths.model.HibernateUtil;
 import simpaths.model.enums.Country;
 import simpaths.model.enums.Region;
@@ -595,7 +598,7 @@ public class TaxDonorDataParser {
         EntityTransaction txn = null;
         try {
 
-            EntityManager em = HibernateUtil.getEntityManagerFactory().createEntityManager();
+            EntityManager em = Persistence.createEntityManagerFactory("tax-database").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 

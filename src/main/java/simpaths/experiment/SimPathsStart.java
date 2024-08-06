@@ -17,6 +17,7 @@ import javax.swing.plaf.basic.BasicInternalFrameUI;
 import javax.swing.JPanel;
 
 // third-party packages
+import simpaths.data.startingpop.DataParser;
 import simpaths.model.SimPathsModel;
 import org.apache.commons.io.FileUtils;
 
@@ -30,6 +31,7 @@ import microsim.gui.shell.MicrosimShell;
 // import SimPaths packages
 import simpaths.model.enums.Country;
 import simpaths.data.*;
+import simpaths.model.taxes.database.TaxDonorDataParser;
 
 
 /**
@@ -235,7 +237,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, showGui);
 
 		// Create initial and donor population database tables
-		StartingDataParser.databaseFromCSV(country, showGui);
+		DataParser.databaseFromCSV(country, showGui);
 		TaxDonorDataParser.databaseFromCSV(country, startYear, false);
 		Parameters.loadTimeSeriesFactorForTaxDonor(country);
 		TaxDonorDataParser.populateDonorTaxUnitTables(country, showGui);
@@ -337,7 +339,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		if (choices[0] || choices[1]) {
 			// rebuild databases for population cross-section used to initialise simulated population
-			StartingDataParser.databaseFromCSV(country, showGui); // Initial database tables
+			DataParser.databaseFromCSV(country, showGui); // Initial database tables
 		}
 
 		if (choices[2]) {

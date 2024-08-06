@@ -18,25 +18,40 @@ import java.util.Map;
  *
  */
 public class HibernateUtil {
-    private static StandardServiceRegistry registry;
-    private static SessionFactory sessionFactory;
-    private static EntityManagerFactory entityManagerFactory;
 
-    public static SessionFactory getSessionFactory() {
+    private StandardServiceRegistry registry;
+    private SessionFactory sessionFactory;
+    private EntityManagerFactory entityManagerFactory;
+
+
+    // new database tables
+    public HibernateUtil(String persistenceUnitName) {
+        try {
+            entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // existing database tables
+    public HibernateUtil(String persistenceUnitName, Map propertyMap) {
+        try {
+            entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName, propertyMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public EntityManagerFactory getEntityManagerFactory() {return entityManagerFactory;}
+
+    public SessionFactory getSessionFactory() {
+
         if (sessionFactory == null) {
 
             try {
-
-                // Registry
                 registry = new StandardServiceRegistryBuilder().configure().build();
-
-                // Create MetadataSources
                 MetadataSources sources = new MetadataSources(registry);
-
-                // Create Metadata
                 Metadata metadata = sources.getMetadataBuilder().build();
-
-                // Create SessionFactory
                 sessionFactory = metadata.getSessionFactoryBuilder().build();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -48,29 +63,7 @@ public class HibernateUtil {
         return sessionFactory;
     }
 
-    public static EntityManagerFactory getEntityManagerFactory() {
-        if (entityManagerFactory == null) {
-            try {
-                entityManagerFactory = Persistence.createEntityManagerFactory("pre-processing");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return entityManagerFactory;
-    }
-
-    public static EntityManagerFactory getEntityManagerFactory(Map propertyMap) {
-        if (entityManagerFactory == null) {
-            try {
-                entityManagerFactory = Persistence.createEntityManagerFactory("pre-processing", propertyMap);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return entityManagerFactory;
-    }
-
-    public static void shutdown() {
+    public void shutdown() {
         if (registry != null) {
             StandardServiceRegistryBuilder.destroy(registry);
         }

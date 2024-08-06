@@ -3,12 +3,7 @@ package simpaths.model;
 import java.util.*;
 import java.util.random.RandomGenerator;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
@@ -32,6 +27,7 @@ import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import simpaths.model.enums.Les_c4;
+import simpaths.model.taxes.DonorPersonPolicy;
 import simpaths.model.taxes.Match;
 
 import static java.lang.Math.max;
@@ -40,281 +36,104 @@ import static java.lang.StrictMath.min;
 @Entity
 public class BenefitUnit implements EventListener, IDoubleSource, Weight, Comparable<BenefitUnit> {
 
-    @Transient
-    private static Logger log = Logger.getLogger(BenefitUnit.class);
+    @Transient private static Logger log = Logger.getLogger(BenefitUnit.class);
+    @Transient private final SimPathsModel model;
+    @Transient private final SimPathsCollector collector;
+    @Transient public static long benefitUnitIdCounter = 1;
 
-    @Transient
-    private final SimPathsModel model;
-
-    @Transient
-    private final SimPathsCollector collector;
-
-    //TODO: Needs to be set above the maximum BenefitUnitId number in the input population to prevent collisions (i.e. the creation of a household with the same ID as one already existing).
-    //Note: Set to start at 1 now, as the benefitUnitId in the initial population starts at above 8 million
-    //Note that although the input population may follow the convention that the person ID is a related to the household ID, this will be difficult to maintain as new benefitUnits will be created as the population leaves their existing benefitUnits to form new benefitUnits (either when they are 18 and leave home, or when they match with a new partner, for example).  This should not be a problem, as we can maintain the link between person and household by reference.
-    @Transient
-    public static long benefitUnitIdCounter = 1;        //2701500 is the current maximum in EU-SILC, more like 27,000 for EUROMOD.
-
-    @Id
-    private final PanelEntityKey key;
-
-    @Column(name="id_original_bu")
-    private Long idOriginalBU;
-
-    @Column(name="id_original_hh")
-    private Long idOriginalHH;
-
-    @Column(name="idfemale")    //XXX: This column is not present in the household table of the input database
-    private Long idFemale;
-
-    @Transient
-    private Person female;        //The female head of the household and the mother of the children
-
-    @Column(name="idmale")        //XXX: This column is not present in the household table of the input database
-    private Long idMale;
-
-    @Transient
-    private Person male;        //The male head of the household and the (possibly step) father of the children
-
-    @Column(name="idhh")
-    private Long idHousehold;
-
+    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
+//    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH)
+//    @JoinColumns({ @JoinColumn(name="hhid", insertable=false, updatable=false),
+//            @JoinColumn(name="hhtime", insertable=false, updatable=false),
+//            @JoinColumn(name="hhrun", insertable=false, updatable=false) })
     @Transient
     private Household household;
-
+    private Long idHousehold;
+//    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
     @Transient
-    private States states;
+    private Set<Person> members = new LinkedHashSet<>();
 
-    @Transient
-    private double investmentIncomeAnnual;
-
-    @Transient
-    private double pensionIncomeAnnual;
-
-    @Column(name="consumption_annual")
+    private Long idOriginalBU;
+    private Long idOriginalHH;
+    @Transient private Person female;
+    @Transient private Long idFemale;
+    @Transient private Person male;
+    @Transient private Long idMale;
+    @Transient private Set<Person> children = new LinkedHashSet<>();
+    @Transient private States states;
+    private Double investmentIncomeAnnual;
+    private Double pensionIncomeAnnual;
     private Double discretionaryConsumptionPerYear;
-
-    @Column(name="liquid_wealth")
-    private Double liquidWealth;
-
-    @Column(name="tot_pen")
-    private Double pensionWealth;
-
-    @Column(name="nvmhome")
-    private Double housingWealth;
-
-    @Enumerated(EnumType.STRING)
-    Occupancy occupancy;
-
-    @Column(name="disposable_household_income_monthly")
+    @Column(name="liquid_wealth") private Double liquidWealth;
+    @Column(name="tot_pen") private Double pensionWealth;
+    @Column(name="nvmhome") private Double housingWealth;
+    @Enumerated(EnumType.STRING) Occupancy occupancy;
     private Double disposableIncomeMonthly;
-
     private Double grossIncomeMonthly;
-
-    @Transient
     private Double benefitsReceivedPerMonth;
-
-    @Column(name="equivalised_household_disposable_income_yearly")
     private Double equivalisedDisposableIncomeYearly;
-
-    @Transient
-    private Double equivalisedDisposableIncomeYearly_lag1;
-
-    @Transient
-    private Double yearlyChangeInLogEDI;
-
-    @Column(name="at_risk_of_poverty")
+    @Transient private Double equivalisedDisposableIncomeYearly_lag1;
+    @Transient private Double yearlyChangeInLogEDI;
     private Integer atRiskOfPoverty;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
-
-    @Transient
-    private Integer atRiskOfPoverty_lag1;
-
-//	@Transient
-//	private Map<Gender, Person> responsiblePersons;	//Even though we work with male, female most of the time (for historic reasons), this map should make it easier to inspect the objects in certain situations
-
-    @Transient
-    private Set<Person> children;
-
-    @Transient
-    @Enumerated(EnumType.ORDINAL)
-    private Indicator indicatorChildren03_lag1;                //Lag(1) of d_children_3under;
-
-    @Transient
-    @Enumerated(EnumType.ORDINAL)
-    private Indicator indicatorChildren412_lag1;                //Lag(1) of d_children_4_12;
-
-    @Transient
-    private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
-
-    @Transient
-    private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age0")
+    @Transient private Integer atRiskOfPoverty_lag1;
+    @Transient private Indicator indicatorChildren03_lag1;                //Lag(1) of d_children_3under;
+    @Transient private Indicator indicatorChildren412_lag1;                //Lag(1) of d_children_4_12;
+    @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
+    @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
     private Integer n_children_0;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age1")
     private Integer n_children_1;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age2")
     private Integer n_children_2;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age3")
     private Integer n_children_3;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age4")
     private Integer n_children_4;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age5")
     private Integer n_children_5;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age6")
     private Integer n_children_6;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age7")
     private Integer n_children_7;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age8")
     private Integer n_children_8;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age9")
     private Integer n_children_9;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age10")
     private Integer n_children_10;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age11")
     private Integer n_children_11;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age12")
     private Integer n_children_12;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age13")
     private Integer n_children_13;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age14")
     private Integer n_children_14;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age15")
     private Integer n_children_15;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age16")
     private Integer n_children_16;
-
-    //	@Transient	//Temporarily added as new input database does not contain this information
-    @Column(name="n_children_age17")
     private Integer n_children_17;
-
-    @Column(name="child_care_cost_per_week")
     private Double childcareCostPerWeek;
-
-    @Column(name="social_care_cost_per_week")
     private Double socialCareCostPerWeek;
-
-    @Column(name="social_care_provision")
     private Integer socialCareProvision;
-
-    @Column(name="tax_db_donor_id")
     private Long taxDbDonorId;
-
-    @Transient
-    private Match taxDbMatch;
-
-    @Enumerated(EnumType.STRING)
-    private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
-
-    //New variables:
-    //ydses_c5: household income quantiles
-    @Enumerated(EnumType.STRING)
-    @Column(name="ydses_c5")
-    private Ydses_c5 ydses_c5;
-
-    //ydses_c5_lag1: lag(1) of household income quantiles
-    @Enumerated(EnumType.STRING)
-    @Transient
-    private Ydses_c5 ydses_c5_lag1 = null;
-
-    //Used in calculation of ydses_c5
-    @Transient
-    private double tmpHHYpnbihs_dv_asinh = 0.;
-
-    //dhhtp_c4: household composition
-    @Enumerated(EnumType.STRING)
-    @Column(name="dhhtp_c4")
-    private Dhhtp_c4 dhhtp_c4;
-
-    //dhhtp_c4_lag1: lag(1) of household composition
-    @Enumerated(EnumType.STRING)
-    @Transient
-    private Dhhtp_c4 dhhtp_c4_lag1 = null;
-
-    //Equivalised weight to use with variables that are equivalised by household composition
-    @Transient
-    private double equivalisedWeight = 1.;
-
+    @Transient private Match taxDbMatch;
+    @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
+    @Enumerated(EnumType.STRING) private Ydses_c5 ydses_c5;
+    @Transient private Ydses_c5 ydses_c5_lag1 = null;
+    @Transient private double tmpHHYpnbihs_dv_asinh = 0.;
+    @Enumerated(EnumType.STRING) private Dhhtp_c4 dhhtp_c4;
+    @Transient private Dhhtp_c4 dhhtp_c4_lag1 = null;
+    @Transient private double equivalisedWeight = 1.;
     private String createdByConstructor;
+    @Column(name="dhh_owned") private Boolean dhhOwned = false; // are any of the individuals in the benefit unit a homeowner? True / false
+    @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
+    @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
 
-    @Column(name="dhh_owned")
-    private Boolean dhh_owned = false; // are any of the individuals in the benefit unit a homeowner? True / false
+    @Transient RandomGenerator childCareRandomGen;
+    @Transient RandomGenerator labourRandomGen;
+    @Transient RandomGenerator homeOwnerRandomGen;
+    @Transient RandomGenerator taxRandomGen;
 
-    @Transient
-    ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
+    @Transient double childCareRandomUniform1;
+    @Transient double childCareRandomUniform2;
+    @Transient double labourRandomUniform1;
+    @Transient double labourRandomUniform2;
+    @Transient double labourRandomUniform3;
+    @Transient double labourRandomUniform4;
+    @Transient double homeOwnerRandomUniform1;
+    @Transient double homeOwnerRandomUniform2;
+    @Transient double taxRandomUniform;
 
-    @Transient
-    ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
-
-    @Transient
-    RandomGenerator childCareRandomGen;
-    @Transient
-    RandomGenerator labourRandomGen;
-    @Transient
-    RandomGenerator homeOwnerRandomGen;
-    @Transient
-    RandomGenerator taxRandomGen;
-
-    @Transient
-    double childCareRandomUniform1;
-    @Transient
-    double childCareRandomUniform2;
-    @Transient
-    double labourRandomUniform1;
-    @Transient
-    double labourRandomUniform2;
-    @Transient
-    double labourRandomUniform3;
-    @Transient
-    double labourRandomUniform4;
-    @Transient
-    double homeOwnerRandomUniform1;
-    @Transient
-    double homeOwnerRandomUniform2;
-    @Transient
-    double taxRandomUniform;
-
-    @Transient
-    private Integer yearLocal;
-    @Transient
-    private Education deh_c3Local;
-    @Transient
-    private Integer labourHoursWeekly1Local;
-    @Transient
-    private Integer labourHoursWeekly2Local;
+    @Transient private Integer yearLocal;
+    @Transient private Education deh_c3Local;
+    @Transient private Integer labourHoursWeekly1Local;
+    @Transient private Integer labourHoursWeekly2Local;
 
 
     /*********************************************************************
@@ -325,8 +144,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey();        //Sets up key
-
-        children = new LinkedHashSet<Person>();
         createdByConstructor = "Empty";
     }
 
@@ -381,8 +198,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(id);        //Sets up key
-
-        children = new LinkedHashSet<>();
 
         long seedTemp = (long)(seed*100000);
         RandomGenerator rndTemp = new Random(seedTemp);
@@ -540,7 +355,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     originalBenefitUnit.getPensionWealth(false),
                     originalBenefitUnit.getHousingWealth(false)
             );
-        this.children = new LinkedHashSet<>();
         this.n_children_0 = originalBenefitUnit.n_children_0;
         this.n_children_1 = originalBenefitUnit.n_children_1;
         this.n_children_2 = originalBenefitUnit.n_children_2;
@@ -572,7 +386,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.dhhtp_c4 = originalBenefitUnit.dhhtp_c4;
         this.dhhtp_c4_lag1 = originalBenefitUnit.dhhtp_c4_lag1;
         this.equivalisedWeight = originalBenefitUnit.getEquivalisedWeight();
-        this.dhh_owned = originalBenefitUnit.dhh_owned;
+        this.dhhOwned = originalBenefitUnit.dhhOwned;
         if (originalBenefitUnit.createdByConstructor != null) {
             this.createdByConstructor = originalBenefitUnit.createdByConstructor;
         } else {
@@ -718,8 +532,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         n_children_15 = 0;
         n_children_16 = 0;
         n_children_17 = 0;
-        if (children == null)
-            children = new LinkedHashSet<>();
         for(Person child: children) {
 
             switch(child.getDag()) {
@@ -2764,7 +2576,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (Parameters.HOURS_IN_WEEK - female.getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
 
             case Homeownership_D:
-                return isDhh_owned()? 1. : 0.;
+                return isDhhOwned()? 1. : 0.;
             case Constant:
                 return 1.0;
             case Year_transformed:
@@ -3029,7 +2841,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (homeOwnerRandomUniform1 < prob) {
                     male_homeowner = true;
                 }
-                male.setDhh_owned(male_homeowner);
+                male.setDhhOwned(male_homeowner);
             }
             if (female!=null) {
 
@@ -3037,12 +2849,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (homeOwnerRandomUniform2 < prob) {
                     female_homeowner = true;
                 }
-                female.setDhh_owned(female_homeowner);
+                female.setDhhOwned(female_homeowner);
             }
             if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
-                setDhh_owned(true);
+                setDhhOwned(true);
             } else {
-                setDhh_owned(false);
+                setDhhOwned(false);
             }
         }
     }
@@ -3333,7 +3145,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             household = newHousehold;
             idHousehold = newHousehold.getId();
-            if(!newHousehold.getBenefitUnitSet().contains(this))
+            if(!newHousehold.getBenefitUnits().contains(this))
                 newHousehold.addBenefitUnit(this);
         }
 
@@ -3604,15 +3416,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return yearlyChangeInLogEDI;
     }
 
-    public boolean isDhh_owned() {
-        if (dhh_owned==null) {
-            dhh_owned = false;
+    public boolean isDhhOwned() {
+        if (dhhOwned ==null) {
+            dhhOwned = false;
         }
-        return dhh_owned;
+        return dhhOwned;
     }
 
-    public void setDhh_owned(boolean dhh_owned) {
-        this.dhh_owned = dhh_owned;
+    public void setDhhOwned(boolean dhh_owned) {
+        this.dhhOwned = dhh_owned;
     }
 
     public ArrayList<Triple<Les_c7_covid, Double, Integer>> getCovid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale() {
@@ -3959,8 +3771,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    public double getInvestmentIncomeAnnual() {return investmentIncomeAnnual;}
-    public double getPensionIncomeAnnual() {return pensionIncomeAnnual;}
+    public double getInvestmentIncomeAnnual() {return (investmentIncomeAnnual!=null) ? investmentIncomeAnnual : 0.0;}
+    public double getPensionIncomeAnnual() {return (pensionIncomeAnnual!=null) ? pensionIncomeAnnual : 0.0;}
 
     void updateNetLiquidWealth() {
 
@@ -4198,4 +4010,5 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Match getTaxDbMatch() {
         return taxDbMatch;
     }
+    public Set<Person> getMembers() {return members;}
 }

@@ -102,8 +102,6 @@ public class Parameters {
 		"idmother", 			//id of mother
 		"idpartner", 			//id of partner
 		"dag", 					//age
-		"dagsp",				//age of spouse
-		"dct", 					//country
 		"deh_c3", 				//highest education level
 		"dehm_c3",				//highest education level of mother
 		"dehf_c3",				//highest education level of father

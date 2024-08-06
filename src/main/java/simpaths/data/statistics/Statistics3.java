@@ -1,9 +1,10 @@
-package simpaths.data;
+package simpaths.data.statistics;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import microsim.data.db.PanelEntityKey;
+import simpaths.data.Parameters;
 import simpaths.data.filters.FertileFilter;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.AlignmentVariable;

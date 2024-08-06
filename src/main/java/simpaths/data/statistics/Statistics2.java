@@ -1,15 +1,15 @@
-package simpaths.data;
+package simpaths.data.statistics;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 import microsim.data.db.PanelEntityKey;
+import simpaths.data.Parameters;
 import simpaths.model.Person;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Education;
 import simpaths.model.enums.Indicator;
-import simpaths.model.enums.TimeSeriesVariable;
 
 @Entity
 public class Statistics2 {
