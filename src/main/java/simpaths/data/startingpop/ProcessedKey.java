@@ -13,45 +13,46 @@ import java.io.Serializable;
 @Embeddable
 public class ProcessedKey implements Serializable {
 
-    PanelEntityKey key;
-    @Column(name = "processed_id") private long processedId = 0L;
+    @Column(name="id") private long id = 1L;
+    @Column(name="simulation_time") private double simulationTime;
+    @Column(name="simulation_run") private long simulationRun;
+    @Column(name="processed_id") private long processedId = 0L;
 
 
     public ProcessedKey(){
-        key = new PanelEntityKey();
+        super();
     }
 
-    public ProcessedKey(long panelEntityKeyId){
-        key = new PanelEntityKey(panelEntityKeyId);
-    }
-
-
-    public void setProcessedId(long processedId) {
-        this.processedId = processedId;
+    public ProcessedKey(long id){
+        super();
+        this.id = id;
     }
 
     public long getId() {
-        return key.getId();
+        return id;
     }
 
     public void setId(long id) {
-        key.setId(id);
+        this.id = id;
     }
 
     public double getSimulationTime() {
-        return key.getSimulationTime();
+        return simulationTime;
     }
 
     public void setSimulationTime(Double simulationTime) {
-        key.setSimulationTime(simulationTime);
+        this.simulationTime = simulationTime;
     }
 
     public long getSimulationRun() {
-        return key.getSimulationRun();
+        return simulationRun;
     }
 
-    public void setSimulationRun(Long simulationRun) {
-        key.setSimulationRun(simulationRun);
+    public void setSimulationRun(long simulationRun) {
+        this.simulationRun = simulationRun;
     }
 
+    public long getProcessedId() { return processedId; }
+
+    public void setProcessedId(long processedId) { this.processedId = processedId; }
 }

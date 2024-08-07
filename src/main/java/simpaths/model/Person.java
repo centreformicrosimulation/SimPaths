@@ -42,7 +42,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @JoinColumns({
             @JoinColumn(name = "buid", referencedColumnName = "id"),
             @JoinColumn(name = "butime", referencedColumnName = "simulation_time"),
-            @JoinColumn(name = "burun", referencedColumnName = "simulation_run")
+            @JoinColumn(name = "burun", referencedColumnName = "simulation_run"),
+            @JoinColumn(name = "prid", referencedColumnName = "processed_id")
     })
     private BenefitUnit benefitUnit;
     @Column(name=Parameters.BENEFIT_UNIT_VARIABLE_NAME) private Long idBenefitUnit;

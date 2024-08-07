@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.data.filters.ValidHomeownersCSfilter;
+import simpaths.data.startingpop.ProcessedKey;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -22,15 +23,12 @@ import simpaths.model.decisions.DecisionParams;
 import simpaths.model.decisions.States;
 import simpaths.experiment.SimPathsCollector;
 import microsim.agent.Weight;
-import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import simpaths.model.enums.Les_c4;
-import simpaths.model.taxes.DonorPersonPolicy;
 import simpaths.model.taxes.Match;
 
-import static java.lang.Math.max;
 import static java.lang.StrictMath.min;
 
 @Entity
@@ -41,7 +39,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private final SimPathsCollector collector;
     @Transient public static long benefitUnitIdCounter = 1;
 
-    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
+    @EmbeddedId @Column(unique = true, nullable = false) private final ProcessedKey key;
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
     @JoinColumns({
             @JoinColumn(name="hhid", referencedColumnName = "id"),
@@ -50,7 +48,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     })
     private Household household;
     private Long idHousehold;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit") private Set<Person> members = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    private Set<Person> members = new LinkedHashSet<>();
 
     private Long idOriginalBU;
     private Long idOriginalHH;
@@ -141,14 +140,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public BenefitUnit() {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new PanelEntityKey();        //Sets up key
+        key  = new ProcessedKey();        //Sets up key
         createdByConstructor = "Empty";
     }
 
     public BenefitUnit(long id) {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new PanelEntityKey(id);        //Sets up key
+        key  = new ProcessedKey(id);        //Sets up key
         createdByConstructor = "Empty";
     }
 
@@ -202,7 +201,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         super();
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new PanelEntityKey(id);        //Sets up key
+        key  = new ProcessedKey(id);        //Sets up key
 
         long seedTemp = (long)(seed*100000);
         RandomGenerator rndTemp = new Random(seedTemp);
@@ -2938,8 +2937,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
      * class in any way.
      *
      */
-    public PanelEntityKey getKey() {
-        return new PanelEntityKey(key.getId());
+    public ProcessedKey getKey() {
+        return new ProcessedKey(key.getId());
     }
 
     public void initialiseLiquidWealth(int age, double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
@@ -4045,5 +4044,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if (!members.contains(child))
                 members.add(child);
         }
+    }
+
+    public void setProcessedId(long id) {
+        key.setProcessedId(id);
     }
 }
