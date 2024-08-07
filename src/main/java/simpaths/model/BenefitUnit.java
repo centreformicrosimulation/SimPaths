@@ -42,15 +42,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient public static long benefitUnitIdCounter = 1;
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-//    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH)
-//    @JoinColumns({ @JoinColumn(name="hhid", insertable=false, updatable=false),
-//            @JoinColumn(name="hhtime", insertable=false, updatable=false),
-//            @JoinColumn(name="hhrun", insertable=false, updatable=false) })
-    @Transient
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH)
+    @JoinColumns({ @JoinColumn(name="hhid", referencedColumnName = "id", insertable=false, updatable=false),
+            @JoinColumn(name="hhtime", referencedColumnName = "simulation_time", insertable=false, updatable=false),
+            @JoinColumn(name="hhrun", referencedColumnName = "simulation_run", insertable=false, updatable=false) })
     private Household household;
     private Long idHousehold;
-//    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
-    @Transient
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+//    @Transient
     private Set<Person> members = new LinkedHashSet<>();
 
     private Long idOriginalBU;
@@ -140,7 +139,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
      * CONSTRUCTOR FOR OBJECT USED ONLY TO INTERACT WITH REGRESSION MODELS
      ********************************************************************/
     public BenefitUnit() {
-        super();
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey();        //Sets up key
@@ -409,37 +407,45 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         UpdateInvestmentIncome,
         ProjectNetLiquidWealth,
         UpdateOccupancy,
+        UpdateMembers,
     }
 
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-            case Update:
-				updateAttributes();
+            case Update -> {
+                updateAttributes();
                 updateOccupancy();
                 updateChildrenFields();
                 updateComposition(); //Update household composition
+                updateMembers();
                 clearStates();
-                break;
-            case CalculateChangeInEDI:
+            }
+            case CalculateChangeInEDI -> {
                 calculateEquivalisedDisposableIncomeYearly(); //Update BU's EDI
                 calculateYearlyChangeInLogEquivalisedDisposableIncome(); //Calculate change in EDI
-                break;
-            case Homeownership:
+            }
+            case Homeownership -> {
                 homeownership();
-                break;
-            case ReceivesBenefits:
+            }
+            case ReceivesBenefits -> {
                 setReceivesBenefitsFlag();
-                break;
-            case UpdateStates:
+            }
+            case UpdateStates -> {
                 setStates();
-                break;
-            case ProjectNetLiquidWealth:
+            }
+            case ProjectNetLiquidWealth -> {
                 updateNetLiquidWealth();
-                break;
-            case UpdateOccupancy:
+            }
+            case UpdateOccupancy -> {
                 updateOccupancy();
-                break;
+            }
+            case UpdateMembers -> {
+                updateMembers();
+            }
+            default -> {
+                throw new RuntimeException("unrecognised BenefitUnit process: " + type);
+            }
         }
     }
     private void checkState() {
@@ -4011,4 +4017,26 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return taxDbMatch;
     }
     public Set<Person> getMembers() {return members;}
+    public void updateMembers() {
+
+        // remove old members
+        if (members.size()>0) {
+
+            Set<Person> temp = members;
+            for (Person member : temp) {
+                if (member != male && member != female && !children.contains(member))
+                    members.remove(member);
+            }
+        }
+
+        // add new members
+        if (male!=null && !members.contains(male))
+            members.add(male);
+        if (female!=null && !members.contains(female))
+            members.add(female);
+        for (Person child : children) {
+            if (!members.contains(child))
+                members.add(child);
+        }
+    }
 }

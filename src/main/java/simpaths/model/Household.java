@@ -30,10 +30,10 @@ public class Household implements EventListener, IDoubleSource {
     @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-//    @OneToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy = "household")
-    @Transient
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "household")
     private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
-//    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy = "households") private Set<Processed> processed = new LinkedHashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH, mappedBy = "households") private Set<Processed> processed = new LinkedHashSet<>();
 
     private Long idOriginalHH;
 
@@ -43,8 +43,6 @@ public class Household implements EventListener, IDoubleSource {
      */
 
     public Household() {
-        super();
-
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdIdCounter++);
@@ -56,8 +54,6 @@ public class Household implements EventListener, IDoubleSource {
     }
 
     public Household(long householdId) {
-        super();
-
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdId);

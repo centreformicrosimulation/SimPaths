@@ -10,20 +10,20 @@ import simpaths.model.enums.Country;
 import java.io.Serializable;
 
 @Embeddable
-public class PopKey implements Serializable {
+public class ProcessedKey implements Serializable {
 
     @Column(name = "country") @Enumerated(EnumType.STRING) private Country country;
     @Column(name = "start_year") private int startYear;
-    @Column(name = "size") private int size;
+    @Column(name = "pop_size") private int popSize;
 
 
-    public PopKey(){super();}
+    public ProcessedKey(){super();}
 
-    public PopKey(Country country, Integer startYear, Integer size) {
+    public ProcessedKey(Country country, Integer startYear, Integer popSize) {
         super();
         this.country = country;
         this.startYear = startYear;
-        this.size = size;
+        this.popSize = popSize;
     }
 
     public Country getCountry() {
@@ -42,11 +42,11 @@ public class PopKey implements Serializable {
         this.startYear = startYear;
     }
 
-    public int getSize() {
-        return size;
+    public int getPopSize() {
+        return popSize;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setPopSize(int size) {
+        this.popSize = size;
     }
 }

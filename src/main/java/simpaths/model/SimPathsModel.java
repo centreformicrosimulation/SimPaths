@@ -371,6 +371,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // time check
         elapsedTime = System.currentTimeMillis();
 
+        persistProcessedTest();
+
+
         // create country-specific tables in the input database and parse the EUROMOD policy scenario data for initializing the donor population
         try {
             inputDatabaseInteraction();
@@ -542,6 +545,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateMembers);
         addEventToAllYears(Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
@@ -2367,23 +2371,23 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double aggregatePersonsWeight = 0.;            //Aggregate Weight of simulated individuals (a weighted sum of the simulated individuals)
         double aggregateHouseholdsWeight = 0.;        //Aggregate Weight of simulated benefitUnits (a weighted sum of the simulated households)
 
-//        Processed repository = new Processed(country, startYear, popSize);
-//        households = repository.getHouseholds();
-        if (!households.isEmpty()) {
+        Processed processed = getProcessed();
+        if (processed!=null) {
 
-//            benefitUnits = repository.getBenefitUnits();
-//            persons = repository.getPersons();
+            households = processed.getHouseholds();
+            benefitUnits = processed.getBenefitUnits();
+            persons = processed.getPersons();
         } else {
 
 
             /*
-             * load data from the input database
+             * need to load fresh data from the input database
              * NOTE: don't need to worry about duplicates, as database ensures all items are unique
              * NOTE: use lists to ensure that simulated population is replicable
              */
 
             //Persons
-            List<Person> inputPersonList = (List<Person>) DatabaseUtils.loadTable(Person.class);               //RHS returns an ArrayList
+            List<Person> inputPersonList = (List<Person>) DatabaseUtils.loadTable(Person.class);
             if (inputPersonList.isEmpty()) {
                 throw new RuntimeException("Error - there are no Persons for country " + country + " in the input database");
             }
@@ -2571,6 +2575,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 benefitUnits.addAll(inputBenefitUnitList);
                 persons.addAll(inputPersonList);
             }
+
+            // save to processed repository
+            persistProcessed();
         }
 
         // finalise
@@ -3346,5 +3353,114 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 }
             }
         }
+    }
+
+    private Processed getProcessed() {
+        return getProcessed(country, startYear, popSize);
+    }
+
+    private Processed getProcessed(Country country, int startYear, int popSize) {
+
+        Processed processed = null;
+
+        EntityTransaction txn = null;
+        try {
+
+            // query database
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
+            txn = em.getTransaction();
+            txn.begin();
+            String query = "SELECT pr FROM Processed pr LEFT JOIN FETCH pr.households hh LEFT JOIN FETCH hh.benefitUnits bu LEFT JOIN FETCH bu.members pp WHERE pr.key.startYear = " + startYear + " AND pr.key.popSize = " + popSize + " AND pr.key.country = " + country;
+            //String query = "SELECT pr FROM Processed pr WHERE pr.key.startYear = " + startYear + " AND pr.key.popSize = " + popSize + " AND pr.key.country = " + country;
+            //String query = "SELECT pr FROM Processed pr";
+            List<Processed> processedList = em.createQuery(query).getResultList();
+            if (!processedList.isEmpty()) {
+
+                processed = processedList.get(0);
+            }
+
+            // close database connection
+            txn.commit();
+            em.close();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Problem sourcing data for starting population");
+        }
+
+        return processed;
+    }
+
+    private void persistProcessed() {
+
+        Processed processed = new Processed(country, startYear, popSize);
+        processed.setHouseholds(households);
+
+        EntityTransaction txn = null;
+        try {
+
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
+            txn = em.getTransaction();
+            txn.begin();
+            em.persist(processed);
+            txn.commit();
+            em.close();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Problem sourcing data for starting population");
+        }
+    }
+
+    private void persistProcessedTest() {
+
+        // test input creation
+
+        // create test case
+        Processed processedIn = new Processed(country, 1910, 5);
+        Household household = new Household(1000000000);
+        BenefitUnit benefitUnit = new BenefitUnit();
+        benefitUnit.setHousehold(household);
+        Person person = new Person();
+        person.setDag(20);
+        person.setDgn(Gender.Male);
+        person.setBenefitUnit(benefitUnit);
+        benefitUnit.updateMembers();
+        Set<Household> householdsTest = new LinkedHashSet<>();
+        householdsTest.add(household);
+
+        processedIn.setHouseholds(householdsTest);
+
+        EntityTransaction txn = null;
+        try {
+
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
+            txn = em.getTransaction();
+            txn.begin();
+            em.persist(processedIn);
+            txn.commit();
+            em.close();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Problem sourcing data for starting population");
+        }
+
+        // test input retrieval
+        Processed processedOut = getProcessed(Country.UK, 1900, 5);
+        if (processedOut!=null) {
+
+            Set<Household> householdsHere = processedOut.getHouseholds();
+            Set<BenefitUnit> benefitUnitsHere = processedOut.getBenefitUnits();
+            Set<Person> personsHere = processedOut.getPersons();
+            txn = null;
+        }
+
     }
 }
