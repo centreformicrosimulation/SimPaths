@@ -3369,22 +3369,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
-            //String query = "SELECT pr FROM Processed pr LEFT JOIN FETCH pr.households ph LEFT JOIN FETCH ph.benefitUnits pb LEFT JOIN FETCH pb.members pp WHERE pr.startYear = " + startYear + " AND pr.popSize = " + popSize + " AND pr.country = " + country;
-            //String query = "SELECT pr FROM Processed pr WHERE pr.key.startYear = " + startYear + " AND pr.key.popSize = " + popSize + " AND pr.key.country = " + country;
-            //String query = "SELECT pr FROM Processed pr";
+            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country;
             List<Processed> processedList = em.createQuery(query).getResultList();
-            for (Processed processedItem: processedList) {
-                for (Household household : processedItem.getHouseholds()) {
-                    for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
-                        for (Person person : benefitUnit.getMembers()) {
-                            person.setRegion(Region.UKC);
-                        }
-                    }
-                }
-            }
             if (!processedList.isEmpty()) {
 
+                if (processedList.size()>1)
+                    throw new RuntimeException("more than one relevant dataset returned from database");
                 processed = processedList.get(0);
                 processed.resetDependents();
             }
@@ -3426,71 +3416,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
-    private void testCreateBenefitUnitPersonLinks() {
-
-        EntityTransaction txn = null;
-        try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
-            txn = em.getTransaction();
-            txn.begin();
-
-            // create test case
-            BenefitUnit benefitUnit = new BenefitUnit(104);
-            Person person = new Person(104);
-            person.setDag(20);
-            person.setDgn(Gender.Male);
-            person.setBenefitUnit(benefitUnit);
-            benefitUnit.updateMembers();
-
-            em.persist(benefitUnit);
-            txn.commit();
-            em.close();
-        } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Problem sourcing data for starting population");
-        }
-    }
-
-    private void testRetrieveBenefitUnitPersonLinks() {
-
-        EntityTransaction txn = null;
-        try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
-            txn = em.getTransaction();
-            txn.begin();
-            String query = "SELECT benefitUnits FROM BenefitUnit benefitUnits LEFT JOIN FETCH benefitUnits.members members";
-            List<BenefitUnit> benefitUnitList = em.createQuery(query).getResultList();
-
-            for (BenefitUnit benefitUnit: benefitUnitList) {
-                for (Person person : benefitUnit.getMembers()) {
-                    person.setRegion(Region.UKC);
-                }
-            }
-
-            // close database connection
-            txn.commit();
-            em.close();
-        } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Problem sourcing data for starting population");
-        }
-    }
-
-
     private void persistProcessedTest() {
 
-        testCreateBenefitUnitPersonLinks();
-        testRetrieveBenefitUnitPersonLinks();
-
-        // test input creation
+        // create test case
+        Household household = new Household(7);
+        BenefitUnit benefitUnit = new BenefitUnit(7);
+        benefitUnit.setHousehold(household);
+        Person person = new Person(7);
+        person.setDag(20);
+        person.setDgn(Gender.Male);
+        person.setBenefitUnit(benefitUnit);
+        benefitUnit.updateMembers();
+        Set<Household> householdsTest = new LinkedHashSet<>();
+        householdsTest.add(household);
 
         EntityTransaction txn = null;
         try {
@@ -3500,19 +3438,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn.begin();
 
             // create test case
-            Processed processedIn = new Processed(country, 1920, 5);
+            Processed processedIn = new Processed(country, 1905, 5);
             em.persist(processedIn);  // generates processed_id
 
-            Household household = new Household(4);
-            BenefitUnit benefitUnit = new BenefitUnit(4);
-            benefitUnit.setHousehold(household);
-            Person person = new Person(4);
-            person.setDag(20);
-            person.setDgn(Gender.Male);
-            person.setBenefitUnit(benefitUnit);
-            benefitUnit.updateMembers();
-            Set<Household> householdsTest = new LinkedHashSet<>();
-            householdsTest.add(household);
             processedIn.setHouseholds(householdsTest);
 
             em.persist(processedIn);
@@ -3527,7 +3455,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
 
         // test input retrieval
-        Processed processedOut = getProcessed(Country.UK, 1915, 5);
+        Processed processedOut = getProcessed(Country.UK, 1920, 5);
         if (processedOut!=null) {
 
             Set<Household> householdsHere = processedOut.getHouseholds();
