@@ -3442,7 +3442,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             em.persist(processedIn);  // generates processed_id
 
             for (Household household1 : householdsTest) {
+                household1.setProcessedId(processedIn.getId());
                 for (BenefitUnit benefitUnit1 : household1.getBenefitUnits()) {
+                    benefitUnit1.setProcessedId(processedIn.getId());
                     for (Person person1 : benefitUnit1.getMembers()) {
                         person1.setProcessedId(processedIn.getId());
                     }

@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import simpaths.data.Parameters;
 import simpaths.model.decisions.DecisionParams;
 import microsim.agent.Weight;
-import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
