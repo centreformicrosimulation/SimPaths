@@ -145,6 +145,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         createdByConstructor = "Empty";
     }
 
+    public BenefitUnit(long id) {
+        model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+        collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
+        key  = new PanelEntityKey(id);        //Sets up key
+        createdByConstructor = "Empty";
+    }
+
     // USED BY EXPECTATIONS OBJECT TO INTERACT WITH REGRESSION MODELS
     public BenefitUnit(boolean regressionModel) {
         if (regressionModel) {

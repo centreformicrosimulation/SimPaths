@@ -117,7 +117,7 @@ public class Processed {
     /**
      * WORKER METHODS
      */
-    private void resetDependents() {
+    public void resetDependents() {
 
         if (benefitUnits == null)
             benefitUnits = new HashSet<>();

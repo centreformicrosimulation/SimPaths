@@ -269,6 +269,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         key = new PanelEntityKey();
     }
 
+    public Person(long id) {
+        model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+        key = new PanelEntityKey(id);
+    }
+
     // used by expectations object when creating dummy person to interact with regression functions
     public Person(boolean regressionModel) {
         if (regressionModel) {

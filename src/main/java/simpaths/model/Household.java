@@ -31,8 +31,7 @@ public class Household implements EventListener, IDoubleSource {
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "household")
-    private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "household") private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
     @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH, mappedBy = "households") private Set<Processed> processed = new LinkedHashSet<>();
 
     private Long idOriginalHH;

@@ -3370,13 +3370,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT pr FROM Processed pr LEFT JOIN FETCH pr.households hh LEFT JOIN FETCH hh.benefitUnits bu LEFT JOIN FETCH bu.members pp WHERE pr.startYear = " + startYear + " AND pr.popSize = " + popSize + " AND pr.country = " + country;
+            String query = "SELECT pr FROM Processed pr LEFT JOIN FETCH pr.households ph LEFT JOIN FETCH ph.benefitUnits pb LEFT JOIN FETCH pb.members pp WHERE pr.startYear = " + startYear + " AND pr.popSize = " + popSize + " AND pr.country = " + country;
             //String query = "SELECT pr FROM Processed pr WHERE pr.key.startYear = " + startYear + " AND pr.key.popSize = " + popSize + " AND pr.key.country = " + country;
             //String query = "SELECT pr FROM Processed pr";
             List<Processed> processedList = em.createQuery(query).getResultList();
             if (!processedList.isEmpty()) {
 
                 processed = processedList.get(0);
+                processed.resetDependents();
             }
 
             // close database connection
@@ -3428,13 +3429,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn.begin();
 
             // create test case
-            Processed processedIn = new Processed(country, 1910, 5);
+            Processed processedIn = new Processed(country, 1915, 5);
             em.persist(processedIn);  // generates processed_id
 
-            Household household = new Household(1000000000);
-            BenefitUnit benefitUnit = new BenefitUnit();
+            Household household = new Household(3);
+            BenefitUnit benefitUnit = new BenefitUnit(3);
             benefitUnit.setHousehold(household);
-            Person person = new Person();
+            Person person = new Person(3);
             person.setDag(20);
             person.setDgn(Gender.Male);
             person.setBenefitUnit(benefitUnit);
