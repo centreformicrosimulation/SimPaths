@@ -113,6 +113,8 @@ public class Processed {
         this.persons = persons;
     }
 
+    public long getId() {return id;}
+
 
     /**
      * WORKER METHODS

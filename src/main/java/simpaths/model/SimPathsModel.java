@@ -3419,8 +3419,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private void persistProcessedTest() {
 
         // create test case
-        Household household = new Household(7);
-        BenefitUnit benefitUnit = new BenefitUnit(7);
+        Household household = new Household(8);
+        BenefitUnit benefitUnit = new BenefitUnit(8);
         benefitUnit.setHousehold(household);
         Person person = new Person(7);
         person.setDag(20);
@@ -3438,9 +3438,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn.begin();
 
             // create test case
-            Processed processedIn = new Processed(country, 1905, 5);
+            Processed processedIn = new Processed(country, 1900, 5);
             em.persist(processedIn);  // generates processed_id
 
+            for (Household household1 : householdsTest) {
+                for (BenefitUnit benefitUnit1 : household1.getBenefitUnits()) {
+                    for (Person person1 : benefitUnit1.getMembers()) {
+                        person1.setProcessedId(processedIn.getId());
+                    }
+                }
+            }
             processedIn.setHouseholds(householdsTest);
 
             em.persist(processedIn);
@@ -3455,7 +3462,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
 
         // test input retrieval
-        Processed processedOut = getProcessed(Country.UK, 1920, 5);
+        Processed processedOut = getProcessed(Country.UK, 1900, 5);
         if (processedOut!=null) {
 
             Set<Household> householdsHere = processedOut.getHouseholds();
@@ -3463,6 +3470,5 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Set<Person> personsHere = processedOut.getPersons();
             txn = null;
         }
-
     }
 }

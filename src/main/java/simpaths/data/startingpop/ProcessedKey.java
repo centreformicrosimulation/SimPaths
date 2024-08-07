@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import microsim.data.db.PanelEntityKey;
 import simpaths.model.enums.Country;
 
 import java.io.Serializable;
@@ -12,41 +13,45 @@ import java.io.Serializable;
 @Embeddable
 public class ProcessedKey implements Serializable {
 
-    @Column(name = "country") @Enumerated(EnumType.STRING) private Country country;
-    @Column(name = "start_year") private int startYear;
-    @Column(name = "pop_size") private int popSize;
+    PanelEntityKey key;
+    @Column(name = "processed_id") private long processedId = 0L;
 
 
-    public ProcessedKey(){super();}
-
-    public ProcessedKey(Country country, Integer startYear, Integer popSize) {
-        super();
-        this.country = country;
-        this.startYear = startYear;
-        this.popSize = popSize;
+    public ProcessedKey(){
+        key = new PanelEntityKey();
     }
 
-    public Country getCountry() {
-        return country;
+    public ProcessedKey(long panelEntityKeyId){
+        key = new PanelEntityKey(panelEntityKeyId);
     }
 
-    public void setCountry(Country country) {
-        this.country = country;
+
+    public void setProcessedId(long processedId) {
+        this.processedId = processedId;
     }
 
-    public int getStartYear() {
-        return startYear;
+    public long getId() {
+        return key.getId();
     }
 
-    public void setStartYear(int startYear) {
-        this.startYear = startYear;
+    public void setId(long id) {
+        key.setId(id);
     }
 
-    public int getPopSize() {
-        return popSize;
+    public double getSimulationTime() {
+        return key.getSimulationTime();
     }
 
-    public void setPopSize(int size) {
-        this.popSize = size;
+    public void setSimulationTime(Double simulationTime) {
+        key.setSimulationTime(simulationTime);
     }
+
+    public long getSimulationRun() {
+        return key.getSimulationRun();
+    }
+
+    public void setSimulationRun(Long simulationRun) {
+        key.setSimulationRun(simulationRun);
+    }
+
 }
