@@ -9,6 +9,7 @@ import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import org.apache.log4j.Logger;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -30,9 +31,8 @@ public class Household implements EventListener, IDoubleSource {
     @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "household") private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
-    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH, mappedBy = "households") private Set<Processed> processed = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household") private Set<BenefitUnit> benefitUnits = new HashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH, mappedBy = "households") private Set<Processed> processed;
 
     private Long idOriginalHH;
 

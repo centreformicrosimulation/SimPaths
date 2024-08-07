@@ -37,10 +37,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient public static long personIdCounter = 1;			//Could perhaps initialise this to one above the max key number in initial population, in the same way that we pull the max Age information from the input files.
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    @JoinColumns({ @JoinColumn(name="buid", referencedColumnName = "id", insertable=false, updatable=false),
-            @JoinColumn(name="butime", referencedColumnName = "simulation_time", insertable=false, updatable=false),
-            @JoinColumn(name="burun", referencedColumnName = "simulation_run",insertable=false, updatable=false) })
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumns({
+            @JoinColumn(name = "buid", referencedColumnName = "id"),
+            @JoinColumn(name = "butime", referencedColumnName = "simulation_time"),
+            @JoinColumn(name = "burun", referencedColumnName = "simulation_run")
+    })
     private BenefitUnit benefitUnit;
     @Column(name=Parameters.BENEFIT_UNIT_VARIABLE_NAME) private Long idBenefitUnit;
     private Long idHousehold;

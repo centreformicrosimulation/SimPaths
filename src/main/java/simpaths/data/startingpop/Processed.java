@@ -33,11 +33,11 @@ public class Processed {
             @JoinColumn(name = "hhrun", referencedColumnName = "simulation_run")
         }
     )
-    private Set<Household> households = new HashSet<>();
+    Set<Household> households;
 
-    @Enumerated(EnumType.STRING) private Country country;
-    @Column(name = "start_year") private int startYear;
-    @Column(name = "pop_size") private int popSize;
+    @Enumerated(EnumType.STRING) Country country;
+    @Column(name = "start_year") int startYear;
+    @Column(name = "pop_size") int popSize;
     @Transient private Set<BenefitUnit> benefitUnits = null;
     @Transient private Set<Person> persons = null;
 

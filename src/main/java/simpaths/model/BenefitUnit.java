@@ -42,15 +42,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient public static long benefitUnitIdCounter = 1;
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH)
-    @JoinColumns({ @JoinColumn(name="hhid", referencedColumnName = "id", insertable=false, updatable=false),
-            @JoinColumn(name="hhtime", referencedColumnName = "simulation_time", insertable=false, updatable=false),
-            @JoinColumn(name="hhrun", referencedColumnName = "simulation_run", insertable=false, updatable=false) })
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @JoinColumns({
+            @JoinColumn(name="hhid", referencedColumnName = "id"),
+            @JoinColumn(name="hhtime", referencedColumnName = "simulation_time"),
+            @JoinColumn(name="hhrun", referencedColumnName = "simulation_run")
+    })
     private Household household;
     private Long idHousehold;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
-//    @Transient
-    private Set<Person> members = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit") private Set<Person> members = new LinkedHashSet<>();
 
     private Long idOriginalBU;
     private Long idOriginalHH;
