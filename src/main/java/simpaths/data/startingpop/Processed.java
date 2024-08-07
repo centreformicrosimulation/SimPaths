@@ -21,13 +21,11 @@ public class Processed {
     /**
      * ATTRIBUTES
      */
-    @EmbeddedId @Column(unique = true, nullable = false) private final ProcessedKey key;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
     @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, targetEntity = Household.class)
     @JoinTable(name="processed_households_mapping",
         joinColumns = {
-            @JoinColumn(name = "country", referencedColumnName = "country"),
-            @JoinColumn(name = "start_year", referencedColumnName = "start_year"),
-            @JoinColumn(name = "pop_size", referencedColumnName = "pop_size")
+            @JoinColumn(name = "id", referencedColumnName = "id")
         },
         inverseJoinColumns = {
             @JoinColumn(name = "hhid", referencedColumnName = "id"),
@@ -36,6 +34,10 @@ public class Processed {
         }
     )
     private Set<Household> households = new HashSet<>();
+
+    @Enumerated(EnumType.STRING) private Country country;
+    @Column(name = "start_year") private int startYear;
+    @Column(name = "pop_size") private int popSize;
     @Transient private Set<BenefitUnit> benefitUnits = null;
     @Transient private Set<Person> persons = null;
 
@@ -43,19 +45,43 @@ public class Processed {
     /**
      * CONSTRUCTOR
      */
-    public Processed() {
-        key = new ProcessedKey();
-    }
+    public Processed() {}
     public Processed(Country country, Integer startYear, Integer popSize) {
-        key = new ProcessedKey(country, startYear, popSize);
+        this.country = country;
+        this.startYear = startYear;
+        this.popSize = popSize;
+    }
+    public Processed(long id, Country country, Integer startYear, Integer popSize) {
+        this(country, startYear, popSize);
+        this.id = id;
     }
 
 
     /**
      * GETTERS AND SETTERS
      */
-    public ProcessedKey getKey() {
-        return key;
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+
+    public int getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(int startYear) {
+        this.startYear = startYear;
+    }
+
+    public int getPopSize() {
+        return popSize;
+    }
+
+    public void setPopSize(int popSize) {
+        this.popSize = popSize;
     }
 
     public Set<Household> getHouseholds() {

@@ -37,7 +37,7 @@ public class DataParser {
 		try {
 			stat = conn.createStatement();
 			stat.execute( "DROP TABLE IF EXISTS processed;");
-			stat.execute( "CREATE TABLE processed (COUNTRY VARCHAR_IGNORECASE DEFAULT 'UK', START_YEAR INT DEFAULT " + startYear + ", POP_SIZE INT DEFAULT 0);");
+			stat.execute( "CREATE TABLE processed (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, COUNTRY VARCHAR_IGNORECASE DEFAULT 'UK', START_YEAR INT DEFAULT " + startYear + ", POP_SIZE INT DEFAULT 0);");
 		} catch(Exception e){
 			//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
 			e.printStackTrace();

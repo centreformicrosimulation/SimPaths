@@ -3370,7 +3370,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT pr FROM Processed pr LEFT JOIN FETCH pr.households hh LEFT JOIN FETCH hh.benefitUnits bu LEFT JOIN FETCH bu.members pp WHERE pr.key.startYear = " + startYear + " AND pr.key.popSize = " + popSize + " AND pr.key.country = " + country;
+            String query = "SELECT pr FROM Processed pr LEFT JOIN FETCH pr.households hh LEFT JOIN FETCH hh.benefitUnits bu LEFT JOIN FETCH bu.members pp WHERE pr.startYear = " + startYear + " AND pr.popSize = " + popSize + " AND pr.country = " + country;
             //String query = "SELECT pr FROM Processed pr WHERE pr.key.startYear = " + startYear + " AND pr.key.popSize = " + popSize + " AND pr.key.country = " + country;
             //String query = "SELECT pr FROM Processed pr";
             List<Processed> processedList = em.createQuery(query).getResultList();
@@ -3420,27 +3420,29 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // test input creation
 
-        // create test case
-        Processed processedIn = new Processed(country, 1910, 5);
-        Household household = new Household(1000000000);
-        BenefitUnit benefitUnit = new BenefitUnit();
-        benefitUnit.setHousehold(household);
-        Person person = new Person();
-        person.setDag(20);
-        person.setDgn(Gender.Male);
-        person.setBenefitUnit(benefitUnit);
-        benefitUnit.updateMembers();
-        Set<Household> householdsTest = new LinkedHashSet<>();
-        householdsTest.add(household);
-
-        processedIn.setHouseholds(householdsTest);
-
         EntityTransaction txn = null;
         try {
 
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
+
+            // create test case
+            Processed processedIn = new Processed(country, 1910, 5);
+            em.persist(processedIn);  // generates processed_id
+
+            Household household = new Household(1000000000);
+            BenefitUnit benefitUnit = new BenefitUnit();
+            benefitUnit.setHousehold(household);
+            Person person = new Person();
+            person.setDag(20);
+            person.setDgn(Gender.Male);
+            person.setBenefitUnit(benefitUnit);
+            benefitUnit.updateMembers();
+            Set<Household> householdsTest = new LinkedHashSet<>();
+            householdsTest.add(household);
+            processedIn.setHouseholds(householdsTest);
+
             em.persist(processedIn);
             txn.commit();
             em.close();
