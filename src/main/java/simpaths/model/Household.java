@@ -32,7 +32,11 @@ public class Household implements EventListener, IDoubleSource {
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household") private Set<BenefitUnit> benefitUnits = new HashSet<>();
-    @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH, mappedBy = "households") private Set<Processed> processed;
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @JoinColumns({
+            @JoinColumn(name = "prid", referencedColumnName = "id")
+    })
+    private Processed processed;
 
     private Long idOriginalHH;
 
@@ -78,7 +82,7 @@ public class Household implements EventListener, IDoubleSource {
     public void resetWeights(double newWeight) {
 
         for (BenefitUnit benefitUnit : benefitUnits) {
-            for( Person person : benefitUnit.getPersonsInBU()) {
+            for( Person person : benefitUnit.getMembers()) {
                 person.setWeight(newWeight);
             }
         }
@@ -125,7 +129,7 @@ public class Household implements EventListener, IDoubleSource {
         double cumulativeWeight = 0.0;
         double size = 0.0;
         for (BenefitUnit benefitUnit : benefitUnits) {
-            for( Person person : benefitUnit.getPersonsInBU()) {
+            for( Person person : benefitUnit.getMembers()) {
                 cumulativeWeight += person.getWeight();
                 size++;
             }
@@ -142,4 +146,6 @@ public class Household implements EventListener, IDoubleSource {
     public void setWorkingId(long id) {
         key.setWorkingId(id);
     }
+
+    public void setProcessed(Processed processed) {this.processed = processed;}
 }

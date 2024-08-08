@@ -3362,7 +3362,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             benefitUnit = newBenefitUnit;
             idBenefitUnit = newBenefitUnit.getKey().getId();
             idHousehold = newBenefitUnit.getIdHousehold();
-            if (!benefitUnit.getPersonsInBU().contains(this)) {
+            if (!benefitUnit.getMembers().contains(this)) {
                 if (dag < Parameters.AGE_TO_BECOME_RESPONSIBLE && idPartner == null) {
                     benefitUnit.addChild(this);
                 } else if (dag >= Parameters.AGE_TO_BECOME_RESPONSIBLE){

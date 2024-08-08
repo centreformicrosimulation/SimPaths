@@ -22,19 +22,7 @@ public class Processed {
      * ATTRIBUTES
      */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
-    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, targetEntity = Household.class)
-    @JoinTable(name="processed_households_mapping",
-        joinColumns = {
-            @JoinColumn(name = "id", referencedColumnName = "id")
-        },
-        inverseJoinColumns = {
-            @JoinColumn(name = "hhid", referencedColumnName = "id"),
-            @JoinColumn(name = "hhtime", referencedColumnName = "simulation_time"),
-            @JoinColumn(name = "hhrun", referencedColumnName = "simulation_run"),
-            @JoinColumn(name = "prid", referencedColumnName = "working_id")
-        }
-    )
-    Set<Household> households;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "processed") Set<Household> households = new HashSet<>();
 
     @Enumerated(EnumType.STRING) Country country;
     @Column(name = "start_year") int startYear;
@@ -134,7 +122,7 @@ public class Processed {
             benefitUnits.addAll(household.getBenefitUnits());
         }
         for (BenefitUnit benefitUnit : benefitUnits) {
-            persons.addAll(benefitUnit.getMembers());
+            persons.addAll(benefitUnit.getMembers2());
         }
     }
 }

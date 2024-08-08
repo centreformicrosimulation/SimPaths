@@ -3163,7 +3163,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
 
         // update benefit unit members
-        Set<Person> persons = getPersonsInBU();
+        Set<Person> persons = getMembers();
         for (Person person : persons) {
             person.setIdHousehold(idHousehold);
         }
@@ -3188,7 +3188,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public double getWeight() {
         double cumulativeWeight = 0.0;
         double size = 0.0;
-        for( Person person : getPersonsInBU()) {
+        for( Person person : getMembers()) {
             cumulativeWeight += person.getWeight();
             size++;
         }
@@ -3671,13 +3671,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    Set<Person> getPersonsInBU() {
+    Set<Person> getMembers() {
 
-        Set<Person> personsInBU = new HashSet<>();
-        if ( male != null ) personsInBU.add(male);
-        if ( female != null ) personsInBU.add(female);
-        if ( children.size() != 0 ) personsInBU.addAll(children);
-        return personsInBU;
+        updateMembers();
+        return members;
     }
 
     public void updateNonLabourIncome() {
@@ -3873,7 +3870,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private void updateSocialCareCostPerWeek() {
 
         socialCareCostPerWeek = 0.0;
-        for (Person person : getPersonsInBU()) {
+        for (Person person : getMembers()) {
             socialCareCostPerWeek += person.getSocialCareCostWeekly();
         }
     }
@@ -3881,7 +3878,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private void updateSocialCareProvision() {
 
         socialCareProvision = 0;
-        for (Person person : getPersonsInBU()) {
+        for (Person person : getMembers()) {
             if (!SocialCareProvision.None.equals(person.getSocialCareProvision()))
                 socialCareProvision = 1;
         }
@@ -4023,7 +4020,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Match getTaxDbMatch() {
         return taxDbMatch;
     }
-    public Set<Person> getMembers() {return members;}
+    public Set<Person> getMembers2() {return members;}
     public void updateMembers() {
 
         // remove old members

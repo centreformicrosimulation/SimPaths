@@ -1079,7 +1079,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         if ( person.getBenefitUnit().getHousehold().getBenefitUnits().size() != 1) {
                             flagAccept = false;
                         } else {
-                            for (Person member : person.getBenefitUnit().getPersonsInBU()) {
+                            for (Person member : person.getBenefitUnit().getMembers()) {
                                 if ( member.getDag() <= person.getDag() && member != person ) flagAccept = false;
                             }
                         }
@@ -1144,7 +1144,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             // simulate domestic migration
             Person migrant = emigrantPoolIterator.next();
             BenefitUnit migrantBU = migrant.getBenefitUnit();
-            Set<Person> migrants = migrantBU.getPersonsInBU();
+            Set<Person> migrants = migrantBU.getMembers();
             Region fromRegion = migrantBU.getRegion();
             Region toRegion = immigrantRegionsIterator.next();
             migrantBU.setRegion(toRegion);
@@ -1216,7 +1216,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                         Person emigrant = migrantPoolByAlignmentGroupIterator.next();
                         BenefitUnit emigrantBU = emigrant.getBenefitUnit();
-                        Set<Person> emigrants = emigrantBU.getPersonsInBU();
+                        Set<Person> emigrants = emigrantBU.getMembers();
 
                         // update working references
                         for (Person person : emigrants) {
@@ -1246,7 +1246,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         throw new RuntimeException("Missing benefit unit for candidate to kill in population alignment.");
                     }
                     if ( (!candidate.equals(benefitUnit.getMale()) && !candidate.equals(benefitUnit.getFemale())) ||
-                        benefitUnit.getOccupancy().equals(Occupancy.Couple) || benefitUnit.getPersonsInBU().size() == 1 ) {
+                        benefitUnit.getOccupancy().equals(Occupancy.Couple) || benefitUnit.getMembers().size() == 1 ) {
                         // death of person should not affect existence of any other person in model
 
                         candidate.setSampleExit(SampleExit.DeathAlignment);
@@ -1285,7 +1285,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     immigrantBU.setRegion(region);
 
                     // update counters and references
-                    for (Person person : immigrantBU.getPersonsInBU()) {
+                    for (Person person : immigrantBU.getMembers()) {
 
                         int ageHere = Math.min(person.getDag(), maxAlignAge);
                         Gender genderHere = person.getDgn();
@@ -1326,7 +1326,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         newBenefitUnit.setHousehold(newHousehold);
         benefitUnits.add(newBenefitUnit);
 
-        Set<Person> originalPersons = originalBenefitUnit.getPersonsInBU();
+        Set<Person> originalPersons = originalBenefitUnit.getMembers();
         for (Person originalPerson : originalPersons) {
 
             Person newPerson = new Person(originalPerson, SimulationEngine.getRnd().nextDouble(), sampleEntry);
@@ -2427,7 +2427,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                 // found member of benefit unit
 
                                 person.setBenefitUnit(benefitUnit);
-                                if (!person.getBenefitUnit().getPersonsInBU().contains(person)) {
+                                if (!person.getBenefitUnit().getMembers().contains(person)) {
                                     orphans.add(person);
                                 }
                                 personIterator.remove();
@@ -2441,7 +2441,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                 orphans.add(person);
                             }
                         } else {
-                            for (Person person : benefitUnit.getPersonsInBU()) {
+                            for (Person person : benefitUnit.getMembers()) {
                                 if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
                                     if (person.getIdPartner() != null) {
                                         orphans.add(person);
@@ -2449,7 +2449,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         checkChildRelations(benefitUnit, person);
                                     }
                                 } else if (person.getIdPartner()!=null) {
-                                    for (Person partner : benefitUnit.getPersonsInBU()) {
+                                    for (Person partner : benefitUnit.getMembers()) {
                                         if (person.getIdPartner().equals(partner.getKey().getId())) person.setPartner(partner);
                                     }
                                 }
@@ -2471,7 +2471,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         Person parent = null;
                         for(BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
-                            for (Person person : benefitUnit.getPersonsInBU()) {
+                            for (Person person : benefitUnit.getMembers()) {
 
                                 if (person != orphan) {
                                     if (orphan.getIdPartner() != null && orphan.getIdPartner().equals(person.getKey().getId())) {
@@ -2876,7 +2876,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void removeBenefitUnit(BenefitUnit benefitUnit) {
 
         // remove all benefit unit members from model
-        for (Person person : benefitUnit.getPersonsInBU()) {
+        for (Person person : benefitUnit.getMembers()) {
             removePerson(person);
         }
 
@@ -3443,6 +3443,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             for (Household household1 : householdsTest) {
                 household1.setWorkingId(processedIn.getId());
+                household1.setProcessed(processedIn);
                 for (BenefitUnit benefitUnit1 : household1.getBenefitUnits()) {
                     benefitUnit1.setWorkingId(processedIn.getId());
                     for (Person person1 : benefitUnit1.getMembers()) {

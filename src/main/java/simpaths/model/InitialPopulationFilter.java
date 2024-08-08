@@ -84,7 +84,7 @@ public class InitialPopulationFilter {
         // check thresholds
         for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
-            for (Person person : benefitUnit.getPersonsInBU()) {
+            for (Person person : benefitUnit.getMembers()) {
 
                 if (person.getDag() < Parameters.MIN_AGE_COHABITATION && Dcpst.Partnered.equals(person.getDcpst()))
                     return false;
@@ -98,7 +98,7 @@ public class InitialPopulationFilter {
         // update thresholds
         for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
-            for (Person person : benefitUnit.getPersonsInBU()) {
+            for (Person person : benefitUnit.getMembers()) {
 
                 if (Dcpst.Partnered.equals(person.getDcpst()))
                     cohabiting -= 1;
