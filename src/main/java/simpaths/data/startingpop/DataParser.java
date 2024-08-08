@@ -36,7 +36,7 @@ public class DataParser {
 		Statement stat = null;
 		try {
 			stat = conn.createStatement();
-			stat.execute( "DROP TABLE IF EXISTS processed;");
+			stat.execute( "DROP TABLE IF EXISTS processed CASCADE;");
 			stat.execute( "CREATE TABLE processed (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, COUNTRY VARCHAR_IGNORECASE DEFAULT 'UK', START_YEAR INT DEFAULT " + startYear + ", POP_SIZE INT DEFAULT 0);");
 		} catch(Exception e){
 			//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
@@ -73,15 +73,16 @@ public class DataParser {
 			stat.execute(
 				//SQL statements creating database tables go here
 				//Refresh table
-				"DROP TABLE IF EXISTS " + inputFileName + ";"
+				"DROP TABLE IF EXISTS " + inputFileName + " CASCADE;"
 				+ "CREATE TABLE " + inputFileName + " AS SELECT * FROM CSVREAD(\'" + inputFileLocation + "\');"
-				+ "DROP TABLE IF EXISTS " + personTable + ";"
+				+ "DROP TABLE IF EXISTS " + personTable + " CASCADE;"
 				+ "CREATE TABLE " + personTable + " AS (SELECT " + stringAppender(inputPersonColumnNamesSet) + " FROM " + inputFileName + ");"
 				//Add id column
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idperson RENAME TO id;"
-				//Add rest of PanelEntityKey
+				//Add rest of ProcessedKey
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN processed_id INT DEFAULT 0;"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -303,10 +304,11 @@ public class DataParser {
 
 			//Create benefitUnit table
 			stat.execute(
-				"DROP TABLE IF EXISTS " + benefitUnitTable + ";"
+				"DROP TABLE IF EXISTS " + benefitUnitTable + " CASCADE;"
 				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN processed_id INT DEFAULT 0;"
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
@@ -364,16 +366,17 @@ public class DataParser {
 			//Remove duplicate rows
 			stat.execute(
 				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + " ORDER BY ID;"
-				+ "DROP TABLE IF EXISTS " + benefitUnitTable + ";"
+				+ "DROP TABLE IF EXISTS " + benefitUnitTable + " CASCADE;"
 				+ "ALTER TABLE NEW RENAME TO " + benefitUnitTable + ";"
 			);
 
 			//Create household table
 			stat.execute(
-					"DROP TABLE IF EXISTS " + householdTable + ";"
+					"DROP TABLE IF EXISTS " + householdTable + " CASCADE;"
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+							+ "ALTER TABLE " + householdTable + " ADD COLUMN processed_id INT DEFAULT 0;"
 							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
 							+ "SELECT * FROM " + householdTable + " ORDER BY id;"
 			);
@@ -381,11 +384,11 @@ public class DataParser {
 			//Remove duplicate rows
 			stat.execute(
 					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + " ORDER BY ID;"
-				+ "DROP TABLE IF EXISTS " + householdTable + ";"
+				+ "DROP TABLE IF EXISTS " + householdTable + " CASCADE;"
 				+ "ALTER TABLE NEW RENAME TO " + householdTable + ";"
 			);
 
-			stat.execute("DROP TABLE IF EXISTS " + inputFileName + ";");
+			stat.execute("DROP TABLE IF EXISTS " + inputFileName + " CASCADE;");
 
 		} catch(Exception e){
 		//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());

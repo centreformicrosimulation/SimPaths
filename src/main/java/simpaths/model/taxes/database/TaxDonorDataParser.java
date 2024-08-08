@@ -123,7 +123,7 @@ public class TaxDonorDataParser {
             stat.execute(
 
                 //Refresh table
-                "DROP TABLE IF EXISTS " + taxDonorInputFileName + ";"
+                "DROP TABLE IF EXISTS " + taxDonorInputFileName + " CASCADE;"
 
                 //Create new database table by reading in from population_country.csv file
                 + "CREATE TABLE " + taxDonorInputFileName + " AS SELECT * FROM CSVREAD('" + donorInputFileLocation + "');"
@@ -268,7 +268,7 @@ public class TaxDonorDataParser {
             }
 
             stat.execute(
-            "DROP TABLE IF EXISTS " + tableName + ";"
+            "DROP TABLE IF EXISTS " + tableName + " CASCADE;"
                 + "CREATE TABLE " + tableName + " (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + varList1 + ");"
             );
 
@@ -301,7 +301,7 @@ public class TaxDonorDataParser {
             }
 
             //Clean-up
-            stat.execute( "DROP TABLE IF EXISTS " + taxDonorInputFileName + ";");
+            stat.execute( "DROP TABLE IF EXISTS " + taxDonorInputFileName + " CASCADE;");
 
         }
         catch(SQLException e) {
@@ -337,13 +337,13 @@ public class TaxDonorDataParser {
             String	taxUnitTableName = "DONORTAXUNIT_" + country;
             stat.execute(
                 // make copy of person table, using tuid
-                "DROP TABLE IF EXISTS TEMP;"
+                "DROP TABLE IF EXISTS TEMP CASCADE;"
                 + "CREATE TABLE TEMP AS (SELECT TUID, WEIGHT FROM " + personTableName + ");"
 
                 // extract only unique values of tuid
                 +"DROP TABLE IF EXISTS " + taxUnitTableName + " CASCADE;"
                 + "CREATE TABLE " + taxUnitTableName + " AS SELECT DISTINCT * FROM TEMP ORDER BY TUID;"
-                + "DROP TABLE IF EXISTS TEMP;"
+                + "DROP TABLE IF EXISTS TEMP CASCADE;"
 
                 // establish primary key
                 + "ALTER TABLE " + taxUnitTableName + " ALTER COLUMN TUID RENAME TO ID;"
@@ -363,7 +363,7 @@ public class TaxDonorDataParser {
             }
 */
             stat.execute(
-                "DROP TABLE IF EXISTS " + taxUnitTableName + ";"
+                "DROP TABLE IF EXISTS " + taxUnitTableName + " CASCADE;"
                     + "CREATE TABLE " + taxUnitTableName + " (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + varList + ");"
             );
         }
