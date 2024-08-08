@@ -1,8 +1,8 @@
 package simpaths.model;
 
 import jakarta.persistence.*;
+import microsim.data.db.PanelEntityKey;
 import simpaths.data.startingpop.Processed;
-import simpaths.data.startingpop.ProcessedKey;
 import simpaths.experiment.SimPathsCollector;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
@@ -30,7 +30,7 @@ public class Household implements EventListener, IDoubleSource {
     @Transient private final SimPathsCollector collector;
     @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
 
-    @EmbeddedId @Column(unique = true, nullable = false) private final ProcessedKey key;
+    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household") private Set<BenefitUnit> benefitUnits = new HashSet<>();
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH, mappedBy = "households") private Set<Processed> processed;
 
@@ -44,7 +44,7 @@ public class Household implements EventListener, IDoubleSource {
     public Household() {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new ProcessedKey(householdIdCounter++);
+        key  = new PanelEntityKey(householdIdCounter++);
     }
 
     public Household(Household originalHousehold) {
@@ -55,7 +55,7 @@ public class Household implements EventListener, IDoubleSource {
     public Household(long householdId) {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new ProcessedKey(householdId);
+        key  = new PanelEntityKey(householdId);
     }
 
     public Household(LinkedHashSet<BenefitUnit> benefitUnitsToAdd) {
@@ -139,7 +139,7 @@ public class Household implements EventListener, IDoubleSource {
 
     public Set<BenefitUnit> getBenefitUnits() { return benefitUnits; }
 
-    public void setProcessedId(long id) {
-        key.setProcessedId(id);
+    public void setWorkingId(long id) {
+        key.setWorkingId(id);
     }
 }

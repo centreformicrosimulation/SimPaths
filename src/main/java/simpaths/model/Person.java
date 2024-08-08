@@ -7,11 +7,11 @@ import java.util.random.RandomGenerator;
 
 import jakarta.persistence.*;
 
+import microsim.data.db.PanelEntityKey;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.data.RegressionName;
 import simpaths.data.filters.FertileFilter;
-import simpaths.data.startingpop.ProcessedKey;
 import simpaths.model.decisions.Axis;
 import simpaths.model.enums.*;
 import microsim.statistics.Series;
@@ -36,13 +36,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private final SimPathsModel model;
     @Transient public static long personIdCounter = 1;			//Could perhaps initialise this to one above the max key number in initial population, in the same way that we pull the max Age information from the input files.
 
-    @EmbeddedId @Column(unique = true, nullable = false) private final ProcessedKey key;
+    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumns({
             @JoinColumn(name = "buid", referencedColumnName = "id"),
             @JoinColumn(name = "butime", referencedColumnName = "simulation_time"),
             @JoinColumn(name = "burun", referencedColumnName = "simulation_run"),
-            @JoinColumn(name = "prid", referencedColumnName = "processed_id")
+            @JoinColumn(name = "prid", referencedColumnName = "working_id")
     })
     private BenefitUnit benefitUnit;
     @Column(name=Parameters.BENEFIT_UNIT_VARIABLE_NAME) private Long idBenefitUnit;
@@ -269,12 +269,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // ---------------------------------------------------------------------
     public Person() {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
-        key = new ProcessedKey();
+        key = new PanelEntityKey();
     }
 
     public Person(long id) {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
-        key = new ProcessedKey(id);
+        key = new PanelEntityKey(id);
     }
 
     // used by expectations object when creating dummy person to interact with regression functions
@@ -537,7 +537,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // used by other constructors
     public Person(Long id, double seed) {
         super();
-        key = new ProcessedKey(id);
+        key = new PanelEntityKey(id);
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         clonedFlag = false;
 
@@ -3095,8 +3095,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * class in any way.
      * 
      */
-     public ProcessedKey getKey() {
-       return new ProcessedKey(key.getId());
+     public PanelEntityKey getKey() {
+       return new PanelEntityKey(key.getId());
      }
 
      public int getPersonCount() {
@@ -4590,7 +4590,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void setProcessedId(long id) {
-        key.setProcessedId(id);
+    public void setWorkingId(long id) {
+        key.setWorkingId(id);
     }
 }

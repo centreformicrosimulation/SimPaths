@@ -5,10 +5,10 @@ import java.util.random.RandomGenerator;
 
 import jakarta.persistence.*;
 
+import microsim.data.db.PanelEntityKey;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.data.filters.ValidHomeownersCSfilter;
-import simpaths.data.startingpop.ProcessedKey;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -39,13 +39,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private final SimPathsCollector collector;
     @Transient public static long benefitUnitIdCounter = 1;
 
-    @EmbeddedId @Column(unique = true, nullable = false) private final ProcessedKey key;
+    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
     @JoinColumns({
             @JoinColumn(name="hhid", referencedColumnName = "id"),
             @JoinColumn(name="hhtime", referencedColumnName = "simulation_time"),
             @JoinColumn(name="hhrun", referencedColumnName = "simulation_run"),
-            @JoinColumn(name = "prid", referencedColumnName = "processed_id")
+            @JoinColumn(name = "prid", referencedColumnName = "working_id")
     })
     private Household household;
     private Long idHousehold;
@@ -141,14 +141,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public BenefitUnit() {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new ProcessedKey();        //Sets up key
+        key  = new PanelEntityKey();        //Sets up key
         createdByConstructor = "Empty";
     }
 
     public BenefitUnit(long id) {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new ProcessedKey(id);        //Sets up key
+        key  = new PanelEntityKey(id);        //Sets up key
         createdByConstructor = "Empty";
     }
 
@@ -202,7 +202,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         super();
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new ProcessedKey(id);        //Sets up key
+        key  = new PanelEntityKey(id);        //Sets up key
 
         long seedTemp = (long)(seed*100000);
         RandomGenerator rndTemp = new Random(seedTemp);
@@ -2938,8 +2938,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
      * class in any way.
      *
      */
-    public ProcessedKey getKey() {
-        return new ProcessedKey(key.getId());
+    public PanelEntityKey getKey() {
+        return new PanelEntityKey(key.getId());
     }
 
     public void initialiseLiquidWealth(int age, double donorLiquidWealth, double donorPensionWealth, double donorHousingWealth) {
@@ -4047,7 +4047,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    public void setProcessedId(long id) {
-        key.setProcessedId(id);
+    public void setWorkingId(long id) {
+        key.setWorkingId(id);
     }
 }

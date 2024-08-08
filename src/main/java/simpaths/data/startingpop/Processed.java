@@ -31,7 +31,7 @@ public class Processed {
             @JoinColumn(name = "hhid", referencedColumnName = "id"),
             @JoinColumn(name = "hhtime", referencedColumnName = "simulation_time"),
             @JoinColumn(name = "hhrun", referencedColumnName = "simulation_run"),
-            @JoinColumn(name = "prid", referencedColumnName = "processed_id")
+            @JoinColumn(name = "prid", referencedColumnName = "working_id")
         }
     )
     Set<Household> households;

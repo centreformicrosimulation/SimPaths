@@ -3439,14 +3439,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             // create test case
             Processed processedIn = new Processed(country, 1900, 5);
-            em.persist(processedIn);  // generates processed_id
+            em.persist(processedIn);  // generates processed id
 
             for (Household household1 : householdsTest) {
-                household1.setProcessedId(processedIn.getId());
+                household1.setWorkingId(processedIn.getId());
                 for (BenefitUnit benefitUnit1 : household1.getBenefitUnits()) {
-                    benefitUnit1.setProcessedId(processedIn.getId());
+                    benefitUnit1.setWorkingId(processedIn.getId());
                     for (Person person1 : benefitUnit1.getMembers()) {
-                        person1.setProcessedId(processedIn.getId());
+                        person1.setWorkingId(processedIn.getId());
                     }
                 }
             }

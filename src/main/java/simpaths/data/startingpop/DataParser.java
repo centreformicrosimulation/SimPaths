@@ -82,7 +82,7 @@ public class DataParser {
 				//Add rest of ProcessedKey
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN processed_id INT DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT DEFAULT 0;"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -308,7 +308,7 @@ public class DataParser {
 				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN processed_id INT DEFAULT 0;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN working_id INT DEFAULT 0;"
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
@@ -376,7 +376,7 @@ public class DataParser {
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-							+ "ALTER TABLE " + householdTable + " ADD COLUMN processed_id INT DEFAULT 0;"
+							+ "ALTER TABLE " + householdTable + " ADD COLUMN working_id INT DEFAULT 0;"
 							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
 							+ "SELECT * FROM " + householdTable + " ORDER BY id;"
 			);
