@@ -43,11 +43,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             @JoinColumn(name = "butime", referencedColumnName = "simulation_time"),
             @JoinColumn(name = "burun", referencedColumnName = "simulation_run"),
             @JoinColumn(name = "prid", referencedColumnName = "working_id")
-    })
-    private BenefitUnit benefitUnit;
-    @Column(name=Parameters.BENEFIT_UNIT_VARIABLE_NAME) private Long idBenefitUnit;
-    private Long idHousehold;
+    }) private BenefitUnit benefitUnit;
 
+    private Long seed;
+    private Long idHousehold;
+    @Column(name=Parameters.BENEFIT_UNIT_VARIABLE_NAME) private Long idBenefitUnit;
     private int dag; //Age
     @Enumerated(EnumType.STRING) private SampleEntry sampleEntry;
     @Enumerated(EnumType.STRING) private SampleExit sampleExit = SampleExit.NotYet;  //entry to sample via international immigration
@@ -290,7 +290,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // used to create new people who enter the simulation during UpdateMaternityStatus
     public Person(Gender gender, Person mother) {
 
-        this(personIdCounter++, mother.getFertilityRandomUniform2());
+        this(personIdCounter++, (long)(100000*mother.getFertilityRandomUniform2()));
 
         this.sampleEntry = SampleEntry.Birth;
         this.dgn = gender;
@@ -337,189 +337,202 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
     // used to generate clones both at population load (to un-weight data) and to generate international immigrants
-    public Person (Person originalPerson, double seed, SampleEntry sampleEntry) {
+    public Person (Person originalPerson, long seed, SampleEntry sampleEntry) {
 
         this(personIdCounter++, seed);
+        switch (sampleEntry) {
+            case InputData -> {
+                idOriginalPerson = originalPerson.key.getId();
+            }
+            case ProcessedInputData -> {
+
+                personIdCounter = originalPerson.key.getId();
+                key.setId(personIdCounter);
+                idOriginalPerson = originalPerson.getIdOriginalPerson();
+            }
+            default -> {
+                throw new RuntimeException("invalid SampleEntry value supplied to person constructor");
+            }
+        }
 
         this.sampleEntry = sampleEntry;
-        this.idOriginalHH = originalPerson.idHousehold;
-        this.idOriginalBU = originalPerson.idBenefitUnit;
-        this.idOriginalPerson = originalPerson.key.getId();
+        idOriginalHH = originalPerson.idHousehold;
+        idOriginalBU = originalPerson.idBenefitUnit;
 
-        this.dag = originalPerson.dag;
-        this.ageGroup = originalPerson.ageGroup;
-        this.dgn = originalPerson.dgn;
-        this.deh_c3 = originalPerson.deh_c3;
+        dag = originalPerson.dag;
+        ageGroup = originalPerson.ageGroup;
+        dgn = originalPerson.dgn;
+        deh_c3 = originalPerson.deh_c3;
 
         if (originalPerson.deh_c3_lag1 != null) { //If original person misses lagged level of education, assign current level of education
-            this.deh_c3_lag1 = originalPerson.deh_c3_lag1;
+            deh_c3_lag1 = originalPerson.deh_c3_lag1;
         } else {
-            this.deh_c3_lag1 = deh_c3;
+            deh_c3_lag1 = deh_c3;
         }
 
-        this.dehf_c3 = originalPerson.dehf_c3;
-        this.dehm_c3 = originalPerson.dehm_c3;
-        this.dehsp_c3 = originalPerson.dehsp_c3;
-        this.dehsp_c3_lag1 = originalPerson.deh_c3_lag1;
+        dehf_c3 = originalPerson.dehf_c3;
+        dehm_c3 = originalPerson.dehm_c3;
+        dehsp_c3 = originalPerson.dehsp_c3;
+        dehsp_c3_lag1 = originalPerson.deh_c3_lag1;
 
         if (originalPerson.dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //If under age to leave education, set flag for being in education to true
-            this.ded = Indicator.True;
+            ded = Indicator.True;
         } else {
-            this.ded = originalPerson.ded;
+            ded = originalPerson.ded;
         }
 
-        this.der = originalPerson.der;
-        this.dcpyy = originalPerson.dcpyy;
-        this.dcpyy_lag1 = Objects.requireNonNullElseGet(originalPerson.dcpyy_lag1, () -> Math.max(0, this.dcpyy - 1));
-        this.dcpagdf = originalPerson.dcpagdf;
-        this.dcpagdf_lag1 = originalPerson.dcpagdf_lag1;
-        this.household_status = originalPerson.household_status;
-        this.household_status_lag = originalPerson.household_status_lag;
+        der = originalPerson.der;
+        dcpyy = originalPerson.dcpyy;
+        dcpyy_lag1 = Objects.requireNonNullElseGet(originalPerson.dcpyy_lag1, () -> Math.max(0, this.dcpyy - 1));
+        dcpagdf = originalPerson.dcpagdf;
+        dcpagdf_lag1 = originalPerson.dcpagdf_lag1;
+        household_status = originalPerson.household_status;
+        household_status_lag = originalPerson.household_status_lag;
         if (originalPerson.les_c4 != null) {
-            this.les_c4 = originalPerson.les_c4;
+            les_c4 = originalPerson.les_c4;
         } else if (originalPerson.dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION) {
-            this.les_c4 = Les_c4.Student;
+            les_c4 = Les_c4.Student;
         } else if (originalPerson.dag > (int)Parameters.getTimeSeriesValue(model.getYear(), originalPerson.getDgn().toString(), TimeSeriesVariable.FixedRetirementAge)) {
-            this.les_c4 = Les_c4.Retired;
+            les_c4 = Les_c4.Retired;
         } else if (originalPerson.getLabourSupplyWeekly() != null && originalPerson.getLabourSupplyWeekly().getHours(originalPerson) > 0) {
-            this.les_c4 = Les_c4.EmployedOrSelfEmployed;
+            les_c4 = Les_c4.EmployedOrSelfEmployed;
         } else {
-            this.les_c4 = Les_c4.NotEmployed;
+            les_c4 = Les_c4.NotEmployed;
         }
 
         if (originalPerson.les_c4_lag1 != null) { //If original persons misses lagged activity status, assign current activity status
-            this.les_c4_lag1 = originalPerson.les_c4_lag1;
+            les_c4_lag1 = originalPerson.les_c4_lag1;
         } else {
-            this.les_c4_lag1 = les_c4;
+            les_c4_lag1 = les_c4;
         }
 
-        this.les_c7_covid = originalPerson.les_c7_covid;
+        les_c7_covid = originalPerson.les_c7_covid;
         if (originalPerson.les_c7_covid_lag1 != null) { //If original persons misses lagged activity status, assign current activity status
-            this.les_c7_covid_lag1 = originalPerson.les_c7_covid_lag1;
+            les_c7_covid_lag1 = originalPerson.les_c7_covid_lag1;
         } else {
-            this.les_c7_covid_lag1 = les_c7_covid;
+            les_c7_covid_lag1 = les_c7_covid;
         }
 
-        this.lesdf_c4 = originalPerson.lesdf_c4;
-        this.lesdf_c4_lag1 = originalPerson.lesdf_c4_lag1;
-        this.lessp_c4 = originalPerson.lessp_c4;
-        this.dcpst = originalPerson.dcpst;
-        this.dcpst_lag1 = originalPerson.dcpst_lag1;
-        this.dcpen = originalPerson.dcpen;
-        this.dcpex = originalPerson.dcpex;
-        this.ypnbihs_dv = originalPerson.getYpnbihs_dv();
-        this.ypnbihs_dv_lag1 = originalPerson.ypnbihs_dv_lag1;
-        this.yptciihs_dv = originalPerson.getYptciihs_dv();
-        this.yplgrs_dv = originalPerson.getYplgrs_dv();
-        this.yplgrs_dv_lag1 = originalPerson.yplgrs_dv_lag1;
-        this.yplgrs_dv_lag2 = originalPerson.yplgrs_dv_lag2;
-        this.yplgrs_dv_lag3 = originalPerson.yplgrs_dv_lag3;
-        this.ynbcpdf_dv = originalPerson.ynbcpdf_dv;
-        this.ynbcpdf_dv_lag1 = originalPerson.ynbcpdf_dv_lag1;
-        this.ypncp_lag2 = originalPerson.ypncp_lag2;
-        this.ypncp_lag1 = originalPerson.ypncp_lag1;
-        this.ypnoab_lag2 = originalPerson.ypnoab_lag2;
-        this.ypnoab_lag1 = originalPerson.ypnoab_lag1;
+        lesdf_c4 = originalPerson.lesdf_c4;
+        lesdf_c4_lag1 = originalPerson.lesdf_c4_lag1;
+        lessp_c4 = originalPerson.lessp_c4;
+        dcpst = originalPerson.dcpst;
+        dcpst_lag1 = originalPerson.dcpst_lag1;
+        dcpen = originalPerson.dcpen;
+        dcpex = originalPerson.dcpex;
+        ypnbihs_dv = originalPerson.getYpnbihs_dv();
+        ypnbihs_dv_lag1 = originalPerson.ypnbihs_dv_lag1;
+        yptciihs_dv = originalPerson.getYptciihs_dv();
+        yplgrs_dv = originalPerson.getYplgrs_dv();
+        yplgrs_dv_lag1 = originalPerson.yplgrs_dv_lag1;
+        yplgrs_dv_lag2 = originalPerson.yplgrs_dv_lag2;
+        yplgrs_dv_lag3 = originalPerson.yplgrs_dv_lag3;
+        ynbcpdf_dv = originalPerson.ynbcpdf_dv;
+        ynbcpdf_dv_lag1 = originalPerson.ynbcpdf_dv_lag1;
+        ypncp_lag2 = originalPerson.ypncp_lag2;
+        ypncp_lag1 = originalPerson.ypncp_lag1;
+        ypnoab_lag2 = originalPerson.ypnoab_lag2;
+        ypnoab_lag1 = originalPerson.ypnoab_lag1;
 
-        this.liwwh = originalPerson.liwwh;
+        liwwh = originalPerson.liwwh;
         if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
-            this.dlltsd = Indicator.False;
-            this.dlltsd_lag1 = Indicator.False;
+            dlltsd = Indicator.False;
+            dlltsd_lag1 = Indicator.False;
         } else {
-            this.dlltsd = originalPerson.dlltsd;
-            this.dlltsd_lag1 = originalPerson.dlltsd_lag1;
+            dlltsd = originalPerson.dlltsd;
+            dlltsd_lag1 = originalPerson.dlltsd_lag1;
         }
         if (Parameters.flagSocialCare) {
-            this.needSocialCare = originalPerson.needSocialCare;
-            this.careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
-            this.careFormalExpenditureWeekly = originalPerson.careFormalExpenditureWeekly;
-            this.careHoursFromPartnerWeekly = originalPerson.careHoursFromPartnerWeekly;
-            this.careHoursFromParentWeekly = originalPerson.careHoursFromParentWeekly;
-            this.careHoursFromDaughterWeekly = originalPerson.careHoursFromDaughterWeekly;
-            this.careHoursFromSonWeekly = originalPerson.careHoursFromSonWeekly;
-            this.careHoursFromOtherWeekly = originalPerson.careHoursFromOtherWeekly;
-            this.socialCareReceipt = originalPerson.socialCareReceipt;
-            this.socialCareFromFormal = originalPerson.socialCareFromFormal;
-            this.socialCareFromPartner = originalPerson.socialCareFromPartner;
-            this.socialCareFromDaughter = originalPerson.socialCareFromDaughter;
-            this.socialCareFromSon = originalPerson.socialCareFromSon;
-            this.socialCareFromOther = originalPerson.socialCareFromOther;
-            this.careHoursProvidedWeekly = originalPerson.careHoursProvidedWeekly;
-            this.socialCareProvision = originalPerson.socialCareProvision;
-            this.needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
-            this.careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
-            this.careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
-            this.careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
-            this.careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
-            this.careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
-            this.socialCareProvision_lag1 = originalPerson.socialCareProvision_lag1;
+            needSocialCare = originalPerson.needSocialCare;
+            careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
+            careFormalExpenditureWeekly = originalPerson.careFormalExpenditureWeekly;
+            careHoursFromPartnerWeekly = originalPerson.careHoursFromPartnerWeekly;
+            careHoursFromParentWeekly = originalPerson.careHoursFromParentWeekly;
+            careHoursFromDaughterWeekly = originalPerson.careHoursFromDaughterWeekly;
+            careHoursFromSonWeekly = originalPerson.careHoursFromSonWeekly;
+            careHoursFromOtherWeekly = originalPerson.careHoursFromOtherWeekly;
+            socialCareReceipt = originalPerson.socialCareReceipt;
+            socialCareFromFormal = originalPerson.socialCareFromFormal;
+            socialCareFromPartner = originalPerson.socialCareFromPartner;
+            socialCareFromDaughter = originalPerson.socialCareFromDaughter;
+            socialCareFromSon = originalPerson.socialCareFromSon;
+            socialCareFromOther = originalPerson.socialCareFromOther;
+            careHoursProvidedWeekly = originalPerson.careHoursProvidedWeekly;
+            socialCareProvision = originalPerson.socialCareProvision;
+            needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
+            careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
+            careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
+            careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
+            careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
+            careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
+            socialCareProvision_lag1 = originalPerson.socialCareProvision_lag1;
         } else {
             setAllSocialCareVariablesToFalse();
         }
-        this.lowWageOffer = originalPerson.lowWageOffer;
-        this.lowWageOffer_lag1 = originalPerson.lowWageOffer_lag1;
-        this.sedex = originalPerson.sedex;
-        this.partnership_samesex = originalPerson.partnership_samesex;
-        this.women_fertility = originalPerson.women_fertility;
-        this.education_inrange = originalPerson.education_inrange;
-        this.toGiveBirth = originalPerson.toGiveBirth;
-        this.toLeaveSchool = originalPerson.toLeaveSchool;
-        this.partner = originalPerson.partner;
-        this.idPartner = originalPerson.idPartner;
-        this.idPartnerLag1 = originalPerson.idPartnerLag1;
-        this.weight = originalPerson.weight;
-        this.idMother = originalPerson.idMother;
-        this.idFather = originalPerson.idFather;
-        this.dhe = originalPerson.dhe;
-        this.dhm = originalPerson.dhm;
+        lowWageOffer = originalPerson.lowWageOffer;
+        lowWageOffer_lag1 = originalPerson.lowWageOffer_lag1;
+        sedex = originalPerson.sedex;
+        partnership_samesex = originalPerson.partnership_samesex;
+        women_fertility = originalPerson.women_fertility;
+        education_inrange = originalPerson.education_inrange;
+        toGiveBirth = originalPerson.toGiveBirth;
+        toLeaveSchool = originalPerson.toLeaveSchool;
+        partner = originalPerson.partner;
+        idPartner = originalPerson.idPartner;
+        idPartnerLag1 = originalPerson.idPartnerLag1;
+        weight = originalPerson.weight;
+        idMother = originalPerson.idMother;
+        idFather = originalPerson.idFather;
+        dhe = originalPerson.dhe;
+        dhm = originalPerson.dhm;
 
         if (originalPerson.dhe_lag1 != null) { //If original person misses lagged level of health, assign current level of health as lagged value
-            this.dhe_lag1 = originalPerson.dhe_lag1;
+            dhe_lag1 = originalPerson.dhe_lag1;
         } else {
-            this.dhe_lag1 = originalPerson.dhe;
+            dhe_lag1 = originalPerson.dhe;
         }
 
         if (originalPerson.dhm_lag1 != null) {
-            this.dhm_lag1 = originalPerson.dhm_lag1;
+            dhm_lag1 = originalPerson.dhm_lag1;
         } else {
-            this.dhm_lag1 = originalPerson.dhm;
+            dhm_lag1 = originalPerson.dhm;
         }
 
-        this.dhmGhq = originalPerson.dhmGhq;
-        this.dhmGhq_lag1 = originalPerson.dhmGhq_lag1;
+        dhmGhq = originalPerson.dhmGhq;
+        dhmGhq_lag1 = originalPerson.dhmGhq_lag1;
 
         if (originalPerson.labourSupplyWeekly_L1 != null) {
-            this.labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
+            labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
         } else {
-            this.labourSupplyWeekly_L1 = originalPerson.getLabourSupplyWeekly();
+            labourSupplyWeekly_L1 = originalPerson.getLabourSupplyWeekly();
         }
 
-        this.dhesp = originalPerson.dhesp; //Is it fine to assign here?
-        this.dhesp_lag1 = originalPerson.dhesp_lag1;
-        this.hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
-        this.labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
-        this.desiredAgeDiff = originalPerson.desiredAgeDiff;
-        this.desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
-        this.scoreMale = originalPerson.scoreMale;
-        this.scoreFemale = originalPerson.scoreFemale;
-        this.countMale = originalPerson.countMale;
-        this.countFemale = originalPerson.countFemale;
-        this.inverseMillsRatioMaxMale = originalPerson.inverseMillsRatioMaxMale;
-        this.inverseMillsRatioMinMale  = originalPerson.inverseMillsRatioMinMale;
-        this.inverseMillsRatioMaxFemale = originalPerson.inverseMillsRatioMaxFemale;
-        this.inverseMillsRatioMinFemale = originalPerson.inverseMillsRatioMinFemale;
+        dhesp = originalPerson.dhesp; //Is it fine to assign here?
+        dhesp_lag1 = originalPerson.dhesp_lag1;
+        hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
+        labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
+        desiredAgeDiff = originalPerson.desiredAgeDiff;
+        desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
+        scoreMale = originalPerson.scoreMale;
+        scoreFemale = originalPerson.scoreFemale;
+        countMale = originalPerson.countMale;
+        countFemale = originalPerson.countFemale;
+        inverseMillsRatioMaxMale = originalPerson.inverseMillsRatioMaxMale;
+        inverseMillsRatioMinMale  = originalPerson.inverseMillsRatioMinMale;
+        inverseMillsRatioMaxFemale = originalPerson.inverseMillsRatioMaxFemale;
+        inverseMillsRatioMinFemale = originalPerson.inverseMillsRatioMinFemale;
 
-        this.adultchildflag = originalPerson.adultchildflag;
+        adultchildflag = originalPerson.adultchildflag;
         yearlyEquivalisedDisposableIncomeSeries = new Series.Double(this, DoublesVariables.EquivalisedIncomeYearly);
         yearlyEquivalisedConsumptionSeries = new Series.Double(this, DoublesVariables.EquivalisedConsumptionYearly);
         yearlyEquivalisedConsumption = originalPerson.yearlyEquivalisedConsumption;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
-        this.dhhOwned = originalPerson.dhhOwned;
-        this.receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
-        this.receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
+        dhhOwned = originalPerson.dhhOwned;
+        receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
+        receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
 
         if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
-            this.fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
+            fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
         } else {
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4)) {
                 les_c4 = Les_c4.NotEmployed;
@@ -528,21 +541,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             updateFullTimeHourlyEarnings();
         }
         if (originalPerson.L1_fullTimeHourlyEarningsPotential!=null && originalPerson.L1_fullTimeHourlyEarningsPotential>Parameters.MIN_HOURLY_WAGE_RATE) {
-            this.L1_fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.L1_fullTimeHourlyEarningsPotential));
+            L1_fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.L1_fullTimeHourlyEarningsPotential));
         } else {
-            this.L1_fullTimeHourlyEarningsPotential = this.fullTimeHourlyEarningsPotential;
+            L1_fullTimeHourlyEarningsPotential = fullTimeHourlyEarningsPotential;
         }
     }
 
     // used by other constructors
-    public Person(Long id, double seed) {
+    public Person(Long id, long seed) {
         super();
         key = new PanelEntityKey(id);
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         clonedFlag = false;
 
-        long seedTemp = (long)(seed*100000);
-        RandomGenerator rndTemp = new Random(seedTemp);
+        this.seed = seed;
+        RandomGenerator rndTemp = new Random(seed);
         healthRandomGen = new Random(rndTemp.nextLong());
         socialCareRandomGen = new Random(rndTemp.nextLong());
         wagesRandomGen = new Random(rndTemp.nextLong());
@@ -4590,7 +4603,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void setWorkingId(long id) {
+    public void setProcessedId(long id) {
         key.setWorkingId(id);
     }
+
+    public long getSeed() {return (seed!=null) ? seed : 0L;}
 }

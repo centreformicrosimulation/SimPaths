@@ -434,11 +434,11 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					Set<JInternalFrame> populationPyramidPlots = new LinkedHashSet<JInternalFrame>();
 					Weighted_PyramidPlotter populationAgeGenderPlotter = new Weighted_PyramidPlotter();
 					// Please note that the Pyramid plotter requires a Weighted_CrossSection.Double[2]
-					Weighted_CrossSection.Double[] populationData = new Weighted_CrossSection.Double[2];
-					Weighted_CrossSection.Double maleAgesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer[] populationData = new Weighted_CrossSection.Integer[2];
+					Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
 					maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
 					populationData[0] = maleAgesCS;
-					Weighted_CrossSection.Double femaleAgesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
 					femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female));
 					populationData[1] = femaleAgesCS;
 

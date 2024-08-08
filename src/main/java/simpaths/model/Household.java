@@ -8,8 +8,8 @@ import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import org.apache.log4j.Logger;
+import simpaths.model.enums.SampleEntry;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,7 +31,9 @@ public class Household implements EventListener, IDoubleSource {
     @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household") private Set<BenefitUnit> benefitUnits = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household")
+    @OrderBy("key ASC")
+    private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
     @JoinColumns({
             @JoinColumn(name = "prid", referencedColumnName = "id")
@@ -51,9 +53,23 @@ public class Household implements EventListener, IDoubleSource {
         key  = new PanelEntityKey(householdIdCounter++);
     }
 
-    public Household(Household originalHousehold) {
+    public Household(Household originalHousehold, SampleEntry sampleEntry) {
+
         this();
-        this.idOriginalHH = originalHousehold.key.getId();
+        switch (sampleEntry) {
+            case InputData -> {
+                idOriginalHH = originalHousehold.key.getId();
+            }
+            case ProcessedInputData -> {
+
+                householdIdCounter = originalHousehold.getId();
+                key.setId(householdIdCounter);
+                this.idOriginalHH = originalHousehold.getIdOriginalHH();
+            }
+            default -> {
+                throw new RuntimeException("invalid SampleEntry value supplied to Household constructor");
+            }
+        }
     }
 
     public Household(long householdId) {
@@ -78,6 +94,7 @@ public class Household implements EventListener, IDoubleSource {
     /*
     METHODS
      */
+    public Long getIdOriginalHH() {return idOriginalHH;}
 
     public void resetWeights(double newWeight) {
 
@@ -143,9 +160,8 @@ public class Household implements EventListener, IDoubleSource {
 
     public Set<BenefitUnit> getBenefitUnits() { return benefitUnits; }
 
-    public void setWorkingId(long id) {
-        key.setWorkingId(id);
+    public void setProcessed(Processed processed) {
+        this.processed = processed;
+        key.setWorkingId(processed.getId());
     }
-
-    public void setProcessed(Processed processed) {this.processed = processed;}
 }

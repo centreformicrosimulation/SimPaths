@@ -45,15 +45,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             @JoinColumn(name="hhid", referencedColumnName = "id"),
             @JoinColumn(name="hhtime", referencedColumnName = "simulation_time"),
             @JoinColumn(name="hhrun", referencedColumnName = "simulation_run"),
-            @JoinColumn(name = "prid", referencedColumnName = "working_id")
+            @JoinColumn(name="prid", referencedColumnName = "working_id")
     })
     private Household household;
-    private Long idHousehold;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
     private Set<Person> members = new LinkedHashSet<>();
 
+    private Long idHousehold;
     private Long idOriginalBU;
     private Long idOriginalHH;
+    private Long seed;
     @Transient private Person female;
     @Transient private Long idFemale;
     @Transient private Person male;
@@ -198,14 +199,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     // USED BY OTHER CONSTRUCTORS
-    public BenefitUnit(Long id, double seed) {
+    public BenefitUnit(Long id, long seed) {
         super();
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(id);        //Sets up key
 
-        long seedTemp = (long)(seed*100000);
-        RandomGenerator rndTemp = new Random(seedTemp);
+        this.seed = seed;
+        RandomGenerator rndTemp = new Random(seed);
         childCareRandomGen = new Random(rndTemp.nextLong());
         labourRandomGen = new Random(rndTemp.nextLong());
         homeOwnerRandomGen = new Random(rndTemp.nextLong());
@@ -250,7 +251,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public BenefitUnit(Person person, Set<Person> childrenToNewBenefitUnit, Household newHousehold) {
 
         // initialise benefit unit
-        this(benefitUnitIdCounter++, person.getBenefitUnitRandomUniform());
+        this(benefitUnitIdCounter++, (long)(person.getBenefitUnitRandomUniform()*100000));
         region = person.getRegion();
 
         if (Parameters.projectLiquidWealth) {
@@ -278,7 +279,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public BenefitUnit(Person p1, Person p2, Set<Person> childrenToNewBenefitUnit, Household newHousehold) {
 
         // initialise benefit unit
-        this(benefitUnitIdCounter++, p1.getBenefitUnitRandomUniform());
+        this(benefitUnitIdCounter++, (long)(p1.getBenefitUnitRandomUniform()*100000));
         region = p1.getRegion();
 
         if (region != p2.getRegion()) {
@@ -313,12 +314,25 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     // Below is a "copy constructor" for benefitUnits: it takes an original benefit unit as input, changes the ID, copies
     // the rest of the benefit unit's properties, and creates a new benefit unit.
-    public BenefitUnit(BenefitUnit originalBenefitUnit, double benefitUnitInnov) {
+    public BenefitUnit(BenefitUnit originalBenefitUnit, long benefitUnitInnov, SampleEntry sampleEntry) {
 
         this(benefitUnitIdCounter++, benefitUnitInnov);
+        switch (sampleEntry) {
+            case InputData -> {
+                idOriginalBU = originalBenefitUnit.getId();
+            }
+            case ProcessedInputData -> {
+
+                benefitUnitIdCounter = originalBenefitUnit.getId();
+                key.setId(benefitUnitIdCounter);
+                idOriginalBU = originalBenefitUnit.getIdOriginalBU();
+            }
+            default -> {
+                throw new RuntimeException("invalid SampleEntry value supplied to person constructor");
+            }
+        }
 
         this.idOriginalHH = originalBenefitUnit.idHousehold;
-        this.idOriginalBU = originalBenefitUnit.key.getId();
 
         this.log = originalBenefitUnit.log;
         this.occupancy = originalBenefitUnit.occupancy;
@@ -3671,12 +3685,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    Set<Person> getMembers() {
-
-        updateMembers();
-        return members;
-    }
-
     public void updateNonLabourIncome() {
 
         if (Parameters.projectLiquidWealth) {
@@ -4020,7 +4028,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Match getTaxDbMatch() {
         return taxDbMatch;
     }
-    public Set<Person> getMembers2() {return members;}
+    public Set<Person> getMembers() {return members;}
     public void updateMembers() {
 
         // remove old members
@@ -4044,7 +4052,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    public void setWorkingId(long id) {
+    public void setProcessedId(long id) {
         key.setWorkingId(id);
     }
+
+    public long getSeed(){return (seed!=null) ? seed : 0L;}
+
+    public long getIdOriginalBU() {return idOriginalBU;}
 }

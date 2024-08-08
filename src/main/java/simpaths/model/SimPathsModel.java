@@ -157,7 +157,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = true; //Set to true to align employment share
+    private boolean alignPopulation = false; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = false;
@@ -354,7 +354,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
 
         persistProcessedTest();
-
         log.debug("Parameters loaded");
 
         // populate tax donor references
@@ -996,7 +995,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         MultiKeyMap<Object, List<Person>> migrantPoolByAlignmentGroup = migrantPoolByAlignmentGroupInit(maxAlignAge, personsByAlignmentGroup);
 
         //Align to targets
-        for (int age = 1; age <= maxAlignAge; age++) {
+        for (int age = 0; age <= maxAlignAge; age++) {
 
             for (Gender gender : Gender.values()) {
 
@@ -1303,14 +1302,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * METHOD TO CLONE EXISTING HOUSEHOLD AND ADD TO SIMULATED POPULATION
      *
      *********************************************************/
-    private Household cloneHousehold(Household originalHousehold, SampleEntry sampleEntry) {
+    private void cloneHousehold(Household originalHousehold, SampleEntry sampleEntry) {
 
-        Household newHousehold = new Household(originalHousehold);
+        Household newHousehold = new Household(originalHousehold, sampleEntry);
         households.add(newHousehold);
+        if (originalHousehold.getBenefitUnits().isEmpty())
+            throw new RuntimeException("problem identifying household benefit units to clone");
         for (BenefitUnit originalBenefitUnit : originalHousehold.getBenefitUnits()) {
             cloneBenefitUnit(originalBenefitUnit, newHousehold, sampleEntry);
         }
-        return newHousehold;
+        newHousehold.resetWeights(1.0d);
     }
 
 
@@ -1322,14 +1323,22 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private BenefitUnit cloneBenefitUnit(BenefitUnit originalBenefitUnit, Household newHousehold, SampleEntry sampleEntry) {
 
         // initialise objects
-        BenefitUnit newBenefitUnit = new BenefitUnit(originalBenefitUnit, SimulationEngine.getRnd().nextDouble());
+
+        double seed0 = SimulationEngine.getRnd().nextDouble();
+        long seed = (SampleEntry.ProcessedInputData.equals(sampleEntry)) ? originalBenefitUnit.getSeed() : (long)(seed0*100000);
+
+        BenefitUnit newBenefitUnit = new BenefitUnit(originalBenefitUnit, seed, sampleEntry);
         newBenefitUnit.setHousehold(newHousehold);
         benefitUnits.add(newBenefitUnit);
 
+        if (originalBenefitUnit.getMembers().isEmpty())
+            throw new RuntimeException("problem identifying benefit unit members to clone");
         Set<Person> originalPersons = originalBenefitUnit.getMembers();
         for (Person originalPerson : originalPersons) {
 
-            Person newPerson = new Person(originalPerson, SimulationEngine.getRnd().nextDouble(), sampleEntry);
+            seed0 = SimulationEngine.getRnd().nextDouble();
+            seed = (SampleEntry.ProcessedInputData.equals(sampleEntry)) ? originalPerson.getSeed() : (long)(seed0*100000);
+            Person newPerson = new Person(originalPerson, seed, sampleEntry);
             newPerson.setBenefitUnit(newBenefitUnit);
             persons.add(newPerson);
         }
@@ -2280,12 +2289,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     //Create database tables to be used in simulation from country-specific tables
                     String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
                     for (String tableName : tableNamesDonor) {
-                        stat.execute("DROP TABLE IF EXISTS " + tableName);
+                        stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
                         stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
                     }
                     String[] tableNamesInitial = new String[]{"HOUSEHOLD", "BENEFITUNIT", "PERSON"};
                     for (String tableName : tableNamesInitial) {
-                        stat.execute("DROP TABLE IF EXISTS " + tableName);
+                        stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
                         if (uprateInitialPopulation) {
                             stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + Parameters.getMaxStartYear()); // Load the last available initial population from all available in tables of the database
                         } else {
@@ -2372,10 +2381,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         Processed processed = getProcessed();
         if (processed!=null) {
-
-            households = processed.getHouseholds();
-            benefitUnits = processed.getBenefitUnits();
-            persons = processed.getPersons();
+            for ( Household originalHousehold : processed.getHouseholds()) {
+                cloneHousehold(originalHousehold, SampleEntry.ProcessedInputData);
+            }
         } else {
 
 
@@ -2559,8 +2567,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     Household originalHousehold = randomHouseholdSampleListIterator.next();
                     if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
 
-                        Household newHousehold = cloneHousehold(originalHousehold, SampleEntry.InputData);
-                        newHousehold.resetWeights(1.0d);
+                        cloneHousehold(originalHousehold, SampleEntry.InputData);
                         if (persons.size() >= popSize ) break;
                     }
                 }
@@ -3369,7 +3376,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
+            //String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " ORDER BY households.key.id";
             String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country;
+
             List<Processed> processedList = em.createQuery(query).getResultList();
             if (!processedList.isEmpty()) {
 
@@ -3380,7 +3389,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
 
             // close database connection
-            txn.commit();
             em.close();
         } catch (Exception e) {
             if (txn != null) {
@@ -3394,9 +3402,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     private void persistProcessed() {
+        persistProcessed(households, country, startYear, popSize);
+    }
 
-        Processed processed = new Processed(country, startYear, popSize);
-        processed.setHouseholds(households);
+    private void persistProcessed(Set<Household> households, Country country, int startYear, int popSize) {
 
         EntityTransaction txn = null;
         try {
@@ -3404,6 +3413,22 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
+
+            Processed processed = new Processed(country, startYear, popSize);
+            em.persist(processed);  // generates processed id
+
+            for (Household household : households) {
+                household.setProcessed(processed);
+                for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                    benefitUnit.setProcessedId(processed.getId());
+                    benefitUnit.updateMembers();
+                    for (Person person : benefitUnit.getMembers()) {
+                        person.setProcessedId(processed.getId());
+                    }
+                }
+            }
+            processed.setHouseholds(households);
+
             em.persist(processed);
             txn.commit();
             em.close();
@@ -3419,59 +3444,29 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private void persistProcessedTest() {
 
         // create test case
-        Household household = new Household(8);
-        BenefitUnit benefitUnit = new BenefitUnit(8);
+        int ii = 1;
+        Household household = new Household(7);
+        BenefitUnit benefitUnit = new BenefitUnit(7);
         benefitUnit.setHousehold(household);
         Person person = new Person(7);
         person.setDag(20);
         person.setDgn(Gender.Male);
         person.setBenefitUnit(benefitUnit);
         benefitUnit.updateMembers();
-        Set<Household> householdsTest = new LinkedHashSet<>();
-        householdsTest.add(household);
+        Set<Household> households = new LinkedHashSet<>();
+        households.add(household);
 
-        EntityTransaction txn = null;
-        try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
-            txn = em.getTransaction();
-            txn.begin();
-
-            // create test case
-            Processed processedIn = new Processed(country, 1900, 5);
-            em.persist(processedIn);  // generates processed id
-
-            for (Household household1 : householdsTest) {
-                household1.setWorkingId(processedIn.getId());
-                household1.setProcessed(processedIn);
-                for (BenefitUnit benefitUnit1 : household1.getBenefitUnits()) {
-                    benefitUnit1.setWorkingId(processedIn.getId());
-                    for (Person person1 : benefitUnit1.getMembers()) {
-                        person1.setWorkingId(processedIn.getId());
-                    }
-                }
-            }
-            processedIn.setHouseholds(householdsTest);
-
-            em.persist(processedIn);
-            txn.commit();
-            em.close();
-        } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Problem sourcing data for starting population");
-        }
+        persistProcessed(households, Country.UK, 1925, 5);
 
         // test input retrieval
-        Processed processedOut = getProcessed(Country.UK, 1900, 5);
+        Processed processedOut = getProcessed(Country.UK, 1925, 5);
+
         if (processedOut!=null) {
 
             Set<Household> householdsHere = processedOut.getHouseholds();
             Set<BenefitUnit> benefitUnitsHere = processedOut.getBenefitUnits();
             Set<Person> personsHere = processedOut.getPersons();
-            txn = null;
+            ii = 2;
         }
     }
 }

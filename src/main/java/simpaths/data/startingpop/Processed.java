@@ -22,7 +22,9 @@ public class Processed {
      * ATTRIBUTES
      */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "processed") Set<Household> households = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "processed")
+    @OrderBy("key ASC")
+    private Set<Household> households = new LinkedHashSet<>();
 
     @Enumerated(EnumType.STRING) Country country;
     @Column(name = "start_year") int startYear;
@@ -111,18 +113,18 @@ public class Processed {
     public void resetDependents() {
 
         if (benefitUnits == null)
-            benefitUnits = new HashSet<>();
+            benefitUnits = new LinkedHashSet<>();
         else
             benefitUnits.clear();
         if (persons == null)
-            persons = new HashSet<>();
+            persons = new LinkedHashSet<>();
         else
             persons.clear();
         for (Household household : households) {
             benefitUnits.addAll(household.getBenefitUnits());
         }
         for (BenefitUnit benefitUnit : benefitUnits) {
-            persons.addAll(benefitUnit.getMembers2());
+            persons.addAll(benefitUnit.getMembers());
         }
     }
 }
