@@ -2925,7 +2925,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     */
     private double calculateYearlyChangeInLogEquivalisedDisposableIncome() {
         double yearlyChangeInLogEquivalisedDisposableIncome = 0.;
-        if (equivalisedDisposableIncomeYearly != null && equivalisedDisposableIncomeYearly_lag1 != null && equivalisedDisposableIncomeYearly >= 0. && equivalisedDisposableIncomeYearly_lag1 >= 0.) {
+        if (equivalisedDisposableIncomeYearly != null && equivalisedDisposableIncomeYearly_lag1 != null && equivalisedDisposableIncomeYearly > 1.0E-5 && equivalisedDisposableIncomeYearly_lag1 > 1.0E-5) {
             // Note that income is uprated to the base price year, as specified in parameters class, as the estimated change uses real income change
             // +1 added as log(0) is not defined
             yearlyChangeInLogEquivalisedDisposableIncome =
@@ -2933,6 +2933,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
         yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
+        if (yearlyChangeInLogEDI==null)
+            throw new RuntimeException("yearly change in log EDI is null");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
 
@@ -3178,8 +3180,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // update benefit unit members
         Set<Person> persons = getMembers();
-        for (Person person : persons) {
-            person.setIdHousehold(idHousehold);
+        if (!persons.isEmpty()) {
+            for (Person person : persons) {
+                person.setIdHousehold(idHousehold);
+            }
         }
     }
 
@@ -3440,7 +3444,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public Double getYearlyChangeInLogEDI() {
-        return yearlyChangeInLogEDI;
+        //TODO: sometimes this is null - cannot work out why
+        return (yearlyChangeInLogEDI==null) ? 0.0 : yearlyChangeInLogEDI;
     }
 
     public boolean isDhhOwned() {
@@ -4028,28 +4033,28 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Match getTaxDbMatch() {
         return taxDbMatch;
     }
-    public Set<Person> getMembers() {return members;}
+    public Set<Person> getMembers() {
+        return getMembers(true);
+    }
+    public Set<Person> getMembers(boolean update) {
+        if (update)
+            updateMembers();
+        return members;
+    }
     public void updateMembers() {
 
         // remove old members
-        if (members.size()>0) {
-
-            Set<Person> temp = members;
-            for (Person member : temp) {
-                if (member != male && member != female && !children.contains(member))
-                    members.remove(member);
-            }
+        if (!members.isEmpty()) {
+            members.removeIf(member -> (member != male && member != female && !children.contains(member)));
         }
 
         // add new members
-        if (male!=null && !members.contains(male))
+        if (male!=null)
             members.add(male);
-        if (female!=null && !members.contains(female))
+        if (female!=null)
             members.add(female);
-        for (Person child : children) {
-            if (!members.contains(child))
-                members.add(child);
-        }
+        if (!children.isEmpty())
+            members.addAll(children);
     }
 
     public void setProcessedId(long id) {
