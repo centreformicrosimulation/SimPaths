@@ -219,39 +219,39 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private RandomGenerator educationRandomGen;
     @Transient private RandomGenerator benefitUnitRandomGen;
 
-    @Transient private double healthRandomUniform1;
-    @Transient private double healthRandomUniform2;
-    @Transient private double healthRandomUniform3;
-    @Transient private double healthRandomUniform4;
-    @Transient private double healthRandomUniform5;
-    @Transient private double socialCareRandomUniform1;
-    @Transient private double socialCareRandomUniform2;
-    @Transient private double socialCareRandomUniform3;
-    @Transient private double socialCareRandomUniform4;
-    @Transient private double socialCareRandomUniform5;
-    @Transient private double socialCareRandomUniform6;
-    @Transient private double socialCareRandomUniform7;
-    @Transient private double socialCareRandomUniform8;
-    @Transient private double socialCareRandomUniform9;
-    @Transient private double socialCareRandomUniform10;
-    @Transient private double wagesRandomUniform1;
-    @Transient private double wagesRandomUniform2;
-    @Transient private double capitalRandomUniform1;
-    @Transient private double capitalRandomUniform2;
-    @Transient private double capitalRandomUniform3;
-    @Transient private double resStanDevRandomUniform;
-    @Transient private double housingRandomUniform;
-    @Transient private double labourRandomUniform1;
-    @Transient private double labourRandomUniform2;
-    @Transient private double labourRandomUniform3;
-    @Transient private double cohabitRandomUniform1;
-    @Transient private double cohabitRandomUniform2;
-    @Transient private double fertilityRandomUniform1;
-    @Transient private double fertilityRandomUniform2;
-    @Transient private double fertilityRandomUniform3;
-    @Transient private double educationRandomUniform;
-    @Transient private double labourSupplySingleDraw = -9;
-    @Transient private double benefitUnitRandomUniform;
+    private Double healthRandomUniform1;
+    private Double healthRandomUniform2;
+    private Double healthRandomUniform3;
+    private Double healthRandomUniform4;
+    private Double healthRandomUniform5;
+    private Double socialCareRandomUniform1;
+    private Double socialCareRandomUniform2;
+    private Double socialCareRandomUniform3;
+    private Double socialCareRandomUniform4;
+    private Double socialCareRandomUniform5;
+    private Double socialCareRandomUniform6;
+    private Double socialCareRandomUniform7;
+    private Double socialCareRandomUniform8;
+    private Double socialCareRandomUniform9;
+    private Double socialCareRandomUniform10;
+    private Double wagesRandomUniform1;
+    private Double wagesRandomUniform2;
+    private Double capitalRandomUniform1;
+    private Double capitalRandomUniform2;
+    private Double capitalRandomUniform3;
+    private Double resStanDevRandomUniform;
+    private Double housingRandomUniform;
+    private Double labourRandomUniform1;
+    private Double labourRandomUniform2;
+    private Double labourRandomUniform3;
+    private Double cohabitRandomUniform1;
+    private Double cohabitRandomUniform2;
+    private Double fertilityRandomUniform1;
+    private Double fertilityRandomUniform2;
+    private Double fertilityRandomUniform3;
+    private Double educationRandomUniform;
+    private Double labourSupplySingleDraw = -9.;
+    private Double benefitUnitRandomUniform;
 
     //TODO: Remove when no longer needed.  Used to calculate mean score of employment selection regression.
     @Transient public static double scoreMale;
@@ -568,6 +568,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         educationRandomGen = new Random(rndTemp.nextLong());
         labourSupplySingleDraw = labourRandomGen.nextDouble();
         benefitUnitRandomGen = new Random(rndTemp.nextLong());
+
+        // initialise random draws
+        randomDraws();
     }
 
 
@@ -1842,40 +1845,44 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // generate year specific random draws
         if (!initialUpdate) {
-
-            healthRandomUniform1 = healthRandomGen.nextDouble();
-            healthRandomUniform2 = healthRandomGen.nextDouble();
-            healthRandomUniform3 = healthRandomGen.nextDouble();
-            healthRandomUniform4 = healthRandomGen.nextDouble();
-            healthRandomUniform5 = healthRandomGen.nextDouble();
-            socialCareRandomUniform1 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform2 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform3 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform4 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform5 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform6 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform7 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform8 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform9 = socialCareRandomGen.nextDouble();
-            socialCareRandomUniform10 = socialCareRandomGen.nextDouble();
-            wagesRandomUniform1 = wagesRandomGen.nextDouble();
-            wagesRandomUniform2 = wagesRandomGen.nextDouble();
-            capitalRandomUniform1 = capitalRandomGen.nextDouble();
-            capitalRandomUniform2 = capitalRandomGen.nextDouble();
-            capitalRandomUniform3 = capitalRandomGen.nextDouble();
-            resStanDevRandomUniform = resStanDevRandomGen.nextDouble();
-            housingRandomUniform = housingRandomGen.nextDouble();
-            labourRandomUniform1 = labourRandomGen.nextDouble();
-            labourRandomUniform2 = labourRandomGen.nextDouble();
-            labourRandomUniform3 = labourRandomGen.nextDouble();
-            cohabitRandomUniform1 = cohabitRandomGen.nextDouble();
-            cohabitRandomUniform2 = cohabitRandomGen.nextDouble();
-            fertilityRandomUniform1 = fertilityRandomGen.nextDouble();
-            fertilityRandomUniform2 = fertilityRandomGen.nextDouble();
-            fertilityRandomUniform3 = fertilityRandomGen.nextDouble();
-            educationRandomUniform = educationRandomGen.nextDouble();
-            benefitUnitRandomUniform = benefitUnitRandomGen.nextDouble();
+            randomDraws();
         }
+    }
+
+    private void randomDraws() {
+
+        healthRandomUniform1 = healthRandomGen.nextDouble();
+        healthRandomUniform2 = healthRandomGen.nextDouble();
+        healthRandomUniform3 = healthRandomGen.nextDouble();
+        healthRandomUniform4 = healthRandomGen.nextDouble();
+        healthRandomUniform5 = healthRandomGen.nextDouble();
+        socialCareRandomUniform1 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform2 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform3 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform4 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform5 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform6 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform7 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform8 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform9 = socialCareRandomGen.nextDouble();
+        socialCareRandomUniform10 = socialCareRandomGen.nextDouble();
+        wagesRandomUniform1 = wagesRandomGen.nextDouble();
+        wagesRandomUniform2 = wagesRandomGen.nextDouble();
+        capitalRandomUniform1 = capitalRandomGen.nextDouble();
+        capitalRandomUniform2 = capitalRandomGen.nextDouble();
+        capitalRandomUniform3 = capitalRandomGen.nextDouble();
+        resStanDevRandomUniform = resStanDevRandomGen.nextDouble();
+        housingRandomUniform = housingRandomGen.nextDouble();
+        labourRandomUniform1 = labourRandomGen.nextDouble();
+        labourRandomUniform2 = labourRandomGen.nextDouble();
+        labourRandomUniform3 = labourRandomGen.nextDouble();
+        cohabitRandomUniform1 = cohabitRandomGen.nextDouble();
+        cohabitRandomUniform2 = cohabitRandomGen.nextDouble();
+        fertilityRandomUniform1 = fertilityRandomGen.nextDouble();
+        fertilityRandomUniform2 = fertilityRandomGen.nextDouble();
+        fertilityRandomUniform3 = fertilityRandomGen.nextDouble();
+        educationRandomUniform = educationRandomGen.nextDouble();
+        benefitUnitRandomUniform = benefitUnitRandomGen.nextDouble();
     }
 
     protected void leavePartner() {

@@ -124,7 +124,7 @@ public class Processed {
             benefitUnits.addAll(household.getBenefitUnits());
         }
         for (BenefitUnit benefitUnit : benefitUnits) {
-            persons.addAll(benefitUnit.getMembers(false));  // don't update members, as person level variables (male/female/children) not populated
+            persons.addAll(benefitUnit.getMembers());  // don't update members, as person level variables (male/female/children) not populated
         }
     }
 }

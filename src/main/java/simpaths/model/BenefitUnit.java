@@ -1658,6 +1658,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (female != null) person.setIdMother(female);
 
         updateChildrenFields();
+        updateMembers();
     }
 
     public void removePerson(Person person) {
@@ -1679,6 +1680,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (male == null && female == null) {
             model.removeBenefitUnit(this);
         }
+        updateMembers();
     }
 
     private boolean removeChild(Person child) {
@@ -1689,6 +1691,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         boolean removed = children.remove(child);
         updateChildrenFields();
         updateDhhtp_c4();
+        updateMembers();
 
         return removed;
     }
@@ -2925,7 +2928,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     */
     private double calculateYearlyChangeInLogEquivalisedDisposableIncome() {
         double yearlyChangeInLogEquivalisedDisposableIncome = 0.;
-        if (equivalisedDisposableIncomeYearly != null && equivalisedDisposableIncomeYearly_lag1 != null && equivalisedDisposableIncomeYearly > 1.0E-5 && equivalisedDisposableIncomeYearly_lag1 > 1.0E-5) {
+        if (equivalisedDisposableIncomeYearly != null && equivalisedDisposableIncomeYearly_lag1 != null && equivalisedDisposableIncomeYearly >= 0. && equivalisedDisposableIncomeYearly_lag1 >= 0.) {
             // Note that income is uprated to the base price year, as specified in parameters class, as the estimated change uses real income change
             // +1 added as log(0) is not defined
             yearlyChangeInLogEquivalisedDisposableIncome =
@@ -2933,8 +2936,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
         yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
-        if (yearlyChangeInLogEDI==null)
-            throw new RuntimeException("yearly change in log EDI is null");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
 
@@ -3071,27 +3072,30 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         if (person != null) {
 
-            if (female != null) {
-                throw new IllegalArgumentException("Benefit unit " + key.getId() + " already has a female.  Remove existing female before adding another one.");
-            }
-            if (!person.getDgn().equals(Gender.Female)) {
-                throw new IllegalArgumentException("Person " + person.getKey().getId() + " does not have gender = Female, so cannot be the responsible female of the benefit unit.");
-            }
+            if (person!=female) {
 
-            // link person with benefit unit
-            female = person;
-            idFemale = person.getKey().getId();
+                if (female != null) {
+                    throw new IllegalArgumentException("Benefit unit " + key.getId() + " already has a female.  Remove existing female before adding another one.");
+                }
+                if (!person.getDgn().equals(Gender.Female)) {
+                    throw new IllegalArgumentException("Person " + person.getKey().getId() + " does not have gender = Female, so cannot be the responsible female of the benefit unit.");
+                }
 
-            checkIfUpdatePersonReferences(person);
-            if (male != null) {
-                male.setPartner(person);
-                person.setPartner(male);
-                occupancy = Occupancy.Couple;
-            } else {
-                occupancy = Occupancy.Single_Female;
-            }
-            for (Person child : children) {
-                child.setIdMother(female);
+                // link person with benefit unit
+                female = person;
+                idFemale = person.getKey().getId();
+
+                checkIfUpdatePersonReferences(person);
+                if (male != null) {
+                    male.setPartner(person);
+                    person.setPartner(male);
+                    occupancy = Occupancy.Couple;
+                } else {
+                    occupancy = Occupancy.Single_Female;
+                }
+                for (Person child : children) {
+                    child.setIdMother(female);
+                }
             }
         } else {
 
@@ -3105,33 +3109,37 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 child.setIdMother((Person)null);
             }
         }
+        updateMembers();
     }
 
     public void setMale(Person person) {
 
         if (person != null) {
 
-            if (male != null) {
-                throw new RuntimeException("Benefit unit " + key.getId() + " already has a male.  Remove existing male before adding another one.");
-            }
-            if (!person.getDgn().equals(Gender.Male)) {
-                throw new RuntimeException("Person " + person.getKey().getId() + " does not have gender = Male, so cannot be the responsible male of the benefit unit.");
-            }
+            if (person!=male) {
 
-            // link person with benefit unit
-            male = person;
-            idMale = person.getKey().getId();
+                if (male != null) {
+                    throw new RuntimeException("Benefit unit " + key.getId() + " already has a male.  Remove existing male before adding another one.");
+                }
+                if (!person.getDgn().equals(Gender.Male)) {
+                    throw new RuntimeException("Person " + person.getKey().getId() + " does not have gender = Male, so cannot be the responsible male of the benefit unit.");
+                }
 
-            checkIfUpdatePersonReferences(person);
-            if (female != null) {
-                female.setPartner(person);
-                person.setPartner(female);
-                occupancy = Occupancy.Couple;
-            } else {
-                occupancy = Occupancy.Single_Male;
-            }
-            for (Person child : children) {
-                child.setIdFather(male);
+                // link person with benefit unit
+                male = person;
+                idMale = person.getKey().getId();
+
+                checkIfUpdatePersonReferences(person);
+                if (female != null) {
+                    female.setPartner(person);
+                    person.setPartner(female);
+                    occupancy = Occupancy.Couple;
+                } else {
+                    occupancy = Occupancy.Single_Male;
+                }
+                for (Person child : children) {
+                    child.setIdFather(male);
+                }
             }
         } else {
 
@@ -3145,6 +3153,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 child.setIdFather((Person)null);
             }
         }
+        updateMembers();
     }
 
     public void checkIfUpdatePersonReferences(Person person) {
@@ -3180,10 +3189,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // update benefit unit members
         Set<Person> persons = getMembers();
-        if (!persons.isEmpty()) {
-            for (Person person : persons) {
-                person.setIdHousehold(idHousehold);
-            }
+        for (Person person : persons) {
+            person.setIdHousehold(idHousehold);
         }
     }
 
@@ -3444,8 +3451,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public Double getYearlyChangeInLogEDI() {
-        //TODO: sometimes this is null - cannot work out why
-        return (yearlyChangeInLogEDI==null) ? 0.0 : yearlyChangeInLogEDI;
+        return yearlyChangeInLogEDI;
     }
 
     public boolean isDhhOwned() {
@@ -4033,28 +4039,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Match getTaxDbMatch() {
         return taxDbMatch;
     }
-    public Set<Person> getMembers() {
-        return getMembers(true);
-    }
-    public Set<Person> getMembers(boolean update) {
-        if (update)
-            updateMembers();
-        return members;
-    }
+    public Set<Person> getMembers() {return members;}
     public void updateMembers() {
 
         // remove old members
-        if (!members.isEmpty()) {
-            members.removeIf(member -> (member != male && member != female && !children.contains(member)));
-        }
+        members.removeIf(person -> person != male && person != female && !children.contains(person));
 
         // add new members
         if (male!=null)
             members.add(male);
         if (female!=null)
             members.add(female);
-        if (!children.isEmpty())
-            members.addAll(children);
+        members.addAll(children);
     }
 
     public void setProcessedId(long id) {

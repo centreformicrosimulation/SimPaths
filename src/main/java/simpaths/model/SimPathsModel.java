@@ -148,7 +148,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
     private boolean useWeights = false;
 
-    private boolean ignoreTargetsAtPopulationLoad = false;
+    private boolean ignoreTargetsAtPopulationLoad = true;
 
     @GUIparameter(description = "If unchecked, will use the standard matching method")
 //	private boolean useSBAMMatching = false;
@@ -353,6 +353,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             //DatabaseExtension.extendInputData();
         }
 
+        //persistProcessedTest();
         log.debug("Parameters loaded");
 
         // populate tax donor references
@@ -370,6 +371,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // time check
         elapsedTime = System.currentTimeMillis();
+
+        // create country-specific tables in the input database and parse the EUROMOD policy scenario data for initializing the donor population
+        try {
+            inputDatabaseInteraction();
+        } catch (InterruptedException interruptedException) {
+            log.debug(interruptedException.getMessage());
+            return;
+        }
 
         // creates initial population (Person and BenefitUnit objects) based on data in input database.
         // Note that the population may be cropped to simulate a smaller population depending on user choices in the GUI.
@@ -1314,7 +1323,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private BenefitUnit cloneBenefitUnit(BenefitUnit originalBenefitUnit, Household newHousehold, SampleEntry sampleEntry) {
 
         // initialise objects
-        boolean updateMembers = (!SampleEntry.ProcessedInputData.equals(sampleEntry));
 
         double seed0 = SimulationEngine.getRnd().nextDouble();
         long seed = (SampleEntry.ProcessedInputData.equals(sampleEntry)) ? originalBenefitUnit.getSeed() : (long)(seed0*100000);
@@ -1323,9 +1331,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         newBenefitUnit.setHousehold(newHousehold);
         benefitUnits.add(newBenefitUnit);
 
-        if (originalBenefitUnit.getMembers(updateMembers).isEmpty())
+        if (originalBenefitUnit.getMembers().isEmpty())
             throw new RuntimeException("problem identifying benefit unit members to clone");
-        Set<Person> originalPersons = originalBenefitUnit.getMembers(updateMembers);
+        Set<Person> originalPersons = originalBenefitUnit.getMembers();
         for (Person originalPerson : originalPersons) {
 
             seed0 = SimulationEngine.getRnd().nextDouble();
@@ -2279,6 +2287,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 if (isFirstRun) {
                     //Create database tables to be used in simulation from country-specific tables
+                    String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
+                    for (String tableName : tableNamesDonor) {
+                        stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
+                        stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
+                    }
                     String[] tableNamesInitial = new String[]{"HOUSEHOLD", "BENEFITUNIT", "PERSON"};
                     for (String tableName : tableNamesInitial) {
                         stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
@@ -2379,14 +2392,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
              * NOTE: don't need to worry about duplicates, as database ensures all items are unique
              * NOTE: use lists to ensure that simulated population is replicable
              */
-
-            // simulation specific adjustments to input data
-            try {
-                inputDatabaseInteraction();
-            } catch (InterruptedException interruptedException) {
-                log.debug(interruptedException.getMessage());
-                return;
-            }
 
             //Persons
             List<Person> inputPersonList = (List<Person>) DatabaseUtils.loadTable(Person.class);
