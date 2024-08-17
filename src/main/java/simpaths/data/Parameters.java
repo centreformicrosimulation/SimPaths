@@ -384,6 +384,8 @@ public class Parameters {
 //	private static MultiKeyMap probSick;
 
     //MultivariateNormalDistribution of age and potential earnings differential to use in the parametric partnership process
+    public final static boolean MARRIAGE_MATCH_TO_MEANS = true;     //TODO: Changing this option to "false" does not generate replicable results
+    public static double targetMeanWageDifferential, targetMeanAgeDifferential;
     private static MultivariateNormalDistribution wageAndAgeDifferentialMultivariateNormalDistribution;
 
     //Mortality, fertility, and unemployment tables for the intertemporal optimisation model
@@ -1586,7 +1588,9 @@ public class Parameters {
         regChildcareC1b = new LinearRegression(coeffCovarianceChildcareC1b);
 
         //Create the age and wage differential MultivariateNormalDistribution for partnership formation, using means and var-cov matrix loaded from Excel
-        double[] means = {((Number) meanCovarianceParametricMatching.getValue("mean_dag_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("mean_wage_diff")).doubleValue()};
+        targetMeanAgeDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_dag_diff")).doubleValue();
+        targetMeanWageDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_wage_diff")).doubleValue();
+        double[] means = {targetMeanAgeDifferential, targetMeanWageDifferential};
         double[][] covariances = { {((Number) meanCovarianceParametricMatching.getValue("var_dag_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("cov_dag_wage_diff")).doubleValue()} , {((Number) meanCovarianceParametricMatching.getValue("cov_dag_wage_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("var_wage_diff")).doubleValue()}};
         wageAndAgeDifferentialMultivariateNormalDistribution = getMultivariateNormalDistribution(means, covariances);
 

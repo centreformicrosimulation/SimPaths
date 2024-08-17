@@ -82,7 +82,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Country country; // = Country.UK;
 
     @GUIparameter(description = "Simulated population size (base year)")
-    private Integer popSize = 170000;
+    private Integer popSize = 5000;
 
     @GUIparameter(description = "Simulation first year [valid range 2011-2019]")
     private Integer startYear = 2011;
@@ -494,7 +494,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addEvent(this, Processes.CohabitationAlignment);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Cohabitation);
 
-        // Union matching
+        // partnership variation
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.PartnershipDissolution);
         yearlySchedule.addEvent(this, Processes.UnionMatching);
         yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateOccupancy);
         //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
@@ -2382,6 +2383,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Processed processed = getProcessed();
         if (processed!=null) {
             for ( Household originalHousehold : processed.getHouseholds()) {
+                originalHousehold.updatePersonLinks();
+                for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
+                    for (Person person : benefitUnit.getMembers()) {
+                        person.setAdditionalFieldsInInitialPopulation();
+                    }
+                    benefitUnit.initializeFields();
+                }
                 cloneHousehold(originalHousehold, SampleEntry.ProcessedInputData);
             }
         } else {

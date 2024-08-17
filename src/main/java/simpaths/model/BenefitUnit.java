@@ -320,19 +320,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         switch (sampleEntry) {
             case InputData -> {
                 idOriginalBU = originalBenefitUnit.getId();
+                idOriginalHH = originalBenefitUnit.idHousehold;
             }
             case ProcessedInputData -> {
 
                 benefitUnitIdCounter = originalBenefitUnit.getId();
                 key.setId(benefitUnitIdCounter);
                 idOriginalBU = originalBenefitUnit.getIdOriginalBU();
+                idOriginalHH = originalBenefitUnit.getIdOriginalHH();
             }
             default -> {
                 throw new RuntimeException("invalid SampleEntry value supplied to person constructor");
             }
         }
 
-        this.idOriginalHH = originalBenefitUnit.idHousehold;
 
         this.log = originalBenefitUnit.log;
         this.occupancy = originalBenefitUnit.occupancy;
@@ -1612,6 +1613,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public void addResponsiblePerson(Person person) {
+        addResponsiblePerson(person, true);
+    }
+
+    public void addResponsiblePerson(Person person, boolean updateMembers) {
 
         if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             throw new RuntimeException("Attempt to add responsible person under age of maturity.");
@@ -1621,9 +1626,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
 
         if (person.getDgn().equals(Gender.Female)) {
-            setFemale(person);
+            setFemale(person, updateMembers);
         } else {
-            setMale(person);
+            setMale(person, updateMembers);
         }
     }
 
@@ -1643,6 +1648,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public void addChild(Person person) {
 
+        addChild(person, true);
+    }
+
+    public void addChild(Person person, boolean updateMembers) {
+
         if (person == null) {
             throw new IllegalArgumentException("Attempt to add null child.");
         }
@@ -1658,7 +1668,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (female != null) person.setIdMother(female);
 
         updateChildrenFields();
-        updateMembers();
+        if (updateMembers)
+            updateMembers();
     }
 
     public void removePerson(Person person) {
@@ -3070,6 +3081,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public void setFemale(Person person) {
 
+        setFemale(person, true);
+    }
+
+    public void setFemale(Person person, boolean updateMembers) {
+
         if (person != null) {
 
             if (person!=female) {
@@ -3109,11 +3125,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 child.setIdMother((Person)null);
             }
         }
-        updateMembers();
+        if (updateMembers)
+            updateMembers();
     }
 
     public void setMale(Person person) {
+        setMale(person, true);
+    }
 
+    public void setMale(Person person, boolean updateMembers) {
         if (person != null) {
 
             if (person!=male) {
@@ -3153,7 +3173,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 child.setIdFather((Person)null);
             }
         }
-        updateMembers();
+        if (updateMembers)
+            updateMembers();
     }
 
     public void checkIfUpdatePersonReferences(Person person) {
@@ -4060,4 +4081,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public long getSeed(){return (seed!=null) ? seed : 0L;}
 
     public long getIdOriginalBU() {return idOriginalBU;}
+
+    public long getIdOriginalHH() {return idOriginalHH;}
 }

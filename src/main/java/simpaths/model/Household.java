@@ -2,6 +2,7 @@ package simpaths.model;
 
 import jakarta.persistence.*;
 import microsim.data.db.PanelEntityKey;
+import simpaths.data.Parameters;
 import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import microsim.engine.SimulationEngine;
@@ -163,5 +164,20 @@ public class Household implements EventListener, IDoubleSource {
     public void setProcessed(Processed processed) {
         this.processed = processed;
         key.setWorkingId(processed.getId());
+    }
+
+    public void updatePersonLinks() {
+
+        for (BenefitUnit benefitUnit : benefitUnits) {
+
+            for (Person person : benefitUnit.getMembers()) {
+
+                if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+                    benefitUnit.addChild(person, false);
+                } else {
+                    benefitUnit.addResponsiblePerson(person, false);
+                }
+            }
+        }
     }
 }

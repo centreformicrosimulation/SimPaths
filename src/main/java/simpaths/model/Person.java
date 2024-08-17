@@ -114,7 +114,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private boolean toLeaveSchool;
     @Transient private boolean toBePartnered;
     @Transient private boolean hasTestPartner;
-    @Transient private boolean leftPartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    @Transient private boolean leavePartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Transient private Person partner;
     private Long idPartner;		//Note, must not use primitive long, as long cannot hold 'null' value, i.e. if the person has no partner
     @Transient private Long idPartnerLag1;
@@ -343,12 +343,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         switch (sampleEntry) {
             case InputData -> {
                 idOriginalPerson = originalPerson.key.getId();
+                idOriginalHH = originalPerson.idHousehold;
+                idOriginalBU = originalPerson.idBenefitUnit;
             }
             case ProcessedInputData -> {
 
                 personIdCounter = originalPerson.key.getId();
                 key.setId(personIdCounter);
                 idOriginalPerson = originalPerson.getIdOriginalPerson();
+                idOriginalBU = originalPerson.getIdOriginalBU();
+                idOriginalHH = originalPerson.getIdOriginalHH();
             }
             default -> {
                 throw new RuntimeException("invalid SampleEntry value supplied to person constructor");
@@ -356,8 +360,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         this.sampleEntry = sampleEntry;
-        idOriginalHH = originalPerson.idHousehold;
-        idOriginalBU = originalPerson.idBenefitUnit;
 
         dag = originalPerson.dag;
         ageGroup = originalPerson.ageGroup;
@@ -429,10 +431,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yplgrs_dv_lag3 = originalPerson.yplgrs_dv_lag3;
         ynbcpdf_dv = originalPerson.ynbcpdf_dv;
         ynbcpdf_dv_lag1 = originalPerson.ynbcpdf_dv_lag1;
-        ypncp_lag2 = originalPerson.ypncp_lag2;
+        ypncp = originalPerson.ypncp;
         ypncp_lag1 = originalPerson.ypncp_lag1;
-        ypnoab_lag2 = originalPerson.ypnoab_lag2;
+        ypncp_lag2 = originalPerson.ypncp_lag2;
+        ypnoab = originalPerson.ypnoab;
         ypnoab_lag1 = originalPerson.ypnoab_lag1;
+        ypnoab_lag2 = originalPerson.ypnoab_lag2;
 
         liwwh = originalPerson.liwwh;
         if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
@@ -554,6 +558,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         clonedFlag = false;
 
+        // initialise random draws
         this.seed = seed;
         RandomGenerator rndTemp = new Random(seed);
         healthRandomGen = new Random(rndTemp.nextLong());
@@ -568,9 +573,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         educationRandomGen = new Random(rndTemp.nextLong());
         labourSupplySingleDraw = labourRandomGen.nextDouble();
         benefitUnitRandomGen = new Random(rndTemp.nextLong());
-
-        // initialise random draws
         randomDraws();
+
+        //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
+        if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
+            desiredAgeDiff = Parameters.targetMeanAgeDifferential;
+            desiredEarningsPotentialDiff = Parameters.targetMeanWageDifferential;
+        } else {
+            //TODO: This option does not generate replicable results
+            double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
+            desiredAgeDiff = sampledDifferentials[0];
+            desiredEarningsPotentialDiff = sampledDifferentials[1];
+        }
     }
 
 
@@ -606,7 +620,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setAdditionalFieldsInInitialPopulation() {
 
-        labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue());
+        if (labourSupplyWeekly==null)
+            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue());
         receivesBenefitsFlag_L1 = receivesBenefitsFlag;
         labourSupplyWeekly_L1 = getLabourSupplyWeekly();
 
@@ -679,23 +694,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // Event Listener
     // ---------------------------------------------------------------------
     public enum Processes {
-        Update,
         Aging,
-        ProjectEquivConsumption,
         Cohabitation,
         ConsiderMortality,
         ConsiderRetirement,
         Fertility,
         GiveBirth,
         Health,
-        SocialCareIncidence,
         HealthMentalHM1, 				//Predict level of mental health on the GHQ-12 Likert scale (Step 1)
         HealthMentalHM2,				//Modify the prediction from Step 1 by applying increments / decrements for exposure
         HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together
         InSchool,
         LeavingSchool,
-        UpdatePotentialHourlyEarnings,	//Needed to union matching and labour supply
+        PartnershipDissolution,
+        ProjectEquivConsumption,
+        SocialCareIncidence,
         Unemployment,
+        Update,
+        UpdatePotentialHourlyEarnings,	//Needed to union matching and labour supply
     }
 
     @Override
@@ -713,6 +729,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Cohabitation -> {
     //			log.debug("BenefitUnit Formation for person " + this.getKey().getId());
                 cohabitation();
+            }
+            case PartnershipDissolution -> {
+                partnershipDissolution();
             }
             case ConsiderMortality -> {
                 considerMortality();
@@ -1253,17 +1272,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void cohabitation() {
         double probitAdjustment = (model.isAlignCohabitation()) ? Parameters.getAlignmentValue(getYear(), AlignmentVariable.PartnershipAlignment) : 0.0;
         probitAdjustment += Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.PartnershipAdjustment);
-        cohabitation(false, probitAdjustment);
+        cohabitation(probitAdjustment);
     }
 
-    protected void cohabitation(boolean alignmentRun, double probitAdjustment) {
+    protected void cohabitation(double probitAdjustment) {
 
         // parameter check
         if (probitAdjustment>(4.0+1.0E-5) || probitAdjustment<(-4.0-1.0E-5))
             throw new RuntimeException("odd value for probit adjustment supplied to considerCohabitation method: " + probitAdjustment);
 
         toBePartnered = false;
-        leftPartner = false;
+        leavePartner = false;
         hasTestPartner = false;
         double cohabitInnov = cohabitRandomUniform1;
         if (dag >= Parameters.MIN_AGE_COHABITATION) {
@@ -1292,9 +1311,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                     prob = Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class);
                     if (cohabitInnov < prob) {
-                        leftPartner = true;
-                        if (!alignmentRun)
-                            leavePartner();
+                        leavePartner = true;
                     }
                 }
             } else if (model.getCountry() == Country.IT) {
@@ -1311,12 +1328,33 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                     double prob = Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class);
                     if (cohabitInnov < prob) {
-                        leftPartner = true;
-                        if (!alignmentRun)
-                            leavePartner();
+                        leavePartner = true;
                     }
                 }
             }
+        }
+    }
+
+    protected void partnershipDissolution() {
+
+        if (leavePartner) {
+
+            // update partner's variables first
+            partner.setPartner(null); 		   //Do for the partner as we model the probability of couple splitting based on female leaving the partnership
+            partner.setDcpyy(null);
+            partner.setDcpex(Indicator.True);
+            partner.setDcpst(Dcpst.PreviouslyPartnered);
+            partner.setLeftPartnership(true); //Set to true if leaves partnership to use with fertility regression, this is never reset
+            partner.setHousehold_status(Household_status.Single);
+
+            setPartner(null);		  //Do this before leaveHome to ensure partner doesn't leave home with this person!
+            setDcpyy(null); 		  //Set number of years in partnership to null if leaving partner
+            setDcpex(Indicator.True); //Set variable indicating leaving the partnership to true
+            setDcpst(Dcpst.PreviouslyPartnered);
+            setLeftPartnership(true); //Set to true if leaves partnership to use with fertility regression, this is never reset
+            idHousehold = null;
+
+            setupNewBenefitUnit(true);
         }
     }
 
@@ -1835,14 +1873,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dcpst = Dcpst.Partnered;
         }
 
-        //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
-        //TODO: Should it be updated yearly or only if null?
-        if (dag >= Parameters.MIN_AGE_COHABITATION) {
-            double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
-            desiredAgeDiff = sampledDifferentials[0];
-            desiredEarningsPotentialDiff = sampledDifferentials[1];
-        }
-
         // generate year specific random draws
         if (!initialUpdate) {
             randomDraws();
@@ -1883,27 +1913,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         fertilityRandomUniform3 = fertilityRandomGen.nextDouble();
         educationRandomUniform = educationRandomGen.nextDouble();
         benefitUnitRandomUniform = benefitUnitRandomGen.nextDouble();
-    }
-
-    protected void leavePartner() {
-        // only considered for female - male is partner
-
-        // update partner's variables first
-        partner.setPartner(null); 		   //Do for the partner as we model the probability of couple splitting based on female leaving the partnership
-        partner.setDcpyy(null);
-        partner.setDcpex(Indicator.True);
-        partner.setDcpst(Dcpst.PreviouslyPartnered);
-        partner.setLeftPartnership(true); //Set to true if leaves partnership to use with fertility regression, this is never reset
-        partner.setHousehold_status(Household_status.Single);
-
-        setPartner(null);		  //Do this before leaveHome to ensure partner doesn't leave home with this person!
-        setDcpyy(null); 		  //Set number of years in partnership to null if leaving partner
-        setDcpex(Indicator.True); //Set variable indicating leaving the partnership to true
-        setDcpst(Dcpst.PreviouslyPartnered);
-        setLeftPartnership(true); //Set to true if leaves partnership to use with fertility regression, this is never reset
-        idHousehold = null;
-
-        setupNewBenefitUnit(true);
     }
 
     protected Household setupNewHousehold(boolean automaticUpdateOfHouseholds) {
@@ -3708,6 +3717,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return idOriginalBU;
     }
 
+    public Long getIdOriginalHH() {
+        return idOriginalHH;
+    }
+
     public int getAgeGroup() {
         return ageGroup;
     }
@@ -4514,12 +4527,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.hasTestPartner = hasTestPartner;
     }
 
-    public boolean getLeftPartner() {
-        return leftPartner;
+    public boolean getLeavePartner() {
+        return leavePartner;
     }
 
-    public void setLeftPartner(boolean leftPartner) {
-        this.leftPartner = leftPartner;
+    public void setLeavePartner(boolean leavePartner) {
+        this.leavePartner = leavePartner;
     }
 
     public boolean getLowWageOffer() {
