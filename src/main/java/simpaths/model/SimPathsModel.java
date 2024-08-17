@@ -148,7 +148,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
     private boolean useWeights = false;
 
-    private boolean ignoreTargetsAtPopulationLoad = true;
+    private boolean ignoreTargetsAtPopulationLoad = false;
 
     @GUIparameter(description = "If unchecked, will use the standard matching method")
 //	private boolean useSBAMMatching = false;
@@ -157,7 +157,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = false; //Set to true to align employment share
+    private boolean alignPopulation = true; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = false;
