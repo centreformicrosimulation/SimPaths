@@ -2891,7 +2891,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void removeBenefitUnit(BenefitUnit benefitUnit) {
 
         // remove all benefit unit members from model
-        for (Person person : benefitUnit.getMembers()) {
+        Set<Person> members = new LinkedHashSet<>(benefitUnit.getMembers());
+        for (Person person : members) {
             removePerson(person);
         }
 
