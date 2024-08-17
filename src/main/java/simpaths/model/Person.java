@@ -70,39 +70,39 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Les_c4 lessp_c4;
     @Enumerated(EnumType.STRING) private Lesdf_c4 lesdf_c4;                  //Own and partner's activity status
     @Transient private Lesdf_c4 lesdf_c4_lag1;             //Lag(1) of own and partner's activity status
-    @Transient private Integer liwwh = 0;                  //Work history in months (number of months in employment) (Note: this is monthly in EM, but simulation updates annually so increment by 12 months).
+    @Transient private Integer liwwh;                  //Work history in months (number of months in employment) (Note: this is monthly in EM, but simulation updates annually so increment by 12 months).
     @Enumerated(EnumType.STRING) private Dcpst dcpst;                        // partnership status
     @Transient private Dcpst dcpst_lag1;   // lag partnership status
     @Enumerated(EnumType.STRING) private Indicator dcpen;    // enter partnership
     @Enumerated(EnumType.STRING) private Indicator dcpex;    // exit partnership
     @Enumerated(EnumType.STRING) private Indicator dlltsd;	//Long-term sick or disabled if = 1
     @Transient private Indicator dlltsd_lag1; //Lag(1) of long-term sick or disabled
-    @Enumerated(EnumType.STRING) @Column(name="need_socare") private Indicator needSocialCare = Indicator.False;
-    @Column(name="formal_socare_hrs") private Double careHoursFromFormalWeekly = 0.0;
-    @Column(name="formal_socare_cost") private Double careFormalExpenditureWeekly = 0.0;
-    @Column(name="partner_socare_hrs") private Double careHoursFromPartnerWeekly = 0.0;
-    @Column(name="parent_socare_hrs") private Double careHoursFromParentWeekly = 0.0;
-    @Column(name="daughter_socare_hrs") private Double careHoursFromDaughterWeekly = 0.0;
-    @Column(name="son_socare_hrs") private Double careHoursFromSonWeekly = 0.0;
-    @Column(name="other_socare_hrs") private Double careHoursFromOtherWeekly = 0.0;
-    private Boolean lowWageOffer = false;
-    @Transient private boolean lowWageOffer_lag1 = false;
-    @Transient SocialCareReceipt socialCareReceipt = SocialCareReceipt.None;
-    @Transient boolean socialCareFromFormal;
-    @Transient boolean socialCareFromPartner;
-    @Transient boolean socialCareFromDaughter;
-    @Transient boolean socialCareFromSon;
-    @Transient boolean socialCareFromOther;
-    @Column(name="socare_provided_hrs") private Double careHoursProvidedWeekly = 0.0;
-    @Enumerated(EnumType.STRING) @Column(name="socare_provided_to") private SocialCareProvision socialCareProvision = SocialCareProvision.None;
-    @Transient private SocialCareProvision socialCareProvision_lag1 = SocialCareProvision.None;
-    @Transient private Indicator needSocialCare_lag1 = Indicator.False;
-    @Transient private double careHoursFromFormalWeekly_lag1 = 0.0;
-    @Transient private double careHoursFromPartnerWeekly_lag1 = 0.0;
-    @Transient private double careHoursFromParentWeekly_lag1 = 0.0;
-    @Transient private double careHoursFromDaughterWeekly_lag1 = 0.0;
-    @Transient private double careHoursFromSonWeekly_lag1 = 0.0;
-    @Transient private double careHoursFromOtherWeekly_lag1 = 0.0;
+    @Enumerated(EnumType.STRING) @Column(name="need_socare") private Indicator needSocialCare;
+    @Column(name="formal_socare_hrs") private Double careHoursFromFormalWeekly;
+    @Column(name="formal_socare_cost") private Double careFormalExpenditureWeekly;
+    @Column(name="partner_socare_hrs") private Double careHoursFromPartnerWeekly;
+    @Column(name="parent_socare_hrs") private Double careHoursFromParentWeekly;
+    @Column(name="daughter_socare_hrs") private Double careHoursFromDaughterWeekly;
+    @Column(name="son_socare_hrs") private Double careHoursFromSonWeekly;
+    @Column(name="other_socare_hrs") private Double careHoursFromOtherWeekly;
+    private Boolean lowWageOffer;
+    @Transient private Boolean lowWageOffer_lag1;
+    @Transient private SocialCareReceipt socialCareReceipt;
+    @Transient private Boolean socialCareFromFormal;
+    @Transient private Boolean socialCareFromPartner;
+    @Transient private Boolean socialCareFromDaughter;
+    @Transient private Boolean socialCareFromSon;
+    @Transient private Boolean socialCareFromOther;
+    @Column(name="socare_provided_hrs") private Double careHoursProvidedWeekly;
+    @Enumerated(EnumType.STRING) @Column(name="socare_provided_to") private SocialCareProvision socialCareProvision;
+    @Transient private SocialCareProvision socialCareProvision_lag1;
+    @Transient private Indicator needSocialCare_lag1;
+    @Transient private Double careHoursFromFormalWeekly_lag1;
+    @Transient private Double careHoursFromPartnerWeekly_lag1;
+    @Transient private Double careHoursFromParentWeekly_lag1;
+    @Transient private Double careHoursFromDaughterWeekly_lag1;
+    @Transient private Double careHoursFromSonWeekly_lag1;
+    @Transient private Double careHoursFromOtherWeekly_lag1;
 
     @Enumerated(EnumType.STRING) private Indicator sedex;    // year left education
     @Enumerated(EnumType.STRING) private Indicator partnership_samesex;
@@ -110,19 +110,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Indicator education_inrange;
 
     @Enumerated(EnumType.STRING) private Indicator adultchildflag;
-    @Transient private boolean toGiveBirth;
-    @Transient private boolean toLeaveSchool;
-    @Transient private boolean toBePartnered;
-    @Transient private boolean hasTestPartner;
-    @Transient private boolean leavePartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    @Transient private Boolean toGiveBirth;
+    @Transient private Boolean toLeaveSchool;
+    @Transient private Boolean toBePartnered;
+    @Transient private Boolean hasTestPartner;
+    @Transient private Boolean leavePartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Transient private Person partner;
     private Long idPartner;		//Note, must not use primitive long, as long cannot hold 'null' value, i.e. if the person has no partner
     @Transient private Long idPartnerLag1;
     @Column(name="person_weight") private Double weight;
     private Long idMother;
     private Long idFather;
-    @Column(name="dhm_ghq") private Boolean dhmGhq = false; //Psychological distress case-based
-    @Transient private boolean dhmGhq_lag1;
+    @Column(name="dhm_ghq") private Boolean dhmGhq; //Psychological distress case-based
+    @Transient private Boolean dhmGhq_lag1;
     @Transient private Dhe dhe_lag1;
     @Enumerated(EnumType.STRING) private Dhe dhesp;
     @Transient private Dhe dhesp_lag1;
@@ -130,8 +130,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Double dhm; //Psychological distress GHQ-12 Likert scale
     @Transient private Double dhm_lag1; //Lag(1) of dhm
     @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
-    @Transient private boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
-    @Transient private boolean receivesBenefitsFlag; // Does person receive benefits
+    @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
+    @Transient private Boolean receivesBenefitsFlag; // Does person receive benefits
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -142,57 +142,57 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 //	age, education, civil status, number of children, etc. Hence, potential earnings
 //	is a separate process in the simulation, and it is computed for every adult
 //	individual in the simulated population, in each simulated period.
-    @Column(name="potential_earnings_hourly") private double fullTimeHourlyEarningsPotential;		//Is hourly rate.  Initialised with value: ils_earns / (4.34 * lhw), where lhw is the weekly hours a person worked in EUROMOD input data
+    @Column(name="potential_earnings_hourly") private Double fullTimeHourlyEarningsPotential;		//Is hourly rate.  Initialised with value: ils_earns / (4.34 * lhw), where lhw is the weekly hours a person worked in EUROMOD input data
     @Column(name="l1_potential_earnings_hourly") private Double L1_fullTimeHourlyEarningsPotential; // Lag(1) of potentialHourlyEarnings
     @Transient private Series.Double yearlyEquivalisedDisposableIncomeSeries;
     private Double yearlyEquivalisedConsumption;
     @Transient private Series.Double yearlyEquivalisedConsumptionSeries;
-    private Double sIndex = Double.NaN;
-    private Double sIndexNormalised = Double.NaN;
+    private Double sIndex;
+    private Double sIndexNormalised;
     @Transient private LinkedHashMap<Integer, Double> sIndexYearMap;
     private Integer dcpyy; //Number of years in partnership
     @Transient private Integer dcpyy_lag1; //Lag(1) of number of years in partnership
     private Integer dcpagdf; //Difference between ages of partners in union (note: this allows negative values and is the difference between own age and partner's age)
     @Transient private Integer dcpagdf_lag1; //Lag(1) of difference between ages of partners in union
-    private Double ypnbihs_dv = 0.; // asinh of personal non-benefit income per month
-    @Transient private Double ypnbihs_dv_lag1 = 0.; //Lag(1) of gross personal non-benefit income
-    private double yptciihs_dv; // asinh of non-employment non-benefit income per month (capital and pension)
-    private double ypncp; // asinh of capital income per month
-    private double ypnoab; // asinh of pension income per month
-    @Transient private double ypncp_lag1; //Lag(1) of ypncp
-    @Transient private double ypncp_lag2; //Lag(2) of capital income
-    @Transient private double ypnoab_lag1; //Lag(1) of pension income
-    @Transient private double ypnoab_lag2; //Lag(2) of pension income
-    @Transient private double yptciihs_dv_lag1; //Lag(1) of gross personal non-benefit non-employment income
-    @Transient private double yptciihs_dv_lag2; //Lag(2) of gross personal non-benefit non-employment income
-    @Transient private double yptciihs_dv_lag3; //Lag(3) of gross personal non-benefit non-employment income
+    private Double ypnbihs_dv; // asinh of personal non-benefit income per month
+    @Transient private Double ypnbihs_dv_lag1; //Lag(1) of gross personal non-benefit income
+    private Double yptciihs_dv; // asinh of non-employment non-benefit income per month (capital and pension)
+    private Double ypncp; // asinh of capital income per month
+    private Double ypnoab; // asinh of pension income per month
+    @Transient private Double ypncp_lag1; //Lag(1) of ypncp
+    @Transient private Double ypncp_lag2; //Lag(2) of capital income
+    @Transient private Double ypnoab_lag1; //Lag(1) of pension income
+    @Transient private Double ypnoab_lag2; //Lag(2) of pension income
+    @Transient private Double yptciihs_dv_lag1; //Lag(1) of gross personal non-benefit non-employment income
+    @Transient private Double yptciihs_dv_lag2; //Lag(2) of gross personal non-benefit non-employment income
+    @Transient private Double yptciihs_dv_lag3; //Lag(3) of gross personal non-benefit non-employment income
     private Double yplgrs_dv;       // asinh transform of personal labour income per month
-    @Transient private double yplgrs_dv_lag1; //Lag(1) of gross personal employment income
-    @Transient private double yplgrs_dv_lag2; //Lag(2) of gross personal employment income
-    @Transient private double yplgrs_dv_lag3; //Lag(3) of gross personal employment income
+    @Transient private Double yplgrs_dv_lag1; //Lag(1) of gross personal employment income
+    @Transient private Double yplgrs_dv_lag2; //Lag(2) of gross personal employment income
+    @Transient private Double yplgrs_dv_lag3; //Lag(3) of gross personal employment income
     private Double ynbcpdf_dv; //Difference between own and partner's gross personal non-benefit income per month
     @Transient private Double ynbcpdf_dv_lag1; //Lag(1) of difference between own and partner's gross personal non-benefit income
 
     //For matching process
-    @Transient private double desiredAgeDiff;
-    @Transient private double desiredEarningsPotentialDiff;
+    @Transient private Double desiredAgeDiff;
+    @Transient private Double desiredEarningsPotentialDiff;
     private Long idOriginalPerson;
     private Long idOriginalBU;
     private Long idOriginalHH;
-    @Transient private int ageGroup;
+    @Transient private Integer ageGroup;
 
-    @Transient private boolean clonedFlag;
-    @Transient private boolean bornInSimulation; //Flag to keep track of newborns
+    @Transient private Boolean clonedFlag;
+    @Transient private Boolean bornInSimulation; //Flag to keep track of newborns
 
     //This is set to true at the point when individual leaves education and never reset. So if true, individual has not always been in continuous education.
-    @Transient private boolean leftEducation;
+    @Transient private Boolean leftEducation;
 
     //This is set to true at the point when individual leaves partnership and never reset. So if true, individual has been / is in a partnership
-    @Transient private boolean leftPartnership;
-    @Transient private int newWorkHours_lag1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
-    @Transient private double covidModuleGrossLabourIncome_lag1;
+    @Transient private Boolean leftPartnership;
+    @Transient private Integer newWorkHours_lag1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
+    @Transient private Double covidModuleGrossLabourIncome_lag1;
     @Transient private Indicator covidModuleReceivesSEISS = Indicator.False;
-    @Transient private double covidModuleGrossLabourIncome_Baseline;
+    @Transient private Double covidModuleGrossLabourIncome_Baseline;
     private Quintiles covidModuleGrossLabourIncomeBaseline_Xt5;
     @Transient private Double wageRegressionRandomComponentE;
     @Transient private Double wageRegressionRandomComponentNE;
@@ -254,14 +254,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double benefitUnitRandomUniform;
 
     //TODO: Remove when no longer needed.  Used to calculate mean score of employment selection regression.
-    @Transient public static double scoreMale;
-    @Transient public static double scoreFemale;
-    @Transient public static double countMale;
-    @Transient public static double countFemale;
-    @Transient public static double inverseMillsRatioMaxMale = Double.MIN_VALUE;
-    @Transient public static double inverseMillsRatioMinMale = Double.MAX_VALUE;
-    @Transient public static double inverseMillsRatioMaxFemale = Double.MIN_VALUE;
-    @Transient public static double inverseMillsRatioMinFemale = Double.MAX_VALUE;
+    @Transient public static Double scoreMale;
+    @Transient public static Double scoreFemale;
+    @Transient public static Double countMale;
+    @Transient public static Double countFemale;
+    @Transient public static Double inverseMillsRatioMaxMale = Double.MIN_VALUE;
+    @Transient public static Double inverseMillsRatioMinMale = Double.MAX_VALUE;
+    @Transient public static Double inverseMillsRatioMaxFemale = Double.MIN_VALUE;
+    @Transient public static Double inverseMillsRatioMinFemale = Double.MAX_VALUE;
 
 
     // ---------------------------------------------------------------------
@@ -303,6 +303,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             this.idFather = mother.getPartner().getKey().getId();
             this.dehf_c3 = mother.getPartner().getDeh_c3();
         }
+
+        liwwh = 0;
+        yptciihs_dv = 0.0;
+        ypncp = 0.0;
+        ypnoab = 0.0;
+        fullTimeHourlyEarningsPotential = Parameters.MIN_HOURLY_WAGE_RATE;
         this.dcpen = Indicator.False;
         this.dcpex = Indicator.False;
         this.dlltsd = Indicator.False;
@@ -401,6 +407,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             les_c4 = Les_c4.NotEmployed;
         }
+        if (dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION)
+            leftEducation = false;
+        else if (dag > Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION)
+            leftEducation = true;
+        else
+            leftEducation = (!Les_c4.Student.equals(les_c4));
 
         if (originalPerson.les_c4_lag1 != null) { //If original persons misses lagged activity status, assign current activity status
             les_c4_lag1 = originalPerson.les_c4_lag1;
@@ -424,21 +436,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dcpex = originalPerson.dcpex;
         ypnbihs_dv = originalPerson.getYpnbihs_dv();
         ypnbihs_dv_lag1 = originalPerson.ypnbihs_dv_lag1;
-        yptciihs_dv = originalPerson.getYptciihs_dv();
+        yptciihs_dv = Objects.requireNonNullElse(originalPerson.yptciihs_dv, 0.0);
         yplgrs_dv = originalPerson.getYplgrs_dv();
         yplgrs_dv_lag1 = originalPerson.yplgrs_dv_lag1;
         yplgrs_dv_lag2 = originalPerson.yplgrs_dv_lag2;
         yplgrs_dv_lag3 = originalPerson.yplgrs_dv_lag3;
         ynbcpdf_dv = originalPerson.ynbcpdf_dv;
         ynbcpdf_dv_lag1 = originalPerson.ynbcpdf_dv_lag1;
-        ypncp = originalPerson.ypncp;
+        ypncp = Objects.requireNonNullElse(originalPerson.ypncp,0.0);
         ypncp_lag1 = originalPerson.ypncp_lag1;
         ypncp_lag2 = originalPerson.ypncp_lag2;
-        ypnoab = originalPerson.ypnoab;
+        ypnoab = Objects.requireNonNullElse(originalPerson.ypnoab, 0.0);
         ypnoab_lag1 = originalPerson.ypnoab_lag1;
         ypnoab_lag2 = originalPerson.ypnoab_lag2;
 
-        liwwh = originalPerson.liwwh;
+        liwwh = Objects.requireNonNullElseGet(originalPerson.liwwh, () -> ((Les_c4.EmployedOrSelfEmployed.equals(les_c4)) ? 12 : 0));
         if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
             dlltsd = Indicator.False;
             dlltsd_lag1 = Indicator.False;
@@ -447,29 +459,46 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dlltsd_lag1 = originalPerson.dlltsd_lag1;
         }
         if (Parameters.flagSocialCare) {
-            needSocialCare = originalPerson.needSocialCare;
-            careHoursFromFormalWeekly = originalPerson.careHoursFromFormalWeekly;
-            careFormalExpenditureWeekly = originalPerson.careFormalExpenditureWeekly;
-            careHoursFromPartnerWeekly = originalPerson.careHoursFromPartnerWeekly;
-            careHoursFromParentWeekly = originalPerson.careHoursFromParentWeekly;
-            careHoursFromDaughterWeekly = originalPerson.careHoursFromDaughterWeekly;
-            careHoursFromSonWeekly = originalPerson.careHoursFromSonWeekly;
-            careHoursFromOtherWeekly = originalPerson.careHoursFromOtherWeekly;
-            socialCareReceipt = originalPerson.socialCareReceipt;
-            socialCareFromFormal = originalPerson.socialCareFromFormal;
-            socialCareFromPartner = originalPerson.socialCareFromPartner;
-            socialCareFromDaughter = originalPerson.socialCareFromDaughter;
-            socialCareFromSon = originalPerson.socialCareFromSon;
-            socialCareFromOther = originalPerson.socialCareFromOther;
-            careHoursProvidedWeekly = originalPerson.careHoursProvidedWeekly;
-            socialCareProvision = originalPerson.socialCareProvision;
-            needSocialCare_lag1 = originalPerson.needSocialCare_lag1;
-            careHoursFromFormalWeekly_lag1 = originalPerson.careHoursFromFormalWeekly_lag1;
-            careHoursFromPartnerWeekly_lag1 = originalPerson.careHoursFromPartnerWeekly_lag1;
-            careHoursFromDaughterWeekly_lag1 = originalPerson.careHoursFromDaughterWeekly_lag1;
-            careHoursFromSonWeekly_lag1 = originalPerson.careHoursFromSonWeekly_lag1;
-            careHoursFromOtherWeekly_lag1 = originalPerson.careHoursFromOtherWeekly_lag1;
-            socialCareProvision_lag1 = originalPerson.socialCareProvision_lag1;
+            needSocialCare = Objects.requireNonNullElse(originalPerson.needSocialCare, Indicator.False);
+            careHoursFromFormalWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromFormalWeekly, 0.0);
+            careFormalExpenditureWeekly = Objects.requireNonNullElse(originalPerson.careFormalExpenditureWeekly, 0.0);
+            careHoursFromPartnerWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromPartnerWeekly, 0.0);
+            careHoursFromParentWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromParentWeekly, 0.0);
+            careHoursFromDaughterWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromDaughterWeekly, 0.0);
+            careHoursFromSonWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromSonWeekly, 0.0);
+            careHoursFromOtherWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromOtherWeekly, 0.0);
+            socialCareFromFormal = Objects.requireNonNullElseGet(originalPerson.socialCareFromFormal, () -> (careHoursFromFormalWeekly > 0.0));
+            socialCareFromPartner = Objects.requireNonNullElseGet(originalPerson.socialCareFromPartner, () -> (careHoursFromPartnerWeekly > 0.0));
+            socialCareFromDaughter = Objects.requireNonNullElseGet(originalPerson.socialCareFromDaughter, () -> (careHoursFromDaughterWeekly > 0.0));
+            socialCareFromSon = Objects.requireNonNullElseGet(originalPerson.socialCareFromSon, () -> (careHoursFromSonWeekly > 0.0));
+            socialCareFromOther = Objects.requireNonNullElseGet(originalPerson.socialCareFromOther, () -> (careHoursFromOtherWeekly > 0.0));
+            if (originalPerson.socialCareReceipt!=null)
+                socialCareReceipt = originalPerson.socialCareReceipt;
+            else {
+                if (socialCareFromFormal) {
+                    if (socialCareFromPartner || socialCareFromDaughter || socialCareFromSon || socialCareFromOther)
+                        socialCareReceipt = SocialCareReceipt.Mixed;
+                    else
+                        socialCareReceipt = SocialCareReceipt.Formal;
+                } else {
+                    if (socialCareFromPartner || socialCareFromDaughter || socialCareFromSon || socialCareFromOther)
+                        socialCareReceipt = SocialCareReceipt.Informal;
+                    else
+                        socialCareReceipt = SocialCareReceipt.None;
+                }
+            }
+
+            careHoursProvidedWeekly = Objects.requireNonNullElse(originalPerson.careHoursProvidedWeekly, 0.0);
+            socialCareProvision = Objects.requireNonNullElseGet(originalPerson.socialCareProvision, () ->
+                    (careHoursProvidedWeekly > 0.01) ? SocialCareProvision.OnlyOther : SocialCareProvision.None);
+
+            needSocialCare_lag1 = Objects.requireNonNullElse(originalPerson.needSocialCare_lag1, needSocialCare);
+            careHoursFromFormalWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromFormalWeekly_lag1, careHoursFromFormalWeekly);
+            careHoursFromPartnerWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromPartnerWeekly_lag1, careHoursFromPartnerWeekly);
+            careHoursFromDaughterWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromDaughterWeekly_lag1, careHoursFromDaughterWeekly);
+            careHoursFromSonWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromSonWeekly_lag1, careHoursFromSonWeekly);
+            careHoursFromOtherWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromOtherWeekly_lag1, careHoursFromOtherWeekly);
+            socialCareProvision_lag1 = Objects.requireNonNullElse(originalPerson.socialCareProvision_lag1, socialCareProvision);
         } else {
             setAllSocialCareVariablesToFalse();
         }
@@ -515,8 +544,29 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhesp_lag1 = originalPerson.dhesp_lag1;
         hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
         labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
-        desiredAgeDiff = originalPerson.desiredAgeDiff;
-        desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
+        if (originalPerson.desiredAgeDiff!=null)
+            desiredAgeDiff = originalPerson.desiredAgeDiff;
+        else {
+            if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
+                desiredAgeDiff = Parameters.targetMeanAgeDifferential;
+            } else {
+                //TODO: This option does not generate replicable results
+                double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
+                desiredAgeDiff = sampledDifferentials[0];
+            }
+        }
+        if (originalPerson.desiredEarningsPotentialDiff!=null)
+            desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
+        else {
+
+            if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
+                desiredEarningsPotentialDiff = Parameters.targetMeanWageDifferential;
+            } else {
+                //TODO: This option does not generate replicable results
+                double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
+                desiredEarningsPotentialDiff = sampledDifferentials[1];
+            }
+        }
         scoreMale = originalPerson.scoreMale;
         scoreFemale = originalPerson.scoreFemale;
         countMale = originalPerson.countMale;
@@ -1424,9 +1474,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             Person child = new Person(babyGender, this);
             model.getPersons().add(child);
             benefitUnit.addChild(child);
-
-            //Update maternity status
-            toGiveBirth = false;						//Reset boolean for next year
         }
     }
 
@@ -1746,6 +1793,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         //Reset flags to default values
         toLeaveSchool = false;
         toGiveBirth = false;
+        toBePartnered = false;
+        leavePartner = false;
+        leftPartnership = false;
         sedex = Indicator.False; //Reset left education variable
         der = Indicator.False; //Reset return to education indicator
         ded = Indicator.False; //Reset in education variable
@@ -4108,7 +4158,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public double getCovidModuleGrossLabourIncome_Baseline() {
-        return covidModuleGrossLabourIncome_Baseline;
+        return (covidModuleGrossLabourIncome_Baseline!=null) ? covidModuleGrossLabourIncome_Baseline : 0.0;
     }
 
     public void setCovidModuleGrossLabourIncome_Baseline(double val) {
@@ -4140,7 +4190,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean isReceivesBenefitsFlag_L1() {
-        return receivesBenefitsFlag_L1;
+        return (receivesBenefitsFlag_L1!=null) ? receivesBenefitsFlag_L1 : false;
     }
 
     public void setReceivesBenefitsFlag_L1(boolean receivesBenefitsFlag_L1) {

@@ -105,13 +105,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Match taxDbMatch;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
     @Enumerated(EnumType.STRING) private Ydses_c5 ydses_c5;
-    @Transient private Ydses_c5 ydses_c5_lag1 = null;
-    @Transient private double tmpHHYpnbihs_dv_asinh = 0.;
+    @Transient private Ydses_c5 ydses_c5_lag1;
+    @Transient private Double tmpHHYpnbihs_dv_asinh;
     @Enumerated(EnumType.STRING) private Dhhtp_c4 dhhtp_c4;
-    @Transient private Dhhtp_c4 dhhtp_c4_lag1 = null;
-    @Transient private double equivalisedWeight = 1.;
+    @Transient private Dhhtp_c4 dhhtp_c4_lag1;
+    @Transient private Double equivalisedWeight;
     private String createdByConstructor;
-    @Column(name="dhh_owned") private Boolean dhhOwned = false; // are any of the individuals in the benefit unit a homeowner? True / false
+    @Column(name="dhh_owned") private Boolean dhhOwned; // are any of the individuals in the benefit unit a homeowner? True / false
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
 
@@ -120,15 +120,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient RandomGenerator homeOwnerRandomGen;
     @Transient RandomGenerator taxRandomGen;
 
-    @Transient double childCareRandomUniform1;
-    @Transient double childCareRandomUniform2;
-    @Transient double labourRandomUniform1;
-    @Transient double labourRandomUniform2;
-    @Transient double labourRandomUniform3;
-    @Transient double labourRandomUniform4;
-    @Transient double homeOwnerRandomUniform1;
-    @Transient double homeOwnerRandomUniform2;
-    @Transient double taxRandomUniform;
+    @Transient Double childCareRandomUniform1;
+    @Transient Double childCareRandomUniform2;
+    @Transient Double labourRandomUniform1;
+    @Transient Double labourRandomUniform2;
+    @Transient Double labourRandomUniform3;
+    @Transient Double labourRandomUniform4;
+    @Transient Double homeOwnerRandomUniform1;
+    @Transient Double homeOwnerRandomUniform2;
+    @Transient Double taxRandomUniform;
 
     @Transient private Integer yearLocal;
     @Transient private Education deh_c3Local;
@@ -211,6 +211,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         labourRandomGen = new Random(rndTemp.nextLong());
         homeOwnerRandomGen = new Random(rndTemp.nextLong());
         taxRandomGen = new Random(rndTemp.nextLong());
+        getNewDraws();
 
         this.n_children_0 = 0;
         this.n_children_1 = 0;
@@ -405,7 +406,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.ydses_c5_lag1 = originalBenefitUnit.ydses_c5_lag1;
         this.dhhtp_c4 = originalBenefitUnit.dhhtp_c4;
         this.dhhtp_c4_lag1 = originalBenefitUnit.dhhtp_c4_lag1;
-        this.equivalisedWeight = originalBenefitUnit.getEquivalisedWeight();
         this.dhhOwned = originalBenefitUnit.dhhOwned;
         if (originalBenefitUnit.createdByConstructor != null) {
             this.createdByConstructor = originalBenefitUnit.createdByConstructor;
@@ -522,6 +522,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         ydses_c5_lag1 = getYdses_c5();
 
         // random draws
+        getNewDraws();
+    }
+
+    private void getNewDraws() {
         childCareRandomUniform1 = childCareRandomGen.nextDouble();
         childCareRandomUniform2 = childCareRandomGen.nextDouble();
         labourRandomUniform1 = labourRandomGen.nextDouble();
@@ -531,7 +535,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         homeOwnerRandomUniform1 = homeOwnerRandomGen.nextDouble();
         homeOwnerRandomUniform2 = homeOwnerRandomGen.nextDouble();
         taxRandomUniform = taxRandomGen.nextDouble();
-
     }
 
 
@@ -3880,6 +3883,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getEquivalisedWeight() {
+        if (equivalisedWeight==null)
+            calculateEquivalisedWeight();
         return equivalisedWeight;
     }
 
