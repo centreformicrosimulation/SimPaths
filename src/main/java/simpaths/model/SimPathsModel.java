@@ -82,7 +82,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Country country; // = Country.UK;
 
     @GUIparameter(description = "Simulated population size (base year)")
-    private Integer popSize = 5000;
+    private Integer popSize = 170000;
 
     @GUIparameter(description = "Simulation first year [valid range 2011-2019]")
     private Integer startYear = 2011;
@@ -160,13 +160,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean alignPopulation = true; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = false;
+    private boolean alignFertility = true;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -359,8 +359,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // populate tax donor references
         populateTaxdbReferences();
         //TestTaxRoutine.run();
-
-        if (fixRandomSeed) Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().reseedRandomGenerator(randomSeedIfFixed);
 
         // set start year for simulation
         year = startYear;
@@ -3385,8 +3383,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            //String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " ORDER BY households.key.id";
-            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country;
+            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " ORDER BY households.key.id";
 
             List<Processed> processedList = em.createQuery(query).getResultList();
             if (!processedList.isEmpty()) {

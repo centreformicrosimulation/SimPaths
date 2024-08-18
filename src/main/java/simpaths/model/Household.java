@@ -58,17 +58,13 @@ public class Household implements EventListener, IDoubleSource {
 
         this();
         switch (sampleEntry) {
-            case InputData -> {
-                idOriginalHH = originalHousehold.key.getId();
-            }
             case ProcessedInputData -> {
-
                 householdIdCounter = originalHousehold.getId();
                 key.setId(householdIdCounter);
                 this.idOriginalHH = originalHousehold.getIdOriginalHH();
             }
             default -> {
-                throw new RuntimeException("invalid SampleEntry value supplied to Household constructor");
+                idOriginalHH = originalHousehold.key.getId();
             }
         }
     }

@@ -251,6 +251,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double fertilityRandomUniform3;
     @Transient private Double educationRandomUniform;
     @Transient private Double labourSupplySingleDraw = -9.;
+    @Transient private Long cohabitRandomLong;
     @Transient private Double benefitUnitRandomUniform;
 
     //TODO: Remove when no longer needed.  Used to calculate mean score of employment selection regression.
@@ -347,13 +348,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         this(personIdCounter++, seed);
         switch (sampleEntry) {
-            case InputData -> {
-                idOriginalPerson = originalPerson.key.getId();
-                idOriginalHH = originalPerson.idHousehold;
-                idOriginalBU = originalPerson.idBenefitUnit;
-            }
             case ProcessedInputData -> {
-
                 personIdCounter = originalPerson.key.getId();
                 key.setId(personIdCounter);
                 idOriginalPerson = originalPerson.getIdOriginalPerson();
@@ -361,7 +356,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 idOriginalHH = originalPerson.getIdOriginalHH();
             }
             default -> {
-                throw new RuntimeException("invalid SampleEntry value supplied to person constructor");
+                idOriginalPerson = originalPerson.key.getId();
+                idOriginalHH = originalPerson.idHousehold;
+                idOriginalBU = originalPerson.idBenefitUnit;
             }
         }
 
@@ -544,29 +541,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhesp_lag1 = originalPerson.dhesp_lag1;
         hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
         labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
-        if (originalPerson.desiredAgeDiff!=null)
-            desiredAgeDiff = originalPerson.desiredAgeDiff;
-        else {
-            if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
-                desiredAgeDiff = Parameters.targetMeanAgeDifferential;
-            } else {
-                //TODO: This option does not generate replicable results
-                double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
-                desiredAgeDiff = sampledDifferentials[0];
-            }
-        }
-        if (originalPerson.desiredEarningsPotentialDiff!=null)
-            desiredEarningsPotentialDiff = originalPerson.desiredEarningsPotentialDiff;
-        else {
+        double[] sampleDifferentials = setMarriageTargets();
+        desiredAgeDiff = Objects.requireNonNullElseGet(originalPerson.desiredAgeDiff, () -> sampleDifferentials[0]);
+        desiredEarningsPotentialDiff = Objects.requireNonNullElseGet(originalPerson.desiredEarningsPotentialDiff, () -> sampleDifferentials[1]);
 
-            if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
-                desiredEarningsPotentialDiff = Parameters.targetMeanWageDifferential;
-            } else {
-                //TODO: This option does not generate replicable results
-                double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
-                desiredEarningsPotentialDiff = sampledDifferentials[1];
-            }
-        }
         scoreMale = originalPerson.scoreMale;
         scoreFemale = originalPerson.scoreFemale;
         countMale = originalPerson.countMale;
@@ -621,26 +599,32 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         cohabitRandomGen = new Random(rndTemp.nextLong());
         fertilityRandomGen = new Random(rndTemp.nextLong());
         educationRandomGen = new Random(rndTemp.nextLong());
-        labourSupplySingleDraw = labourRandomGen.nextDouble();
         benefitUnitRandomGen = new Random(rndTemp.nextLong());
+        labourSupplySingleDraw = labourRandomGen.nextDouble();
+        cohabitRandomLong = cohabitRandomGen.nextLong();
         randomDraws();
 
         //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
-        if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
-            desiredAgeDiff = Parameters.targetMeanAgeDifferential;
-            desiredEarningsPotentialDiff = Parameters.targetMeanWageDifferential;
-        } else {
-            //TODO: This option does not generate replicable results
-            double[] sampledDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution().sample(); //Sample age and wage differential from the bivariate normal distribution
-            desiredAgeDiff = sampledDifferentials[0];
-            desiredEarningsPotentialDiff = sampledDifferentials[1];
-        }
+        double[] sampleDifferentials = setMarriageTargets();
+        desiredAgeDiff = sampleDifferentials[0];
+        desiredEarningsPotentialDiff = sampleDifferentials[1];
     }
 
 
     // ---------------------------------------------------------------------
     // Initialisation methods
     // ---------------------------------------------------------------------
+    private double[] setMarriageTargets() {
+
+        double[] sampleDifferentials = new double[2];
+        if (Parameters.MARRIAGE_MATCH_TO_MEANS) {
+            sampleDifferentials[0] = Parameters.targetMeanAgeDifferential;
+            sampleDifferentials[1] = Parameters.targetMeanWageDifferential;
+        } else {
+            sampleDifferentials = Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution(cohabitRandomLong);
+        }
+        return sampleDifferentials;
+    }
 
     private void setAllSocialCareVariablesToFalse() {
         needSocialCare = Indicator.False;
@@ -4034,7 +4018,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean isToBePartnered() {
-        return toBePartnered;
+        return toBePartnered != null && toBePartnered;
     }
 
     public void setToBePartnered(boolean toBePartnered) {
@@ -4570,7 +4554,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean getTestPartner() {
-        return hasTestPartner;
+        return (hasTestPartner!=null) && hasTestPartner;
     }
 
     public void setHasTestPartner(boolean hasTestPartner) {
@@ -4578,7 +4562,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean getLeavePartner() {
-        return leavePartner;
+        return (leavePartner!=null) && leavePartner;
     }
 
     public void setLeavePartner(boolean leavePartner) {
@@ -4586,7 +4570,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean getLowWageOffer() {
-        return (lowWageOffer!=null) ? lowWageOffer : false;
+        return (lowWageOffer!=null) && lowWageOffer;
     }
 
     private boolean checkHighestParentalEducationEquals(Education ee) {

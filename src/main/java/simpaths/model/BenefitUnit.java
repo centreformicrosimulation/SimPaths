@@ -319,19 +319,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         this(benefitUnitIdCounter++, benefitUnitInnov);
         switch (sampleEntry) {
-            case InputData -> {
-                idOriginalBU = originalBenefitUnit.getId();
-                idOriginalHH = originalBenefitUnit.idHousehold;
-            }
             case ProcessedInputData -> {
-
                 benefitUnitIdCounter = originalBenefitUnit.getId();
                 key.setId(benefitUnitIdCounter);
                 idOriginalBU = originalBenefitUnit.getIdOriginalBU();
                 idOriginalHH = originalBenefitUnit.getIdOriginalHH();
             }
             default -> {
-                throw new RuntimeException("invalid SampleEntry value supplied to person constructor");
+                idOriginalBU = originalBenefitUnit.getId();
+                idOriginalHH = originalBenefitUnit.idHousehold;
             }
         }
 

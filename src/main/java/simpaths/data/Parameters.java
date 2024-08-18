@@ -2255,8 +2255,9 @@ public class Parameters {
         return ((Number) fertilityProjectionsByYear.getValue("Value", yearHere)).doubleValue();
     }
 
-    public static MultivariateNormalDistribution getWageAndAgeDifferentialMultivariateNormalDistribution() {
-        return wageAndAgeDifferentialMultivariateNormalDistribution;
+    public synchronized static double[] getWageAndAgeDifferentialMultivariateNormalDistribution(long seed) {
+        wageAndAgeDifferentialMultivariateNormalDistribution.reseedRandomGenerator(seed);
+        return wageAndAgeDifferentialMultivariateNormalDistribution.sample();
     }
 
     public static ProbitRegression getRegLeaveHomeP1a() {
