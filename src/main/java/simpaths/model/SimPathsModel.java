@@ -82,7 +82,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Country country; // = Country.UK;
 
     @GUIparameter(description = "Simulated population size (base year)")
-    private Integer popSize = 170000;
+    private Integer popSize = 5000;
 
     @GUIparameter(description = "Simulation first year [valid range 2011-2019]")
     private Integer startYear = 2011;
@@ -160,13 +160,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean alignPopulation = true; //Set to true to align employment share
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = true;
+    private boolean alignFertility = false;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -507,7 +507,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // TIME USE MODULE
         // Social care
         if (projectSocialCare) {
-            addCollectionEventToAllYears(persons, Person.Processes.SocialCareIncidence);
+            addCollectionEventToAllYears(persons, Person.Processes.SocialCareReceipt);
+            addCollectionEventToAllYears(persons, Person.Processes.SocialCareProvision);
             //yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
         }
 

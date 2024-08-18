@@ -387,7 +387,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         der = originalPerson.der;
-        dcpyy = originalPerson.dcpyy;
+        dcpyy = Objects.requireNonNullElse(originalPerson.dcpyy,0);
         dcpyy_lag1 = Objects.requireNonNullElseGet(originalPerson.dcpyy_lag1, () -> Math.max(0, this.dcpyy - 1));
         dcpagdf = originalPerson.dcpagdf;
         dcpagdf_lag1 = originalPerson.dcpagdf_lag1;
@@ -742,7 +742,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         LeavingSchool,
         PartnershipDissolution,
         ProjectEquivConsumption,
-        SocialCareIncidence,
+        SocialCareReceipt,
+        SocialCareProvision,
         Unemployment,
         Update,
         UpdatePotentialHourlyEarnings,	//Needed to union matching and labour supply
@@ -784,8 +785,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     //			log.debug("Health for person " + this.getKey().getId());
                 health();
             }
-            case SocialCareIncidence -> {
+            case SocialCareReceipt -> {
                 evaluateSocialCareReceipt();
+            }
+            case SocialCareProvision -> {
                 evaluateSocialCareProvision();
             }
             case HealthMentalHM1 -> {

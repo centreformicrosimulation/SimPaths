@@ -334,37 +334,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         this.log = originalBenefitUnit.log;
         this.occupancy = originalBenefitUnit.occupancy;
-        if (originalBenefitUnit.getDisposableIncomeMonthly() != null) {
-            this.disposableIncomeMonthly = originalBenefitUnit.getDisposableIncomeMonthly();
-        } else {
-            this.disposableIncomeMonthly = 0.;
-        }
-        if (originalBenefitUnit.getGrossIncomeMonthly() != null) {
-            this.grossIncomeMonthly = originalBenefitUnit.getGrossIncomeMonthly();
-        } else {
-            this.grossIncomeMonthly = 0.;
-        }
-        if (originalBenefitUnit.equivalisedDisposableIncomeYearly != null) {
-            this.equivalisedDisposableIncomeYearly = originalBenefitUnit.equivalisedDisposableIncomeYearly;
-        } else {
-            this.equivalisedDisposableIncomeYearly = 0.;
-        }
-        if (originalBenefitUnit.getBenefitsReceivedPerMonth() != null) {
-            this.benefitsReceivedPerMonth = originalBenefitUnit.getBenefitsReceivedPerMonth();
-        } else {
-            this.benefitsReceivedPerMonth = 0.;
-        }
-        if (originalBenefitUnit.equivalisedDisposableIncomeYearly_lag1 != null) {
-            this.equivalisedDisposableIncomeYearly_lag1 = originalBenefitUnit.equivalisedDisposableIncomeYearly_lag1;
-        } else {
-            this.equivalisedDisposableIncomeYearly_lag1 = this.equivalisedDisposableIncomeYearly;
-        }
-        this.atRiskOfPoverty = originalBenefitUnit.atRiskOfPoverty;
-        if (originalBenefitUnit.atRiskOfPoverty_lag1 != null) {
-            this.atRiskOfPoverty_lag1 = originalBenefitUnit.atRiskOfPoverty_lag1;
-        } else {
-            this.atRiskOfPoverty_lag1 = originalBenefitUnit.atRiskOfPoverty;
-        }
+        disposableIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getDisposableIncomeMonthly(),0.0);
+        grossIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getGrossIncomeMonthly(),0.0);
+        equivalisedDisposableIncomeYearly = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly,0.0);
+        equivalisedDisposableIncomeYearly_lag1 = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly_lag1,equivalisedDisposableIncomeYearly);
+        benefitsReceivedPerMonth = Objects.requireNonNullElse(originalBenefitUnit.getBenefitsReceivedPerMonth(),0.0);
+        atRiskOfPoverty = Objects.requireNonNullElse(originalBenefitUnit.atRiskOfPoverty,0);
+        atRiskOfPoverty_lag1 = Objects.requireNonNullElse(originalBenefitUnit.atRiskOfPoverty_lag1,atRiskOfPoverty);
+        yearlyChangeInLogEDI = Objects.requireNonNullElse(originalBenefitUnit.yearlyChangeInLogEDI,0.0);
         if (Parameters.projectLiquidWealth)
             initialiseLiquidWealth(
                     originalBenefitUnit.getRefPersonForDecisions().getDag(),
@@ -403,11 +380,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.dhhtp_c4 = originalBenefitUnit.dhhtp_c4;
         this.dhhtp_c4_lag1 = originalBenefitUnit.dhhtp_c4_lag1;
         this.dhhOwned = originalBenefitUnit.dhhOwned;
-        if (originalBenefitUnit.createdByConstructor != null) {
-            this.createdByConstructor = originalBenefitUnit.createdByConstructor;
-        } else {
-            this.createdByConstructor = "CopyConstructor";
-        }
+        createdByConstructor = Objects.requireNonNullElse(originalBenefitUnit.createdByConstructor,"CopyConstructor");
+        tmpHHYpnbihs_dv_asinh = Objects.requireNonNullElse(originalBenefitUnit.tmpHHYpnbihs_dv_asinh, 0.0);
     }
 
 
@@ -1489,7 +1463,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         calculateEquivalisedWeight();
         if(getOccupancy().equals(Occupancy.Couple)) {
 
-            if(male != null && female != null) {
+            if (male != null && female != null) {
 
                 // male
                 double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
@@ -1523,10 +1497,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         ydses_c5 = Ydses_c5.Q5;
                     }
                 }
-            }
+            } else
+                throw new RuntimeException("couple unit does not have a male and female");
         } else if(getOccupancy().equals(Occupancy.Single_Male)) {
 
-            if(male != null) {
+            if (male != null) {
 
                 double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
                 male.setYplgrs_dv(asinh(labourEarningsMaleMonthly)); //This follows asinh transform of labourEarnings
@@ -1551,10 +1526,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         ydses_c5 = Ydses_c5.Q5;
                     }
                 }
-            }
+            } else
+                throw new RuntimeException("single male unit does not include a single male");
         } else {
 
-            if(female != null) {
+            if (female != null) {
 
                 //If not a couple nor a single male, occupancy must be single female
                 double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
@@ -1581,7 +1557,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         ydses_c5 = Ydses_c5.Q5;
                     }
                 }
-            }
+            } else
+                throw new RuntimeException("single female unit does not include a single male");
         }
     }
 
@@ -2946,6 +2923,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
         yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
+        if (yearlyChangeInLogEDI==null)
+            throw new RuntimeException("problem evaluating yearly change in log edi");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
 
@@ -3436,6 +3415,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getTmpHHYpnbihs_dv_asinh() {
+        if (tmpHHYpnbihs_dv_asinh==null)
+            throw new RuntimeException("tmpHHYpnbihs_dv_asinh accessed before initialised");
         return tmpHHYpnbihs_dv_asinh;
     }
 
@@ -3470,7 +3451,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.ydses_c5_lag1 = ydses_c5_lag1;
     }
 
-    public Double getYearlyChangeInLogEDI() {
+    public double getYearlyChangeInLogEDI() {
+        if (yearlyChangeInLogEDI==null)
+            throw new RuntimeException("yearlyChangeInLogEDI requested before set");
         return yearlyChangeInLogEDI;
     }
 
