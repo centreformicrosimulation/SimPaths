@@ -384,7 +384,7 @@ public class Parameters {
 //	private static MultiKeyMap probSick;
 
     //MultivariateNormalDistribution of age and potential earnings differential to use in the parametric partnership process
-    public final static boolean MARRIAGE_MATCH_TO_MEANS = true;     //TODO: Changing this option to "false" does not generate replicable results
+    public final static boolean MARRIAGE_MATCH_TO_MEANS = false;
     public static double targetMeanWageDifferential, targetMeanAgeDifferential;
     private static MultivariateNormalDistribution wageAndAgeDifferentialMultivariateNormalDistribution;
 
