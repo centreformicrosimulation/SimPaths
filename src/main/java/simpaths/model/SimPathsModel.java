@@ -148,7 +148,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
     private boolean useWeights = false;
 
-    private boolean ignoreTargetsAtPopulationLoad = false;
+    private boolean ignoreTargetsAtPopulationLoad = true;
 
     @GUIparameter(description = "If unchecked, will use the standard matching method")
 //	private boolean useSBAMMatching = false;

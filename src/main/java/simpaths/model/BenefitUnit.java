@@ -1,7 +1,6 @@
 package simpaths.model;
 
 import java.util.*;
-import java.util.random.RandomGenerator;
 
 import jakarta.persistence.*;
 
@@ -55,31 +54,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Long idOriginalBU;
     private Long idOriginalHH;
     private Long seed;
+
     @Transient private Person female;
     @Transient private Long idFemale;
     @Transient private Person male;
     @Transient private Long idMale;
     @Transient private Set<Person> children = new LinkedHashSet<>();
-    @Transient private States states;
-    private Double investmentIncomeAnnual;
-    private Double pensionIncomeAnnual;
-    private Double discretionaryConsumptionPerYear;
-    @Column(name="liquid_wealth") private Double liquidWealth;
-    @Column(name="tot_pen") private Double pensionWealth;
-    @Column(name="nvmhome") private Double housingWealth;
     @Enumerated(EnumType.STRING) Occupancy occupancy;
-    private Double disposableIncomeMonthly;
-    private Double grossIncomeMonthly;
-    private Double benefitsReceivedPerMonth;
-    private Double equivalisedDisposableIncomeYearly;
-    @Transient private Double equivalisedDisposableIncomeYearly_lag1;
-    @Transient private Double yearlyChangeInLogEDI;
-    private Integer atRiskOfPoverty;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
-    @Transient private Integer atRiskOfPoverty_lag1;
-    @Transient private Indicator indicatorChildren03_lag1;                //Lag(1) of d_children_3under;
-    @Transient private Indicator indicatorChildren412_lag1;                //Lag(1) of d_children_4_12;
-    @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
-    @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
     private Integer n_children_0;
     private Integer n_children_1;
     private Integer n_children_2;
@@ -98,6 +79,27 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Integer n_children_15;
     private Integer n_children_16;
     private Integer n_children_17;
+    @Transient private Double equivalisedWeight;
+
+    @Transient private States states;
+    private Double investmentIncomeAnnual;
+    private Double pensionIncomeAnnual;
+    private Double discretionaryConsumptionPerYear;
+    @Column(name="liquid_wealth") private Double liquidWealth;
+    @Column(name="tot_pen") private Double pensionWealth;
+    @Column(name="nvmhome") private Double housingWealth;
+    private Double disposableIncomeMonthly;
+    private Double grossIncomeMonthly;
+    private Double benefitsReceivedPerMonth;
+    private Double equivalisedDisposableIncomeYearly;
+    @Transient private Double equivalisedDisposableIncomeYearly_lag1;
+    @Transient private Double yearlyChangeInLogEDI;
+    private Integer atRiskOfPoverty;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
+    @Transient private Integer atRiskOfPoverty_lag1;
+    @Transient private Indicator indicatorChildren03_lag1;                //Lag(1) of d_children_3under;
+    @Transient private Indicator indicatorChildren412_lag1;                //Lag(1) of d_children_4_12;
+    @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
+    @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
     private Double childcareCostPerWeek;
     private Double socialCareCostPerWeek;
     private Integer socialCareProvision;
@@ -109,26 +111,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Double tmpHHYpnbihs_dv_asinh;
     @Enumerated(EnumType.STRING) private Dhhtp_c4 dhhtp_c4;
     @Transient private Dhhtp_c4 dhhtp_c4_lag1;
-    @Transient private Double equivalisedWeight;
     private String createdByConstructor;
     @Column(name="dhh_owned") private Boolean dhhOwned; // are any of the individuals in the benefit unit a homeowner? True / false
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
 
-    @Transient RandomGenerator childCareRandomGen;
-    @Transient RandomGenerator labourRandomGen;
-    @Transient RandomGenerator homeOwnerRandomGen;
-    @Transient RandomGenerator taxRandomGen;
-
-    @Transient Double childCareRandomUniform1;
-    @Transient Double childCareRandomUniform2;
-    @Transient Double labourRandomUniform1;
-    @Transient Double labourRandomUniform2;
-    @Transient Double labourRandomUniform3;
-    @Transient Double labourRandomUniform4;
-    @Transient Double homeOwnerRandomUniform1;
-    @Transient Double homeOwnerRandomUniform2;
-    @Transient Double taxRandomUniform;
+    @Transient Innovations innovations;
 
     @Transient private Integer yearLocal;
     @Transient private Education deh_c3Local;
@@ -206,12 +194,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         key  = new PanelEntityKey(id);        //Sets up key
 
         this.seed = seed;
-        RandomGenerator rndTemp = new Random(seed);
-        childCareRandomGen = new Random(rndTemp.nextLong());
-        labourRandomGen = new Random(rndTemp.nextLong());
-        homeOwnerRandomGen = new Random(rndTemp.nextLong());
-        taxRandomGen = new Random(rndTemp.nextLong());
-        getNewDraws();
+        innovations = new Innovations(9, seed);
 
         this.n_children_0 = 0;
         this.n_children_1 = 0;
@@ -492,22 +475,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         ydses_c5_lag1 = getYdses_c5();
 
         // random draws
-        getNewDraws();
+        innovations.getNewDoubleDraws();
     }
-
-    private void getNewDraws() {
-        childCareRandomUniform1 = childCareRandomGen.nextDouble();
-        childCareRandomUniform2 = childCareRandomGen.nextDouble();
-        labourRandomUniform1 = labourRandomGen.nextDouble();
-        labourRandomUniform2 = labourRandomGen.nextDouble();
-        labourRandomUniform3 = labourRandomGen.nextDouble();
-        labourRandomUniform4 = labourRandomGen.nextDouble();
-        homeOwnerRandomUniform1 = homeOwnerRandomGen.nextDouble();
-        homeOwnerRandomUniform2 = homeOwnerRandomGen.nextDouble();
-        taxRandomUniform = taxRandomGen.nextDouble();
-    }
-
-
 
     protected void updateChildrenFields() {
 
@@ -803,7 +772,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // update disposable income
         TaxEvaluation evaluatedTransfers;
-        double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
+        double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : innovations.getDoubleDraw(8);
         evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDag(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
 
         return evaluatedTransfers;
@@ -847,7 +816,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
     protected void chooseRandomMonthlyOutcomeCovid19() {
 
-        double labourInnov = labourRandomUniform1;
+        double labourInnov = innovations.getDoubleDraw(2);
+        double taxRandomUniform = innovations.getDoubleDraw(8);
         if (Occupancy.Couple.equals(occupancy)) {
             if(male.atRiskOfWork()) {
                 if(female.atRiskOfWork()) {
@@ -1006,7 +976,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         double grossMonthlyIncomeToReturn = 0; // Gross income to return to updateLabourSupplyCovid19() method
 
         // Transitions from employment
-        double labourInnov2 = labourRandomUniform2, labourInnov3 = labourRandomUniform3;
+        double labourInnov2 = innovations.getDoubleDraw(3), labourInnov3 = innovations.getDoubleDraw(4);
         if (Les_c7_covid.Employee.equals(stateFrom)) {
             Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_E1.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
@@ -1350,7 +1320,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
 
             //Sample labour supply from possible labour (pairs of) values
-            double labourInnov = labourRandomUniform4;
+            double labourInnov = innovations.getDoubleDraw(5);
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
                 labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
@@ -2855,7 +2825,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if (male!=null) {
 
                 double prob = Parameters.getRegHomeownershipHO1a().getProbability(male, Person.DoublesVariables.class);
-                if (homeOwnerRandomUniform1 < prob) {
+                if (innovations.getDoubleDraw(6) < prob) {
                     male_homeowner = true;
                 }
                 male.setDhhOwned(male_homeowner);
@@ -2863,7 +2833,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if (female!=null) {
 
                 double prob = Parameters.getRegHomeownershipHO1a().getProbability(female, Person.DoublesVariables.class);
-                if (homeOwnerRandomUniform2 < prob) {
+                if (innovations.getDoubleDraw(7) < prob) {
                     female_homeowner = true;
                 }
                 female.setDhhOwned(female_homeowner);
@@ -3877,11 +3847,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (hasChildrenEligibleForCare() && (age < Parameters.getStatePensionAge(year, age))) {
 
             double prob = Parameters.getRegChildcareC1a().getProbability(this, Regressors.class);
-            if (childCareRandomUniform1 < prob) {
+            if (innovations.getDoubleDraw(0) < prob) {
 
                 double score = Parameters.getRegChildcareC1b().getScore(this, Regressors.class);
                 double rmse = Parameters.getRMSEForRegression("C1b");
-                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(childCareRandomUniform2);
+                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(1));
                 childcareCostPerWeek = Math.exp(score + rmse * gauss);
                 double costCap = childCareCostCapWeekly();
                 if (costCap > 0.0 && costCap < getChildcareCostPerWeek()) {
