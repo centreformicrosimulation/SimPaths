@@ -100,12 +100,9 @@ public class Expectations {
         // proxy to evaluate regression projections for current period
         benefitUnitProxyThisPeriod = new BenefitUnit(true);
         benefitUnitProxyThisPeriod.setYearLocal(currentStates.getYear());
-        benefitUnitProxyThisPeriod.setOccupancy(currentStates.getOccupancyCode());
+        benefitUnitProxyThisPeriod.setOccupancyLocal(currentStates.getOccupancyCode());
         benefitUnitProxyThisPeriod.setDeh_c3Local(currentStates.getEducationCode());
         benefitUnitProxyThisPeriod.setRegion(currentStates.getRegionCode());
-        for (int ii=0; ii<18; ii++) {
-            benefitUnitProxyThisPeriod.setNumberChildrenByAge(ii, currentStates.getChildrenByAge(ii));
-        }
     }
 
     /**
@@ -178,7 +175,7 @@ public class Expectations {
         personProxyThisPeriod.setDgn(currentStates.getGenderCode());
         personProxyThisPeriod.setDhe(currentStates.getHealthCode());
         personProxyThisPeriod.setDeh_c3(currentStates.getEducationCode());
-        personProxyThisPeriod.setDcpst(currentStates.getDcpst());
+        personProxyThisPeriod.setDcpstLocal(currentStates.getDcpst());
         personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
         personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
 
@@ -205,12 +202,12 @@ public class Expectations {
         personProxyNextPeriod.setDehf_c3(DecisionParams.EDUCATION_FATHER);
         personProxyNextPeriod.setDehm_c3(DecisionParams.EDUCATION_MOTHER);
         if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
-            personProxyNextPeriod.setDcpst(currentStates.getDcpst());
+            personProxyNextPeriod.setDcpstLocal(currentStates.getDcpst());
         } else {
             if (currentStates.getDcpst().equals(Dcpst.Partnered))
-                personProxyNextPeriod.setDcpst(Dcpst.PreviouslyPartnered);
+                personProxyNextPeriod.setDcpstLocal(Dcpst.PreviouslyPartnered);
             else
-                personProxyNextPeriod.setDcpst(Dcpst.SingleNeverMarried);
+                personProxyNextPeriod.setDcpstLocal(Dcpst.SingleNeverMarried);
         }
         personProxyNextPeriod.setDcpst_lag1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);

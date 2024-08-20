@@ -8,7 +8,7 @@ import org.apache.commons.math3.util.Pair;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Dcpst;
 import simpaths.model.enums.Gender;
-import simpaths.model.enums.Household_status;
+import simpaths.model.enums.HouseholdStatus;
 
 import java.util.*;
 
@@ -142,14 +142,8 @@ public class UnionMatching {
             if (!male.getRegion().equals(female.getRegion()))
                 female.setRegion(male.getRegion());
 
-            male.setPartner(female);
-            female.setPartner(male);
-            male.setHousehold_status(Household_status.Couple);
-            female.setHousehold_status(Household_status.Couple);
             male.setDcpyy(0); //Set years in partnership to 0
             female.setDcpyy(0);
-            male.setDcpst(Dcpst.Partnered);
-            female.setDcpst(Dcpst.Partnered);
 
             //Update household
             male.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both male and female.  Note need to have partner reference before calling setupNewHome!

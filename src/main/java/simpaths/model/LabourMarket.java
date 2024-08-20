@@ -109,16 +109,10 @@ public class LabourMarket {
                  */
 
                 LinkedHashSet<Person> personsInBenefitUnit = new LinkedHashSet<>(); // Store adults from the benefit unit
+                Occupancy occupancy = benefitUnit.getOccupancy();
                 if ((year == 2020 && getCovid19TransitionsMonth() == 4)) {
 
-                    // This is just a safety check as male and female are modified below
-                    if (benefitUnit.occupancy.equals(Occupancy.Couple)) {
-                        if (benefitUnit.getMale() == null || benefitUnit.getFemale() == null) {
-                            benefitUnit.updateOccupancy();
-                        }
-                    }
-
-                    if (benefitUnit.occupancy.equals(Occupancy.Couple)) {
+                    if (occupancy.equals(Occupancy.Couple)) {
                         Person male = benefitUnit.getMale();
                         Person female = benefitUnit.getFemale();
                         personsInBenefitUnit.add(male);
@@ -135,7 +129,7 @@ public class LabourMarket {
                         if (setFemaleSelfEmployed && female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
                             female.setLes_c7_covid(Les_c7_covid.SelfEmployed);
                         }
-                    } else if (benefitUnit.occupancy.equals(Occupancy.Single_Male)) {
+                    } else if (occupancy.equals(Occupancy.Single_Male)) {
                         Person male = benefitUnit.getMale();
                         male.initialise_les_c6_from_c4();
                         personsInBenefitUnit.add(male);
@@ -143,7 +137,7 @@ public class LabourMarket {
                         if (setSelfEmployed && male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
                             male.setLes_c7_covid(Les_c7_covid.SelfEmployed);
                         }
-                    } else if (benefitUnit.occupancy.equals(Occupancy.Single_Female)) {
+                    } else if (occupancy.equals(Occupancy.Single_Female)) {
                         Person female = benefitUnit.getFemale();
                         female.initialise_les_c6_from_c4();
                         personsInBenefitUnit.add(female);
@@ -160,7 +154,7 @@ public class LabourMarket {
                 // Households are created and destroyed each year, so there might be some in 2021 who were not in the simulation in 2020 and need to be initialised
                 if (year == 2021 && getCovid19TransitionsMonth() == 1) {
 
-                    if (benefitUnit.occupancy.equals(Occupancy.Couple)) {
+                    if (occupancy.equals(Occupancy.Couple)) {
                         Person male = benefitUnit.getMale();
                         Person female = benefitUnit.getFemale();
                         personsInBenefitUnit.add(male);
@@ -179,7 +173,7 @@ public class LabourMarket {
                                 female.setLes_c7_covid(Les_c7_covid.SelfEmployed);
                             }
                         }
-                    }  else if (benefitUnit.occupancy.equals(Occupancy.Single_Male)) {
+                    }  else if (occupancy.equals(Occupancy.Single_Male)) {
                         Person male = benefitUnit.getMale();
                         personsInBenefitUnit.add(male);
                         if (male != null && male.getLes_c7_covid() == null) {
@@ -189,7 +183,7 @@ public class LabourMarket {
                                 male.setLes_c7_covid(Les_c7_covid.SelfEmployed);
                             }
                         }
-                    } else if (benefitUnit.occupancy.equals(Occupancy.Single_Female)) {
+                    } else if (occupancy.equals(Occupancy.Single_Female)) {
                         Person female = benefitUnit.getFemale();
                         personsInBenefitUnit.add(female);
                         if (female != null && female.getLes_c7_covid() == null) {
@@ -213,12 +207,6 @@ public class LabourMarket {
                 updateMonthlyLabourSupplyCovid19() method predicts monthly transition, work hours, gross and disposable income and adds such triplet to an array list keeping track of monthly values.
                  */
                 for (BenefitUnit benefitUnit : benefitUnitsCovid19Update) {
-
-                    if (benefitUnit.occupancy.equals(Occupancy.Couple)) {
-                        if (benefitUnit.getMale() == null || benefitUnit.getFemale() == null) {
-                            benefitUnit.updateOccupancy();
-                        }
-                    }
 
                     benefitUnit.updateMonthlyLabourSupplyCovid19();
                 }

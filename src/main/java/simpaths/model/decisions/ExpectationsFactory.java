@@ -480,7 +480,7 @@ public class ExpectationsFactory {
             } else if (Axis.SocialCareProvision.equals(axis)) {
                 personProxyNextPeriod.setSocialCareProvision(states.getSocialCareProvisionCode());
             } else if (Axis.Cohabitation.equals(axis)) {
-                personProxyNextPeriod.setDcpst(states.getDcpst());
+                personProxyNextPeriod.setDcpstLocal(states.getDcpst());
             } else if (Axis.Child.equals(axis)) {
                 personProxyNextPeriod.setNumberChildren017Local(states.getChildren017());
                 personProxyNextPeriod.setIndicatorChildren02Local(states.getChildrenUnder3Indicator());

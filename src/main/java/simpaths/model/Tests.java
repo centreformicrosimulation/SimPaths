@@ -45,20 +45,6 @@ public class Tests implements EventListener {
     /*
     Test 2: verify there are no discrepancies in IDs across different units (person, benefit unit, household)
      */
-    private boolean idCheckTest2() {
-        boolean passed = true;
-
-        for (Person person : model.getPersons()) {
-            if (!person.getIdBenefitUnit().equals(person.getBenefitUnit().getKey().getId())) {
-                passed = false;
-            }
-            if (!person.getIdHousehold().equals(person.getBenefitUnit().getHousehold().getId())) {
-                passed = false;
-            }
-        }
-
-        return passed;
-    }
 
     /*
     Test 3: verify that each existing BenefitUnit has a (responsible) male and/or female

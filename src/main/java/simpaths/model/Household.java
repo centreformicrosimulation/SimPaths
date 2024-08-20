@@ -161,19 +161,4 @@ public class Household implements EventListener, IDoubleSource {
         this.processed = processed;
         key.setWorkingId(processed.getId());
     }
-
-    public void updatePersonLinks() {
-
-        for (BenefitUnit benefitUnit : benefitUnits) {
-
-            for (Person person : benefitUnit.getMembers()) {
-
-                if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-                    benefitUnit.addChild(person, false);
-                } else {
-                    benefitUnit.addResponsiblePerson(person, false);
-                }
-            }
-        }
-    }
 }

@@ -85,7 +85,6 @@ public class Parameters {
 		"idhh",				//id of household (can contain multiple benefit units)
 		"idbenefitunit",	//id of a benefit unit
 		"drgn1", 			//region (NUTS1)
-		"dhhtp_c4",			//household composition
 		"ydses_c5",			//household income quantile
 		"dhh_owned",		//flag indicating if benefit unit owns a house
 		"liquid_wealth",	//benefit unit net wealth non-pension non-housing wealth
@@ -100,22 +99,16 @@ public class Parameters {
 		"dwt", 					//household weight
 		"idfather", 			//id of father
 		"idmother", 			//id of mother
-		"idpartner", 			//id of partner
 		"dag", 					//age
 		"deh_c3", 				//highest education level
 		"dehm_c3",				//highest education level of mother
 		"dehf_c3",				//highest education level of father
-		"dehsp_c3",				//highest education level of partner
 		"ded",					//in education dummy
 		"der",					//return to education dummy
 		"dhe",					//health status
 		"dhm",					//mental health status
 		"scghq2_dv",			//mental health status case based
 		"dhm_ghq",				//mental health status case based dummy (1 = psychologically distressed)
-		"dhesp",				//health status of partner
-		"dcpst",				//partnership status
-		"dcpen",				//enter partnership dummy
-		"dcpex",				//exit partnership dummy
 		"dcpyy",				//years in partnership
 		"dcpagdf",				//partners age difference
 		"dnc02",				//number children aged 0-2
@@ -128,15 +121,10 @@ public class Parameters {
 		"ynbcpdf_dv",			//difference partner income
 		"dlltsd",				//long-term sick or disabled
 		"sedex",				//year left education
-		"ssscp",				//in same-sex partnership
-		"sprfm",				//women in fertility range
-		"sedag",				//in educational age range
 		"stm",					//system variable - year
 		"swv",					//system variable - wave
 		"dgn", 					//gender
 		"les_c4", 				//labour employment status
-		"lessp_c4",				//labour employment status of partner
-		"lesdf_c4",				//own and partner employment status
 		"lhw", 					//hours worked per week
 		"adultchildflag",		//flag indicating adult child living at home in the data
 		"dhh_owned",			//flag indicating if individual is a homeowner
@@ -264,8 +252,8 @@ public class Parameters {
 
     //public static int MAX_AGE_IN_EDUCATION;// = MAX_AGE;//30;			// Max age a person can stay in education	//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
-    private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
-    private static final int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static final int MIN_START_YEAR = 2019; //Minimum allowed starting point. Should correspond to the oldest initial population.
+    private static final int MAX_START_YEAR = 2019; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static int startYear;
     public static int endYear;
     private static final int MIN_START_YEAR_TRAINING = 2019;
@@ -320,7 +308,6 @@ public class Parameters {
     public static final String ILS_BENNT_NAME = "ILS_BENNT";
     //public static final String SELF_EMPLOY_SOCIAL_INSURANCE_VARIABLE_NAME = "SELF_EMPLOY_SOC_INSUR_CONTR_PER_HOUR";
     public static final String HOURS_WORKED_WEEKLY = "HOURS_WORKED_WEEKLY";
-    public static final String BENEFIT_UNIT_VARIABLE_NAME = "BU_ID";
 
     public static final double MIN_CAPITAL_INCOME_PER_MONTH = 0.0;
     public static final double MAX_CAPITAL_INCOME_PER_MONTH = 4000.0;

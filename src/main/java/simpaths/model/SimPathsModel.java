@@ -293,7 +293,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean responsesToRegion = false;
 
     RandomGenerator cohabitInnov;
-    RandomGenerator fertilityInnov;
     Random initialiseInnov;
     Random popAlignInnov;
     Random educationInnov;
@@ -331,7 +330,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // set seed for random number generator
         if (fixRandomSeed) SimulationEngine.getRnd().setSeed(randomSeedIfFixed);
-        fertilityInnov = new Random(SimulationEngine.getRnd().nextLong());
         cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
         initialiseInnov = new Random(SimulationEngine.getRnd().nextLong());
         educationInnov = new Random(SimulationEngine.getRnd().nextLong());
@@ -370,7 +368,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // time check
         elapsedTime = System.currentTimeMillis();
 
-        // create country-specific tables in the input database and parse the EUROMOD policy scenario data for initializing the donor population
         try {
             inputDatabaseInteraction();
         } catch (InterruptedException interruptedException) {
@@ -495,7 +492,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // partnership variation
         yearlySchedule.addCollectionEvent(persons, Person.Processes.PartnershipDissolution);
         yearlySchedule.addEvent(this, Processes.UnionMatching);
-        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateOccupancy);
         //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
         //yearlySchedule.addEvent(this, Processes.Timer);
 
@@ -543,7 +539,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateMembers);
         addEventToAllYears(Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
@@ -1343,27 +1338,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             persons.add(newPerson);
         }
 
-        // ensure consistent labour statistics to allow for recoding at SQLdataParser
-        if (Occupancy.Couple.equals(newBenefitUnit.getOccupancy())) {
-            newBenefitUnit.getFemale().setLessp_c4(newBenefitUnit.getMale().getLes_c4());
-            newBenefitUnit.getMale().setLessp_c4(newBenefitUnit.getFemale().getLes_c4());
-            if (Les_c4.EmployedOrSelfEmployed.equals(newBenefitUnit.getFemale().getLes_c4()) &&
-                    Les_c4.EmployedOrSelfEmployed.equals(newBenefitUnit.getMale().getLes_c4())) {
-                newBenefitUnit.getFemale().setLesdf_c4(Lesdf_c4.BothEmployed);
-                newBenefitUnit.getMale().setLesdf_c4(Lesdf_c4.BothEmployed);
-            } else if (Les_c4.EmployedOrSelfEmployed.equals(newBenefitUnit.getFemale().getLes_c4())) {
-                newBenefitUnit.getFemale().setLesdf_c4(Lesdf_c4.EmployedSpouseNotEmployed);
-                newBenefitUnit.getMale().setLesdf_c4(Lesdf_c4.NotEmployedSpouseEmployed);
-            } else if (Les_c4.EmployedOrSelfEmployed.equals(newBenefitUnit.getMale().getLes_c4())) {
-                newBenefitUnit.getMale().setLesdf_c4(Lesdf_c4.EmployedSpouseNotEmployed);
-                newBenefitUnit.getFemale().setLesdf_c4(Lesdf_c4.NotEmployedSpouseEmployed);
-            } else {
-                newBenefitUnit.getMale().setLesdf_c4(Lesdf_c4.BothNotEmployed);
-                newBenefitUnit.getFemale().setLesdf_c4(Lesdf_c4.BothNotEmployed);
-            }
+        // final clean-up
+        for (Person person : newBenefitUnit.getMembers()) {
+            person.cloneCleanup();
         }
-
-        newHousehold.addBenefitUnit(newBenefitUnit);
 
         return newBenefitUnit;
     }
@@ -1714,12 +1692,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         // throw new RuntimeException("Error - both parties to match have the same gender!");
                                     } else {
 
-                                        p1.setPartner(p2);
-                                        p2.setPartner(p1);
                                         p1.setDcpyy(0); //Set years in partnership to 0
                                         p2.setDcpyy(0);
-                                        p1.setDcpst(Dcpst.Partnered);
-                                        p2.setDcpst(Dcpst.Partnered);
 
                                         // update benefit unit and household
                                         p1.setupNewBenefitUnit(true);
@@ -1756,9 +1730,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
 
         // System.out.println("Total over all years of unmatched males is " + malesUnmatched + " and females " + femalesUnmatched);
-        for (BenefitUnit benefitUnit : benefitUnits) {
-            benefitUnit.updateOccupancy();
-        }
     }
 
     /**
@@ -1804,11 +1775,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         evalMatches(unmatched, alignmentRun);
 
         if (!alignmentRun) {
-
             if (commentsOn) log.debug("Marriage matched");
-            for (BenefitUnit benefitUnit : benefitUnits) {
-                benefitUnit.updateOccupancy();
-            }
         }
     }
 
@@ -2253,11 +2220,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
 
-    /**
-     *
-     * CREATE INPUT DATABASE TABLES BASED ON .txt FILES CREATED IN GUI DIALOG FROM EUROMOD
-     *
-     */
     private void inputDatabaseInteraction() throws InterruptedException {
 
         Connection conn = null;
@@ -2276,8 +2238,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     log.info(e.getMessage());
                     throw new RuntimeException("SQL Exception! " + e.getMessage());
                 }
-
-                System.out.print("... Success!\n");
                 retry = false;
 
                 //If user chooses start year that is higher than the last available initial population, last available population should be used but with uprated monetary values
@@ -2382,7 +2342,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Processed processed = getProcessed();
         if (processed!=null) {
             for ( Household originalHousehold : processed.getHouseholds()) {
-                originalHousehold.updatePersonLinks();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
                     for (Person person : benefitUnit.getMembers()) {
                         person.setAdditionalFieldsInInitialPopulation();
@@ -2393,159 +2352,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
         } else {
 
+            List<Household> inputHouseholdList = loadStaringPopulation();
 
-            /*
-             * need to load fresh data from the input database
-             * NOTE: don't need to worry about duplicates, as database ensures all items are unique
-             * NOTE: use lists to ensure that simulated population is replicable
-             */
-
-            //Persons
-            List<Person> inputPersonList = (List<Person>) DatabaseUtils.loadTable(Person.class);
-            if (inputPersonList.isEmpty()) {
-                throw new RuntimeException("Error - there are no Persons for country " + country + " in the input database");
-            }
-
-            //Benefit units
-            List<BenefitUnit> inputBenefitUnitList = (List<BenefitUnit>) DatabaseUtils.loadTable(BenefitUnit.class);    //RHS returns an ArrayList
-            if (inputBenefitUnitList.isEmpty()) {
-                throw new RuntimeException("Error - there are no Benefit Units for country " + country + " in the input database");
-            }
-
-            //Households
-            List<Household> inputHouseholdList = (List<Household>) DatabaseUtils.loadTable(Household.class);
-            if (inputHouseholdList.isEmpty()) {
-                throw new RuntimeException("Error - there are no Households for country " + country + " in the input database");
-            }
-
-            // establish links between units
-            LinkedList<BenefitUnit> benefitUnitsToAllocate = new LinkedList<>(inputBenefitUnitList);
-            LinkedList<Person> personsToAllocate = new LinkedList<>(inputPersonList);
-            Double minWeight = null;
-            for (Household household : inputHouseholdList) {
-
-                Iterator<BenefitUnit> benefitUnitIterator = benefitUnitsToAllocate.iterator();
-                LinkedList<Person> orphans = new LinkedList<>();
-                while (benefitUnitIterator.hasNext()) {
-
-                    BenefitUnit benefitUnit = benefitUnitIterator.next();
-                    if (benefitUnit.getIdHousehold().equals(household.getId())) {
-                        // found benefit unit in household
-
-                        benefitUnit.setHousehold(household);
-                        benefitUnitIterator.remove();
-                        Iterator<Person> personIterator = personsToAllocate.iterator();
-                        while(personIterator.hasNext()) {
-
-                            Person person = personIterator.next();
-                            if (person.getIdBenefitUnit().equals(benefitUnit.getId())) {
-                                // found member of benefit unit
-
-                                person.setBenefitUnit(benefitUnit);
-                                if (!person.getBenefitUnit().getMembers().contains(person)) {
-                                    orphans.add(person);
-                                }
-                                personIterator.remove();
-                            }
-                        }
-
-                        // establish responsible adults and relationship status
-                        if ( benefitUnit.getMale() == null && benefitUnit.getFemale() == null ) {
-                            household.removeBenefitUnit(benefitUnit);
-                            for (Person person : benefitUnit.getChildren()) {
-                                orphans.add(person);
-                            }
-                        } else {
-                            for (Person person : benefitUnit.getMembers()) {
-                                if (person.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-                                    if (person.getIdPartner() != null) {
-                                        orphans.add(person);
-                                    } else {
-                                        checkChildRelations(benefitUnit, person);
-                                    }
-                                } else if (person.getIdPartner()!=null) {
-                                    for (Person partner : benefitUnit.getMembers()) {
-                                        if (person.getIdPartner().equals(partner.getKey().getId())) person.setPartner(partner);
-                                    }
-                                }
-                                if (!orphans.contains(person)) {
-                                    person.setAdditionalFieldsInInitialPopulation();
-                                }
-                            }
-                            benefitUnit.initializeFields();
-                        }
-                    }
-                }
-                if (!orphans.isEmpty()) {
-
-                    Iterator<Person> orphansIterator = orphans.iterator();
-                    while (orphansIterator.hasNext()) {
-
-                        Person orphan = orphansIterator.next();
-                        Person partner = null;
-                        Person parent = null;
-                        for(BenefitUnit benefitUnit : household.getBenefitUnits()) {
-
-                            for (Person person : benefitUnit.getMembers()) {
-
-                                if (person != orphan) {
-                                    if (orphan.getIdPartner() != null && orphan.getIdPartner().equals(person.getKey().getId())) {
-                                        partner = person;
-                                    }
-                                    if (orphan.getIdMother() != null && orphan.getIdMother().equals(person.getKey().getId())) {
-                                        parent = person;
-                                    }
-                                    if (orphan.getIdFather() != null && orphan.getIdFather().equals(person.getKey().getId())) {
-                                        parent = person;
-                                    }
-                                }
-                            }
-                        }
-                        if (parent != null) {
-
-                            orphansIterator.remove();
-                            if (orphan.getIdPartner() != null) {
-                                orphan.setPartner(null);
-                            }
-                            if (partner != null) {
-                                partner.setPartner(null);
-                            }
-                            orphan.setBenefitUnit(null);
-                            orphan.setBenefitUnit(parent.getBenefitUnit());
-                            checkChildRelations(parent.getBenefitUnit(), orphan);
-                            orphan.setAdditionalFieldsInInitialPopulation();
-                            parent.getBenefitUnit().initializeFields();
-                        } else if (partner != null) {
-
-                            orphansIterator.remove();
-                            orphan.setIdMother((Person)null);
-                            orphan.setIdFather((Person)null);
-                            orphan.setDag(Parameters.AGE_TO_BECOME_RESPONSIBLE);
-                            orphan.setBenefitUnit(null);
-                            orphan.setBenefitUnit(partner.getBenefitUnit());
-                            orphan.setAdditionalFieldsInInitialPopulation();
-                            partner.getBenefitUnit().initializeFields();
-                        }
-                    }
-                }
-                if (!orphans.isEmpty()) {
-                    throw new RuntimeException("Children not associated with a qualifying benefit unit included in population load.");
-                }
-                if (minWeight == null || household.getWeight() < minWeight) {
-                    minWeight = household.getWeight();
-                }
-            }
-            if (!benefitUnitsToAllocate.isEmpty()) {
-                throw new RuntimeException("Not all benefit units associated with a household at population load.");
-            }
-            if (!personsToAllocate.isEmpty()) {
-                throw new RuntimeException("Not all persons associated with a benefit unit at population load.");
-            }
-
-
-            /**********************************************************
-             * instantiate simulated population
-             **********************************************************/
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
@@ -2558,6 +2366,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // so that replicating by a factor adjustment on weight of each observation may result in none of the
                 // observations being included in the simulated sample (unless the simulated sample was very large).
                 List<Household> randomHouseholdSampleList = new LinkedList<>();
+                Double minWeight = null;
+                for (Household household : inputHouseholdList) {
+                    if (minWeight == null || household.getWeight() < minWeight)
+                        minWeight = household.getWeight();
+                }
                 double replicationFactor = 5.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
                 for (Household household : inputHouseholdList) {
 
@@ -2585,8 +2398,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // use population weights
 
                 households.addAll(inputHouseholdList);
-                benefitUnits.addAll(inputBenefitUnitList);
-                persons.addAll(inputPersonList);
+                for (Household household : inputHouseholdList) {
+                    benefitUnits.addAll(household.getBenefitUnits());
+                    for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                        persons.addAll(benefitUnit.getMembers());
+                    }
+                }
             }
 
             // save to processed repository
@@ -2598,36 +2415,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         log.info("Representative size of population is " + aggregatePersonsWeight + " living in " + aggregateHouseholdsWeight + " representative benefitUnits.");
         initialHoursWorkedWeekly = null;
         System.gc();
-    }
-
-    private void checkChildRelations(BenefitUnit benefitUnit, Person child) {
-
-        if (child.getIdFather() != null && benefitUnit.getIdMale() != null && !child.getIdFather().equals(benefitUnit.getIdMale())) {
-            if (child.getIdPartner().equals(benefitUnit.getIdMale())) {
-                benefitUnit.removePerson(child);
-                child.setDag(Parameters.AGE_TO_BECOME_RESPONSIBLE);
-                child.setBenefitUnit(benefitUnit);
-            } else {
-                throw new RuntimeException("Problem identifying father at population load.");
-            }
-        } else if (child.getIdFather() != null && benefitUnit.getMale() == null) {
-            child.setIdFather((Long) null);
-        } else if (child.getIdFather() == null && benefitUnit.getMale() != null) {
-            child.setIdFather(benefitUnit.getMale().getKey().getId());
-        }
-        if (child.getIdMother() != null && benefitUnit.getIdFemale() != null && !child.getIdMother().equals(benefitUnit.getIdFemale())) {
-            if (child.getIdPartner().equals(benefitUnit.getIdFemale())) {
-                benefitUnit.removePerson(child);
-                child.setDag(Parameters.AGE_TO_BECOME_RESPONSIBLE);
-                child.setBenefitUnit(benefitUnit);
-            } else if (!benefitUnit.getIdFemale().equals(child.getKey().getId())) {
-                throw new RuntimeException("Problem identifying mother at population load.");
-            }
-        } else if (child.getIdMother() != null && benefitUnit.getFemale() == null) {
-            child.setIdMother((Long) null);
-        } else if (child.getIdMother() == null && benefitUnit.getFemale() != null) {
-            child.setIdMother(benefitUnit.getFemale().getKey().getId());
-        }
     }
 
 
@@ -2875,7 +2662,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // remove from benefit unit
         if (person.getBenefitUnit() != null)
-            person.getBenefitUnit().removePerson(person);
+            person.getBenefitUnit().removeMember(person);
 
         // remove person from model
         if (persons.contains(person)) {
@@ -3408,6 +3195,34 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         return processed;
     }
 
+    private List<Household> loadStaringPopulation() {
+
+        List<Household> households;
+
+        EntityTransaction txn = null;
+        try {
+
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
+            txn = em.getTransaction();
+            txn.begin();
+            String query = "SELECT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
+            households = em.createQuery(query).getResultList();
+
+            // close database connection
+            em.close();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Problem sourcing data for starting population");
+        }
+
+        return households;
+    }
+
     private void persistProcessed() {
         persistProcessed(households, country, startYear, popSize);
     }
@@ -3428,7 +3243,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 household.setProcessed(processed);
                 for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
                     benefitUnit.setProcessedId(processed.getId());
-                    benefitUnit.updateMembers();
                     for (Person person : benefitUnit.getMembers()) {
                         person.setProcessedId(processed.getId());
                     }
@@ -3459,7 +3273,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         person.setDag(20);
         person.setDgn(Gender.Male);
         person.setBenefitUnit(benefitUnit);
-        benefitUnit.updateMembers();
         Set<Household> households = new LinkedHashSet<>();
         households.add(household);
 
