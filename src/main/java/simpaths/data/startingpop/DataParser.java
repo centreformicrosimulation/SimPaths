@@ -84,7 +84,7 @@ public class DataParser {
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT NOT NULL DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT NOT NULL DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT NOT NULL DEFAULT 0;"
-				+ "ALTER TABLE " + personTable + " ADD CONSTRAINT PK1 PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				+ "ALTER TABLE " + personTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -285,7 +285,7 @@ public class DataParser {
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_time INT NOT NULL;"
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_run INT NOT NULL;"
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN working_id INT NOT NULL;"
-				+ "ALTER TABLE " + benefitUnitTable + " ADD CONSTRAINT PK2 PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 			);
 
 			//Create household table
@@ -309,15 +309,15 @@ public class DataParser {
 				+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_time INT NOT NULL;"
 				+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_run INT NOT NULL;"
 				+ "ALTER TABLE " + householdTable + " ALTER COLUMN working_id INT NOT NULL;"
-				+ "ALTER TABLE " + householdTable + " ADD CONSTRAINT PK3 PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				+ "ALTER TABLE " + householdTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 			);
 
 			//Set-up foreign keys
 			stat.execute(
-					"ALTER TABLE " + benefitUnitTable + " ADD CONSTRAINT FK1 "
-					+ "FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES " + householdTable + " (id, simulation_time, simulation_run, working_id);"
-					+ "ALTER TABLE " + personTable + " ADD CONSTRAINT FK2 "
-					+ "FOREIGN KEY (buid, butime, burun, prid) REFERENCES " + benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
+					"ALTER TABLE " + benefitUnitTable + " ADD FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES "
+							+ householdTable + " (id, simulation_time, simulation_run, working_id);"
+					+ "ALTER TABLE " + personTable + " ADD FOREIGN KEY (buid, butime, burun, prid) REFERENCES "
+							+ benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
 			);
 
 			stat.execute("DROP TABLE IF EXISTS " + inputFileName + ";");
