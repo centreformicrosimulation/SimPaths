@@ -75,19 +75,6 @@ public class Household implements EventListener, IDoubleSource {
         key  = new PanelEntityKey(householdId);
     }
 
-    public Household(LinkedHashSet<BenefitUnit> benefitUnitsToAdd) {
-        this(); //Refers to the basic constructor Household()
-        for(BenefitUnit benefitUnit : benefitUnitsToAdd) {
-            addBenefitUnit(benefitUnit);
-        }
-    }
-
-    //Overloaded constructor taking a benefit unit as input and adding it to the new household
-    public Household(BenefitUnit benefitUnitToAdd) {
-        this(); //Refers to the basic constructor Household()
-        addBenefitUnit(benefitUnitToAdd);
-    }
-
     /*
     METHODS
      */
@@ -102,31 +89,11 @@ public class Household implements EventListener, IDoubleSource {
         }
     }
 
-    public void addBenefitUnit(BenefitUnit benefitUnit) {
-
-        benefitUnits.add(benefitUnit);
-        if ( benefitUnit.getHousehold() != this ) {
-            if ( benefitUnit.getHousehold() != null )
-                benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
-            benefitUnit.setHousehold(this);
-        }
-    }
-
-    //Remove a benefitUnit from the household
     public void removeBenefitUnit(BenefitUnit benefitUnit) {
-
-        if (benefitUnits.contains(benefitUnit)) {
-
-            boolean removed = benefitUnits.remove(benefitUnit);
-            if (!removed)
-                throw new IllegalArgumentException("BenefitUnit " + benefitUnit.getKey().getId() + " could not be removed from household");
+        benefitUnits.remove(benefitUnit);
+        if (benefitUnits.isEmpty()) {
+            model.getHouseholds().remove(this);
         }
-        if (benefitUnit.getHousehold() == this)
-            benefitUnit.setHousehold(null);
-
-        //Check for benefit units remaining in the household - if none, remove the household
-        if (benefitUnits.isEmpty())
-            model.removeHousehold(this);
     }
 
     @Override

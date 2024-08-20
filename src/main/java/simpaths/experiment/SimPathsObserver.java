@@ -753,13 +753,13 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				int colorCounter = 0;
 			    for(Region region: Parameters.getCountryRegions()) {
 					RegionCSfilter regionFilter = new RegionCSfilter(region);
-					Weighted_CrossSection.Integer regionCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleOccupancy", true);
+					Weighted_CrossSection.Integer regionCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleDummy", true);
 					regionCS.setFilter(regionFilter);
 					houseCompositionRegionPlotter.addSeries(region.getName(), new Weighted_MeanArrayFunction(regionCS), null, colorArrayList.get(colorCounter), false);		//'yo' means "years old"
 					houseCompositionRegionPlotter.addSeries("Validation "+region.getName(), validator, Validator.DoublesVariables.valueOf("partneredShare_"+region), colorArrayList.get(colorCounter), true);
 					colorCounter++;
 			    }		    
-			    Weighted_CrossSection.Integer coupleCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleOccupancy", true);
+			    Weighted_CrossSection.Integer coupleCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleDummy", true);
 			    houseCompositionRegionPlotter.addSeries("national", new Weighted_MeanArrayFunction(coupleCS), null, colorArrayList.get(colorCounter), false);		//'yo' means "years old"
 				houseCompositionRegionPlotter.addSeries("Validation national", validator, Validator.DoublesVariables.valueOf("partneredShare_All"), colorArrayList.get(colorCounter), true);
 			    houseCompositionRegionPlotter.setName("Cohabitation status");
@@ -769,7 +769,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			    /*
 			    //Add a graph showing share of individuals with a partner:
 				TimeSeriesSimulationPlotter personsWithPartnerPlotter = new TimeSeriesSimulationPlotter("Share of individuals with partner", "");
-				Weighted_CrossSection.Integer personsWithPartner = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getCoupleOccupancy", true);
+				Weighted_CrossSection.Integer personsWithPartner = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getCoupleDummy", true);
 				personsWithPartnerPlotter.addSeries("Share of persons with partner", new Weighted_MeanArrayFunction(personsWithPartner));
 				personsWithPartnerPlotter.setName("Share of persons with partner");
 				updateChartSet.add(personsWithPartnerPlotter);

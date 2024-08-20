@@ -157,7 +157,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = false; //TODO: routine fails to replicate results for minor variations between simulations
+    private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = false;
@@ -351,7 +351,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             //DatabaseExtension.extendInputData();
         }
 
-        //persistProcessedTest();
         log.debug("Parameters loaded");
 
         // populate tax donor references
@@ -444,8 +443,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             firstYearSched.addEvent(this, Processes.RationalOptimisation);
 
         addEventToAllYears(Processes.UpdateParameters);
-        addEventToAllYears(Processes.CheckForExitingPersons);
-        addEventToAllYears(Processes.CheckForEmptyBenefitUnits);
+        addEventToAllYears(Processes.GarbageCollection);
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
         addCollectionEventToAllYears(persons, Person.Processes.Update);
 
@@ -733,7 +731,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         RationalOptimisation,
         UpdateYear,
         CheckForEmptyBenefitUnits,
-        CheckForExitingPersons,
+        GarbageCollection,
         CheckForImperfectTaxDBMatches,
         CleanUp,
     }
@@ -847,26 +845,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 }
                 year++;
             }
-            case CheckForExitingPersons -> {
-                screenForExitingPersons();
-            }
-            case CheckForEmptyBenefitUnits -> {
-
-                List<BenefitUnit> benefitUnitsWithoutAdult = new ArrayList<>();
-                for (BenefitUnit benefitUnit: benefitUnits) {
-                    if (benefitUnit.getMale() == null && benefitUnit.getFemale() == null) {
-                        benefitUnitsWithoutAdult.add(benefitUnit);
-                    }
-                }
-                for (BenefitUnit benefitUnit: benefitUnitsWithoutAdult) {
-                    log.warn("Benefit unit " + benefitUnit.getKey().getId() + " has no responsible adult, comprising " + benefitUnit.getChildren().size() + " child(ren) and " + benefitUnit.getSize() + " total members.");
-                    for (Person person: benefitUnit.getChildren()) {
-                        log.warn("person " + person.getKey().getId() + ", age " + person.getDag() + ", is in benefit unit");
-                    }
-                }
-                for (BenefitUnit benefitUnit : benefitUnitsWithoutAdult) {
-                    removeBenefitUnit(benefitUnit);
-                }
+            case GarbageCollection -> {
+                screenForExitingObjects();
             }
             case CheckForImperfectTaxDBMatches -> {
 
@@ -893,20 +873,63 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      */
 
 
-    /**
-     *
-     * PROCESS - SCREEN FOR IMPERFECT TAX DATABASE MATCHES
-     *
-     */
-    private void screenForExitingPersons() {
+    private void screenForExitingObjects() {
 
-        List<Person> personsExiting = new ArrayList<>();
-        for (Person person: persons) {
-            if (!SampleExit.NotYet.equals(person.getSampleExit()))
-                personsExiting.add(person);
+        // screen for persons exiting the sample
+        persons.removeIf(person -> (!SampleExit.NotYet.equals(person.getSampleExit())));
+        for (BenefitUnit benefitUnit: benefitUnits) {
+            benefitUnit.getMembers().removeIf(person -> !persons.contains(person));
         }
-        for (Person person: personsExiting) {
-            removePerson(person);
+
+        // screen for empty benefit units
+        benefitUnits.removeIf(benefitUnit -> (benefitUnit.getMale()==null && benefitUnit.getFemale()==null));
+        for (Household household: households) {
+            household.getBenefitUnits().removeIf(benefitUnit -> !benefitUnits.contains(benefitUnit));
+        }
+
+        // screen for empty households
+        households.removeIf(household -> household.getBenefitUnits().isEmpty());
+
+        // screen for benefit units not associated with a valid household
+        benefitUnits.removeIf(benefitUnit -> (!households.contains(benefitUnit.getHousehold())));
+
+        // screen for persons not associated with a valid benefit unit
+        persons.removeIf(person -> (!benefitUnits.contains(person.getBenefitUnit())));
+
+        // screen for residual problems
+        for (Person person : persons) {
+            if (!benefitUnits.contains(person.getBenefitUnit()))
+                throw new RuntimeException("person included in model in benefit unit that is not included in model");
+        }
+        for (BenefitUnit benefitUnit: benefitUnits) {
+            if (!households.contains(benefitUnit.getHousehold()))
+                throw new RuntimeException("benefit unit included in model in household that is not included in model");
+            if (benefitUnit.getMale()==null && benefitUnit.getFemale()==null)
+                throw new RuntimeException("problem screening out benefit units with no responsible adults");
+            int male = 0;
+            int female = 0;
+            for (Person person: benefitUnit.getMembers()) {
+                if (!person.getBenefitUnit().equals(benefitUnit))
+                    throw new RuntimeException("inconsistent linkages between benefit units and members");
+                if (person.getDag()>=Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+                    if (Gender.Male.equals(person.getDgn()))
+                        male++;
+                    else
+                        female++;
+                }
+            }
+            if (male>1)
+                throw new RuntimeException("more than one mature male in benefit unit");
+            if (female>1)
+                throw new RuntimeException("more than one mature female in benefit unit");
+            if (male+female<1)
+                throw new RuntimeException("no mature adults in benefit unit");
+        }
+        for (Household household: households) {
+            for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                if (!benefitUnit.getHousehold().equals(household))
+                    throw new RuntimeException("inconsistent linkages between households and benefit units");
+            }
         }
     }
 
@@ -1688,7 +1711,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                 public void match(Person p1, Person p2) {
 
                                     //If two people have the same gender or different region, simply don't match and do nothing?
-                                    if(p1.getDgn().equals(p2.getDgn()) || !p1.getRegion().equals(p2.getRegion())) {
+                                    if (p1.getDgn().equals(p2.getDgn()) || !p1.getRegion().equals(p2.getRegion())) {
                                         // throw new RuntimeException("Error - both parties to match have the same gender!");
                                     } else {
 
@@ -1696,7 +1719,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         p2.setDcpyy(0);
 
                                         // update benefit unit and household
-                                        p1.setupNewBenefitUnit(true);
+                                        p1.setupNewBenefitUnit(p2, true);
                                         p1.setToBePartnered(false);         //Probably could be removed
                                         p2.setToBePartnered(false);
                                         personsToMatch2.get(key).remove(p1); //Remove matched persons and keep everyone else in the matching queue
@@ -2370,6 +2393,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 for (Household household : inputHouseholdList) {
                     if (minWeight == null || household.getWeight() < minWeight)
                         minWeight = household.getWeight();
+                    for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                        for (Person person : benefitUnit.getMembers()) {
+                            person.setAdditionalFieldsInInitialPopulation();
+                        }
+                        benefitUnit.initializeFields();
+                    }
                 }
                 double replicationFactor = 5.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
                 for (Household household : inputHouseholdList) {
@@ -2656,61 +2685,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public Map<Gender, LinkedHashMap<Region, Set<Person>>> getPersonsToMatch() {
         return personsToMatch;
-    }
-
-    public void removePerson(Person person) {
-
-        // remove from benefit unit
-        if (person.getBenefitUnit() != null)
-            person.getBenefitUnit().removeMember(person);
-
-        // remove person from model
-        if (persons.contains(person)) {
-
-            boolean removed = persons.remove(person);
-            if(!removed) {
-                throw new RuntimeException("Person " + person.getKey().getId() + " could not be removed from persons set");
-            }
-        }
-    }
-
-    public void removeBenefitUnit(BenefitUnit benefitUnit) {
-
-        // remove all benefit unit members from model
-        Set<Person> members = new LinkedHashSet<>(benefitUnit.getMembers());
-        for (Person person : members) {
-            removePerson(person);
-        }
-
-        // remove benefit unit from the household
-        if (benefitUnit.getHousehold() != null)
-            benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
-
-        // remove benefit unit from model
-        if ( benefitUnits.contains(benefitUnit) ) {
-
-            boolean removed = benefitUnits.remove(benefitUnit);
-            if(!removed) {
-                throw new RuntimeException("BenefitUnit " + benefitUnit.getKey().getId() + " could not be removed from benefitUnits set");
-            }
-        }
-    }
-
-    public void removeHousehold(Household household) {
-
-        // remove any child benefit units
-        for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
-            benefitUnit.setHousehold(null);
-            removeBenefitUnit(benefitUnit);
-        }
-
-        if (households.contains(household)) {
-
-            boolean removed = households.remove(household);
-            if (!removed) {
-                throw new RuntimeException("Household " + household.getId() + " could not be removed from Households set");
-            }
-        }
     }
 
     public int getNumberOfSimulatedPersons() {
@@ -3259,34 +3233,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
             e.printStackTrace();
             throw new RuntimeException("Problem sourcing data for starting population");
-        }
-    }
-
-    private void persistProcessedTest() {
-
-        // create test case
-        int ii = 1;
-        Household household = new Household(7);
-        BenefitUnit benefitUnit = new BenefitUnit(7);
-        benefitUnit.setHousehold(household);
-        Person person = new Person(7);
-        person.setDag(20);
-        person.setDgn(Gender.Male);
-        person.setBenefitUnit(benefitUnit);
-        Set<Household> households = new LinkedHashSet<>();
-        households.add(household);
-
-        persistProcessed(households, Country.UK, 1925, 5);
-
-        // test input retrieval
-        Processed processedOut = getProcessed(Country.UK, 1925, 5);
-
-        if (processedOut!=null) {
-
-            Set<Household> householdsHere = processedOut.getHouseholds();
-            Set<BenefitUnit> benefitUnitsHere = processedOut.getBenefitUnits();
-            Set<Person> personsHere = processedOut.getPersons();
-            ii = 2;
         }
     }
 }

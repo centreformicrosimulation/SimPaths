@@ -146,7 +146,7 @@ public class UnionMatching {
             female.setDcpyy(0);
 
             //Update household
-            male.setupNewBenefitUnit(true);        //All the lines below are executed within the setupNewHome() method for both male and female.  Note need to have partner reference before calling setupNewHome!
+            male.setupNewBenefitUnit(female, true);        //All the lines below are executed within the setupNewHome() method for both male and female.  Note need to have partner reference before calling setupNewHome!
         }
     }
 
@@ -166,10 +166,13 @@ public class UnionMatching {
         double potentialHourlyEarningsDiff = male.getFullTimeHourlyEarningsPotential() - female.getFullTimeHourlyEarningsPotential();        //If female.getDesiredEarningPotential > 0, favours wealthier men
         double earningsMatch = (potentialHourlyEarningsDiff - female.getDesiredEarningsPotentialDiff());
         double ageMatch = (ageDiff - male.getDesiredAgeDiff());
+        boolean flagAllow = (male.getIdMother() == null || male.getIdMother() != female.getId()) &&
+                (female.getIdFather() == null || female.getIdFather() != male.getId());
+
         // term to enhance replication of simulated projections
         //double rndMatch = (male.getCohabitRandomUniform() - female.getCohabitRandomUniform()) * 10.0;
 
-        if (Math.abs(ageMatch) < Parameters.AGE_DIFFERENCE_INITIAL_BOUND &&
+        if (flagAllow && Math.abs(ageMatch) < Parameters.AGE_DIFFERENCE_INITIAL_BOUND &&
                 Math.abs(earningsMatch) < Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND) {
 
             // Score currently based on an equally weighted measure.  The Iterative (Simple and Random) Matching algorithm prioritises matching to the potential partner that returns the lowest score from this method (therefore, on aggregate we are trying to minimize the value below).

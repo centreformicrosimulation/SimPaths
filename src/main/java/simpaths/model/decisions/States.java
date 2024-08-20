@@ -134,7 +134,7 @@ public class States {
         }
 
         // cohabitation
-        populate(Axis.Cohabitation, benefitUnit.getCoupleOccupancy());
+        populate(Axis.Cohabitation, benefitUnit.getCoupleDummy());
 
         // gender
         populate(Axis.Gender, refPerson.getGender());

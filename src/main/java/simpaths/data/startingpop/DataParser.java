@@ -77,11 +77,14 @@ public class DataParser {
 				+ "CREATE TABLE " + inputFileName + " AS SELECT * FROM CSVREAD(\'" + inputFileLocation + "\');"
 				+ "DROP TABLE IF EXISTS " + personTable + " CASCADE;"
 				+ "CREATE TABLE " + personTable + " AS (SELECT " + stringAppender(inputPersonColumnNamesSet) + " FROM " + inputFileName + ");"
-				//Add id column
+
+				//Add panel entity key
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idperson RENAME TO id;"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT NOT NULL;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT NOT NULL DEFAULT " + startyear + ";"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT NOT NULL DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT NOT NULL DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ADD CONSTRAINT PK1 PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -227,7 +230,6 @@ public class DataParser {
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhtime INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhrun INT DEFAULT 0;"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN prid INT DEFAULT 0;"
-
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
 			);
 
@@ -264,7 +266,7 @@ public class DataParser {
 				+ "UPDATE " + benefitUnitTable + " SET tot_pen = 0.0 WHERE tot_pen = -9.0;"
 				+ "UPDATE " + benefitUnitTable + " SET nvmhome = 0.0 WHERE nvmhome = -9.0;"
 
-				//Rename id column
+				//Add panel entity key
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idbenefitunit RENAME TO id;"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
@@ -276,14 +278,19 @@ public class DataParser {
 
 			//Remove duplicate rows
 			stat.execute(
-				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + " ORDER BY ID;"
-				+ "DROP TABLE IF EXISTS " + benefitUnitTable + " CASCADE;"
+				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + ";"
+				+ "DROP TABLE IF EXISTS " + benefitUnitTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + benefitUnitTable + ";"
+				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN id BIGINT NOT NULL;"
+				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN working_id INT NOT NULL;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD CONSTRAINT PK2 PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 			);
 
 			//Create household table
 			stat.execute(
-					"DROP TABLE IF EXISTS " + householdTable + " CASCADE;"
+					"DROP TABLE IF EXISTS " + householdTable + ";"
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
 							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
@@ -295,12 +302,25 @@ public class DataParser {
 
 			//Remove duplicate rows
 			stat.execute(
-					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + " ORDER BY ID;"
-				+ "DROP TABLE IF EXISTS " + householdTable + " CASCADE;"
+					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + ";"
+				+ "DROP TABLE IF EXISTS " + householdTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + householdTable + ";"
+				+ "ALTER TABLE " + householdTable + " ALTER COLUMN id BIGINT NOT NULL;"
+				+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+				+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+				+ "ALTER TABLE " + householdTable + " ALTER COLUMN working_id INT NOT NULL;"
+				+ "ALTER TABLE " + householdTable + " ADD CONSTRAINT PK3 PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 			);
 
-			stat.execute("DROP TABLE IF EXISTS " + inputFileName + " CASCADE;");
+			//Set-up foreign keys
+			stat.execute(
+					"ALTER TABLE " + benefitUnitTable + " ADD CONSTRAINT FK1 "
+					+ "FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES " + householdTable + " (id, simulation_time, simulation_run, working_id);"
+					+ "ALTER TABLE " + personTable + " ADD CONSTRAINT FK2 "
+					+ "FOREIGN KEY (buid, butime, burun, prid) REFERENCES " + benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
+			);
+
+			stat.execute("DROP TABLE IF EXISTS " + inputFileName + ";");
 
 		} catch(Exception e){
 		//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());

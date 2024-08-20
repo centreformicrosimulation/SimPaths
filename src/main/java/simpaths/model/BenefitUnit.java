@@ -129,13 +129,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     // USED BY EXPECTATIONS OBJECT TO INTERACT WITH REGRESSION MODELS
-    public BenefitUnit(BenefitUnit originalBenefitUnit, boolean regressionProxy) {
+    public BenefitUnit(BenefitUnit originalBenefitUnit, boolean regressionModel) {
 
-        if (regressionProxy) {
-            this.model = null;
-            key = null;
-            collector = null;
+        this(regressionModel);
+        if (regressionModel) {
             yearLocal = originalBenefitUnit.yearLocal;
+            occupancyLocal = originalBenefitUnit.occupancyLocal;
             deh_c3Local = originalBenefitUnit.deh_c3Local;
             region = originalBenefitUnit.region;
         } else {
@@ -171,12 +170,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     // USED TO CONSTRUCT NEW BENEFIT UNITS FOR PEOPLE AS NEEDED
     // SEE THE PERSON OBJECT, setupNewBenefitUnit METHOD
-    public BenefitUnit(Person person, Set<Person> childrenToNewBenefitUnit, Household newHousehold) {
+    public BenefitUnit(Person person) {
 
         // initialise benefit unit
         this(benefitUnitIdCounter++, (long)(person.getBenefitUnitRandomUniform()*100000));
         region = person.getRegion();
-
         if (Parameters.projectLiquidWealth) {
             // transfer wealth between benefit units
 
@@ -187,28 +185,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
         }
 
-        // add new members
-        for (Person child : childrenToNewBenefitUnit) {
-            addMember(child);
-        }
-        addMember(person);
-
-        setHousehold(newHousehold);
-
         // finalise
         this.createdByConstructor = "Singles";
     }
 
-    public BenefitUnit(Person p1, Person p2, Set<Person> childrenToNewBenefitUnit, Household newHousehold) {
+    public BenefitUnit(Person p1, Person p2) {
 
         // initialise benefit unit
         this(benefitUnitIdCounter++, (long)(p1.getBenefitUnitRandomUniform()*100000));
         region = p1.getRegion();
-
-        if (region != p2.getRegion()) {
+        if (region != p2.getRegion())
             throw new RuntimeException("ERROR - region of responsible male and female must match!");
-        }
-
         if (Parameters.projectLiquidWealth) {
             // transfer wealth between benefit units
 
@@ -222,13 +209,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 pBU.setLiquidWealth(pBU.getLiquidWealth() - p2.getLiquidWealth());
             }
         }
-
-        // add new members
-        members.addAll(childrenToNewBenefitUnit);
-        members.add(p1);
-        members.add(p2);
-
-        setHousehold(newHousehold);
 
         // finalise
         createdByConstructor = "Couples";
@@ -985,8 +965,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                     //Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
                     double regressionScore = 0.;
-                    if(male.atRiskOfWork()) { //If male has flexible labour supply
-                        if(female.atRiskOfWork()) { //And female has flexible labour supply
+                    if (male.atRiskOfWork()) { //If male has flexible labour supply
+                        if (female.atRiskOfWork()) { //And female has flexible labour supply
                             //Follow utility process for couples
                             regressionScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
                         } else if (!female.atRiskOfWork()) { //Male has flexible labour supply, female doesn't
@@ -995,7 +975,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             //In Italy, this should follow a separate set of estimates. One way is to differentiate between countries here; another would be to add a set of estimates for both countries, but for the UK have the same number as for singles
                             //Introduced a new category of estimates, Males/Females with Dependent to be used when only one of the couple is flexible in labour supply. In Italy, these have a separate set of estimates; in the UK they use the same estimates as "independent" singles
                         }
-                    } else if(female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
+                    } else if (female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
                         //Follow utility process for single female
                         regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
@@ -1310,18 +1290,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else  {
                 person.setLes_c4(Les_c4.NotEmployed);
             }
-        }
-    }
-
-    public void addMember(Person person) {
-        members.add(person);
-    }
-
-    public void removeMember(Person person) {
-
-        members.remove(person);
-        if (getMale()==null && getFemale()==null) {
-            model.removeBenefitUnit(this);
         }
     }
 
@@ -2420,42 +2388,42 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? (double) Parameters.timeTrendStopsIn - 2000 : (double) getYear() - 2000;
             }
             case couple_emp_2ft -> {
-                return (getCouple() && (getMinWeeklyHoursWorked() >= Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
+                return (getCoupleBoolean() && (getMinWeeklyHoursWorked() >= Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case couple_emp_ftpt -> {
-                return (getCouple() &&
+                return (getCoupleBoolean() &&
                         (getMinWeeklyHoursWorked() > 0) && (getMinWeeklyHoursWorked() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED) &&
                         (getMaxWeeklyHoursWorked() >= Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case couple_emp_2pt -> {
-                return (getCouple() &&
+                return (getCoupleBoolean() &&
                         (getMinWeeklyHoursWorked() > 0) &&
                         (getMaxWeeklyHoursWorked() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case couple_emp_ftne -> {
-                return (getCouple() &&
+                return (getCoupleBoolean() &&
                         (getMinWeeklyHoursWorked() == 0) &&
                         (getMaxWeeklyHoursWorked() >= Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case couple_emp_ptne -> {
-                return (getCouple() &&
+                return (getCoupleBoolean() &&
                         (getMinWeeklyHoursWorked() == 0) &&
                         (getMaxWeeklyHoursWorked() > 0) &&
                         (getMaxWeeklyHoursWorked() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case couple_emp_2ne -> {
-                return (getCouple() && (getMaxWeeklyHoursWorked() == 0)) ? 1.0 : 0.0;
+                return (getCoupleBoolean() && (getMaxWeeklyHoursWorked() == 0)) ? 1.0 : 0.0;
             }
             case single_emp_ft -> {
-                return (!getCouple() && (getMinWeeklyHoursWorked() >= Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
+                return (!getCoupleBoolean() && (getMinWeeklyHoursWorked() >= Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case single_emp_pt -> {
-                return (!getCouple() &&
+                return (!getCoupleBoolean() &&
                         (getMinWeeklyHoursWorked() > 0) &&
                         (getMaxWeeklyHoursWorked() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)) ? 1.0 : 0.0;
             }
             case single_emp_ne -> {
-                return (!getCouple() && (getMaxWeeklyHoursWorked() == 0)) ? 1.0 : 0.0;
+                return (!getCoupleBoolean() && (getMaxWeeklyHoursWorked() == 0)) ? 1.0 : 0.0;
             }
             case Graduate -> {
                 return (Education.High.equals(getHighestDehC3())) ? 1.0 : 0.0;
@@ -2835,21 +2803,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public void setHousehold(Household newHousehold) {
 
-        if (newHousehold == null) {
+        if (household!=null && !household.equals(newHousehold))
+            household.getBenefitUnits().remove(this);
 
-            household = null;
-        } else {
-
-            if (household != null) {
-                household.removeBenefitUnit(this);
-            }
-            household = newHousehold;
-            if(!newHousehold.getBenefitUnits().contains(this))
-                newHousehold.addBenefitUnit(this);
-        }
-
-        // update benefit unit members
-        Set<Person> persons = getMembers();
+        household = newHousehold;
+        if (household!=null)
+            household.getBenefitUnits().add(this);
     }
 
     public Region getRegion() {
@@ -2964,9 +2923,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return benefitsReceivedPerMonth;
     }
 
+    public void setOccupancyLocal(Occupancy occupancy) {
+        occupancyLocal = occupancy;
+    }
+
     public Occupancy getOccupancy() {
-        if (model==null)
+        if (model==null) {
+            if (occupancyLocal==null)
+                throw new RuntimeException("occupancyLocal not initialised");
             return occupancyLocal;
+        }
         if (getMale()!=null) {
             if (getFemale()!=null)
                 return Occupancy.Couple;
@@ -2979,11 +2945,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             throw new RuntimeException("Benefit unit does not include at least one responsible adult");
     }
 
-    public int getCoupleOccupancy() {
+    public int getCoupleDummy() {
         return (getMale()!=null && getFemale()!=null) ? 1 : 0;
     }
 
-    public boolean getCouple() {
+    public boolean getCoupleBoolean() {
         return (getMale()!=null && getFemale()!=null);
     }
 
@@ -3420,58 +3386,80 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
+    public void setDeh_c3Local(Education edu) {
+        deh_c3Local = edu;
+    }
+
     private Education getHighestDehC3() {
+
         Education max = Education.Low;
-        Person male = getMale();
-        Person female = getFemale();
-        if(male != null || female != null) {
+        if (model==null) {
 
-            if (male != null) max = male.getDeh_c3();
-            if (female != null) {
+            if (deh_c3Local == null)
+                throw new RuntimeException("reference to uninitialised education status");
+            max = deh_c3Local;
+        } else {
 
-                if (Education.High.equals(female.getDeh_c3())) {
-                    max = Education.High;
-                } else if (Education.Medium.equals(female.getDeh_c3()) && !(max == Education.High)) {
-                    max = Education.Medium;
+            Person male = getMale();
+            Person female = getFemale();
+            if(male != null || female != null) {
+
+                if (male != null) max = male.getDeh_c3();
+                if (female != null) {
+
+                    if (Education.High.equals(female.getDeh_c3())) {
+                        max = Education.High;
+                    } else if (Education.Medium.equals(female.getDeh_c3()) && !(max == Education.High)) {
+                        max = Education.Medium;
+                    }
                 }
             }
-        } else {
-            if (deh_c3Local == null) {
-                throw new RuntimeException("reference to uninitialised education status");
-            }
-            max = deh_c3Local;
         }
+
         return max;
     }
 
-    private int getMinWeeklyHoursWorked() {
+    public void setLabourHoursWeekly1Local(Integer hours) {
+        labourHoursWeekly1Local = hours;
+    }
+
+    public void setLabourHoursWeekly2Local(Integer hours) {
+        labourHoursWeekly2Local = hours;
+    }
+
+    private Integer getMinWeeklyHoursWorked() {
 
         Integer val = null;
-        Person male = getMale();
-        Person female = getFemale();
-        if (male != null || female != null) {
-
-            if (male != null) {
-                val = male.getLabourSupplyHoursWeekly();
-            }
-            if (female != null) {
-                if (val != null) {
-                    val = Math.min(val, female.getLabourSupplyHoursWeekly());
-                } else {
-                    val = female.getLabourSupplyHoursWeekly();
-                }
-            }
-        } else {
+        if (model==null) {
 
             if (labourHoursWeekly1Local == null) {
                 throw new RuntimeException("reference to uninitialised labourHoursWeekly attribute of benefitUnit");
             } else {
                 val = labourHoursWeekly1Local;
             }
-            if (labourHoursWeekly2Local != null) {
-                if (labourHoursWeekly2Local < val) val = labourHoursWeekly2Local;
-            }
+            if (labourHoursWeekly2Local != null)
+                if (labourHoursWeekly2Local < val)
+                    val = labourHoursWeekly2Local;
+        } else {
+
+            Person male = getMale();
+            Person female = getFemale();
+            if (male != null || female != null) {
+
+                if (male != null) {
+                    val = male.getLabourSupplyHoursWeekly();
+                }
+                if (female != null) {
+                    if (val != null) {
+                        val = Math.min(val, female.getLabourSupplyHoursWeekly());
+                    } else {
+                        val = female.getLabourSupplyHoursWeekly();
+                    }
+                }
+            } else
+                throw new RuntimeException("problem identifying responsible adults");
         }
+
         return val;
     }
 
@@ -3533,28 +3521,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
         return cap;
     }
+
     public void setYearLocal(Integer year) {
         yearLocal = year;
     }
+
     public int getYear() {
-        if (model != null) {
-            return model.getYear();
-        } else {
-            if (yearLocal == null) {
+        if (model == null) {
+            if (yearLocal == null)
                 throw new RuntimeException("call to get uninitialised year in benefit unit");
-            }
             return yearLocal;
         }
+        return model.getYear();
     }
-    public void setDeh_c3Local(Education edu) {
-        deh_c3Local = edu;
-    }
-    public void setLabourHoursWeekly1Local(Integer hours) {
-        labourHoursWeekly1Local = hours;
-    }
-    public void setLabourHoursWeekly2Local(Integer hours) {
-        labourHoursWeekly2Local = hours;
-    }
+
     public long getTaxDbDonorId() {
         return taxDbDonorId;
     }
@@ -3589,7 +3569,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return null;
     }
 
-    public void setOccupancyLocal(Occupancy occupancy) {
-        occupancyLocal = occupancy;
+    public void removeMember(Person member) {
+        members.remove(member);
+        if (getMale()==null && getFemale()==null) {
+            if (members.size()>0)
+                throw new RuntimeException("orphan benefit unit");
+            household.removeBenefitUnit(this);
+            model.getBenefitUnits().remove(this);
+        }
     }
 }

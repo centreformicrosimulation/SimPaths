@@ -229,6 +229,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (regressionModel) {
             model = null;
             key = null;
+            setAllSocialCareVariablesToFalse();
         } else {
             throw new RuntimeException("Person constructor call not recognised");
         }
@@ -564,6 +565,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         needSocialCare_lag1 = Indicator.False;
         careHoursFromFormalWeekly_lag1 = -9.0;
         careHoursFromPartnerWeekly_lag1 = -9.0;
+        careHoursFromParentWeekly_lag1 = -9.0;
         careHoursFromDaughterWeekly_lag1 = -9.0;
         careHoursFromSonWeekly_lag1 = -9.0;
         careHoursFromOtherWeekly_lag1 = -9.0;
@@ -797,12 +799,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private void aging() {
 
         // iterate years in cohabiting partnership
-        dcpyy_lag1 = dcpyy; //Update lag value outside of updateVariables() method
         Person partner = getPartner();
         if (partner != null) {
-            if (Objects.equals(partner.getId(), idPartnerLag1))
+            if (Objects.equals(partner.getId(), idPartnerLag1)) {
+                if (dcpyy==null)
+                    throw new RuntimeException("problem identifying dcpyy");
                 dcpyy++;
-            else
+            } else
                 dcpyy = 0;
         } else
             dcpyy = 0;
@@ -859,7 +862,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             } else {
 
                 adultchildflag = Indicator.False;
-                setupNewHousehold(true); //If person leaves home, they set up a new household
+                setupNewHousehold(); //If person leaves home, they set up a new household
             }
         }
     }
@@ -1362,7 +1365,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             //Give birth to new person and add them to benefitUnit.
             Person child = new Person(babyGender, this);
             model.getPersons().add(child);
-            benefitUnit.addMember(child);
+            benefitUnit.getMembers().add(child);
         }
     }
 
@@ -1567,27 +1570,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // ---------------------------------------------------------------------
     // Other Methods
     // ---------------------------------------------------------------------
-
-
-    private boolean becomeResponsibleInHouseholdIfPossible() {
-        if(dgn.equals(Gender.Male)) {
-            if(benefitUnit.getMale() == null) {
-                benefitUnit.addMember(this);	//This person is male, so becomes responsible male of benefitUnit
-                return benefitUnit.getMale() == this;			//Should return true;
-            }
-            else return false;
-//			else throw new IllegalArgumentException("ERROR - BenefitUnit " + benefitUnit.getKey().getId() + " already has a responsible male!  Cannot set resonsible male as person " + key.getId());
-        }
-        else {	//This person is female
-            if(benefitUnit.getFemale() == null) {
-                benefitUnit.addMember(this);	//This person is female, so becomes responsible female of benefitUnit
-                return benefitUnit.getFemale() == this;		//Should return true;
-            }
-            else return false;
-//			else throw new IllegalArgumentException("ERROR - BenefitUnit " + benefitUnit.getKey().getId() + " already has a responsible female!  Cannot set resonsible female as person " + key.getId());
-        }
-    }
-
     public boolean atRiskOfWork() {
 
         /*
@@ -1685,7 +1667,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         toGiveBirth = false;
         toBePartnered = false;
         leavePartner = false;
-        leftPartnership = false;
         ded = (Les_c4.Student.equals(les_c4)) ? Indicator.True : Indicator.False;
         if (initialUpdate && careHoursFromParentWeekly==null)
             careHoursFromParentWeekly = 0.0;
@@ -1784,23 +1765,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         lesdf_c4_lag1 = getLesdf_c4(); //Lag(1) of own and partner's activity status
     }
 
-    protected Household setupNewHousehold(boolean automaticUpdateOfHouseholds) {
+    // used when children leave home
+    protected void setupNewHousehold() {
 
-        Household newHousehold = new Household(); //Set up a new empty household
-        if (automaticUpdateOfHouseholds) {
-
-            model.getHouseholds().add(newHousehold);
-
-            //Remove benefitUnit from old household (if exists)
-            if (benefitUnit.getHousehold() != null) {
-
-                benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
-            }
-        }
-        newHousehold.addBenefitUnit(this.benefitUnit); //Add benefit unit of the person moving out to the new household
+        Household newHousehold = new Household();
+        model.getHouseholds().add(newHousehold);
+        benefitUnit.setHousehold(newHousehold);
         idHousehold = newHousehold.getId();
-
-        return newHousehold;
     }
 
 
@@ -1826,54 +1797,53 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      *   benefitUnit manually e.g. (houseIterator.add(newHouse)).  Also the updateHousehold() method will need to be called and the person
      *   removed from the old house manually outside the iteration through benefitUnits.
      *
-     *   @return new benefit unit
      */
-    protected BenefitUnit setupNewBenefitUnit(boolean automaticUpdateOfBenefitUnits) {
+    public void setupNewBenefitUnit(boolean automaticUpdateOfBenefitUnits) {
+        setupNewBenefitUnit(null, automaticUpdateOfBenefitUnits);
+    }
+    public void setupNewBenefitUnit(Person partner, boolean automaticUpdateOfBenefitUnits) {
 
         // identify children transferring to new benefit unit
         // this needs to be done before new benefit units are created because the new benefit units
         // are instantiated with the transferred responsible adults, at which time the old benefit unit
         // references are also transferred
         Set<Person> childrenToNewBenefitUnit = childrenToFollowPerson(this);
-        Person partner = getPartner();
         if (partner != null) {
             childrenToNewBenefitUnit.addAll(childrenToFollowPerson(partner));
         }
 
-
-        /*
-         * Create new benefitUnit
-         */
+        Household newHousehold;
         BenefitUnit newBenefitUnit;
-        if(partner != null) {
+        if (partner != null) {
             // relationship forms
             // when a relationship forms newBenefitUnit is populated with data described by person and partner, both of whom
             // are re-assigned from their previous benefitUnits to newBenefitUnit and households to newHousehold
 
-            // Multigeneration families are not allowed - setting up a new benefit unit with partner requires setting up new household
-            Household newHousehold = new Household();
-            model.getHouseholds().add(newHousehold);
-
-            // Partner will become responsible adult, even if their age < age to move out of home if they are already living with their partner
-            newBenefitUnit = new BenefitUnit(this, partner, childrenToNewBenefitUnit, newHousehold);
+            newHousehold = new Household();
+            newBenefitUnit = new BenefitUnit(this, partner);
         } else {
             // includes when reach age of maturity and when relationship dissolves.
             // When relationship dissolves person is the female, and this routine sets up a new benefit unit for the woman,
             // updates characteristics for both newBenefitUnit and benefitUnit, and then leaves benefitUnit to the man
 
-            Household newHousehold;
-            if (idHousehold != null) {
-                // this initialises maturing children to the household of their parents
-
+            if (dag==Parameters.AGE_TO_BECOME_RESPONSIBLE) {
                 newHousehold = benefitUnit.getHousehold();
             } else {
-                // this creates a new household for females following relationship dissolution
-
                 newHousehold = new Household();
-                model.getHouseholds().add(newHousehold);
             }
-            newBenefitUnit = new BenefitUnit(this, childrenToNewBenefitUnit, newHousehold);
+            newBenefitUnit = new BenefitUnit(this);
         }
+
+        // establish links between objects
+        newBenefitUnit.setHousehold(newHousehold);
+        for (Person child : childrenToNewBenefitUnit) {
+            child.setBenefitUnit(newBenefitUnit);
+        }
+        if (partner!=null)
+            partner.setBenefitUnit(newBenefitUnit);
+        this.setBenefitUnit(newBenefitUnit);
+        newBenefitUnit.initializeFields();
+
 
         // Automatic update of collections if required
         // Removing children (above) from the benefitUnit should not lead to the removal of the benefitUnit (due to becoming an empty benefitUnit)
@@ -1883,13 +1853,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         // automaticUpdateOfBenefitUnits is a toggle to prevent automatic update to the model's set of benefitUnits, which would cause concurrent
         // modification exception to be thrown if called within an iteration through benefitUnits.  In this case, set parameter to false and use the
         // iterator on the benefitUnits to add manually e.g. (houseIterator.add(newBU)).
+        model.getHouseholds().add(newHousehold);
         if (automaticUpdateOfBenefitUnits) {
 
             model.getBenefitUnits().add(newBenefitUnit);	//This will cause concurrent modification if setupNewHome is called in an iteration through benefitUnits
         }
-
-        newBenefitUnit.initializeFields();
-        return newBenefitUnit;
     }
 
     private Set<Person> childrenToFollowPerson(Person person) {
@@ -1899,11 +1867,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (person.dag<Parameters.AGE_TO_BECOME_RESPONSIBLE)
             throw new RuntimeException("problem identifying allocation of children to new benefit unit");
         if (Gender.Female.equals(person.dgn))
-            childrenToNewBenefitUnit.addAll(person.getBenefitUnit().getChildren());
-        else {
-
             for (Person child : person.getBenefitUnit().getChildren()) {
-                if (child.idMother==null)
+                if (child.getIdMother()!=null && person.getId()==child.getIdMother())
+                    childrenToNewBenefitUnit.add(child);
+            }
+        else {
+            for (Person child : person.getBenefitUnit().getChildren()) {
+                if (child.idMother==null && child.getIdFather()!=null && person.getId()==child.getIdFather())
                     childrenToNewBenefitUnit.add(child);
             }
         }
@@ -3323,33 +3293,39 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public HouseholdStatus getHouseholdStatus() {
          Household household = benefitUnit.getHousehold();
-         if (household.getBenefitUnits().size()>1) {
+         if (household.getBenefitUnits().size()>1 && (idMother!=null || idFather!=null)) {
              for (BenefitUnit unit : household.getBenefitUnits()) {
                  if (unit != benefitUnit) {
                      for (Person member : unit.getMembers()) {
-                         if (member.getId()==idMother || member.getId()==idFather)
+                         if (idMother!=null && member.getId()==idMother)
+                             return HouseholdStatus.Parents;
+                         if (idFather!=null && member.getId()==idFather)
                              return HouseholdStatus.Parents;
                      }
                  }
              }
          }
-        if (benefitUnit.getCouple())
+        if (benefitUnit.getCoupleBoolean())
             return HouseholdStatus.Couple;
         else
             return HouseholdStatus.Single;
     }
 
     public int getCohabiting() {
-        return benefitUnit.getCoupleOccupancy();
+        return benefitUnit.getCoupleDummy();
     }
 
     public Education getDeh_c3() {
         return deh_c3;
     }
 
-    public void setDeh_c3(Education deh_c3) {this.deh_c3 = deh_c3;}
+    public void setDeh_c3(Education deh_c3) {
+         this.deh_c3 = deh_c3;
+     }
 
-    public void setDeh_c3_lag1(Education deh_c3_lag1) {this.deh_c3_lag1 = deh_c3_lag1;}
+    public void setDeh_c3_lag1(Education deh_c3_lag1) {
+         this.deh_c3_lag1 = deh_c3_lag1;
+     }
 
     public Education getDehm_c3() {
         return dehm_c3;
@@ -3442,11 +3418,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (Les_c4.NotEmployed.equals(les_c4)) ? 1 : 0;
     }
 
+    public void setRegionLocal(Region region) {
+        regionLocal = region;
+    }
+
     public Region getRegion() {
-        if (benefitUnit != null) {
-            return benefitUnit.getRegion();
-        } else {
+        if (benefitUnit == null) {
+            if (regionLocal==null)
+                throw new RuntimeException("attempt to access regionLocal before it has been assigned");
             return regionLocal;
+        } else {
+            return benefitUnit.getRegion();
         }
     }
 
@@ -3496,25 +3478,35 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setBenefitUnit(BenefitUnit newBenefitUnit) {
 
-        if (newBenefitUnit == null) {
+        if (benefitUnit!=null && !benefitUnit.equals(newBenefitUnit)) {
+            benefitUnit.removeMember(this);
+        }
 
-            benefitUnit = null;
+        benefitUnit = newBenefitUnit;
+        if (newBenefitUnit == null)
             idHousehold = null;
-        } else {
-
-            if ( benefitUnit != null ) {
-                benefitUnit.removeMember(this);
-            }
-            benefitUnit = newBenefitUnit;
+        else  {
+            if (newBenefitUnit.getHousehold()==null)
+                throw new RuntimeException("problem identifying household of benefit unit");
             idHousehold = newBenefitUnit.getHousehold().getId();
-            benefitUnit.addMember(this);
+            benefitUnit.getMembers().add(this);
         }
     }
 
     public Person getPartner() {
+
         if (dag >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+
             for (Person member : benefitUnit.getMembers()) {
-                if (member!=this && member.getDag()>=Parameters.AGE_TO_BECOME_RESPONSIBLE)
+
+                boolean accept = true;
+                if (member==this || member.getDag()<Parameters.AGE_TO_BECOME_RESPONSIBLE)
+                    accept = false;
+                if (idMother!=null && member.getId()==idMother)
+                    accept = false;
+                if (idFather!=null && member.getId()==idFather)
+                    accept = false;
+                if (accept)
                     return member;
             }
         }
@@ -3532,11 +3524,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public Labour getLabourSupplyWeekly() {
+        if (labourSupplyWeekly==null)
+            throw new RuntimeException("request for labourSupplyWeekly before it has been initialised");
         return labourSupplyWeekly;
     }
 
     public int getL1LabourSupplyHoursWeekly() {
-        return (labourSupplyWeekly_L1 != null) ? labourSupplyWeekly_L1.getHours(this) : 0;
+        if (labourSupplyWeekly_L1==null)
+            throw new RuntimeException("request for labourSupplyWeekly_L1 before it has been initialised");
+        return labourSupplyWeekly_L1.getHours(this);
     }
 
     public int getLabourSupplyHoursWeekly() {
@@ -3721,9 +3717,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public Dcpst getDcpst() {
-        if (model==null)
+        if (benefitUnit==null) {
+            if (dcpstLocal==null)
+                throw new RuntimeException("attempt to access unassigned value for dcpstLocal");
             return dcpstLocal;
-        if (benefitUnit.getCouple())
+        }
+        if (benefitUnit.getCoupleBoolean())
             return Dcpst.Partnered;
         if (Dcpst.Partnered.equals(dcpst_lag1))
             return Dcpst.PreviouslyPartnered;
@@ -3851,7 +3850,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public Lesdf_c4 getLesdf_c4() {
-        if (benefitUnit.getCouple()) {
+        if (benefitUnit.getCoupleBoolean() && dag>=Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            if (getPartner()==null)
+                throw new RuntimeException("inconsistency between couple and partner identifiers");
             if (Les_c4.EmployedOrSelfEmployed.equals(les_c4) && Les_c4.EmployedOrSelfEmployed.equals(getPartner().les_c4))
                 return Lesdf_c4.BothEmployed;
             else if (Les_c4.EmployedOrSelfEmployed.equals(les_c4))
@@ -4166,44 +4167,45 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void setRegionLocal(Region region) {
-        regionLocal = region;
-    }
-    public void setDhhtp_c4_lag1Local(Dhhtp_c4 dhhtp_c4_lag1) {
-        dhhtp_c4_lag1Local = dhhtp_c4_lag1;
-    }
-    public void setYdses_c5_lag1Local(Ydses_c5 ydses_c5_lag1) {
-        ydses_c5_lag1Local = ydses_c5_lag1;
-    }
-    public void setNumberChildrenAllLocal_lag1(Integer nbr) {
-        numberChildrenAllLocal_lag1 = nbr;
-    }
-    public void setNumberChildrenAllLocal(Integer nbr) {
-        numberChildrenAllLocal = nbr;
-    }
-    public void setNumberChildren02Local_lag1(Integer nbr) {
-        numberChildren02Local_lag1 = nbr;
-    }
     public void setNumberChildren017Local(Integer nbr) {
         numberChildren017Local = nbr;
     }
     public void setIndicatorChildren02Local(Indicator idctr) {
         indicatorChildren02Local = idctr;
     }
+
     private Ydses_c5 getYdses_c5_lag1() {
-        if (benefitUnit!=null) {
-            return getBenefitUnit().getYdses_c5_lag1();
+        if (model!=null) {
+            if (benefitUnit==null)
+                throw new RuntimeException("attempt to access unassigned benefit unit");
+            return benefitUnit.getYdses_c5_lag1();
         } else {
+            if (ydses_c5_lag1Local==null)
+                throw new RuntimeException("attempt to access unassigned ydses_c5_lag1Local");
             return ydses_c5_lag1Local;
         }
     }
+
+    public void setYdses_c5_lag1Local(Ydses_c5 ydses_c5_lag1) {
+        ydses_c5_lag1Local = ydses_c5_lag1;
+    }
+
     private Dhhtp_c4 getDhhtp_c4_lag1() {
-        if (benefitUnit!=null) {
-            return getBenefitUnit().getDhhtp_c4_lag1();
+        if (model!=null) {
+            if (benefitUnit==null)
+                throw new RuntimeException("attempt to access unassigned benefit unit");
+            return benefitUnit.getDhhtp_c4_lag1();
         } else {
+            if (dhhtp_c4_lag1Local==null)
+                throw new RuntimeException("attempt to access unassigned dhhtp_c4_lag1Local");
             return dhhtp_c4_lag1Local;
         }
     }
+
+    public void setDhhtp_c4_lag1Local(Dhhtp_c4 dhhtp_c4_lag1) {
+        dhhtp_c4_lag1Local = dhhtp_c4_lag1;
+    }
+
     private Integer getNumberChildrenAll_lag1() {
         if (benefitUnit != null) {
             return (benefitUnit.getNumberChildrenAll_lag1() != null) ? benefitUnit.getNumberChildrenAll_lag1() : 0;
@@ -4211,27 +4213,55 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (numberChildrenAllLocal_lag1==null) ? 0 : numberChildrenAllLocal_lag1;
         }
     }
+
+    public void setNumberChildrenAllLocal(Integer nbr) {
+        numberChildrenAllLocal = nbr;
+    }
+
     private Integer getNumberChildrenAll() {
-        if (benefitUnit != null) {
+        if (model != null) {
+            if (benefitUnit==null)
+                throw new RuntimeException("attempt to access unassigned benefit unit");
             return benefitUnit.getNumberChildrenAll();
         } else {
-            return (numberChildrenAllLocal==null) ? 0 : numberChildrenAllLocal;
+            if (numberChildrenAllLocal==null)
+                throw new RuntimeException("attempt to access unassigned numberChildrenAllLocal");
+            return numberChildrenAllLocal;
         }
     }
+
+    public void setNumberChildrenAllLocal_lag1(Integer nbr) {
+        numberChildrenAllLocal_lag1 = nbr;
+    }
+
+    public void setNumberChildren02Local_lag1(Integer nbr) {
+        numberChildren02Local_lag1 = nbr;
+    }
+
     private Integer getNumberChildren02_lag1() {
-        if (benefitUnit != null) {
-            return (benefitUnit.getNumberChildren02_lag1() != null) ? benefitUnit.getNumberChildren02_lag1() : 0;
+        if (model != null) {
+            if (benefitUnit==null)
+                throw new RuntimeException("attempt to access unassigned benefit unit");
+            return benefitUnit.getNumberChildren02_lag1();
         } else {
-            return (numberChildren02Local_lag1==null) ? 0 : numberChildren02Local_lag1;
+            if (numberChildren02Local_lag1==null)
+                throw new RuntimeException("attempt to access unassigned numberChildren02Local_lag1");
+            return numberChildren02Local_lag1;
         }
     }
+
     private Integer getNumberChildren017() {
-        if (benefitUnit != null) {
+        if (model != null) {
+            if (benefitUnit==null)
+                throw new RuntimeException("attempt to access unassigned benefit unit");
             return benefitUnit.getNumberChildren(0,17);
         } else {
-            return (numberChildren017Local==null) ? 0 : numberChildren017Local;
+            if (numberChildren017Local==null)
+                throw new RuntimeException("attempt to access unassigned numberChildren017Local");
+            return numberChildren017Local;
         }
     }
+
     private Double getInverseMillsRatio() {
 
         double score;
@@ -4577,5 +4607,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public long getId() {
         return key.getId();
+    }
+
+    public Long getIdMother() {
+        return idMother;
+    }
+
+    public Long getIdFather() {
+        return idFather;
     }
 }

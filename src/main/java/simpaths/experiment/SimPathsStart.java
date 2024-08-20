@@ -73,7 +73,6 @@ public class SimPathsStart implements ExperimentBuilder {
 				runGUIlessSetup(4);
 			} catch (FileNotFoundException f) {
 				System.err.println(f.getMessage());
-				System.exit(1);
 			};
 		}
 

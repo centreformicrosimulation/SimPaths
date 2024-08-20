@@ -149,10 +149,6 @@ public class TaxDonorDataParser {
                 + "ALTER TABLE " + tableName + " ALTER COLUMN ID BIGINT NOT NULL;"
                 + "ALTER TABLE " + tableName + " ADD PRIMARY KEY (ID);"
 
-                //Add rest of PanelEntityKey
-                + "ALTER TABLE " + tableName + " ADD COLUMN SIMULATION_TIME INT DEFAULT " + startYear + ";"
-                + "ALTER TABLE " + tableName + " ADD COLUMN SIMULATION_RUN INT DEFAULT 0;"
-
                 //Reclassify EUROMOD variables
                 // may need to change data structure type otherwise SQL conversion error, so create new column of the correct type,
                 // map data from old column and drop old column
