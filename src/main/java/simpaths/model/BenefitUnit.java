@@ -3572,8 +3572,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public void removeMember(Person member) {
         members.remove(member);
         if (getMale()==null && getFemale()==null) {
-            if (members.size()>0)
-                throw new RuntimeException("orphan benefit unit");
+            if (!members.isEmpty()) {
+                for (Person orphan : members) {
+                    System.out.println("WARNING: Removed orphan aged " + orphan.getDag() + " in benefit unit without reference adult");
+                    model.getPersons().remove(orphan);
+                }
+            }
             household.removeBenefitUnit(this);
             model.getBenefitUnits().remove(this);
         }
