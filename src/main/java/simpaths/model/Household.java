@@ -110,12 +110,20 @@ public class Household implements EventListener, IDoubleSource {
         double cumulativeWeight = 0.0;
         double size = 0.0;
         for (BenefitUnit benefitUnit : benefitUnits) {
-            for( Person person : benefitUnit.getMembers()) {
+            for ( Person person : benefitUnit.getMembers()) {
                 cumulativeWeight += person.getWeight();
                 size++;
             }
         }
         return cumulativeWeight / size;
+    }
+
+    public void setWeight(double weight) {
+        for (BenefitUnit benefitUnit : benefitUnits) {
+            for ( Person person : benefitUnit.getMembers()) {
+                person.setWeight(weight);
+            }
+        }
     }
 
     public long getId() { //Get household ID as set in the simulation. Note that it is different than in the input data.

@@ -21,11 +21,13 @@ import simpaths.model.enums.TargetShares;
 public class InitialPopulationFilter {
 
     // target population counters
-    int populationSize;
-    int censorAge;
-    int cohabiting;
-    MultiKeyMap<Object, Integer> populationByGenderRegionAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
-    final double MARGIN = 0.05;   //
+    private int populationSize;
+    private int censorAge;
+    private int cohabiting;
+    private final boolean IGNORE_REGION = true;
+    private MultiKeyMap<Object, Integer> populationByGenderAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+    private MultiKeyMap<Object, Integer> populationByGenderRegionAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+    private final double MARGIN = 0.01;   //
 
 
     // CONSTRUCTOR
@@ -51,23 +53,48 @@ public class InitialPopulationFilter {
         }
 
         double adults = 0.0;
-        for (Gender gender : Gender.values()) {
-            for (Region region: Parameters.getCountryRegions()) {
-                double valAgg = 0.0;
+        if (IGNORE_REGION) {
+
+            for (Gender gender : Gender.values()) {
+                double valAgg2 = 0.0;
                 for (int age = 0; age <= maxAgeProjection; age++) {
-                    double val = Parameters.getPopulationProjections(gender, region, age, year);
-                    if (age >= Parameters.MIN_AGE_COHABITATION)
-                        adults += val;
-                    if (age >= censorAge) {
-                        valAgg += val;
+                    double valAgg1 = 0.0;
+                    for (Region region: Parameters.getCountryRegions()) {
+                        double val = Parameters.getPopulationProjections(gender, region, age, year);
+                        valAgg1 += val;
                     }
+                    if (age >= Parameters.MIN_AGE_COHABITATION)
+                        adults += valAgg1;
                     if (age < censorAge) {
-                        int valHere = (int)(val / totalPopulationProjection * populationSize);
-                        populationByGenderRegionAndAge.put(gender, region, age, valHere);
+                        int valHere = (int)(valAgg1 / totalPopulationProjection * populationSize);
+                        populationByGenderAndAge.put(gender, age, valHere);
+                    } else  {
+                        valAgg2 += valAgg1;
                     }
                 }
-                int valHere = (int)(valAgg / totalPopulationProjection * populationSize);
-                populationByGenderRegionAndAge.put(gender, region, censorAge, valHere);
+                int valHere = (int)(valAgg2 / totalPopulationProjection * populationSize);
+                populationByGenderAndAge.put(gender, censorAge, valHere);
+            }
+        } else {
+
+            for (Gender gender : Gender.values()) {
+                for (Region region: Parameters.getCountryRegions()) {
+                    double valAgg = 0.0;
+                    for (int age = 0; age <= maxAgeProjection; age++) {
+                        double val = Parameters.getPopulationProjections(gender, region, age, year);
+                        if (age >= Parameters.MIN_AGE_COHABITATION)
+                            adults += val;
+                        if (age >= censorAge) {
+                            valAgg += val;
+                        }
+                        if (age < censorAge) {
+                            int valHere = (int)(val / totalPopulationProjection * populationSize);
+                            populationByGenderRegionAndAge.put(gender, region, age, valHere);
+                        }
+                    }
+                    int valHere = (int)(valAgg / totalPopulationProjection * populationSize);
+                    populationByGenderRegionAndAge.put(gender, region, censorAge, valHere);
+                }
             }
         }
         cohabiting = (int)(Parameters.getTargetShare(year, TargetShares.Partnership) * adults / totalPopulationProjection * populationSize);
@@ -90,8 +117,15 @@ public class InitialPopulationFilter {
                     return false;
                 else if (Dcpst.Partnered.equals(person.getDcpst()) && cohabiting <= 0)
                     return false;
-                else if (populationByGenderRegionAndAge.get(person.getDgn(), person.getRegion(), Math.min(censorAge,person.getDag())) <= 0)
-                    return false;
+                else {
+                    if (IGNORE_REGION) {
+                        if (populationByGenderAndAge.get(person.getDgn(), Math.min(censorAge,person.getDag())) <= 0)
+                            return false;
+                    } else {
+                        if (populationByGenderRegionAndAge.get(person.getDgn(), person.getRegion(), Math.min(censorAge,person.getDag())) <= 0)
+                            return false;
+                    }
+                }
             }
         }
 
@@ -104,10 +138,15 @@ public class InitialPopulationFilter {
                     cohabiting -= 1;
 
                 int age = Math.min(censorAge, person.getDag());
-                Region region = person.getRegion();
                 Gender gender = person.getDgn();
-                int ceil = populationByGenderRegionAndAge.get(gender, region, age);
-                populationByGenderRegionAndAge.put(gender, region, age, ceil-1);
+                if (IGNORE_REGION) {
+                    int ceil = populationByGenderAndAge.get(gender, age);
+                    populationByGenderAndAge.put(gender, age, ceil-1);
+                } else {
+                    Region region = person.getRegion();
+                    int ceil = populationByGenderRegionAndAge.get(gender, region, age);
+                    populationByGenderRegionAndAge.put(gender, region, age, ceil-1);
+                }
             }
         }
 
@@ -117,11 +156,23 @@ public class InitialPopulationFilter {
     public int getRemainingVacancies() {
 
         int vacancies = 0;
-        for (Gender gender : Gender.values()) {
-            for (Region region: Parameters.getCountryRegions()) {
+        if (IGNORE_REGION) {
+
+            for (Gender gender : Gender.values()) {
                 for (int age = 0; age <= censorAge; age++) {
-                    if (populationByGenderRegionAndAge.get(gender, region, age) > 0) {
-                        vacancies += populationByGenderRegionAndAge.get(gender, region, age);
+                    if (populationByGenderRegionAndAge.get(gender, age) > 0) {
+                        vacancies += populationByGenderRegionAndAge.get(gender, age);
+                    }
+                }
+            }
+        } else {
+
+            for (Gender gender : Gender.values()) {
+                for (Region region: Parameters.getCountryRegions()) {
+                    for (int age = 0; age <= censorAge; age++) {
+                        if (populationByGenderRegionAndAge.get(gender, region, age) > 0) {
+                            vacancies += populationByGenderRegionAndAge.get(gender, region, age);
+                        }
                     }
                 }
             }

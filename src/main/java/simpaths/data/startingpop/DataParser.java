@@ -67,6 +67,11 @@ public class DataParser {
 		Set<String> inputBenefitUnitColumnNamesSet = new LinkedHashSet<String>(Arrays.asList(Parameters.BENEFIT_UNIT_VARIABLES_INITIAL));
 		Set<String> inputHouseholdColumnNameSet = new LinkedHashSet<>(Arrays.asList(Parameters.HOUSEHOLD_VARIABLES_INITIAL));
 
+		//FLAG to switch off identification of primary and foreign keys to improve read performance
+		//setting this to false reduces load times of survey data from 5.5 to 4 minutes
+		//the improvement in performance is sacrificed to benefit from checks of internal consistency of the data
+		final boolean PROCESS_KEY_IDENTIFICATION = true;
+
 		Statement stat = null;
 		try {
 			stat = conn.createStatement();
@@ -80,11 +85,10 @@ public class DataParser {
 
 				//Add panel entity key
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idperson RENAME TO id;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT NOT NULL;"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT NOT NULL DEFAULT " + startyear + ";"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT NOT NULL DEFAULT 0;"
-				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT NOT NULL DEFAULT 0;"
-				+ "ALTER TABLE " + personTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT DEFAULT 0;"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -222,7 +226,17 @@ public class DataParser {
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"
 			);
 
-			//Create benefitUnit table
+			if (PROCESS_KEY_IDENTIFICATION) {
+				stat.execute(
+						"ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ALTER COLUMN working_id INT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				);
+			}
+
+			// CREATE BENEFITUNIT TABLE
 			stat.execute(
 				"DROP TABLE IF EXISTS " + benefitUnitTable + " CASCADE;"
 				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
@@ -281,14 +295,19 @@ public class DataParser {
 				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + ";"
 				+ "DROP TABLE IF EXISTS " + benefitUnitTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + benefitUnitTable + ";"
-				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN id BIGINT NOT NULL;"
-				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_time INT NOT NULL;"
-				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_run INT NOT NULL;"
-				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN working_id INT NOT NULL;"
-				+ "ALTER TABLE " + benefitUnitTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 			);
 
-			//Create household table
+			if (PROCESS_KEY_IDENTIFICATION) {
+				stat.execute(
+						"ALTER TABLE " + benefitUnitTable + " ALTER COLUMN id BIGINT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN working_id INT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				);
+			}
+
+			// CREATE HOUSEHOLD TABLE
 			stat.execute(
 					"DROP TABLE IF EXISTS " + householdTable + ";"
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
@@ -305,20 +324,29 @@ public class DataParser {
 					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + ";"
 				+ "DROP TABLE IF EXISTS " + householdTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + householdTable + ";"
-				+ "ALTER TABLE " + householdTable + " ALTER COLUMN id BIGINT NOT NULL;"
-				+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_time INT NOT NULL;"
-				+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_run INT NOT NULL;"
-				+ "ALTER TABLE " + householdTable + " ALTER COLUMN working_id INT NOT NULL;"
-				+ "ALTER TABLE " + householdTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
 			);
 
+			if (PROCESS_KEY_IDENTIFICATION) {
+
+				stat.execute(
+						"ALTER TABLE " + householdTable + " ALTER COLUMN id BIGINT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN working_id INT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				);
+			}
+
 			//Set-up foreign keys
-			stat.execute(
-					"ALTER TABLE " + benefitUnitTable + " ADD FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES "
-							+ householdTable + " (id, simulation_time, simulation_run, working_id);"
-					+ "ALTER TABLE " + personTable + " ADD FOREIGN KEY (buid, butime, burun, prid) REFERENCES "
-							+ benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
-			);
+			if (PROCESS_KEY_IDENTIFICATION) {
+
+				stat.execute(
+						"ALTER TABLE " + benefitUnitTable + " ADD FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES "
+								+ householdTable + " (id, simulation_time, simulation_run, working_id);"
+								+ "ALTER TABLE " + personTable + " ADD FOREIGN KEY (buid, butime, burun, prid) REFERENCES "
+								+ benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
+				);
+			}
 
 			stat.execute("DROP TABLE IF EXISTS " + inputFileName + ";");
 

@@ -82,7 +82,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Country country; // = Country.UK;
 
     @GUIparameter(description = "Simulated population size (base year)")
-    private Integer popSize = 5000;
+    private Integer popSize = 170000;
 
     @GUIparameter(description = "Simulation first year [valid range 2011-2019]")
     private Integer startYear = 2011;
@@ -148,7 +148,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
     private boolean useWeights = false;
 
-    private boolean ignoreTargetsAtPopulationLoad = true;
+    private boolean ignoreTargetsAtPopulationLoad = false;
 
     @GUIparameter(description = "If unchecked, will use the standard matching method")
 //	private boolean useSBAMMatching = false;
@@ -157,7 +157,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
+    private boolean alignPopulation = false; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = false;
@@ -2375,7 +2375,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
         } else {
 
+            StopWatch stopwatch1 = new StopWatch();
+            stopwatch1.start();
+
             List<Household> inputHouseholdList = loadStaringPopulation();
+
+            stopwatch1.stop();
+            double time = stopwatch1.getTime();
+
 
             if (!useWeights) {
                 // Expand population, sample, and remove weights
@@ -2390,17 +2397,27 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // observations being included in the simulated sample (unless the simulated sample was very large).
                 List<Household> randomHouseholdSampleList = new LinkedList<>();
                 Double minWeight = null;
+                final double CHILD_UPRATING_FACTOR = 15.0;
+                final double MIN_REPLICATION_FACTOR = 10.0;
                 for (Household household : inputHouseholdList) {
-                    if (minWeight == null || household.getWeight() < minWeight)
-                        minWeight = household.getWeight();
+                    double hhweight = household.getWeight();
+                    boolean hasChild = false;
                     for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
                         for (Person person : benefitUnit.getMembers()) {
                             person.setAdditionalFieldsInInitialPopulation();
+                            if (person.getDag()<Parameters.AGE_TO_BECOME_RESPONSIBLE)
+                                hasChild = true;
                         }
                         benefitUnit.initializeFields();
                     }
+                    if (hasChild) {
+                        hhweight *= CHILD_UPRATING_FACTOR;
+                        household.setWeight(hhweight);
+                    }
+                    if (minWeight == null || hhweight < minWeight)
+                        minWeight = hhweight;
                 }
-                double replicationFactor = 5.0 / minWeight;    // ensures each sampled household represented at least 5 times in list
+                double replicationFactor = MIN_REPLICATION_FACTOR / minWeight;    // ensures each sampled household represented at least 5 times in list
                 for (Household household : inputHouseholdList) {
 
                     int numberOfClones = (int) Math.round(household.getWeight() * replicationFactor);
