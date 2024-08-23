@@ -1256,7 +1256,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else if (dgn == Gender.Female && (dag > 29 || !Les_c4.Student.equals(les_c4) || leftEducation)) {
                     // partnership dissolution
 
-                    prob = Parameters.getRegPartnershipU2b().getProbability(this, Person.DoublesVariables.class);
+                    double score = Parameters.getRegPartnershipU2b().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegPartnershipU2b().getProbability(score - probitAdjustment);
                     if (cohabitInnov < prob) {
                         leavePartner = true;
                     }
@@ -3722,7 +3723,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 throw new RuntimeException("attempt to access unassigned value for dcpstLocal");
             return dcpstLocal;
         }
-        if (benefitUnit.getCoupleBoolean())
+        if (getPartner()!=null)
             return Dcpst.Partnered;
         if (Dcpst.Partnered.equals(dcpst_lag1))
             return Dcpst.PreviouslyPartnered;
@@ -4616,4 +4617,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public Long getIdFather() {
         return idFather;
     }
+
+    public boolean getToBePartnered() {return toBePartnered;}
 }

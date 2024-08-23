@@ -9,6 +9,7 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.AlignmentVariable;
 import simpaths.model.enums.Dcpst;
+import simpaths.model.enums.TargetShares;
 import simpaths.model.enums.TimeSeriesVariable;
 
 @Entity
@@ -23,8 +24,11 @@ public class Statistics3 {
     @Column(name = "partnership_adj_factor")
     private double partnershipAdjustmentFactor;
 
-    @Column(name = "share_cohabiting")
-    private double shareCohabiting;
+    @Column(name = "share_cohabiting_sim")
+    private double shareCohabitingSimulated;
+
+    @Column(name = "share_cohabiting_tgt")
+    private double shareCohabitingTarget;
 
     @Column(name = "fertility_adj_factor")
     private double fertilityAdjustmentFactor;
@@ -88,9 +92,9 @@ public class Statistics3 {
 
     public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
 
-    public double getShareCohabiting() {return shareCohabiting;}
+    public double getShareCohabitingSimulated() {return shareCohabitingSimulated;}
 
-    public void setShareCohabiting(double shareCohabiting) { this.shareCohabiting = shareCohabiting; }
+    public void setShareCohabitingSimulated(double shareCohabitingSimulated) { this.shareCohabitingSimulated = shareCohabitingSimulated; }
 
     public double getFertilityRateSimulated() {
         return fertilityRateSimulated;
@@ -108,6 +112,14 @@ public class Statistics3 {
         this.fertilityRateTarget = fertilityRateTarget;
     }
 
+    public double getShareCohabitingTarget() {
+        return shareCohabitingTarget;
+    }
+
+    public void setShareCohabitingTarget(double shareCohabitingTarget) {
+        this.shareCohabitingTarget = shareCohabitingTarget;
+    }
+
     public void update(SimPathsModel model) {
 
         // cohabitation
@@ -121,7 +133,8 @@ public class Statistics3 {
                 .filter(person -> (person.getDcpst().equals(Dcpst.Partnered)))
                 .count();
         val = (numPersonsWhoCanHavePartner > 0) ? (double) numPersonsPartnered / numPersonsWhoCanHavePartner : 0.0;
-        setShareCohabiting(val);
+        setShareCohabitingSimulated(val);
+        setShareCohabitingTarget(Parameters.getTargetShare(model.getYear()-1, TargetShares.Partnership));
 
         // fertility
         val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.FertilityAdjustment) +

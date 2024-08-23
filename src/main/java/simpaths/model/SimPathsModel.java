@@ -157,16 +157,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = false; //TODO: routine fails to replicate results for minor variations between simulations
+    private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = false;
+    private boolean alignFertility = true;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -1879,6 +1879,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // run search
         RootSearch search = getRootSearch(0.0, minVal, maxVal, partnershipAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
 
+        // check result
+        //double val = partnershipAlignment.evaluate(search.getTarget());
+
         // update and exit
         if (search.isTargetAltered()) {
             Parameters.setAlignmentValue(getYear(), search.getTarget()[0], AlignmentVariable.PartnershipAlignment); // If adjustment is altered from the initial value, update the map
@@ -2362,6 +2365,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double aggregatePersonsWeight = 0.;            //Aggregate Weight of simulated individuals (a weighted sum of the simulated individuals)
         double aggregateHouseholdsWeight = 0.;        //Aggregate Weight of simulated benefitUnits (a weighted sum of the simulated households)
 
+        //TODO: Slight differences between otherwise identical simulations arise when loading "processed" vs "unprocessed" data (distinguished by the if statement below)
         Processed processed = getProcessed();
         if (processed!=null) {
             for ( Household originalHousehold : processed.getHouseholds()) {
@@ -2397,7 +2401,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // observations being included in the simulated sample (unless the simulated sample was very large).
                 List<Household> randomHouseholdSampleList = new LinkedList<>();
                 Double minWeight = null;
-                final double CHILD_UPRATING_FACTOR = 15.0;
+                double childUpratingFactor = 15.0;
+                if (ignoreTargetsAtPopulationLoad)
+                    childUpratingFactor = 1.0;
                 final double MIN_REPLICATION_FACTOR = 10.0;
                 for (Household household : inputHouseholdList) {
                     double hhweight = household.getWeight();
@@ -2411,7 +2417,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         benefitUnit.initializeFields();
                     }
                     if (hasChild) {
-                        hhweight *= CHILD_UPRATING_FACTOR;
+                        hhweight *= childUpratingFactor;
                         household.setWeight(hhweight);
                     }
                     if (minWeight == null || hhweight < minWeight)

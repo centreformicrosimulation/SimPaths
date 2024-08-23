@@ -74,12 +74,15 @@ public class PartnershipAlignment implements IEvaluation {
      * @return The aggregate share of partnered persons among those eligible, or 0.0 if no eligible persons are found.
      */
     private double evalAggregateShareOfPartneredPersons() {
+
         long numPersonsWhoCanHavePartner = persons.stream()
                 .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
                 .count();
 
         long numPersonsPartnered = persons.stream()
-                .filter(person -> (person.getTestPartner() || (person.getDcpst().equals(Dcpst.Partnered)) && !person.getLeavePartner()))
+                .filter(person -> (person.getTestPartner() ||
+                        (person.getPartner()!=null &&
+                                !person.getLeavePartner() && !person.getPartner().getLeavePartner())))
                 .count();
 
         return numPersonsWhoCanHavePartner > 0 ?
