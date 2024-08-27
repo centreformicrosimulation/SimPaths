@@ -160,13 +160,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = true;
+    private boolean alignFertility = false;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
-    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
@@ -2420,7 +2420,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         hhweight *= childUpratingFactor;
                         household.setWeight(hhweight);
                     }
-                    if (minWeight == null || hhweight < minWeight)
+                    if (hhweight>0.1 && (minWeight == null || hhweight < minWeight))
                         minWeight = hhweight;
                 }
                 double replicationFactor = MIN_REPLICATION_FACTOR / minWeight;    // ensures each sampled household represented at least 5 times in list
