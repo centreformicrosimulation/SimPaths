@@ -55,6 +55,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Boolean bornInSimulation; //Flag to keep track of newborns
     private Long seed;
     private Long idHousehold;
+    private Long idBenefitUnit;
     @Enumerated(EnumType.STRING) private SampleEntry sampleEntry;
     @Enumerated(EnumType.STRING) private SampleExit sampleExit = SampleExit.NotYet;  //entry to sample via international immigration
 
@@ -261,6 +262,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         setAllSocialCareVariablesToFalse();
         lowWageOffer = false;
         benefitUnit = mother.benefitUnit;
+        idBenefitUnit = benefitUnit.getId();
         dag = 0;
         weight = mother.getWeight();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         dhe = Dhe.VeryGood;
@@ -1773,6 +1775,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         model.getHouseholds().add(newHousehold);
         benefitUnit.setHousehold(newHousehold);
         idHousehold = newHousehold.getId();
+        idBenefitUnit = benefitUnit.getId();
     }
 
 
@@ -3484,6 +3487,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         benefitUnit = newBenefitUnit;
+        idBenefitUnit = benefitUnit.getId();
         if (newBenefitUnit == null)
             idHousehold = null;
         else  {

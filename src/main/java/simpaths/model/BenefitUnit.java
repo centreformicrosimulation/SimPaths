@@ -54,6 +54,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     // identifiers
     private Long idOriginalBU;
     private Long idOriginalHH;
+    private Long idHousehold;
     private Long seed;
 
     // unit specific variables
@@ -235,6 +236,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         this.log = originalBenefitUnit.log;
         disposableIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getDisposableIncomeMonthly(),0.0);
+        discretionaryConsumptionPerYear = Objects.requireNonNullElse(originalBenefitUnit.discretionaryConsumptionPerYear, 0.0);
         grossIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getGrossIncomeMonthly(),0.0);
         equivalisedDisposableIncomeYearly = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly,0.0);
         equivalisedDisposableIncomeYearly_lag1 = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly_lag1,equivalisedDisposableIncomeYearly);
@@ -2807,6 +2809,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             household.getBenefitUnits().remove(this);
 
         household = newHousehold;
+        idHousehold = household.getId();
         if (household!=null)
             household.getBenefitUnits().add(this);
     }

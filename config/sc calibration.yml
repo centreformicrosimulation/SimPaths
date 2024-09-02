@@ -18,8 +18,9 @@ model_args:
     saveImperfectTaxDBMatches: false
     flagSuppressSocialCareCosts: false
     flagSuppressChildcareCosts: false
+    flagDefaultToTimeSeriesAverages: true
     useSavedBehaviour: false
-    readGrid: "base"
+    readGrid: "test"
 
 # Arguments that alter processing of the SimPathsMultiRun object
 innovation_args:
