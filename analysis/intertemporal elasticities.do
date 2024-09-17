@@ -17,9 +17,9 @@
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal - 4runs p005\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal5\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
-local dr = 0.005	// delta interest rate (from SimPathsMultiRun object)
+local dr = 0.0075	// delta interest rate (from SimPathsMultiRun object)
 
 
 /**************************************************************************************

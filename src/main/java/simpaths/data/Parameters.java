@@ -853,7 +853,7 @@ public class Parameters {
         */
 
         // alignment parameters
-        populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 59);
+        populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 110);
         setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels

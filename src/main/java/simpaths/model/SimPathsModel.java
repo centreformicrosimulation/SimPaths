@@ -367,13 +367,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // time check
         elapsedTime = System.currentTimeMillis();
 
-        try {
-            inputDatabaseInteraction();
-        } catch (InterruptedException interruptedException) {
-            log.debug(interruptedException.getMessage());
-            return;
-        }
-
         // creates initial population (Person and BenefitUnit objects) based on data in input database.
         // Note that the population may be cropped to simulate a smaller population depending on user choices in the GUI.
         createInitialPopulationDataStructures();
@@ -444,6 +437,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         addEventToAllYears(Processes.UpdateParameters);
         addEventToAllYears(Processes.GarbageCollection);
+        if (enableIntertemporalOptimisations)
+            yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateWealth);
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
         addCollectionEventToAllYears(persons, Person.Processes.Update);
 
@@ -520,8 +515,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
         // CONSUMPTION AND SAVINGS MODULE
-        if (Parameters.projectLiquidWealth)
-            addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectNetLiquidWealth);
+        if (enableIntertemporalOptimisations)
+            addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectDiscretionaryConsumption);
         addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
 
         // equivalised disposable income
@@ -939,6 +934,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         for (BenefitUnit benefitUnit: benefitUnits) {
 
             Match match = benefitUnit.getTaxDbMatch();
+            if (match==null)
+                throw new RuntimeException("failed to identify tax database match");
             if (match.getMatchCriterion()>Parameters.IMPERFECT_THRESHOLD) {
                 imperfectMatches.addMatch(match);
             }
@@ -2246,99 +2243,93 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
 
-    private void inputDatabaseInteraction() throws InterruptedException {
+    private void inputDatabaseInteraction() {
 
         Connection conn = null;
         Statement stat = null;
-
-        boolean retry = false;
-
-        do {
+        try {
+            Class.forName("org.h2.Driver");
+            System.out.println("Reading from database at " + DatabaseUtils.databaseInputUrl);
             try {
-                Class.forName("org.h2.Driver");
-                System.out.print("Reading from database at " + DatabaseUtils.databaseInputUrl);
-                try {
-                    conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=FALSE", "sa", "");
+                conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=FALSE", "sa", "");
+            }
+            catch (SQLException e) {
+                log.info(e.getMessage());
+                throw new RuntimeException("SQL Exception! " + e.getMessage());
+            }
+
+            //If user chooses start year that is higher than the last available initial population, last available population should be used but with uprated monetary values
+            boolean uprateInitialPopulation = (startYear > Parameters.getMaxStartYear());
+
+            stat = conn.createStatement();
+
+            if (isFirstRun) {
+                //Create database tables to be used in simulation from country-specific tables
+                String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
+                for (String tableName : tableNamesDonor) {
+                    stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
+                    stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
                 }
-                catch (SQLException e) {
-                    log.info(e.getMessage());
-                    throw new RuntimeException("SQL Exception! " + e.getMessage());
-                }
-                retry = false;
-
-                //If user chooses start year that is higher than the last available initial population, last available population should be used but with uprated monetary values
-                boolean uprateInitialPopulation = (startYear > Parameters.getMaxStartYear());
-
-                stat = conn.createStatement();
-
-                if (isFirstRun) {
-                    //Create database tables to be used in simulation from country-specific tables
-                    String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
-                    for (String tableName : tableNamesDonor) {
-                        stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
-                        stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
-                    }
-                    String[] tableNamesInitial = new String[]{"HOUSEHOLD", "BENEFITUNIT", "PERSON"};
-                    for (String tableName : tableNamesInitial) {
-                        stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
-                        if (uprateInitialPopulation) {
-                            stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + Parameters.getMaxStartYear()); // Load the last available initial population from all available in tables of the database
-                        } else {
-                            stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + startYear); // Load the country-year specific initial population from all available in tables of the database
-                        }
+                String[] tableNamesInitial = new String[]{"HOUSEHOLD", "BENEFITUNIT", "PERSON"};
+                for (String tableName : tableNamesInitial) {
+                    stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
+                    if (uprateInitialPopulation) {
+                        stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + Parameters.getMaxStartYear()); // Load the last available initial population from all available in tables of the database
+                    } else {
+                        stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + startYear); // Load the country-year specific initial population from all available in tables of the database
                     }
                 }
+            }
 
-                initialHoursWorkedWeekly = new LinkedHashMap<Long, Double>();
+            initialHoursWorkedWeekly = new LinkedHashMap<Long, Double>();
 
-                //Add hours from initial population which is now different than donor
-                String query2 = "SELECT ID, " + Parameters.HOURS_WORKED_WEEKLY + " FROM PERSON";
-                ResultSet rs2 = stat.executeQuery(query2);
-                while (rs2.next()) {
-                    initialHoursWorkedWeekly.put(rs2.getLong("ID"), rs2.getDouble(Parameters.HOURS_WORKED_WEEKLY));
-                }
+            //Add hours from initial population which is now different than donor
+            String query2 = "SELECT ID, " + Parameters.HOURS_WORKED_WEEKLY + " FROM PERSON";
+            ResultSet rs2 = stat.executeQuery(query2);
+            while (rs2.next()) {
+                initialHoursWorkedWeekly.put(rs2.getLong("ID"), rs2.getDouble(Parameters.HOURS_WORKED_WEEKLY));
+            }
 
-                //If start year is higher than the last available population, calculate the uprating factor and apply it to the monetary values in the database:
-                if (uprateInitialPopulation & isFirstRun) {
-                    double upratingFactor =
-                            Parameters.getTimeSeriesIndex(startYear, UpratingCase.ModelInitialise) /
-                                    Parameters.getTimeSeriesIndex(Parameters.getMaxStartYear(), UpratingCase.ModelInitialise);
-                    //Modify the underlying initial population being used by applying the upratingFactor to its monetary values
-                    String[] columnsToUprate = new String[]{"YPNBIHS_DV", "YPTCIIHS_DV", "YPNCP", "YPNOAB", "YPLGRS_DV"};
-                    for (String columnToUprateName : columnsToUprate) {
-                        stat.execute(
-                                "ALTER TABLE PERSON ALTER COLUMN " + columnToUprateName + " NUMERIC(30,6);"
-                                        + "UPDATE PERSON SET " + columnToUprateName + " = SINH(" + columnToUprateName + ") * " + upratingFactor + ";"
-                                        + "UPDATE PERSON SET " + columnToUprateName + " = LOG(" + columnToUprateName + " + SQRT(POWER(" + columnToUprateName + ",2) + 1));"
-                        );
-                    }
+            //If start year is higher than the last available population, calculate the uprating factor and apply it to the monetary values in the database:
+            if (uprateInitialPopulation & isFirstRun) {
+                double upratingFactor =
+                        Parameters.getTimeSeriesIndex(startYear, UpratingCase.ModelInitialise) /
+                                Parameters.getTimeSeriesIndex(Parameters.getMaxStartYear(), UpratingCase.ModelInitialise);
+                //Modify the underlying initial population being used by applying the upratingFactor to its monetary values
+                String[] columnsToUprate = new String[]{"YPNBIHS_DV", "YPTCIIHS_DV", "YPNCP", "YPNOAB", "YPLGRS_DV"};
+                for (String columnToUprateName : columnsToUprate) {
                     stat.execute(
-                            "UPDATE PERSON SET SIMULATION_TIME = " + startYear + ";"
-                                    + "UPDATE PERSON SET SYSTEM_YEAR = " + startYear + ";"
+                            "ALTER TABLE PERSON ALTER COLUMN " + columnToUprateName + " NUMERIC(30,6);"
+                                    + "UPDATE PERSON SET " + columnToUprateName + " = SINH(" + columnToUprateName + ") * " + upratingFactor + ";"
+                                    + "UPDATE PERSON SET " + columnToUprateName + " = LOG(" + columnToUprateName + " + SQRT(POWER(" + columnToUprateName + ",2) + 1));"
                     );
                 }
+                stat.execute(
+                        "UPDATE PERSON SET SIMULATION_TIME = " + startYear + ";"
+                                + "UPDATE PERSON SET SYSTEM_YEAR = " + startYear + ";"
+                );
+            }
 
-            }
-            catch(ClassNotFoundException|SQLException e){
-                if(e instanceof ClassNotFoundException) {
-                    log.debug( "ERROR: Class not found: " + e.getMessage() + "\nCheck that the input.h2.db "
-                            + "exists in the input folder.  If not, unzip the input.h2.zip file and store the resulting "
-                            + "input.h2.db in the input folder!\n");
-                } else {
-                    log.debug("SQL Exception thrown: " + e.getMessage());
-                    throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
+        }
+        catch(ClassNotFoundException|SQLException e){
+            if(e instanceof ClassNotFoundException) {
+                log.debug( "ERROR: Class not found: " + e.getMessage() + "\nCheck that the input.h2.db "
+                        + "exists in the input folder.  If not, unzip the input.h2.zip file and store the resulting "
+                        + "input.h2.db in the input folder!\n");
+            } else {
+                log.debug("SQL Exception thrown: " + e.getMessage());
+                throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
 //	    			throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
-                }
-            } finally {
-                try {
-                    if (stat != null) { stat.close(); }
-                    if (conn != null) { conn.close(); }
-                } catch (SQLException e) {
-                    log.debug("SQL Exception thrown: " + e.getMessage());
-                    e.printStackTrace();
-                }
             }
-        } while (retry);
+        } finally {
+            try {
+                if (stat != null) { stat.close(); }
+                if (conn != null) { conn.close(); }
+            } catch (SQLException e) {
+                log.debug("SQL Exception thrown: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -2368,6 +2359,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //TODO: Slight differences between otherwise identical simulations arise when loading "processed" vs "unprocessed" data (distinguished by the if statement below)
         Processed processed = getProcessed();
         if (processed!=null) {
+            Set<Household> households = processed.getHouseholds();
+            if (households.isEmpty())
+                throw new RuntimeException("No households in processed set");
             for ( Household originalHousehold : processed.getHouseholds()) {
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
                     for (Person person : benefitUnit.getMembers()) {
@@ -2379,15 +2373,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
         } else {
 
-            StopWatch stopwatch1 = new StopWatch();
-            stopwatch1.start();
-
+            inputDatabaseInteraction();
             List<Household> inputHouseholdList = loadStaringPopulation();
-
-            stopwatch1.stop();
-            double time = stopwatch1.getTime();
-
-
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
@@ -2401,23 +2388,23 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // observations being included in the simulated sample (unless the simulated sample was very large).
                 List<Household> randomHouseholdSampleList = new LinkedList<>();
                 Double minWeight = null;
-                double childUpratingFactor = 15.0;
+                double premiumUpratingFactor = 20.0;
                 if (ignoreTargetsAtPopulationLoad)
-                    childUpratingFactor = 1.0;
-                final double MIN_REPLICATION_FACTOR = 10.0;
+                    premiumUpratingFactor = 1.0;
+                final double MIN_REPLICATION_FACTOR = 15.0;
                 for (Household household : inputHouseholdList) {
                     double hhweight = household.getWeight();
-                    boolean hasChild = false;
+                    boolean hasPremiumMember = false;
                     for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
                         for (Person person : benefitUnit.getMembers()) {
                             person.setAdditionalFieldsInInitialPopulation();
-                            if (person.getDag()<Parameters.AGE_TO_BECOME_RESPONSIBLE)
-                                hasChild = true;
+                            if (person.getDag()<30)
+                                hasPremiumMember = true;
                         }
                         benefitUnit.initializeFields();
                     }
-                    if (hasChild) {
-                        hhweight *= childUpratingFactor;
+                    if (hasPremiumMember) {
+                        hhweight *= premiumUpratingFactor;
                         household.setWeight(hhweight);
                     }
                     if (hhweight>0.1 && (minWeight == null || hhweight < minWeight))
@@ -2432,20 +2419,45 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     }
                 }
                 Collections.shuffle(randomHouseholdSampleList, initialiseInnov);
-                ListIterator<Household> randomHouseholdSampleListIterator = randomHouseholdSampleList.listIterator();
                 InitialPopulationFilter filter = new InitialPopulationFilter(popSize, startYear, maxAge);
-                while (randomHouseholdSampleListIterator.hasNext()) {
+                boolean flagContinue = true;
+                int counter = 0;
+                int minAcceptedPopSize = (int)(popSize * 1.0), maxCounter = 2;
+                while (flagContinue) {
 
-                    Household originalHousehold = randomHouseholdSampleListIterator.next();
-                    if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
+                    counter++;
+                    for (Household originalHousehold : randomHouseholdSampleList) {
 
-                        cloneHousehold(originalHousehold, SampleEntry.InputData);
-                        if (persons.size() >= popSize ) break;
+                        if (counter==1) {
+                            // retain sample region
+
+                            if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
+
+                                cloneHousehold(originalHousehold, SampleEntry.InputData);
+                                if (persons.size() >= popSize) break;
+                            }
+                        } else {
+                            // relax region restriction
+
+                            for (Region region : Parameters.getCountryRegions()) {
+
+                                if (filter.evaluate(originalHousehold, region) || ignoreTargetsAtPopulationLoad) {
+
+                                    cloneHousehold(originalHousehold, SampleEntry.InputData);
+                                    if (persons.size() >= popSize) break;
+                                }
+                            }
+                        }
                     }
+                    if (persons.size() >= minAcceptedPopSize || counter>maxCounter) {
+                        flagContinue = false;
+                    }
+                    if (flagContinue)
+                        System.out.println("Completed resampling iteration " + counter + " for popsize " + persons.size());
                 }
                 //filter.getRemainingVacancies();
                 stopwatch.stop();
-                System.out.println("Time elapsed " + stopwatch.getTime() + " milliseconds");
+                System.out.println("Time elapsed " + stopwatch.getTime()/1000 + " seconds");
             } else {
                 // use population weights
 

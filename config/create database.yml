@@ -1,58 +1,62 @@
 # This file can be used to override defaults for multirun arguments.
 # Arguments of the SimPathsMultiRun object overridden by the command-line
-
 countryString: "United Kingdom"
-startYear: 2011
 maxNumberOfRuns: 1
 executeWithGui: false
+randomSeed: 606
+startYear: 2019
+endYear: 2070
+popSize: 170000
 
 # Arguments passed to the SimPathsModel
 model_args:
-#    maxAge: 130
-#    fixTimeTrend: true
-#    timeTrendStopsIn: 2017
-#    fixRandomSeed: true
-#    sIndexTimeWindow: 5
-#    sIndexAlpha: 2
-#    sIndexDelta: 0
-#    savingRate: 0
-#    initialisePotentialEarningsFromDatabase: true
-#    useWeights: false
-#    useSBAMMatching:
-#    projectMortality: true
-#    labourMarketCovid19On: false
-#    projectFormalChildcare: true
-#    donorPoolAveraging: true
-#    alignEmployment: false
-#    alignCohabitation: false
-#    enableIntertemporalOptimisations: true
-#    responsesToLowWageOffer: true
-#    projectSocialCare: false
-#    saveBehaviour: false
-#    flagDefaultToTimeSeriesAverages: true
-#    saveImperfectTaxDBMatches: false
-#    useSavedBehaviour: false
-#    readGrid: "laptop serial"
-#    employmentOptionsOfPrincipalWorker: 3
-#    employmentOptionsOfSecondaryWorker: 3
-#    responsesToEducation: true
-#    responsesToRetirement: false
-#    responsesToHealth: true
-#    responsesToDisability: false
-#    minAgeForPoorHealth: 50
-#    responsesToRegion: false
-#    alignPopulation: false
-#    alignFertility: false
-#    alignEducation: false
-#    alignInSchool: false
+    maxAge: 130
+    fixTimeTrend: true
+    timeTrendStopsIn: 2021
+    timeTrendStopsInMonetaryProcesses: 2021
+    fixRandomSeed: true
+    savingRate: 0.056
+    initialisePotentialEarningsFromDatabase: true
+    useWeights: false
+    ignoreTargetsAtPopulationLoad: false
+    projectMortality: true
+    alignPopulation: true
+    alignFertility: false
+    alignEducation: false
+    alignInSchool: false
+    alignCohabitation: false
+    alignEmployment: false
+    addRegressionStochasticComponent: true
+    fixRegressionStochasticComponent: false
+    labourMarketCovid19On: false
+    projectFormalChildcare: true
+    donorPoolAveraging: true
+    projectSocialCare: true
+    flagSuppressChildcareCosts: false
+    flagSuppressSocialCareCosts: false
+    enableIntertemporalOptimisations: true
+    saveBehaviour: true
+    useSavedBehaviour: false
+    readGrid: "temp"
+    flagDefaultToTimeSeriesAverages: true
+    saveImperfectTaxDBMatches: true
+    employmentOptionsOfPrincipalWorker: 3
+    employmentOptionsOfSecondaryWorker: 3
+    responsesToEducation: true
+    responsesToPension: false
+    responsesToLowWageOffer: true
+    responsesToRetirement: false
+    responsesToHealth: true
+    responsesToDisability: true
+    minAgeForPoorHealth: 45
+    responsesToRegion: false
 
 # Arguments that alter processing of the SimPathsMultiRun object
 innovation_args:
     randomSeedInnov: false
     flagDatabaseSetup: true
-#    intertemporalElasticityInnov: true
-#    labourSupplyElasticityInnov: true
-#    flagUpdateDatabase: true
+    intertemporalElasticityInnov: false
+    labourSupplyElasticityInnov: false
 
 collector_args:
 #    calculateGiniCoefficients: false

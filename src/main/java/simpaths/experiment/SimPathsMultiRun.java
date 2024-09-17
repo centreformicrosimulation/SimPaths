@@ -50,7 +50,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
-	public static String configFile = "sc calibration.yml";
+	public static String configFile = "labour supply elasticity.yml";
 
 	// other working variables
 	private static Country country;
@@ -396,9 +396,9 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 		if (intertemporalElasticityInnov) {
 			if (counter==1)
-				interestRateInnov = 0.005;
+				interestRateInnov = 0.0075;
 			else if (counter==2)
-				interestRateInnov = -0.005;
+				interestRateInnov = -0.0075;
 		}
 		if (labourSupplyElasticityInnov) {
 			if (counter==1)

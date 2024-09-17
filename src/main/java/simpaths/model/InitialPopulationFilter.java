@@ -9,6 +9,8 @@ import simpaths.model.enums.Gender;
 import simpaths.model.enums.Region;
 import simpaths.model.enums.TargetShares;
 
+import java.util.Iterator;
+
 
 /**
  * Class filter to ensure that starting population for simulation matches alignment targets.
@@ -24,7 +26,7 @@ public class InitialPopulationFilter {
     private int populationSize;
     private int censorAge;
     private int cohabiting;
-    private final boolean IGNORE_REGION = true;
+    private final boolean IGNORE_REGION = false;
     private MultiKeyMap<Object, Integer> populationByGenderAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
     private MultiKeyMap<Object, Integer> populationByGenderRegionAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
     private final double MARGIN = 0.01;   //
@@ -108,6 +110,13 @@ public class InitialPopulationFilter {
      */
     public boolean evaluate(Household household) {
 
+        Iterator<BenefitUnit> it = household.getBenefitUnits().iterator();
+        Region region = it.next().getRegion();
+        return evaluate(household, region);
+    }
+
+    public boolean evaluate(Household household, Region region) {
+
         // check thresholds
         for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
@@ -122,7 +131,7 @@ public class InitialPopulationFilter {
                         if (populationByGenderAndAge.get(person.getDgn(), Math.min(censorAge,person.getDag())) <= 0)
                             return false;
                     } else {
-                        if (populationByGenderRegionAndAge.get(person.getDgn(), person.getRegion(), Math.min(censorAge,person.getDag())) <= 0)
+                        if (populationByGenderRegionAndAge.get(person.getDgn(), region, Math.min(censorAge,person.getDag())) <= 0)
                             return false;
                     }
                 }
@@ -132,6 +141,8 @@ public class InitialPopulationFilter {
         // update thresholds
         for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
 
+            if (!region.equals(benefitUnit.getRegion()))
+                benefitUnit.setRegion(region);
             for (Person person : benefitUnit.getMembers()) {
 
                 if (Dcpst.Partnered.equals(person.getDcpst()))
@@ -143,7 +154,6 @@ public class InitialPopulationFilter {
                     int ceil = populationByGenderAndAge.get(gender, age);
                     populationByGenderAndAge.put(gender, age, ceil-1);
                 } else {
-                    Region region = person.getRegion();
                     int ceil = populationByGenderRegionAndAge.get(gender, region, age);
                     populationByGenderRegionAndAge.put(gender, region, age, ceil-1);
                 }

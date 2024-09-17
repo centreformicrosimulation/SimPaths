@@ -54,6 +54,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     // identifiers
     private Long idOriginalBU;
     private Long idOriginalHH;
+    private Long idHousehold;
     private Long seed;
 
     // unit specific variables
@@ -235,6 +236,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         this.log = originalBenefitUnit.log;
         disposableIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getDisposableIncomeMonthly(),0.0);
+        discretionaryConsumptionPerYear = Objects.requireNonNullElse(originalBenefitUnit.discretionaryConsumptionPerYear, 0.0);
         grossIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getGrossIncomeMonthly(),0.0);
         equivalisedDisposableIncomeYearly = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly,0.0);
         equivalisedDisposableIncomeYearly_lag1 = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly_lag1,equivalisedDisposableIncomeYearly);
@@ -263,6 +265,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.dhhOwned = originalBenefitUnit.dhhOwned;
         createdByConstructor = Objects.requireNonNullElse(originalBenefitUnit.createdByConstructor,"CopyConstructor");
         tmpHHYpnbihs_dv_asinh = Objects.requireNonNullElse(originalBenefitUnit.tmpHHYpnbihs_dv_asinh, 0.0);
+        taxDbMatch = originalBenefitUnit.getTaxDbMatch();
     }
 
 
@@ -273,12 +276,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Processes {
         Update,        //This updates the household fields, such as number of children of a certain age
+        UpdateWealth,
         CalculateChangeInEDI, //Calculate change in equivalised disposable income
         Homeownership,
         ReceivesBenefits,
         UpdateStates,
         UpdateInvestmentIncome,
-        ProjectNetLiquidWealth,
+        ProjectDiscretionaryConsumption,
         UpdateMembers,
     }
 
@@ -288,6 +292,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case Update -> {
                 updateAttributes();
                 clearStates();
+            }
+            case UpdateWealth -> {
+                updateWealth();
             }
             case CalculateChangeInEDI -> {
                 calculateEquivalisedDisposableIncomeYearly(); //Update BU's EDI
@@ -302,8 +309,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case UpdateStates -> {
                 setStates();
             }
-            case ProjectNetLiquidWealth -> {
-                updateNetLiquidWealth();
+            case ProjectDiscretionaryConsumption -> {
+                updateDiscretionaryConsumption();
             }
             default -> {
                 throw new RuntimeException("unrecognised BenefitUnit process: " + type);
@@ -344,6 +351,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // random draws
         innovations.getNewDoubleDraws();
+    }
+
+    protected void updateWealth() {
+        liquidWealth += disposableIncomeMonthly * 12.0 - discretionaryConsumptionPerYear - getNonDiscretionaryConsumptionPerYear();
     }
 
 
@@ -2807,6 +2818,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             household.getBenefitUnits().remove(this);
 
         household = newHousehold;
+        idHousehold = household.getId();
         if (household!=null)
             household.getBenefitUnits().add(this);
     }
@@ -3268,7 +3280,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public double getInvestmentIncomeAnnual() {return (investmentIncomeAnnual!=null) ? investmentIncomeAnnual : 0.0;}
     public double getPensionIncomeAnnual() {return (pensionIncomeAnnual!=null) ? pensionIncomeAnnual : 0.0;}
 
-    void updateNetLiquidWealth() {
+    void updateDiscretionaryConsumption() {
 
         if ( Parameters.enableIntertemporalOptimisations ) {
 
@@ -3276,16 +3288,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if ((getDisposableIncomeMonthly()==null) || (Double.isNaN(getDisposableIncomeMonthly()))) {
                 throw new RuntimeException("Disposable income not defined.");
             }
-            double nonDiscretionaryConsumptionPerYear = 0.0;
-            if (Parameters.flagFormalChildcare) {
-                nonDiscretionaryConsumptionPerYear += getChildcareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
-            }
-            if (Parameters.flagSocialCare) {
-                nonDiscretionaryConsumptionPerYear += getSocialCareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
-            }
 
             double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
-                    + getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - nonDiscretionaryConsumptionPerYear;
+                    + getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
             if (Double.isNaN(cashOnHand)) {
                 throw new RuntimeException("Problem identifying cash on hand");
             }
@@ -3299,15 +3304,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if ( Double.isNaN(discretionaryConsumptionPerYear) ) {
                 throw new RuntimeException("annual discretionary consumption not defined (1)");
             }
-
-            // apply accounting identity
-            double liquidWealth_lag1 = getLiquidWealth();
-            setLiquidWealth(liquidWealth_lag1 + getDisposableIncomeMonthly() * 12.0 - discretionaryConsumptionPerYear - nonDiscretionaryConsumptionPerYear);
         } else {
             throw new RuntimeException("Unrecognised call to update net liquid wealth");
         }
     }
 
+    private double getNonDiscretionaryConsumptionPerYear() {
+        double nonDiscretionaryConsumptionPerYear = 0.0;
+        if (Parameters.flagFormalChildcare) {
+            nonDiscretionaryConsumptionPerYear += getChildcareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
+        }
+        if (Parameters.flagSocialCare) {
+            nonDiscretionaryConsumptionPerYear += getSocialCareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
+        }
+        return nonDiscretionaryConsumptionPerYear;
+    }
     public double getDiscretionaryConsumptionPerYear() {
         return getDiscretionaryConsumptionPerYear(true);
     }
