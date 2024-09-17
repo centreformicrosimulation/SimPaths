@@ -29,10 +29,11 @@ public class InitialPopulationFilter {
     private final boolean IGNORE_REGION = false;
     private MultiKeyMap<Object, Integer> populationByGenderAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
     private MultiKeyMap<Object, Integer> populationByGenderRegionAndAge = MultiKeyMap.multiKeyMap(new LinkedMap<>());
-    private final double MARGIN = 0.01;   //
+    private final double MARGIN = 0.0025;   //
 
 
     // CONSTRUCTOR
+    public InitialPopulationFilter() {}
     public InitialPopulationFilter(int populationSize, int year, int maxAge){
 
         this.populationSize = (int)((1.0 + MARGIN) * (double)populationSize);

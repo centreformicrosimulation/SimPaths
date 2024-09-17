@@ -33,7 +33,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     @Transient private static Logger log = Logger.getLogger(Person.class);
     @Transient private final SimPathsModel model;
-    @Transient public static long personIdCounter = 1;			//Could perhaps initialise this to one above the max key number in initial population, in the same way that we pull the max Age information from the input files.
+    @Transient public static long personIdCounter = 1L;			//Could perhaps initialise this to one above the max key number in initial population, in the same way that we pull the max Age information from the input files.
 
     // database keys
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
@@ -293,8 +293,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this(personIdCounter++, seed);
         switch (sampleEntry) {
             case ProcessedInputData -> {
-                personIdCounter = originalPerson.key.getId();
-                key.setId(personIdCounter);
+                key.setId(originalPerson.getId());
                 idOriginalPerson = originalPerson.getIdOriginalPerson();
                 idOriginalBU = originalPerson.getIdOriginalBU();
                 idOriginalHH = originalPerson.getIdOriginalHH();
@@ -1835,7 +1834,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             } else {
                 newHousehold = new Household();
             }
-            newBenefitUnit = new BenefitUnit(this);
+            long seed = (long)(getBenefitUnitRandomUniform()*100000);
+            newBenefitUnit = new BenefitUnit(this, seed);
+            if (model.getBenefitUnits().contains(newBenefitUnit)) {
+                throw new RuntimeException("New benefit unit already found in benefitUnits - Hint: Primary keys may be corrupted");
+            }
         }
 
         // establish links between objects
@@ -4623,4 +4626,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean getToBePartnered() {return toBePartnered;}
+
+    public static void setPersonIdCounter(long id) {personIdCounter=id;}
 }

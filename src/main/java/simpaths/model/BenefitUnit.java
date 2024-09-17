@@ -36,7 +36,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private static Logger log = Logger.getLogger(BenefitUnit.class);
     @Transient private final SimPathsModel model;
     @Transient private final SimPathsCollector collector;
-    @Transient public static long benefitUnitIdCounter = 1;
+    @Transient public static long benefitUnitIdCounter = 1L;
 
     // database keys
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
@@ -171,10 +171,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     // USED TO CONSTRUCT NEW BENEFIT UNITS FOR PEOPLE AS NEEDED
     // SEE THE PERSON OBJECT, setupNewBenefitUnit METHOD
-    public BenefitUnit(Person person) {
+    public BenefitUnit(Person person, long seed) {
 
         // initialise benefit unit
-        this(benefitUnitIdCounter++, (long)(person.getBenefitUnitRandomUniform()*100000));
+        this(benefitUnitIdCounter++, seed);
         region = person.getRegion();
         if (Parameters.projectLiquidWealth) {
             // transfer wealth between benefit units
@@ -222,8 +222,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this(benefitUnitIdCounter++, benefitUnitInnov);
         switch (sampleEntry) {
             case ProcessedInputData -> {
-                benefitUnitIdCounter = originalBenefitUnit.getId();
-                key.setId(benefitUnitIdCounter);
+                key.setId(originalBenefitUnit.getId());
                 idOriginalBU = originalBenefitUnit.getIdOriginalBU();
                 idOriginalHH = originalBenefitUnit.getIdOriginalHH();
             }
@@ -284,11 +283,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         UpdateInvestmentIncome,
         ProjectDiscretionaryConsumption,
         UpdateMembers,
+        Test,
     }
 
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
+            case Test -> {
+                Person male = getMale();
+                if (male!=null)
+                    if (male.getId()==8) {
+                        int dag = male.getDag();
+                        male.setDag(dag);
+                    }
+            }
             case Update -> {
                 updateAttributes();
                 clearStates();
@@ -3593,4 +3601,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             model.getBenefitUnits().remove(this);
         }
     }
+
+    public static void setBenefitUnitIdCounter(long id) {benefitUnitIdCounter = id;}
 }

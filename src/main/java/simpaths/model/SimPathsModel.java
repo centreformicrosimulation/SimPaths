@@ -293,7 +293,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean responsesToRegion = false;
 
     RandomGenerator cohabitInnov;
-    Random initialiseInnov;
+    Random initialiseInnov1;
+    Random initialiseInnov2;
     Random popAlignInnov;
     Random educationInnov;
 
@@ -331,7 +332,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // set seed for random number generator
         if (fixRandomSeed) SimulationEngine.getRnd().setSeed(randomSeedIfFixed);
         cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
-        initialiseInnov = new Random(SimulationEngine.getRnd().nextLong());
+        initialiseInnov1 = new Random(SimulationEngine.getRnd().nextLong());
+        initialiseInnov2 = new Random(SimulationEngine.getRnd().nextLong());
         educationInnov = new Random(SimulationEngine.getRnd().nextLong());
         popAlignInnov = new Random(SimulationEngine.getRnd().nextLong());
 
@@ -2362,15 +2364,25 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Set<Household> households = processed.getHouseholds();
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
+            long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
             for ( Household originalHousehold : processed.getHouseholds()) {
+                if (originalHousehold.getId() > householdIdCounter)
+                    householdIdCounter = originalHousehold.getId();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
+                    if (benefitUnit.getId() > benefitUnitIdCounter)
+                        benefitUnitIdCounter = benefitUnit.getId();
                     for (Person person : benefitUnit.getMembers()) {
+                        if (person.getId() > personIdCounter)
+                            personIdCounter = person.getId();
                         person.setAdditionalFieldsInInitialPopulation();
                     }
                     benefitUnit.initializeFields();
                 }
                 cloneHousehold(originalHousehold, SampleEntry.ProcessedInputData);
             }
+            Household.setHouseholdIdCounter(householdIdCounter+1);
+            BenefitUnit.setBenefitUnitIdCounter(benefitUnitIdCounter+1);
+            Person.setPersonIdCounter(personIdCounter+1);
         } else {
 
             inputDatabaseInteraction();
@@ -2386,74 +2398,90 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 // subgroups. In this case you may have many similar observations in the sample all with low survey weights
                 // so that replicating by a factor adjustment on weight of each observation may result in none of the
                 // observations being included in the simulated sample (unless the simulated sample was very large).
-                List<Household> randomHouseholdSampleList = new LinkedList<>();
+                List<Household> householdList1 = new LinkedList<>();
+                List<Household> householdList2 = new LinkedList<>();
                 Double minWeight = null;
-                double premiumUpratingFactor = 20.0;
-                if (ignoreTargetsAtPopulationLoad)
-                    premiumUpratingFactor = 1.0;
-                final double MIN_REPLICATION_FACTOR = 15.0;
                 for (Household household : inputHouseholdList) {
                     double hhweight = household.getWeight();
-                    boolean hasPremiumMember = false;
+                    boolean hasChild = false;
                     for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
                         for (Person person : benefitUnit.getMembers()) {
                             person.setAdditionalFieldsInInitialPopulation();
-                            if (person.getDag()<30)
-                                hasPremiumMember = true;
+                            if (person.getDag()<Parameters.AGE_TO_BECOME_RESPONSIBLE)
+                                hasChild = true;
                         }
                         benefitUnit.initializeFields();
                     }
-                    if (hasPremiumMember) {
-                        hhweight *= premiumUpratingFactor;
-                        household.setWeight(hhweight);
-                    }
+                    if (ignoreTargetsAtPopulationLoad || hasChild)
+                        householdList1.add(household);
+                    else
+                        householdList2.add(household);
                     if (hhweight>0.1 && (minWeight == null || hhweight < minWeight))
                         minWeight = hhweight;
                 }
-                double replicationFactor = MIN_REPLICATION_FACTOR / minWeight;    // ensures each sampled household represented at least 5 times in list
-                for (Household household : inputHouseholdList) {
+                double replicationFactor = 1.0 / minWeight;    // ensures each sampled household represented at least 1 time in list
+
+                List<Household> householdList1Deweighted = new LinkedList<>();
+                for (Household household : householdList1) {
 
                     int numberOfClones = (int) Math.round(household.getWeight() * replicationFactor);
                     for (int ii=0; ii<numberOfClones; ii++) {
-                        randomHouseholdSampleList.add(household);
+                        householdList1Deweighted.add(household);
                     }
                 }
-                Collections.shuffle(randomHouseholdSampleList, initialiseInnov);
-                InitialPopulationFilter filter = new InitialPopulationFilter(popSize, startYear, maxAge);
-                boolean flagContinue = true;
+                List<Household> householdList2Deweighted = new LinkedList<>();
+                for (Household household : householdList2) {
+
+                    int numberOfClones = (int) Math.round(household.getWeight() * replicationFactor);
+                    for (int ii=0; ii<numberOfClones; ii++) {
+                        householdList2Deweighted.add(household);
+                    }
+                }
+
+                Collections.shuffle(householdList1Deweighted, initialiseInnov1);
+                Collections.shuffle(householdList2Deweighted, initialiseInnov2);
+                InitialPopulationFilter filter;
+                if (!ignoreTargetsAtPopulationLoad)
+                    filter = new InitialPopulationFilter(popSize, startYear, maxAge);
+                else
+                    filter = new InitialPopulationFilter();
+                boolean flagSearch1 = true, flagConsiderRegion = true;
                 int counter = 0;
-                int minAcceptedPopSize = (int)(popSize * 1.0), maxCounter = 2;
-                while (flagContinue) {
+                while (persons.size() < (int)((double)popSize*0.999)) {
 
                     counter++;
-                    for (Household originalHousehold : randomHouseholdSampleList) {
+                    int populationLag = persons.size();
 
-                        if (counter==1) {
-                            // retain sample region
+                    if (flagSearch1)
+                        searchForClones(householdList1Deweighted, flagConsiderRegion, filter);
+                    else
+                        searchForClones(householdList2Deweighted, flagConsiderRegion, filter);
 
-                            if (filter.evaluate(originalHousehold) || ignoreTargetsAtPopulationLoad) {
+                    if (!ignoreTargetsAtPopulationLoad) {
+                        // reporting
 
-                                cloneHousehold(originalHousehold, SampleEntry.InputData);
-                                if (persons.size() >= popSize) break;
-                            }
-                        } else {
-                            // relax region restriction
-
-                            for (Region region : Parameters.getCountryRegions()) {
-
-                                if (filter.evaluate(originalHousehold, region) || ignoreTargetsAtPopulationLoad) {
-
-                                    cloneHousehold(originalHousehold, SampleEntry.InputData);
-                                    if (persons.size() >= popSize) break;
-                                }
-                            }
-                        }
+                        if (flagSearch1 && flagConsiderRegion)
+                            System.out.println("Resampling child households with region: iteration " + counter + " for population size " + persons.size());
+                        else if (flagSearch1 && !flagConsiderRegion)
+                            System.out.println("Resampling child households without region: iteration " + counter + " for population size " + persons.size());
+                        else if (!flagSearch1 && flagConsiderRegion)
+                            System.out.println("Resampling adult households with region: iteration " + counter + " for population size " + persons.size());
+                        else
+                            System.out.println("Resampling adult households without region: iteration " + counter + " for population size " + persons.size());
                     }
-                    if (persons.size() >= minAcceptedPopSize || counter>maxCounter) {
-                        flagContinue = false;
+
+                    // consider next iteration
+                    int increment = persons.size() - populationLag;
+                    if (increment < 50 || ((double)increment/(double)popSize) < 0.005) {
+                        // switch search strategy
+                        if (flagConsiderRegion)
+                            flagConsiderRegion = false;
+                        else if (flagSearch1) {
+                            flagSearch1 = false;
+                            flagConsiderRegion = true;
+                        } else
+                           break;
                     }
-                    if (flagContinue)
-                        System.out.println("Completed resampling iteration " + counter + " for popsize " + persons.size());
                 }
                 //filter.getRemainingVacancies();
                 stopwatch.stop();
@@ -2481,6 +2509,24 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         System.gc();
     }
 
+    private void searchForClones(List<Household> householdList, boolean flagConsiderRegion, InitialPopulationFilter filter) {
+
+        for (Household originalHousehold : householdList) {
+
+            if (flagConsiderRegion) {
+                if (ignoreTargetsAtPopulationLoad || filter.evaluate(originalHousehold)) {
+                    cloneHousehold(originalHousehold, SampleEntry.InputData);
+                }
+            } else {
+                for (Region region : Parameters.getCountryRegions()) {
+                    if (ignoreTargetsAtPopulationLoad || filter.evaluate(originalHousehold, region)) {
+                        cloneHousehold(originalHousehold, SampleEntry.InputData);
+                    }
+                }
+            }
+            if (persons.size() >= popSize) break;
+        }
+    }
 
     //Requires Labour Market to be initialised and EUROMOD policy scenario for start year to be specified, hence it is called after creating the Labour Market object
     private void initialisePotentialEarningsByWageEquationAndEmployerSocialInsurance() {
@@ -3166,10 +3212,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     private Processed getProcessed() {
-        return getProcessed(country, startYear, popSize);
+        return getProcessed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
     }
 
-    private Processed getProcessed(Country country, int startYear, int popSize) {
+    private Processed getProcessed(Country country, int startYear, int popSize, boolean ignoreTargetsAtPopulationLoad) {
 
         Processed processed = null;
 
@@ -3180,7 +3226,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " ORDER BY households.key.id";
+            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
 
             List<Processed> processedList = em.createQuery(query).getResultList();
             if (!processedList.isEmpty()) {
@@ -3233,10 +3279,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     private void persistProcessed() {
-        persistProcessed(households, country, startYear, popSize);
+        persistProcessed(households, country, startYear, popSize, ignoreTargetsAtPopulationLoad);
     }
 
-    private void persistProcessed(Set<Household> households, Country country, int startYear, int popSize) {
+    private void persistProcessed(Set<Household> households, Country country, int startYear, int popSize, boolean ignoreTargetsAtPopulationLoad) {
 
         EntityTransaction txn = null;
         try {
@@ -3245,7 +3291,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn = em.getTransaction();
             txn.begin();
 
-            Processed processed = new Processed(country, startYear, popSize);
+            Processed processed = new Processed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
             em.persist(processed);  // generates processed id
 
             for (Household household : households) {

@@ -56,14 +56,17 @@ public class Household implements EventListener, IDoubleSource {
 
     public Household(Household originalHousehold, SampleEntry sampleEntry) {
 
-        this();
         switch (sampleEntry) {
             case ProcessedInputData -> {
-                householdIdCounter = originalHousehold.getId();
-                key.setId(householdIdCounter);
+                model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+                collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
+                key  = new PanelEntityKey(originalHousehold.getId());
                 this.idOriginalHH = originalHousehold.getIdOriginalHH();
             }
             default -> {
+                model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+                collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
+                key  = new PanelEntityKey(householdIdCounter++);
                 idOriginalHH = originalHousehold.key.getId();
             }
         }
@@ -136,4 +139,6 @@ public class Household implements EventListener, IDoubleSource {
         this.processed = processed;
         key.setWorkingId(processed.getId());
     }
+
+    public static void setHouseholdIdCounter(long id) {householdIdCounter = id;}
 }

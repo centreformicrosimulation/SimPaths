@@ -29,6 +29,7 @@ public class Processed {
     @Enumerated(EnumType.STRING) Country country;
     @Column(name = "start_year") int startYear;
     @Column(name = "pop_size") int popSize;
+    @Column(name = "no_targets") boolean noTargets;
     @Transient private Set<BenefitUnit> benefitUnits = null;
     @Transient private Set<Person> persons = null;
 
@@ -37,13 +38,14 @@ public class Processed {
      * CONSTRUCTOR
      */
     public Processed() {}
-    public Processed(Country country, Integer startYear, Integer popSize) {
+    public Processed(Country country, Integer startYear, Integer popSize, Boolean noTargets) {
         this.country = country;
         this.startYear = startYear;
         this.popSize = popSize;
+        this.noTargets = noTargets;
     }
-    public Processed(long id, Country country, Integer startYear, Integer popSize) {
-        this(country, startYear, popSize);
+    public Processed(long id, Country country, Integer startYear, Integer popSize, Boolean noTargets) {
+        this(country, startYear, popSize, noTargets);
         this.id = id;
     }
 
@@ -73,6 +75,14 @@ public class Processed {
 
     public void setPopSize(int popSize) {
         this.popSize = popSize;
+    }
+
+    public boolean isNoTargets() {
+        return noTargets;
+    }
+
+    public void setNoTargets(boolean noTargets) {
+        this.noTargets = noTargets;
     }
 
     public Set<Household> getHouseholds() {

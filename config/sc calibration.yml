@@ -20,7 +20,7 @@ model_args:
     useWeights: false
     ignoreTargetsAtPopulationLoad: false
     projectMortality: true
-    alignPopulation: true
+    alignPopulation: false
     alignFertility: false
     alignEducation: false
     alignInSchool: false
@@ -36,8 +36,8 @@ model_args:
     flagSuppressSocialCareCosts: false
     enableIntertemporalOptimisations: true
     saveBehaviour: false
-    useSavedBehaviour: false
-    readGrid: "calib4"
+    useSavedBehaviour: true
+    readGrid: "temp"
     flagDefaultToTimeSeriesAverages: true
     saveImperfectTaxDBMatches: false
     employmentOptionsOfPrincipalWorker: 3
