@@ -5,7 +5,7 @@ maxNumberOfRuns: 1
 executeWithGui: false
 randomSeed: 606
 startYear: 2019
-endYear: 2020
+endYear: 2070
 popSize: 170000
 
 # Arguments passed to the SimPathsModel
@@ -20,11 +20,11 @@ model_args:
     useWeights: false
     ignoreTargetsAtPopulationLoad: false
     projectMortality: true
-    alignPopulation: false
-    alignFertility: false
+    alignPopulation: true
+    alignFertility: true
     alignEducation: false
     alignInSchool: false
-    alignCohabitation: false
+    alignCohabitation: true
     alignEmployment: false
     addRegressionStochasticComponent: true
     fixRegressionStochasticComponent: false
@@ -36,7 +36,7 @@ model_args:
     flagSuppressSocialCareCosts: false
     enableIntertemporalOptimisations: true
     saveBehaviour: false
-    useSavedBehaviour: true
+    useSavedBehaviour: false
     readGrid: "temp"
     flagDefaultToTimeSeriesAverages: true
     saveImperfectTaxDBMatches: false

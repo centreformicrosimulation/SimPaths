@@ -283,20 +283,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         UpdateInvestmentIncome,
         ProjectDiscretionaryConsumption,
         UpdateMembers,
-        Test,
     }
 
     @Override
     public void onEvent(Enum<?> type) {
         switch ((Processes) type) {
-            case Test -> {
-                Person male = getMale();
-                if (male!=null)
-                    if (male.getId()==8) {
-                        int dag = male.getDag();
-                        male.setDag(dag);
-                    }
-            }
             case Update -> {
                 updateAttributes();
                 clearStates();
