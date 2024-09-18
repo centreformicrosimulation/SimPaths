@@ -402,6 +402,6 @@ public class SimPathsMultiRun extends MultiRun {
 
 	@Override
 	public String setupRunLabel() {
-		return counter.toString();
+		return randomSeed.toString() + "_" + counter.toString();
 	}
 }
