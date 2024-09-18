@@ -5,7 +5,7 @@ maxNumberOfRuns: 1
 executeWithGui: false
 randomSeed: 606
 startYear: 2019
-endYear: 2070
+endYear: 2040
 popSize: 170000
 
 # Arguments passed to the SimPathsModel
@@ -21,10 +21,10 @@ model_args:
     ignoreTargetsAtPopulationLoad: false
     projectMortality: true
     alignPopulation: true
-    alignFertility: true
+    alignFertility: false
     alignEducation: false
     alignInSchool: false
-    alignCohabitation: true
+    alignCohabitation: false
     alignEmployment: false
     addRegressionStochasticComponent: true
     fixRegressionStochasticComponent: false

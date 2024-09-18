@@ -2385,13 +2385,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Person.setPersonIdCounter(personIdCounter+1);
         } else {
 
+            StopWatch stopwatch = new StopWatch();
+            stopwatch.start();
+
+            System.out.println("Initialising input dataset for assumed start year");
             inputDatabaseInteraction();
             List<Household> inputHouseholdList = loadStaringPopulation();
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
-                StopWatch stopwatch = new StopWatch();
-                stopwatch.start();
                 System.out.println("Will expand the initial population to " + popSize + " individuals, each of whom has an equal weight.");
 
                 // approach to resampling considered here is designed to allow for surveys that over-sample some population
@@ -2484,8 +2486,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     }
                 }
                 //filter.getRemainingVacancies();
-                stopwatch.stop();
-                System.out.println("Time elapsed " + stopwatch.getTime()/1000 + " seconds");
             } else {
                 // use population weights
 
@@ -2499,12 +2499,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
 
             // save to processed repository
+            System.out.println("Saving compiled inpput data for future reference");
             persistProcessed();
+
+            stopwatch.stop();
+            System.out.println("Time elapsed " + stopwatch.getTime()/1000 + " seconds");
         }
 
         // finalise
-        log.info("Number of simulated individuals (persons.size()) is " + persons.size() + " living in " + benefitUnits.size() + " simulated benefitUnits.");
-        log.info("Representative size of population is " + aggregatePersonsWeight + " living in " + aggregateHouseholdsWeight + " representative benefitUnits.");
+        System.out.println("Number of simulated individuals (persons.size()) is " + persons.size() + " living in " + benefitUnits.size() + " simulated benefitUnits.");
+        System.out.println("Representative size of population is " + aggregatePersonsWeight + " living in " + aggregateHouseholdsWeight + " representative benefitUnits.");
         initialHoursWorkedWeekly = null;
         System.gc();
     }
