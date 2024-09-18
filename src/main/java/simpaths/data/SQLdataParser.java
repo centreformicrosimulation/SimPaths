@@ -49,6 +49,8 @@ public class SQLdataParser {
 				+ "CREATE TABLE " + personTable + " AS (SELECT " + stringAppender(inputPersonColumnNamesSet) + " FROM " + inputFileName + ");"
 				//Add id column
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idperson RENAME TO id;"
+				//Add working_id column
+				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT DEFAULT 0;"
 				//Add rest of PanelEntityKey
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
@@ -289,6 +291,9 @@ public class SQLdataParser {
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
 
+				//Add working_id column
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN working_id INT DEFAULT 0;"
+
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
 			);
 
@@ -354,6 +359,8 @@ public class SQLdataParser {
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+							//Add working_id column
+							+ "ALTER TABLE " + householdTable + " ADD COLUMN working_id INT DEFAULT 0;"
 							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
 							+ "SELECT * FROM " + householdTable + " ORDER BY id;"
 			);
