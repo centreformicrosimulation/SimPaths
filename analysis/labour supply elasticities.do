@@ -14,7 +14,7 @@
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\labsupply1\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\labour elas\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 local dinc = 0.01	// assumed adjustment factor for disposable income of employed people (from SimPathsMultiRun object)
 

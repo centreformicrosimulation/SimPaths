@@ -10,14 +10,14 @@
 *
 *	NOTE: results exhibit substantial volatility
 *
-*	Last version:  Justin van de Ven, 21 May 2024
-*	First version: Justin van de Ven, 13 Jun 2024
+*	First version:  Justin van de Ven, 21 May 2024
+*	Last version: Justin van de Ven, 16 Sep 2024
 *
 **************************************************************************************/
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal5\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal elas\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 local dr = 0.0075	// delta interest rate (from SimPathsMultiRun object)
 
@@ -51,7 +51,9 @@ forvalues ii = 1/3 {
 	gen tcons = discretionaryconsumptionperyear + (childcarecostperweek + socialcarecostperweek) * 364.25/7 
 	gen econs = tcons/eqs
 	gen lrecons`ii' = ln(econs / l.econs)
+	gen reqs = round(eqs / l.eqs, 0.01)
 	keep if (!missing(lrecons))
+	keep if (reqs==1)
 	keep id_benefitunit lrecons idoriginalbu idoriginalhh
 	rename idoriginalbu idorigbu`ii'
 	rename idoriginalhh idorighh`ii'

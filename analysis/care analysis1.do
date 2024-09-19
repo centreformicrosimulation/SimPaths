@@ -8,7 +8,7 @@
 **************************************************************************************/
 
 clear all
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\sc analysis1\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
 
@@ -24,10 +24,6 @@ import delimited using "$moddir/BenefitUnit.csv", clear
 rename *, l
 rename id_benefitunit idbenefitunit
 gsort idbenefitunit time
-gen nk = 0
-forvalues ii = 0/17 {
-	replace nk = nk + n_children_`ii'
-}
 save "$outdir/temp0", replace
 import delimited using "$moddir/Person.csv", clear
 rename *, l
@@ -54,7 +50,11 @@ gen hed = (deh_c3=="High")
 
 gen male = (dgn=="Male")
 
-gen partnered = (dcpst=="Partnered")
+gen idna = (dag>17)
+gen idnk = (dag<18)
+bys time idbenefitunit: egen partnered = sum(idna)
+replace partnered = partnered - 1
+bys time idbenefitunit: egen nk = sum(idnk)
 
 gen needCare = (needsocialcare=="True")
 gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly + carehoursfromsonweekly + carehoursfromotherweekly + carehoursfromparentweekly
@@ -68,69 +68,96 @@ save "$outdir/temp1", replace
 *	childcare
 **************************************************************************************/
 use "$outdir/temp1", clear
-tab time						// all people
-tab time if (dag>17)			// population aged 18+
-tab time if (refbenefitunit)	// benefit units
-tab time if (nk>0 & refbenefitunit)	// benefit units with children
+
+// block 1 statistics
+matrix store1 = J(2070-2018,3,.)
+forvalues yy = 2019/2070 {
+	qui{
+		count if (time==`yy')
+		mat store1[`yy'-2018,1] = r(N)
+		count if (time==`yy' & dag>17)
+		mat store1[`yy'-2018,2] = r(N)
+		count if (time==`yy' & dag<18)
+		mat store1[`yy'-2018,3] = r(N)
+	}
+}
+matlist store1
+
+// block 2 statistics
+matrix store2 = J(2070-2018,3,.)
 gen incidenceChildcare = (childcarecostperweek>0)
-tab time if (incidenceChildcare & refbenefitunit)		// benefit units paying childcare
+forvalues yy = 2019/2070 {
+	qui{
+		count if (time==`yy' & refbenefitunit)
+		mat store2[`yy'-2018,1] = r(N)
+		count if (time==`yy' & refbenefitunit & nk>0)
+		mat store2[`yy'-2018,2] = r(N)
+		count if (time==`yy' & refbenefitunit & incidenceChildcare)
+		mat store2[`yy'-2018,3] = r(N)
+	}
+}
+matlist store2
 
 gen avChildAge = 0
 forvalues aa = 0/17 {
-	replace avChildAge = avChildAge + `aa' * n_children_`aa'
+	qui {
+		gen child`aa' = (dag==`aa')
+		bys time idbenefitunit: egen n_children_`aa' = sum(child`aa')
+		replace avChildAge = avChildAge + `aa' * n_children_`aa'
+	}
 }
 replace avChildAge = avChildAge / nk if (nk>0)
-matrix store1 = J(2069-2018,1,.)
-forvalues yy = 2019/2069 {
-	sum avChildAge if (time==`yy' & nk>0 & refbenefitunit), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-matrix store1 = J(2069-2018,1,.)
 gen cc2024prices = childcarecostperweek * 1.2663	// from 2015 prices
-forvalues yy = 2019/2069 {
-	sum cc2024prices if (time==`yy' & incidenceChildcare & refbenefitunit), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
 by time idbenefitunit: egen nNotEmpAdult = sum(idNotEmployedAdult)
 by time idbenefitunit: egen maxAge = max(dag)
-
-matrix store1 = J(2069-2018,1,.)
 gen chk = (nNotEmpAdult>0)
-forvalues yy = 2019/2069 {
-	sum chk if (time==`yy' & refbenefitunit), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
 
-forvalues yy = 2019/2069 {
-	sum chk if (time==`yy' & nk>0 & refbenefitunit), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 3 statistics
+matrix store3 = J(2070-2018,6,.)
+forvalues yy = 2019/2070 {
+	qui{
+		sum avChildAge if (time==`yy' & nk>0 & refbenefitunit), mean
+		mat store3[`yy'-2018,1] = r(mean)
+		sum nk if (time==`yy' & nk>0 & refbenefitunit), mean
+		mat store3[`yy'-2018,2] = r(mean)
+		sum cc2024prices if (time==`yy' & incidenceChildcare & refbenefitunit), mean
+		mat store3[`yy'-2018,3] = r(mean)
+		sum chk if (time==`yy' & refbenefitunit), mean
+		mat store3[`yy'-2018,4] = r(mean)
+		sum chk if (time==`yy' & nk>0 & refbenefitunit), mean
+		mat store3[`yy'-2018,5] = r(mean)
+		sum chk if (time==`yy' & maxAge<55 & refbenefitunit), mean
+		mat store3[`yy'-2018,6] = r(mean)
+	}
 }
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum chk if (time==`yy' & maxAge<55 & refbenefitunit), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
+matlist store3
+drop chk
 
 
 /*******************************************************************************
 *	social care need
 *******************************************************************************/
 use "$outdir/temp1", clear
-tab time if (dag>44 & dag<65)
-tab time if (needCare==1 & dag>44 & dag<65)
 
-tab time if (dag>64 & dag<80)
-tab time if (needCare==1 & dag>64 & dag<80)
-
-tab time if (dag>79)
-tab time if (needCare==1 & dag>79)
+// block 4 statistics
+matrix store4 = J(2070-2018,6,.)
+forvalues yy = 2019/2070 {
+	qui{
+		count if (time==`yy' & dag>44 & dag<65)
+		mat store4[`yy'-2018,1] = r(N)
+		count if (time==`yy' & dag>44 & dag<65 & needCare)
+		mat store4[`yy'-2018,2] = r(N)
+		count if (time==`yy' & dag>64 & dag<80)
+		mat store4[`yy'-2018,3] = r(N)
+		count if (time==`yy' & dag>64 & dag<80 & needCare)
+		mat store4[`yy'-2018,4] = r(N)
+		count if (time==`yy' & dag>79)
+		mat store4[`yy'-2018,5] = r(N)
+		count if (time==`yy' & dag>79 & needCare)
+		mat store4[`yy'-2018,6] = r(N)
+	}
+}
+matlist store4
 
 gen dhev = 0
 replace dhev = 1 if (dhe=="Poor")
@@ -140,116 +167,67 @@ replace dhev = 4 if (dhe=="VeryGood")
 replace dhev = 5 if (dhe=="Excellent")
 
 /*************** aged 45 to 64 ******************/
-matrix store1 = J(2069-2018,1,.)
-forvalues yy = 2019/2069 {
-	sum male if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 5 statistics
+matrix store5 = J(2070-2018,3,.)
+gen id = (dag>44 & dag<65)
+forvalues yy = 2019/2070 {
+	qui {
+		local jj = 1
+		sum hed if (time==`yy' & id), mean
+		mat store5[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+		sum led if (time==`yy' & id), mean
+		mat store5[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+		sum partnered if (time==`yy' & id), mean
+		mat store5[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+	}
 }
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum hed if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum led if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum partnered if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum dag if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum dhev if (time==`yy' & dag>44 & dag<65), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
+matlist store5
+drop id
 
 /*************** aged 65 to 79 ******************/
-forvalues yy = 2019/2069 {
-	sum male if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 6 statistics
+matrix store6 = J(2070-2018,3,.)
+gen id = (dag>64 & dag<80)
+forvalues yy = 2019/2070 {
+	qui {
+		local jj = 1
+		sum hed if (time==`yy' & id), mean
+		mat store6[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+		sum led if (time==`yy' & id), mean
+		mat store6[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+		sum partnered if (time==`yy' & id), mean
+		mat store6[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+	}
 }
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum hed if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum led if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum partnered if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum dag if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum dhev if (time==`yy' & dag>64 & dag<80), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
+matlist store6
+drop id
 
 /*************** aged 80 and over ******************/
-forvalues yy = 2019/2069 {
-	sum male if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 7 statistics
+matrix store7 = J(2070-2018,3,.)
+gen id = (dag>79)
+forvalues yy = 2019/2070 {
+	qui {
+		local jj = 1
+		sum hed if (time==`yy' & id), mean
+		mat store7[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+		sum led if (time==`yy' & id), mean
+		mat store7[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+		sum partnered if (time==`yy' & id), mean
+		mat store7[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
+	}
 }
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum hed if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum led if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum partnered if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum dag if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
-
-forvalues yy = 2019/2069 {
-	sum dhev if (time==`yy' & dag>79), mean
-	mat store1[`yy'-2018,1] = r(mean)
-}
-matlist store1
+matlist store7
+drop id
 
 
 /*******************************************************************************
@@ -257,54 +235,77 @@ matlist store1
 *******************************************************************************/
 use "$outdir/temp1", clear
 
-tab time if (recCare & dag>44 & dag<65)
-tab time if (recCare & dag>64 & dag<80)
-tab time if (recCare & needCare & dag>64 & dag<80)
-
-tab time if (recCare & dag>79)
-tab time if (recCare & needCare & dag>79)
-
-matrix store1 = J(2069-2018,1,.)
-forvalues yy = 2019/2069 {
-	sum totalCareHours if (time==`yy' & dag>44 & dag<65 & recCare), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 8 statistics
+matrix store8 = J(2070-2018,5,.)
+forvalues yy = 2019/2070 {
+	qui {
+		local jj = 1
+		count if (time==`yy' & recCare & dag>44 & dag<65)
+		mat store8[`yy'-2018,`jj'] = r(N)
+		local jj = `jj' + 1
+		count if (time==`yy' & recCare & dag>64 & dag<80)
+		mat store8[`yy'-2018,`jj'] = r(N)
+		local jj = `jj' + 1
+		count if (time==`yy' & recCare & needCare & dag>64 & dag<80)
+		mat store8[`yy'-2018,`jj'] = r(N)
+		local jj = `jj' + 1
+		count if (time==`yy' & recCare & dag>79)
+		mat store8[`yy'-2018,`jj'] = r(N)
+		local jj = `jj' + 1
+		count if (time==`yy' & recCare & needCare & dag>79)
+		mat store8[`yy'-2018,`jj'] = r(N)
+		local jj = `jj' + 1
+	}
 }
-matlist store1
+matlist store8
 
-forvalues yy = 2019/2069 {
-	sum totalCareHours if (time==`yy' & dag>64 & dag<80 & recCare), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 9 statistics
+matrix store9 = J(2070-2018,3,.)
+forvalues yy = 2019/2070 {
+	qui {
+		sum totalCareHours if (time==`yy' & dag>44 & dag<65 & recCare), mean
+		mat store9[`yy'-2018,1] = r(mean)
+		sum totalCareHours if (time==`yy' & dag>64 & dag<80 & recCare), mean
+		mat store9[`yy'-2018,2] = r(mean)
+		sum totalCareHours if (time==`yy' & dag>79 & recCare), mean
+		mat store9[`yy'-2018,3] = r(mean)
+	}
 }
-matlist store1
+matlist store9
 
-forvalues yy = 2019/2069 {
-	sum totalCareHours if (time==`yy' & dag>79 & recCare), mean
-	mat store1[`yy'-2018,1] = r(mean)
+// block 10 statistics
+matrix store10 = J(2070-2018,3,.)
+forvalues yy = 2019/2070 {
+	qui {
+		count if (time==`yy' & informalCareHours>0.1 & carehoursfromformalweekly<0.1)
+		mat store10[`yy'-2018,1] = r(N)
+		count if (time==`yy' & informalCareHours>0.1 & carehoursfromformalweekly>0.1)
+		mat store10[`yy'-2018,2] = r(N)
+		count if (time==`yy' & informalCareHours<0.1 & carehoursfromformalweekly>0.1)
+		mat store10[`yy'-2018,3] = r(N)
+	}
 }
-matlist store1
+matlist store10
 
-tab time if (informalCareHours>0.1 & carehoursfromformalweekly<0.1)
-tab time if (informalCareHours>0.1 & carehoursfromformalweekly>0.1)
-tab time if (informalCareHours<0.1 & carehoursfromformalweekly>0.1)
-
-matrix store1 = J(2069-2018,6,.)
+// block 11 statistics
+matrix store11 = J(2070-2018,6,.)
 gen chk = (dag>44)
-forvalues yy = 2019/2069 {
+forvalues yy = 2019/2070 {
 	sum carehoursfromparentweekly if (time==`yy' & chk), mean
-	mat store1[`yy'-2018,1] = r(mean)
+	mat store11[`yy'-2018,1] = r(mean)
 	sum carehoursfrompartnerweekly if (time==`yy' & chk), mean
-	mat store1[`yy'-2018,2] = r(mean)
+	mat store11[`yy'-2018,2] = r(mean)
 	sum carehoursfromdaughterweekly if (time==`yy' & chk), mean
-	mat store1[`yy'-2018,3] = r(mean)
+	mat store11[`yy'-2018,3] = r(mean)
 	sum carehoursfromsonweekly if (time==`yy' & chk), mean
-	mat store1[`yy'-2018,4] = r(mean)
+	mat store11[`yy'-2018,4] = r(mean)
 	sum carehoursfromotherweekly if (time==`yy' & chk), mean
-	mat store1[`yy'-2018,5] = r(mean)
+	mat store11[`yy'-2018,5] = r(mean)
 	sum carehoursfromformalweekly if (time==`yy' & chk), mean
-	mat store1[`yy'-2018,6] = r(mean)
+	mat store11[`yy'-2018,6] = r(mean)
 }
 drop chk
-matlist store1
+matlist store11
 
 
 /*******************************************************************************
@@ -316,8 +317,8 @@ tab time if (socialcareprovision_p=="OnlyOther")
 tab time if (socialcareprovision_p=="OnlyPartner")
 tab time if (socialcareprovision_p=="PartnerAndOther")
 
-matrix store1 = J(2069-2018,1,.)
-forvalues yy = 2019/2069 {
+matrix store1 = J(2070-2018,1,.)
+forvalues yy = 2019/2070 {
 	sum carehoursprovidedweekly if (time==`yy' & socialcareprovision_p!="None"), mean
 	mat store1[`yy'-2018,1] = r(mean)
 }
