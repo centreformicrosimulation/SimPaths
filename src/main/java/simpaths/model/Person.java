@@ -1677,19 +1677,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 idFather = null;
         }
 
-        if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
-            dlltsd = Indicator.False;
-            dlltsd_lag1 = Indicator.False;
-        }
-        if (!Parameters.flagSocialCare) {
-            setAllSocialCareVariablesToFalse();
-        }
-
         //Lagged variables
         updateLaggedVariables(initialUpdate);
 
         // generate year specific random draws
         if (!initialUpdate) {
+            if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
+                dlltsd = Indicator.False;
+                dlltsd_lag1 = Indicator.False;
+            }
+            if (!Parameters.flagSocialCare) {
+                setAllSocialCareVariablesToFalse();
+            }
             innovations.getNewDoubleDraws();
         }
     }

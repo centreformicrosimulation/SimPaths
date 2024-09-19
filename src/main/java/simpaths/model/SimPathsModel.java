@@ -2550,7 +2550,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
 
             // save to processed repository
-            System.out.println("Saving compiled inpput data for future reference");
+            System.out.println("Saving compiled input data for future reference");
             persistProcessed();
 
             stopwatch.stop();
