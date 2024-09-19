@@ -2559,7 +2559,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // finalise
         System.out.println("Number of simulated individuals (persons.size()) is " + persons.size() + " living in " + benefitUnits.size() + " simulated benefitUnits.");
-        System.out.println("Representative size of population is " + aggregatePersonsWeight + " living in " + aggregateHouseholdsWeight + " representative benefitUnits.");
         initialHoursWorkedWeekly = null;
         System.gc();
     }

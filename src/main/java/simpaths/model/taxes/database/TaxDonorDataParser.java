@@ -642,12 +642,16 @@ public class TaxDonorDataParser {
                         throw new RuntimeException("sample sizes for tax database vary between system years");
                 }
             }
+            System.out.println("Completed checks of donor data sample sizes");
 
             // populate tax unit data
             taxUnits = em.createQuery("SELECT DISTINCT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.persons tp LEFT JOIN FETCH tp.policies pl").getResultList();
+            System.out.println("Completed querying full donor database sample");
+            int counter = 0, decile=(int)((double)taxUnits.size()*0.1);
             for (DonorTaxUnit taxUnit : taxUnits) {
                 // loop through tax units
 
+                counter++;
                 int age = 0, numberMembersOver17 = 0, numberChildrenUnder5 = 0, numberChildren5To9 = 0;
                 int numberChildren10To17 = 0, dlltsd1 = -1, dlltsd2 = -1, careProvision = -1;
                 double hoursWorkedPerWeek1 = 0.0, hoursWorkedPerWeek2 = 0.0;
@@ -750,6 +754,10 @@ public class TaxDonorDataParser {
                     em.persist(taxUnitPolicy);
                 }
                 em.persist(taxUnit);
+                if ((counter % decile)==0) {
+                    int dec = counter/decile;
+                    System.out.println("Completed processing decile " + dec + " of donor database");
+                }
             }
 
             // close connection
