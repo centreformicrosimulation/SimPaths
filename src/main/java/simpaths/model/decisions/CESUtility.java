@@ -24,7 +24,7 @@ public class CESUtility implements IEvaluation {
     public static final double ALPHA_YOUNG = 1.22;                                   // utility price of leisure for single adults
     public static final double ALPHA_MID = 1.22;                                     // utility price of leisure for single adults
     public static final double ALPHA_OLD = 1.22;                                     // utility price of leisure for couples
-    public static final double GAMMA = 2.2;                                         // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
+    public static final double GAMMA = 2.0;                                         // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
     public static final double ZETA0 = 17.0;                                        // warm-glow bequests parameter for singles - additive
     public static final double ZETA1 = 0.4;                                         // warm-glow bequests parameter for singles - slope
     public static final double DELTA_SINGLES = 0.98;                                // exponential intertemporal discount factor for singles

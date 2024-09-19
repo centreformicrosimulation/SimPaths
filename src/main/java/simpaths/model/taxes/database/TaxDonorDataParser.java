@@ -73,6 +73,9 @@ public class TaxDonorDataParser {
             // method to initialise donor tax unit tables
             createDonorTaxUnitTables(conn, country);
 
+            // set default tables to new data
+            updateDefaultDonorTables(conn, country);
+
             // clean-up
             conn.close();
             conn = null;
@@ -98,6 +101,33 @@ public class TaxDonorDataParser {
         // remove message box
         if (csvFrame != null)
             csvFrame.setVisible(false);
+    }
+
+
+    private static void updateDefaultDonorTables(Connection conn, Country country) {
+
+        Statement stat = null;
+        try {
+            stat = conn.createStatement();
+
+            String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
+            for (String tableName : tableNamesDonor) {
+                stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
+                stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
+                System.out.println("Completed updating " + tableName);
+            }
+        }
+        catch(SQLException e){
+            throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
+        }
+        finally {
+            try {
+                if(stat != null) stat.close();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

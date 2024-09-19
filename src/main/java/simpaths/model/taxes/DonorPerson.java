@@ -12,7 +12,7 @@ import java.util.HashSet;
  *
  */
 @Entity
-@Table(name = "DONORPERSON_UK")
+//@Table(name = "DONORPERSON_UK")
 public class DonorPerson {
 
 

@@ -81,6 +81,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //@GUIparameter(description = "Country to be simulated")
     private Country country; // = Country.UK;
 
+    private boolean flagUpdateCountry = false;  // set to true if switch between countries
+
     @GUIparameter(description = "Simulated population size (base year)")
     private Integer popSize = 170000;
 
@@ -329,6 +331,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @Override
     public void buildObjects() {
 
+
+        // time check
+        elapsedTime = System.currentTimeMillis();
+
         // set seed for random number generator
         if (fixRandomSeed) SimulationEngine.getRnd().setSeed(randomSeedIfFixed);
         cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
@@ -352,12 +358,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             //DecisionTests.compareGrids();
             //DatabaseExtension.extendInputData();
         }
-
-        log.debug("Parameters loaded");
+        System.out.println("Time to load parameters: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 
         // populate tax donor references
+        if (flagUpdateCountry) {
+            taxDatabaseUpdate();
+        }
         populateTaxdbReferences();
         //TestTaxRoutine.run();
+        System.out.println("Time to load tax database references: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 
         // set start year for simulation
         year = startYear;
@@ -366,12 +375,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //Display current country and start year in the console
         System.out.println("Country: " + country + ". Running simulation from: " + startYear + " to " + endYear);
 
-        // time check
-        elapsedTime = System.currentTimeMillis();
-
         // creates initial population (Person and BenefitUnit objects) based on data in input database.
         // Note that the population may be cropped to simulate a smaller population depending on user choices in the GUI.
         createInitialPopulationDataStructures();
+        System.out.println("Time to create initial population structures: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
 
         // initialise variables used to match marriage unions
         createDataStructuresForMarriageMatching();
@@ -2244,6 +2251,47 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         log.debug("Year: " + year + ", Elapsed time: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
     }
 
+    private void taxDatabaseUpdate() {
+
+        System.out.println("Updating country reference for tax database");
+
+        Connection conn = null;
+        Statement stat = null;
+        try {
+            Class.forName("org.h2.Driver");
+            System.out.println("Reading from database at ./input/input");
+            try {
+                conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;AUTO_SERVER=FALSE", "sa", "");
+            }
+            catch (SQLException e) {
+                log.info(e.getMessage());
+                throw new RuntimeException("SQL Exception! " + e.getMessage());
+            }
+
+            stat = conn.createStatement();
+            System.out.println("Database connection established");
+            if (isFirstRun) {
+                //Create database tables to be used in simulation from country and year specific tables
+                String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
+                for (String tableName : tableNamesDonor) {
+                    stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
+                    stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
+                    System.out.println("Completed updating " + tableName);
+                }
+            }
+        }
+        catch(ClassNotFoundException|SQLException e){
+            throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
+        } finally {
+            try {
+                if (stat != null) { stat.close(); }
+                if (conn != null) { conn.close(); }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     private void inputDatabaseInteraction() {
 
@@ -2265,21 +2313,20 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             stat = conn.createStatement();
 
+            System.out.println("Database connection established");
             if (isFirstRun) {
-                //Create database tables to be used in simulation from country-specific tables
-                String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
-                for (String tableName : tableNamesDonor) {
-                    stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
-                    stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
-                }
+                //Create database tables to be used in simulation from country and year specific tables
                 String[] tableNamesInitial = new String[]{"HOUSEHOLD", "BENEFITUNIT", "PERSON"};
                 for (String tableName : tableNamesInitial) {
                     stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
+                    int year;
                     if (uprateInitialPopulation) {
-                        stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + Parameters.getMaxStartYear()); // Load the last available initial population from all available in tables of the database
+                        year = Parameters.getMaxStartYear(); // Load the last available initial population from all available in tables of the database
                     } else {
-                        stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + startYear); // Load the country-year specific initial population from all available in tables of the database
+                        year = startYear; // Load the country-year specific initial population from all available in tables of the database
                     }
+                    stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country + "_" + year);
+                    System.out.println("Completed reading from " + tableName + "_" + country + "_" + year);
                 }
             }
 
@@ -2310,8 +2357,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         "UPDATE PERSON SET SIMULATION_TIME = " + startYear + ";"
                                 + "UPDATE PERSON SET SYSTEM_YEAR = " + startYear + ";"
                 );
+                System.out.println("Completed amending Person table");
             }
-
         }
         catch(ClassNotFoundException|SQLException e){
             if(e instanceof ClassNotFoundException) {
@@ -2364,6 +2411,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Set<Household> households = processed.getHouseholds();
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
+            System.out.println("Found processed dataset - preparing for simulation");
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
             for ( Household originalHousehold : processed.getHouseholds()) {
                 if (originalHousehold.getId() > householdIdCounter)
@@ -2390,7 +2438,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             System.out.println("Initialising input dataset for assumed start year");
             inputDatabaseInteraction();
+            System.out.println("Completed initialising input dataset");
+            System.out.println("Loading survey data for starting population");
             List<Household> inputHouseholdList = loadStaringPopulation();
+            System.out.println("completed loading survey data for starting population");
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 

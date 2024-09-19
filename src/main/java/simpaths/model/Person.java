@@ -382,57 +382,49 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         ypnoab_lag2 = originalPerson.ypnoab_lag2;
 
         liwwh = Objects.requireNonNullElseGet(originalPerson.liwwh, () -> ((Les_c4.EmployedOrSelfEmployed.equals(les_c4)) ? 12 : 0));
-        if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
-            dlltsd = Indicator.False;
-            dlltsd_lag1 = Indicator.False;
-        } else {
-            dlltsd = originalPerson.dlltsd;
-            dlltsd_lag1 = originalPerson.dlltsd_lag1;
-        }
-        if (Parameters.flagSocialCare) {
-            needSocialCare = Objects.requireNonNullElse(originalPerson.needSocialCare, Indicator.False);
-            careHoursFromFormalWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromFormalWeekly, 0.0);
-            careFormalExpenditureWeekly = Objects.requireNonNullElse(originalPerson.careFormalExpenditureWeekly, 0.0);
-            careHoursFromPartnerWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromPartnerWeekly, 0.0);
-            careHoursFromParentWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromParentWeekly, 0.0);
-            careHoursFromDaughterWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromDaughterWeekly, 0.0);
-            careHoursFromSonWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromSonWeekly, 0.0);
-            careHoursFromOtherWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromOtherWeekly, 0.0);
-            socialCareFromFormal = Objects.requireNonNullElseGet(originalPerson.socialCareFromFormal, () -> (careHoursFromFormalWeekly > 0.0));
-            socialCareFromPartner = Objects.requireNonNullElseGet(originalPerson.socialCareFromPartner, () -> (careHoursFromPartnerWeekly > 0.0));
-            socialCareFromDaughter = Objects.requireNonNullElseGet(originalPerson.socialCareFromDaughter, () -> (careHoursFromDaughterWeekly > 0.0));
-            socialCareFromSon = Objects.requireNonNullElseGet(originalPerson.socialCareFromSon, () -> (careHoursFromSonWeekly > 0.0));
-            socialCareFromOther = Objects.requireNonNullElseGet(originalPerson.socialCareFromOther, () -> (careHoursFromOtherWeekly > 0.0));
-            if (originalPerson.socialCareReceipt!=null)
-                socialCareReceipt = originalPerson.socialCareReceipt;
-            else {
-                if (socialCareFromFormal) {
-                    if (socialCareFromPartner || socialCareFromDaughter || socialCareFromSon || socialCareFromOther)
-                        socialCareReceipt = SocialCareReceipt.Mixed;
-                    else
-                        socialCareReceipt = SocialCareReceipt.Formal;
-                } else {
-                    if (socialCareFromPartner || socialCareFromDaughter || socialCareFromSon || socialCareFromOther)
-                        socialCareReceipt = SocialCareReceipt.Informal;
-                    else
-                        socialCareReceipt = SocialCareReceipt.None;
-                }
+        dlltsd = originalPerson.dlltsd;
+        dlltsd_lag1 = originalPerson.dlltsd_lag1;
+        needSocialCare = Objects.requireNonNullElse(originalPerson.needSocialCare, Indicator.False);
+        careHoursFromFormalWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromFormalWeekly, 0.0);
+        careFormalExpenditureWeekly = Objects.requireNonNullElse(originalPerson.careFormalExpenditureWeekly, 0.0);
+        careHoursFromPartnerWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromPartnerWeekly, 0.0);
+        careHoursFromParentWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromParentWeekly, 0.0);
+        careHoursFromDaughterWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromDaughterWeekly, 0.0);
+        careHoursFromSonWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromSonWeekly, 0.0);
+        careHoursFromOtherWeekly = Objects.requireNonNullElse(originalPerson.careHoursFromOtherWeekly, 0.0);
+        socialCareFromFormal = Objects.requireNonNullElseGet(originalPerson.socialCareFromFormal, () -> (careHoursFromFormalWeekly > 0.0));
+        socialCareFromPartner = Objects.requireNonNullElseGet(originalPerson.socialCareFromPartner, () -> (careHoursFromPartnerWeekly > 0.0));
+        socialCareFromDaughter = Objects.requireNonNullElseGet(originalPerson.socialCareFromDaughter, () -> (careHoursFromDaughterWeekly > 0.0));
+        socialCareFromSon = Objects.requireNonNullElseGet(originalPerson.socialCareFromSon, () -> (careHoursFromSonWeekly > 0.0));
+        socialCareFromOther = Objects.requireNonNullElseGet(originalPerson.socialCareFromOther, () -> (careHoursFromOtherWeekly > 0.0));
+        if (originalPerson.socialCareReceipt!=null)
+            socialCareReceipt = originalPerson.socialCareReceipt;
+        else {
+            if (socialCareFromFormal) {
+                if (socialCareFromPartner || socialCareFromDaughter || socialCareFromSon || socialCareFromOther)
+                    socialCareReceipt = SocialCareReceipt.Mixed;
+                else
+                    socialCareReceipt = SocialCareReceipt.Formal;
+            } else {
+                if (socialCareFromPartner || socialCareFromDaughter || socialCareFromSon || socialCareFromOther)
+                    socialCareReceipt = SocialCareReceipt.Informal;
+                else
+                    socialCareReceipt = SocialCareReceipt.None;
             }
-
-            careHoursProvidedWeekly = Objects.requireNonNullElse(originalPerson.careHoursProvidedWeekly, 0.0);
-            socialCareProvision = Objects.requireNonNullElseGet(originalPerson.socialCareProvision, () ->
-                    (careHoursProvidedWeekly > 0.01) ? SocialCareProvision.OnlyOther : SocialCareProvision.None);
-
-            needSocialCare_lag1 = Objects.requireNonNullElse(originalPerson.needSocialCare_lag1, needSocialCare);
-            careHoursFromFormalWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromFormalWeekly_lag1, careHoursFromFormalWeekly);
-            careHoursFromPartnerWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromPartnerWeekly_lag1, careHoursFromPartnerWeekly);
-            careHoursFromDaughterWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromDaughterWeekly_lag1, careHoursFromDaughterWeekly);
-            careHoursFromSonWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromSonWeekly_lag1, careHoursFromSonWeekly);
-            careHoursFromOtherWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromOtherWeekly_lag1, careHoursFromOtherWeekly);
-            socialCareProvision_lag1 = Objects.requireNonNullElse(originalPerson.socialCareProvision_lag1, socialCareProvision);
-        } else {
-            setAllSocialCareVariablesToFalse();
         }
+
+        careHoursProvidedWeekly = Objects.requireNonNullElse(originalPerson.careHoursProvidedWeekly, 0.0);
+        socialCareProvision = Objects.requireNonNullElseGet(originalPerson.socialCareProvision, () ->
+                (careHoursProvidedWeekly > 0.01) ? SocialCareProvision.OnlyOther : SocialCareProvision.None);
+
+        needSocialCare_lag1 = Objects.requireNonNullElse(originalPerson.needSocialCare_lag1, needSocialCare);
+        careHoursFromFormalWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromFormalWeekly_lag1, careHoursFromFormalWeekly);
+        careHoursFromPartnerWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromPartnerWeekly_lag1, careHoursFromPartnerWeekly);
+        careHoursFromDaughterWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromDaughterWeekly_lag1, careHoursFromDaughterWeekly);
+        careHoursFromSonWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromSonWeekly_lag1, careHoursFromSonWeekly);
+        careHoursFromOtherWeekly_lag1 = Objects.requireNonNullElse(originalPerson.careHoursFromOtherWeekly_lag1, careHoursFromOtherWeekly);
+        socialCareProvision_lag1 = Objects.requireNonNullElse(originalPerson.socialCareProvision_lag1, socialCareProvision);
+
         lowWageOffer = originalPerson.lowWageOffer;
         lowWageOffer_lag1 = originalPerson.lowWageOffer_lag1;
         sedex = originalPerson.sedex;
@@ -1683,6 +1675,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 idFather = father.getId();
             else
                 idFather = null;
+        }
+
+        if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
+            dlltsd = Indicator.False;
+            dlltsd_lag1 = Indicator.False;
+        }
+        if (!Parameters.flagSocialCare) {
+            setAllSocialCareVariablesToFalse();
         }
 
         //Lagged variables
