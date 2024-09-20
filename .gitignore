@@ -290,3 +290,13 @@ input/InitialPopulations/current/population_initial_UK_2021.csv
 input/InitialPopulations/testing/population_initial_UK_2019.csv
 input/EUROMODoutput/testing/uk_2015_std.txt
 input/EUROMODoutput/testing/uk_2019_std.txt
+input/EUROMODoutput/extended/uk_2015_std.txt
+input/EUROMODoutput/extended/uk_2019_std.txt
+input/EUROMODoutput/extended/uk_2020_std.txt
+input/EUROMODoutput/extended/uk_2021_std.txt
+input/EUROMODoutput/extended/uk_2022_std.txt
+input/EUROMODoutput/extended/uk_2023_std.txt
+input/EUROMODoutput/extended/uk_2024_std.txt
+input/EUROMODoutput/extended/uk_2025_std.txt
+input/EUROMODoutput/testing/DatabaseCountryYear.xlsx
+input/EUROMODoutput/testing/EUROMODpolicySchedule.xlsx

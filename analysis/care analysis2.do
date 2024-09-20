@@ -8,9 +8,9 @@
 **************************************************************************************/
 
 clear all
-global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\base\csv"
-global zerocostsdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\zero\csv"
-global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\ignore\csv"
+global basedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\sc analysis1\csv"
+global zerocostsdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\sc analysis1\csv"
+global naivedir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\sc analysis3\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 cd "$outdir"
 
@@ -164,16 +164,17 @@ save "$outdir/naive1", replace
 /**************************************************************************************
 *	age profile analysis
 **************************************************************************************/
+// block a
 matrix store1 = J(80-17,9,.)
-forvalues jj = 1/3 {
+forvalues kk = 1/3 {
 	
-	if (`jj'==1) {
+	if (`kk'==1) {
 		use "$outdir/zero1", clear
 	}
-	if (`jj'==2) {
+	if (`kk'==2) {
 		use "$outdir/naive1", clear
 	}
-	if (`jj'==3) {
+	if (`kk'==3) {
 		use "$outdir/base1", clear
 	}
 
@@ -212,19 +213,19 @@ forvalues jj = 1/3 {
 		local jj = `jj' + 1
 
 		sum dispinc if (dag==`aa' & target), mean
-		mat store1[`aa'-17,`jj'] = r(mean) * 1.2663  // from 2015 to 2022 prices
+		mat store1[`aa'-17,`jj'] = r(mean) * 1.305  // from 2015 to 2024 prices (ONS CPI Annual Average (All Items, D7BT))
 		local jj = `jj' + 1
 
 		sum discretionaryconsumptionperyear if (dag==`aa' & target), mean
-		mat store1[`aa'-17,`jj'] = r(mean) * 1.2663  // from 2015 to 2022 prices
+		mat store1[`aa'-17,`jj'] = r(mean) * 1.305  // from 2015 to 2024 prices
 		local jj = `jj' + 1
 
 		sum careexpend if (dag==`aa' & target), mean
-		mat store1[`aa'-17,`jj'] = r(mean) * 1.2663  // from 2015 to 2022 prices
+		mat store1[`aa'-17,`jj'] = r(mean) * 1.305  // from 2015 to 2024 prices
 		local jj = `jj' + 1
 
 		sum liquidwealth if (dag==`aa' & target), mean
-		mat store1[`aa'-17,`jj'] = r(mean) * 1.2663  // from 2015 to 2022 prices
+		mat store1[`aa'-17,`jj'] = r(mean) * 1.305  // from 2015 to 2024 prices
 		local jj = `jj' + 1
 	}
 	matlist store1

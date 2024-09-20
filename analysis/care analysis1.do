@@ -313,16 +313,20 @@ matlist store11
 *******************************************************************************/
 use "$outdir/temp1", clear
 
-tab time if (socialcareprovision_p=="OnlyOther")
-tab time if (socialcareprovision_p=="OnlyPartner")
-tab time if (socialcareprovision_p=="PartnerAndOther")
-
-matrix store1 = J(2070-2018,1,.)
+// block 12 statistics
+matrix store12 = J(2070-2018,4,.)
 forvalues yy = 2019/2070 {
-	sum carehoursprovidedweekly if (time==`yy' & socialcareprovision_p!="None"), mean
-	mat store1[`yy'-2018,1] = r(mean)
+	qui {
+		count if (time==`yy' & socialcareprovision_p=="OnlyOther")
+		mat store12[`yy'-2018,1] = r(N)
+		count if (time==`yy' & socialcareprovision_p=="OnlyPartner")
+		mat store12[`yy'-2018,2] = r(N)
+		count if (time==`yy' & socialcareprovision_p=="PartnerAndOther")
+		mat store12[`yy'-2018,3] = r(N)
+		sum carehoursprovidedweekly if (time==`yy' & socialcareprovision_p!="None"), mean
+		mat store12[`yy'-2018,4] = r(mean)
 }
-matlist store1
+matlist store12
 
 
 /*******************************************************************************
