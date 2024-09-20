@@ -50,7 +50,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
-	public static String configFile = "create database.yml";
+	public static String configFile = "sc analysis1.yml";
 
 	// other working variables
 	private static Country country;
@@ -430,13 +430,15 @@ public class SimPathsMultiRun extends MultiRun {
 		String filePath = "./input" + File.separator + "input.mv.db";
 		safeDelete(filePath);
 
-		// populate new database
+		// populate new database for starting data
+		DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+
+		// populate new database for tax donors
 		String taxDonorInputFilename = "tax_donor_population_" + country;
 		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
-		DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
-		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
-		TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables
 		Parameters.loadTimeSeriesFactorForTaxDonor(country);
+		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
+		TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables from csv data
 		TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
 	}
 	private static void safeDelete(String filePath) {
