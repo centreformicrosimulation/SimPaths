@@ -65,9 +65,9 @@ public class TaxDonorDataParser {
         Connection conn = null;
         try {
             Class.forName("org.h2.Driver");
-            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;CACHE_SIZE=2097152;AUTO_SERVER=TRUE", "sa", "");
+            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
-            // method to create the donor person tables
+            // method to create the donor person and personpolicy tables
             createDonorPersonTables(conn, country, startYear);
 
             // method to initialise donor tax unit tables
@@ -104,13 +104,13 @@ public class TaxDonorDataParser {
     }
 
 
-    private static void updateDefaultDonorTables(Connection conn, Country country) {
+    public static void updateDefaultDonorTables(Connection conn, Country country) {
 
         Statement stat = null;
         try {
             stat = conn.createStatement();
 
-            String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
+            String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON", "DONORPERSONPOLICY"};
             for (String tableName : tableNamesDonor) {
                 stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
                 stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);

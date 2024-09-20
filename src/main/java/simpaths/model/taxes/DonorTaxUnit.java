@@ -12,7 +12,7 @@ import java.util.HashSet;
  *
  */
 @Entity
-//@Table(name = "DONORTAXUNIT_UK")
+@Table(name = "DONORTAXUNIT_UK")
 public class DonorTaxUnit {
 
 

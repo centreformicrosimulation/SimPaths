@@ -56,6 +56,7 @@ import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
 import simpaths.model.taxes.database.DatabaseExtension;
+import simpaths.model.taxes.database.TaxDonorDataParser;
 
 
 /**
@@ -363,6 +364,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // populate tax donor references
         if (flagUpdateCountry) {
             taxDatabaseUpdate();
+            TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
         }
         populateTaxdbReferences();
         //TestTaxRoutine.run();
@@ -2256,35 +2258,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         System.out.println("Updating country reference for tax database");
 
         Connection conn = null;
-        Statement stat = null;
         try {
-            Class.forName("org.h2.Driver");
-            System.out.println("Reading from database at ./input/input");
-            try {
-                conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;AUTO_SERVER=FALSE", "sa", "");
-            }
-            catch (SQLException e) {
-                log.info(e.getMessage());
-                throw new RuntimeException("SQL Exception! " + e.getMessage());
-            }
-
-            stat = conn.createStatement();
-            System.out.println("Database connection established");
             if (isFirstRun) {
-                //Create database tables to be used in simulation from country and year specific tables
-                String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON"};
-                for (String tableName : tableNamesDonor) {
-                    stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
-                    stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
-                    System.out.println("Completed updating " + tableName);
-                }
+
+                Class.forName("org.h2.Driver");
+                conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+                TaxDonorDataParser.updateDefaultDonorTables(conn, country);
             }
         }
         catch(ClassNotFoundException|SQLException e){
             throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
         } finally {
             try {
-                if (stat != null) { stat.close(); }
                 if (conn != null) { conn.close(); }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -2301,7 +2286,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Class.forName("org.h2.Driver");
             System.out.println("Reading from database at " + DatabaseUtils.databaseInputUrl);
             try {
-                conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";AUTO_SERVER=FALSE", "sa", "");
+                conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
             }
             catch (SQLException e) {
                 log.info(e.getMessage());
@@ -3156,6 +3141,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 txn.begin();
                 String query = "SELECT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";
                 List<DonorTaxUnit> donorPool = em.createQuery(query).getResultList();
+                System.out.println("Completed accessing donor data from the database");
+
                 double[][] dataDualIncome = {}, dataChildcare = {}, dataDualIncomeChildcare = {};
 
                 // loop over each donor
