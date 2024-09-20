@@ -11,8 +11,6 @@ import simpaths.data.Parameters;
  *
  */
 @Entity
-//@Table(name = "DONORTAXUNITPOLICY_UK")
-//@Table(name = "DONORTAXUNITPOLICY")
 public class DonorTaxUnitPolicy {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
