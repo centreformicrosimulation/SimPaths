@@ -402,7 +402,6 @@ public class DataParser {
 
 		// start work
 		Connection conn = null;
-		Statement stat = null;
 		try {
 			Class.forName("org.h2.Driver");
 			conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
@@ -426,15 +425,13 @@ public class DataParser {
 		}
 		finally {
 			try {
-				if (stat != null) { stat.close(); }
 				if (conn != null) { conn.close(); }
 			} catch (SQLException e) {
-
 				e.printStackTrace();
 			}
 		}
 
-		// finish off
+		// remove message box
 		if (databaseFrame != null)
 			databaseFrame.setVisible(false);
 	}
