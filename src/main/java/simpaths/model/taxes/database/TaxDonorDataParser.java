@@ -20,7 +20,6 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import simpaths.data.FormattedDialogBox;
 import simpaths.data.Parameters;
-import simpaths.model.HibernateUtil;
 import simpaths.model.enums.Country;
 import simpaths.model.enums.Region;
 import simpaths.model.taxes.*;
@@ -55,7 +54,6 @@ public class TaxDonorDataParser {
                     + "Constructing donor database tables for imputing tax and benefit payments</h2></html>";
             if (isVisible) csvFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, isVisible);
         }
-
         System.out.println(title);
 
         // initialise tax database
@@ -67,13 +65,7 @@ public class TaxDonorDataParser {
             Class.forName("org.h2.Driver");
             conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
-            // method to create the donor person and personpolicy tables
-            createDonorPersonTables(conn, country, startYear);
-
-            // method to initialise donor tax unit tables
-            createDonorTaxUnitTables(conn, country);
-
-            // set default tables to new data
+            createTaxDonorTables(conn, country, startYear);
             updateDefaultDonorTables(conn, country);
 
             // clean-up
@@ -110,12 +102,19 @@ public class TaxDonorDataParser {
         try {
             stat = conn.createStatement();
 
-            String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON", "DONORPERSONPOLICY"};
+            String[] tableNamesDonor = new String[]{"DONORTAXUNIT", "DONORPERSON", "DONORPERSONPOLICY", "DONORTAXUNITPOLICY"};
             for (String tableName : tableNamesDonor) {
                 stat.execute("DROP TABLE IF EXISTS " + tableName + " CASCADE");
                 stat.execute("CREATE TABLE " + tableName + " AS SELECT * FROM " + tableName + "_" + country);
                 System.out.println("Completed updating " + tableName);
+                stat.execute("ALTER TABLE " + tableName + " ALTER COLUMN ID BIGINT NOT NULL AUTO_INCREMENT;"
+                        + "ALTER TABLE " + tableName + " ADD PRIMARY KEY (ID);");
             }
+            stat.execute(
+            "ALTER TABLE DONORPERSON ADD FOREIGN KEY (TUID) REFERENCES DONORTAXUNIT (ID);"
+                + "ALTER TABLE DONORTAXUNITPOLICY ADD FOREIGN KEY (TUID) REFERENCES DONORTAXUNIT (ID);"
+                + "ALTER TABLE DONORPERSONPOLICY ADD FOREIGN KEY (PID) REFERENCES DONORPERSON (ID);"
+            );
         }
         catch(SQLException e){
             throw new RuntimeException("SQL Exception thrown! " + e.getMessage());
@@ -140,7 +139,7 @@ public class TaxDonorDataParser {
      * @param startYear first simulated year
      *
      */
-    private static void createDonorPersonTables(Connection conn, Country country, int startYear) {
+    private static void createTaxDonorTables(Connection conn, Country country, int startYear) {
 
         // file for importing csv data
         String taxDonorInputFileName = Parameters.getTaxDonorInputFileName();
@@ -162,7 +161,7 @@ public class TaxDonorDataParser {
             //---------------------------------------------------------------------------
             //	DonorPerson table
             //---------------------------------------------------------------------------
-            String	tableName = "DONORPERSON_" + country;
+            String personTableName = "DONORPERSON_" + country;
 
             // Ensure no duplicate column names
             Set<String> inputPersonStaticColumnNames = new LinkedHashSet<>(Arrays.asList(Parameters.DONOR_STATIC_VARIABLES));
@@ -171,90 +170,90 @@ public class TaxDonorDataParser {
             // begin SQL translation for person table - start with policy invariant variables (DONOR_STATIC_VARIABLES)
             stat.execute(
 
-                "DROP TABLE IF EXISTS " + tableName + " CASCADE;"
-                + "CREATE TABLE " + tableName + " AS (SELECT " + stringAppender(inputPersonStaticColumnNames) + " FROM " + taxDonorInputFileName + ");"
+                "DROP TABLE IF EXISTS " + personTableName + " CASCADE;"
+                + "CREATE TABLE " + personTableName + " AS (SELECT " + stringAppender(inputPersonStaticColumnNames) + " FROM " + taxDonorInputFileName + ");"
 
                 //Add id column
-                + "ALTER TABLE " + tableName + " ALTER COLUMN IDPERSON RENAME TO ID;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN ID BIGINT NOT NULL;"
-                + "ALTER TABLE " + tableName + " ADD PRIMARY KEY (ID);"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN idperson RENAME TO ID;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN ID BIGINT NOT NULL;"
+                + "ALTER TABLE " + personTableName + " ADD PRIMARY KEY (ID);"
 
                 //Reclassify EUROMOD variables
                 // may need to change data structure type otherwise SQL conversion error, so create new column of the correct type,
                 // map data from old column and drop old column
 
+                //adjust name for tax unit identifier
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN " + Parameters.getBenefitUnitVariableNames().getValue(country.getCountryName()) + " RENAME TO tuid;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN tuid BIGINT;"
+
                 //Age
-                + "ALTER TABLE " + tableName + " ALTER COLUMN DAG int NOT NULL;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN DAG int NOT NULL;"
 
                 //Country
-                + "ALTER TABLE " + tableName + " ADD COUNTRY VARCHAR_IGNORECASE;"
-                + "UPDATE " + tableName + " SET COUNTRY = '" + country + "' WHERE DCT = " + country.getEuromodCountryCode() + ";"
-                + "ALTER TABLE " + tableName + " DROP COLUMN DCT;"
+                + "ALTER TABLE " + personTableName + " ADD COUNTRY VARCHAR_IGNORECASE;"
+                + "UPDATE " + personTableName + " SET COUNTRY = '" + country + "' WHERE DCT = " + country.getEuromodCountryCode() + ";"
+                + "ALTER TABLE " + personTableName + " DROP COLUMN DCT;"
 
                 //Education
-                + "ALTER TABLE " + tableName + " ADD EDUCATION VARCHAR_IGNORECASE;"
-                + "UPDATE " + tableName + " SET EDUCATION = 'Low' WHERE deh < 2;"
-                + "UPDATE " + tableName + " SET EDUCATION = 'Medium' WHERE deh >= 2 AND deh < 5;"
-                + "UPDATE " + tableName + " SET EDUCATION = 'High' WHERE deh = 5;"
-                + "ALTER TABLE " + tableName + " DROP COLUMN deh;"
+                + "ALTER TABLE " + personTableName + " ADD EDUCATION VARCHAR_IGNORECASE;"
+                + "UPDATE " + personTableName + " SET EDUCATION = 'Low' WHERE deh < 2;"
+                + "UPDATE " + personTableName + " SET EDUCATION = 'Medium' WHERE deh >= 2 AND deh < 5;"
+                + "UPDATE " + personTableName + " SET EDUCATION = 'High' WHERE deh = 5;"
+                + "ALTER TABLE " + personTableName + " DROP COLUMN deh;"
 
                 //Gender
-                + "ALTER TABLE " + tableName + " ADD GENDER VARCHAR_IGNORECASE;"
-                + "UPDATE " + tableName + " SET GENDER = 'Female' WHERE DGN = 0;"
-                + "UPDATE " + tableName + " SET GENDER = 'Male' WHERE DGN = 1;"
-                + "ALTER TABLE " + tableName + " DROP COLUMN DGN;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN GENDER RENAME TO DGN;"
+                + "ALTER TABLE " + personTableName + " ADD GENDER VARCHAR_IGNORECASE;"
+                + "UPDATE " + personTableName + " SET GENDER = 'Female' WHERE DGN = 0;"
+                + "UPDATE " + personTableName + " SET GENDER = 'Male' WHERE DGN = 1;"
+                + "ALTER TABLE " + personTableName + " DROP COLUMN DGN;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN GENDER RENAME TO DGN;"
             );
             stat.execute(
 
                 //Weights
-                "ALTER TABLE " + tableName + " ALTER COLUMN DWT RENAME TO WEIGHT;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN WEIGHT double;"
+                "ALTER TABLE " + personTableName + " ALTER COLUMN DWT RENAME TO WEIGHT;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN WEIGHT double;"
 
                 //Labour Market Economic Status
-                + "ALTER TABLE " + tableName + " ADD ACTIVITY_STATUS VARCHAR_IGNORECASE;"
-                + "UPDATE " + tableName + " SET ACTIVITY_STATUS = 'EmployedOrSelfEmployed' WHERE LES >= 1 AND LES <= 3;"
-                + "UPDATE " + tableName + " SET ACTIVITY_STATUS = 'Student' WHERE LES = 0 OR LES = 6;"
-                + "UPDATE " + tableName + " SET ACTIVITY_STATUS = 'Retired' WHERE LES = 4;"
-                + "UPDATE " + tableName + " SET ACTIVITY_STATUS = 'NotEmployed' WHERE LES = 5 OR LES >= 7;"
+                + "ALTER TABLE " + personTableName + " ADD ACTIVITY_STATUS VARCHAR_IGNORECASE;"
+                + "UPDATE " + personTableName + " SET ACTIVITY_STATUS = 'EmployedOrSelfEmployed' WHERE LES >= 1 AND LES <= 3;"
+                + "UPDATE " + personTableName + " SET ACTIVITY_STATUS = 'Student' WHERE LES = 0 OR LES = 6;"
+                + "UPDATE " + personTableName + " SET ACTIVITY_STATUS = 'Retired' WHERE LES = 4;"
+                + "UPDATE " + personTableName + " SET ACTIVITY_STATUS = 'NotEmployed' WHERE LES = 5 OR LES >= 7;"
 
                 //Health
-                + "ALTER TABLE " + tableName + " ADD HEALTH VARCHAR_IGNORECASE;"
-                + "UPDATE " + tableName + " SET HEALTH = 'Good' WHERE LES != 8;"
-                + "UPDATE " + tableName + " SET HEALTH = 'Poor' WHERE LES = 8;"
-                + "ALTER TABLE " + tableName + " DROP COLUMN LES;"
+                + "ALTER TABLE " + personTableName + " ADD HEALTH VARCHAR_IGNORECASE;"
+                + "UPDATE " + personTableName + " SET HEALTH = 'Good' WHERE LES != 8;"
+                + "UPDATE " + personTableName + " SET HEALTH = 'Poor' WHERE LES = 8;"
+                + "ALTER TABLE " + personTableName + " DROP COLUMN LES;"
 
                 //Long-term sick and disabled
-                + "ALTER TABLE " + tableName + " ALTER COLUMN DDI int;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN DDI RENAME TO DLLTSD;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN DDI int;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN DDI RENAME TO DLLTSD;"
 
                 //social care provision
-                + "ALTER TABLE " + tableName + " ALTER COLUMN LCR01 int;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN LCR01 RENAME TO CARER;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN LCR01 int;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN LCR01 RENAME TO CARER;"
 
                 //Labour hours
                 //XXX: Could set " + Parameters.HOURS_WORKED_WEEKLY + ", earnings, labour cost etc. to 0 if retired.
                 // However, the data does not conform - see idperson 101, who is retired pensioner aged 80, but who declares lhw = 40
                 // i.e. works 40 hours per week and has a sizeable earnings and employer social contributions.
-                + "ALTER TABLE " + tableName + " ALTER COLUMN LHW int;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN LHW RENAME TO " + Parameters.HOURS_WORKED_WEEKLY.toUpperCase() + ";"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN LHW int;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN LHW RENAME TO " + Parameters.HOURS_WORKED_WEEKLY.toUpperCase() + ";"
 
                 //Region
-                + "ALTER TABLE " + tableName + " ADD REGION VARCHAR_IGNORECASE;"
-
-                //adjust name for tax unit identifier
-                + "ALTER TABLE " + tableName + " ALTER COLUMN " + Parameters.getBenefitUnitVariableNames().getValue(country.getCountryName()) + " RENAME TO TUID;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN TUID BIGINT NOT NULL;"
+                + "ALTER TABLE " + personTableName + " ADD REGION VARCHAR_IGNORECASE;"
             );
 
             //Region - See Region class for mapping definitions and sources of info
             Parameters.setCountryRegions(country);
             for(Region region: Parameters.getCountryRegions()) {
                 stat.execute(
-                    "UPDATE " + tableName + " SET REGION = '" + region + "' WHERE DRGN1 = " + region.getValue() + ";"
+                    "UPDATE " + personTableName + " SET REGION = '" + region + "' WHERE DRGN1 = " + region.getValue() + ";"
                 );
             }
-            stat.execute( "ALTER TABLE " + tableName + " DROP COLUMN DRGN1;");
+            stat.execute( "ALTER TABLE " + personTableName + " DROP COLUMN DRGN1;");
 
             //Set zeros to null where relevant
             stat.execute(
@@ -262,28 +261,28 @@ public class TaxDonorDataParser {
                 // If the person has absolute self-employment income > absolute employment income, define workStatus
                 // enum as Self_Employed as self-employment income or loss has a bigger effect on personal wealth
                 // than employment income (or loss).
-                "ALTER TABLE " + tableName + " ADD WORK_SECTOR VARCHAR_IGNORECASE DEFAULT 'Private_Employee';"		//Here we assume by default that people are employed - this is because the MultiKeyMaps holding households have work_sector as a key, and cannot handle null values for work_sector. TODO: Need to check that this assumption is OK.
-                + "ALTER TABLE " + tableName + " ALTER COLUMN YEM DOUBLE;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN YSE DOUBLE;"
+                "ALTER TABLE " + personTableName + " ADD WORK_SECTOR VARCHAR_IGNORECASE DEFAULT 'Private_Employee';"		//Here we assume by default that people are employed - this is because the MultiKeyMaps holding households have work_sector as a key, and cannot handle null values for work_sector. TODO: Need to check that this assumption is OK.
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN YEM DOUBLE;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN YSE DOUBLE;"
 
                 //TODO: Check whether we should re-install the check of activity_status = 'Employed' for definitions below, and potentially add a 'Null' value to handle cases where people are not employed.
-                + "UPDATE " + tableName + " SET WORK_SECTOR = 'Self_Employed' WHERE abs(YEM) < abs(YSE);"		//Size of earnings derived from self-employment income (including declared self-employment losses) is larger than employment income (or loss - although while yse is sometimes negative, I'm not sure if yem is ever negative), so define as self-employed.
-                + "UPDATE " + tableName + " SET WORK_SECTOR = 'Public_Employee' WHERE LCS = 1;"		//Lastly, regardless of yem or yse, if lcs = 1, indicates person is s civil servant so overwrite any value with 'Public_Employee' work_sector value.
+                + "UPDATE " + personTableName + " SET WORK_SECTOR = 'Self_Employed' WHERE abs(YEM) < abs(YSE);"		//Size of earnings derived from self-employment income (including declared self-employment losses) is larger than employment income (or loss - although while yse is sometimes negative, I'm not sure if yem is ever negative), so define as self-employed.
+                + "UPDATE " + personTableName + " SET WORK_SECTOR = 'Public_Employee' WHERE LCS = 1;"		//Lastly, regardless of yem or yse, if lcs = 1, indicates person is s civil servant so overwrite any value with 'Public_Employee' work_sector value.
 
                 //        		+ "UPDATE " + personTable + " SET earnings = yem + yse;"		//Now use EUROMOD output ils_earns, which includes more than just yem + yse, depending on the country (e.g. in Italy there is a temporary employment field yemtj 'income from co.co.co.').
-                + "ALTER TABLE " + tableName + " ALTER COLUMN YEM RENAME TO EMPLOYMENT_INCOME;"
-                + "ALTER TABLE " + tableName + " ALTER COLUMN YSE RENAME TO SELF_EMPLOYMENT_INCOME;"
-                + "ALTER TABLE " + tableName + " DROP COLUMN LCS;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN YEM RENAME TO EMPLOYMENT_INCOME;"
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN YSE RENAME TO SELF_EMPLOYMENT_INCOME;"
+                + "ALTER TABLE " + personTableName + " DROP COLUMN LCS;"
 
                 //Re-order by id
-                + "SELECT * FROM " + tableName + " ORDER BY ID;"
+                + "SELECT * FROM " + personTableName + " ORDER BY ID;"
             );
 
 
             //---------------------------------------------------------------------------
             //	DonorPersonPolicy table
             //---------------------------------------------------------------------------
-            tableName = "DONORPERSONPOLICY_" + country;
+            String personPolicyTableName = "DONORPERSONPOLICY_" + country;
 
             // initialise table
             StringBuilder varList1 = new StringBuilder("PID VARCHAR, FROM_YEAR INT, SYSTEM_YEAR INT");
@@ -294,8 +293,8 @@ public class TaxDonorDataParser {
             }
 
             stat.execute(
-            "DROP TABLE IF EXISTS " + tableName + " CASCADE;"
-                + "CREATE TABLE " + tableName + " (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + varList1 + ");"
+            "DROP TABLE IF EXISTS " + personPolicyTableName + " CASCADE;"
+                + "CREATE TABLE " + personPolicyTableName + " (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + varList1 + ");"
             );
 
             // loop over each policy reference
@@ -311,55 +310,25 @@ public class TaxDonorDataParser {
                 }
 
                 stat.execute(
-                    "INSERT INTO " + tableName + " (" + varList2 + ")"
+                    "INSERT INTO " + personPolicyTableName + " (" + varList2 + ")"
                     + " SELECT " + stringAppender(inputPersonDynamicColumnNames) + " FROM " + taxDonorInputFileName + ";"
                 );
                 stat.execute(
-                    "UPDATE " + tableName + " SET SYSTEM_YEAR = " + systemYear + " WHERE SYSTEM_YEAR IS NULL;"
-                    + "UPDATE " + tableName + " SET FROM_YEAR = " + fromYear + " WHERE FROM_YEAR IS NULL;"
+                    "UPDATE " + personPolicyTableName + " SET SYSTEM_YEAR = " + systemYear + " WHERE SYSTEM_YEAR IS NULL;"
+                    + "UPDATE " + personPolicyTableName + " SET FROM_YEAR = " + fromYear + " WHERE FROM_YEAR IS NULL;"
                 );
             }
             stat.execute(
-                "ALTER TABLE " + tableName + " ALTER COLUMN PID BIGINT NOT NULL;"
+                "ALTER TABLE " + personPolicyTableName + " ALTER COLUMN PID BIGINT;"
             );
             for(String variable: Parameters.DONOR_POLICY_VARIABLES) {
-                stat.execute( "ALTER TABLE " + tableName + " ALTER COLUMN " + variable + " DOUBLE;");
+                stat.execute( "ALTER TABLE " + personPolicyTableName + " ALTER COLUMN " + variable + " DOUBLE;");
             }
 
-            //Clean-up
-            stat.execute( "DROP TABLE IF EXISTS " + taxDonorInputFileName + " CASCADE;");
-
-        }
-        catch(SQLException e) {
-            throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
-        }
-        finally {
-            try {
-                if(stat != null) stat.close();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
-    /**
-     *
-     * METHOD TO INITIALISE (EMPTY) TAX UNIT TABLES
-     *
-     */
-    private static void createDonorTaxUnitTables(Connection conn, Country country) {
-
-        Statement stat = null;
-        try {
-            stat = conn.createStatement();
 
             //---------------------------------------------------------------------------
             //	DonorTaxUnit table
             //---------------------------------------------------------------------------
-            // Set name of donor table
-            String	personTableName = "DONORPERSON_" + country;
             String	taxUnitTableName = "DONORTAXUNIT_" + country;
             stat.execute(
                 // make copy of person table, using tuid
@@ -378,20 +347,34 @@ public class TaxDonorDataParser {
                 + "SELECT * FROM " + taxUnitTableName + " ORDER BY ID;"
             );
 
+
             //---------------------------------------------------------------------------
             //	DonorTaxUnitPolicy table
             //---------------------------------------------------------------------------
-            taxUnitTableName = "DONORTAXUNITPOLICY_" + country;
+            String taxUnitPolicyTableName = "DONORTAXUNITPOLICY_" + country;
             StringBuilder varList = new StringBuilder("TUID LONG, FROM_YEAR INT, SYSTEM_YEAR INT");
-/*
-            for(String variable: Parameters.DONOR_POLICY_VARIABLES) {
-                varList.append(", ").append(variable.toUpperCase()).append(" DOUBLE");
-            }
-*/
+
             stat.execute(
-                "DROP TABLE IF EXISTS " + taxUnitTableName + " CASCADE;"
-                    + "CREATE TABLE " + taxUnitTableName + " (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + varList + ");"
+                    "DROP TABLE IF EXISTS " + taxUnitPolicyTableName + " CASCADE;"
+                            + "CREATE TABLE " + taxUnitPolicyTableName + " (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, " + varList + ");"
             );
+
+
+            //---------------------------------------------------------------------------
+            //  Set-up foreign keys
+            //---------------------------------------------------------------------------
+            stat.execute(
+                "ALTER TABLE " + personTableName + " ADD FOREIGN KEY (TUID) REFERENCES " + taxUnitTableName + " (ID);"
+                + "ALTER TABLE " + taxUnitPolicyTableName + " ADD FOREIGN KEY (TUID) REFERENCES " + taxUnitTableName + " (ID);"
+                + "ALTER TABLE " + personPolicyTableName + " ADD FOREIGN KEY (PID) REFERENCES " + personTableName + " (ID);"
+            );
+
+
+            //---------------------------------------------------------------------------
+            //  Clean-up
+            //---------------------------------------------------------------------------
+            stat.execute( "DROP TABLE IF EXISTS " + taxDonorInputFileName + " CASCADE;");
+
         }
         catch(SQLException e) {
             throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
@@ -400,7 +383,7 @@ public class TaxDonorDataParser {
             try {
                 if(stat != null) stat.close();
             }
-            catch (SQLException e) {
+            catch (Exception e) {
                 e.printStackTrace();
             }
         }

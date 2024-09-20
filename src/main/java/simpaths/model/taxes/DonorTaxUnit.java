@@ -2,6 +2,7 @@ package simpaths.model.taxes;
 
 import jakarta.persistence.*;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -12,17 +13,16 @@ import java.util.HashSet;
  *
  */
 @Entity
-@Table(name = "DONORTAXUNIT_UK")
 public class DonorTaxUnit {
 
+    @Id @Column(name = "ID", unique = true, nullable = false) private Long id;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "taxUnit")
+    @OrderBy("id ASC")
+    private Set<DonorPerson> persons = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "taxUnit")
+    private Set<DonorTaxUnitPolicy> policies = new LinkedHashSet<>();
 
-    /**
-     * ATTRIBUTES
-     */
-    @Id @Column(name = "ID", unique = true, nullable = false) private long id;
     @Column(name = "WEIGHT") private Double weight;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "taxUnit", cascade = CascadeType.ALL, orphanRemoval = true) private Set<DonorPerson> persons = new HashSet<DonorPerson>(0);
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "taxUnit", cascade = CascadeType.ALL, orphanRemoval = true) private Set<DonorTaxUnitPolicy> policies = new HashSet<DonorTaxUnitPolicy>(0);
 
 
     /**
@@ -34,7 +34,7 @@ public class DonorTaxUnit {
      * GETTERS AND SETTERS
      */
     public long getId() {return this.id;}
-    public void setId(int id) {this.id = id;}
+    public void setId(long id) {this.id = id;}
     public Double getWeight() {return this.weight;}
     public void setWeight(double weight) { this.weight = weight;}
     public DonorTaxUnitPolicy getPolicyByFromYear(int fromYear) {
