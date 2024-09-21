@@ -202,9 +202,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private LinkedHashMap<String, Double>  marriageTargetsByKey;
 
-    private long elapsedTime;
+    private long elapsedTime0;
 
-    private long timerYearStart;
     private long timerStartSim;
 
     private int year;
@@ -334,7 +333,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 
         // time check
-        elapsedTime = System.currentTimeMillis();
+        elapsedTime0 = System.currentTimeMillis();
+        timerStartSim = elapsedTime0;
 
         // set seed for random number generator
         if (fixRandomSeed) SimulationEngine.getRnd().setSeed(randomSeedIfFixed);
@@ -359,7 +359,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             //DecisionTests.compareGrids();
             //DatabaseExtension.extendInputData();
         }
-        System.out.println("Time to load parameters: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
+        long elapsedTime1 = System.currentTimeMillis();
+        System.out.println("Time to load parameters: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
+        elapsedTime0 = elapsedTime1;
 
         // populate tax donor references
         if (flagUpdateCountry) {
@@ -368,7 +370,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
         populateTaxdbReferences();
         //TestTaxRoutine.run();
-        System.out.println("Time to load tax database references: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
+        elapsedTime1 = System.currentTimeMillis();
+        System.out.println("Time to load tax database references: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
+        elapsedTime0 = elapsedTime1;
 
         // set start year for simulation
         year = startYear;
@@ -380,7 +384,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // creates initial population (Person and BenefitUnit objects) based on data in input database.
         // Note that the population may be cropped to simulate a smaller population depending on user choices in the GUI.
         createInitialPopulationDataStructures();
-        System.out.println("Time to create initial population structures: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
+        elapsedTime1 = System.currentTimeMillis();
+        System.out.println("Time to create initial population structures: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
+        elapsedTime0 = elapsedTime1;
 
         // initialise variables used to match marriage unions
         createDataStructuresForMarriageMatching();
@@ -411,9 +417,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         saveRunParameters();
 
         // finalise
-        log.debug("Time to build objects: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
-        System.out.println("Time to complete initialisation " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
-        elapsedTime = System.currentTimeMillis();
+        elapsedTime1 = System.currentTimeMillis();
+        log.debug("Time to build objects: " + (elapsedTime1 - timerStartSim)/1000. + " seconds.");
+        System.out.println("Time to complete initialisation " + (System.currentTimeMillis() - timerStartSim)/1000.0/60.0 + " minutes.");
+        elapsedTime0 = elapsedTime1;
     }
 
 
@@ -563,8 +570,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         SystemEvent end = new SystemEvent(SimulationEngine.getInstance(), SystemEventType.End);
         getEngine().getEventQueue().scheduleOnce(end, endYear+1, orderEarlier);
 
-        log.debug("Time to build schedule " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
-        elapsedTime = System.currentTimeMillis();
+        log.debug("Time to build schedule " + (System.currentTimeMillis() - elapsedTime0)/1000. + " seconds.");
+        elapsedTime0 = System.currentTimeMillis();
     }
     private void addEventToAllYears(Tests tt, Enum ee) {
         firstYearSched.addEvent(tt, ee);
@@ -747,16 +754,17 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         switch ((Processes) type) {
             case StartYear -> {
 
-                timerYearStart = System.currentTimeMillis();
-                if (year==startYear) timerStartSim = timerYearStart;
+                elapsedTime0 = System.currentTimeMillis();
                 System.out.println("Starting year " + year);
                 if (commentsOn) log.info("Starting year " + year);
             }
             case EndYear -> {
 
-                double timerForYear = (System.currentTimeMillis() - timerYearStart)/1000.0;
+                long elapsedTime1 = System.currentTimeMillis();
+                double timerForYear = (elapsedTime1 - elapsedTime0)/1000.0;
                 System.out.println("Finished year " + year + " (in " + timerForYear + " seconds)");
                 if (commentsOn) log.info("Finished year " + year + " (in " + timerForYear + " seconds)");
+                elapsedTime0 = elapsedTime1;
             }
             case PopulationAlignment -> {
 
@@ -2250,7 +2258,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      *
      */
     private void printElapsedTime() {
-        log.debug("Year: " + year + ", Elapsed time: " + (System.currentTimeMillis() - elapsedTime)/1000. + " seconds.");
+        log.debug("Year: " + year + ", Elapsed time: " + (System.currentTimeMillis() - elapsedTime0)/1000. + " seconds.");
     }
 
     private void taxDatabaseUpdate() {

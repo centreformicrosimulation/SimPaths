@@ -34,7 +34,7 @@ model_args:
     projectSocialCare: false
     flagSuppressChildcareCosts: false
     flagSuppressSocialCareCosts: false
-    enableIntertemporalOptimisations: false
+    enableIntertemporalOptimisations: true
     saveBehaviour: false
     useSavedBehaviour: false
     readGrid: "temp"
