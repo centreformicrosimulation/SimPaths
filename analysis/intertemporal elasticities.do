@@ -17,7 +17,7 @@
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal elas\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\intertemporal\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 local dr = 0.0075	// delta interest rate (from SimPathsMultiRun object)
 
