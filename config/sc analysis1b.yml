@@ -1,5 +1,5 @@
-# CONFIG FILE TO RUN ZERO COSTS SIMULATION FOR SOCIAL CARE ANALYSIS
-# MODEL INCLUDES RATIONAL RESPONSES IN ABSENCE OF CARE COSTS AND POPULATION ALIGNMENT
+# CONFIG FILE TO RUN BASE SIMULATION FOR SOCIAL CARE ANALYSIS
+# MODEL INCLUDES RATIONAL RESPONSES TO CARE AND POPULATION ALIGNMENT
 countryString: "United Kingdom"
 maxNumberOfRuns: 1
 executeWithGui: false
@@ -32,12 +32,12 @@ model_args:
     projectFormalChildcare: true
     donorPoolAveraging: true
     projectSocialCare: true
-    flagSuppressChildcareCosts: true
-    flagSuppressSocialCareCosts: true
+    flagSuppressChildcareCosts: false
+    flagSuppressSocialCareCosts: false
     enableIntertemporalOptimisations: true
     saveBehaviour: true
-    useSavedBehaviour: false
-    readGrid: "sc analysis2"
+    useSavedBehaviour: true
+    readGrid: "sc analysis1"
     flagDefaultToTimeSeriesAverages: true
     saveImperfectTaxDBMatches: false
     employmentOptionsOfPrincipalWorker: 3

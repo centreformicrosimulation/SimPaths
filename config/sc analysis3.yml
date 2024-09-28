@@ -20,7 +20,7 @@ model_args:
     useWeights: false
     ignoreTargetsAtPopulationLoad: false
     projectMortality: true
-    alignPopulation: true
+    alignPopulation: false
     alignFertility: false
     alignEducation: false
     alignInSchool: false
