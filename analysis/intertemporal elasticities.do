@@ -27,7 +27,7 @@ local dr = 0.0075	// delta interest rate (from SimPathsMultiRun object)
 **************************************************************************************/
 cd "$outdir"
 import delimited using "$moddir/BenefitUnit.csv"
-save temp0, replace
+save ietemp0, replace
 
 
 /**************************************************************************************
@@ -35,7 +35,7 @@ save temp0, replace
 **************************************************************************************/
 forvalues ii = 1/3 {
 	
-	use temp0, clear
+	use ietemp0, clear
 	keep if (run==`ii')
 	if (`ii'==1) {
 		sum id_benefitunit
@@ -57,27 +57,27 @@ forvalues ii = 1/3 {
 	keep id_benefitunit lrecons idoriginalbu idoriginalhh
 	rename idoriginalbu idorigbu`ii'
 	rename idoriginalhh idorighh`ii'
-	save temp`ii', replace
+	save ietemp`ii', replace
 }
 
 
 /**************************************************************************************
 *	compile statistics over runs
 **************************************************************************************/
-use temp1, clear
-merge 1:1 id_benefitunit using temp2, keep(3) nogen
-merge 1:1 id_benefitunit using temp3, keep(3) nogen
+use ietemp1, clear
+merge 1:1 id_benefitunit using ietemp2, keep(3) nogen
+merge 1:1 id_benefitunit using ietemp3, keep(3) nogen
 gen chk = (idorigbu1~=idorigbu2) | (idorigbu2~=idorigbu3) | (idorighh1~=idorighh2) | (idorighh2~=idorighh3)
 tab chk
 drop if (chk==1)
 drop chk idorigbu* idorighh*
-save temp4, replace
+save ietemp4, replace
 
 
 /**************************************************************************************
 *	evaluate individual specific elasticities
 **************************************************************************************/
-use temp4, clear
+use ietemp4, clear
 local r1 = 0.046	// starting average rate of return to saving (slight difference with cost of debt)
 local lr1 = ln(1.0 + `r1')
 local lr2 = ln(1.0 + `r1' + `dr')
@@ -99,11 +99,11 @@ disp `elasAv'
 **************************************************************************************/
 #delimit ;
 local files_to_drop 
-	temp0.dta
-	temp1.dta
-	temp2.dta
-	temp3.dta
-	temp4.dta
+	ietemp0.dta
+	ietemp1.dta
+	ietemp2.dta
+	ietemp3.dta
+	ietemp4.dta
 	;
 #delimit cr // cr stands for carriage return
 

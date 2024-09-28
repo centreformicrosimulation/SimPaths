@@ -14,7 +14,7 @@
 
 clear all
 
-global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\labour elas\csv"
+global moddir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\output\labour elasticity\csv"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\analysis\"
 local dinc = 0.01	// assumed adjustment factor for disposable income of employed people (from SimPathsMultiRun object)
 
@@ -25,7 +25,7 @@ local dinc = 0.01	// assumed adjustment factor for disposable income of employed
 cd "$outdir"
 import delimited using "$moddir/Person.csv"
 drop if (time!=2019)
-save temp0, replace
+save letemp0, replace
 
 
 /**************************************************************************************
@@ -33,7 +33,7 @@ save temp0, replace
 **************************************************************************************/
 forvalues ii = 1/3 {
 	
-	use temp0, clear
+	use letemp0, clear
 	keep if (run==`ii')
 	if (`ii'==1) {
 		sum id_person
@@ -62,20 +62,20 @@ forvalues ii = 1/3 {
 	keep idbenefitunit idoriginalbu lhours
 	rename idoriginalbu idorigbu`ii'
 	rename lhours lhours`ii'
-	save temp`ii', replace
+	save letemp`ii', replace
 }
 
 
 /**************************************************************************************
 *	compile statistics over runs
 **************************************************************************************/
-use temp1, clear
-merge 1:1 idbenefitunit using temp2, keep(3) nogen
-merge 1:1 idbenefitunit using temp3, keep(3) nogen
+use letemp1, clear
+merge 1:1 idbenefitunit using letemp2, keep(3) nogen
+merge 1:1 idbenefitunit using letemp3, keep(3) nogen
 gen chk = (idorigbu1!=idorigbu2) | (idorigbu2!=idorigbu3)
 tab chk
 drop if (chk==1)
-save temp4, replace
+save letemp4, replace
 
 
 /**************************************************************************************
@@ -99,11 +99,11 @@ disp `elasAv'
 **************************************************************************************/
 #delimit ;
 local files_to_drop 
-	temp0.dta
-	temp1.dta
-	temp2.dta
-	temp3.dta
-	temp4.dta
+	letemp0.dta
+	letemp1.dta
+	letemp2.dta
+	letemp3.dta
+	letemp4.dta
 	;
 #delimit cr // cr stands for carriage return
 

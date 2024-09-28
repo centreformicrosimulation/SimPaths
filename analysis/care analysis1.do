@@ -1,6 +1,7 @@
 /**************************************************************************************
 *
 *	PROGRAM TO ANALYSE FORWARD PROJECTIONS FOR CARE
+*	RESULTS ORGANISED IN FILE projections.xlsx
 *
 *	Last version:  Justin van de Ven, 18 Jun 2024
 *	First version: Justin van de Ven, 18 Jun 2024
@@ -24,13 +25,13 @@ import delimited using "$moddir/BenefitUnit.csv", clear
 rename *, l
 rename id_benefitunit idbenefitunit
 gsort idbenefitunit time
-save "$outdir/temp0", replace
+save "$outdir/ca1temp0", replace
 import delimited using "$moddir/Person.csv", clear
 rename *, l
 rename id_person idperson
 rename socialcareprovision socialcareprovision_p
 gsort idbenefitunit time idperson
-merge m:1 idbenefitunit time using temp0
+merge m:1 idbenefitunit time using ca1temp0
 gsort time idbenefitunit idperson
 gen refbenefitunit = 0
 replace refbenefitunit = 1 if (idbenefitunit != idbenefitunit[_n-1])
@@ -61,13 +62,13 @@ gen informalCareHours = carehoursfrompartnerweekly + carehoursfromdaughterweekly
 gen totalCareHours = informalCareHours + carehoursfromformalweekly
 gen recCare = (totalCareHours>0.01)
 
-save "$outdir/temp1", replace
+save "$outdir/ca1temp1", replace
 
 
 /**************************************************************************************
 *	childcare
 **************************************************************************************/
-use "$outdir/temp1", clear
+use "$outdir/ca1temp1", clear
 
 // block 1 statistics
 matrix store1 = J(2070-2018,3,.)
@@ -137,7 +138,7 @@ drop chk
 /*******************************************************************************
 *	social care need
 *******************************************************************************/
-use "$outdir/temp1", clear
+use "$outdir/ca1temp1", clear
 
 // block 4 statistics
 matrix store4 = J(2070-2018,6,.)
@@ -210,7 +211,7 @@ drop id
 
 /*************** aged 80 and over ******************/
 // block 7 statistics
-matrix store7 = J(2070-2018,3,.)
+matrix store7 = J(2070-2018,4,.)
 gen id = (dag>79)
 forvalues yy = 2019/2070 {
 	qui {
@@ -224,6 +225,9 @@ forvalues yy = 2019/2070 {
 		sum partnered if (time==`yy' & id), mean
 		mat store7[`yy'-2018,`jj'] = r(mean)
 		local jj = `jj' + 1
+		sum dag if (time==`yy' & id), mean
+		mat store7[`yy'-2018,`jj'] = r(mean)
+		local jj = `jj' + 1
 	}
 }
 matlist store7
@@ -233,7 +237,7 @@ drop id
 /*******************************************************************************
 *	social care receipt
 *******************************************************************************/
-use "$outdir/temp1", clear
+use "$outdir/ca1temp1", clear
 
 // block 8 statistics
 matrix store8 = J(2070-2018,5,.)
@@ -311,7 +315,7 @@ matlist store11
 /*******************************************************************************
 *	social care provision
 *******************************************************************************/
-use "$outdir/temp1", clear
+use "$outdir/ca1temp1", clear
 
 // block 12 statistics
 matrix store12 = J(2070-2018,4,.)
@@ -325,6 +329,7 @@ forvalues yy = 2019/2070 {
 		mat store12[`yy'-2018,3] = r(N)
 		sum carehoursprovidedweekly if (time==`yy' & socialcareprovision_p!="None"), mean
 		mat store12[`yy'-2018,4] = r(mean)
+	}
 }
 matlist store12
 
@@ -334,8 +339,8 @@ matlist store12
 *******************************************************************************/
 #delimit ;
 local files_to_drop 
-	temp0.dta
-	temp1.dta
+	ca1temp0.dta
+	ca1temp1.dta
 	;
 #delimit cr // cr stands for carriage return
 
