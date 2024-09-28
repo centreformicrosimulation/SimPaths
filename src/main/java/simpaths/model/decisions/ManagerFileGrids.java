@@ -109,40 +109,37 @@ public class ManagerFileGrids {
             throw e;
         }
 
-        if (!flagIntermediate) {
+        // write consumption
+        try {
+            unformattedReadWrite(grids.consumption, "write", DecisionParams.gridsOutputDirectory, "consumption.uft");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
 
-            // write consumption
+        if (grids.employment1!=null) {
+            // write employment 1
             try {
-                unformattedReadWrite(grids.consumption, "write", DecisionParams.gridsOutputDirectory, "consumption.uft");
+                unformattedReadWrite(grids.employment1, "write", DecisionParams.gridsOutputDirectory, "employment1.uft");
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (Throwable e) {
                 e.printStackTrace();
                 throw e;
             }
+        }
 
-            if (grids.employment1!=null) {
-                // write employment 1
-                try {
-                    unformattedReadWrite(grids.employment1, "write", DecisionParams.gridsOutputDirectory, "employment1.uft");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                    throw e;
-                }
-            }
-
-            if (grids.employment2!=null) {
-                // write employment 2
-                try {
-                    unformattedReadWrite(grids.employment2, "write", DecisionParams.gridsOutputDirectory, "employment2.uft");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                    throw e;
-                }
+        if (grids.employment2!=null) {
+            // write employment 2
+            try {
+                unformattedReadWrite(grids.employment2, "write", DecisionParams.gridsOutputDirectory, "employment2.uft");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw e;
             }
         }
     }

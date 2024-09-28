@@ -78,10 +78,7 @@ public enum Labour implements IntegerValuedEnum {
         if (this != Labour.ZERO && Parameters.USE_CONTINUOUS_LABOUR_SUPPLY_HOURS && person != null) {
 
             // Verify that person's draw is not null. If null, draw a value first.
-            Double personDrawnValue = person.getLabourSupplySingleDraw();
-            if (personDrawnValue == null) {
-                person.setLabourSupplySingleDraw(person.getLabourSupplyInnov().nextDouble());
-            }
+            double personDrawnValue = person.getLabourSupplySingleDraw();
 
             // Continuous hours are based on person's randomly drawn value. This can be considered person's "type", for example, a person always works hours in the bottom 10% of a (uniformly distributed) labour supply bracket.
             int hours = (int) Math.round(personDrawnValue * (maxBound - minBound) + minBound);

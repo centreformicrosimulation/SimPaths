@@ -22,7 +22,7 @@ public class DecisionParams {
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
 
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
-    public static final int SOLVE_FROM_AGE = 31;                     // if SOLVE_FROM_INTERMEDIATE
+    public static final int SOLVE_FROM_AGE = 74;                     // if SOLVE_FROM_INTERMEDIATE
 
     // MODEL SETTINGS
     public static final double GRID_DEFAULT_VALUE = 999.0;

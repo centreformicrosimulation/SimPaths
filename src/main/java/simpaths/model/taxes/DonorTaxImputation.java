@@ -294,8 +294,10 @@ public class DonorTaxImputation {
             disposableIncomePerWeek *= keys.getOriginalIncomePerWeek();
             benefitsReceivedPerWeek *= keys.getOriginalIncomePerWeek();
         }
-        disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeInnov);
-        benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeInnov);
+        if (keys.getHoursWorkedPerWeekMan() + keys.getHoursWorkedPerWeekWoman() > 0.1) {
+            disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
+            benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
+        }
     }
 
     private int getSystemYear(int simYear) {

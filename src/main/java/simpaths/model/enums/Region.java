@@ -15,7 +15,7 @@ public enum Region implements IntegerValuedEnum {
 	//UK									//Name							//EUROMOD drgn1 value
 	UKC("North East", 1),					//North East					//1
 	UKD("North West", 2),					//North West					//2
-	UKE("Yorkshire and the Humber", 4),		//Yorkshire and the Humber		//4		//Note, there is no 3 in the definition!
+	UKE("Yorkshire and the Humber", 4),	//Yorkshire and the Humber		//4		//Note, there is no 3 in the definition!
 	UKF("East Midlands", 5),				//East Midlands					//5
 	UKG("West Midlands", 6),				//West Midlands					//6
 	UKH("East of England", 7),				//East of England				//7

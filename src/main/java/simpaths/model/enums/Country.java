@@ -52,7 +52,7 @@ public enum Country {
     
     public static Country getCountryFromNameString(String country) {
     	for(Country c: Country.values()) {
-    		if(c.getCountryName() == country) {
+    		if(country.equals(c.getCountryName())) {
     			return c;
     		}
     	}

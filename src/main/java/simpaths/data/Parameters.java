@@ -3,9 +3,12 @@ package simpaths.data;
 
 // import Java packages
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 // import plug-in packages
+import simpaths.data.startingpop.DataParser;
 import simpaths.model.AnnuityRates;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
@@ -25,6 +28,7 @@ import microsim.statistics.regression.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.decisions.Grids;
 import simpaths.model.taxes.MatchFeature;
+import simpaths.model.taxes.database.TaxDonorDataParser;
 
 
 /**
@@ -85,7 +89,6 @@ public class Parameters {
 		"idhh",				//id of household (can contain multiple benefit units)
 		"idbenefitunit",	//id of a benefit unit
 		"drgn1", 			//region (NUTS1)
-		"dhhtp_c4",			//household composition
 		"ydses_c5",			//household income quantile
 		"dhh_owned",		//flag indicating if benefit unit owns a house
 		"liquid_wealth",	//benefit unit net wealth non-pension non-housing wealth
@@ -100,24 +103,16 @@ public class Parameters {
 		"dwt", 					//household weight
 		"idfather", 			//id of father
 		"idmother", 			//id of mother
-		"idpartner", 			//id of partner
 		"dag", 					//age
-		"dagsp",				//age of spouse
-		"dct", 					//country
 		"deh_c3", 				//highest education level
 		"dehm_c3",				//highest education level of mother
 		"dehf_c3",				//highest education level of father
-		"dehsp_c3",				//highest education level of partner
 		"ded",					//in education dummy
 		"der",					//return to education dummy
 		"dhe",					//health status
 		"dhm",					//mental health status
 		"scghq2_dv",			//mental health status case based
 		"dhm_ghq",				//mental health status case based dummy (1 = psychologically distressed)
-		"dhesp",				//health status of partner
-		"dcpst",				//partnership status
-		"dcpen",				//enter partnership dummy
-		"dcpex",				//exit partnership dummy
 		"dcpyy",				//years in partnership
 		"dcpagdf",				//partners age difference
 		"dnc02",				//number children aged 0-2
@@ -130,15 +125,10 @@ public class Parameters {
 		"ynbcpdf_dv",			//difference partner income
 		"dlltsd",				//long-term sick or disabled
 		"sedex",				//year left education
-		"ssscp",				//in same-sex partnership
-		"sprfm",				//women in fertility range
-		"sedag",				//in educational age range
 		"stm",					//system variable - year
 		"swv",					//system variable - wave
 		"dgn", 					//gender
 		"les_c4", 				//labour employment status
-		"lessp_c4",				//labour employment status of partner
-		"lesdf_c4",				//own and partner employment status
 		"lhw", 					//hours worked per week
 		"adultchildflag",		//flag indicating adult child living at home in the data
 		"dhh_owned",			//flag indicating if individual is a homeowner
@@ -223,8 +213,9 @@ public class Parameters {
     public static final double UNMATCHED_TOLERANCE_THRESHOLD = 0.1;		//Smallest proportion of a gender left unmatched (we take the minimum of the male proportion and female proportions).  If there are more than this, we will relax the constraints (e.g. the bounds on age difference and potential earnings difference) until this target has been reached
     public static final int MAXIMUM_ATTEMPTS_MATCHING = 10;
     public static final double RELAXATION_FACTOR = 1.5;
-    public static final int AGE_DIFFERENCE_INITIAL_BOUND = 5;
-    public static final double POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND = 5.;
+
+    public static final int AGE_DIFFERENCE_INITIAL_BOUND = 999;
+    public static final double POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND = 999.;
 
     public static final double WEEKS_PER_MONTH = 365.25/(7.*12.);	// = 4.348214286
     public static final double WEEKS_PER_YEAR = 365.25 / 7.;
@@ -278,7 +269,7 @@ public class Parameters {
 
     public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
-    public static double PROB_NEWBORN_IS_MALE = 0.5;
+    public static double PROB_NEWBORN_IS_MALE = 0.5;            // Must be strictly greater than 0.0 and less than 1.0
 
     public static final boolean systemOut = true;
 
@@ -321,7 +312,6 @@ public class Parameters {
     public static final String ILS_BENNT_NAME = "ILS_BENNT";
     //public static final String SELF_EMPLOY_SOCIAL_INSURANCE_VARIABLE_NAME = "SELF_EMPLOY_SOC_INSUR_CONTR_PER_HOUR";
     public static final String HOURS_WORKED_WEEKLY = "HOURS_WORKED_WEEKLY";
-    public static final String BENEFIT_UNIT_VARIABLE_NAME = "BU_ID";
 
     public static final double MIN_CAPITAL_INCOME_PER_MONTH = 0.0;
     public static final double MAX_CAPITAL_INCOME_PER_MONTH = 4000.0;
@@ -340,6 +330,7 @@ public class Parameters {
     public static Map<Integer, String> EUROMODpolicySchedule = new TreeMap<Integer, String>();
     public static Map<Integer, Pair<String, Integer>> EUROMODpolicyScheduleSystemYearMap = new TreeMap<>(); // This map stores year from which policy applies, and then a Pair of <name of policy, policy system year as specified in EM>. This is used when uprating values from the policy system year to a current simulated year.
     private static MultiKeyMap<Object, Double> fertilityRateByRegionYear;
+    private static Map<Integer, Double> fertilityRateByYear;
     private static MultiKeyCoefficientMap populationProjections;
     public static final int ALIGN_MIN_AGE_ASSUME_DEATH = 65;
     public static final int ALIGN_MAX_AGE_REQUIRE_MATCH = 65;
@@ -355,9 +346,10 @@ public class Parameters {
     private static boolean flagDefaultToTimeSeriesAverages;
     private static Double averageSavingReturns, averageDebtCostLow, averageDebtCostHigh;
     private static MultiKeyCoefficientMap upratingIndexMapRealGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            partnershipTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentCouples,
-            upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
+            partnershipTimeAdjustment, fertilityTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales,
+            utilityTimeAdjustmentCouples, upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
             wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
+    public static Map<Integer, Double> partnershipAlignAdjustment, fertilityAlignAdjustment;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
     //Education level projections
@@ -383,6 +375,8 @@ public class Parameters {
 //	private static MultiKeyMap probSick;
 
     //MultivariateNormalDistribution of age and potential earnings differential to use in the parametric partnership process
+    public final static boolean MARRIAGE_MATCH_TO_MEANS = false;
+    public static double targetMeanWageDifferential, targetMeanAgeDifferential;
     private static MultivariateNormalDistribution wageAndAgeDifferentialMultivariateNormalDistribution;
 
     //Mortality, fertility, and unemployment tables for the intertemporal optimisation model
@@ -777,11 +771,12 @@ public class Parameters {
     public static Integer timeTrendStopsIn;
     public static boolean flagFormalChildcare;
     public static boolean flagSocialCare;
-    public static boolean flagSuppressCareCosts = false;
+    public static boolean flagSuppressChildcareCosts;
+    public static boolean flagSuppressSocialCareCosts;
     public static boolean donorPoolAveraging;
 
     public static double realInterestRateInnov;
-    public static double disposableIncomeInnov;
+    public static double disposableIncomeFromLabourInnov;
 
 
     /**
@@ -794,7 +789,8 @@ public class Parameters {
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
-                                      double disposableIncomeInnov1, boolean flagSuppressCareCosts1) {
+                                      double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
+                                      boolean flagSuppressSocialCareCosts1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -812,6 +808,7 @@ public class Parameters {
         setProjectLiquidWealth();
         String countryString = country.toString();
         loadTimeSeriesFactorMaps(country);
+        instantiateAlignmentMaps();
 
         // scenario parameters
         if (country.equals(Country.IT)) {
@@ -826,10 +823,11 @@ public class Parameters {
         timeTrendStopsIn = timeTrendStops;
         flagFormalChildcare = projectFormalChildcare;
         flagSocialCare = projectSocialCare;
-        flagSuppressCareCosts = flagSuppressCareCosts1;
+        flagSuppressChildcareCosts = flagSuppressChildcareCosts1;
+        flagSuppressSocialCareCosts = flagSuppressSocialCareCosts1;
         donorPoolAveraging = donorPoolAveraging1;
         realInterestRateInnov = interestRateInnov1;
-        disposableIncomeInnov = disposableIncomeInnov1;
+        disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
 //		unemploymentRates = ExcelAssistant.loadCoefficientMap("input/scenario_unemploymentRates.xlsx", countryString, 1, 46);
@@ -859,7 +857,7 @@ public class Parameters {
         */
 
         // alignment parameters
-        populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 50);
+        populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 110);
         setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels
@@ -1104,8 +1102,8 @@ public class Parameters {
             columnsPartnershipU1a = 27;
             columnsPartnershipU1b = 31;
             columnsPartnershipU2b = 38;
-            columnsFertilityF1a = 11;
-            columnsFertilityF1b = 34;
+            columnsFertilityF1a = 6;
+            columnsFertilityF1b = 26;
             columnsIncomeI1a = 19;  //*
             columnsIncomeI1b = 31;  //*
             columnsIncomeI3a = 20;
@@ -1581,7 +1579,9 @@ public class Parameters {
         regChildcareC1b = new LinearRegression(coeffCovarianceChildcareC1b);
 
         //Create the age and wage differential MultivariateNormalDistribution for partnership formation, using means and var-cov matrix loaded from Excel
-        double[] means = {((Number) meanCovarianceParametricMatching.getValue("mean_dag_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("mean_wage_diff")).doubleValue()};
+        targetMeanAgeDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_dag_diff")).doubleValue();
+        targetMeanWageDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_wage_diff")).doubleValue();
+        double[] means = {targetMeanAgeDifferential, targetMeanWageDifferential};
         double[][] covariances = { {((Number) meanCovarianceParametricMatching.getValue("var_dag_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("cov_dag_wage_diff")).doubleValue()} , {((Number) meanCovarianceParametricMatching.getValue("cov_dag_wage_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("var_wage_diff")).doubleValue()}};
         wageAndAgeDifferentialMultivariateNormalDistribution = getMultivariateNormalDistribution(means, covariances);
 
@@ -1753,28 +1753,32 @@ public class Parameters {
     private static void calculateFertilityRatesFromProjections() {
 
         fertilityRateByRegionYear = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+        fertilityRateByYear = new HashMap<>();
+        for (int year = startYear; year <= endYear; year++) {
 
-        for(int year = startYear; year <= endYear; year++) {
+            double projectedNumFertileWomenAll = 0.0, numNewBornAll = 0.0;
+            for (Region region : countryRegions) {
 
-            for(Region region : countryRegions) {
-
-                double projectedNumFertileWomen = 0.;
-                for(int age = MIN_AGE_MATERNITY; age <= MAX_AGE_MATERNITY; age++) {
-                    projectedNumFertileWomen += getPopulationProjections(Gender.Female, region, age, year);
+                double projectedNumFertileWomenByRegion = 0.0;
+                for (int age = MIN_AGE_MATERNITY; age <= MAX_AGE_MATERNITY; age++) {
+                    projectedNumFertileWomenByRegion += getPopulationProjections(Gender.Female, region, age, year);
                 }
 
-                double numNewBorn = 0.;
-                for(Gender gender: Gender.values()) {
-                    numNewBorn += getPopulationProjections(gender, region, 0, year);		//Number of people aged 0 in projected years
+                double numNewBornByRegion = 0.;
+                for (Gender gender: Gender.values()) {
+                    numNewBornByRegion += getPopulationProjections(gender, region, 0, year);		//Number of people aged 0 in projected years
                 }
 
-                if(projectedNumFertileWomen <= 0.) {
+                if (projectedNumFertileWomenByRegion <= 0.) {
                     throw new IllegalArgumentException("Projected Number of Females of Fertile Age is not positive!");
                 }
                 else {
-                    fertilityRateByRegionYear.put(region, year, numNewBorn / projectedNumFertileWomen);
+                    projectedNumFertileWomenAll += projectedNumFertileWomenByRegion;
+                    numNewBornAll += numNewBornByRegion;
+                    fertilityRateByRegionYear.put(region, year, numNewBornByRegion / projectedNumFertileWomenByRegion);
                 }
             }
+            fertilityRateByYear.put(year, numNewBornAll / projectedNumFertileWomenAll);
         }
     }
 
@@ -2242,8 +2246,9 @@ public class Parameters {
         return ((Number) fertilityProjectionsByYear.getValue("Value", yearHere)).doubleValue();
     }
 
-    public static MultivariateNormalDistribution getWageAndAgeDifferentialMultivariateNormalDistribution() {
-        return wageAndAgeDifferentialMultivariateNormalDistribution;
+    public synchronized static double[] getWageAndAgeDifferentialMultivariateNormalDistribution(long seed) {
+        wageAndAgeDifferentialMultivariateNormalDistribution.reseedRandomGenerator(seed);
+        return wageAndAgeDifferentialMultivariateNormalDistribution.sample();
     }
 
     public static ProbitRegression getRegLeaveHomeP1a() {
@@ -2466,6 +2471,7 @@ public class Parameters {
         upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
         socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
+        fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_fertility_adjustment", 1, 1);
         utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_smales", 1, 1);
         utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_sfemales", 1, 1);
         utilityTimeAdjustmentCouples = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_couples", 1, 1);
@@ -2474,8 +2480,6 @@ public class Parameters {
         rebaseIndexMap(TimeSeriesVariable.GDP);
         rebaseIndexMap(TimeSeriesVariable.Inflation);
         rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-        rebaseIndexMap(TimeSeriesVariable.CareProvisionAdjustment, startYear, false);
-        rebaseIndexMap(TimeSeriesVariable.PartnershipAdjustment, startYear, false);
 
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
@@ -2486,22 +2490,31 @@ public class Parameters {
 
     }
 
+    public static void instantiateAlignmentMaps() {
+        partnershipAlignAdjustment = new HashMap<>();
+        fertilityAlignAdjustment = new HashMap<>();
+        for (int yy=startYear; yy<=endYear; yy++) {
+            partnershipAlignAdjustment.put(yy,0.0);
+            fertilityAlignAdjustment.put(yy,0.0);
+        }
+    }
+
     public static void loadTimeSeriesFactorForTaxDonor(Country country) {
 
         TimeSeriesVariable index = getTimeSeriesVariable(UpratingCase.TaxDonor);
         switch (index) {
-            case GDP:
+            case GDP -> {
                 upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
                 rebaseIndexMap(TimeSeriesVariable.GDP);
-                break;
-            case WageGrowth:
+            }
+            case WageGrowth -> {
                 upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
                 rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                break;
-            case Inflation:
+            }
+            case Inflation -> {
                 upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
                 rebaseIndexMap(TimeSeriesVariable.Inflation);
-                break;
+            }
         }
     }
 
@@ -2509,10 +2522,10 @@ public class Parameters {
         rebaseIndexMap(indexType, BASE_PRICE_YEAR, true);
     }
 
-    private static void rebaseIndexMap(TimeSeriesVariable indexType, int baseYear, boolean ratioAdjust) {
+    private static void rebaseIndexMap(TimeSeriesVariable timeSeriesVariable, int baseYear, boolean ratioAdjust) {
 
-        MultiKeyCoefficientMap map = getTimeSeriesValueMap(indexType);
-        double valueBase = getTimeSeriesValue(baseYear, indexType);
+        MultiKeyCoefficientMap map = getTimeSeriesValueMap(timeSeriesVariable);
+        double valueBase = getTimeSeriesValue(baseYear, timeSeriesVariable);
         for (Object key: map.keySet()) {
 
             double valueHere = ((Number) map.getValue(key)).doubleValue();
@@ -2524,47 +2537,53 @@ public class Parameters {
         }
     }
 
-    private static MultiKeyCoefficientMap getTimeSeriesValueMap(TimeSeriesVariable variableType) {
+    private static MultiKeyCoefficientMap getTimeSeriesValueMap(TimeSeriesVariable timeSeriesVariable) {
 
         MultiKeyCoefficientMap map = null;
-        switch (variableType) {
-            case GDP:
+        switch (timeSeriesVariable) {
+            case GDP -> {
                 map = upratingIndexMapRealGDP;
-                break;
-            case Inflation:
+            }
+            case Inflation -> {
                 map = upratingIndexMapInflation;
-                break;
-            case WageGrowth:
+            }
+            case WageGrowth -> {
                 map = upratingIndexMapRealWageGrowth;
-                break;
-            case CarerWageRate:
+            }
+            case CarerWageRate -> {
                 map = wageRateFormalSocialCare;
-                break;
-            case CareProvisionAdjustment:
+            }
+            case CareProvisionAdjustment -> {
                 map = socialCareProvisionTimeAdjustment;
-                break;
-            case PartnershipAdjustment:
+            }
+            case PartnershipAdjustment -> {
                 map = partnershipTimeAdjustment;
-                break;
-            case UtilityAdjustmentSingleMales:
+            }
+            case FertilityAdjustment -> {
+                map = fertilityTimeAdjustment;
+            }
+            case UtilityAdjustmentSingleMales -> {
                 map = utilityTimeAdjustmentSingleMales;
-                break;
-            case UtilityAdjustmentSingleFemales:
+            }
+            case UtilityAdjustmentSingleFemales -> {
                 map = utilityTimeAdjustmentSingleFemales;
-                break;
-            case UtilityAdjustmentCouples:
+            }
+            case UtilityAdjustmentCouples -> {
                 map = utilityTimeAdjustmentCouples;
-                break;
-            case HighEducationRate:
+            }
+            case HighEducationRate -> {
                 map = projectionsHighEdu;
-            case LowEducationRate:
+            }
+            case LowEducationRate -> {
                 map = projectionsLowEdu;
-            case EmploymentAlignment:
+            }
+            case EmploymentAlignment -> {
                 map = employmentAlignment;
-            case FixedRetirementAge:
+            }
+            case FixedRetirementAge -> {
                 map = fixedRetireAge;
+            }
         }
-
         return map;
     }
 
@@ -2572,63 +2591,57 @@ public class Parameters {
 
         MultiKeyCoefficientMap map = null;
         switch (targetShareType) {
-            case Partnership:
+            case Partnership -> {
                 map = partneredShare;
-                break;
-            case EmploymentSingleMales:
+            }
+            case EmploymentSingleMales -> {
                 map = employedShareSingleMales;
-                break;
-            case EmploymentSingleFemales:
+            }
+            case EmploymentSingleFemales -> {
                 map = employedShareSingleFemales;
-                break;
-            case EmploymentCouples:
+            }
+            case EmploymentCouples -> {
                 map = employedShareCouples;
-                break;
+            }
         }
 
         return map;
     }
 
-    public static Double getTimeSeriesIndex(int year, UpratingCase upratingCase ) {
+    public static Double getTimeSeriesIndex(int year, UpratingCase upratingCase) {
 
-        TimeSeriesVariable indexType = getTimeSeriesVariable(upratingCase);
-        return getTimeSeriesValue(year, indexType);
+        TimeSeriesVariable timeSeriesVariable = getTimeSeriesVariable(upratingCase);
+        return getTimeSeriesValue(year, timeSeriesVariable);
     }
 
-    private static TimeSeriesVariable getTimeSeriesVariable(UpratingCase upratingCase ) {
+    private static TimeSeriesVariable getTimeSeriesVariable(UpratingCase upratingCase) {
 
-        TimeSeriesVariable indexType = null;
+        TimeSeriesVariable timeSeriesVariable = null;
         switch (upratingCase) {
-            case Capital:
-                indexType = TimeSeriesVariable.GDP;
-                break;
-            case Earnings:
-                indexType = TimeSeriesVariable.WageGrowth;
-                break;
-            case ModelInitialise:
-                indexType = TimeSeriesVariable.GDP;
-                break;
-            case Pension:
-                indexType = TimeSeriesVariable.GDP;
-                break;
-            case TaxDonor:
-                indexType = TimeSeriesVariable.Inflation;
-                break;
+            case Capital, ModelInitialise, Pension -> {
+                timeSeriesVariable = TimeSeriesVariable.GDP;
+            }
+            case Earnings -> {
+                timeSeriesVariable = TimeSeriesVariable.WageGrowth;
+            }
+            case TaxDonor -> {
+                timeSeriesVariable = TimeSeriesVariable.Inflation;
+            }
         }
-        return indexType;
+        return timeSeriesVariable;
     }
 
-    public static double getTimeSeriesValue(int year, TimeSeriesVariable variableType) {
-        return getTimeSeriesValue(year, null, null, variableType);
+    public static double getTimeSeriesValue(int year, TimeSeriesVariable timeSeriesVariable) {
+        return getTimeSeriesValue(year, null, null, timeSeriesVariable);
     }
 
-    public static double getTimeSeriesValue(int year, String stringKey1, TimeSeriesVariable variableType) {
-        return getTimeSeriesValue(year, stringKey1, null, variableType);
+    public static double getTimeSeriesValue(int year, String stringKey1, TimeSeriesVariable timeSeriesVariable) {
+        return getTimeSeriesValue(year, stringKey1, null, timeSeriesVariable);
     }
 
-    public static double getTimeSeriesValue(int year, String stringKey1, String stringKey2, TimeSeriesVariable variableType) {
+    public static double getTimeSeriesValue(int year, String stringKey1, String stringKey2, TimeSeriesVariable timeSeriesVariable) {
 
-        MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(variableType);
+        MultiKeyCoefficientMap valueMap = getTimeSeriesValueMap(timeSeriesVariable);
         Object val = getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, valueMap);
         if (val == null)
             val = extendValueTimeSeries(year, stringKey1, stringKey2, valueMap);
@@ -2728,22 +2741,22 @@ public class Parameters {
                 }
             }
         }
-        return valObj;
+        return getObjectFromTimeSeriesValueMap(year, stringKey1, stringKey2, mapToExtend);
     }
 
     private static MultiKeyCoefficientMap getTimeSeriesRateMap(TimeVaryingRate rateType) {
 
         MultiKeyCoefficientMap map = null;
         switch (rateType) {
-            case RealSavingReturns:
+            case RealSavingReturns -> {
                 map = priceMapRealSavingReturns;
-                break;
-            case RealDebtCostLow:
+            }
+            case RealDebtCostLow -> {
                 map = priceMapRealDebtCostLow;
-                break;
-            case RealDebtCostHigh:
+            }
+            case RealDebtCostHigh -> {
                 map = priceMapRealDebtCostHigh;
-                break;
+            }
         }
 
         return map;
@@ -2752,12 +2765,15 @@ public class Parameters {
     private static Double getTimeSeriesRateParameter(TimeVaryingRate rateType) {
 
         switch (rateType) {
-            case RealSavingReturns:
+            case RealSavingReturns -> {
                 return averageSavingReturns;
-            case RealDebtCostLow:
+            }
+            case RealDebtCostLow -> {
                 return averageDebtCostLow;
-            case RealDebtCostHigh:
+            }
+            case RealDebtCostHigh -> {
                 return averageDebtCostHigh;
+            }
         }
         throw new RuntimeException("failed to find requested time varying rate");
     }
@@ -2765,15 +2781,18 @@ public class Parameters {
     private static void setTimeSeriesRateParameter(TimeVaryingRate rateType, double val) {
 
         switch (rateType) {
-            case RealSavingReturns:
+            case RealSavingReturns -> {
                 averageSavingReturns = val;
                 return;
-            case RealDebtCostLow:
+            }
+            case RealDebtCostLow -> {
                 averageDebtCostLow = val;
                 return;
-            case RealDebtCostHigh:
+            }
+            case RealDebtCostHigh -> {
                 averageDebtCostHigh = val;
                 return;
+            }
         }
         throw new RuntimeException("failed to find requested time varying rate");
     }
@@ -3171,4 +3190,87 @@ public class Parameters {
         }
     }
 
+    public static double updateProbability(double init, double threshold) {
+
+        if (init<0.0 || init>1.0)
+            throw new RuntimeException("call to update probability that is not strictly within range of 0 and 1");
+        if (threshold<0.0 || threshold>1.0)
+            throw new RuntimeException("call to update probability where threshold is not strictly within range of 0 and 1");
+
+        return (init<threshold) ? init/threshold : (1.0-init)/(1.0-threshold);
+    }
+    public static double updateProbability(double init) {
+
+        return (init<0.5) ? init/0.5 : (1-init) / 0.5;
+    }
+
+    public static double getAlignmentValue(int year, AlignmentVariable variableType) {
+        switch (variableType) {
+            case PartnershipAlignment -> {
+                Double val = partnershipAlignAdjustment.get(year);
+                if (val==null)
+                    throw new RuntimeException("value undefined for partnershipAlignAdjustment in year " + year);
+                return val;
+            }
+            case FertilityAlignment -> {
+                Double val = fertilityAlignAdjustment.get(year);
+                if (val==null)
+                    throw new RuntimeException("value undefined for fertilityAlignAdjustment in year " + year);
+                return val;
+            }
+            default -> {
+                throw new RuntimeException("failed to identify alignment value type to get");
+            }
+        }
+    }
+
+    public static void setAlignmentValue(int year, double val, AlignmentVariable variableType) {
+        switch (variableType) {
+            case PartnershipAlignment -> {
+                partnershipAlignAdjustment.put(year, val);
+            }
+            case FertilityAlignment -> {
+                fertilityAlignAdjustment.put(year, val);
+            }
+            default -> {
+                throw new RuntimeException("failed to identify alignment value type in set");
+            }
+        }
+    }
+
+    public static double getFertilityRateByYear(int year) {
+        Double val = fertilityRateByYear.get(year);
+        if (val==null)
+            throw new RuntimeException("value undefined for getFertilityRateByYear in year " + year);
+        return val;
+    }
+
+    public static void databaseSetup(Country country, boolean executeWithGui, int startYear) {
+
+        // remove database file if it exists
+        String filePath = "./input" + File.separator + "input.mv.db";
+        safeDelete(filePath);
+
+        // populate new database for starting data
+        DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+
+        // populate new database for tax donors
+        String taxDonorInputFilename = "tax_donor_population_" + country;
+        Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
+        Parameters.loadTimeSeriesFactorForTaxDonor(country);
+        TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
+        TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables from csv data
+        TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
+    }
+    private static void safeDelete(String filePath) {
+        File file = new File(filePath);
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }

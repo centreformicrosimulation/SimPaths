@@ -80,7 +80,8 @@ drop if dag < 16
 replace stm = stm - 2000
 
 /*check if all covariates are available in the data*/ 
-recode dhe dnc dnc02 deh_c3 les_c3 ydses_c5 dcpst drgn1 sprfm scedsmpl dukfr dchpd    (-9=. )
+recode dhe dnc dnc02 deh_c3 les_c3 ydses_c5 dcpst drgn1 sprfm scedsmpl dukfr    (-9=. )
+recode dchpd (-9=0)
 
 xtset idperson swv
 
@@ -89,7 +90,7 @@ xtset idperson swv
 *Proces F1a - Probability of Having a Child - In continuous education
 **********************************************************************
 *Sample: Women aged 18-44 not in continuous education.
-probit dchpd dag li.ydses_c5 l.dnc l.dnc02 ib1.dhe ib1.dcpst lib1.dcpst if (sprfm==1 & scedsmpl==1) [pweight=disclwt], vce(robust)
+probit dchpd dag l.dnc il.dnc02 ib1.dcpst if (sprfm==1 & scedsmpl==1) [pweight=disclwt], vce(robust)
 matrix results = r(table)
 matrix results = results[1..6,1...]'
 putexcel set "$dir_data/Fertility_w", sheet("Process F1a - In education") replace
@@ -104,7 +105,9 @@ title("Process F1a: Probability of giving birth to a child. Sample: Women aged 1
 *Proces F1b Probability of Having a Child - Not in continuous education
 *************************************************************************
 *Sample: Women aged 18-44 not in continuous education.
-probit dchpd dag dagsq li.ydses_c5 l.dnc l.dnc02 ib1.dhe ib1.dcpst lib1.dcpst ib1.deh_c3 dukfr li.les_c3 ib8.drgn1 if (sprfm==1 & scedsmpl==0) [pweight=disclwt], vce(robust)
+gen ddnc02 = (dnc02 > 0)
+probit dchpd dag dagsq l.dnc l.ddnc02 ib1.dhe ib1.dcpst dukfr li.les_c3 ib8.drgn1 if (sprfm==1 & scedsmpl==0) [pweight=disclwt], vce(robust)
+
 matrix results = r(table)
 matrix results = results[1..6,1...]'
 putexcel set "$dir_data/Fertility_w", sheet("Process F1b - Not in education") modify

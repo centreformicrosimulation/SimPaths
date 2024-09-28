@@ -2,6 +2,7 @@ package simpaths.model.taxes;
 
 import jakarta.persistence.*;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -12,21 +13,20 @@ import java.util.HashSet;
  *
  */
 @Entity
-@Table(name = "DONORPERSON_UK")
 public class DonorPerson {
 
+    @Id @Column(name = "ID", unique = true, nullable = false) private Long id;
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @JoinColumn(name = "TUID", referencedColumnName = "id")
+    private DonorTaxUnit taxUnit;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "person")
+    private Set<DonorPersonPolicy> policies = new LinkedHashSet<>();
 
-    /**
-     * ATTRIBUTES
-     */
-    @Id @Column(name = "ID", unique = true, nullable = false) private long id;
     @Column(name = "DAG") private Integer age;
     @Column(name = "WEIGHT") private Double weight;
     @Column(name = "HOURS_WORKED_WEEKLY") private Integer hoursWorkedWeekly;
     @Column(name = "DLLTSD") private Integer dlltsd;
     @Column(name = "CARER") private Integer carer;
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "TUID", nullable=false) private DonorTaxUnit taxUnit;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true) private Set<DonorPersonPolicy> policies = new HashSet<DonorPersonPolicy>(0);
 
 
     /**
@@ -48,11 +48,10 @@ public class DonorPerson {
     public double getWeight() { return this.weight; }
     public Set<DonorPersonPolicy> getPolicies() { return policies; }
     public DonorPersonPolicy getPolicy(int startYear) {
-
-        DonorPersonPolicy policy = null;
-        for ( DonorPersonPolicy policyCheck : policies) {
-            if (policyCheck.getFromYear() == startYear)  policy = policyCheck;
+        for ( DonorPersonPolicy policy : policies) {
+            if (policy.getFromYear() == startYear)
+                return policy;
         }
-        return policy;
+        return null;
     }
 }

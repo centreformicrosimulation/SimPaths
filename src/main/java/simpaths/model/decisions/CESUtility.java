@@ -18,17 +18,17 @@ public class CESUtility implements IEvaluation {
     Grid valueFunction;            // storage of preceding solutions for value function
 
     // CES utility options
-    public static final double ANNUAL_CONSUMPTION_NORMALISATION_FACTOR = 15600.0;  // used to improve the curvature of the utility function with respect to consumption
+    public static final double ANNUAL_CONSUMPTION_NORMALISATION_FACTOR = 15600.0;   // used to improve the curvature of the utility function with respect to consumption
     public static final double BEQUEST_NORMALISATION_FACTOR = 250000.0;
-    public static final double EPSILON = 0.35;                                      // elasticity of substitution between equivalised consumption and leisure within each year
-    public static final double ALPHA_YOUNG = 1.3;                                // utility price of leisure for single adults
-    public static final double ALPHA_MID = 1.3;                                // utility price of leisure for single adults
-    public static final double ALPHA_OLD = 1.3;                                // utility price of leisure for couples
-    public static final double GAMMA = 1.9;                                        // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
-    public static final double ZETA0 = 17.0;                            // warm-glow bequests parameter for singles - additive
-    public static final double ZETA1 = 0.4;                             // warm-glow bequests parameter for singles - slope
-    public static final double DELTA_SINGLES = 0.995;                               // exponential intertemporal discount factor for singles
-    public static final double DELTA_COUPLES = 0.995;                               // exponential intertemporal discount factor for couples
+    public static final double EPSILON = 0.34;                                      // elasticity of substitution between equivalised consumption and leisure within each year
+    public static final double ALPHA_YOUNG = 1.26;                                   // utility price of leisure for single adults
+    public static final double ALPHA_MID = 1.26;                                     // utility price of leisure for single adults
+    public static final double ALPHA_OLD = 1.26;                                     // utility price of leisure for couples
+    public static final double GAMMA = 2.0;                                         // (constant) coefficient of risk aversion equal to inverse of intertemporal elasticity
+    public static final double ZETA0 = 17.0;                                        // warm-glow bequests parameter for singles - additive
+    public static final double ZETA1 = 0.4;                                         // warm-glow bequests parameter for singles - slope
+    public static final double DELTA_SINGLES = 0.98;                                // exponential intertemporal discount factor for singles
+    public static final double DELTA_COUPLES = 0.98;                                // exponential intertemporal discount factor for couples
 
 
     /**

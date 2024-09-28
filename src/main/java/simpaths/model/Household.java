@@ -1,16 +1,16 @@
 package simpaths.model;
 
-import simpaths.experiment.SimPathsCollector;
+import jakarta.persistence.*;
 import microsim.data.db.PanelEntityKey;
+import simpaths.data.Parameters;
+import simpaths.data.startingpop.Processed;
+import simpaths.experiment.SimPathsCollector;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import org.apache.log4j.Logger;
+import simpaths.model.enums.SampleEntry;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -26,26 +26,22 @@ from the data, on the basis of the idhh.
 @Entity
 public class Household implements EventListener, IDoubleSource {
 
-    @Transient
-    private static Logger log = Logger.getLogger(Household.class);
+    @Transient private static Logger log = Logger.getLogger(Household.class);
+    @Transient private final SimPathsModel model;
+    @Transient private final SimPathsCollector collector;
+    @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
 
-    @Transient
-    private final SimPathsModel model;
+    @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household")
+    @OrderBy("key ASC")
+    private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @JoinColumns({
+            @JoinColumn(name = "prid", referencedColumnName = "id")
+    })
+    private Processed processed;
 
-    @Transient
-    private final SimPathsCollector collector;
-
-    @Transient
-    public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
-
-    @Id
-    private final PanelEntityKey key;
-
-    @Column(name="id_original_hh")
     private Long idOriginalHH;
-
-    @Transient
-    private Set<BenefitUnit> benefitUnitSet;
 
 
     /*
@@ -53,78 +49,53 @@ public class Household implements EventListener, IDoubleSource {
      */
 
     public Household() {
-        super();
-
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(householdIdCounter++);
-        benefitUnitSet = new LinkedHashSet<BenefitUnit>();
     }
 
-    public Household(Household originalHousehold) {
-        this();
-        this.idOriginalHH = originalHousehold.key.getId();
-    }
+    public Household(Household originalHousehold, SampleEntry sampleEntry) {
 
-    public Household(long householdId) {
-        super();
-
-        model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
-        collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
-        key  = new PanelEntityKey(householdId);
-        benefitUnitSet = new LinkedHashSet<BenefitUnit>();
-    }
-
-    public Household(LinkedHashSet<BenefitUnit> benefitUnitsToAdd) {
-        this(); //Refers to the basic constructor Household()
-        for(BenefitUnit benefitUnit : benefitUnitsToAdd) {
-            addBenefitUnit(benefitUnit);
+        switch (sampleEntry) {
+            case ProcessedInputData -> {
+                model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+                collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
+                key  = new PanelEntityKey(originalHousehold.getId());
+                this.idOriginalHH = originalHousehold.getIdOriginalHH();
+            }
+            default -> {
+                model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+                collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
+                key  = new PanelEntityKey(householdIdCounter++);
+                idOriginalHH = originalHousehold.key.getId();
+            }
         }
     }
 
-    //Overloaded constructor taking a benefit unit as input and adding it to the new household
-    public Household(BenefitUnit benefitUnitToAdd) {
-        this(); //Refers to the basic constructor Household()
-        addBenefitUnit(benefitUnitToAdd);
+    public Household(long householdId) {
+        model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
+        collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
+        key  = new PanelEntityKey(householdId);
     }
 
     /*
     METHODS
      */
+    public Long getIdOriginalHH() {return idOriginalHH;}
 
     public void resetWeights(double newWeight) {
 
-        for (BenefitUnit benefitUnit : benefitUnitSet) {
-            for( Person person : benefitUnit.getPersonsInBU()) {
+        for (BenefitUnit benefitUnit : benefitUnits) {
+            for( Person person : benefitUnit.getMembers()) {
                 person.setWeight(newWeight);
             }
         }
     }
 
-    public void addBenefitUnit(BenefitUnit benefitUnit) {
-
-        benefitUnitSet.add(benefitUnit);
-        if ( benefitUnit.getHousehold() != this ) {
-            if ( benefitUnit.getHousehold() != null )
-                benefitUnit.getHousehold().removeBenefitUnit(benefitUnit);
-            benefitUnit.setHousehold(this);
-        }
-    }
-
-    //Remove a benefitUnit from the household
     public void removeBenefitUnit(BenefitUnit benefitUnit) {
-
-        if(benefitUnitSet.contains(benefitUnit)) {
-
-            boolean removed = benefitUnitSet.remove(benefitUnit);
-            if (!removed)
-                throw new IllegalArgumentException("BenefitUnit " + benefitUnit.getKey().getId() + " could not be removed from household");
-        }
-        if (benefitUnit.getHousehold() == this) benefitUnit.setHousehold(null);
-
-        //Check for benefit units remaining in the household - if none, remove the household
-        if (benefitUnitSet.isEmpty()) {
-            model.removeHousehold(this);
+        benefitUnits.remove(benefitUnit);
+        if (benefitUnits.isEmpty()) {
+            model.getHouseholds().remove(this);
         }
     }
 
@@ -141,8 +112,8 @@ public class Household implements EventListener, IDoubleSource {
     public double getWeight() {
         double cumulativeWeight = 0.0;
         double size = 0.0;
-        for (BenefitUnit benefitUnit : benefitUnitSet) {
-            for( Person person : benefitUnit.getPersonsInBU()) {
+        for (BenefitUnit benefitUnit : benefitUnits) {
+            for ( Person person : benefitUnit.getMembers()) {
                 cumulativeWeight += person.getWeight();
                 size++;
             }
@@ -150,9 +121,24 @@ public class Household implements EventListener, IDoubleSource {
         return cumulativeWeight / size;
     }
 
+    public void setWeight(double weight) {
+        for (BenefitUnit benefitUnit : benefitUnits) {
+            for ( Person person : benefitUnit.getMembers()) {
+                person.setWeight(weight);
+            }
+        }
+    }
+
     public long getId() { //Get household ID as set in the simulation. Note that it is different than in the input data.
         return key.getId();
     }
 
-    public Set<BenefitUnit> getBenefitUnitSet() { return benefitUnitSet; }
+    public Set<BenefitUnit> getBenefitUnits() { return benefitUnits; }
+
+    public void setProcessed(Processed processed) {
+        this.processed = processed;
+        key.setWorkingId(processed.getId());
+    }
+
+    public static void setHouseholdIdCounter(long id) {householdIdCounter = id;}
 }

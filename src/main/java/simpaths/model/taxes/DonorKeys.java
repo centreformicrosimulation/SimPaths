@@ -20,6 +20,7 @@ public class DonorKeys {
     private Integer simYear = null;     // year for which keys evaluated
     private Integer priceYear = null;   // year of prices used to measure financial statistics
     private boolean[] lowIncome;  // low income identifier used to determine income imputation method
+    private double hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman;
     private Double originalIncomePerWeek = null;
     private Double secondIncomePerWeek = null;
     private Double childcareCostPerWeek = null;
@@ -56,6 +57,9 @@ public class DonorKeys {
     }
     public Double getSecondIncomePerWeek() { return secondIncomePerWeek; }
     public Double getChildcareCostPerWeek() { return childcareCostPerWeek; }
+    public double getHoursWorkedPerWeekMan() { return hoursWorkedPerWeekMan; }
+    public double getHoursWorkedPerWeekWoman() { return hoursWorkedPerWeekWoman; }
+
     public double getRandomDraw() { return randomDraw; }
     public boolean isLowIncome(int regime) {
         if (regime<0)
@@ -76,5 +80,7 @@ public class DonorKeys {
         priceYear = function.getPriceYear();
         keys = function.evaluateKeys();
         lowIncome = function.isLowIncome(keys);
+        hoursWorkedPerWeekMan = function.getHoursWorkedPerWeekMan();
+        hoursWorkedPerWeekWoman = function.getHoursWorkedPerWeekWoman();
     }
 }

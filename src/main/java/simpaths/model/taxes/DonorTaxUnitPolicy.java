@@ -11,14 +11,13 @@ import simpaths.data.Parameters;
  *
  */
 @Entity
-@Table(name = "DONORTAXUNITPOLICY_UK")
 public class DonorTaxUnitPolicy {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
+    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @JoinColumn(name = "TUID", referencedColumnName = "id")
+    private DonorTaxUnit taxUnit;
 
-    /**
-     * ATTRIBUTES
-     */
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "ID", unique = true, nullable = false) private long id;
     @Column(name = "FROM_YEAR") private Integer fromYear;           // simulated year to use this policy from (ignored for earliest fromYear policy)
     @Column(name = "SYSTEM_YEAR") private Integer systemYear;       // year for which database values were projected - financials are reported in prices from this year
     @Column(name="ILS_DISPY") private Double disposableIncomePerMonth;
@@ -33,7 +32,6 @@ public class DonorTaxUnitPolicy {
     @Column(name = "DONOR_KEY2") private Integer donorKey2;
     @Column(name = "DONOR_KEY3") private Integer donorKey3;
     @Column(name = "DONOR_KEY4") private Integer donorKey4;
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "TUID", nullable=false) private DonorTaxUnit taxUnit;
 
 
     /**

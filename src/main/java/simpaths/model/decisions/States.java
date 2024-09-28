@@ -134,7 +134,7 @@ public class States {
         }
 
         // cohabitation
-        populate(Axis.Cohabitation, benefitUnit.getCoupleOccupancy());
+        populate(Axis.Cohabitation, benefitUnit.getCoupleDummy());
 
         // gender
         populate(Axis.Gender, refPerson.getGender());
@@ -622,7 +622,7 @@ public class States {
 
     /**
      * METHOD TO RETURN SOCIAL CARE RECEIPT
-     * @return integer (0 no care, 1 only informal, 2 formal and informal, 3 only formal
+     * @return integer (0 none needed, 1 no formal (needed but not received or only informal), 2 formal and informal, 3 only formal
      */
     int getSocialCareReceiptState() {
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
@@ -637,7 +637,7 @@ public class States {
      * @return boolean
      */
     public boolean getPrincipalEligibleForWork() {
-        if (!Parameters.flagSuppressCareCosts) {
+        if (!Parameters.flagSuppressSocialCareCosts) {
             if (getDisability()==1)
                 return false;
             if (getSocialCareReceiptState()>0)

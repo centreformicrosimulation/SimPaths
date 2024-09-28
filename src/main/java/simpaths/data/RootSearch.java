@@ -37,15 +37,19 @@ public class RootSearch {
 
             // check starting points
             CheckBoundsForRoot bounds = new CheckBoundsForRoot(lowerBounds, upperBounds, function);
-            if (!bounds.getBracketed())
-                throw new RuntimeException("Root search supplied boundaries do not bracket solution");
             xn = bounds.getXn();
             fn = bounds.getFn();
             xp = bounds.getXp();
             fp = bounds.getFp();
-
-            //target = bisection(xn, xg, xp, fn, fg, fp);
-            target = zbrent(xn, xp, fn, fp);
+            if (bounds.getBracketed()) {
+                target = zbrent(xn, xp, fn, fp);
+            } else {
+                if (Math.abs(fn) < Math.abs(fp)) {
+                    target = xn;
+                } else {
+                    target = xp;
+                }
+            }
         }
     }
 

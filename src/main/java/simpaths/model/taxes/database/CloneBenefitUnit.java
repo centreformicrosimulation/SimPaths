@@ -392,6 +392,7 @@ public class CloneBenefitUnit {
                 members.remove(spouse);
                 spouse = null;
                 target.replace("dms",1.0);
+                target.replace("idpartner",0.0);
                 for (Map child : children) {
                     if (getInteger(target,"dgn")==0) {
                         child.replace("idfather",0.0);
@@ -513,6 +514,7 @@ public class CloneBenefitUnit {
     }
     private long[] cloneAllHouseholdMembers(List<Map> originalMembers, long idTarget, long newHouseholdId, long newPersonId) {
 
+        long fail = 0;
         Map idKey = new HashMap<Long,Double>();
         for (Map obs : originalMembers) {
             Map clone = clone(obs);
@@ -536,34 +538,42 @@ public class CloneBenefitUnit {
             newPersonId++;
         }
         if (members.isEmpty() || target==null)
-            throw new RuntimeException("failed to clone members");
-        for (Map obs : members) {
-            replaceId(true, idKey, obs, "idpartner");
-            replaceId(false, idKey, obs, "idfather");
-            replaceId(false, idKey, obs, "idmother");
+            fail = 1;
+        if (fail==0) {
+
+            for (Map obs : members) {
+                if (replaceId(idKey, obs, "idpartner")) {
+                    replaceId(idKey, obs, "idfather");
+                    replaceId(idKey, obs, "idmother");
+                } else {
+                    fail = 1;
+                }
+            }
+            if (fail==0) {
+                for (Map obs : members) {
+                    getLong(obs, "idperson");
+                    getLong(obs, "idpartner");
+                    getLong(obs, "idmother");
+                    getLong(obs, "idfather");
+                }
+            }
         }
-        for (Map obs : members) {
-            getLong(obs, "idperson");
-            getLong(obs, "idpartner");
-            getLong(obs, "idmother");
-            getLong(obs, "idfather");
-        }
-        long[] result = {newHouseholdId, newPersonId};
+        long[] result = {newHouseholdId, newPersonId, fail};
         return result;
     }
-    private void replaceId(boolean flagError, Map idKey, Map obs, String name) {
+    private boolean replaceId(Map idKey, Map obs, String name) {
 
+        boolean pass = true;
         long idchk = getLong(obs,name);
         if (idchk!=0) {
             Double val = (Double)idKey.get(idchk);
             if (val==null) {
-                if (flagError)
-                    throw new RuntimeException("failed to clone members");
-                else
-                    val = 0.0;
+                pass = false;
+                val = 0.0;
             }
             obs.replace(name, val);
         }
+        return pass;
     }
     private long[] findTargetHouseholdId(long idTarget, InputDataSet dataSet) {
 

@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 /**
@@ -57,6 +58,7 @@ public class InputDataSet {
         File chk = new File(directory);
         if (!chk.exists()) chk.mkdir();
         String filePath = directory + File.separator + fileName;
+        safeDelete(filePath);
 
         Writer writer = new FileWriter(filePath);
         CSVFormat csvFormat = CSVFormat.TDF.builder().setHeader(variables).build();
@@ -75,6 +77,17 @@ public class InputDataSet {
         }
         writer.flush();
         writer.close();
+    }
+    private static void safeDelete(String filePath) {
+        File file = new File(filePath);
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     public double getMaxValue(String variable) {
 

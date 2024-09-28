@@ -1,6 +1,8 @@
-package simpaths.data;
+package simpaths.data.startingpop;
 
+import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -9,16 +11,44 @@ import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import simpaths.data.FormattedDialogBox;
+import simpaths.data.Parameters;
 import simpaths.model.enums.Country;
 import simpaths.model.enums.Region;
 
-public class SQLdataParser {
+import javax.swing.*;
+
+public class DataParser {
 
 	public static void createDatabaseForPopulationInitialisationByYearFromCSV(Country country, String initialInputFilename, int startYear, int endYear, Connection conn) {
 
+		//Initialise repository table for country-year-population size combinations
+		initialiseRepository(conn, startYear);
+
 		//Construct tables for Simulated Persons & Households (initial population)
 		for (int year = startYear; year <= endYear; year++) {
-			SQLdataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+			DataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+		}
+	}
+
+	private static void initialiseRepository(Connection conn, int startYear) {
+
+		Statement stat = null;
+		try {
+			stat = conn.createStatement();
+			stat.execute( "DROP TABLE IF EXISTS processed CASCADE;");
+			stat.execute( "CREATE TABLE processed (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, COUNTRY VARCHAR_IGNORECASE DEFAULT 'UK', START_YEAR INT DEFAULT " + startYear + ", POP_SIZE INT DEFAULT 0);");
+		} catch(Exception e){
+			//	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				if(stat != null)
+					stat.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -37,31 +67,28 @@ public class SQLdataParser {
 		Set<String> inputBenefitUnitColumnNamesSet = new LinkedHashSet<String>(Arrays.asList(Parameters.BENEFIT_UNIT_VARIABLES_INITIAL));
 		Set<String> inputHouseholdColumnNameSet = new LinkedHashSet<>(Arrays.asList(Parameters.HOUSEHOLD_VARIABLES_INITIAL));
 
+		//FLAG to switch off identification of primary and foreign keys to improve read performance
+		//setting this to false reduces load times of survey data from 5.5 to 4 minutes
+		//the improvement in performance is sacrificed to benefit from checks of internal consistency of the data
+		final boolean PROCESS_KEY_IDENTIFICATION = true;
+
 		Statement stat = null;
 		try {
 			stat = conn.createStatement();
 			stat.execute(
 				//SQL statements creating database tables go here
 				//Refresh table
-				"DROP TABLE IF EXISTS " + inputFileName + ";"
+				"DROP TABLE IF EXISTS " + inputFileName + " CASCADE;"
 				+ "CREATE TABLE " + inputFileName + " AS SELECT * FROM CSVREAD(\'" + inputFileLocation + "\');"
-				+ "DROP TABLE IF EXISTS " + personTable + ";"
+				+ "DROP TABLE IF EXISTS " + personTable + " CASCADE;"
 				+ "CREATE TABLE " + personTable + " AS (SELECT " + stringAppender(inputPersonColumnNamesSet) + " FROM " + inputFileName + ");"
-				//Add id column
+
+				//Add panel entity key
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idperson RENAME TO id;"
-				//Add rest of PanelEntityKey
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-
-				//Rename EUROMOD variables
-				//Age of partner
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN dagsp RENAME TO age_partner;"
-
-				//Reclassify EUROMOD variables - may need to change data structure type otherwise SQL conversion error, so create new column of the correct type, map data from old column and drop old column
-				//Country
-				+ "ALTER TABLE " + personTable + " ADD country VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET country = \'" + country + "\' WHERE dct = " + country.getEuromodCountryCode() + ";"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dct;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN working_id INT DEFAULT 0;"
 
 				//Health
 				+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
@@ -72,16 +99,6 @@ public class SQLdataParser {
 				+ "UPDATE " + personTable + " SET health = 'Excellent' WHERE dhe = 5;"
 				+ "ALTER TABLE " + personTable + " DROP COLUMN dhe;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN health RENAME TO dhe;"
-
-				+ "ALTER TABLE " + personTable + " ADD healthsp VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET healthsp = 'Poor' WHERE dhesp = 1;"
-				+ "UPDATE " + personTable + " SET healthsp = 'Fair' WHERE dhesp = 2;"
-				+ "UPDATE " + personTable + " SET healthsp = 'Good' WHERE dhesp = 3;"
-				+ "UPDATE " + personTable + " SET healthsp = 'VeryGood' WHERE dhesp = 4;"
-				+ "UPDATE " + personTable + " SET healthsp = 'Excellent' WHERE dhesp = 5;"
-				+ "UPDATE " + personTable + " SET healthsp = NULL WHERE dhesp = 0;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dhesp;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN healthsp RENAME TO dhesp;"
 
 				//Education
 				+ "ALTER TABLE " + personTable + " ADD education VARCHAR_IGNORECASE;"
@@ -108,16 +125,6 @@ public class SQLdataParser {
 				+ "UPDATE " + personTable + " SET education_father = 'High' WHERE dehf_c3 = 1;"
 				+ "ALTER TABLE " + personTable + " DROP COLUMN dehf_c3;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN education_father RENAME TO dehf_c3;"
-
-				//Education partner
-				+ "ALTER TABLE " + personTable + " ADD education_partner VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET education_partner = 'Low' WHERE dehsp_c3 = 3;"
-				+ "UPDATE " + personTable + " SET education_partner = 'Medium' WHERE dehsp_c3 = 2;"
-				+ "UPDATE " + personTable + " SET education_partner = 'High' WHERE dehsp_c3 = 1;"
-				//Note: Have to consider missing values as for single persons partner's education is undefined
-				+ "UPDATE " + personTable + " SET education_partner = null WHERE dehsp_c3 = -9;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dehsp_c3;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN education_partner RENAME TO dehsp_c3;"
 
 				//In education dummy (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD education_in VARCHAR_IGNORECASE;"
@@ -153,52 +160,6 @@ public class SQLdataParser {
 				+ "ALTER TABLE " + personTable + " DROP COLUMN les_c4;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status RENAME TO les_c4;"
 
-				//Partner's Labour Market Economic Status
-				+ "ALTER TABLE " + personTable + " ADD activity_status_partner VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET activity_status_partner = 'EmployedOrSelfEmployed' WHERE lessp_c4 = 1;"
-				+ "UPDATE " + personTable + " SET activity_status_partner = 'Student' WHERE lessp_c4 = 2;"
-				+ "UPDATE " + personTable + " SET activity_status_partner = 'NotEmployed' WHERE lessp_c4 = 3;"
-				+ "UPDATE " + personTable + " SET activity_status_partner = 'Retired' WHERE lessp_c4 = 4;"
-
-				//Null values because not everyone has a partner
-				+ "UPDATE " + personTable + " SET activity_status_partner = null WHERE lessp_c4 = -9;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN lessp_c4;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status_partner RENAME TO lessp_c4;"
-
-				//Own and partner's Labour Market Economic Status
-				+ "ALTER TABLE " + personTable + " ADD activity_status_couple VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET activity_status_couple = 'BothEmployed' WHERE lesdf_c4 = 1;"
-				+ "UPDATE " + personTable + " SET activity_status_couple = 'EmployedSpouseNotEmployed' WHERE lesdf_c4 = 2;"
-				+ "UPDATE " + personTable + " SET activity_status_couple = 'NotEmployedSpouseEmployed' WHERE lesdf_c4 = 3;"
-				+ "UPDATE " + personTable + " SET activity_status_couple = 'BothNotEmployed' WHERE lesdf_c4 = 4;"
-
-				//Null values because not everyone has a partner
-				+ "UPDATE " + personTable + " SET activity_status_couple = null WHERE lesdf_c4 = -9;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN lesdf_c4;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status_couple RENAME TO lesdf_c4;"
-
-				//Partnership status
-				+ "ALTER TABLE " + personTable + " ADD partnership_status VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET partnership_status = 'Partnered' WHERE dcpst = 1;"
-				+ "UPDATE " + personTable + " SET partnership_status = 'SingleNeverMarried' WHERE dcpst = 2;"
-				+ "UPDATE " + personTable + " SET partnership_status = 'PreviouslyPartnered' WHERE dcpst = 3;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dcpst;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN partnership_status RENAME TO dcpst;"
-
-				//Enter partnership dummy (to be used with Indicator enum when defined in Person class)
-				+ "ALTER TABLE " + personTable + " ADD partnership_enter VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET partnership_enter = 'False' WHERE dcpen = 0;"
-				+ "UPDATE " + personTable + " SET partnership_enter = 'True' WHERE dcpen = 1;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dcpen;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN partnership_enter RENAME TO dcpen;"
-
-				//Exit partnership dummy (to be used with Indicator enum when defined in Person class)
-				+ "ALTER TABLE " + personTable + " ADD partnership_exit VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET partnership_exit = 'False' WHERE dcpex = 0;"
-				+ "UPDATE " + personTable + " SET partnership_exit = 'True' WHERE dcpex = 1;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dcpex;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN partnership_exit RENAME TO dcpex;"
-
 				//DEMOGRAPHIC: Long-term sick or disabled (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD sick_longterm VARCHAR_IGNORECASE;"
 				+ "UPDATE " + personTable + " SET sick_longterm = 'False' WHERE dlltsd = 0;"
@@ -219,24 +180,6 @@ public class SQLdataParser {
 				+ "UPDATE " + personTable + " SET education_left = 'True' WHERE sedex = 1;"
 				+ "ALTER TABLE " + personTable + " DROP COLUMN sedex;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN education_left RENAME TO sedex;" //Getting data conversion error trying to directly change values of sedex
-
-				//SYSTEM: In same-sex partnership (to be used with Indicator enum when defined in Person class)
-				+ "ALTER TABLE " + personTable + " ADD partnership_samesex VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET partnership_samesex = 'False' WHERE ssscp = 0;"
-				+ "UPDATE " + personTable + " SET partnership_samesex = 'True' WHERE ssscp = 1;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN ssscp;"
-
-				//SYSTEM: Women in fertility range (to be used with Indicator enum when defined in Person class)
-				+ "ALTER TABLE " + personTable + " ADD women_fertility VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET women_fertility = 'False' WHERE sprfm = 0;"
-				+ "UPDATE " + personTable + " SET women_fertility = 'True' WHERE sprfm = 1;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN sprfm;"
-
-				//SYSTEM: In educational age range (to be used with Indicator enum when defined in Person class)
-				+ "ALTER TABLE " + personTable + " ADD education_inrange VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET education_inrange = 'False' WHERE sedag = 0;"
-				+ "UPDATE " + personTable + " SET education_inrange = 'True' WHERE sedag = 1;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN sedag;"
 
 				//Adult child flag:
 				+ "ALTER TABLE " + personTable + " ADD adult_child VARCHAR_IGNORECASE;"
@@ -269,26 +212,38 @@ public class SQLdataParser {
 
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN lhw RENAME TO " + Parameters.HOURS_WORKED_WEEKLY + ";"
 				+ "ALTER TABLE " + personTable + " ADD work_sector VARCHAR_IGNORECASE DEFAULT 'Private_Employee';"		//Here we assume by default that people are employed - this is because the MultiKeyMaps holding households have work_sector as a key, and cannot handle null values for work_sector. TODO: Need to check that this assumption is OK.
-				+ "UPDATE " + personTable + " SET idpartner = null WHERE idpartner = -9;"
 				+ "UPDATE " + personTable + " SET idmother = null WHERE idmother = -9;"
 				+ "UPDATE " + personTable + " SET idfather = null WHERE idfather = -9;"
 
 				//Rename idbenefitunit to BU_ID
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO " + Parameters.BENEFIT_UNIT_VARIABLE_NAME + ";"
-
-				//Id of the household is loaded from the input population without any modification as idhh
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO buid;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN butime INT DEFAULT " + startyear + ";"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN burun INT DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ADD COLUMN prid INT DEFAULT 0;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 
 				//Re-order by id
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"
 			);
 
-			//Create benefitUnit table
-			stat.execute(
-				"DROP TABLE IF EXISTS " + benefitUnitTable + ";"
-				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
-				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
-				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+			if (PROCESS_KEY_IDENTIFICATION) {
+				stat.execute(
+						"ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ALTER COLUMN working_id INT NOT NULL;"
+							+ "ALTER TABLE " + personTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				);
+			}
 
+			// CREATE BENEFITUNIT TABLE
+			stat.execute(
+				"DROP TABLE IF EXISTS " + benefitUnitTable + " CASCADE;"
+				+ "CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
+				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idhh RENAME TO hhid;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhtime INT DEFAULT " + startyear + ";"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhrun INT DEFAULT 0;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN prid INT DEFAULT 0;"
 				+ "ALTER TABLE " + benefitUnitTable + " ADD region VARCHAR_IGNORECASE;"
 			);
 
@@ -302,15 +257,6 @@ public class SQLdataParser {
 
 			stat.execute(
 				"ALTER TABLE " + benefitUnitTable + " DROP COLUMN drgn1;"
-
-				//BenefitUnit composition
-				+ "ALTER TABLE " + benefitUnitTable + " ADD household_composition VARCHAR_IGNORECASE;"
-				+ "UPDATE " + benefitUnitTable + " SET household_composition = 'CoupleNoChildren' WHERE dhhtp_c4 = 1;"
-				+ "UPDATE " + benefitUnitTable + " SET household_composition = 'CoupleChildren' WHERE dhhtp_c4 = 2;"
-				+ "UPDATE " + benefitUnitTable + " SET household_composition = 'SingleNoChildren' WHERE dhhtp_c4 = 3;"
-				+ "UPDATE " + benefitUnitTable + " SET household_composition = 'SingleChildren' WHERE dhhtp_c4 = 4;"
-				+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN dhhtp_c4;"
-				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN household_composition RENAME TO dhhtp_c4;"
 
 				//INCOME: BenefitUnit income - quintiles
 				+ "ALTER TABLE " + benefitUnitTable + " ADD household_income_qtiles VARCHAR_IGNORECASE;"
@@ -334,8 +280,11 @@ public class SQLdataParser {
 				+ "UPDATE " + benefitUnitTable + " SET tot_pen = 0.0 WHERE tot_pen = -9.0;"
 				+ "UPDATE " + benefitUnitTable + " SET nvmhome = 0.0 WHERE nvmhome = -9.0;"
 
-				//Rename id column
+				//Add panel entity key
 				+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idbenefitunit RENAME TO id;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
+				+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN working_id INT DEFAULT 0;"
 
 				//Re-order by id
 				+ "SELECT * FROM " + benefitUnitTable + " ORDER BY id;"
@@ -343,27 +292,61 @@ public class SQLdataParser {
 
 			//Remove duplicate rows
 			stat.execute(
-				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + " ORDER BY ID;"
+				"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + benefitUnitTable + ";"
 				+ "DROP TABLE IF EXISTS " + benefitUnitTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + benefitUnitTable + ";"
 			);
 
-			//Create household table
+			if (PROCESS_KEY_IDENTIFICATION) {
+				stat.execute(
+						"ALTER TABLE " + benefitUnitTable + " ALTER COLUMN id BIGINT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN working_id INT NOT NULL;"
+								+ "ALTER TABLE " + benefitUnitTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				);
+			}
+
+			// CREATE HOUSEHOLD TABLE
 			stat.execute(
 					"DROP TABLE IF EXISTS " + householdTable + ";"
 							+ "CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
+							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 							+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
-							+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
+							+ "ALTER TABLE " + householdTable + " ADD COLUMN working_id INT DEFAULT 0;"
 							+ "SELECT * FROM " + householdTable + " ORDER BY id;"
+
 			);
 
 			//Remove duplicate rows
 			stat.execute(
-					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + " ORDER BY ID;"
+					"CREATE TABLE NEW AS SELECT DISTINCT * FROM " + householdTable + ";"
 				+ "DROP TABLE IF EXISTS " + householdTable + ";"
 				+ "ALTER TABLE NEW RENAME TO " + householdTable + ";"
 			);
+
+			if (PROCESS_KEY_IDENTIFICATION) {
+
+				stat.execute(
+						"ALTER TABLE " + householdTable + " ALTER COLUMN id BIGINT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_time INT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN simulation_run INT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN working_id INT NOT NULL;"
+								+ "ALTER TABLE " + householdTable + " ADD PRIMARY KEY (id, simulation_time, simulation_run, working_id);"
+				);
+			}
+
+			//Set-up foreign keys
+			if (PROCESS_KEY_IDENTIFICATION) {
+
+				stat.execute(
+						"ALTER TABLE " + benefitUnitTable + " ADD FOREIGN KEY (hhid, hhtime, hhrun, prid) REFERENCES "
+								+ householdTable + " (id, simulation_time, simulation_run, working_id);"
+								+ "ALTER TABLE " + personTable + " ADD FOREIGN KEY (buid, butime, burun, prid) REFERENCES "
+								+ benefitUnitTable + " (id, simulation_time, simulation_run, working_id);"
+				);
+			}
 
 			stat.execute("DROP TABLE IF EXISTS " + inputFileName + ";");
 
@@ -395,4 +378,61 @@ public class SQLdataParser {
 		return sb.toString();
 	}
 
+
+
+	/**
+	 *
+	 * GENERATE DATABASE TABLES TO INITIALISE SIMULATED POPULATION CROSS-SECTION FROM CSV FILES
+	 * @param country
+	 *
+	 */
+	public static void databaseFromCSV(Country country, boolean showGui) {
+
+		String title = "Building database tables for starting populations";
+		JFrame databaseFrame = null;
+		if (showGui) {
+			// display a dialog box to let the user know what is happening
+			String text = "<html><h2 style=\"text-align: center; font-size:120%; padding: 10pt\">"
+					+ "Building database tables to initialise simulated population cross-section for " + country.getCountryName()
+					+ "</h2></html>";
+
+			databaseFrame = FormattedDialogBox.create(title, text, 800, 120, null, false, false, showGui);
+		}
+		System.out.println(title);
+
+		// start work
+		Connection conn = null;
+		try {
+			Class.forName("org.h2.Driver");
+			conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+
+			Parameters.setPopulationInitialisationInputFileName("population_initial_" + country.toString());
+
+			//This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
+			DataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
+
+			conn.close();
+		}
+		catch(ClassNotFoundException|SQLException e){
+			if(e instanceof ClassNotFoundException) {
+				System.out.println( "ERROR: Class not found: " + e.getMessage() + "\nCheck that the input.h2.db "
+						+ "exists in the input folder.  If not, unzip the input.h2.zip file and store the resulting "
+						+ "input.h2.db in the input folder!\n");
+			}
+			else {
+				throw new IllegalArgumentException("SQL Exception thrown! " + e.getMessage());
+			}
+		}
+		finally {
+			try {
+				if (conn != null) { conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// remove message box
+		if (databaseFrame != null)
+			databaseFrame.setVisible(false);
+	}
 }
