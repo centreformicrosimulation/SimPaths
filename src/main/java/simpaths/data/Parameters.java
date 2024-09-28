@@ -3,9 +3,12 @@ package simpaths.data;
 
 // import Java packages
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 // import plug-in packages
+import simpaths.data.startingpop.DataParser;
 import simpaths.model.AnnuityRates;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
@@ -25,6 +28,7 @@ import microsim.statistics.regression.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.decisions.Grids;
 import simpaths.model.taxes.MatchFeature;
+import simpaths.model.taxes.database.TaxDonorDataParser;
 
 
 /**
@@ -3239,5 +3243,34 @@ public class Parameters {
         if (val==null)
             throw new RuntimeException("value undefined for getFertilityRateByYear in year " + year);
         return val;
+    }
+
+    public static void databaseSetup(Country country, boolean executeWithGui, int startYear) {
+
+        // remove database file if it exists
+        String filePath = "./input" + File.separator + "input.mv.db";
+        safeDelete(filePath);
+
+        // populate new database for starting data
+        DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+
+        // populate new database for tax donors
+        String taxDonorInputFilename = "tax_donor_population_" + country;
+        Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
+        Parameters.loadTimeSeriesFactorForTaxDonor(country);
+        TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
+        TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables from csv data
+        TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
+    }
+    private static void safeDelete(String filePath) {
+        File file = new File(filePath);
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

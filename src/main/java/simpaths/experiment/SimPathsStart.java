@@ -211,10 +211,6 @@ public class SimPathsStart implements ExperimentBuilder {
 		if (testList.size()==0)
 			Parameters.setTrainingFlag(true);
 
-		// set country donor input file
-		String taxDonorInputFilename = "tax_donor_population_" + country;
-		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
-
 		// Create EUROMODPolicySchedule input from files
 		if (!rewritePolicySchedule &&
 				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
@@ -233,14 +229,9 @@ public class SimPathsStart implements ExperimentBuilder {
 		// load uprating factors
 		Parameters.loadTimeSeriesFactorMaps(country);
 		Parameters.instantiateAlignmentMaps();
-		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, showGui);
 
-		// Create initial and donor population database tables
-		DataParser.databaseFromCSV(country, showGui);
-		TaxDonorDataParser.databaseFromCSV(country, startYear, false);
-		Parameters.loadTimeSeriesFactorForTaxDonor(country);
-		TaxDonorDataParser.populateDonorTaxUnitTables(country, showGui);
-
+		// set-up database
+		Parameters.databaseSetup(country, showGui, startYear);
 	}
 
 	public static void writePolicyScheduleExcelFile() {

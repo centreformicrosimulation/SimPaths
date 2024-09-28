@@ -8,12 +8,9 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
 import java.util.Map;
 
 import simpaths.data.Parameters;
-import simpaths.data.startingpop.DataParser;
-import simpaths.model.taxes.database.TaxDonorDataParser;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
@@ -94,7 +91,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 		if (flagDatabaseSetup) {
 
-			databaseSetup();
+			Parameters.databaseSetup(country, executeWithGui, startYear);
 		} else {
 			// standard simulation
 
@@ -422,34 +419,5 @@ public class SimPathsMultiRun extends MultiRun {
 	@Override
 	public String setupRunLabel() {
 		return counter.toString();
-	}
-
-	private static void databaseSetup() {
-
-		// remove database file if it exists
-		String filePath = "./input" + File.separator + "input.mv.db";
-		safeDelete(filePath);
-
-		// populate new database for starting data
-		DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
-
-		// populate new database for tax donors
-		String taxDonorInputFilename = "tax_donor_population_" + country;
-		Parameters.setTaxDonorInputFileName(taxDonorInputFilename);
-		Parameters.loadTimeSeriesFactorForTaxDonor(country);
-		TaxDonorDataParser.constructAggregateTaxDonorPopulationCSVfile(country, executeWithGui);
-		TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables from csv data
-		TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
-	}
-	private static void safeDelete(String filePath) {
-		File file = new File(filePath);
-		try {
-			Files.deleteIfExists(file.toPath());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
-			throw e;
-		}
 	}
 }
