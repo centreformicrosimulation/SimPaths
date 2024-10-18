@@ -5,13 +5,18 @@ This enum defines possible states for transitions in the Covid-19 module from fl
 
 */
 
-public enum Les_transitions_FX1 {
-	NotEmployed,
-	SelfEmployed,
-	Employee,
-	FurloughedFull,
-	FurloughedFlex; //Definition of this could be omitted - omitted category would act as the baseline in the multiprobit regression. But specified for clarity.
+public enum Les_transitions_FX1 implements IntegerValuedEnum {
+	NotEmployed(0),
+	SelfEmployed(1),
+	Employee(2),
+	FurloughedFull(3),
+	FurloughedFlex(4); //Definition of this could be omitted - omitted category would act as the baseline in the multiprobit regression. But specified for clarity.
 
+	private final int value;
+	Les_transitions_FX1(int val) { value = val; }
+
+	@Override
+	public int getValue() {return value;}
 	public Les_c7_covid convertToLes_c7_covid() {
 		Les_c7_covid outcome = null;
 		if (this.equals(Les_transitions_FX1.NotEmployed)) {

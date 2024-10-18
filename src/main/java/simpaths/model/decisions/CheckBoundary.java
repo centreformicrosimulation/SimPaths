@@ -1,5 +1,8 @@
 package simpaths.model.decisions;
 
+import simpaths.data.FunctionEvaluation;
+import simpaths.data.IEvaluation;
+
 import java.util.Arrays;
 
 

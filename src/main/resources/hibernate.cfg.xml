@@ -21,5 +21,6 @@
         <mapping class="simpaths.model.taxes.DonorPersonPolicy" />
         <mapping class="simpaths.model.taxes.DonorTaxUnit" />
         <mapping class="simpaths.model.taxes.DonorTaxUnitPolicy" />
+        <mapping class="simpaths.data.startingpop.Processed" />
     </session-factory>
 </hibernate-configuration>

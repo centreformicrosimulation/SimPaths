@@ -5,11 +5,16 @@ This enum defines possible states for transitions in the Covid-19 module from em
 
 */
 
-public enum Les_transitions_U1 {
-	Employee,
-	SelfEmployed,
-	NotEmployed; //Definition of this could be omitted - omitted category would act as the baseline in the multiprobit regression. But specified for clarity.
+public enum Les_transitions_U1 implements IntegerValuedEnum {
+	NotEmployed(0), //Definition of this could be omitted - omitted category would act as the baseline in the multiprobit regression. But specified for clarity.
+	Employee(1),
+	SelfEmployed(2);
 
+	private final int value;
+	Les_transitions_U1(int val) { value = val; }
+
+	@Override
+	public int getValue() {return value;}
 	public Les_c7_covid convertToLes_c7_covid() {
 		Les_c7_covid outcome = null;
 		if (this.equals(Les_transitions_U1.Employee)) {

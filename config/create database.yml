@@ -1,0 +1,71 @@
+# This file can be used to override defaults for multirun arguments.
+# Arguments of the SimPathsMultiRun object overridden by the command-line
+countryString: "United Kingdom"
+maxNumberOfRuns: 1
+executeWithGui: false
+randomSeed: 606
+startYear: 2019
+endYear: 2070
+popSize: 170000
+
+# Arguments passed to the SimPathsModel
+model_args:
+    maxAge: 130
+    fixTimeTrend: true
+    timeTrendStopsIn: 2021
+    timeTrendStopsInMonetaryProcesses: 2021
+    fixRandomSeed: true
+    savingRate: 0.056
+    initialisePotentialEarningsFromDatabase: true
+    useWeights: false
+    ignoreTargetsAtPopulationLoad: false
+    projectMortality: true
+    alignPopulation: true
+    alignFertility: false
+    alignEducation: false
+    alignInSchool: false
+    alignCohabitation: false
+    alignEmployment: false
+    addRegressionStochasticComponent: true
+    fixRegressionStochasticComponent: false
+    labourMarketCovid19On: false
+    projectFormalChildcare: true
+    donorPoolAveraging: true
+    projectSocialCare: true
+    flagSuppressChildcareCosts: false
+    flagSuppressSocialCareCosts: false
+    enableIntertemporalOptimisations: true
+    saveBehaviour: true
+    useSavedBehaviour: false
+    readGrid: "temp"
+    flagDefaultToTimeSeriesAverages: true
+    saveImperfectTaxDBMatches: true
+    employmentOptionsOfPrincipalWorker: 3
+    employmentOptionsOfSecondaryWorker: 3
+    responsesToEducation: true
+    responsesToPension: false
+    responsesToLowWageOffer: true
+    responsesToRetirement: false
+    responsesToHealth: true
+    responsesToDisability: true
+    minAgeForPoorHealth: 45
+    responsesToRegion: false
+
+# Arguments that alter processing of the SimPathsMultiRun object
+innovation_args:
+    randomSeedInnov: false
+    flagDatabaseSetup: true
+    intertemporalElasticityInnov: false
+    labourSupplyElasticityInnov: false
+
+collector_args:
+#    calculateGiniCoefficients: false
+#    exportToDatabase: false
+#    exportToCSV: true
+#    persistStatistics: true
+#    persistStatistics2: true
+#    persistPersons: false
+#    persistBenefitUnits: false
+#    persistHouseholds: false
+#    dataDumpStartTime: 0L
+#    dataDumpTimePeriod: 1.0

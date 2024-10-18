@@ -54,6 +54,8 @@ public class UtilityMaximisation {
         // populate control arrays
         int dim = 0;
         if (expectations.cashOnHand <= DecisionParams.MIN_CONSUMPTION_PER_YEAR) {
+            lowerBounds[dim] = DecisionParams.MIN_CONSUMPTION_PER_YEAR;
+            upperBounds[dim] = DecisionParams.MIN_CONSUMPTION_PER_YEAR;
             target[dim] = DecisionParams.MIN_CONSUMPTION_PER_YEAR;
         } else {
             lowerBounds[dim] = DecisionParams.MIN_CONSUMPTION_PER_YEAR;
@@ -75,7 +77,11 @@ public class UtilityMaximisation {
 
         // pack consumption solution
         dim = 0;
-        controls[dim] = problem.target[dim] / expectations.cashOnHand;
+        if (expectations.cashOnHand < DecisionParams.MIN_CONSUMPTION_PER_YEAR) {
+            controls[dim] = 1.0;
+        } else {
+            controls[dim] = problem.target[dim] / expectations.cashOnHand;
+        }
         dim++;
 
         if (dim != problem.target.length) {

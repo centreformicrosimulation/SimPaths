@@ -38,7 +38,16 @@ public class XLSXfileWriter {
 		try { 
         	//Creates file but checks whether a file with the same filename already exists - if so, overwrite. 
         	File f = new File(filePath);
-        	
+
+			if (!f.exists()) {  // Create new empty workbook if doesn't exist
+        		wb = WorkbookFactory.create(true);
+				wb.createSheet(worksheetName);
+				out = new FileOutputStream(filePath);
+				wb.write(out);
+				wb.close();
+				out.close();
+			}
+
         	if(f.exists()){
         		Path source = FileSystems.getDefault().getPath(directoryName, filename + extension);        		
         		newPath = Files.copy(source, source.resolveSibling(filename + "_bak" + extension), StandardCopyOption.REPLACE_EXISTING);

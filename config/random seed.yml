@@ -1,0 +1,58 @@
+# This file can be used to override defaults for multirun arguments.
+# Arguments of the SimPathsMultiRun object overridden by the command-line
+
+maxNumberOfRuns: 5
+executeWithGui: false
+randomSeed: 12345
+startYear: 2018
+endYear: 2025
+popSize: 75000
+
+# Arguments passed to the SimPathsModel
+model_args:
+#    maxAge: 130
+#    fixTimeTrend: true
+#    timeTrendStopsIn: 2017
+#    fixRandomSeed: true
+#    sIndexTimeWindow: 5
+#    sIndexAlpha: 2
+#    sIndexDelta: 0
+#    savingRate: 0
+#    initialisePotentialEarningsFromDatabase: true
+#    useWeights: false
+#    useSBAMMatching:
+#    projectMortality: true
+#    alignFertility: true
+#    labourMarketCovid19On: false
+#    projectFormalChildcare: true
+#    donorPoolAveraging: true
+#    projectSocialCare: false
+#    enableIntertemporalOptimisations: false
+#    useSavedBehaviour: false
+#    readGrid: "laptop serial"
+#    saveBehaviour: true
+#    employmentOptionsOfPrincipalWorker: 3
+#    employmentOptionsOfSecondaryWorker: 3
+#    responsesToEducation: true
+#    responsesToRetirement: false
+#    responsesToHealth: true
+#    responsesToDisability: false
+#    minAgeForPoorHealth: 50
+#    responsesToRegion: false
+
+# Arguments that alter processing of the SimPathsMultiRun object
+innovation_args:
+#  randomSeedInnov: false
+#  intertemporalElasticityInnov: true
+
+collector_args:
+#    calculateGiniCoefficients: false
+#    exportToDatabase: false
+#    exportToCSV: true
+#    persistStatistics: true
+#    persistStatistics2: true
+#    persistPersons: false
+#    persistBenefitUnits: false
+#    persistHouseholds: false
+#    dataDumpStartTime: 0L
+#    dataDumpTimePeriod: 1.0

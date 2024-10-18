@@ -23,9 +23,6 @@ import javax.swing.JTextPane;
  */
 public class FormattedDialogBoxNonStatic {
 
-	// variables used in multiple methods
-	private boolean skip = false;
-
 
 	/**
 	 *
@@ -38,7 +35,7 @@ public class FormattedDialogBoxNonStatic {
 	 * @param modal
 	 *
 	 */
-	public FormattedDialogBoxNonStatic(String title, String text, int width, int height, JComponent component, boolean modal, boolean keepExistingButton) {
+	public FormattedDialogBoxNonStatic(String title, String text, int width, int height, JComponent component, boolean modal) {
 		
 		// create dialog box
 		JFrame frame = new JFrame();
@@ -72,23 +69,10 @@ public class FormattedDialogBoxNonStatic {
 			}
 		});
 
-		// add button to use existing policy scenario
-		JButton skipButton = new JButton("Keep existing Policy Schedule");
-		skipButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				skip = true;
-				dialog.setVisible(false);
-				dialog.dispose();
-			}
-		});
-
 		// add content to dialog box
 		JPanel dialogPanel = new JPanel();
 		if (component != null) dialogPanel.add(component);
 		dialogPanel.add(updateButton);
-		if (keepExistingButton) { // Only show "keep existing policy schedule" button if EM schedule builder not called as part of the rebuild of all databases
-			dialogPanel.add(skipButton);
-		}
 		dialogPanel.setBorder(BorderFactory.createEmptyBorder(20,20,70,20));
 
 		// complete construction
@@ -106,16 +90,5 @@ public class FormattedDialogBoxNonStatic {
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dialog.setVisible(true);
 		dialog.setAlwaysOnTop(true);
-	}
-
-
-	/**
-	 *
-	 * METHOD TO RETURN FLAG IF EXISTING POLICY SCENARIO HAS BEEN SELECTED
-	 * @return
-	 *
-	 */
-	public boolean isSkip() {
-		return skip;
 	}
 }

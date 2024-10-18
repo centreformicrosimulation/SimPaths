@@ -434,11 +434,11 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					Set<JInternalFrame> populationPyramidPlots = new LinkedHashSet<JInternalFrame>();
 					Weighted_PyramidPlotter populationAgeGenderPlotter = new Weighted_PyramidPlotter();
 					// Please note that the Pyramid plotter requires a Weighted_CrossSection.Double[2]
-					Weighted_CrossSection.Double[] populationData = new Weighted_CrossSection.Double[2];
-					Weighted_CrossSection.Double maleAgesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer[] populationData = new Weighted_CrossSection.Integer[2];
+					Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
 					maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
 					populationData[0] = maleAgesCS;
-					Weighted_CrossSection.Double femaleAgesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
 					femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female));
 					populationData[1] = femaleAgesCS;
 
@@ -753,13 +753,13 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				int colorCounter = 0;
 			    for(Region region: Parameters.getCountryRegions()) {
 					RegionCSfilter regionFilter = new RegionCSfilter(region);
-					Weighted_CrossSection.Integer regionCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleOccupancy", true);
+					Weighted_CrossSection.Integer regionCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleDummy", true);
 					regionCS.setFilter(regionFilter);
 					houseCompositionRegionPlotter.addSeries(region.getName(), new Weighted_MeanArrayFunction(regionCS), null, colorArrayList.get(colorCounter), false);		//'yo' means "years old"
 					houseCompositionRegionPlotter.addSeries("Validation "+region.getName(), validator, Validator.DoublesVariables.valueOf("partneredShare_"+region), colorArrayList.get(colorCounter), true);
 					colorCounter++;
 			    }		    
-			    Weighted_CrossSection.Integer coupleCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleOccupancy", true);
+			    Weighted_CrossSection.Integer coupleCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getCoupleDummy", true);
 			    houseCompositionRegionPlotter.addSeries("national", new Weighted_MeanArrayFunction(coupleCS), null, colorArrayList.get(colorCounter), false);		//'yo' means "years old"
 				houseCompositionRegionPlotter.addSeries("Validation national", validator, Validator.DoublesVariables.valueOf("partneredShare_All"), colorArrayList.get(colorCounter), true);
 			    houseCompositionRegionPlotter.setName("Cohabitation status");
@@ -769,7 +769,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			    /*
 			    //Add a graph showing share of individuals with a partner:
 				TimeSeriesSimulationPlotter personsWithPartnerPlotter = new TimeSeriesSimulationPlotter("Share of individuals with partner", "");
-				Weighted_CrossSection.Integer personsWithPartner = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getCoupleOccupancy", true);
+				Weighted_CrossSection.Integer personsWithPartner = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getCoupleDummy", true);
 				personsWithPartnerPlotter.addSeries("Share of persons with partner", new Weighted_MeanArrayFunction(personsWithPartner));
 				personsWithPartnerPlotter.setName("Share of persons with partner");
 				updateChartSet.add(personsWithPartnerPlotter);
@@ -787,9 +787,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				toBePartneredFemales.setFilter(new GenderCSfilter(Gender.Female));
 				cohabitationDesireByGender.addSeries("Males", new Weighted_SumArrayFunction.Integer(toBePartneredMales), null, colorArrayList.get(0), false);
 				cohabitationDesireByGender.addSeries("Females", new Weighted_SumArrayFunction.Integer(toBePartneredFemales), null, colorArrayList.get(1), false);
-			//	cohabitationDesireByGender.addSeries("Total matches", model, "getAllMatches", true);
-				cohabitationDesireByGender.addSeries("Year matches", model, "getYearMatches", true);
-				cohabitationDesireByGender.addSeries("Total unmatched", model, "getUnmatchedSize", true);
 				cohabitationDesireByGender.setName("Individuals looking for partner");
 				updateChartSet.add(cohabitationDesireByGender);
 				tabSet.add(cohabitationDesireByGender);
@@ -1202,7 +1199,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				int colorCounter = 0;
 				for(Education edu: Education.values()) {
 					FlexibleInLabourSupplyByEducationFilter eduFilter = new FlexibleInLabourSupplyByEducationFilter(edu);
-					Weighted_CrossSection.Double supplyCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getLabourSupplyYearly", true);
+					Weighted_CrossSection.Double supplyCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getLabourSupplyHoursYearly", true);
 					supplyCS.setFilter(eduFilter);
 					supplyPlotter.addSeries(edu.toString(), new Weighted_MeanArrayFunction(supplyCS), null, colorArrayList.get(colorCounter), false);
 					supplyPlotter.addSeries("Validation " + edu.toString(), validator, Validator.DoublesVariables.valueOf("labour_supply_"+edu), colorArrayList.get(colorCounter), true);
@@ -1291,7 +1288,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				hoursOfWorkByGenderPlotter = new TimeSeriesSimulationPlotter("Hours of Work Weekly by Gender", "Hours");
 				for (Gender gender : Gender.values()) {
 					GenderWorkingCSfilter genderWorkingFilter = new GenderWorkingCSfilter(gender);
-					Weighted_CrossSection.Double hoursCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyWeeklyHours", true); // Note: these are nominal values for each simulated year
+					Weighted_CrossSection.Double hoursCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDoubleLabourSupplyHoursWeekly", true); // Note: these are nominal values for each simulated year
 					hoursCS.setFilter(genderWorkingFilter);
 					hoursOfWorkByGenderPlotter.addSeries(gender.toString(), new Weighted_MeanArrayFunction(hoursCS), null, colorArrayList.get(colorCounter), false);
 					hoursOfWorkByGenderPlotter.addSeries("Validation " + gender, validator, Validator.DoublesVariables.valueOf("lhw_"+ gender), colorArrayList.get(colorCounter), true);
@@ -1452,22 +1449,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				updateChartSet.add(DispIncByGenderAndEducationPlotter);
 				tabSet.add(DispIncByGenderAndEducationPlotter);
 			}
-
-			if (incomeHistograms) {
-				/*
-				Note that the variable isDisposableIncomeMonthlyImputedFlag is set to false at the beginning of each year, so this statistic reflects imputations done in a given year
-				 */
-				TimeSeriesSimulationPlotter ratioVsImputedConversionPlotter;
-				int colorCounter = 0;
-				ratioVsImputedConversionPlotter = new TimeSeriesSimulationPlotter("Share of BUs with imputed income", "Share");
-				Weighted_CrossSection.Double imputedCS = new Weighted_CrossSection.Double(model.getBenefitUnits(), BenefitUnit.class, "isDisposableIncomeMonthlyImputedFlag", true);
-				ratioVsImputedConversionPlotter.addSeries("Share imputed", new Weighted_MeanArrayFunction(imputedCS), null, colorArrayList.get(colorCounter), false);
-				colorCounter++;
-				ratioVsImputedConversionPlotter.setName("Share of BUs with imputed income");
-				updateChartSet.add(ratioVsImputedConversionPlotter);
-				tabSet.add(ratioVsImputedConversionPlotter);
-			}
-
 
 		    if (securityIndex) {
 

@@ -1,15 +1,16 @@
 package simpaths.model.enums;
 
-public enum Education implements DoubleValuedEnum {
+public enum Education implements IntegerValuedEnum {
 	
-	Low(0.0),
-	Medium(1.0),
-	High(2.0);
-	private final double value;
-	Education(double val) {value=val;}
+	Low(0),
+	Medium(1),
+	High(2);
+	private final int value;
+	Education(int val) {value=val;}
+
 	@Override
-	public double getValue() {return value;}
-	Education getCode(int val) {
+	public int getValue() {return value;}
+	public static Education getCode(int val) {
 		if (val == 0)
 			return Education.Low;
 		else if (val == 1)

@@ -9,8 +9,9 @@ import simpaths.model.enums.Region;
 
 public class FertileFilter<T extends Person> implements Predicate<T> {
 	
-	private Region region;
-	
+	private Region region = null;
+
+	public FertileFilter() {}
 	public FertileFilter(Region region) {
 		super();
 		this.region = region;
@@ -20,15 +21,14 @@ public class FertileFilter<T extends Person> implements Predicate<T> {
 	public boolean evaluate(T agent) {
 		
 		int age = agent.getDag();
-		
-		return (( agent.getDgn().equals(Gender.Female)) &&
-				( agent.getRegion().equals(region)) &&
+		boolean fertile = false;
+		if ( (agent.getDgn().equals(Gender.Female)) &&
+				( region==null || agent.getRegion().equals(region)) &&
 //				( !agent.getLes_c3().equals(Les_c4.Student) || agent.isToLeaveSchool() ) &&	//2 processes for fertility, for those in and out of education - specified in alignment
 				( age >= Parameters.MIN_AGE_MATERNITY ) &&
 				( age <= Parameters.MAX_AGE_MATERNITY ) &&
-				( agent.getPartner() != null)						//This is an additional restriction in the SimPaths model
-				);
+				( ( agent.getPartner() != null)	|| (Parameters.FLAG_SINGLE_MOTHERS) ) )
+			fertile = true;
+		return fertile;
 	}
-
-
 }

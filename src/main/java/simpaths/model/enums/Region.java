@@ -1,6 +1,6 @@
 package simpaths.model.enums;
 
-public enum Region {		
+public enum Region implements IntegerValuedEnum {
 	
 	//Uses NUTS Level 1 system for each country
 	
@@ -15,7 +15,7 @@ public enum Region {
 	//UK									//Name							//EUROMOD drgn1 value
 	UKC("North East", 1),					//North East					//1
 	UKD("North West", 2),					//North West					//2
-	UKE("Yorkshire and the Humber", 4),		//Yorkshire and the Humber		//4		//Note, there is no 3 in the definition!
+	UKE("Yorkshire and the Humber", 4),	//Yorkshire and the Humber		//4		//Note, there is no 3 in the definition!
 	UKF("East Midlands", 5),				//East Midlands					//5
 	UKG("West Midlands", 6),				//West Midlands					//6
 	UKH("East of England", 7),				//East of England				//7
@@ -51,23 +51,21 @@ public enum Region {
 
 	
 	private final String name;
-	private final int drgn1EUROMODvariable;
+	private final int value;
 
-    private Region(String name, int drgn1EUROMODvariable)
+    Region(String name, int drgn1EUROMODvariable)
     {
         this.name = name;
-        this.drgn1EUROMODvariable = drgn1EUROMODvariable;
+        this.value = drgn1EUROMODvariable;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
-    
-    public int getDrgn1EUROMODvariable()
-    {
-        return drgn1EUROMODvariable;
-    }
 
-	
+	@Override
+    public int getValue()
+    {
+        return value;
+    }
 }

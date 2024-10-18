@@ -1,5 +1,7 @@
 package simpaths.model.decisions;
 
+import simpaths.data.Parameters;
+
 import java.security.InvalidParameterException;
 
 
@@ -39,10 +41,10 @@ public class Grids {
         /*
          * INITIALISE GRID VECTORS
          */
-        long gridSize = scale.gridDimensions[scale.simLifeSpan -1][3] + scale.gridDimensions[scale.simLifeSpan -1][2];
+        long gridSize = scale.gridDimensions[scale.simLifeSpan-1][3] + scale.gridDimensions[scale.simLifeSpan-1][2];
         valueFunction = new Grid(scale, gridSize);
         consumption = new Grid(scale, gridSize);
-        gridSize = scale.gridDimensions[DecisionParams.maxAgeFlexibleLabourSupply - simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE + 1][3];
+        gridSize = scale.gridDimensions[DecisionParams.maxAgeFlexibleLabourSupply - Parameters.AGE_TO_BECOME_RESPONSIBLE + 1][3];
         if (DecisionParams.FLAG_IO_EMPLOYMENT1) employment1 = new Grid(scale, gridSize);
         if (DecisionParams.FLAG_IO_EMPLOYMENT2) employment2 = new Grid(scale, gridSize);
     }
@@ -93,6 +95,37 @@ public class Grids {
                     }
                 }
             }
+        }
+    }
+
+    public double getValueFunction(States states) {
+
+        // evaluate state index
+        long gridIndex = states.returnGridIndex();
+        return valueFunction.get(gridIndex);
+    }
+    public double getConsumptionShare(States states) {
+
+        // evaluate state index
+        long gridIndex = states.returnGridIndex();
+        return consumption.get(gridIndex);
+    }
+    public double getEmployment1(States states) {
+
+        if (states.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_IO_EMPLOYMENT1) {
+            long gridIndex = states.returnGridIndex();
+            return employment1.get(gridIndex);
+        } else {
+            return 0.0;
+        }
+    }
+    public double getEmployment2(States states) {
+
+        if (states.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_IO_EMPLOYMENT2 && states.getCohabitation()) {
+            long gridIndex = states.returnGridIndex();
+            return employment2.get(gridIndex);
+        } else {
+            return 0.0;
         }
     }
 }

@@ -1,15 +1,13 @@
 package simpaths.model.taxes;
 
-import simpaths.model.BenefitUnit;
 import simpaths.model.TaxEvaluation;
+
 
 public class TestTaxRoutine {
 
-    TestTaxRoutine(){}
-
     public static void run() {
 
-        int year, age, adults, children04, children59, children1017, disability1, disability2, key, matchRegime;
+        int year, age, adults, children04, children59, children1017, disability1, disability2, careProvision, key, matchRegime;
         long donorID;
         double hoursWork1, hoursWork2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, disposableIncomePerMonth;
         TaxEvaluation evaluatedTransfers;
@@ -33,10 +31,11 @@ public class TestTaxRoutine {
         hoursWork2 = 0.0;
         disability1 = 1;
         disability2 = 0;
+        careProvision = 0;
         originalIncomePerMonth = 1500.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -53,10 +52,11 @@ public class TestTaxRoutine {
         hoursWork2 = 0.0;
         disability1 = 1;
         disability2 = 0;
+        careProvision = 0;
         originalIncomePerMonth = 4800.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 700.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -75,7 +75,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -94,7 +94,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -113,7 +113,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 4500.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -132,7 +132,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -151,7 +151,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 3000.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -170,7 +170,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 3000.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 500.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -189,7 +189,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 3000.0;
         secondIncomePerMonth = 2000.0;
         childcarePerMonth = 500.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -208,7 +208,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 3000.0;
         secondIncomePerMonth = 2000.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -227,7 +227,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 3000.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -246,7 +246,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 3000.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -265,7 +265,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 1000.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -284,7 +284,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -303,7 +303,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -322,7 +322,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -341,7 +341,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -360,7 +360,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -379,7 +379,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -398,7 +398,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -417,7 +417,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -436,7 +436,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -455,7 +455,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -474,7 +474,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -493,7 +493,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -512,7 +512,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -531,7 +531,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -550,7 +550,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -569,7 +569,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
@@ -588,7 +588,7 @@ public class TestTaxRoutine {
         originalIncomePerMonth = 320.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
-        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
+        evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
         key = evaluatedTransfers.getKeys().getKey(0);
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();

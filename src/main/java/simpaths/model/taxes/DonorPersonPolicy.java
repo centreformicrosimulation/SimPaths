@@ -10,14 +10,13 @@ import jakarta.persistence.*;
  *
  */
 @Entity
-@Table(name = "DONORPERSONPOLICY_UK")
 public class DonorPersonPolicy {
 
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "pid", referencedColumnName = "id")
+    private DonorPerson person;
 
-    /**
-     * ATTRIBUTES
-     */
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "ID", unique = true, nullable = false) private long id;
     @Column(name = "FROM_YEAR") private Integer fromYear;
     @Column(name = "SYSTEM_YEAR") private Integer systemYear;
     @Column(name="ILS_DISPY") private Double disposableIncomePerMonth;
@@ -26,7 +25,6 @@ public class DonorPersonPolicy {
     @Column(name="ILS_ORIGY") private Double originalIncomePerMonth;
     @Column(name="ILS_EARNS") private Double earningsPerMonth;
     @Column(name="XCC") private Double childcareCostPerMonth;
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "PID", nullable=false) private DonorPerson person;
 
 
     /**

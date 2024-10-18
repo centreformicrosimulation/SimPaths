@@ -50,9 +50,9 @@ public enum Country {
         return countryName;
     }
     
-    public Country getCountryFromNameString(String country) {
+    public static Country getCountryFromNameString(String country) {
     	for(Country c: Country.values()) {
-    		if(c.getCountryName() == country) {
+    		if(country.equals(c.getCountryName())) {
     			return c;
     		}
     	}

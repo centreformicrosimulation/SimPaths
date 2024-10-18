@@ -1,0 +1,65 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Build and run SimPaths
+
+on:
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build:
+
+    runs-on: [ ubuntu-latest ]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: simpaths_jars
+        path: ./*.jar
+
+  run-simpaths:
+    needs: build
+
+    runs-on: [ ubuntu-latest ]
+
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 19
+      uses: actions/setup-java@v3
+      with:
+        java-version: '19'
+        distribution: 'temurin'
+
+    - uses: actions/download-artifact@v3
+      with:
+        name: simpaths_jars
+        path: .
+
+    - name: Setup run
+      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
+
+    - name: Check input db exists
+      id: check_file
+      uses: thebinaryfelix/check-file-existence-action@1.0.0
+      with:
+        files: 'input/input.mv.db, input/EUROMODpolicySchedule.xlsx, input/DatabaseCountryYear.xlsx'
+
+    - name: Do one run
+      run: java -jar multirun.jar -p 20000 -s 2019 -e 2022 -r 100 -n 2 -g false

@@ -1,17 +1,19 @@
 package simpaths.model.decisions;
 
 import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
-import simpaths.data.RegressionNames;
+import simpaths.data.RegressionName;
 import simpaths.model.enums.*;
 import simpaths.model.BenefitUnit;
 import simpaths.model.Person;
 import simpaths.model.TaxEvaluation;
+import simpaths.model.taxes.Match;
+import simpaths.model.taxes.Matches;
+
+import static simpaths.data.Parameters.asinh;
 
 
 /**
@@ -38,8 +40,9 @@ public class Expectations {
     double mortalityProbability;    // probability of death before next period
 
     // next period characteristics
+    int ageYearsThisPeriod;         // age in years for current period
     int ageIndexNextPeriod;         // age index for state expectations
-    int ageYearsNextPeriod;         // age in years for expectations
+    int ageYearsNextPeriod;         // age in years for next period expectations
     int numberExpected;             // number of state combinations comprising expectations, conditional on survival
     double[] probability;           // vector recording probability associated with each anticipated state combination, conditional on survival
     States[] anticipated;           // vector to store anticipated state combinations
@@ -48,7 +51,7 @@ public class Expectations {
     double leisureTime;             // proportion of time spent in leisure
     double disposableIncomeAnnual;  // disposable income
     double cashOnHand;              // total value of pot that can be used to finance consumption within period
-
+    Matches imperfectMatches = new Matches();
 
      // OBJECTS FOR EVALUATING MODEL TAX AND BENEFIT AND REGRESSION FUNCTIONS
     BenefitUnit benefitUnitProxyThisPeriod;
@@ -69,48 +72,37 @@ public class Expectations {
         equivalenceScale = currentStates.oecdEquivalenceScale();
 
         // prospective characteristics (deterministic)
+        ageYearsThisPeriod = currentStates.ageYears;
         ageIndexNextPeriod = currentStates.ageIndex + 1;
-        ageYearsNextPeriod = currentStates.ageYears + 1;
+        ageYearsNextPeriod = ageYearsThisPeriod + 1;
         numberExpected = 1;
         probability = new double[numberExpected];
         anticipated = new States[numberExpected];
-        probability[0] = 1;
+        probability[0] = 1.0;
         anticipated[0] = new States(scale, ageYearsNextPeriod);
         if (ageYearsNextPeriod <= DecisionParams.maxAge) {
 
             // birth year
-            int stateIndexCurrPeriod = scale.getIndex(Axis.BirthYear, ageYearsNextPeriod - 1);
+            int stateIndexCurrPeriod = scale.getIndex(Axis.BirthYear, ageYearsThisPeriod);
             int stateIndexNextPeriod = scale.getIndex(Axis.BirthYear, ageYearsNextPeriod);
             for (int ii = 0; ii < numberExpected; ii++) {
                 anticipated[ii].states[stateIndexNextPeriod] = currentStates.states[stateIndexCurrPeriod];
             }
 
             //gender (1 = female)
-            stateIndexCurrPeriod = scale.getIndex(Axis.Gender, ageYearsNextPeriod - 1);
+            stateIndexCurrPeriod = scale.getIndex(Axis.Gender, ageYearsThisPeriod);
             stateIndexNextPeriod = scale.getIndex(Axis.Gender, ageYearsNextPeriod);
             for (int ii = 0; ii < numberExpected; ii++) {
                 anticipated[ii].states[stateIndexNextPeriod] = currentStates.states[stateIndexCurrPeriod];
             }
-
-            // region (assume that expect to remain in current region)
-            if (DecisionParams.flagRegion) {
-                stateIndexCurrPeriod = scale.getIndex(Axis.Region, ageYearsNextPeriod - 1);
-                stateIndexNextPeriod = scale.getIndex(Axis.Region, ageYearsNextPeriod);
-                for (int ii = 0; ii < numberExpected; ii++) {
-                    anticipated[ii].states[stateIndexNextPeriod] = currentStates.states[stateIndexCurrPeriod];
-                }
-            }
         }
 
-        // proxy for next period expectations
+        // proxy to evaluate regression projections for current period
         benefitUnitProxyThisPeriod = new BenefitUnit(true);
         benefitUnitProxyThisPeriod.setYearLocal(currentStates.getYear());
-        benefitUnitProxyThisPeriod.setOccupancy(currentStates.getOccupancyCode());
+        benefitUnitProxyThisPeriod.setOccupancyLocal(currentStates.getOccupancyCode());
         benefitUnitProxyThisPeriod.setDeh_c3Local(currentStates.getEducationCode());
         benefitUnitProxyThisPeriod.setRegion(currentStates.getRegionCode());
-        for (int ii=0; ii<18; ii++) {
-            benefitUnitProxyThisPeriod.setN_children_byAge(ii, currentStates.getChildrenByAge(ii));
-        }
     }
 
     /**
@@ -123,7 +115,9 @@ public class Expectations {
         // copy outerExpectations
         scale = outerExpectations.scale;
         cohabitation = outerExpectations.cohabitation;
+        retiring = outerExpectations.retiring;
         equivalenceScale = outerExpectations.equivalenceScale;
+        ageYearsThisPeriod = outerExpectations.ageYearsThisPeriod;
         ageIndexNextPeriod = outerExpectations.ageIndexNextPeriod;
         ageYearsNextPeriod = outerExpectations.ageYearsNextPeriod;
         numberExpected = outerExpectations.numberExpected;
@@ -133,18 +127,14 @@ public class Expectations {
 
         // prevailing characteristics - based on currentStates
         this.currentStates = currentStates;
-        fullTimeHourlyEarningsPotential = DecisionParams.MIN_WAGE_PHOUR;
-        if (currentStates.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply) {
-            int scaleIndex = scale.getIndex(Axis.WagePotential, currentStates.ageYears);
-            fullTimeHourlyEarningsPotential = (Math.exp(currentStates.states[scaleIndex]) - DecisionParams.C_WAGE_POTENTIAL);
-        }
-        liquidWealth = Math.exp(currentStates.states[0]) - DecisionParams.C_LIQUID_WEALTH;
-        if (currentStates.ageYears == DecisionParams.maxAge) {
+        fullTimeHourlyEarningsPotential = currentStates.getFullTimeHourlyEarningsPotential();
+        liquidWealth = currentStates.getLiquidWealth();
+        if (ageYearsThisPeriod == DecisionParams.maxAge) {
             availableCredit = 0;
             mortalityProbability = 1;
         } else {
             availableCredit = - (Math.exp(scale.axes[ageIndexNextPeriod][0][1]) - DecisionParams.C_LIQUID_WEALTH);
-            mortalityProbability = Parameters.getMortalityProbability(currentStates.getGenderCode(), currentStates.ageYears, currentStates.getYear());
+            mortalityProbability = Parameters.getMortalityProbability(currentStates.getGenderCode(), ageYearsThisPeriod, currentStates.getYear());
         }
         pensionIncomePerYear = currentStates.getPensionPerYear();
     }
@@ -155,19 +145,12 @@ public class Expectations {
      */
     public Expectations(Expectations invariantExpectations) {
 
-        // prevailing characteristics - based on currentStates
-        currentStates = invariantExpectations.currentStates;
+        // copy existing attributes
         scale = invariantExpectations.scale;
         cohabitation = invariantExpectations.cohabitation;
+        retiring = invariantExpectations.retiring;
         equivalenceScale = invariantExpectations.equivalenceScale;
-        fullTimeHourlyEarningsPotential = invariantExpectations.fullTimeHourlyEarningsPotential;
-        liquidWealth = invariantExpectations.liquidWealth;
-        pensionIncomePerYear = invariantExpectations.pensionIncomePerYear;
-        availableCredit = invariantExpectations.availableCredit;
-        mortalityProbability = invariantExpectations.mortalityProbability;
-        benefitUnitProxyThisPeriod = new BenefitUnit(invariantExpectations.benefitUnitProxyThisPeriod, true);
-
-        // prospective characteristics
+        ageYearsThisPeriod = invariantExpectations.ageYearsThisPeriod;
         ageIndexNextPeriod = invariantExpectations.ageIndexNextPeriod;
         ageYearsNextPeriod = invariantExpectations.ageYearsNextPeriod;
         numberExpected = invariantExpectations.numberExpected;
@@ -177,44 +160,55 @@ public class Expectations {
             probability[ii] = invariantExpectations.probability[ii];
             anticipated[ii] = new States(invariantExpectations.anticipated[ii]);
         }
+        benefitUnitProxyThisPeriod = new BenefitUnit(invariantExpectations.benefitUnitProxyThisPeriod, true);
+        currentStates = invariantExpectations.currentStates;
+        fullTimeHourlyEarningsPotential = invariantExpectations.fullTimeHourlyEarningsPotential;
+        pensionIncomePerYear = invariantExpectations.pensionIncomePerYear;
+        liquidWealth = invariantExpectations.liquidWealth;
+        availableCredit = invariantExpectations.availableCredit;
+        mortalityProbability = invariantExpectations.mortalityProbability;
 
-        // add person proxy for this period
+        // add new data for within period regression specifications
         personProxyThisPeriod = new Person(true);
+        personProxyThisPeriod.setDag(ageYearsThisPeriod);
         personProxyThisPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyThisPeriod.setDgn(currentStates.getGenderCode());
         personProxyThisPeriod.setDhe(currentStates.getHealthCode());
         personProxyThisPeriod.setDeh_c3(currentStates.getEducationCode());
-        if (SocialCareMarketAll.Informal.equals(currentStates.getSocialCareMarketCode()) ||
-                SocialCareMarketAll.Mixed.equals(currentStates.getSocialCareMarketCode()))
-            personProxyThisPeriod.setCareFromOther(true);
+        personProxyThisPeriod.setDcpstLocal(currentStates.getDcpst());
+        personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
+        personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
 
         // add person proxy for next period expectations
         personProxyNextPeriod = new Person(true);
         personProxyNextPeriod.setYearLocal(currentStates.getYearByAge(ageYearsNextPeriod));
-        personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyNextPeriod.setDhhtp_c4_lag1Local(currentStates.getHouseholdTypeCode());
         personProxyNextPeriod.setYdses_c5_lag1Local(Ydses_c5.Q3);
-        personProxyNextPeriod.setN_children_allAges_lag1Local(currentStates.getChildrenAll());
-        personProxyNextPeriod.setN_children_allAges_Local(currentStates.getChildrenAll());
-        personProxyNextPeriod.setN_children_02_lag1Local(currentStates.getChildren02());
+        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(currentStates.getChildrenAll());
+        personProxyNextPeriod.setNumberChildrenAllLocal(currentStates.getChildrenAll());
+        personProxyNextPeriod.setNumberChildren02Local_lag1(currentStates.getChildren02());
         personProxyNextPeriod.setDag(ageYearsNextPeriod);
+        personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyNextPeriod.setDgn(currentStates.getGenderCode());
         personProxyNextPeriod.setDlltsd(currentStates.getDlltsd());
         personProxyNextPeriod.setDlltsd_lag1(currentStates.getDlltsd());
         personProxyNextPeriod.setDhe(currentStates.getHealthCode());
         personProxyNextPeriod.setDhe_lag1(currentStates.getHealthCode());
-        if (SocialCareMarketAll.Informal.equals(currentStates.getSocialCareMarketCode()) ||
-                SocialCareMarketAll.Mixed.equals(currentStates.getSocialCareMarketCode()))
-            personProxyThisPeriod.setCareHoursFromOtherWeekly_lag1(10.0);
-        if (SocialCareMarketAll.Formal.equals(currentStates.getSocialCareMarketCode()) ||
-                SocialCareMarketAll.Mixed.equals(currentStates.getSocialCareMarketCode()))
-            personProxyThisPeriod.setCareHoursFromFormalWeekly_lag1(10.0);
+        personProxyNextPeriod.populateSocialCareReceipt_lag1(currentStates.getSocialCareReceiptStateCode());
+        personProxyNextPeriod.setSocialCareProvision_lag1(currentStates.getSocialCareProvisionCode());
         personProxyNextPeriod.setDed(currentStates.getStudentIndicator());
         personProxyNextPeriod.setDeh_c3(currentStates.getEducationCode());
         personProxyNextPeriod.setDeh_c3_lag1(currentStates.getEducationCode());
         personProxyNextPeriod.setDehf_c3(DecisionParams.EDUCATION_FATHER);
         personProxyNextPeriod.setDehm_c3(DecisionParams.EDUCATION_MOTHER);
-        personProxyNextPeriod.setDcpst(currentStates.getDcpst());
+        if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
+            personProxyNextPeriod.setDcpstLocal(currentStates.getDcpst());
+        } else {
+            if (currentStates.getDcpst().equals(Dcpst.Partnered))
+                personProxyNextPeriod.setDcpstLocal(Dcpst.PreviouslyPartnered);
+            else
+                personProxyNextPeriod.setDcpstLocal(Dcpst.SingleNeverMarried);
+        }
         personProxyNextPeriod.setDcpst_lag1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);
         personProxyNextPeriod.setL1_fullTimeHourlyEarningsPotential(fullTimeHourlyEarningsPotential);
@@ -247,14 +241,29 @@ public class Expectations {
         // update current period variables for discrete decisions
         //********************************************************
 
+        // care hours per week
+        double careHoursProvidedWeekly = 0.0;
+        int careProvision = 0;
+        if (Parameters.flagSocialCare) {
+            careHoursProvidedWeekly = evalSocialCareHoursProvidedWeekly();
+            if (careHoursProvidedWeekly>1.0E-5)
+                careProvision = 1;
+        }
+
         // labour and labour income in current period - to evaluate taxes and benefits
-        double labourIncome1Weekly = 0;
-        double labourIncome2Weekly = 0;
+        double labourIncome1Weekly = 0.0;
+        double labourIncome2Weekly = 0.0;
         double hourlyWageRate1, hourlyWageRate2;
         Integer labourHours1Weekly = null;
         Integer labourHours2Weekly = null;
-        leisureTime = 1;
-        if (currentStates.ageYears <= DecisionParams.maxAgeFlexibleLabourSupply) {
+        leisureTime = 1.0;
+        if (careHoursProvidedWeekly>0.0) {
+            if (cohabitation)
+                leisureTime -= careHoursProvidedWeekly / (2.0*Parameters.HOURS_IN_WEEK);
+            else
+                leisureTime -= careHoursProvidedWeekly / Parameters.HOURS_IN_WEEK;
+        }
+        if (ageYearsThisPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
             labourHours1Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp1Pr);
             hourlyWageRate1 = getHourlyWageRate(labourHours1Weekly);
             labourIncome1Weekly = hourlyWageRate1 * (double)labourHours1Weekly;
@@ -262,19 +271,26 @@ public class Expectations {
                 labourHours2Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp2Pr);
                 hourlyWageRate2 = getHourlyWageRate(labourHours2Weekly);
                 labourIncome2Weekly = hourlyWageRate2 * (double)labourHours2Weekly;
-                leisureTime = 1 - ((double)(labourHours1Weekly + labourHours2Weekly)) / (2.0 * DecisionParams.LIVING_HOURS_WEEKLY);
+                leisureTime -= ((double)(labourHours1Weekly + labourHours2Weekly)) / (2.0 * Parameters.HOURS_IN_WEEK);
             } else {
-                leisureTime = 1 - ((double)labourHours1Weekly) / DecisionParams.LIVING_HOURS_WEEKLY;
+                leisureTime -= ((double)labourHours1Weekly) / Parameters.HOURS_IN_WEEK;
             }
         } else if (emp1Pr>1.0E-5 || emp2Pr>1.0E-5) {
             throw new InvalidParameterException("inconsistent labour decisions supplied for updating expectations");
         }
+        leisureTime = Math.max(1.0/Parameters.HOURS_IN_WEEK, leisureTime);
 
         // pension income
+        boolean retiring = false;
         double pensionIncome1Annual, pensionIncome2Annual;
-        if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
-            if (currentStates.getRetirement() == 0 && emp1Pr == 0 && pensionIncomePerYear == 0 && liquidWealth > 0) {
-                // allow for annuitisation at retirement
+        if (DecisionParams.flagPrivatePension && ageYearsThisPeriod>=DecisionParams.minAgeToRetire) {
+            // allow for pension take-up (take-up in previous year accounted for at instantiation)
+            if (!DecisionParams.flagRetirement && ageYearsThisPeriod == DecisionParams.minAgeToRetire) {
+                retiring = true;
+            } else if (DecisionParams.flagRetirement && currentStates.getRetirement()==0 && emp1Pr == 0 && liquidWealth > 0) {
+                retiring = true;
+            }
+            if (retiring) {
                 pensionIncomePerYear = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                         Parameters.annuityRates.getAnnuityRate(currentStates.getOccupancyCode(), currentStates.getBirthYear(), currentStates.getYear());
                 liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
@@ -328,7 +344,11 @@ public class Expectations {
         double socialCareCostAnnual = evalSocialCareCostWeekly() * Parameters.WEEKS_PER_YEAR;
 
         // disability
-        int disability1 = currentStates.getDisability(), disability2 = -1;
+        int disability1 = 0, disability2;
+        if (!Parameters.flagSuppressSocialCareCosts) {
+
+            disability1 = currentStates.getDisability();
+        }
         if (cohabitation) {
             disability2 = 0;
         } else {
@@ -337,7 +357,8 @@ public class Expectations {
 
         // call to tax and benefit function
         disposableIncomeAnnual = taxBenefitFunction(labourHours1Weekly, disability1, labourIncome1Weekly, investmentIncome1Annual, pensionIncome1Annual,
-                labourHours2Weekly, disability2, labourIncome2Weekly, investmentIncome2Annual, pensionIncome2Annual, childcareCostAnnual, socialCareCostAnnual, liquidWealth);
+                labourHours2Weekly, disability2, careProvision, labourIncome2Weekly, investmentIncome2Annual, pensionIncome2Annual, childcareCostAnnual,
+                socialCareCostAnnual, liquidWealth);
 
         // cash on hand
         cashOnHand = liquidWealth + availableCredit + disposableIncomeAnnual - childcareCostAnnual - socialCareCostAnnual;
@@ -352,319 +373,87 @@ public class Expectations {
             personProxyNextPeriod.setLes_c4_lag1(currentStates.getLesCode(emp1Pr));
             personProxyNextPeriod.setLesdf_c4_lag1(currentStates.getLesC4Code(emp1Pr, emp2Pr));
             personProxyNextPeriod.setYpnbihs_dv_lag1(
-                    labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0);
+                    asinh(labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0));
             if (cohabitation) {
                 personProxyNextPeriod.setYnbcpdf_dv_lag1(
-                        labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0 -
-                                (labourIncome2Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome2Annual + pensionIncome2Annual) / 12.0));
+                        asinh(labourIncome1Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome1Annual + pensionIncome1Annual) / 12.0) -
+                                asinh(labourIncome2Weekly*Parameters.WEEKS_PER_MONTH + (investmentIncome2Annual + pensionIncome2Annual) / 12.0) );
             } else {
                 personProxyNextPeriod.setYnbcpdf_dv_lag1(0.0);
             }
 
+            // instantiate expectations factory
+            ExpectationsFactory futures = new ExpectationsFactory(anticipated, probability, personProxyNextPeriod, scale, ageYearsThisPeriod, currentStates, pensionIncomePerYear);
+
+            // region
+            if (DecisionParams.flagRegion) {
+                futures.updateRegion();
+                throw new RuntimeException("Please validate code for regions in expectations object");
+            }
+
             // retirement - not a state included in personProxyNextPeriod (don't track changes)
             if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire && ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
-                stateIndexNextPeriod = scale.getIndex(Axis.Retirement, ageYearsNextPeriod);
-                int currentRetirement = currentStates.getRetirement();
-                if (currentRetirement==0 && emp1Pr==0) {
-                    // retire this period
-                    for (int ii = 0; ii < numberExpected; ii++) {
-                        anticipated[ii].states[stateIndexNextPeriod] = 1.0;
-                    }
-                } else {
-                    // no change to retirement state
-                    for (int ii = 0; ii < numberExpected; ii++) {
-                        anticipated[ii].states[stateIndexNextPeriod] = currentRetirement;
-                    }
-                }
+                futures.updateRetirement(retiring);
+                throw new RuntimeException("Please validate code for retirement in expectations object");
             }
 
             // student - don't need to track separately from education (no need for flagStudentVaries)
-            if (ageYearsNextPeriod <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
-                stateIndexCurrPeriod = scale.getIndex(Axis.Student, currentStates.ageYears);
-                stateIndexNextPeriod = scale.getIndex(Axis.Student, ageYearsNextPeriod);
-                LocalExpectations lexpect;
-                if (currentStates.getStudent() == 0) {
-                    lexpect = new LocalExpectations(currentStates.states[stateIndexCurrPeriod]);
-                } else {
-                    lexpect = new LocalExpectations(personProxyNextPeriod, RegressionNames.EducationE1a);
-                }
-                expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
+            if (DecisionParams.flagEducation && ageYearsNextPeriod<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+                futures.updateStudent();
             }
 
             // education
-            boolean flagEducationVaries = false;
             if (DecisionParams.flagEducation) {
-                stateIndexCurrPeriod = scale.getIndex(Axis.Education, currentStates.ageYears);
-                stateIndexNextPeriod = scale.getIndex(Axis.Education, ageYearsNextPeriod);
-                if (currentStates.getStudent() == 0) {
-                    // not student - no change in education state possible
-
-                    LocalExpectations lexpect = new LocalExpectations(currentStates.states[stateIndexCurrPeriod]);
-                    expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-                } else {
-                    // student in current period - allow for exit from education
-
-                    // set-up probabilities and values
-                    Map<Education,Double> probsStudent = simpaths.data.Parameters.getRegEducationE2a().getProbabilities(personProxyNextPeriod, Person.DoublesVariables.class);
-
-                    // update expectations array
-                    int numberExpectedInitial = numberExpected;
-                    for (int ii = 0; ii < numberExpectedInitial; ii++) {
-                        if (anticipated[ii].getStudent() == 1) {
-                            // continuing student
-                            anticipated[ii].states[stateIndexNextPeriod] = currentStates.states[stateIndexCurrPeriod];
-                        } else {
-                            // allow for exit from education
-                            expandExpectationsSingleIndex(ii, stateIndexNextPeriod, probsStudent);
-                            flagEducationVaries = true;
-                        }
-                    }
-                }
+                futures.updateEducation();
             }
 
             // health
-            boolean flagHealthVaries = false;
             if (DecisionParams.flagHealth && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
-
-                // state indices
-                flagHealthVaries = true;
-                stateIndexNextPeriod = scale.getIndex(Axis.Health, ageYearsNextPeriod);
-
-                // populate expectations
-                if (!flagEducationVaries) {
-                    // both student status and education given
-
-                    Map<Dhe,Double> probs = Parameters.getRegHealthH1b().getProbabilities(personProxyNextPeriod, Person.DoublesVariables.class);
-                    expandExpectationsAllIndices(stateIndexNextPeriod, probs);
-                } else {
-                    // need to allow for education change
-
-                    // for continuing students
-                    updatePersonNextPeriod(currentStates, Axis.Education);
-                    Map<Dhe,Double> studentProbs = Parameters.getRegHealthH1a().getProbabilities(personProxyNextPeriod, Person.DoublesVariables.class);
-
-                    // begin loop over existing expectations
-                    int numberExpectedInitial = numberExpected;
-                    for (int ii=0; ii<numberExpectedInitial; ii++) {
-                        if (anticipated[ii].getStudent()==1) {
-                            // continuing student
-                            expandExpectationsSingleIndex(ii, stateIndexNextPeriod, studentProbs);
-                        } else {
-                            // exit from education - allow for education change
-                            updatePersonNextPeriod(anticipated[ii], Axis.Education);
-                            Map<Dhe,Double> probs = Parameters.getRegHealthH1b().getProbabilities(personProxyNextPeriod, Person.DoublesVariables.class);
-                            expandExpectationsSingleIndex(ii, stateIndexNextPeriod, probs);
-                        }
-                    }
-                }
-           }
+                futures.updateHealth();
+            }
 
             // disability
-            boolean flagDisabilityVaries = false;
-            if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth) {
-                flagDisabilityVaries = true;
-                stateIndexNextPeriod = scale.getIndex(Axis.Disability, ageYearsNextPeriod);
-                indicatorExpectations(flagEducationVaries, flagHealthVaries, stateIndexNextPeriod, RegressionNames.HealthH2b);
+            if (DecisionParams.flagDisability  && ageYearsNextPeriod >= DecisionParams.minAgeForPoorHealth && ageYearsNextPeriod <= DecisionParams.maxAgeForDisability()) {
+                futures.updateDisability();
             }
 
             // cohabitation (1 = cohabiting)
-            boolean flagCohabitationVaries = false;
             if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
-                flagCohabitationVaries = true;
-                stateIndexNextPeriod = scale.getIndex(Axis.Cohabitation, ageYearsNextPeriod);
-                if (cohabitation) {
-                    indicatorExpectations(flagEducationVaries, stateIndexNextPeriod, 0.0, 1.0, RegressionNames.PartnershipU2b);
-                } else {
-                    indicatorExpectations(flagEducationVaries, stateIndexNextPeriod, RegressionNames.PartnershipU1a, RegressionNames.PartnershipU1b);
-                }
+                futures.updateCohabitation();
             }
 
             // dependent children
-            // loop over each birth age
-            boolean flagChildrenVaries = false;
-            for (int jj = 0; jj < DecisionParams.NUMBER_BIRTH_AGES; jj++) {
+            futures.updateChildren();
 
-                if (ageYearsNextPeriod >= DecisionParams.BIRTH_AGE[jj] && ageYearsNextPeriod < (DecisionParams.BIRTH_AGE[jj] + simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
-                    // may have children from this age in next period
-
-                    if (ageYearsNextPeriod == DecisionParams.BIRTH_AGE[jj]) {
-                        // next year is birth age - number of children uncertain
-
-                        flagChildrenVaries = true;
-                        stateIndexNextPeriod = scale.getIndex(Axis.Child, ageYearsNextPeriod, jj);
-                        int options = (int)scale.axes[ageIndexNextPeriod][stateIndexNextPeriod][0];
-
-                        // begin loop over existing expectations
-                        int numberExpectedInitial = numberExpected;
-                        for (int ii=0; ii<numberExpectedInitial; ii++) {
-
-                            // update states
-                            updatePersonNextPeriod(anticipated[ii], Axis.Child);
-                            updatePersonNextPeriod(anticipated[ii], Axis.Education);
-
-                            // expand expectations
-                            if (Gender.Female == currentStates.getGenderCode() || anticipated[ii].getCohabitation()) {
-                                // birth possible
-
-                                if (anticipated[ii].getStudent()==1) {
-                                    expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionNames.FertilityF1a);
-                                } else {
-                                    expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionNames.FertilityF1b);
-                                }
-                            } else {
-                                // birth not possible
-
-                                stateIndexNextPeriod = scale.getIndex(Axis.Child, ageYearsNextPeriod, jj);
-                                for (int kk = 0; kk< numberExpected; kk++) {
-                                    anticipated[kk].states[stateIndexNextPeriod] = 0.0;
-                                }
-                            }
-                        }
-                    } else {
-                        // assume next year have same number of children as this year
-
-                        stateIndexCurrPeriod = scale.getIndex(Axis.Child, currentStates.ageYears, jj);
-                        stateIndexNextPeriod = scale.getIndex(Axis.Child, ageYearsNextPeriod, jj);
-                        LocalExpectations lexpect = new LocalExpectations(currentStates.states[stateIndexCurrPeriod]);
-                        expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-                    }
-                }
+            // social care receipt
+            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
+                futures.updateSocialCareReceipt();
             }
 
-            // social care market
-            boolean flagSocialCareMarketVaries = false;
-            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeFormalSocialCare) {
-
-                flagSocialCareMarketVaries = true;
-                stateIndexNextPeriod = scale.getIndex(Axis.SocialCareMarket, ageYearsNextPeriod);
-                Map<SocialCareMarketAll,Double> probs = null;
-                if (flagEducationVaries || flagHealthVaries || flagCohabitationVaries) {
-
-                    int numberExpectedInitial = numberExpected;
-                    for (int ii=0; ii<numberExpectedInitial; ii++) {
-
-                        boolean flagEval = false;
-                        if (probs == null) {
-                            flagEval = true;
-                        }
-                        if (flagEducationVaries) {
-                            boolean flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Education);
-                            if (flagChange) flagEval = true;
-                        }
-                        if (flagHealthVaries) {
-                            boolean flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Health);
-                            if (flagChange) flagEval = true;
-                        }
-                        if (flagCohabitationVaries) {
-                            boolean flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Cohabitation);
-                            if (flagChange) flagEval = true;
-                        }
-                        if (flagEval) {
-                            double prob0 = Parameters.getRegReceiveCareS2b().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
-                            Map<SocialCareMarket,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(personProxyNextPeriod, Person.DoublesVariables.class, SocialCareMarket.class);
-                            probs = compileSocialCareProbs(prob0, probs1);
-                        }
-                        if (probs==null)
-                            throw new RuntimeException("attempt to assign expectations for social care market before evaluated");
-                        expandExpectationsSingleIndex(ii, stateIndexNextPeriod, probs);
-                    }
-                } else {
-
-                    double prob0 = Parameters.getRegReceiveCareS2b().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
-                    Map<SocialCareMarket,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(personProxyNextPeriod, Person.DoublesVariables.class, SocialCareMarket.class);
-                    probs = compileSocialCareProbs(prob0, probs1);
-                    expandExpectationsAllIndices(stateIndexNextPeriod, probs);
-                }
+            // social care provision
+            if (Parameters.flagSocialCare) {
+                futures.updateSocialCareProvision();
             }
 
             // full-time wage potential
             if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
-
-                // state indices
-                stateIndexNextPeriod = scale.getIndex(Axis.WagePotential, ageYearsNextPeriod);
-
-                double minValue = Math.log(DecisionParams.MIN_WAGE_PHOUR);
-                double maxValue = Math.log(DecisionParams.MAX_WAGE_PHOUR);
-                int numberExpectedInitial = numberExpected;
-                boolean flagChange, flagEval = true;
-                LocalExpectations lexpect = null;
-                Double rmse;
-                if (currentStates.getGenderCode()==Gender.Male) {
-                    rmse = ManagerRegressions.getRmse(RegressionNames.WagesMalesE);
-                } else {
-                    rmse = ManagerRegressions.getRmse(RegressionNames.WagesFemalesE);
-                }
-                for (int ii=0; ii<numberExpectedInitial; ii++) {
-
-                    // update regression variables
-                    if (flagEducationVaries) {
-                        flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Education);
-                        if (flagChange) flagEval = true;
-                    }
-                    if (flagHealthVaries) {
-                        flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Health);
-                        if (flagChange) flagEval = true;
-                    }
-                    if (flagDisabilityVaries) {
-                        flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Disability);
-                        if (flagChange) flagEval = true;
-                    }
-                    if (flagSocialCareMarketVaries) {
-                        flagChange = updatePersonNextPeriod(anticipated[ii], Axis.SocialCareMarket);
-                        if (flagChange) flagEval = true;
-                    }
-                    if (flagCohabitationVaries) {
-                        flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Cohabitation);
-                        if (flagChange) flagEval = true;
-                    }
-                    if (flagChildrenVaries) {
-                        flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Child);
-                        if (flagChange) flagEval = true;
-                    }
-
-                    // update expectations
-                    if (flagEval) {
-
-                        Double score;
-                        if (currentStates.getGenderCode()==Gender.Male) {
-                            score = ManagerRegressions.getScore(personProxyNextPeriod, RegressionNames.WagesMalesE);
-                        } else {
-                            score = ManagerRegressions.getScore(personProxyNextPeriod, RegressionNames.WagesFemalesE);
-                        }
-                        lexpect = new LocalExpectations(score, rmse, minValue, maxValue);
-                        for (int jj=0; jj<lexpect.values.length; jj++) {
-                            lexpect.values[jj] = Math.log(Math.exp(lexpect.values[jj]) + DecisionParams.C_WAGE_POTENTIAL);
-                        }
-                    }
-                    expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-                    flagEval = false;
-                }
+                futures.updateWagePotential();
             }
 
             // pension income
-            if (DecisionParams.flagRetirement && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
-                stateIndexNextPeriod = scale.getIndex(Axis.PensionIncome, ageYearsNextPeriod);
-                int numberExpectedInitial = numberExpected;
-                double val;
-                for (int ii=0; ii<numberExpectedInitial; ii++) {
-                    val = pensionIncomePerYear;
-                    if (cohabitation && !anticipated[ii].getCohabitation()) {
-                        val /= 2.0;
-                    } else if (!cohabitation && anticipated[ii].getCohabitation()) {
-                        val *= 2.0;
-                    }
-                    val = Math.min( Math.max( val, 0.0 ), DecisionParams.maxPensionPYear );
-                    val = Math.log(val + DecisionParams.C_PENSION);
-                    anticipated[ii].states[stateIndexNextPeriod] = val;
-                }
+            if (DecisionParams.flagPrivatePension && ageYearsNextPeriod > DecisionParams.minAgeToRetire) {
+                futures.updatePensionIncome();
             }
 
             // wage offer
-            if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
-                stateIndexNextPeriod = scale.getIndex(Axis.WageOffer1, ageYearsNextPeriod);
-                LocalExpectations lexpect = new LocalExpectations(1.0, 0.0, DecisionParams.PROBABILITY_WAGE_OFFER1);
-                expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
+            if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
+                futures.updateWageOffer1();
             }
+
+            // retrieve results
+            probability = futures.getProbability();
+            anticipated = futures.getAnticipated();
+            numberExpected = futures.getNumberExpected();
 
             // check evaluated probabilities
             double probabilityCheck = 0;
@@ -672,7 +461,7 @@ public class Expectations {
                 probabilityCheck += probability[ii];
             }
             if (Math.abs(probabilityCheck-1) > 1.0E-5) {
-                throw new InvalidParameterException("problem with probabilities supplied to outer expectations");
+                throw new InvalidParameterException("problem with probabilities supplied to outer expectations 1");
             }
         }
     }
@@ -680,11 +469,11 @@ public class Expectations {
     private double evalChildcareCostWeekly() {
 
         double childcareCostWeekly = 0.0;
-        if (Parameters.flagFormalChildcare && currentStates.hasChildrenEligibleForCare()) {
+        if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts && currentStates.hasChildrenEligibleForCare()) {
 
             double probFormalChildCare = Parameters.getRegChildcareC1a().getProbability(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
             double logChildcareCostScore = Parameters.getRegChildcareC1b().getScore(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
-            double logChildcareRSME = ManagerRegressions.getRmse(RegressionNames.ChildcareValue);
+            double logChildcareRSME = ManagerRegressions.getRmse(RegressionName.ChildcareC1b);
             childcareCostWeekly = Math.exp(logChildcareCostScore + logChildcareRSME*logChildcareRSME/2.0) * probFormalChildCare;
         }
         return childcareCostWeekly;
@@ -693,32 +482,41 @@ public class Expectations {
     private double evalSocialCareCostWeekly() {
 
         double socialCareCostWeekly = 0.0;
-        if (Parameters.flagSocialCare && (currentStates.getAgeYears()>=DecisionParams.minAgeFormalSocialCare)) {
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
 
-            SocialCareMarketAll market = currentStates.getSocialCareMarketCode();
-            if (SocialCareMarketAll.Mixed.equals(market) || SocialCareMarketAll.Formal.equals(market)) {
+            SocialCareReceiptState market = currentStates.getSocialCareReceiptStateCode();
+            if (SocialCareReceiptState.Mixed.equals(market) || SocialCareReceiptState.Formal.equals(market)) {
 
                 double score = Parameters.getRegFormalCareHoursS2k().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
                 double rmse = Parameters.getRMSEForRegression("S2k");
-                double hours = Math.min(150.0, Math.exp(score + rmse*rmse/2.0));
+                double hours = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse*rmse/2.0));
                 socialCareCostWeekly = hours * Parameters.getTimeSeriesValue(currentStates.getYear(), TimeSeriesVariable.CarerWageRate);
             }
         }
         return socialCareCostWeekly;
     }
 
-    private Map<SocialCareMarketAll,Double> compileSocialCareProbs(double prob0, Map<SocialCareMarket,Double> probs1) {
-        Map<SocialCareMarketAll,Double> probs = new HashMap<>();
-        probs.put(SocialCareMarketAll.None, 1-prob0);
-        for (SocialCareMarket key : SocialCareMarket.values()) {
-            probs.put(SocialCareMarketAll.getCode(key), probs1.get(key) * prob0);
+    private double evalSocialCareHoursProvidedWeekly() {
+
+        double socialCareHoursProvidedWeekly = 0.0;
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
+
+            SocialCareProvision status = currentStates.getSocialCareProvisionCode();
+            if (!SocialCareProvision.None.equals(status)) {
+
+                double score = Parameters.getRegCareHoursProvS3e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
+                double rmse = Parameters.getRMSEForRegression("S3e");
+                socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
+            }
         }
-        return probs;
+        return socialCareHoursProvidedWeekly;
     }
 
     /**
      * METHOD TO CALL TO TAX AND BENEFIT FUNCTION
      * @return disposable income per annum of benefitUnit
+     *
+     * NOTE: ALL FINANCIALS ARE DEFINED HERE IN PRICES OF ASSUMED BASE YEAR (Parameters.BASE_PRICE_YEAR)
      */
     public double taxBenefitFunction(Integer labourHours1Weekly,
                                      Integer disability1,
@@ -727,6 +525,7 @@ public class Expectations {
                                      double pensionIncome1Annual,
                                      Integer labourHours2Weekly,
                                      Integer disability2,
+                                     Integer careProvision,
                                      double labourIncome2Weekly,
                                      double investmentIncome2Annual,
                                      double pensionIncome2Annual,
@@ -763,137 +562,17 @@ public class Expectations {
         // evaluate disposable income
         double originalIncomePerMonth = originalIncomePerWeek * Parameters.WEEKS_PER_MONTH;
         TaxEvaluation evaluatedTransfers = new TaxEvaluation(year, ageYearsNextPeriod, numberAdults, numberChildrenUnder5, numberChildrenAged5To9,
-                numberChildrenAged10To17, hoursWorkPerWeek1, hoursWorkPerWeek2, disability1, disability2, originalIncomePerMonth, secondIncomePerMonth,
+                numberChildrenAged10To17, hoursWorkPerWeek1, hoursWorkPerWeek2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth,
                 childcareCostPerMonth, socialCareCostPerMonth, liquidWealth, -1.0);
+
+        Match match = evaluatedTransfers.getMatch();
+        if (match.getMatchCriterion()>Parameters.IMPERFECT_THRESHOLD) {
+            imperfectMatches.addMatch(match);
+        }
 
         // finalise outputs
         disposableIncomeAnnual = evaluatedTransfers.getDisposableIncomePerMonth() * 12.0;
         return disposableIncomeAnnual;
-    }
-
-    private <E extends Enum<E> & DoubleValuedEnum> void expandExpectationsSingleIndex(int expandIndex, int stateIndex, Map<E, Double> probs) {
-
-        double[] probabilities = new double[probs.size()];
-        double[] values = new double[probs.size()];
-        int ii = 0;
-        for (E key : probs.keySet()) {
-            probabilities[ii] = probs.get(key);
-            values[ii] = key.getValue();
-            ii++;
-        }
-        expandExpectationsSingleIndex(expandIndex, stateIndex, probabilities, values);
-    }
-    private void expandExpectationsSingleIndex(int expandIndex, int stateIndex, double[] probabilities, double[] values) {
-
-        // expand expectations array
-        if (probabilities.length > 1) {
-            probability = Arrays.copyOf(probability, numberExpected + probabilities.length - 1);
-            anticipated = Arrays.copyOf(anticipated, numberExpected + probabilities.length - 1);
-            for (int ii=0; ii<probabilities.length-1; ii++) {
-                probability[numberExpected +ii] = probability[expandIndex];
-                anticipated[numberExpected +ii] = new States(anticipated[expandIndex]);
-            }
-        }
-
-        // update expectations arrays
-        double probabilityCheck = 0.0;
-        for (int ii=probabilities.length-1; ii>=0; ii--) {
-            probabilityCheck += probabilities[ii];
-            if (ii>0) {
-                probability[numberExpected - 1 + ii] = probability[numberExpected - 1 + ii] * probabilities[ii];
-                anticipated[numberExpected - 1 + ii].states[stateIndex] = values[ii];
-            } else {
-                probability[expandIndex] = probability[expandIndex] * probabilities[ii];
-                anticipated[expandIndex].states[stateIndex] = values[ii];
-            }
-        }
-
-        // check supplied probabilities
-        if (Math.abs(probabilityCheck-1) > 1.0E-5) {
-            throw new InvalidParameterException("problem with probabilities supplied to outer expectations");
-        }
-
-        // update indices
-        numberExpected = numberExpected + probabilities.length - 1;
-    }
-
-    /**
-     * METHOD TO EXPAND EXPECTATIONS ARRAYS TO ALLOW FOR FERTILITY BIRTH YEARS
-     * @param expandIndex the index of the anticipated array taken as a starting point
-     * @param stateIndex the state index for the respective birth year
-     * @param birthYear the current birth year (e.g. 0, 1 or 2)
-     * @param options the number of potential alternatives at birth age (= max no. births + 1)
-     * @param regression the regression equation used to update probabilities
-     */
-    private void expandExpectationsFertility(int expandIndex, int stateIndex, int birthYear, int options, RegressionNames regression) {
-
-        // initialise storage arrays - 100% probability to zero children at birth year
-        double[] probabilities = new double[options];
-        double[] values = new double[options];
-        for (int ii=0; ii<options; ii++) {
-            if (ii==0) {
-                probabilities[ii] = 1.0;
-            } else {
-                probabilities[ii] = 0.0;
-            }
-            values[ii] = ii;
-        }
-
-        // identify age pool for birth year
-        int[] ageVector = currentStates.getFertilityAgeBand(birthYear);
-        int age0 = ageVector[0];
-        int age1 = ageVector[1];
-
-        // evaluate probabilities
-        int childrenAll = currentStates.getChildrenAll();
-        int children02 = currentStates.getChildren02();
-
-        // loop over age pool for birth year
-        for (int age=age0; age<=age1; age++) {
-
-            personProxyNextPeriod.setDag(age);
-            // at each age in the pool, data for n+1 births are a flow from n births
-            // loop consequently works in reverse order through number of births, starting
-            // at the pen-ultimate group (as flows from upper bound are ignored)
-            for (int ii=options-2; ii>=0; ii--) {
-
-                // ii = number of previous births for this birth age
-                int birthsHere02 = Math.min(ii + children02, 2);  // assume at most 2 children under 3
-                personProxyNextPeriod.setN_children_allAges_lag1Local(childrenAll + ii);
-                personProxyNextPeriod.setN_children_02_lag1Local(birthsHere02);
-                double proportionBirths = ManagerRegressions.getProbability(personProxyNextPeriod, regression);
-                probabilities[ii+1] += probabilities[ii] * proportionBirths;
-                probabilities[ii] *= (1 - proportionBirths);
-            }
-        }
-
-        // expand expectations array
-        expandExpectationsSingleIndex(expandIndex, stateIndex, probabilities, values);
-
-        // restore benefitUnit and person characteristics
-        personProxyNextPeriod.setDag(ageYearsNextPeriod);
-        personProxyNextPeriod.setN_children_allAges_lag1Local(childrenAll);
-        personProxyNextPeriod.setN_children_02_lag1Local(children02);
-    }
-
-    private <E extends Enum<E> & DoubleValuedEnum> void expandExpectationsAllIndices(int stateIndex, Map<E, Double> probs) {
-
-        double[] probabilities = new double[probs.size()];
-        double[] values = new double[probs.size()];
-        int ii = 0;
-        for (E key : probs.keySet()) {
-            probabilities[ii] = probs.get(key);
-            values[ii] = key.getValue();
-            ii++;
-        }
-        expandExpectationsAllIndices(stateIndex, probabilities, values);
-    }
-
-    private void expandExpectationsAllIndices(int stateIndex, double[] probabilities, double[] values) {
-        int numberExpectedInitial = numberExpected;
-        for (int ii=0; ii<numberExpectedInitial; ii++) {
-            expandExpectationsSingleIndex(ii, stateIndex, probabilities, values);
-        }
     }
 
     private double getHourlyWageRate(int labourHoursWeekly) {
@@ -903,119 +582,11 @@ public class Expectations {
         } else {
             double ptPremium;
             if (currentStates.getGenderCode()==Gender.Male) {
-                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesMalesE, "Pt");
+                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesMalesE, "Pt");
             } else {
-                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionNames.WagesFemalesE, "Pt");
+                ptPremium = ManagerRegressions.getRegressionCoeff(RegressionName.WagesFemalesE, "Pt");
             }
             return Math.exp( Math.log(fullTimeHourlyEarningsPotential) + ptPremium);
         }
-    }
-
-    private void indicatorExpectations(boolean variableEducation, boolean variableHealth, int stateIndexNextPeriod, RegressionNames reg) {
-        indicatorExpectations(variableEducation, variableHealth, 1.0, 0.0, stateIndexNextPeriod, reg, reg);
-    }
-    private void indicatorExpectations(boolean variableEducation, int stateIndexNextPeriod, double valTrue, double valFalse, RegressionNames reg) {
-        indicatorExpectations(variableEducation, false, valTrue, valFalse, stateIndexNextPeriod, reg, reg);
-    }
-    private void indicatorExpectations(boolean variableEducation, int stateIndexNextPeriod, RegressionNames studentReg, RegressionNames nonstudentReg) {
-        indicatorExpectations(variableEducation, false, 1.0, 0.0, stateIndexNextPeriod, studentReg, nonstudentReg);
-    }
-    private void indicatorExpectations(boolean variableEducation, boolean variableHealth, double valTrue, double valFalse, int stateIndexNextPeriod, RegressionNames studentReg, RegressionNames nonstudentReg) {
-
-        LocalExpectations lexpect = null;
-        if (variableEducation || variableHealth) {
-
-            int numberExpectedInitial = numberExpected;
-            for (int ii=0; ii<numberExpectedInitial; ii++) {
-
-                boolean flagEval = false;
-                if (lexpect == null) {
-                    flagEval = true;
-                }
-                if (variableEducation) {
-                    boolean flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Education);
-                    if (flagChange) flagEval = true;
-                }
-                if (variableHealth) {
-                    boolean flagChange = updatePersonNextPeriod(anticipated[ii], Axis.Health);
-                    if (flagChange) flagEval = true;
-                }
-                if (flagEval) {
-                    if(anticipated[ii].getStudent() == 1) {
-                        lexpect = new LocalExpectations(personProxyNextPeriod, valTrue, valFalse, studentReg);
-                    } else {
-                        lexpect = new LocalExpectations(personProxyNextPeriod, valTrue, valFalse, nonstudentReg);
-                    }
-                }
-                expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-            }
-        } else {
-
-            if(anticipated[0].getStudent() == 1) {
-                lexpect = new LocalExpectations(personProxyNextPeriod, valTrue, valFalse, studentReg);
-            } else {
-                lexpect = new LocalExpectations(personProxyNextPeriod, valTrue, valFalse, nonstudentReg);
-            }
-            expandExpectationsAllIndices(stateIndexNextPeriod, lexpect.probabilities, lexpect.values);
-        }
-    }
-
-    private boolean updatePersonNextPeriod(States states, Axis axis) {
-        boolean changed = false;
-        Object val0, val1;
-        if (Axis.Education.equals(axis)) {
-            val0 = personProxyNextPeriod.getDeh_c3();
-            val1 = states.getEducationCode();
-            if (val0==val1) {
-                val0 = personProxyNextPeriod.getDed();
-                val1 = states.getStudentIndicator();
-            }
-        } else if (Axis.Health.equals(axis)) {
-            val0 = personProxyNextPeriod.getDhe();
-            val1 = states.getHealthCode();
-        } else if (Axis.Disability.equals(axis)) {
-            val0 = personProxyNextPeriod.getDlltsd();
-            val1 = states.getDlltsd();
-        } else if (Axis.SocialCareMarket.equals(axis)) {
-            val0 = personProxyNextPeriod.getSocialCareMarketAll();
-            val1 = states.getSocialCareMarketCode();
-        } else if (Axis.Cohabitation.equals(axis)) {
-            val0 = personProxyNextPeriod.getDcpst();
-            val1 = states.getDcpst();
-        } else if (Axis.Child.equals(axis)) {
-            val0 = personProxyNextPeriod.getN_children_017Local();
-            val1 = states.getChildren017();
-            if (val0==val1) {
-                val0 = personProxyNextPeriod.getD_children_2underLocal();
-                val1 = states.getChildrenUnder3Indicator();
-            }
-            if (val0==val1) {
-                val0 = personProxyNextPeriod.getN_children_allAges_Local();
-                val1 = states.getChildren017();
-            }
-        } else {
-            throw new RuntimeException("unrecognised axis for considering change in person proxy states");
-        }
-        if (val0!=val1) {
-            changed = true;
-
-            if (Axis.Education.equals(axis)) {
-                personProxyNextPeriod.setDeh_c3(states.getEducationCode());
-                personProxyNextPeriod.setDed(states.getStudentIndicator());
-            } else if (Axis.Health.equals(axis)) {
-                personProxyNextPeriod.setDhe(states.getHealthCode());
-            } else if (Axis.Disability.equals(axis)) {
-                personProxyNextPeriod.setDlltsd(states.getDlltsd());
-            } else if (Axis.SocialCareMarket.equals(axis)) {
-                personProxyNextPeriod.setSocialCareMarketAll(states.getSocialCareMarketCode());
-            } else if (Axis.Cohabitation.equals(axis)) {
-                personProxyNextPeriod.setDcpst(states.getDcpst());
-            } else if (Axis.Child.equals(axis)) {
-                personProxyNextPeriod.setN_children_017Local(states.getChildren017());
-                personProxyNextPeriod.setD_children_2underLocal(states.getChildrenUnder3Indicator());
-                personProxyNextPeriod.setN_children_allAges_Local(states.getChildren017());
-            }
-        }
-        return changed;
     }
 }

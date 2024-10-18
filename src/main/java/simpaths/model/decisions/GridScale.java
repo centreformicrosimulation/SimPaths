@@ -30,19 +30,20 @@ public class GridScale {
         double value;
 
         // sim_life_span
-        simLifeSpan = DecisionParams.maxAge - simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE + 1;
+        simLifeSpan = DecisionParams.maxAge - Parameters.AGE_TO_BECOME_RESPONSIBLE + 1;
 
         // number_of_states
         numberOfStates = 1;                                       // liquid wealth
         numberOfStates++;                                         // full-time wage potential
-        if (DecisionParams.flagRetirement) numberOfStates++;      // private pension income
+        if (DecisionParams.flagPrivatePension) numberOfStates++;      // private pension income
         numberOfStates++;                                         // birth year
-        if (DecisionParams.FLAG_WAGE_OFFER1) numberOfStates++;    // wage offer of principal earner (1 = receive wage offer)
+        if (DecisionParams.flagLowWageOffer1) numberOfStates++;   // wage offer of principal earner (1 = receive wage offer)
         if (DecisionParams.FLAG_WAGE_OFFER2) numberOfStates++;    // wage offer of secondary earner (1 = receive wage offer)
         if (DecisionParams.flagRetirement) numberOfStates++;      // retirement status
         if (DecisionParams.flagHealth) numberOfStates++;          // health status
         if (DecisionParams.flagDisability) numberOfStates++;      // disability status
-        if (Parameters.flagSocialCare) numberOfStates++;          // social care market
+        if (Parameters.flagSocialCare) numberOfStates++;          // social care receipt
+        if (Parameters.flagSocialCare) numberOfStates++;          // social care provision
         if (DecisionParams.flagRegion) numberOfStates++;          // region
         if (DecisionParams.flagEducation) numberOfStates++;       // student
         if (DecisionParams.flagEducation) numberOfStates++;       // education
@@ -75,6 +76,7 @@ public class GridScale {
          *      retirement status (o)
          *      health status (h)
          *      disability status (d)
+         *      social care (sc)
          *      region (r) based on (12) Government Office Regions in UK
          *      student status (s)
          *      highest education attainment (e) (integers for education categories, with higher number reflecting higher education)
@@ -103,21 +105,17 @@ public class GridScale {
          */
         for (int aa = 0; aa < simLifeSpan; aa++) {
 
-            ageHh = simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
+            ageHh = Parameters.AGE_TO_BECOME_RESPONSIBLE + aa;
             dimIndex = 0;
 
             // liquid wealth
-            axes[aa][dimIndex][0] = DecisionParams.PTS_LIQUID_WEALTH;
-            if (ageHh<= DecisionParams.AGE_DEBT_DRAWDOWN) {
-                axes[aa][dimIndex][1] = Math.log(DecisionParams.MIN_LIQUID_WEALTH + DecisionParams.C_LIQUID_WEALTH);
-            } else if (ageHh< DecisionParams.MAX_AGE_DEBT) {
-                value = DecisionParams.MIN_LIQUID_WEALTH * (DecisionParams.MAX_AGE_DEBT - ageHh) /
-                        (DecisionParams.MAX_AGE_DEBT - DecisionParams.AGE_DEBT_DRAWDOWN);
-                axes[aa][dimIndex][1] = Math.log(value + DecisionParams.C_LIQUID_WEALTH);
+            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply) {
+                axes[aa][dimIndex][0] = DecisionParams.PTS_LIQUID_WEALTH_WKG;
             } else {
-                axes[aa][dimIndex][1] = Math.log(DecisionParams.C_LIQUID_WEALTH);
+                axes[aa][dimIndex][0] = DecisionParams.PTS_LIQUID_WEALTH_RTD;
             }
-            axes[aa][dimIndex][2] = Math.log(DecisionParams.MAX_LIQUID_WEALTH + DecisionParams.C_LIQUID_WEALTH);
+            axes[aa][dimIndex][1] = Math.log(DecisionParams.getMinWealthByAge(ageHh) + DecisionParams.C_LIQUID_WEALTH);
+            axes[aa][dimIndex][2] = Math.log(DecisionParams.getMaxWealthByAge(ageHh) + DecisionParams.C_LIQUID_WEALTH);
             axes[aa][dimIndex][3] = 1;
             axes[aa][dimIndex][4] = 1;
             dimIndex++;
@@ -133,7 +131,7 @@ public class GridScale {
             }
 
             // pension income
-            if (DecisionParams.flagRetirement && ageHh > DecisionParams.minAgeToRetire) {
+            if (DecisionParams.flagPrivatePension && ageHh > DecisionParams.minAgeToRetire) {
                 axes[aa][dimIndex][0] = DecisionParams.PTS_PENSION;
                 axes[aa][dimIndex][1] = Math.log(DecisionParams.C_PENSION);
                 axes[aa][dimIndex][2] = Math.log(DecisionParams.maxPensionPYear + DecisionParams.C_PENSION);
@@ -155,7 +153,7 @@ public class GridScale {
             dimIndex++;
 
             // wage offer of principal earner (1 = receive wage offer)
-            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+            if (ageHh <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
                 axes[aa][dimIndex][0] = 2;
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 1;
@@ -186,7 +184,6 @@ public class GridScale {
                 dimIndex++;
             }
 
-
             // health status
             if (DecisionParams.flagHealth && ageHh >= DecisionParams.minAgeForPoorHealth) {
                 axes[aa][dimIndex][0] = DecisionParams.PTS_HEALTH;
@@ -198,7 +195,7 @@ public class GridScale {
             }
 
             //disability status
-            if (DecisionParams.flagDisability && ageHh >= DecisionParams.minAgeForPoorHealth) {
+            if (DecisionParams.flagDisability && ageHh >= DecisionParams.minAgeForPoorHealth && ageHh <= DecisionParams.maxAgeForDisability()) {
                 axes[aa][dimIndex][0] = 2;
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 1;
@@ -207,9 +204,19 @@ public class GridScale {
                 dimIndex++;
             }
 
-            // social care market (used to meet care needs)
-            if (Parameters.flagSocialCare && ageHh >= DecisionParams.minAgeFormalSocialCare) {
-                axes[aa][dimIndex][0] = 4; // none, only informal, informal and formal, only formal
+            // social care receipt
+            if (Parameters.flagSocialCare && ageHh >= DecisionParams.minAgeReceiveFormalCare) {
+                axes[aa][dimIndex][0] = 4; // none needed, no formal, informal and formal, only formal (see Enum SocialCareReceiptState)
+                axes[aa][dimIndex][1] = 0;
+                axes[aa][dimIndex][2] = 3;
+                axes[aa][dimIndex][3] = 0;
+                axes[aa][dimIndex][4] = 0;
+                dimIndex++;
+            }
+
+            // social care provision
+            if (Parameters.flagSocialCare) {
+                axes[aa][dimIndex][0] = 4; // none, partner only, partner and non-partner, non-partner only (see Enum SocialCareProvision)
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 3;
                 axes[aa][dimIndex][3] = 0;
@@ -249,7 +256,7 @@ public class GridScale {
 
             //dependent children
             for (int ii = 0; ii < DecisionParams.NUMBER_BIRTH_AGES; ii++) {
-                if (ageHh >= DecisionParams.BIRTH_AGE[ii] && ageHh < (DecisionParams.BIRTH_AGE[ii] + simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
+                if (ageHh >= DecisionParams.BIRTH_AGE[ii] && ageHh < (DecisionParams.BIRTH_AGE[ii] + Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
                     axes[aa][dimIndex][0] = DecisionParams.MAX_BIRTHS[ii] + 1;
                     axes[aa][dimIndex][1] = 0;
                     axes[aa][dimIndex][2] = DecisionParams.MAX_BIRTHS[ii];
@@ -439,7 +446,7 @@ public class GridScale {
         }
 
         // private pension
-        if (DecisionParams.flagRetirement && ageYears > DecisionParams.minAgeToRetire) {
+        if (DecisionParams.flagPrivatePension && ageYears > DecisionParams.minAgeToRetire) {
             if (axisID==Axis.PensionIncome) return dimIndex;
             dimIndex++;
         } else {
@@ -451,7 +458,7 @@ public class GridScale {
         dimIndex++;
 
         // wage offer of principal earner (1 = receive wage offer)
-        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.FLAG_WAGE_OFFER1) {
+        if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             if (axisID==Axis.WageOffer1) return dimIndex;
             dimIndex++;
         } else {
@@ -483,19 +490,27 @@ public class GridScale {
         }
 
         // disability
-        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth) {
+        if (DecisionParams.flagDisability && ageYears >= DecisionParams.minAgeForPoorHealth && ageYears <= DecisionParams.maxAgeForDisability()) {
             if (axisID==Axis.Disability) return dimIndex;
             dimIndex++;
         } else {
             if (axisID==Axis.Disability) return -1;
         }
 
-        // social care market
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeFormalSocialCare) {
-            if (axisID==Axis.SocialCareMarket) return dimIndex;
+        // social care receipt
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+            if (axisID==Axis.SocialCareReceiptState) return dimIndex;
             dimIndex++;
         } else {
-            if (axisID==Axis.SocialCareMarket) return -1;
+            if (axisID==Axis.SocialCareReceiptState) return -1;
+        }
+
+        // social care provision
+        if (Parameters.flagSocialCare) {
+            if (axisID==Axis.SocialCareProvision) return dimIndex;
+            dimIndex++;
+        } else {
+            if (axisID==Axis.SocialCareProvision) return -1;
         }
 
         // region
@@ -524,7 +539,7 @@ public class GridScale {
 
         // dependent children
         for (int ii = 0; ii < DecisionParams.NUMBER_BIRTH_AGES; ii++) {
-            if (ageYears >= DecisionParams.BIRTH_AGE[ii] && ageYears < (DecisionParams.BIRTH_AGE[ii] + simpaths.data.Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
+            if (ageYears >= DecisionParams.BIRTH_AGE[ii] && ageYears < (DecisionParams.BIRTH_AGE[ii] + Parameters.AGE_TO_BECOME_RESPONSIBLE)) {
                 if (axisID==Axis.Child && ii==birthAge) return dimIndex;
                 dimIndex++;
             }
