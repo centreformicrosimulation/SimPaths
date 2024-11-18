@@ -38,6 +38,8 @@ import simpaths.model.taxes.database.TaxDonorDataParser;
  */
 public class Parameters {
 
+    public static final boolean TESTING_FLAG = true;
+
     // EUROMOD variables
 
 
@@ -260,6 +262,8 @@ public class Parameters {
     private static final int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static int startYear;
     public static int endYear;
+    private static final int MIN_START_YEAR_TESTING = 2019;
+    private static final int MAX_START_YEAR_TESTING = 2019; //Maximum allowed starting point. Should correspond to the most recent initial population.
     private static final int MIN_START_YEAR_TRAINING = 2019;
     private static final int MAX_START_YEAR_TRAINING = 2019; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
@@ -1553,11 +1557,11 @@ public class Parameters {
 
         // Regressions for Covid-19 labour transition models below
         regC19LS_SE = new ProbitRegression(coeffCovarianceC19LS_SE);
-        regC19LS_E1 = new MultiLogitRegression<>(coeffC19LS_E1Map);
-        regC19LS_FF1 = new MultiLogitRegression<>(coeffC19LS_FF1Map);
-        regC19LS_FX1 = new MultiLogitRegression<>(coeffC19LS_FX1Map);
-        regC19LS_S1 = new MultiLogitRegression<>(coeffC19LS_S1Map);
-        regC19LS_U1 = new MultiLogitRegression<>(coeffC19LS_U1Map);
+        regC19LS_E1 = new MultiLogitRegression<>(Les_transitions_E1.class, coeffC19LS_E1Map);
+        regC19LS_FF1 = new MultiLogitRegression<>(Les_transitions_FF1.class, coeffC19LS_FF1Map);
+        regC19LS_FX1 = new MultiLogitRegression<>(Les_transitions_FX1.class, coeffC19LS_FX1Map);
+        regC19LS_S1 = new MultiLogitRegression<>(Les_transitions_S1.class, coeffC19LS_S1Map);
+        regC19LS_U1 = new MultiLogitRegression<>(Les_transitions_U1.class, coeffC19LS_U1Map);
         regC19LS_E2a = new LinearRegression(coeffC19LS_E2a);
         regC19LS_E2b = new LinearRegression(coeffC19LS_E2b);
         regC19LS_F2a = new LinearRegression(coeffC19LS_F2a);
@@ -2168,15 +2172,24 @@ public class Parameters {
     }
 
     public static int getMaxStartYear() {
-        return (trainingFlag) ? MAX_START_YEAR_TRAINING : MAX_START_YEAR;
+        if (TESTING_FLAG)
+            return MAX_START_YEAR_TESTING;
+        else
+            return (trainingFlag) ? MAX_START_YEAR_TRAINING : MAX_START_YEAR;
     }
 
     public static int getMinStartYear() {
-        return (trainingFlag) ? MIN_START_YEAR_TRAINING : MIN_START_YEAR;
+        if (TESTING_FLAG)
+            return MIN_START_YEAR_TESTING;
+        else
+            return (trainingFlag) ? MIN_START_YEAR_TRAINING : MIN_START_YEAR;
     }
 
     public static String getEuromodOutputDirectory() {
-        return (trainingFlag) ? EUROMOD_TRAINING_DIRECTORY : EUROMOD_OUTPUT_DIRECTORY;
+        if (TESTING_FLAG)
+            return EUROMOD_OUTPUT_DIRECTORY;
+        else
+            return (trainingFlag) ? EUROMOD_TRAINING_DIRECTORY : EUROMOD_OUTPUT_DIRECTORY;
     }
 
     public static String getEUROMODpolicyForThisYear(int year) {
@@ -3015,7 +3028,10 @@ public class Parameters {
         trainingFlag = flag;
     }
     public static String getInputDirectoryInitialPopulations() {
-        return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
+        if (TESTING_FLAG)
+            return INPUT_DIRECTORY_INITIAL_POPULATIONS;
+        else
+            return (trainingFlag) ? INPUT_DIRECTORY_INITIAL_POPULATIONS + "training"  + File.separator  : INPUT_DIRECTORY_INITIAL_POPULATIONS;
     }
     private static void setMapBounds(MapBounds map, String countryString) {
 

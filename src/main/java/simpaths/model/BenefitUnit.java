@@ -728,7 +728,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         // Transitions from employment
         double labourInnov2 = innovations.getDoubleDraw(3), labourInnov3 = innovations.getDoubleDraw(4);
         if (Les_c7_covid.Employee.equals(stateFrom)) {
-            Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_E1.class);
+            Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilites(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_E1 transitionTo = (Les_transitions_E1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -753,7 +753,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from furlough full
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFull)) {
-            Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FF1.class);
+            Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilites(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FF1 transitionTo = (Les_transitions_FF1) event.eval();
 
@@ -778,7 +778,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from furlough flex
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFlex)) {
-            Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FX1.class);
+            Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilites(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FX1 transitionTo = (Les_transitions_FX1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -802,7 +802,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from self-employment
         } else if (stateFrom.equals(Les_c7_covid.SelfEmployed)) {
-            Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_S1.class);
+            Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilites(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_S1 transitionTo = (Les_transitions_S1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -830,7 +830,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from non-employment
         } else if (stateFrom.equals(Les_c7_covid.NotEmployed)) {
-            Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_U1.class);
+            Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilites(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_U1 transitionTo = (Les_transitions_U1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
