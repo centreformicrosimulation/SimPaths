@@ -1,6 +1,6 @@
 package simpaths.data;
 
-import simpaths.model.enums.IntegerValuedEnum;
+import microsim.statistics.regression.IntegerValuedEnum;
 
 import java.util.ArrayList;
 import java.util.List;

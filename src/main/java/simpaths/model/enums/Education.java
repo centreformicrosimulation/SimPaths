@@ -1,5 +1,7 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 public enum Education implements IntegerValuedEnum {
 	
 	Low(0),

@@ -9,7 +9,7 @@ import microsim.statistics.regression.ProbitRegression;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import simpaths.model.Person;
-import simpaths.model.enums.IntegerValuedEnum;
+import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.model.enums.Labour;
 
 import java.security.InvalidParameterException;

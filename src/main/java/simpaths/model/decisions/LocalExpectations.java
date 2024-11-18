@@ -1,13 +1,12 @@
 package simpaths.model.decisions;
 
 
-import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
 import simpaths.data.RegressionType;
 import simpaths.model.Person;
-import simpaths.model.enums.IntegerValuedEnum;
+import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.model.enums.TimeSeriesVariable;
 
 import java.util.Map;
