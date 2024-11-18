@@ -1064,7 +1064,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (recCareInnov < probRecCare) {
                 // receive care
 
-                Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(this, Person.DoublesVariables.class);
+                Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilities(this, Person.DoublesVariables.class);
                 MultiValEvent event = new MultiValEvent(probs1, innovations.getDoubleDraw(8));
                 SocialCareReceiptS2c socialCareReceiptS2c = (SocialCareReceiptS2c) event.eval();
                 socialCareReceipt = SocialCareReceipt.getCode(socialCareReceiptS2c);
@@ -1083,7 +1083,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                             socialCareFromPartner = true;
                             Map<PartnerSupplementaryCarer,Double> probs2 =
-                                    Parameters.getRegPartnerSupplementaryCareS2e().getProbabilites(this, Person.DoublesVariables.class);
+                                    Parameters.getRegPartnerSupplementaryCareS2e().getProbabilities(this, Person.DoublesVariables.class);
                             event = new MultiValEvent(probs2, innovations.getDoubleDraw(10));
                             PartnerSupplementaryCarer cc = (PartnerSupplementaryCarer) event.eval();
                             if (PartnerSupplementaryCarer.Daughter.equals(cc))
@@ -1098,7 +1098,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         // no care from partner - identify who supplies informal care
 
                         Map<NotPartnerInformalCarer,Double> probs2 =
-                                Parameters.getRegNotPartnerInformalCareS2f().getProbabilites(this, Person.DoublesVariables.class);
+                                Parameters.getRegNotPartnerInformalCareS2f().getProbabilities(this, Person.DoublesVariables.class);
                         event = new MultiValEvent(probs2, innovations.getDoubleDraw(11));
                         NotPartnerInformalCarer cc = (NotPartnerInformalCarer) event.eval();
                         if (NotPartnerInformalCarer.DaughterOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))

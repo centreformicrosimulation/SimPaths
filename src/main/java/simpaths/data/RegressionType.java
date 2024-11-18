@@ -8,4 +8,5 @@ public enum RegressionType {
     Linear,
     RMSE,
     OrderedProbit,
+    GeneralisedOrderedLogit,
 }

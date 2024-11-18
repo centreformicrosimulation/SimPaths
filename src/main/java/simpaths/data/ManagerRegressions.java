@@ -226,7 +226,7 @@ public class ManagerRegressions {
         if (RegressionType.OrderedProbit.equals(regression.getType())) {
             return getOrderedProbitRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
         } else if (RegressionType.MultinomialLogit.equals(regression.getType())) {
-            return getMultiLogitRegression(regression).getProbabilites(obj, Person.DoublesVariables.class);
+            return getMultiLogitRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
         } else
             throw new InvalidParameterException("Probability requested for unrecognised multinomial regression equation");
     }

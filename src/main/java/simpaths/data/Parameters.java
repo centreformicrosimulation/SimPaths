@@ -8,8 +8,10 @@ import java.nio.file.Files;
 import java.util.*;
 
 // import plug-in packages
+import microsim.statistics.IDoubleSource;
 import simpaths.data.startingpop.DataParser;
 import simpaths.model.AnnuityRates;
+import simpaths.model.Person;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -418,6 +420,8 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHealthH1a;
     private static MultiKeyCoefficientMap coeffCovarianceHealthH1b;
     private static MultiKeyCoefficientMap coeffCovarianceHealthH2b; //Prob. long-term sick or disabled
+//    private static Map<Dhe, MultiKeyCoefficientMap> coeffCovarianceHealth1aMap;
+//    private static Map<Dhe, MultiKeyCoefficientMap> coeffCovarianceHealth1bMap;
 
     //Social care
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1a; // prob of needing social care under 65
@@ -633,6 +637,8 @@ public class Parameters {
     /////////////////////////////////////////////////////////////////// REGRESSION OBJECTS //////////////////////////////////////////
 
     //Health
+//    private static GeneralisedOrderedLogitRegression<Dhe> regHealthH1a;
+//    private static GeneralisedOrderedLogitRegression<Dhe> regHealthH1b;
     private static OrderedProbitRegression regHealthH1a;
     private static OrderedProbitRegression regHealthH1b;
     private static ProbitRegression regHealthH2b;
@@ -1445,15 +1451,19 @@ public class Parameters {
         }
 
         //Health
+//        coeffCovarianceHealth1aMap = RegressionUtils.populateMultinomialCoefficientMap(Dhe.class, coeffCovarianceHealthH1a);
+//        coeffCovarianceHealth1bMap = RegressionUtils.populateMultinomialCoefficientMap(Dhe.class, coeffCovarianceHealthH1b);
+//        regHealthH1a = new GeneralisedOrderedLogitRegression<>(Dhe.class, coeffCovarianceHealth1aMap);
+//        regHealthH1b = new GeneralisedOrderedLogitRegression<>(Dhe.class, coeffCovarianceHealth1bMap);
         regHealthH1a = new OrderedProbitRegression(coeffCovarianceHealthH1a, Dhe.class);
         regHealthH1b = new OrderedProbitRegression(coeffCovarianceHealthH1b, Dhe.class);
         regHealthH2b = new ProbitRegression(coeffCovarianceHealthH2b);
 
         //Social care
-        coeffCovarianceSocialCareS2cMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2c);
-        coeffCovarianceSocialCareS2eMap = MultiLogitRegression.populateMultinomialCoefficientMap(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2e);
-        coeffCovarianceSocialCareS2fMap = MultiLogitRegression.populateMultinomialCoefficientMap(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f);
-        coeffCovarianceSocialCareS3dMap = MultiLogitRegression.populateMultinomialCoefficientMap(SocialCareProvision.class, coeffCovarianceSocialCareS3d);
+        coeffCovarianceSocialCareS2cMap = RegressionUtils.populateMultinomialCoefficientMap(SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2c);
+        coeffCovarianceSocialCareS2eMap = RegressionUtils.populateMultinomialCoefficientMap(PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2e);
+        coeffCovarianceSocialCareS2fMap = RegressionUtils.populateMultinomialCoefficientMap(NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f);
+        coeffCovarianceSocialCareS3dMap = RegressionUtils.populateMultinomialCoefficientMap(SocialCareProvision.class, coeffCovarianceSocialCareS3d);
         regReceiveCareS1a = new ProbitRegression(coeffCovarianceSocialCareS1a);
         regCareHoursS1b = new ProbitRegression(coeffCovarianceSocialCareS1b);
         regNeedCareS2a = new ProbitRegression(coeffCovarianceSocialCareS2a);
@@ -1934,12 +1944,10 @@ public class Parameters {
         Parameters.employmentsFurloughedFlex = employmentsFurloughedFlex;
     }
 
-    public static OrderedProbitRegression getRegHealthH1a() {
-        return regHealthH1a;
-    }
-    public static OrderedProbitRegression getRegHealthH1b() {
-        return regHealthH1b;
-    }
+//    public static GeneralisedOrderedLogitRegression getRegHealthH1a() { return regHealthH1a; }
+//    public static GeneralisedOrderedLogitRegression getRegHealthH1b() {
+    public static OrderedProbitRegression getRegHealthH1a() { return regHealthH1a; }
+    public static OrderedProbitRegression getRegHealthH1b() { return regHealthH1b; }
     public static ProbitRegression getRegHealthH2b() { return regHealthH2b; }
 
     public static ProbitRegression getRegReceiveCareS1a() { return regReceiveCareS1a; }
@@ -3287,6 +3295,24 @@ public class Parameters {
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    public static <E extends Enum<E> & IntegerValuedEnum> Map getMultinomialProbabilities(IDoubleSource obj, RegressionName regression) {
+
+        switch (regression) {
+            case EducationE2a -> {
+                return regEducationE2a.getProbabilities(obj, Person.DoublesVariables.class);
+            }
+//            case HealthH1a -> {
+//                return regHealthH1a.getProbabilities(obj, Person.DoublesVariables.class);
+//            }
+//            case SocialCareS2c -> {
+//                return regSocialCareMarketS2c.getProbabilities(obj, Person.DoublesVariables.class);
+//            }
+            default -> {
+                throw new RuntimeException("failed to identify alignment value type in set");
+            }
         }
     }
 }
