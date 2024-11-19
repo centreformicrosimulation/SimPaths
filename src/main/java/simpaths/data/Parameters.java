@@ -41,7 +41,7 @@ import simpaths.model.taxes.database.TaxDonorDataParser;
  */
 public class Parameters {
 
-    public static final boolean TESTING_FLAG = true;
+    public static final boolean TESTING_FLAG = false;
 
     // EUROMOD variables
 
