@@ -967,11 +967,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             Map<Dhe,Double> probs = Parameters.getMultinomialProbabilities(this, RegressionName.HealthH1a);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             dhe = (Dhe) event.eval();
+            if (event.isProblemWithProbs())
+                model.addCounterErrorgologit();
         } else if (dag >= 16) {
 
             Map<Dhe,Double> probs = Parameters.getMultinomialProbabilities(this, RegressionName.HealthH1b);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             dhe = (Dhe) event.eval();
+            if (event.isProblemWithProbs())
+                model.addCounterErrorgologit();
 
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
             boolean becomeLTSickDisabled = false;

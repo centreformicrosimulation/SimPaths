@@ -208,6 +208,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private int year;
 
+    private int counterErrorgologit;
+
     private Set<BenefitUnit> benefitUnits;
 
     private Set<Household> households;
@@ -2247,6 +2249,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      *
      */
     private void updateParameters() {
+
+        counterErrorgologit = 0;
 //		Parameters.updateProbSick(year);		//Make any adjustments to the sickness probability profile by age depending on retirement age
 //		Parameters.updateUnemploymentRate(year);
     }
@@ -3365,4 +3369,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             throw new RuntimeException("Problem sourcing data for starting population");
         }
     }
+
+    public int getCounterErrorgologit() { return counterErrorgologit; }
+    public void addCounterErrorgologit() { counterErrorgologit++; }
 }

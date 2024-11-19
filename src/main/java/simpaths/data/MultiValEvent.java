@@ -3,6 +3,7 @@ package simpaths.data;
 import microsim.statistics.regression.IntegerValuedEnum;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ public class MultiValEvent <E extends IntegerValuedEnum> {
     private E selectedEvent;
     private Map<E, Double> probs;
     private double randomDrawInitial, randomDrawAdjusted;
+    boolean problemWithProbs = false;
 
 
     // CONSTRUCTOR
@@ -36,6 +38,9 @@ public class MultiValEvent <E extends IntegerValuedEnum> {
     public void setRandomDrawAdjusted(double randomDrawAdjusted) {
         this.randomDrawAdjusted = randomDrawAdjusted;
     }
+    public boolean isProblemWithProbs() {
+        return problemWithProbs;
+    }
 
 
     // WORKER METHODS
@@ -45,26 +50,16 @@ public class MultiValEvent <E extends IntegerValuedEnum> {
 
         // evaluate cumulative probability and list keys in ascending order of associated probability
         double cprob = 0.0;
-        List<E> keys = new ArrayList<>();
-        for (E ee : probs.keySet()) {
-
-            if (probs.get(ee) != null) {
-
-                cprob += probs.get(ee);
-                for (int ii=0; ii<keys.size(); ii++) {
-
-                    E ee1 = keys.get(ii);
-                    if (ee1.getValue() > ee.getValue()) {
-
-                        keys.add(ii, ee);
-                        break;
-                    }
-                }
-                if (!keys.contains(ee))
-                    keys.add(ee);
-            } else {
+        List<E> keys = new ArrayList<>(probs.keySet());
+        keys.sort(Comparator.comparingInt(IntegerValuedEnum::getValue));
+        for (E ee : keys) {
+            if (probs.get(ee) == null)
                 throw new RuntimeException("problem identifying probabilities for multinomial object (2)");
+            if (probs.get(ee) < 0.0) {
+                probs.put(ee, 0.0);
+                problemWithProbs = true;
             }
+            cprob += probs.get(ee);
         }
 
         // identify selection and adjusted value of random draw
