@@ -7,6 +7,7 @@ public enum Education implements IntegerValuedEnum {
 	Low(0),
 	Medium(1),
 	High(2);
+
 	private final int value;
 	Education(int val) {value=val;}
 

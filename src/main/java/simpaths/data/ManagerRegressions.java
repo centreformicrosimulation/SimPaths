@@ -88,12 +88,6 @@ public class ManagerRegressions {
             throw new RuntimeException("requested OrderedProbitRegression object is not an ordered probit");
 
         switch (regression) {
-            case HealthH1a -> {
-                return Parameters.getRegHealthH1a();
-            }
-            case HealthH1b -> {
-                return Parameters.getRegHealthH1b();
-            }
             case EducationE2a -> {
                 return Parameters.getRegEducationE2a();
             }
@@ -156,12 +150,14 @@ public class ManagerRegressions {
         if (RegressionType.Linear.equals(regression.getType())) {
 
             return getLinearRegression(regression).getScore(person, Person.DoublesVariables.class);
-        } else if (RegressionType.OrderedProbit.equals(regression.getType())) {
-
-            return getOrderedProbitRegression(regression).getScore(person, Person.DoublesVariables.class);
-        } else {
+        } else if (RegressionType.StandardProbit.equals(regression.getType()) |
+                RegressionType.ReversedProbit.equals(regression.getType()) |
+                RegressionType.AdjustedStandardProbit.equals(regression.getType())) {
 
             return getProbitRegression(regression).getScore(person, Person.DoublesVariables.class);
+        } else {
+
+            throw new RuntimeException("unrecognised regression in getScore");
         }
     }
 
@@ -219,16 +215,6 @@ public class ManagerRegressions {
             throw new InvalidParameterException("Problem evaluating probability from probit regression equation");
         }
         return probability;
-    }
-
-    public static <E extends Enum<E> & IntegerValuedEnum> Map<E, Double> getMultinomialProbabilities(IDoubleSource obj, RegressionName regression) {
-
-        if (RegressionType.OrderedProbit.equals(regression.getType())) {
-            return getOrderedProbitRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
-        } else if (RegressionType.MultinomialLogit.equals(regression.getType())) {
-            return getMultiLogitRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
-        } else
-            throw new InvalidParameterException("Probability requested for unrecognised multinomial regression equation");
     }
 
     public static double getRegressionCoeff(Enum<?> regression, String coeff) {
