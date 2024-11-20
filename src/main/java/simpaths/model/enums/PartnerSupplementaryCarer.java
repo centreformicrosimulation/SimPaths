@@ -1,5 +1,7 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 public enum PartnerSupplementaryCarer implements IntegerValuedEnum {
     None(0),
     Daughter(1),

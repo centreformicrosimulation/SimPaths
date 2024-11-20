@@ -1,5 +1,6 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.data.Parameters;
 import simpaths.model.Person;
 

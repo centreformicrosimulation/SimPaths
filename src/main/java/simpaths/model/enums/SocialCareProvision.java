@@ -1,5 +1,7 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 public enum SocialCareProvision implements IntegerValuedEnum {
 
     None(0),

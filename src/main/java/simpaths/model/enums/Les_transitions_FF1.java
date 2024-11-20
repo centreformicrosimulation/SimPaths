@@ -5,6 +5,8 @@ This enum defines possible states for transitions in the Covid-19 module from em
 
 */
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 public enum Les_transitions_FF1 implements IntegerValuedEnum {
 	NotEmployed(0),
 	SelfEmployed(1),

@@ -964,14 +964,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if((dag >= 16 && dag <= 29) && Les_c4.Student.equals(les_c4) && leftEducation == false) {
             //If age is between 16 - 29 and individual has always been in education, follow process H1a:
 
-            Map<Dhe,Double> probs = Parameters.getRegHealthH1a().getProbabilities(this, Person.DoublesVariables.class);
+            Map<Dhe,Double> probs = Parameters.getMultinomialProbabilities(this, RegressionName.HealthH1a);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             dhe = (Dhe) event.eval();
+            if (event.isProblemWithProbs())
+                model.addCounterErrorgologit();
         } else if (dag >= 16) {
 
-            Map<Dhe,Double> probs = Parameters.getRegHealthH1b().getProbabilities(this, Person.DoublesVariables.class);
+            Map<Dhe,Double> probs = Parameters.getMultinomialProbabilities(this, RegressionName.HealthH1b);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             dhe = (Dhe) event.eval();
+            if (event.isProblemWithProbs())
+                model.addCounterErrorgologit();
 
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
             boolean becomeLTSickDisabled = false;
@@ -1064,7 +1068,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (recCareInnov < probRecCare) {
                 // receive care
 
-                Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilites(this, Person.DoublesVariables.class);
+                Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilities(this, Person.DoublesVariables.class);
                 MultiValEvent event = new MultiValEvent(probs1, innovations.getDoubleDraw(8));
                 SocialCareReceiptS2c socialCareReceiptS2c = (SocialCareReceiptS2c) event.eval();
                 socialCareReceipt = SocialCareReceipt.getCode(socialCareReceiptS2c);
@@ -1083,7 +1087,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                             socialCareFromPartner = true;
                             Map<PartnerSupplementaryCarer,Double> probs2 =
-                                    Parameters.getRegPartnerSupplementaryCareS2e().getProbabilites(this, Person.DoublesVariables.class);
+                                    Parameters.getRegPartnerSupplementaryCareS2e().getProbabilities(this, Person.DoublesVariables.class);
                             event = new MultiValEvent(probs2, innovations.getDoubleDraw(10));
                             PartnerSupplementaryCarer cc = (PartnerSupplementaryCarer) event.eval();
                             if (PartnerSupplementaryCarer.Daughter.equals(cc))
@@ -1098,7 +1102,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         // no care from partner - identify who supplies informal care
 
                         Map<NotPartnerInformalCarer,Double> probs2 =
-                                Parameters.getRegNotPartnerInformalCareS2f().getProbabilites(this, Person.DoublesVariables.class);
+                                Parameters.getRegNotPartnerInformalCareS2f().getProbabilities(this, Person.DoublesVariables.class);
                         event = new MultiValEvent(probs2, innovations.getDoubleDraw(11));
                         NotPartnerInformalCarer cc = (NotPartnerInformalCarer) event.eval();
                         if (NotPartnerInformalCarer.DaughterOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))

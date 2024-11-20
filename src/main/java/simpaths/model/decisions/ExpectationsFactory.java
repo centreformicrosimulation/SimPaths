@@ -3,7 +3,6 @@ package simpaths.model.decisions;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
-import simpaths.data.RegressionType;
 import simpaths.model.Person;
 import simpaths.model.enums.Dcpst;
 import simpaths.model.enums.Gender;
@@ -328,7 +327,7 @@ public class ExpectationsFactory {
         // raw inputs
         double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
         double probRecCare = Parameters.getRegReceiveCareS2b().getProbability(personProxyNextPeriod, Person.DoublesVariables.class);
-        Map<SocialCareReceiptS2c,Double> probsCareFrom = Parameters.getRegSocialCareMarketS2c().getProbabilites(personProxyNextPeriod, Person.DoublesVariables.class);
+        Map<SocialCareReceiptS2c,Double> probsCareFrom = Parameters.getRegSocialCareMarketS2c().getProbabilities(personProxyNextPeriod, Person.DoublesVariables.class);
 
         // compile and package outputs
         int ii = 0;

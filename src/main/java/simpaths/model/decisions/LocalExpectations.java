@@ -1,13 +1,12 @@
 package simpaths.model.decisions;
 
 
-import microsim.statistics.IDoubleSource;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
 import simpaths.data.RegressionType;
 import simpaths.model.Person;
-import simpaths.model.enums.IntegerValuedEnum;
+import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.model.enums.TimeSeriesVariable;
 
 import java.util.Map;
@@ -71,6 +70,9 @@ public class LocalExpectations {
         } else if (RegressionType.MultinomialLogit.equals(regression.getType()) || RegressionType.OrderedProbit.equals(regression.getType())) {
             // multinomial regression
             evaluateMultinomial(person, regression);
+        } else if (RegressionType.GeneralisedOrderedLogit.equals(regression.getType())) {
+            // generalised ordered logit regression
+            evaluateMultinomial(person, regression);
         } else {
             throw new RuntimeException("unexpected regression specification submitted for evaluation of local expectations");
         }
@@ -104,7 +106,7 @@ public class LocalExpectations {
 
     private <E extends Enum<E> & IntegerValuedEnum> void evaluateMultinomial(Person person, RegressionName regression) {
         double[] probs, vals;
-        Map<E,Double> probsMap = ManagerRegressions.getMultinomialProbabilities(person, regression);
+        Map<E,Double> probsMap = Parameters.getMultinomialProbabilities(person, regression);
         int nn = probsMap.size();
         if (nn<2)
             throw new RuntimeException("call to evaluate multinomial probabilities returned fewer than 2 results");
