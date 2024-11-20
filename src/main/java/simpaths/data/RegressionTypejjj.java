@@ -1,6 +1,6 @@
 package simpaths.data;
 
-public enum RegressionType {
+public enum RegressionTypejjj {
     Logit,
     StandardProbit,           // binary (0,1)
     AdjustedStandardProbit,   // binary (0,1) with adjusted intercept

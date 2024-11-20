@@ -923,7 +923,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             boolean tmp_outcome;
 
             tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 1 of case-based psychological distress model
-
             if (dag >= 25 && dag <= 64) {
                 if (Gender.Male.equals(getDgn())) {
                     tmp_step2_score = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model

@@ -3,70 +3,70 @@ package simpaths.data;
 
 public enum RegressionName {
 
-    ChildcareC1b(RegressionType.Linear),
+    ChildcareC1b(RegressionTypejjj.Linear),
 
-    EducationE1a(RegressionType.StandardProbit),
-    EducationE1b(RegressionType.StandardProbit),
-    EducationE2a(RegressionType.OrderedProbit),
+    EducationE1a(RegressionTypejjj.StandardProbit),
+    EducationE1b(RegressionTypejjj.StandardProbit),
+    EducationE2a(RegressionTypejjj.OrderedProbit),
 
-    FertilityF1a(RegressionType.AdjustedStandardProbit),
-    FertilityF1b(RegressionType.AdjustedStandardProbit),
+    FertilityF1a(RegressionTypejjj.AdjustedStandardProbit),
+    FertilityF1b(RegressionTypejjj.AdjustedStandardProbit),
 
-    PartnershipU1a(RegressionType.AdjustedStandardProbit),
-    PartnershipU1b(RegressionType.AdjustedStandardProbit),
-    PartnershipU2b(RegressionType.ReversedProbit),
+    PartnershipU1a(RegressionTypejjj.AdjustedStandardProbit),
+    PartnershipU1b(RegressionTypejjj.AdjustedStandardProbit),
+    PartnershipU2b(RegressionTypejjj.ReversedProbit),
 
-    HealthH1a(RegressionType.GeneralisedOrderedLogit),
-    HealthH1b(RegressionType.GeneralisedOrderedLogit),
-    HealthH2b(RegressionType.StandardProbit),
+    HealthH1a(RegressionTypejjj.GeneralisedOrderedLogit),
+    HealthH1b(RegressionTypejjj.GeneralisedOrderedLogit),
+    HealthH2b(RegressionTypejjj.StandardProbit),
 
-    HealthHM1Level(RegressionType.Linear),
-    HealthHM2LevelMales(RegressionType.Linear),
-    HealthHM2LevelFemales(RegressionType.Linear),
-    HealthHM1Case(RegressionType.Logit),
-    HealthHM2CaseMales(RegressionType.Logit),
-    HealthHM2CaseFemales(RegressionType.Logit),
+    HealthHM1Level(RegressionTypejjj.Linear),
+    HealthHM2LevelMales(RegressionTypejjj.Linear),
+    HealthHM2LevelFemales(RegressionTypejjj.Linear),
+    HealthHM1Case(RegressionTypejjj.Logit),
+    HealthHM2CaseMales(RegressionTypejjj.Logit),
+    HealthHM2CaseFemales(RegressionTypejjj.Logit),
 
-    RMSE(RegressionType.RMSE),
+    RMSE(RegressionTypejjj.RMSE),
 
-    SocialCareS1a(RegressionType.StandardProbit),
-    SocialCareS1b(RegressionType.Linear),
-    SocialCareS2a(RegressionType.StandardProbit),
-    SocialCareS2b(RegressionType.StandardProbit),
-    SocialCareS2c(RegressionType.MultinomialLogit),
-    SocialCareS2d(RegressionType.StandardProbit),
-    SocialCareS2e(RegressionType.MultinomialLogit),
-    SocialCareS2f(RegressionType.MultinomialLogit),
-    SocialCareS2g(RegressionType.Linear),
-    SocialCareS2h(RegressionType.Linear),
-    SocialCareS2i(RegressionType.Linear),
-    SocialCareS2j(RegressionType.Linear),
-    SocialCareS2k(RegressionType.Linear),
-    SocialCareS3a(RegressionType.StandardProbit),
-    SocialCareS3b(RegressionType.StandardProbit),
-    SocialCareS3c(RegressionType.StandardProbit),
-    SocialCareS3d(RegressionType.MultinomialLogit),
-    SocialCareS3e(RegressionType.Linear),
+    SocialCareS1a(RegressionTypejjj.StandardProbit),
+    SocialCareS1b(RegressionTypejjj.Linear),
+    SocialCareS2a(RegressionTypejjj.StandardProbit),
+    SocialCareS2b(RegressionTypejjj.StandardProbit),
+    SocialCareS2c(RegressionTypejjj.MultinomialLogit),
+    SocialCareS2d(RegressionTypejjj.StandardProbit),
+    SocialCareS2e(RegressionTypejjj.MultinomialLogit),
+    SocialCareS2f(RegressionTypejjj.MultinomialLogit),
+    SocialCareS2g(RegressionTypejjj.Linear),
+    SocialCareS2h(RegressionTypejjj.Linear),
+    SocialCareS2i(RegressionTypejjj.Linear),
+    SocialCareS2j(RegressionTypejjj.Linear),
+    SocialCareS2k(RegressionTypejjj.Linear),
+    SocialCareS3a(RegressionTypejjj.StandardProbit),
+    SocialCareS3b(RegressionTypejjj.StandardProbit),
+    SocialCareS3c(RegressionTypejjj.StandardProbit),
+    SocialCareS3d(RegressionTypejjj.MultinomialLogit),
+    SocialCareS3e(RegressionTypejjj.Linear),
 
-    UnemploymentU1a(RegressionType.ReversedProbit),
-    UnemploymentU1b(RegressionType.ReversedProbit),
-    UnemploymentU1c(RegressionType.ReversedProbit),
-    UnemploymentU1d(RegressionType.ReversedProbit),
+    UnemploymentU1a(RegressionTypejjj.ReversedProbit),
+    UnemploymentU1b(RegressionTypejjj.ReversedProbit),
+    UnemploymentU1c(RegressionTypejjj.ReversedProbit),
+    UnemploymentU1d(RegressionTypejjj.ReversedProbit),
 
-    WagesMales(RegressionType.Linear),
-    WagesMalesE(RegressionType.Linear),
-    WagesMalesNE(RegressionType.Linear),
-    WagesFemales(RegressionType.Linear),
-    WagesFemalesE(RegressionType.Linear),
-    WagesFemalesNE(RegressionType.Linear);
+    WagesMales(RegressionTypejjj.Linear),
+    WagesMalesE(RegressionTypejjj.Linear),
+    WagesMalesNE(RegressionTypejjj.Linear),
+    WagesFemales(RegressionTypejjj.Linear),
+    WagesFemalesE(RegressionTypejjj.Linear),
+    WagesFemalesNE(RegressionTypejjj.Linear);
 
-    private final RegressionType type;
+    private final RegressionTypejjj type;
 
-    RegressionName(RegressionType tt) {
+    RegressionName(RegressionTypejjj tt) {
         type = tt;
     }
 
-    public RegressionType getType() {
+    public RegressionTypejjj getType() {
         return type;
     }
 }

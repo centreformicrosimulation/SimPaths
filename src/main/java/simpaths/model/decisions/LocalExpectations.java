@@ -4,7 +4,7 @@ package simpaths.model.decisions;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
-import simpaths.data.RegressionType;
+import simpaths.data.RegressionTypejjj;
 import simpaths.model.Person;
 import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.model.enums.TimeSeriesVariable;
@@ -62,15 +62,15 @@ public class LocalExpectations {
 
     public void evaluate(Person person, RegressionName regression) {
 
-        if (RegressionType.StandardProbit.equals(regression.getType()) || RegressionType.AdjustedStandardProbit.equals(regression.getType())) {
+        if (RegressionTypejjj.StandardProbit.equals(regression.getType()) || RegressionTypejjj.AdjustedStandardProbit.equals(regression.getType())) {
             // binomial regression
             evaluateIndicator(person, regression);
-        } else if (RegressionType.ReversedProbit.equals(regression.getType())) {
+        } else if (RegressionTypejjj.ReversedProbit.equals(regression.getType())) {
             evaluateIndicator(person, regression, 0.0);
-        } else if (RegressionType.MultinomialLogit.equals(regression.getType()) || RegressionType.OrderedProbit.equals(regression.getType())) {
+        } else if (RegressionTypejjj.MultinomialLogit.equals(regression.getType()) || RegressionTypejjj.OrderedProbit.equals(regression.getType())) {
             // multinomial regression
             evaluateMultinomial(person, regression);
-        } else if (RegressionType.GeneralisedOrderedLogit.equals(regression.getType())) {
+        } else if (RegressionTypejjj.GeneralisedOrderedLogit.equals(regression.getType())) {
             // generalised ordered logit regression
             evaluateMultinomial(person, regression);
         } else {
@@ -91,7 +91,7 @@ public class LocalExpectations {
         double[] probs, vals;
         double score = ManagerRegressions.getScore(person, regression);
         double adj = 0.0;
-        if (RegressionType.AdjustedStandardProbit.equals(regression.getType())) {
+        if (RegressionTypejjj.AdjustedStandardProbit.equals(regression.getType())) {
            adj = Parameters.getTimeSeriesValue(person.getYear(), TimeSeriesVariable.FertilityAdjustment);
         }
 
@@ -123,7 +123,7 @@ public class LocalExpectations {
 
     public void evaluateGaussian(Person person, RegressionName regression, double minValue, double maxValue, double cTransform) {
 
-        if (!RegressionType.Linear.equals(regression.getType()))
+        if (!RegressionTypejjj.Linear.equals(regression.getType()))
             throw new RuntimeException("unexpected regression specification submitted for evaluation of local expectations");
 
         double[] probs, vals;

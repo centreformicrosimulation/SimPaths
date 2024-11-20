@@ -2,14 +2,10 @@ package simpaths.data;
 
 
 import microsim.statistics.IDoubleSource;
-import microsim.statistics.regression.LinearRegression;
-import microsim.statistics.regression.MultiLogitRegression;
-import microsim.statistics.regression.OrderedProbitRegression;
-import microsim.statistics.regression.ProbitRegression;
+import microsim.statistics.regression.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import simpaths.model.Person;
-import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.model.enums.Labour;
 
 import java.security.InvalidParameterException;
@@ -23,11 +19,11 @@ import java.util.*;
  */
 public class ManagerRegressions {
 
-    public static ProbitRegression getProbitRegression(RegressionName regression) {
+    public static BinomialRegression getProbitRegression(RegressionName regression) {
 
-        if (!RegressionType.StandardProbit.equals(regression.getType()) &&
-                !RegressionType.AdjustedStandardProbit.equals(regression.getType()) &&
-                !RegressionType.ReversedProbit.equals(regression.getType()))
+        if (!RegressionTypejjj.StandardProbit.equals(regression.getType()) &&
+                !RegressionTypejjj.AdjustedStandardProbit.equals(regression.getType()) &&
+                !RegressionTypejjj.ReversedProbit.equals(regression.getType()))
             throw new RuntimeException("requested ProbitRegression object is not a probit");
 
         switch (regression) {
@@ -82,9 +78,9 @@ public class ManagerRegressions {
         }
     }
 
-    public static OrderedProbitRegression getOrderedProbitRegression(RegressionName regression) {
+    public static OrderedRegression getOrderedProbitRegression(RegressionName regression) {
 
-        if (!RegressionType.OrderedProbit.equals(regression.getType()))
+        if (!RegressionTypejjj.OrderedProbit.equals(regression.getType()))
             throw new RuntimeException("requested OrderedProbitRegression object is not an ordered probit");
 
         switch (regression) {
@@ -97,9 +93,9 @@ public class ManagerRegressions {
         }
     }
 
-    public static MultiLogitRegression getMultiLogitRegression(RegressionName regression) {
+    public static MultinomialRegression getMultiLogitRegression(RegressionName regression) {
 
-        if (!RegressionType.MultinomialLogit.equals(regression.getType()))
+        if (!RegressionTypejjj.MultinomialLogit.equals(regression.getType()))
             throw new RuntimeException("requested MultiLogitRegression object is not a multinomial logit");
 
         switch (regression) {
@@ -117,7 +113,7 @@ public class ManagerRegressions {
 
     public static LinearRegression getLinearRegression(RegressionName regression) {
 
-        if (!RegressionType.Linear.equals(regression.getType()))
+        if (!RegressionTypejjj.Linear.equals(regression.getType()))
             throw new RuntimeException("requested LinearRegression object is not a linear regression");
 
         switch (regression) {
@@ -147,12 +143,12 @@ public class ManagerRegressions {
 
     public static double getScore(IDoubleSource person, RegressionName regression) {
 
-        if (RegressionType.Linear.equals(regression.getType())) {
+        if (RegressionTypejjj.Linear.equals(regression.getType())) {
 
             return getLinearRegression(regression).getScore(person, Person.DoublesVariables.class);
-        } else if (RegressionType.StandardProbit.equals(regression.getType()) |
-                RegressionType.ReversedProbit.equals(regression.getType()) |
-                RegressionType.AdjustedStandardProbit.equals(regression.getType())) {
+        } else if (RegressionTypejjj.StandardProbit.equals(regression.getType()) |
+                RegressionTypejjj.ReversedProbit.equals(regression.getType()) |
+                RegressionTypejjj.AdjustedStandardProbit.equals(regression.getType())) {
 
             return getProbitRegression(regression).getScore(person, Person.DoublesVariables.class);
         } else {
