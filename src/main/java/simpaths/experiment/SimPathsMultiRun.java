@@ -12,6 +12,7 @@ import java.util.Map;
 
 import simpaths.data.Parameters;
 import simpaths.model.SimPathsModel;
+import microsim.data.db.Experiment;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
 import microsim.engine.MultiRun;
@@ -342,6 +343,85 @@ public class SimPathsMultiRun extends MultiRun {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	// Specifically for updating parameters when no object called - i.e. Parameters.java
+	public static void updateParameters(Map<String, Object> parameter_args) {
+
+		for (Map.Entry<String, Object> entry : parameter_args.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			switch (key) {
+				case "WORKING_DIRECTORY":
+					Parameters.setWorkingDirectory(value.toString());
+					setExperimentFolders(value.toString(), true);
+					break;
+				case "INPUT_DIRECTORY":
+					Parameters.setInputDirectory(value.toString());
+					setExperimentFolders(value.toString());
+					break;
+				case "INPUT_DIRECTORY_INITIAL_POPULATIONS":
+					Parameters.setInputDirectoryInitialPopulations(value.toString());
+					break;
+				case "EUROMOD_OUTPUT_DIRECTORY":
+					Parameters.setEuromodOutputDirectory(value.toString());
+					break;
+				default:
+					try {
+						Field field = Parameters.class.getDeclaredField(key);
+						field.setAccessible(true);
+
+						// Determine the field type
+						Class<?> fieldType = field.getType();
+
+						// Convert the YAML value to the field type
+						Object convertedValue = convertToType(value, fieldType);
+
+						// Set the field value
+						field.set(Parameters.class, convertedValue);
+
+						field.setAccessible(false);
+					} catch (NoSuchFieldException | IllegalAccessException e) {
+						// Handle exceptions if the field is not found or inaccessible
+						e.printStackTrace();
+					}
+
+			}
+
+		}
+
+	}
+
+	public static void setExperimentFolders(String root_dir) {
+
+		try {
+			Field inputDir = Experiment.class.getDeclaredField("inputFolder");
+			inputDir.setAccessible(true);
+			inputDir.set(Experiment.class, root_dir + File.separator + "input");
+			inputDir.setAccessible(false);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+	}
+	public static void setExperimentFolders(String root_dir, boolean working_dir) {
+
+		try {
+			Field inputDir = Experiment.class.getDeclaredField("inputFolder");
+			inputDir.setAccessible(true);
+			inputDir.set(null, root_dir + File.separator + "input");
+			inputDir.setAccessible(false);
+			if (working_dir) {
+				Field outputDir = Experiment.class.getDeclaredField("outputRootFolder");
+				outputDir.setAccessible(true);
+				outputDir.set(null, root_dir + File.separator + "output");
+				outputDir.setAccessible(false);
+			}
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private static Object convertToType(Object value, Class<?> targetType) {
