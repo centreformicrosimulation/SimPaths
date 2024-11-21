@@ -47,6 +47,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
+	private static Map<String, Object> parameterArgs;
 	public static String configFile = "default.yml";
 
 	// other working variables
@@ -265,6 +266,12 @@ public class SimPathsMultiRun extends MultiRun {
 
 				if ("collector_args".equals(key)) {
 					collectorArgs = (Map<String, Object>) value;
+					continue;
+				}
+
+				// Read in parameter arguments - to be handled differently as no Parameters object
+				if ("parameter_args".equals(key)) {
+					parameterArgs = (Map<String, Object>) value;
 					continue;
 				}
 
