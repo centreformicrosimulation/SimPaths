@@ -3282,7 +3282,7 @@ public class Parameters {
     }
 
     public static void setInputDirectory(String inputDirectory) {
-        INPUT_DIRECTORY = inputDirectory;
+        INPUT_DIRECTORY = inputDirectory + File.separator;
         INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
         EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
         EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
