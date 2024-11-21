@@ -19,104 +19,45 @@ import java.util.*;
  */
 public class ManagerRegressions {
 
-    public static BinomialRegression getProbitRegression(RegressionName regression) {
-
-        if (!RegressionTypejjj.StandardProbit.equals(regression.getType()) &&
-                !RegressionTypejjj.AdjustedStandardProbit.equals(regression.getType()) &&
-                !RegressionTypejjj.ReversedProbit.equals(regression.getType()))
-            throw new RuntimeException("requested ProbitRegression object is not a probit");
-
-        switch (regression) {
-            case EducationE1a -> {
-                return Parameters.getRegEducationE1a();
-            }
-            case EducationE1b -> {
-                return Parameters.getRegEducationE1b();
-            }
-            case HealthH2b -> {
-                return Parameters.getRegHealthH2b();
-            }
-            case UnemploymentU1a -> {
-                return Parameters.getRegUnemploymentMaleGraduateU1a();
-            }
-            case UnemploymentU1b -> {
-                return Parameters.getRegUnemploymentMaleNonGraduateU1b();
-            }
-            case UnemploymentU1c -> {
-                return Parameters.getRegUnemploymentFemaleGraduateU1c();
-            }
-            case UnemploymentU1d -> {
-                return Parameters.getRegUnemploymentFemaleNonGraduateU1d();
-            }
-            case SocialCareS2a -> {
-                return Parameters.getRegNeedCareS2a();
-            }
-            case SocialCareS2b -> {
-                return Parameters.getRegReceiveCareS2b();
-            }
-            case SocialCareS3c -> {
-                return Parameters.getRegNoPartnerProvCareToOtherS3c();
-            }
-            case PartnershipU1a -> {
-                return Parameters.getRegPartnershipU1a();
-            }
-            case PartnershipU1b -> {
-                return Parameters.getRegPartnershipU1b();
-            }
-            case PartnershipU2b -> {
-                return Parameters.getRegPartnershipU2b();
-            }
-            case FertilityF1a -> {
-                return Parameters.getRegFertilityF1a();
-            }
-            case FertilityF1b -> {
-                return Parameters.getRegFertilityF1b();
-            }
-            default -> {
-                throw new RuntimeException("unrecognised regression (1)");
-            }
-        }
-    }
-
-    public static OrderedRegression getOrderedProbitRegression(RegressionName regression) {
-
-        if (!RegressionTypejjj.OrderedProbit.equals(regression.getType()))
-            throw new RuntimeException("requested OrderedProbitRegression object is not an ordered probit");
-
-        switch (regression) {
-            case EducationE2a -> {
-                return Parameters.getRegEducationE2a();
-            }
-            default -> {
-                throw new RuntimeException("unrecognised regression (2)");
-            }
-        }
-    }
-
-    public static MultinomialRegression getMultiLogitRegression(RegressionName regression) {
-
-        if (!RegressionTypejjj.MultinomialLogit.equals(regression.getType()))
-            throw new RuntimeException("requested MultiLogitRegression object is not a multinomial logit");
-
-        switch (regression) {
-            case SocialCareS2c -> {
-                return Parameters.getRegSocialCareMarketS2c();
-            }
-            case SocialCareS3d -> {
-                return Parameters.getRegInformalCareToS3d();
-            }
-            default -> {
-                throw new RuntimeException("unrecognised regression (2)");
-            }
-        }
-    }
-
     public static LinearRegression getLinearRegression(RegressionName regression) {
 
-        if (!RegressionTypejjj.Linear.equals(regression.getType()))
+        if (!RegressionType.Linear.equals(regression.getType()))
             throw new RuntimeException("requested LinearRegression object is not a linear regression");
 
         switch (regression) {
+            case ChildcareC1b -> {
+                return Parameters.getRegChildcareC1b();
+            }
+            case HealthHM1Level -> {
+                return Parameters.getRegHealthHM1Level();
+            }
+            case HealthHM2LevelMales -> {
+                return Parameters.getRegHealthHM2LevelMales();
+            }
+            case HealthHM2LevelFemales -> {
+                return Parameters.getRegHealthHM2LevelFemales();
+            }
+            case SocialCareS1b -> {
+                return Parameters.getRegCareHoursS1b();
+            }
+            case SocialCareS2g -> {
+                return Parameters.getRegPartnerCareHoursS2g();
+            }
+            case SocialCareS2h -> {
+                return Parameters.getRegDaughterCareHoursS2h();
+            }
+            case SocialCareS2i -> {
+                return Parameters.getRegSonCareHoursS2i();
+            }
+            case SocialCareS2j -> {
+                return Parameters.getRegOtherCareHoursS2j();
+            }
+            case SocialCareS2k -> {
+                return Parameters.getRegFormalCareHoursS2k();
+            }
+            case SocialCareS3e -> {
+                return Parameters.getRegCareHoursProvS3e();
+            }
             case WagesMales -> {
                 return Parameters.getRegWagesMales();
             }
@@ -141,20 +82,147 @@ public class ManagerRegressions {
         }
     }
 
+    public static BinomialRegression getBinomialRegression(RegressionName regression) {
+
+        if (!RegressionType.Probit.equals(regression.getType()) && !RegressionType.Logit.equals(regression.getType()))
+            throw new RuntimeException("requested Binomial regression is not recognised: " + regression.name());
+
+        switch (regression) {
+            case EducationE1a -> {
+                return Parameters.getRegEducationE1a();
+            }
+            case EducationE1b -> {
+                return Parameters.getRegEducationE1b();
+            }
+            case FertilityF1a -> {
+                return Parameters.getRegFertilityF1a();
+            }
+            case FertilityF1b -> {
+                return Parameters.getRegFertilityF1b();
+            }
+            case PartnershipU1a -> {
+                return Parameters.getRegPartnershipU1a();
+            }
+            case PartnershipU1b -> {
+                return Parameters.getRegPartnershipU1b();
+            }
+            case PartnershipU2b -> {
+                return Parameters.getRegPartnershipU2b();
+            }
+            case HealthH2b -> {
+                return Parameters.getRegHealthH2b();
+            }
+            case HealthHM1Case -> {
+                return Parameters.getRegHealthHM1Case();
+            }
+            case HealthHM2CaseMales -> {
+                return Parameters.getRegHealthHM2CaseMales();
+            }
+            case HealthHM2CaseFemales -> {
+                return Parameters.getRegHealthHM2CaseFemales();
+            }
+            case SocialCareS1a -> {
+                return Parameters.getRegReceiveCareS1a();
+            }
+            case SocialCareS2a -> {
+                return Parameters.getRegNeedCareS2a();
+            }
+            case SocialCareS2b -> {
+                return Parameters.getRegReceiveCareS2b();
+            }
+            case SocialCareS2d -> {
+                return Parameters.getRegReceiveCarePartnerS2d();
+            }
+            case SocialCareS3a -> {
+                return Parameters.getRegCarePartnerProvCareToOtherS3a();
+            }
+            case SocialCareS3b -> {
+                return Parameters.getRegNoCarePartnerProvCareToOtherS3b();
+            }
+            case SocialCareS3c -> {
+                return Parameters.getRegNoPartnerProvCareToOtherS3c();
+            }
+            case UnemploymentU1a -> {
+                return Parameters.getRegUnemploymentMaleGraduateU1a();
+            }
+            case UnemploymentU1b -> {
+                return Parameters.getRegUnemploymentMaleNonGraduateU1b();
+            }
+            case UnemploymentU1c -> {
+                return Parameters.getRegUnemploymentFemaleGraduateU1c();
+            }
+            case UnemploymentU1d -> {
+                return Parameters.getRegUnemploymentFemaleNonGraduateU1d();
+            }
+            default -> {
+                throw new RuntimeException("unrecognised regression (1)");
+            }
+        }
+    }
+
+    public static OrderedRegression getOrderedRegression(RegressionName regression) {
+
+        if (!RegressionType.OrderedLogit.equals(regression.getType()) && !RegressionType.OrderedProbit.equals(regression.getType()))
+            throw new RuntimeException("requested ordered regression is not recognised: " + regression.name());
+
+        switch (regression) {
+            case EducationE2a -> {
+                return Parameters.getRegEducationE2a();
+            }
+            default -> {
+                throw new RuntimeException("unrecognised regression (1)");
+            }
+        }
+    }
+
+    public static GeneralisedOrderedRegression getGeneralisedOrderedRegression(RegressionName regression) {
+
+        if (!RegressionType.GenOrderedLogit.equals(regression.getType()) && !RegressionType.GenOrderedProbit.equals(regression.getType()))
+            throw new RuntimeException("requested generalised ordered regression is not recognised: " + regression.name());
+
+        switch (regression) {
+            case HealthH1a -> {
+                return Parameters.getRegHealthH1a();
+            }
+            case HealthH1b -> {
+                return Parameters.getRegHealthH1b();
+            }
+            default -> {
+                throw new RuntimeException("unrecognised regression (1)");
+            }
+        }
+    }
+
+    public static MultinomialRegression getMultinomialRegression(RegressionName regression) {
+
+        if (!RegressionType.MultinomialLogit.equals(regression.getType()))
+            throw new RuntimeException("requested multinomial regression is not recognised: " + regression.name());
+
+        switch (regression) {
+            case SocialCareS2c -> {
+                return Parameters.getRegSocialCareMarketS2c();
+            }
+            case SocialCareS2e -> {
+                return Parameters.getRegPartnerSupplementaryCareS2e();
+            }
+            case SocialCareS2f -> {
+                return Parameters.getRegNotPartnerInformalCareS2f();
+            }
+            case SocialCareS3d -> {
+                return Parameters.getRegInformalCareToS3d();
+            }
+            default -> {
+                throw new RuntimeException("unrecognised regression (1)");
+            }
+        }
+    }
+
     public static double getScore(IDoubleSource person, RegressionName regression) {
 
-        if (RegressionTypejjj.Linear.equals(regression.getType())) {
-
+        if (RegressionType.Linear.equals(regression.getType()))
             return getLinearRegression(regression).getScore(person, Person.DoublesVariables.class);
-        } else if (RegressionTypejjj.StandardProbit.equals(regression.getType()) |
-                RegressionTypejjj.ReversedProbit.equals(regression.getType()) |
-                RegressionTypejjj.AdjustedStandardProbit.equals(regression.getType())) {
 
-            return getProbitRegression(regression).getScore(person, Person.DoublesVariables.class);
-        } else {
-
-            throw new RuntimeException("unrecognised regression in getScore");
-        }
+        throw new RuntimeException("unrecognised regression in getScore");
     }
 
     public static double getRmse(RegressionName regression) {
@@ -195,24 +263,6 @@ public class ManagerRegressions {
         return getRegressionCoeff(RegressionName.RMSE, code);
     }
 
-    public static double getProbability(IDoubleSource person, RegressionName regression) {
-
-        double probability = getProbitRegression(regression).getProbability(person, Person.DoublesVariables.class);
-        if (probability > 1.0 || probability < 0.0) {
-            throw new InvalidParameterException("Problem evaluating probability from probit regression equation");
-        }
-        return probability;
-    }
-
-    public static double getProbability(double score, RegressionName regression) {
-
-        double probability = getProbitRegression(regression).getProbability(score);
-        if (probability > 1.0 || probability < 0.0) {
-            throw new InvalidParameterException("Problem evaluating probability from probit regression equation");
-        }
-        return probability;
-    }
-
     public static double getRegressionCoeff(Enum<?> regression, String coeff) {
         Object oo = getRegressionCoeffObject(regression, coeff, false);
         if (oo instanceof Double) {
@@ -226,27 +276,28 @@ public class ManagerRegressions {
             }
         }
     }
+
     private static Object getRegressionCoeffObject(Enum<?> regression, String coeff, boolean multi) {
         switch ((RegressionName) regression) {
             case WagesMalesE -> {
                 return (multi) ? Parameters.getCoeffCovarianceWagesMalesE().getValue(coeff, "COEFFICIENT") :
-                    Parameters.getCoeffCovarianceWagesMalesE().getValue(coeff);
+                        Parameters.getCoeffCovarianceWagesMalesE().getValue(coeff);
             }
             case WagesMalesNE -> {
                 return (multi) ? Parameters.getCoeffCovarianceWagesMalesNE().getValue(coeff, "COEFFICIENT") :
-                    Parameters.getCoeffCovarianceWagesMalesNE().getValue(coeff);
+                        Parameters.getCoeffCovarianceWagesMalesNE().getValue(coeff);
             }
             case WagesFemalesE -> {
                 return (multi) ? Parameters.getCoeffCovarianceWagesFemalesE().getValue(coeff, "COEFFICIENT") :
-                    Parameters.getCoeffCovarianceWagesFemalesE().getValue(coeff);
+                        Parameters.getCoeffCovarianceWagesFemalesE().getValue(coeff);
             }
             case WagesFemalesNE -> {
                 return (multi) ? Parameters.getCoeffCovarianceWagesFemalesNE().getValue(coeff, "COEFFICIENT") :
-                    Parameters.getCoeffCovarianceWagesFemalesNE().getValue(coeff);
+                        Parameters.getCoeffCovarianceWagesFemalesNE().getValue(coeff);
             }
             case RMSE -> {
                 return (multi) ? Parameters.getCoefficientMapRMSE().getValue(coeff, "COEFFICIENT") :
-                    Parameters.getCoefficientMapRMSE().getValue(coeff);
+                        Parameters.getCoefficientMapRMSE().getValue(coeff);
             }
             default -> {
                 throw new RuntimeException("Coefficient retrieval not supported for regression type " + regression.name());
@@ -254,36 +305,66 @@ public class ManagerRegressions {
         }
     }
 
-    public static <E extends IntegerValuedEnum> E multiEvent(Map<E, Double> probs, double rand) {
+    public static <E extends Enum<E> & IntegerValuedEnum> double getProbability(IDoubleSource obj, RegressionName regression) {
 
-        double cprob = 0.0;
-        List<E> keys = new ArrayList<>();
-        for (E ee : probs.keySet()) {
-            if (probs.get(ee) != null) {
-                cprob += probs.get(ee);
-                for (int ii=0; ii<keys.size(); ii++) {
-                    E ee1 = keys.get(ii);
-                    if (ee1.getValue() > ee.getValue()) {
-                        keys.add(ii, ee);
-                        break;
-                    }
-                }
-                if (!keys.contains(ee))
-                    keys.add(ee);
-            } else {
-                throw new RuntimeException("problem identifying probabilities for multinomial object (2)");
-            }
-        }
+        if (!RegressionType.Logit.equals(regression.getType()) && !RegressionType.Probit.equals(regression.getType()))
+            throw new InvalidParameterException("Failed to retrieve probability for unrecognised regression: " + regression.name());
 
-        double prob = 0.0;
-        for (E ee : keys) {
-            prob += probs.get(ee) / cprob;
-            if (rand < prob) {
-                return ee;
-            }
+        List<E> eventList = getBinomialRegression(regression).getEventList();
+        E event = null;
+        for (E ee : eventList) {
+            if ("True".equals(ee.name()))
+                event = ee;
         }
-        throw new RuntimeException("failed to identify new enumerator for multi-event (2)");
+        if (event==null)
+            throw new RuntimeException("failed to identify true event for binomial distribution");
+
+        return getProbability(event, obj, regression);
     }
+
+    public static <E extends Enum<E> & IntegerValuedEnum> double getProbability(E event, IDoubleSource obj, RegressionName regression) {
+
+        switch (regression.getType()) {
+
+            case Logit, Probit -> {
+                return getBinomialRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
+            }
+            case OrderedLogit, OrderedProbit -> {
+                return getOrderedRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
+            }
+            case GenOrderedLogit, GenOrderedProbit -> {
+                return getGeneralisedOrderedRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
+            }
+            case MultinomialLogit -> {
+                return getMultinomialRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
+            }
+            default ->
+                throw new InvalidParameterException("Probability requested for unrecognised regression: " + regression.name());
+        }
+    }
+
+    public static <E extends Enum<E> & IntegerValuedEnum> Map<E, Double> getProbabilities(IDoubleSource obj, RegressionName regression) {
+
+        switch (regression.getType()) {
+
+            case Logit, Probit -> {
+                return getBinomialRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
+            }
+            case OrderedLogit, OrderedProbit -> {
+                return getOrderedRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
+            }
+            case GenOrderedLogit, GenOrderedProbit -> {
+                return getGeneralisedOrderedRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
+            }
+            case MultinomialLogit -> {
+                return getMultinomialRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
+            }
+            default ->
+                throw new InvalidParameterException("Probability requested for unrecognised regression: " + regression.name());
+        }
+    }
+
+
 
     public static MultiKey<? extends Labour> multiEvent(MultiKeyMap<Labour, Double> probs, double rand) {
 

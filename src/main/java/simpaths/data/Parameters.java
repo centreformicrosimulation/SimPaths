@@ -33,6 +33,8 @@ import simpaths.model.decisions.Grids;
 import simpaths.model.taxes.MatchFeature;
 import simpaths.model.taxes.database.TaxDonorDataParser;
 
+import static microsim.statistics.regression.RegressionUtils.appendCoefficientMaps;
+
 
 /**
  *
@@ -1467,10 +1469,10 @@ public class Parameters {
         regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
 
         //Unemployment
-        regUnemploymentMaleGraduateU1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceUnemploymentU1a);
-        regUnemploymentMaleNonGraduateU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceUnemploymentU1b);
-        regUnemploymentFemaleGraduateU1c = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceUnemploymentU1c);
-        regUnemploymentFemaleNonGraduateU1d = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceUnemploymentU1d);
+        regUnemploymentMaleGraduateU1a = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffCovarianceUnemploymentU1a);
+        regUnemploymentMaleNonGraduateU1b = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffCovarianceUnemploymentU1b);
+        regUnemploymentFemaleGraduateU1c = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffCovarianceUnemploymentU1c);
+        regUnemploymentFemaleNonGraduateU1d = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffCovarianceUnemploymentU1d);
 
         //Health mental
         regHealthHM1Level = new LinearRegression(coeffCovarianceHM1Level);
@@ -1488,9 +1490,12 @@ public class Parameters {
 
         //Partnership
         if (country.equals(Country.UK)) {
-            regPartnershipU1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipU1a);
-            regPartnershipU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipU1b);
-            regPartnershipU2b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipU2b);
+            MultiKeyCoefficientMap coeffPartnershipU1aAppended = appendCoefficientMaps(coeffCovariancePartnershipU1a, partnershipTimeAdjustment, "Year");
+            MultiKeyCoefficientMap coeffPartnershipU1bAppended = appendCoefficientMaps(coeffCovariancePartnershipU1b, partnershipTimeAdjustment, "Year");
+            MultiKeyCoefficientMap coeffPartnershipU2bAppended = appendCoefficientMaps(coeffCovariancePartnershipU2b, partnershipTimeAdjustment, "Year");
+            regPartnershipU1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1aAppended);
+            regPartnershipU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1bAppended);
+            regPartnershipU2b = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffPartnershipU2bAppended);
         } else if (country.equals(Country.IT)) {
             regPartnershipITU1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipITU1);
             regPartnershipITU2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipITU2);
@@ -1498,8 +1503,10 @@ public class Parameters {
 
         //Fertility
         if (country.equals(Country.UK)) {
-            regFertilityF1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceFertilityF1a);
-            regFertilityF1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceFertilityF1b);
+            MultiKeyCoefficientMap coeffFertilityF1aAppended = appendCoefficientMaps(coeffCovarianceFertilityF1a, fertilityTimeAdjustment, "Year");
+            MultiKeyCoefficientMap coeffFertilityF1bAppended = appendCoefficientMaps(coeffCovarianceFertilityF1b, fertilityTimeAdjustment, "Year");
+            regFertilityF1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1aAppended);
+            regFertilityF1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1bAppended);
         } else if (country.equals(Country.IT)) {
             regFertilityF1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceFertilityF1);
         }
@@ -3195,6 +3202,7 @@ public class Parameters {
         TaxDonorDataParser.databaseFromCSV(country, startYear, executeWithGui); // Donor database tables from csv data
         TaxDonorDataParser.populateDonorTaxUnitTables(country, executeWithGui); // Populate tax unit donor tables from person data
     }
+
     private static void safeDelete(String filePath) {
         File file = new File(filePath);
         try {
@@ -3204,36 +3212,6 @@ public class Parameters {
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
-        }
-    }
-
-    public static <E extends Enum<E> & IntegerValuedEnum> Map<E, Double> getMultinomialProbabilities(IDoubleSource obj, RegressionName regression) {
-
-        switch (regression) {
-
-            case EducationE2a -> {
-                return regEducationE2a.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case HealthH1a -> {
-                return regHealthH1a.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case HealthH1b -> {
-                return regHealthH1b.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case SocialCareS2c -> {
-                return regSocialCareMarketS2c.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case SocialCareS2e -> {
-                return regPartnerSupplementaryCareS2e.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case SocialCareS2f -> {
-                return regNotPartnerInformalCareS2f.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case SocialCareS3d -> {
-                return regInformalCareToS3d.getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            default ->
-                    throw new InvalidParameterException("Probability requested for unrecognised multinomial regression equation");
         }
     }
 }

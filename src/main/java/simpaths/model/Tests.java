@@ -24,10 +24,13 @@ public class Tests implements EventListener {
     }
 
     public void runTests() {
-        int val = model.getCounterErrorgologit();
-        if (val > 50)
-            System.out.println("Generalised ordered logit produced negative probabilities for " + val + " observations");
-//        System.out.println(personBUTest1());
+
+        if (model.getCounterErrorH1a() > 20)
+            System.out.println("Generalised ordered logit H1a produced negative probabilities for " + model.getCounterErrorH1a() + " observations");
+        if (model.getCounterErrorH1b() > 20)
+            System.out.println("Generalised ordered logit H1b produced negative probabilities for " + model.getCounterErrorH1b() + " observations");
+
+        // System.out.println(personBUTest1());
 //        System.out.println(idCheckTest2());
     }
 
