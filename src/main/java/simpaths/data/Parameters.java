@@ -3273,4 +3273,31 @@ public class Parameters {
             throw e;
         }
     }
+    public static void setWorkingDirectory(String workingDirectory) {
+        WORKING_DIRECTORY = workingDirectory;
+        INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
+        INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
+        EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
+        EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+    }
+
+    public static void setInputDirectory(String inputDirectory) {
+        INPUT_DIRECTORY = inputDirectory;
+        INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
+        EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
+        EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+    }
+    public static void setInputDirectoryInitialPopulations(String inputDirectoryInitialPopulations) {
+
+        INPUT_DIRECTORY_INITIAL_POPULATIONS = inputDirectoryInitialPopulations;
+    }
+
+    public static void setEuromodOutputDirectory(String euromodOutputDirectory) {
+        EUROMOD_OUTPUT_DIRECTORY = euromodOutputDirectory;
+        EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+    }
+
+    public static String getInputDirectory() {
+        return INPUT_DIRECTORY;
+    }
 }
