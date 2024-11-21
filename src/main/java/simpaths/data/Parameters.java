@@ -256,8 +256,8 @@ public class Parameters {
 
     //public static int MAX_AGE_IN_EDUCATION;// = MAX_AGE;//30;			// Max age a person can stay in education	//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
-    private static final int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
-    private static final int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
+    private static int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static int startYear;
     public static int endYear;
     private static final int MIN_START_YEAR_TRAINING = 2019;
@@ -267,7 +267,7 @@ public class Parameters {
     public static final boolean FLAG_SINGLE_MOTHERS = true;
     public static boolean flagUnemployment = false;
 
-    public static final int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
+    public static int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
     public static double PROB_NEWBORN_IS_MALE = 0.5;            // Must be strictly greater than 0.0 and less than 1.0
 
