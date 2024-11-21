@@ -288,14 +288,14 @@ public class Parameters {
     public static int maleMaxAgeSick = Integer.MIN_VALUE;
 
     //For use with EUROMOD and h2 input database construction
-    public static final String WORKING_DIRECTORY = System.getProperty("user.dir");
-    public static final String INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
+    public static String WORKING_DIRECTORY = System.getProperty("user.dir");
+    public static String INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
     public static boolean trainingFlag = false;
-    public static final String INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
-    public static final String EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
-    public static final String EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
-    public static final String EUROMODpolicyScheduleFilename = "EUROMODpolicySchedule";
-    public static final String DatabaseCountryYearFilename = "DatabaseCountryYear";
+    public static String INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
+    public static String EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
+    public static String EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+    public static String EUROMODpolicyScheduleFilename = "EUROMODpolicySchedule";
+    public static String DatabaseCountryYearFilename = "DatabaseCountryYear";
 
     //Headings in Excel file of EUROMOD policy scenarios
     public static final String EUROMODpolicyScheduleHeadingFilename = "Filename";
