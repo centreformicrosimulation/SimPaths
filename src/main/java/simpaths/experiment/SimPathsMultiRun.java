@@ -65,8 +65,18 @@ public class SimPathsMultiRun extends MultiRun {
 	 */
 	public static void main(String[] args) {
 
+
+		// process Yaml config file
+		if (!parseYamlConfig(args)) {
+			// if parseYamlConfig returns false (indicating bad filename passed), exit main
+			return;
+		}
+
+		if (parameterArgs != null)
+			updateParameters(parameterArgs);
+
 		// set default values for country and start year
-		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
+		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
 		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
 			countryString = "Italy";
 		} else {
@@ -76,11 +86,6 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
-		// process Yaml config file
-		if (!parseYamlConfig(args)) {
-			// if parseYamlConfig returns false (indicating bad filename passed), exit main
-			return;
-		}
 		if (innovationArgs!=null)
 			updateLocalParameters(innovationArgs);
 
@@ -446,9 +451,6 @@ public class SimPathsMultiRun extends MultiRun {
 
 	@Override
 	public void buildExperiment(SimulationEngine engine) {
-
-		if (parameterArgs != null)
-			updateParameters(parameterArgs);
 
 		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
 		updateLocalParameters(model);
