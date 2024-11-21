@@ -60,3 +60,6 @@ collector_args:
 #    persistHouseholds: false
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
+
+parameter_args:
+  INPUT_DIRECTORY: input
