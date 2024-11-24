@@ -888,7 +888,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     emp2 = 0.0;
                 }
-                if ( getRefPersonForDecisions().getGender()==0) {
+                if (getRefPersonForDecisions().getGender()==0) {
                     // reference person is male
 
                     hoursWorkedPerWeekM = DecisionParams.FULLTIME_HOURS_WEEKLY * emp1;
@@ -951,11 +951,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             LinkedHashSet<MultiKey<Labour>> possibleLabourCombinations = findPossibleLabourCombinations(); // Find possible labour combinations for this benefit unit
             MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
-
             //Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
-            if(Occupancy.Couple.equals(occupancy)) {
+            if (Occupancy.Couple.equals(occupancy)) {
 
-                for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
+                for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
 
                     //Sets values for regression score calculation
                     male.setLabourSupplyWeekly(labourKey.getKey(0));
@@ -1002,9 +1001,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else {
                 // single adult
 
-                if(Occupancy.Single_Male.equals(occupancy)) {
+                if (Occupancy.Single_Male.equals(occupancy)) {
 
-                    for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
+                    for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
 
                         male.setLabourSupplyWeekly(labourKey.getKey(0));
                         double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getYptciihs_dv());
@@ -1032,7 +1031,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     }
                 } else if (Occupancy.Single_Female.equals(occupancy)) {        //Occupant must be a single female
 
-                    for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
+                    for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
 
                         female.setLabourSupplyWeekly(labourKey.getKey(1));
                         double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getYptciihs_dv());
@@ -1059,14 +1058,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     }
                 }
             }
-            if(labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
+            if (labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
                 // error check
 
                 System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
-                if(male != null) {
+                if (male != null) {
                     System.out.print("male : " + male.getKey().getId() + ", ");
                 }
-                if(female != null) {
+                if (female != null) {
                     System.out.print("female : " + female.getKey().getId() + ", ");
                 }
                 System.out.print("is empty!");

@@ -104,7 +104,7 @@ public class States {
 
         // social care receipt
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            populate(Axis.SocialCareReceiptState, (double)refPerson.getSocialCareReceiptState().getValue());
+            populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptState().getValue());
 
         // social care provision
         if (Parameters.flagSocialCare)
@@ -324,7 +324,7 @@ public class States {
         boolean loopConsider = true;
 
         // check wage offer
-        int wageOffer = getWageOffer();
+        int wageOffer = getWageOffer1();
         if (wageOffer == 0) {
 
             // skip if no wage offer is received, as numerical solution for this state combination is identical to
@@ -391,7 +391,7 @@ public class States {
      * METHOD TO EXTRACT WAGE OFFER STATE FROM STATES ARRAY
      * @return the wage offer state if during working lifetime, and -1 otherwise
      */
-    int getWageOffer() {
+    int getWageOffer1() {
         int wageOffer;
         if (ageYears <= DecisionParams.maxAgeFlexibleLabourSupply && DecisionParams.flagLowWageOffer1) {
             wageOffer = (int) Math.round(states[scale.getIndex(Axis.WageOffer1, ageYears)]);
@@ -606,7 +606,10 @@ public class States {
      * METHOD TO RETURN GEOGRAPHIC REGION IMPLIED BY STATE COMBINATION
      * @return integer
      */
-    int getRegion() { return (int)states[scale.getIndex(Axis.Region, ageYears)]; }
+    int getRegion() {
+        int index = scale.getIndex(Axis.Region, ageYears);
+        return (index<0) ? 0 : (int)states[index];
+    }
 
     /**
      * METHOD TO RETURN DISABILITY STATUS IMPLIED BY STATE COMBINATION
@@ -624,9 +627,9 @@ public class States {
      * METHOD TO RETURN SOCIAL CARE RECEIPT
      * @return integer (0 none needed, 1 no formal (needed but not received or only informal), 2 formal and informal, 3 only formal
      */
-    int getSocialCareReceiptState() {
+    int getSocialCareReceipt() {
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
-            return (int)states[scale.getIndex(Axis.SocialCareReceiptState, ageYears)];
+            return (int)states[scale.getIndex(Axis.SocialCareReceipt, ageYears)];
         } else {
             return 0;
         }
@@ -640,7 +643,7 @@ public class States {
         if (!Parameters.flagSuppressSocialCareCosts) {
             if (getDisability()==1)
                 return false;
-            if (getSocialCareReceiptState()>0)
+            if (getSocialCareReceipt()>0)
                 return false;
         }
         return true;
@@ -890,7 +893,7 @@ public class States {
     SocialCareReceiptState getSocialCareReceiptStateCode() {
         SocialCareReceiptState code;
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            code = SocialCareReceiptState.getCode(getVal(Axis.SocialCareReceiptState));
+            code = SocialCareReceiptState.getCode(getVal(Axis.SocialCareReceipt));
         else
             code = SocialCareReceiptState.NoneNeeded;
         return code;
@@ -902,7 +905,7 @@ public class States {
     SocialCareReceipt getSocialCareReceiptCode() {
         SocialCareReceipt code;
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
-            code = SocialCareReceipt.getCode(getVal(Axis.SocialCareReceiptState));
+            code = SocialCareReceipt.getCode(getVal(Axis.SocialCareReceipt));
         else
             code = SocialCareReceipt.None;
         return code;
@@ -1034,7 +1037,7 @@ public class States {
 
         // social care receipt
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
-            stateIndex = scale.getIndex(Axis.SocialCareReceiptState, ageYears);
+            stateIndex = scale.getIndex(Axis.SocialCareReceipt, ageYears);
             printOutOfBounds(stateIndex);
             msg = "social care receipt: " + String.format(fmtIndicator,states[stateIndex]);
             System.out.println(msg);

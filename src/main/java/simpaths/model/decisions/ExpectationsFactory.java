@@ -108,13 +108,13 @@ public class ExpectationsFactory {
             int numberExpectedInitial = numberExpected;
             boolean flagEval;
             LocalExpectations lexpect = new LocalExpectations();
-            lexpect.evaluate(personProxyNextPeriod, RegressionName.EducationE1a);
+            lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE1a);
             for (int ii=0; ii<numberExpectedInitial; ii++) {
 
                 flagEval = updatePersonNextPeriod(ii);
                 if (flagEval) {
                     lexpect = new LocalExpectations();
-                    lexpect.evaluate(personProxyNextPeriod, RegressionName.EducationE1a);
+                    lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE1a);
                 }
                 expandExpectationsSingleIndex(ii, stateIndexNextPeriod, lexpect);
             }
@@ -123,7 +123,7 @@ public class ExpectationsFactory {
             if (currentStates.getStudent() == 0) {
                 lexpect.assignValue(currentStates.states[stateIndexCurrPeriod]);
             } else {
-                lexpect.evaluate(personProxyNextPeriod, RegressionName.EducationE1a);
+                lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE1a);
             }
             expandExpectationsAllIndices(stateIndexNextPeriod, lexpect);
         }
@@ -147,7 +147,7 @@ public class ExpectationsFactory {
             int numberExpectedInitial = numberExpected;
             boolean flagEval = false;
             LocalExpectations lexpect = new LocalExpectations();
-            lexpect.evaluate(personProxyNextPeriod, RegressionName.EducationE2a);
+            lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2a);
             for (int ii = 0; ii < numberExpectedInitial; ii++) {
 
                 if (anyVaries()) {
@@ -155,7 +155,7 @@ public class ExpectationsFactory {
                 }
                 if (flagEval) {
                     lexpect = new LocalExpectations();
-                    lexpect.evaluate(personProxyNextPeriod, RegressionName.EducationE2a);
+                    lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2a);
                 }
 
                 if (anticipated[ii].getStudent() == 1) {
@@ -258,7 +258,7 @@ public class ExpectationsFactory {
     }
 
     public void updateSocialCareReceipt() {
-        updateCommon(Axis.SocialCareReceiptState);
+        updateCommon(Axis.SocialCareReceipt);
         flagSocialCareReceiptVaries = true;
     }
 
@@ -302,22 +302,22 @@ public class ExpectationsFactory {
     private LocalExpectations lexpectEval(Axis axis) {
 
         LocalExpectations lexpectations = new LocalExpectations();
-        if (Axis.SocialCareReceiptState.equals(axis)) {
+        if (Axis.SocialCareReceipt.equals(axis)) {
 
             lexpectations = compileSocialCareReceiptProbs();
         } else if (Axis.SocialCareProvision.equals(axis)) {
 
             if (Dcpst.Partnered.equals(personProxyNextPeriod.getDcpst()))
-                lexpectations.evaluate(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis));
+                lexpectations.evaluateDiscrete(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis));
             else
-                lexpectations.evaluateIndicator(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis), 3.0);
+                lexpectations.evaluateLabelledIndicator(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis), 3.0);
         } else if (Axis.WagePotential.equals(axis)) {
 
             lexpectations.evaluateGaussian(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis),
                     Math.log(DecisionParams.MIN_WAGE_PHOUR), Math.log(DecisionParams.MAX_WAGE_PHOUR), DecisionParams.C_WAGE_POTENTIAL);
         } else {
 
-            lexpectations.evaluate(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis));
+            lexpectations.evaluateDiscrete(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis));
         }
         return lexpectations;
     }
@@ -402,7 +402,7 @@ public class ExpectationsFactory {
             if (flagChange) flagEval = true;
         }
         if (flagSocialCareReceiptVaries) {
-            flagChange = updatePersonNextPeriod(anticipated[ii], Axis.SocialCareReceiptState);
+            flagChange = updatePersonNextPeriod(anticipated[ii], Axis.SocialCareReceipt);
             if (flagChange) flagEval = true;
         }
         if (flagSocialCareProvisionVaries) {
@@ -439,7 +439,7 @@ public class ExpectationsFactory {
         } else if (Axis.Disability.equals(axis)) {
             val0 = personProxyNextPeriod.getDlltsd();
             val1 = states.getDlltsd();
-        } else if (Axis.SocialCareReceiptState.equals(axis)) {
+        } else if (Axis.SocialCareReceipt.equals(axis)) {
             val0 = personProxyNextPeriod.getSocialCareReceipt();
             val1 = states.getSocialCareReceiptCode();
         } else if (Axis.SocialCareProvision.equals(axis)) {
@@ -474,7 +474,7 @@ public class ExpectationsFactory {
                 personProxyNextPeriod.setDhe(states.getHealthCode());
             } else if (Axis.Disability.equals(axis)) {
                 personProxyNextPeriod.setDlltsd(states.getDlltsd());
-            } else if (Axis.SocialCareReceiptState.equals(axis)) {
+            } else if (Axis.SocialCareReceipt.equals(axis)) {
                 personProxyNextPeriod.setSocialCareReceipt(states.getSocialCareReceiptCode());
             } else if (Axis.SocialCareProvision.equals(axis)) {
                 personProxyNextPeriod.setSocialCareProvision(states.getSocialCareProvisionCode());

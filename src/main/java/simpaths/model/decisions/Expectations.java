@@ -233,10 +233,6 @@ public class Expectations {
      */
     public void updateForDiscreteControls(double emp1Pr, double emp2Pr) {
 
-        // working variables
-        int stateIndexNextPeriod, stateIndexCurrPeriod;
-
-
         //********************************************************
         // update current period variables for discrete decisions
         //********************************************************
@@ -419,7 +415,7 @@ public class Expectations {
 
             // cohabitation (1 = cohabiting)
             if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
-                futures.updateCohabitation();
+               futures.updateCohabitation();
             }
 
             // dependent children
