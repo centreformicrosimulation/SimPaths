@@ -12,7 +12,7 @@ import java.io.File;
 public class DecisionParams {
 
     // RUNNING OPTIONS
-    public static final boolean PARALLELISE_SOLUTIONS = false;
+    public static final boolean PARALLELISE_SOLUTIONS = true;
     public static boolean saveGridSlicesToCSV = true;
     public static boolean saveIntermediateSolutions = false;
     public static boolean saveImperfectTaxDbMatches = false;
@@ -21,7 +21,7 @@ public class DecisionParams {
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
 
-    public static final boolean SOLVE_FROM_INTERMEDIATE = true;
+    public static final boolean SOLVE_FROM_INTERMEDIATE = false;
     public static final int SOLVE_FROM_AGE = 36;                     // if SOLVE_FROM_INTERMEDIATE
 
     // MODEL SETTINGS
@@ -65,9 +65,9 @@ public class DecisionParams {
     public static final double MIN_CONSUMPTION_PER_YEAR = 5 * 52;              // minimum feasible consumption per year
 
     // LIQUID WEALTH STATE
-    //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
-    public static final int PTS_LIQUID_WEALTH_WKG = 5;
-    public static final int PTS_LIQUID_WEALTH_RTD = 5;
+    //public static final int PTS_LIQUID_WEALTH = 21;                   // number of discrete points used to approximate liquid wealth
+    public static final int PTS_LIQUID_WEALTH_WKG = 21;
+    public static final int PTS_LIQUID_WEALTH_RTD = 21;
     public static final double C_LIQUID_WEALTH = 50260.0;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
     public static double rSafeAssets;                                 // return to liquid wealth
     public static double rDebtLow;                                    // interest charge on net debt
@@ -75,8 +75,8 @@ public class DecisionParams {
 
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
-    //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
-    public static final int PTS_WAGE_POTENTIAL = 5;
+    //public static final int PTS_WAGE_POTENTIAL = 21;                // number of discrete points used to approximate full-time wage potential
+    public static final int PTS_WAGE_POTENTIAL = 21;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour
     public static final double C_WAGE_POTENTIAL = 1.0;                // log scale adjustment (see liquid wealth above)

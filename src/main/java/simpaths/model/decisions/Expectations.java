@@ -233,10 +233,6 @@ public class Expectations {
      */
     public void updateForDiscreteControls(double emp1Pr, double emp2Pr) {
 
-        // working variables
-        int stateIndexNextPeriod, stateIndexCurrPeriod;
-
-
         //********************************************************
         // update current period variables for discrete decisions
         //********************************************************

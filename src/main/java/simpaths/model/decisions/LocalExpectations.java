@@ -85,7 +85,7 @@ public class LocalExpectations {
             double prob = probsMap.get(key);
             if (prob<0.0 && !RegressionType.GenOrderedProbit.equals(regression.getType()) && !RegressionType.GenOrderedLogit.equals(regression.getType()))
                 throw new RuntimeException("negative probability evaluated for local expectations");
-            probs[ii] = Math.max(0.0,probsMap.get(key));
+            probs[ii] = Math.max(0.0,prob);
             if (key instanceof ReversedIndicator)
                 vals[ii] = 1.0 - (double)key.getValue();
             else

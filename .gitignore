@@ -336,3 +336,5 @@ input/EUROMODoutput/current/uk_2024_std.txt
 input/EUROMODoutput/current/uk_2025_std.txt
 input/EUROMODoutput/current/uk_2026_std.txt
 input/EUROMODoutput/current/uk_2027_std.txt
+input/InitialPopulations/current/*
+input/InitialPopulations/testing/*
