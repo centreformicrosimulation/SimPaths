@@ -12,8 +12,8 @@ import java.io.File;
 public class DecisionParams {
 
     // RUNNING OPTIONS
-    public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static boolean saveGridSlicesToCSV = false;
+    public static final boolean PARALLELISE_SOLUTIONS = false;
+    public static boolean saveGridSlicesToCSV = true;
     public static boolean saveIntermediateSolutions = false;
     public static boolean saveImperfectTaxDbMatches = false;
 
@@ -21,8 +21,8 @@ public class DecisionParams {
     public static final double MIN_STATE_PROBABILITY = 0.01;          // if FILTER_LOCAL_EXPECTATIONS, omits state-specific events with probability under this threshold
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
 
-    public static final boolean SOLVE_FROM_INTERMEDIATE = false;
-    public static final int SOLVE_FROM_AGE = 74;                     // if SOLVE_FROM_INTERMEDIATE
+    public static final boolean SOLVE_FROM_INTERMEDIATE = true;
+    public static final int SOLVE_FROM_AGE = 36;                     // if SOLVE_FROM_INTERMEDIATE
 
     // MODEL SETTINGS
     public static final double GRID_DEFAULT_VALUE = 999.0;

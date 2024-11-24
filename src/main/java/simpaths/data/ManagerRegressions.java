@@ -7,6 +7,7 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import simpaths.model.Person;
 import simpaths.model.enums.Labour;
+import simpaths.model.enums.ReversedIndicator;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -217,6 +218,27 @@ public class ManagerRegressions {
         }
     }
 
+    public static IDiscreteChoiceModel getDiscreteVariableRegression(RegressionName regression) {
+
+        switch (regression.getType()) {
+
+            case Logit, Probit -> {
+                return getBinomialRegression(regression);
+            }
+            case OrderedLogit, OrderedProbit -> {
+                return getOrderedRegression(regression);
+            }
+            case GenOrderedLogit, GenOrderedProbit -> {
+                return getGeneralisedOrderedRegression(regression);
+            }
+            case MultinomialLogit -> {
+                return getMultinomialRegression(regression);
+            }
+            default ->
+                throw new InvalidParameterException("Unrecognised call for discrete variable regression: " + regression.name());
+        }
+    }
+
     public static double getScore(IDoubleSource person, RegressionName regression) {
 
         if (RegressionType.Linear.equals(regression.getType()))
@@ -305,66 +327,44 @@ public class ManagerRegressions {
         }
     }
 
-    public static <E extends Enum<E> & IntegerValuedEnum> double getProbability(IDoubleSource obj, RegressionName regression) {
+    public static double getProbability(IDoubleSource obj, RegressionName regression) {
 
         if (!RegressionType.Logit.equals(regression.getType()) && !RegressionType.Probit.equals(regression.getType()))
             throw new InvalidParameterException("Failed to retrieve probability for unrecognised regression: " + regression.name());
 
-        List<E> eventList = getBinomialRegression(regression).getEventList();
-        E event = null;
-        for (E ee : eventList) {
-            if ("True".equals(ee.name()))
-                event = ee;
-        }
-        if (event==null)
-            throw new RuntimeException("failed to identify true event for binomial distribution");
-
-        return getProbability(event, obj, regression);
+        return getBinomialRegression(regression).getProbability(obj, Person.DoublesVariables.class);
     }
 
     public static <E extends Enum<E> & IntegerValuedEnum> double getProbability(E event, IDoubleSource obj, RegressionName regression) {
 
-        switch (regression.getType()) {
-
-            case Logit, Probit -> {
-                return getBinomialRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
-            }
-            case OrderedLogit, OrderedProbit -> {
-                return getOrderedRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
-            }
-            case GenOrderedLogit, GenOrderedProbit -> {
-                return getGeneralisedOrderedRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
-            }
-            case MultinomialLogit -> {
-                return getMultinomialRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
-            }
-            default ->
-                throw new InvalidParameterException("Probability requested for unrecognised regression: " + regression.name());
-        }
+        return getDiscreteVariableRegression(regression).getProbability(event, obj, Person.DoublesVariables.class);
     }
 
     public static <E extends Enum<E> & IntegerValuedEnum> Map<E, Double> getProbabilities(IDoubleSource obj, RegressionName regression) {
 
-        switch (regression.getType()) {
-
-            case Logit, Probit -> {
-                return getBinomialRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case OrderedLogit, OrderedProbit -> {
-                return getOrderedRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case GenOrderedLogit, GenOrderedProbit -> {
-                return getGeneralisedOrderedRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            case MultinomialLogit -> {
-                return getMultinomialRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
-            }
-            default ->
-                throw new InvalidParameterException("Probability requested for unrecognised regression: " + regression.name());
-        }
+        return getDiscreteVariableRegression(regression).getProbabilities(obj, Person.DoublesVariables.class);
     }
 
+    public static <E extends Enum<E> & IntegerValuedEnum> E getEvent(Map<E, Double> probs, double rand) {
 
+        List<E> eventList = (List<E>) probs.keySet();
+        eventList.sort(Comparator.comparingInt(IntegerValuedEnum::getValue));
+
+        double prob = 0.0;
+        for (E event : eventList) {
+            prob += probs.get(event);
+            if (rand < prob) {
+                return event;
+            }
+        }
+        throw new RuntimeException("failed to select event from discrete set");
+    }
+
+    public static <E extends Enum<E> & IntegerValuedEnum> E getEvent(IDoubleSource obj, RegressionName regression, double rand) {
+
+        Map<E, Double> probs = getProbabilities(obj, regression);
+        return getEvent(probs, rand);
+    }
 
     public static MultiKey<? extends Labour> multiEvent(MultiKeyMap<Labour, Double> probs, double rand) {
 
@@ -398,6 +398,7 @@ public class ManagerRegressions {
         }
         throw new RuntimeException("failed to identify new enumerator for multi-event (3)");
     }
+
     private static int getMultiKeyValue(MultiKey<? extends Labour> ee) {
         int val = 0;
         int fctr = 1;

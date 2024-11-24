@@ -6,6 +6,7 @@ import simpaths.data.ManagerRegressions;
 import simpaths.data.RegressionName;
 import simpaths.model.Person;
 import microsim.statistics.regression.IntegerValuedEnum;
+import simpaths.model.enums.ReversedIndicator;
 
 import java.util.Map;
 
@@ -63,7 +64,7 @@ public class LocalExpectations {
         values = new double[] {value};
     }
 
-    public void evaluateIndicator(Person person, RegressionName regression, Double valueTrue) {
+    public void evaluateLabelledIndicator(Person person, RegressionName regression, Double valueTrue) {
         double[] probs, vals;
         double prob = ManagerRegressions.getProbability(person, regression);
         probs = new double[] {1.0-prob, prob};
@@ -85,7 +86,10 @@ public class LocalExpectations {
             if (prob<0.0 && !RegressionType.GenOrderedProbit.equals(regression.getType()) && !RegressionType.GenOrderedLogit.equals(regression.getType()))
                 throw new RuntimeException("negative probability evaluated for local expectations");
             probs[ii] = Math.max(0.0,probsMap.get(key));
-            vals[ii] = (double)key.getValue();
+            if (key instanceof ReversedIndicator)
+                vals[ii] = 1.0 - (double)key.getValue();
+            else
+                vals[ii] = (double)key.getValue();
             ii++;
         }
         screenAndAssign(probs, vals);

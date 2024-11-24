@@ -419,7 +419,7 @@ public class Expectations {
 
             // cohabitation (1 = cohabiting)
             if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
-                futures.updateCohabitation();
+               futures.updateCohabitation();
             }
 
             // dependent children
