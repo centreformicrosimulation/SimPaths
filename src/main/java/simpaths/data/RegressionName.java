@@ -1,37 +1,66 @@
 package simpaths.data;
 
 
+import microsim.statistics.regression.RegressionType;
+
 public enum RegressionName {
 
-    EducationE1a(RegressionType.StandardProbit),
-    EducationE1b(RegressionType.StandardProbit),
+    ChildcareC1b(RegressionType.Linear),
+
+    EducationE1a(RegressionType.Probit),
+    EducationE1b(RegressionType.Probit),
     EducationE2a(RegressionType.OrderedProbit),
-    HealthH1a(RegressionType.OrderedProbit),
-    HealthH1b(RegressionType.OrderedProbit),
-    HealthH2b(RegressionType.StandardProbit),
-    SocialCareS2a(RegressionType.StandardProbit),
-    SocialCareS2b(RegressionType.StandardProbit),
+
+    FertilityF1a(RegressionType.Probit),
+    FertilityF1b(RegressionType.Probit),
+
+    PartnershipU1a(RegressionType.Probit),
+    PartnershipU1b(RegressionType.Probit),
+    PartnershipU2b(RegressionType.Probit),
+
+    HealthH1a(RegressionType.GenOrderedLogit),
+    HealthH1b(RegressionType.GenOrderedLogit),
+    HealthH2b(RegressionType.Probit),
+
+    HealthHM1Level(RegressionType.Linear),
+    HealthHM2LevelMales(RegressionType.Linear),
+    HealthHM2LevelFemales(RegressionType.Linear),
+    HealthHM1Case(RegressionType.Logit),
+    HealthHM2CaseMales(RegressionType.Logit),
+    HealthHM2CaseFemales(RegressionType.Logit),
+
+    RMSE(RegressionType.Linear),
+
+    SocialCareS1a(RegressionType.Probit),
+    SocialCareS1b(RegressionType.Linear),
+    SocialCareS2a(RegressionType.Probit),
+    SocialCareS2b(RegressionType.Probit),
     SocialCareS2c(RegressionType.MultinomialLogit),
-    SocialCareS3c(RegressionType.StandardProbit),
+    SocialCareS2d(RegressionType.Probit),
+    SocialCareS2e(RegressionType.MultinomialLogit),
+    SocialCareS2f(RegressionType.MultinomialLogit),
+    SocialCareS2g(RegressionType.Linear),
+    SocialCareS2h(RegressionType.Linear),
+    SocialCareS2i(RegressionType.Linear),
+    SocialCareS2j(RegressionType.Linear),
+    SocialCareS2k(RegressionType.Linear),
+    SocialCareS3a(RegressionType.Probit),
+    SocialCareS3b(RegressionType.Probit),
+    SocialCareS3c(RegressionType.Probit),
     SocialCareS3d(RegressionType.MultinomialLogit),
     SocialCareS3e(RegressionType.Linear),
-    PartnershipU1a(RegressionType.AdjustedStandardProbit),
-    PartnershipU1b(RegressionType.AdjustedStandardProbit),
-    PartnershipU2b(RegressionType.ReversedProbit),
-    FertilityF1a(RegressionType.AdjustedStandardProbit),
-    FertilityF1b(RegressionType.AdjustedStandardProbit),
+
+    UnemploymentU1a(RegressionType.Probit),
+    UnemploymentU1b(RegressionType.Probit),
+    UnemploymentU1c(RegressionType.Probit),
+    UnemploymentU1d(RegressionType.Probit),
+
     WagesMales(RegressionType.Linear),
     WagesMalesE(RegressionType.Linear),
     WagesMalesNE(RegressionType.Linear),
     WagesFemales(RegressionType.Linear),
     WagesFemalesE(RegressionType.Linear),
-    WagesFemalesNE(RegressionType.Linear),
-    UnemploymentU1a(RegressionType.ReversedProbit),
-    UnemploymentU1b(RegressionType.ReversedProbit),
-    UnemploymentU1c(RegressionType.ReversedProbit),
-    UnemploymentU1d(RegressionType.ReversedProbit),
-    ChildcareC1b(RegressionType.Linear),
-    RMSE(RegressionType.RMSE);
+    WagesFemalesNE(RegressionType.Linear);
 
     private final RegressionType type;
 

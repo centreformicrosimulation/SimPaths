@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-core</artifactId>
-			<version>4.3.11</version>
+			<version>4.3.14</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

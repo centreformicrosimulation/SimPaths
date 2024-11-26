@@ -166,25 +166,31 @@ public class ManagerFileGrids {
                 WriteGridsBean bean = new WriteGridsBean();
 
                 // populate with state combination
-                bean.setCohabitation(currentStates.getCohabitationIndex());
-                bean.setNk0(currentStates.getChildrenByBirthIndex(0));
-                bean.setNk1(currentStates.getChildrenByBirthIndex(1));
-                bean.setNk2(currentStates.getChildrenByBirthIndex(2));
-                bean.setBirthYear(currentStates.getBirthYear());
-                bean.setGender(currentStates.getGender());
-                bean.setEducation(currentStates.getEducation());
-                bean.setStudent(currentStates.getStudent());
-                bean.setHealth(currentStates.getHealthVal());
-                bean.setWageOffer(currentStates.getWageOffer());
                 bean.setLiquidWealth(currentStates.getLiquidWealth());
                 bean.setWagePotentialperHour(currentStates.getFullTimeHourlyEarningsPotential());
                 bean.setPensionIncomePerYear(currentStates.getPensionPerYear());
+                bean.setBirthYear(currentStates.getBirthYear());
+                bean.setWageOffer1(currentStates.getWageOffer1());
+                //bean.setWageOffer2(currentStates.getWageOffer2());
+                bean.setRetirement(currentStates.getRetirement());
+                bean.setHealth(currentStates.getHealthVal());
+                bean.setDisability(currentStates.getDisability());
+                bean.setSocialCareReceipt(currentStates.getSocialCareReceipt());
+                bean.setSocialCareProvision(currentStates.getSocialCareProvision());
+                bean.setRegion(currentStates.getRegion());
+                bean.setStudent(currentStates.getStudent());
+                bean.setEducation(currentStates.getEducation());
+                bean.setNk0(currentStates.getChildrenByBirthIndex(0));
+                bean.setNk1(currentStates.getChildrenByBirthIndex(1));
+                bean.setNk2(currentStates.getChildrenByBirthIndex(2));
+                bean.setCohabitation(currentStates.getCohabitationIndex());
+                bean.setGender(currentStates.getGender());
 
                 // populate with grid solutions
-                bean.setValueFunction(grids.getValueFunction(currentStates));
                 bean.setConsumptionShare(grids.getConsumptionShare(currentStates));
                 bean.setEmployment1(grids.getEmployment1(currentStates));
                 bean.setEmployment2(grids.getEmployment2(currentStates));
+                bean.setValueFunction(grids.getValueFunction(currentStates));
 
                 // add to list
                 beans.add(bean);
@@ -195,8 +201,9 @@ public class ManagerFileGrids {
         File dir = new File(DecisionParams.gridsOutputDirectory);
         if (!dir.exists()) dir.mkdir();
         String filePath = DecisionParams.gridsOutputDirectory + File.separator + "grid_age_" + ageYears + ".csv";
-        String[] HEADERS = {"gender", "birthyear", "education", "student", "married", "children0", "children1", "children2", "health", "wealth", "wageperhour", "pensionperyear",
-                "valuefunction", "consumptionshare", "employment1", "employment2"};
+        String[] HEADERS = {"wealth", "wageperhour", "pensionperyear", "birthyear", "wageoffer1", "retirement", "health", "disability",
+                "socialcarereceipt", "socialcareprovision", "region", "student", "education", "children0", "children1", "children2",
+                "married", "gender", "consumptionshare", "employment1", "employment2", "valuefunction"};
         try {
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(HEADERS).build();
@@ -204,23 +211,28 @@ public class ManagerFileGrids {
 
             for (WriteGridsBean bean : beans) {
                 List<String> record = new ArrayList<>();
-                record.add(bean.getGenderString());
-                record.add(bean.getBirthYearString());
-                record.add(bean.getEducationString());
-                record.add(bean.getStudentString());
-                record.add(bean.getCohabitationString());
-                record.add(bean.getNk0String());
-                record.add(bean.getNk1String());
-                record.add(bean.getNk2String());
-                record.add(bean.getHealthString());
-                record.add(bean.getWageOfferString());
                 record.add(bean.getLiquidWealthString());
                 record.add(bean.getWagePotentialperHourString());
                 record.add(bean.getPensionIncomePerYearString());
-                record.add(bean.getValueFunctionString());
+                record.add(bean.getBirthYearString());
+                record.add(bean.getWageOffer1String());
+                record.add(bean.getRetirementString());
+                record.add(bean.getHealthString());
+                record.add(bean.getDisabilityString());
+                record.add(bean.getSocialCareReceiptString());
+                record.add(bean.getSocialCareProvisionString());
+                record.add(bean.getRegionString());
+                record.add(bean.getStudentString());
+                record.add(bean.getEducationString());
+                record.add(bean.getNk0String());
+                record.add(bean.getNk1String());
+                record.add(bean.getNk2String());
+                record.add(bean.getCohabitationString());
+                record.add(bean.getGenderString());
                 record.add(bean.getConsumptionShareString());
                 record.add(bean.getEmployment1String());
                 record.add(bean.getEmployment2String());
+                record.add(bean.getValueFunctionString());
                 printer.printRecord(record);
             }
 

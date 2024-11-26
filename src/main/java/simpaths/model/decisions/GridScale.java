@@ -499,10 +499,10 @@ public class GridScale {
 
         // social care receipt
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
-            if (axisID==Axis.SocialCareReceiptState) return dimIndex;
+            if (axisID==Axis.SocialCareReceipt) return dimIndex;
             dimIndex++;
         } else {
-            if (axisID==Axis.SocialCareReceiptState) return -1;
+            if (axisID==Axis.SocialCareReceipt) return -1;
         }
 
         // social care provision

@@ -13,7 +13,7 @@ public class DecisionParams {
 
     // RUNNING OPTIONS
     public static final boolean PARALLELISE_SOLUTIONS = true;
-    public static boolean saveGridSlicesToCSV = false;
+    public static boolean saveGridSlicesToCSV = true;
     public static boolean saveIntermediateSolutions = false;
     public static boolean saveImperfectTaxDbMatches = false;
 
@@ -22,7 +22,7 @@ public class DecisionParams {
     public static final double MIN_FACTOR_PROBABILITY = 0.05;         // if FILTER_LOCAL_EXPECTATIONS, omits events with probability less than mean probability multiplied by this threshold
 
     public static final boolean SOLVE_FROM_INTERMEDIATE = false;
-    public static final int SOLVE_FROM_AGE = 74;                     // if SOLVE_FROM_INTERMEDIATE
+    public static final int SOLVE_FROM_AGE = 36;                     // if SOLVE_FROM_INTERMEDIATE
 
     // MODEL SETTINGS
     public static final double GRID_DEFAULT_VALUE = 999.0;
@@ -65,7 +65,7 @@ public class DecisionParams {
     public static final double MIN_CONSUMPTION_PER_YEAR = 5 * 52;              // minimum feasible consumption per year
 
     // LIQUID WEALTH STATE
-    //public static final int PTS_LIQUID_WEALTH = 26;                   // number of discrete points used to approximate liquid wealth
+    //public static final int PTS_LIQUID_WEALTH = 21;                   // number of discrete points used to approximate liquid wealth
     public static final int PTS_LIQUID_WEALTH_WKG = 21;
     public static final int PTS_LIQUID_WEALTH_RTD = 21;
     public static final double C_LIQUID_WEALTH = 50260.0;               // state-space summarised by logarithmic scale: w = exp(x) - c; larger c is closer to arithmetic scale
@@ -75,7 +75,7 @@ public class DecisionParams {
 
     // FULL-TIME WAGE POTENTIAL STATE
     public static int maxAgeFlexibleLabourSupply;
-    //public static final int PTS_WAGE_POTENTIAL = 26;                // number of discrete points used to approximate full-time wage potential
+    //public static final int PTS_WAGE_POTENTIAL = 21;                // number of discrete points used to approximate full-time wage potential
     public static final int PTS_WAGE_POTENTIAL = 21;
     public static final double MAX_WAGE_PHOUR = 175.0;                // maximum per hour
     public static final double MIN_WAGE_PHOUR = 1.25;                  // minimum per hour

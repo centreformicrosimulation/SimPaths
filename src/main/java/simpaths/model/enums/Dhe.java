@@ -1,6 +1,9 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 public enum Dhe implements IntegerValuedEnum {
+
     Poor(1),
     Fair(2),
     Good(3),

@@ -208,6 +208,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private int year;
 
+    // generalised logit error counters
+    private int counterErrorH1a, counterErrorH1b;
+
     private Set<BenefitUnit> benefitUnits;
 
     private Set<Household> households;
@@ -2226,9 +2229,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         FertilityAlignment fertilityAlignment = new FertilityAlignment(persons);
 
         // define limits of search algorithm
-        double fertiityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.FertilityAdjustment);
-        double minVal = Math.max(-4.0, - fertiityAdjustment - 4.0);
-        double maxVal = Math.min(4.0, - fertiityAdjustment + 4.0);
+        double fertilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.FertilityAdjustment);
+        double minVal = Math.max(-4.0, - fertilityAdjustment - 4.0);
+        double maxVal = Math.min(4.0, - fertilityAdjustment + 4.0);
 
         // run search
         RootSearch search = getRootSearch(0.0, minVal, maxVal, fertilityAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
@@ -2247,6 +2250,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      *
      */
     private void updateParameters() {
+
+        counterErrorH1a = 0;
 //		Parameters.updateProbSick(year);		//Make any adjustments to the sickness probability profile by age depending on retirement age
 //		Parameters.updateUnemploymentRate(year);
     }
@@ -3365,4 +3370,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             throw new RuntimeException("Problem sourcing data for starting population");
         }
     }
+
+    public int getCounterErrorH1a() { return counterErrorH1a; }
+    public int getCounterErrorH1b() { return counterErrorH1b; }
+    public void addCounterErrorH1a() { counterErrorH1a++; }
+    public void addCounterErrorH1b() { counterErrorH1b++; }
 }

@@ -728,7 +728,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         // Transitions from employment
         double labourInnov2 = innovations.getDoubleDraw(3), labourInnov3 = innovations.getDoubleDraw(4);
         if (Les_c7_covid.Employee.equals(stateFrom)) {
-            Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_E1.class);
+            Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_E1 transitionTo = (Les_transitions_E1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -753,7 +753,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from furlough full
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFull)) {
-            Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FF1.class);
+            Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FF1 transitionTo = (Les_transitions_FF1) event.eval();
 
@@ -778,7 +778,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from furlough flex
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFlex)) {
-            Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FX1.class);
+            Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FX1 transitionTo = (Les_transitions_FX1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -802,7 +802,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from self-employment
         } else if (stateFrom.equals(Les_c7_covid.SelfEmployed)) {
-            Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_S1.class);
+            Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_S1 transitionTo = (Les_transitions_S1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -830,7 +830,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from non-employment
         } else if (stateFrom.equals(Les_c7_covid.NotEmployed)) {
-            Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_U1.class);
+            Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_U1 transitionTo = (Les_transitions_U1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -888,7 +888,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     emp2 = 0.0;
                 }
-                if ( getRefPersonForDecisions().getGender()==0) {
+                if (getRefPersonForDecisions().getGender()==0) {
                     // reference person is male
 
                     hoursWorkedPerWeekM = DecisionParams.FULLTIME_HOURS_WEEKLY * emp1;
@@ -951,11 +951,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             LinkedHashSet<MultiKey<Labour>> possibleLabourCombinations = findPossibleLabourCombinations(); // Find possible labour combinations for this benefit unit
             MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
-
             //Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
-            if(Occupancy.Couple.equals(occupancy)) {
+            if (Occupancy.Couple.equals(occupancy)) {
 
-                for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
+                for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
 
                     //Sets values for regression score calculation
                     male.setLabourSupplyWeekly(labourKey.getKey(0));
@@ -1002,9 +1001,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else {
                 // single adult
 
-                if(Occupancy.Single_Male.equals(occupancy)) {
+                if (Occupancy.Single_Male.equals(occupancy)) {
 
-                    for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
+                    for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
 
                         male.setLabourSupplyWeekly(labourKey.getKey(0));
                         double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getYptciihs_dv());
@@ -1032,7 +1031,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     }
                 } else if (Occupancy.Single_Female.equals(occupancy)) {        //Occupant must be a single female
 
-                    for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
+                    for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
 
                         female.setLabourSupplyWeekly(labourKey.getKey(1));
                         double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getYptciihs_dv());
@@ -1059,14 +1058,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     }
                 }
             }
-            if(labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
+            if (labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
                 // error check
 
                 System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
-                if(male != null) {
+                if (male != null) {
                     System.out.print("male : " + male.getKey().getId() + ", ");
                 }
-                if(female != null) {
+                if (female != null) {
                     System.out.print("female : " + female.getKey().getId() + ", ");
                 }
                 System.out.print("is empty!");

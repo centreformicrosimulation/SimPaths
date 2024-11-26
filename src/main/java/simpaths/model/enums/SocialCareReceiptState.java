@@ -1,5 +1,7 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 // used to describe state for IO decisions
 // Relative to the population projections, IO decisions ignore two categories:
 //      (1) those who do not need care are treated equivalently regardless of whether they receive care
