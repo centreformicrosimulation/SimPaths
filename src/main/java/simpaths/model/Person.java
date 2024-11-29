@@ -3931,6 +3931,33 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
         return val;
     }
+    public double getDls() {
+        double val;
+        if (dls == null) {
+            val = -1.0;
+        } else {
+            val = dls;
+        }
+        return val;
+    }
+    public double getDwb_mcs() {
+        double val;
+        if (dwb_mcs == null) {
+            val = -1.0;
+        } else {
+            val = dwb_mcs;
+        }
+        return val;
+    }
+    public double getDwb_pcs() {
+        double val;
+        if (dwb_pcs == null) {
+            val = -1.0;
+        } else {
+            val = dwb_pcs;
+        }
+        return val;
+    }
 
     public void populateSocialCareReceipt(SocialCareReceiptState state) {
         if (SocialCareReceiptState.NoFormal.equals(state)) {
