@@ -1730,6 +1730,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhe_lag1 = dhe; //Update lag(1) of health
         dhm_lag1 = dhm; //Update lag(1) of mental health
         dhmGhq_lag1 = dhmGhq;
+        dls_lag1 = dls;
+        dwb_mcs_lag1 = dwb_mcs;
+        dwb_pcs_lag1 = dwb_pcs;
         dlltsd_lag1 = dlltsd; //Update lag(1) of long-term sick or disabled status
         needSocialCare_lag1 = needSocialCare;
         careHoursFromFormalWeekly_lag1 = careHoursFromFormalWeekly;
