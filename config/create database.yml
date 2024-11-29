@@ -1,4 +1,6 @@
-# This file can be used to override defaults for multirun arguments.
+
+# CONFIG FILE TO CREATE NEW DATABASE OBJECTS
+
 # Arguments of the SimPathsMultiRun object overridden by the command-line
 countryString: "United Kingdom"
 maxNumberOfRuns: 1

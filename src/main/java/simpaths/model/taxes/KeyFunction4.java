@@ -14,7 +14,7 @@ import java.util.Map;
  * CLASS TO MANAGE ONE SPECIFICATION FOR EVALUATING DONOR KEYS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
  *
  */
-public class KeyFunction4 {
+public class KeyFunction4 implements IKeyFunction {
 
 
     /**
@@ -306,6 +306,7 @@ public class KeyFunction4 {
         Map<MatchFeature, Map<Integer, Integer>> taxdbCounter = getTaxdbCounter();
         int keyLocal = keyValue;
         for (int ii = MatchFeature.values().length-1; ii>=0; ii--) {
+
             MatchFeature featureHere = MatchFeature.values()[ii];
             try {
                 int size = taxdbCounter.get(featureHere).get(taxDBRegime);
@@ -327,13 +328,12 @@ public class KeyFunction4 {
      * METHOD TO INDICATE IF TAX UNIT IS MEMBER OF 'LOW INCOME' CATEGORY FOR DATABASE MATCHING
      */
     public boolean[] isLowIncome(Integer[] keys) {
+
         boolean[] lowIncome = new boolean[Parameters.TAXDB_REGIMES];
-        for (int regime=0;regime<Parameters.TAXDB_REGIMES;regime++) {
+        for (int regime=0; regime<Parameters.TAXDB_REGIMES; regime++) {
+
             int index = getMatchFeatureIndex(MatchFeature.Income, regime, keys[regime]);
-            if ( (regime<=1 && index==1) || (regime>1 && index==0) )
-                lowIncome[regime] = true;
-            else
-                lowIncome[regime] = false;
+            lowIncome[regime] = (regime <= 1 && index == 1) || (regime > 1 && index == 0);
         }
         return lowIncome;
     }
