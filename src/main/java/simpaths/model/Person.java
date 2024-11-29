@@ -455,6 +455,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhmGhq = Objects.requireNonNullElse(originalPerson.dhmGhq, false);
         dhmGhq_lag1 = Objects.requireNonNullElse(originalPerson.dhmGhq_lag1, dhmGhq);
 
+        dls = originalPerson.dls;
+        dwb_mcs = originalPerson.dwb_mcs;
+        dwb_pcs = originalPerson.dwb_pcs;
+
+        if (originalPerson.dls_lag1 != null) {
+            dls_lag1 = originalPerson.dls_lag1;
+        } else {
+            dls_lag1 = originalPerson.dls;
+        }
+
+        if (originalPerson.dhm_lag1 != null) {
+            dwb_mcs_lag1 = originalPerson.dwb_mcs_lag1;
+        } else {
+            dwb_mcs_lag1 = originalPerson.dwb_mcs;
+        }
+
+        if (originalPerson.dwb_pcs_lag1 != null) {
+            dwb_pcs_lag1 = originalPerson.dwb_pcs_lag1;
+        } else {
+            dwb_pcs_lag1 = originalPerson.dwb_pcs;
+        }
+
         if (originalPerson.labourSupplyWeekly_L1 != null) {
             labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
         } else {
