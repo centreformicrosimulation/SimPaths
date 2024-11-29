@@ -15,7 +15,7 @@ import java.util.Map;
  * CLASS TO MANAGE ONE SPECIFICATION FOR EVALUATING DONOR KEYS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
  *
  */
-public class KeyFunction2 {
+public class KeyFunction2 implements IKeyFunction {
 
 
     /**
@@ -34,27 +34,16 @@ public class KeyFunction2 {
 
     /**
      * METHOD TO EVALUATE DONOR KEYS FOR COARSE EXACT MATCHING
-     * @param simYear simulated year
-     * @param priceYear year of prices used to measure financial statistics
-     * @param age simulated age
-     * @param numberMembersOver17 family members aged 18+
-     * @param numberChildrenUnder5 family members under age 5
-     * @param numberChildren5To17 family members aged 5 to 17
-     * @param hoursWorkedPerWeekMan employment hours per week of adult male
-     * @param hoursWorkedPerWeekWoman employment hours per week of adult female
-     * @param dlltsdMan disability status of man
-     * @param dlltsdWoman disability status of woman
-     * @param originalIncomePerWeek original income per week of family (possibly negative)
-     * @return Integer list of keys, ordered from most fine (0) to most coarse (2)
      */
-    public List<Integer> evaluateKeys(int simYear, int priceYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To17,
-                                      double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int dlltsdMan, int dlltsdWoman, double originalIncomePerWeek) {
+    public Integer[] evaluateKeys(int simYear, int priceYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9,
+                                  int numberChildren10To17, double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int dlltsdMan,
+                                  int dlltsdWoman, int careProvision, double originalIncomePerWeek, double secondIncomePerWeek, double childcareCostPerWeek) {
 
         // initialise working variables
         int spa = getStatePensionAge(age, simYear);
         Map<MatchFeature, Map<Integer, Integer>> taxdbCounter = getTaxdbCounter();
         Map<MatchFeature, Map<Integer, Integer>> units = new HashMap<>();
-        List<Integer> result = new ArrayList<>();
+        Integer[] result = new Integer[Parameters.TAXDB_REGIMES];
         Map<Integer, Integer> localMap;
 
         // discretise hours worked variables
@@ -108,9 +97,9 @@ public class KeyFunction2 {
         localMap = new HashMap<>();
         if ( age < spa ) {
 
-            localMap.put(0, Math.min(numberChildrenUnder5,2) + 3 * Math.min(numberChildren5To17,3));
-            localMap.put(1, Math.min(numberChildrenUnder5,1) + 2 * Math.min(numberChildren5To17,3));
-            localMap.put(2, Math.min(numberChildrenUnder5 + numberChildren5To17,3));
+            localMap.put(0, Math.min(numberChildrenUnder5,2) + 3 * Math.min(numberChildren5To9+numberChildren10To17,3));
+            localMap.put(1, Math.min(numberChildrenUnder5,1) + 2 * Math.min(numberChildren5To9+numberChildren10To17,3));
+            localMap.put(2, Math.min(numberChildrenUnder5 + numberChildren5To9+numberChildren10To17,3));
         } else {
 
             localMap.put(0, 0);
@@ -195,7 +184,7 @@ public class KeyFunction2 {
                 if (units.containsKey(feature))
                     index += units.get(feature).get(ii) * taxdbCounter.get(feature).get(ii);
             }
-            result.add(index);
+            result[ii] = index;
         }
 
         // return
@@ -204,19 +193,38 @@ public class KeyFunction2 {
 
     /**
      * METHOD TO INDICATE IF TAX UNIT IS MEMBER OF 'LOW INCOME' CATEGORY FOR DATABASE MATCHING
-     * @param priceYear year of prices used to measure income
-     * @param originalIncomePerWeek original income per week of family
-     * @return boolean equal to true if family treated as low income
      */
-    public boolean isLowIncome(int priceYear, double originalIncomePerWeek) {
+    public boolean[] isLowIncome(Integer[] keys) {
 
-        boolean lowIncome = false;
-        double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
-                Parameters.getTimeSeriesIndex(priceYear, UpratingCase.TaxDonor);
-        if (originalIncomePerWeekAdjusted < LO_INCOME) {
-            lowIncome = true;
+        boolean[] lowIncome = new boolean[Parameters.TAXDB_REGIMES];
+        for (int regime=0; regime<Parameters.TAXDB_REGIMES; regime++) {
+
+            int index = getMatchFeatureIndex(MatchFeature.Income, regime, keys[regime]);
+            lowIncome[regime] = (index == 0);
         }
         return lowIncome;
+    }
+
+    public int getMatchFeatureIndex(MatchFeature feature, int taxDBRegime, int keyValue) {
+
+        Map<MatchFeature, Map<Integer, Integer>> taxdbCounter = getTaxdbCounter();
+        int keyLocal = keyValue;
+        for (int ii = MatchFeature.values().length-1; ii>=0; ii--) {
+
+            MatchFeature featureHere = MatchFeature.values()[ii];
+            try {
+                int size = taxdbCounter.get(featureHere).get(taxDBRegime);
+                int index = keyLocal / size;
+                if (feature.equals(featureHere))
+                    return index;
+                else
+                    keyLocal -= index * size;
+            } catch (Exception e) {
+                System.out.println("Issue retrieving feature" + featureHere + "for regime " + taxDBRegime);
+                e.printStackTrace();
+            }
+        }
+        throw new RuntimeException("failed to identify match feature for indexing");
     }
 
     /**

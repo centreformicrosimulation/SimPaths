@@ -20,10 +20,7 @@ public class KeyFunction {
     private double hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek;
 
     // define key function here - switchable
-    //private KeyFunction1 keyFunction;
-    //private KeyFunction2 keyFunction;
-    //private KeyFunction3 keyFunction;
-    private KeyFunction4 keyFunction;
+    private IKeyFunction keyFunction;
 
 
     /**
@@ -196,14 +193,6 @@ public class KeyFunction {
         this.childcareCostPerWeek = childcareCostPerWeek;
     }
 
-    public KeyFunction4 getKeyFunction() {
-        return keyFunction;
-    }
-
-    public void setKeyFunction(KeyFunction4 keyFunction) {
-        this.keyFunction = keyFunction;
-    }
-
     /**
      * WORKER METHODS
      */
@@ -222,10 +211,8 @@ public class KeyFunction {
     }
 
     public boolean[] isLowIncome(Integer[] keys) {
-
-        if (keyFunction == null) {
+        if (keyFunction == null)
             throw new InvalidParameterException("call to evaluate donor keys before KeyFunction populated");
-        }
         return keyFunction.isLowIncome(keys);
     }
 
