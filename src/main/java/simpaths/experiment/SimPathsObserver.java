@@ -1005,7 +1005,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 //					healthMentalAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalHealthFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
 
 					updateChartSet.add(lifeSatisfactionAgePlotter);
-					healthMentalAgePlots.add(lifeSatisfactionAgePlotter);
+					lifeSatisfactionAgePlots.add(lifeSatisfactionAgePlotter);
 				}
 
 				tabSet.add(createScrollPaneFromPlots(lifeSatisfactionAgePlots, "Life Satisfaction score: age/gender", 2));
@@ -1030,7 +1030,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 //					healthMentalAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalHealthFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
 
 					updateChartSet.add(wellbeingMCSAgePlotter);
-					healthMentalAgePlots.add(wellbeingMCSAgePlotter);
+					wellbeingMCSAgePlots.add(wellbeingMCSAgePlotter);
 				}
 
 				tabSet.add(createScrollPaneFromPlots(wellbeingMCSAgePlots, "Mental wellbeing score: age/gender", 2));
@@ -1054,7 +1054,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 //					healthMentalAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalHealthFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
 
 					updateChartSet.add(wellbeingPCSAgePlotter);
-					healthMentalAgePlots.add(wellbeingPCSAgePlotter);
+					wellbeingPCSAgePlots.add(wellbeingPCSAgePlotter);
 				}
 				
 				tabSet.add(createScrollPaneFromPlots(wellbeingPCSAgePlots, "Physical wellbeing score: age/gender", 2));
