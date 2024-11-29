@@ -120,6 +120,9 @@ public class Parameters {
 		"dhm",					//mental health status
 		"scghq2_dv",			//mental health status case based
 		"dhm_ghq",				//mental health status case based dummy (1 = psychologically distressed)
+        "dls",                  //life satisfaction
+        "dwb_mcs",              //mental well-being
+        "dwb_pcs",              //physical well-being
 		"dcpyy",				//years in partnership
 		"dcpagdf",				//partners age difference
 		"dnc02",				//number children aged 0-2
