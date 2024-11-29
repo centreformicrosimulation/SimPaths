@@ -2148,6 +2148,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhhtp_c4_SingleNoChildren_L1,
         Dhm,							//Mental health status
         Dhm_L1,							//Mental health status lag(1)
+        Dls,                            //Life satisfaction status
+        Dls_L1,                            //Life satisfaction status lag(1)
+        Dwb_mcs,                        //Mental well-being status
+        Dwb_mcs_L1,                        //Mental well-being status lag(1)
+        Dwb_pcs,                        //Physical well-being status
+        Dwb_pcs_L1,                        //Physical well-being status lag(1)
         Dhmghq_L1,
         Dlltsd,							//Long-term sick or disabled
         Dlltsd_L1,						//Long-term sick or disabled lag(1)
@@ -2696,6 +2702,30 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhm_L1 -> {
                 if (dhm_lag1 != null && dhm_lag1 >= 0.) {
                     return dhm_lag1;
+                } else return 0.;
+            }
+            case Dwb_mcs -> {
+                return dwb_mcs;
+            }
+            case Dwb_mcs_L1 -> {
+                if (dwb_mcs_lag1 != null && dwb_mcs_lag1 >= 0.) {
+                    return dwb_mcs_lag1;
+                } else return 0.;
+            }
+            case Dwb_pcs -> {
+                return dwb_pcs;
+            }
+            case Dwb_pcs_L1 -> {
+                if (dwb_pcs_lag1 != null && dwb_pcs_lag1 >= 0.) {
+                    return dwb_pcs_lag1;
+                } else return 0.;
+            }
+            case Dls -> {
+                return dls;
+            }
+            case Dls_L1 -> {
+                if (dls_lag1 != null && dls_lag1 >= 0.) {
+                    return dls_lag1;
                 } else return 0.;
             }
             case Dhmghq_L1 -> {
