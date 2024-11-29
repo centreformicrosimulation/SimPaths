@@ -27,10 +27,6 @@ public class KeyFunction {
      * CONSTRUCTORS
      */
     public KeyFunction() {
-
-        // instantiate key function variant
-        //this.keyFunction = new KeyFunction1();
-        //this.keyFunction = new KeyFunction2();
         this.keyFunction = new KeyFunction4();
     }
     public KeyFunction(int simYear, int priceYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9, int numberChildren10To17,
