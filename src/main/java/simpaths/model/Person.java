@@ -26,6 +26,7 @@ import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.IIntSource;
 
+import static simpaths.data.Parameters.getRegWellbeingMCS1;
 import static simpaths.data.Parameters.getUnemploymentRateByGenderEducationAgeYear;
 
 @Entity
@@ -666,6 +667,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         HealthMentalHM1, 				//Predict level of mental health on the GHQ-12 Likert scale (Step 1)
         HealthMentalHM2,				//Modify the prediction from Step 1 by applying increments / decrements for exposure
         HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together
+        WellbeingMCS1,
+        WellbeingPCS1,
         InSchool,
         LeavingSchool,
         PartnershipDissolution,
@@ -724,6 +727,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case HealthMentalHM2 -> {
                 healthMentalHM2Level();
+            }
+            case WellbeingMCS1 -> {
+                wellbeingMCS1();
+            }
+            case WellbeingPCS1 -> {
+                wellbeingPCS1();
             }
             case HealthMentalHM1HM2Cases -> {
                 healthMentalHM1HM2Cases();
@@ -938,6 +947,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 dhm = constrainDhmEstimate(dhmPrediction+dhm);
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
         }
+    }
+
+    protected void wellbeingMCS1() {
+
+        double mcsPrediction;
+        mcsPrediction = Parameters.getRegWellbeingMCS1().getScore(this, Person.DoublesVariables.class);
+        dwb_mcs = mcsPrediction;
+
+    }
+
+    protected void wellbeingPCS1() {
+
+        double pcsPrediction;
+        pcsPrediction = Parameters.getRegWellbeingMCS1().getScore(this, Person.DoublesVariables.class);
+        dwb_pcs = pcsPrediction;
+
     }
 
     /*
