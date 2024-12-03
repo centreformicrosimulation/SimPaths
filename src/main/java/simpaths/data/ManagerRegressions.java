@@ -37,6 +37,12 @@ public class ManagerRegressions {
             case HealthHM2LevelFemales -> {
                 return Parameters.getRegHealthHM2LevelFemales();
             }
+            case WellbeingMCS1 -> {
+                return Parameters.getRegWellbeingMCS1();
+            }
+            case WellbeingPCS1 -> {
+                return Parameters.getRegWellbeingPCS1();
+            }
             case SocialCareS1b -> {
                 return Parameters.getRegCareHoursS1b();
             }
