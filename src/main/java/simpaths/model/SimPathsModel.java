@@ -3345,7 +3345,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();txn = em.getTransaction();
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
+            txn = em.getTransaction();
             txn.begin();
 
             Processed processed = new Processed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
