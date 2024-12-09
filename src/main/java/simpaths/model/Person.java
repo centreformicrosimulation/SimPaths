@@ -26,7 +26,6 @@ import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.IIntSource;
 
-import static simpaths.data.Parameters.getRegWellbeingMCS1;
 import static simpaths.data.Parameters.getUnemploymentRateByGenderEducationAgeYear;
 
 @Entity
@@ -668,7 +667,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         HealthMentalHM2,				//Modify the prediction from Step 1 by applying increments / decrements for exposure
         HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together
         WellbeingMCS1,
+        WellbeingMCS2,
         WellbeingPCS1,
+        WellbeingPCS2,
+        LifeSatisfaction1,
+        LifeSatisfaction2,
         InSchool,
         LeavingSchool,
         PartnershipDissolution,
@@ -731,8 +734,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case WellbeingMCS1 -> {
                 wellbeingMCS1();
             }
+            case WellbeingMCS2 -> {
+                wellbeingMCS2();
+            }
             case WellbeingPCS1 -> {
                 wellbeingPCS1();
+            }
+            case WellbeingPCS2 -> {
+                wellbeingPCS2();
+            }
+            case LifeSatisfaction1 -> {
+                lifeSatisfaction1();
+            }
+            case LifeSatisfaction2 -> {
+                lifeSatisfaction2();
             }
             case HealthMentalHM1HM2Cases -> {
                 healthMentalHM1HM2Cases();
@@ -957,12 +972,58 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     }
 
+    protected void wellbeingMCS2() {
+
+        double mcsPrediction;
+        if (Gender.Male.equals(getDgn())) {
+            mcsPrediction = Parameters.getRegWellbeingMCS2Males().getScore(this, Person.DoublesVariables.class);
+            dwb_mcs = mcsPrediction;
+        } else if (Gender.Female.equals(getDgn())) {
+            mcsPrediction = Parameters.getRegWellbeingMCS2Females().getScore(this, Person.DoublesVariables.class);
+            dwb_mcs = mcsPrediction;
+        }
+    }
+
     protected void wellbeingPCS1() {
 
         double pcsPrediction;
-        pcsPrediction = Parameters.getRegWellbeingMCS1().getScore(this, Person.DoublesVariables.class);
+        pcsPrediction = Parameters.getRegWellbeingPCS1().getScore(this, Person.DoublesVariables.class);
         dwb_pcs = pcsPrediction;
 
+    }
+
+
+    protected void wellbeingPCS2() {
+
+        double pcsPrediction;
+        if (Gender.Male.equals(getDgn())) {
+            pcsPrediction = Parameters.getRegWellbeingPCS2Males().getScore(this, Person.DoublesVariables.class);
+            dwb_pcs = pcsPrediction;
+        } else if (Gender.Female.equals(getDgn())) {
+            pcsPrediction = Parameters.getRegWellbeingPCS2Females().getScore(this, Person.DoublesVariables.class);
+            dwb_pcs = pcsPrediction;
+        }
+    }
+
+    protected void lifeSatisfaction1() {
+
+        double dlsPrediction;
+        dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
+        dls = dlsPrediction;
+
+    }
+
+
+    protected void lifeSatisfaction2() {
+
+        double dlsPrediction;
+        if (Gender.Male.equals(getDgn())) {
+            dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
+            dls = dlsPrediction;
+        } else if (Gender.Female.equals(getDgn())) {
+            dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
+            dls = dlsPrediction;
+        }
     }
 
     /*

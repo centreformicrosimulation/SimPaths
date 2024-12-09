@@ -464,10 +464,17 @@ public class Parameters {
 
     //Wellbeing
     private static MultiKeyCoefficientMap coeffCovarianceDWB_MCS1;
-    private static MultiKeyCoefficientMap coeffCovarianceDWB_PCS1;
+    private static MultiKeyCoefficientMap coeffCovarianceDWB_MCS2Males;
+    private static MultiKeyCoefficientMap coeffCovarianceDWB_MCS2Females;
 
-    //Life satisfaction
+    private static MultiKeyCoefficientMap coeffCovarianceDWB_PCS1;
+    private static MultiKeyCoefficientMap coeffCovarianceDWB_PCS2Males;
+    private static MultiKeyCoefficientMap coeffCovarianceDWB_PCS2Females;
+
     private static MultiKeyCoefficientMap coeffCovarianceDLS1;
+    private static MultiKeyCoefficientMap coeffCovarianceDLS2Males;
+    private static MultiKeyCoefficientMap coeffCovarianceDLS2Females;
+
 
     //Education
     private static MultiKeyCoefficientMap coeffCovarianceEducationE1a;
@@ -685,7 +692,16 @@ public class Parameters {
 
     //Wellbeing
     private static LinearRegression regWellbeingMCS1;
+    private static LinearRegression regWellbeingMCS2Males;
+    private static LinearRegression regWellbeingMCS2Females;
+
     private static LinearRegression regWellbeingPCS1;
+    private static LinearRegression regWellbeingPCS2Males;
+    private static LinearRegression regWellbeingPCS2Females;
+
+    private static LinearRegression regLifeSatisfaction1;
+    private static LinearRegression regLifeSatisfaction2Males;
+    private static LinearRegression regLifeSatisfaction2Females;
 
     //Education
     private static BinomialRegression regEducationE1a;
@@ -1301,7 +1317,16 @@ public class Parameters {
 
         //Wellbeing
         coeffCovarianceDWB_MCS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS1", 1, columnsWellbeingMCS1);
+        coeffCovarianceDWB_MCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS2_Males", 1, columnsWellbeingMCS1);
+        coeffCovarianceDWB_MCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS2_Females", 1, columnsWellbeingMCS1);
+
         coeffCovarianceDWB_PCS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS1", 1, columnsWellbeingPCS1);
+        coeffCovarianceDWB_PCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS2_Males", 1, columnsWellbeingPCS1);
+        coeffCovarianceDWB_PCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS2_Females", 1, columnsWellbeingPCS1);
+
+        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS1", 1, columnsWellbeingPCS1);
+        coeffCovarianceDLS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS2_Males", 1, columnsWellbeingPCS1);
+        coeffCovarianceDLS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS2_Females", 1, columnsWellbeingPCS1);
 
         //Life satisfaction
 
@@ -1513,7 +1538,14 @@ public class Parameters {
 
         //Wellbeing
         regWellbeingMCS1 = new LinearRegression(coeffCovarianceDWB_MCS1);
+        regWellbeingMCS2Males = new LinearRegression(coeffCovarianceDWB_MCS2Males);
+        regWellbeingMCS2Females = new LinearRegression(coeffCovarianceDWB_MCS2Females);
         regWellbeingPCS1 = new LinearRegression(coeffCovarianceDWB_PCS1);
+        regWellbeingPCS2Males = new LinearRegression(coeffCovarianceDWB_PCS2Males);
+        regWellbeingPCS2Females = new LinearRegression(coeffCovarianceDWB_PCS2Females);
+        regLifeSatisfaction1 = new LinearRegression(coeffCovarianceDLS1);
+        regLifeSatisfaction2Males = new LinearRegression(coeffCovarianceDLS2Males);
+        regLifeSatisfaction2Females = new LinearRegression(coeffCovarianceDLS2Females);
 
         //Education
         regEducationE1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1a);
@@ -2000,7 +2032,16 @@ public class Parameters {
     public static BinomialRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
 
     public static LinearRegression getRegWellbeingMCS1() { return regWellbeingMCS1; }
+    public static LinearRegression getRegWellbeingMCS2Males() { return regWellbeingMCS2Males;   }
+    public static LinearRegression getRegWellbeingMCS2Females() { return regWellbeingMCS2Females; }
+
     public static LinearRegression getRegWellbeingPCS1() { return regWellbeingPCS1; }
+    public static LinearRegression getRegWellbeingPCS2Males() { return regWellbeingPCS2Males; }
+    public static LinearRegression getRegWellbeingPCS2Females() { return regWellbeingPCS2Females; }
+
+    public static LinearRegression getRegLifeSatisfaction1() { return regLifeSatisfaction1; }
+    public static LinearRegression getRegLifeSatisfaction2Males() { return regLifeSatisfaction2Males; }
+    public static LinearRegression getRegLifeSatisfaction2Females() { return regLifeSatisfaction2Females; }
 
     public static BinomialRegression getRegEducationE1a() {return regEducationE1a;}
     public static BinomialRegression getRegEducationE1b() {return regEducationE1b;}

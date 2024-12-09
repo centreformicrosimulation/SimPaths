@@ -56,13 +56,13 @@ public class ManagerRegressions {
                 return Parameters.getRegWellbeingPCS2Females();
             }
             case LifeSatisfaction1 -> {
-                return Parameters.getRegWellbeingLS1();
+                return Parameters.getRegLifeSatisfaction1();
             }
             case LifeSatisfaction2Males -> {
-                return Parameters.getRegWellbeingLS2Males();
+                return Parameters.getRegLifeSatisfaction2Males();
             }
             case LifeSatisfaction2Females -> {
-                return Parameters.getRegWellbeingLS2Females();
+                return Parameters.getRegLifeSatisfaction2Females();
             }
             case SocialCareS1b -> {
                 return Parameters.getRegCareHoursS1b();

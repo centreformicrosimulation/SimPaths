@@ -497,7 +497,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         //Update SF12 MCS and PCS wellbeing scores
         yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingMCS1);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingMCS2);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingPCS1);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingPCS2);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
         // HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
 
