@@ -30,7 +30,16 @@ public enum RegressionName {
     HealthHM2CaseFemales(RegressionType.Logit),
 
     WellbeingMCS1(RegressionType.Linear),
+    WellbeingMCS2Males(RegressionType.Linear),
+    WellbeingMCS2Females(RegressionType.Linear),
+
     WellbeingPCS1(RegressionType.Linear),
+    WellbeingPCS2Males(RegressionType.Linear),
+    WellbeingPCS2Females(RegressionType.Linear),
+
+    LifeSatisfaction1(RegressionType.Linear),
+    LifeSatisfaction2Males(RegressionType.Linear),
+    LifeSatisfaction2Females(RegressionType.Linear),
 
     RMSE(RegressionType.Linear),
 
