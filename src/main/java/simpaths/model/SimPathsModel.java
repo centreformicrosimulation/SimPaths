@@ -560,6 +560,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // update case-based measure
         addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
+        // WELLBEING and LIFE SATISFACTION 2
+        addCollectionEventToAllYears(persons, Person.Processes.WellbeingMCS2);
+        addCollectionEventToAllYears(persons, Person.Processes.WellbeingPCS2);
+        addCollectionEventToAllYears(persons, Person.Processes.LifeSatisfaction2);
+
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
         addEventToAllYears(Processes.PopulationAlignment);
