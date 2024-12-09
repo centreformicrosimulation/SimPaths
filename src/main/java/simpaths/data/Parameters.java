@@ -960,8 +960,14 @@ public class Parameters {
         int columnsHealthHM2Males = -1;
         int columnsHealthHM2Females = -1;
         int columnsWellbeingMCS1 = -1;
+        int columnsWellbeingMCS2Males = -1;
+        int columnsWellbeingMCS2Females = -1;
         int columnsWellbeingPCS1 = -1;
-        int columnsLifeSatisfaction = -1;
+        int columnsWellbeingPCS2Males = -1;
+        int columnsWellbeingPCS2Females = -1;
+        int columnsLifeSatisfaction1 = -1;
+        int columnsLifeSatisfaction2Males = -1;
+        int columnsLifeSatisfaction2Females = -1;
         int columnsSocialCareS1a = -1;
         int columnsSocialCareS1b = -1;
         int columnsSocialCareS2a = -1;
@@ -1110,8 +1116,15 @@ public class Parameters {
             columnsHealthHM1 = 31;
             columnsHealthHM2Males = 11;
             columnsHealthHM2Females = 11;
-            columnsWellbeingMCS1 = 26;
-            columnsWellbeingPCS1 = 26;
+            columnsWellbeingMCS1 = 32;
+            columnsWellbeingMCS2Males = 9;
+            columnsWellbeingMCS2Females = 9;
+            columnsWellbeingPCS1 = 32;
+            columnsWellbeingPCS2Males = 9;
+            columnsWellbeingPCS2Females = 9;
+            columnsLifeSatisfaction1 = 33;
+            columnsLifeSatisfaction2Males = 9;
+            columnsLifeSatisfaction2Females = 9;
             columnsSocialCareS1a = 17;
             columnsSocialCareS1b = 18;
             columnsSocialCareS2a = 32;
@@ -1317,16 +1330,16 @@ public class Parameters {
 
         //Wellbeing
         coeffCovarianceDWB_MCS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS1", 1, columnsWellbeingMCS1);
-        coeffCovarianceDWB_MCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS2_Males", 1, columnsWellbeingMCS1);
-        coeffCovarianceDWB_MCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS2_Females", 1, columnsWellbeingMCS1);
+        coeffCovarianceDWB_MCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS2_Males", 1, columnsWellbeingMCS2Males);
+        coeffCovarianceDWB_MCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_MCS2_Females", 1, columnsWellbeingMCS2Females);
 
         coeffCovarianceDWB_PCS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS1", 1, columnsWellbeingPCS1);
-        coeffCovarianceDWB_PCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS2_Males", 1, columnsWellbeingPCS1);
-        coeffCovarianceDWB_PCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS2_Females", 1, columnsWellbeingPCS1);
+        coeffCovarianceDWB_PCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS2_Males", 1, columnsWellbeingPCS2Males);
+        coeffCovarianceDWB_PCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DWB_PCS2_Females", 1, columnsWellbeingPCS2Females);
 
-        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS1", 1, columnsWellbeingPCS1);
-        coeffCovarianceDLS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS2_Males", 1, columnsWellbeingPCS1);
-        coeffCovarianceDLS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS2_Females", 1, columnsWellbeingPCS1);
+        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS1", 1, columnsLifeSatisfaction1);
+        coeffCovarianceDLS2Males = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS2_Males", 1, columnsLifeSatisfaction2Males);
+        coeffCovarianceDLS2Females = ExcelAssistant.loadCoefficientMap("input/reg_wellbeing.xlsx", countryString + "_DLS2_Females", 1, columnsLifeSatisfaction2Females);
 
         //Life satisfaction
 
