@@ -18,9 +18,7 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
-import simpaths.data.IEvaluation;
-import simpaths.data.MahalanobisDistance;
-import simpaths.data.RootSearch;
+import simpaths.data.*;
 import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
@@ -48,7 +46,6 @@ import microsim.matching.MatchingClosure;
 import microsim.matching.MatchingScoreClosure;
 
 // import LABOURsim packages
-import simpaths.data.Parameters;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
@@ -372,7 +369,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
         }
         populateTaxdbReferences();
+
+        // run pre-simulation diagnostic tests
         //TestTaxRoutine.run();
+        //TestRegressions.run(RegressionName.EducationE2a);
+
         elapsedTime1 = System.currentTimeMillis();
         System.out.println("Time to load tax database references: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
         elapsedTime0 = elapsedTime1;

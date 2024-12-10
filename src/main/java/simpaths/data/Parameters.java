@@ -634,8 +634,8 @@ public class Parameters {
     /////////////////////////////////////////////////////////////////// REGRESSION OBJECTS //////////////////////////////////////////
 
     //Health
-    private static GeneralisedOrderedRegression regHealthH1a;
-    private static GeneralisedOrderedRegression regHealthH1b;
+    private static OrderedRegression regHealthH1a;
+    private static OrderedRegression regHealthH1b;
     private static BinomialRegression regHealthH2b;
 
     //Social care
@@ -1101,7 +1101,7 @@ public class Parameters {
             columnsUnemploymentU1d = 19;
             columnsEducationE1a = 19;
             columnsEducationE1b = 25;
-            columnsEducationE2a = 20;
+            columnsEducationE2a = 11;
             columnsPartnershipU1a = 27;
             columnsPartnershipU1b = 31;
             columnsPartnershipU2b = 38;
@@ -1444,8 +1444,8 @@ public class Parameters {
         }
 
         //Health
-        regHealthH1a = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1a);
-        regHealthH1b = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1b);
+        regHealthH1a = new OrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1a);
+        regHealthH1b = new OrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1b);
         regHealthH2b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceHealthH2b);
 
         //Social care
@@ -1486,7 +1486,7 @@ public class Parameters {
         //Education
         regEducationE1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1a);
         regEducationE1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1b);
-        regEducationE2a = new OrderedRegression(RegressionType.OrderedProbit, Education.class, coeffCovarianceEducationE2a);
+        regEducationE2a = new OrderedRegression<>(RegressionType.GenOrderedLogit, Education.class, coeffCovarianceEducationE2a);
 
         //Partnership
         if (country.equals(Country.UK)) {
@@ -1932,8 +1932,8 @@ public class Parameters {
         Parameters.employmentsFurloughedFlex = employmentsFurloughedFlex;
     }
 
-    public static GeneralisedOrderedRegression getRegHealthH1a() { return regHealthH1a; }
-    public static GeneralisedOrderedRegression getRegHealthH1b() { return regHealthH1b; }
+    public static OrderedRegression getRegHealthH1a() { return regHealthH1a; }
+    public static OrderedRegression getRegHealthH1b() { return regHealthH1b; }
     public static BinomialRegression getRegHealthH2b() { return regHealthH2b; }
 
     public static BinomialRegression getRegReceiveCareS1a() { return regReceiveCareS1a; }
