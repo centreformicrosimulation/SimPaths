@@ -132,6 +132,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Double dwb_pcs;  //physical well-being: SF12 physical component summary score
     private Double dwb_pcs_lag1;  //physical well-being: SF12 physical component summary score lag 1
     private Double dls;      //life satisfaction - score 1-7
+    @Transient private Double dls_temp;
     private Double dls_lag1;      //life satisfaction - score 1-7 lag 1
     @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
     @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
@@ -977,10 +978,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         double mcsPrediction;
         if (Gender.Male.equals(getDgn())) {
             mcsPrediction = Parameters.getRegWellbeingMCS2Males().getScore(this, Person.DoublesVariables.class);
-            dwb_mcs = mcsPrediction;
+            dwb_mcs = constrainSF12Estimate(mcsPrediction + dwb_mcs);
         } else if (Gender.Female.equals(getDgn())) {
             mcsPrediction = Parameters.getRegWellbeingMCS2Females().getScore(this, Person.DoublesVariables.class);
-            dwb_mcs = mcsPrediction;
+            dwb_mcs = constrainSF12Estimate(mcsPrediction + dwb_mcs);
         }
     }
 
@@ -998,10 +999,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         double pcsPrediction;
         if (Gender.Male.equals(getDgn())) {
             pcsPrediction = Parameters.getRegWellbeingPCS2Males().getScore(this, Person.DoublesVariables.class);
-            dwb_pcs = pcsPrediction;
+            dwb_pcs = constrainSF12Estimate(pcsPrediction + dwb_pcs);
         } else if (Gender.Female.equals(getDgn())) {
             pcsPrediction = Parameters.getRegWellbeingPCS2Females().getScore(this, Person.DoublesVariables.class);
-            dwb_pcs = pcsPrediction;
+            dwb_pcs = constrainSF12Estimate(pcsPrediction + dwb_pcs);
         }
     }
 
@@ -1019,10 +1020,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         double dlsPrediction;
         if (Gender.Male.equals(getDgn())) {
             dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
-            dls = dlsPrediction;
+            dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls);
         } else if (Gender.Female.equals(getDgn())) {
             dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
-            dls = dlsPrediction;
+            dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls);
         }
     }
 
@@ -1066,6 +1067,25 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhm = 36.;
         }
         return dhm;
+    }
+
+    protected Double constrainSF12Estimate(double sf12) {
+        if (sf12 < 0.) {
+            sf12 = 0.;
+        } else if (sf12 > 100.) {
+            sf12 = 100.;
+        }
+        return sf12;
+    }
+
+    protected Double constrainLifeSatisfactionEstimate(double dls) {
+        if (dls < 1.) {
+            dls = 1.;
+        } else if (dls > 7.) {
+            dls = 7.;
+        }
+
+        return dls;
     }
 
     //Health process defines health using H1a or H1b process
