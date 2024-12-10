@@ -495,13 +495,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // Update mental health - determine (continuous) mental health level based on regression models
         yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
 
-        //Update SF12 MCS and PCS wellbeing scores
+        //Update SF12 MCS and PCS wellbeing scores step 1
         yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingMCS1);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingMCS2);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingPCS1);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.WellbeingPCS2);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
         // HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
 
@@ -561,6 +558,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
         // WELLBEING and LIFE SATISFACTION 2
+        addCollectionEventToAllYears(persons, Person.Processes.WellbeingMCS1); //Step 1 of mental health
+        addCollectionEventToAllYears(persons, Person.Processes.WellbeingPCS1); //Step 1 of mental health
+        addCollectionEventToAllYears(persons, Person.Processes.LifeSatisfaction1); //Step 1 of mental health
         addCollectionEventToAllYears(persons, Person.Processes.WellbeingMCS2);
         addCollectionEventToAllYears(persons, Person.Processes.WellbeingPCS2);
         addCollectionEventToAllYears(persons, Person.Processes.LifeSatisfaction2);
