@@ -1071,8 +1071,8 @@ public class Parameters {
             columnsLabourSupplyUtilityCouples = 64;
             columnsLabourCovid19_SE = 1;
             columnsLabourCovid19_2a_processes = 1;
-            columnsHealthH1a = 37;
-            columnsHealthH1b = 77;
+            columnsHealthH1a = 28;
+            columnsHealthH1b = 35;
             columnsHealthH2b = 35;
             columnsHealthHM1 = 31;
             columnsHealthHM2Males = 11;
