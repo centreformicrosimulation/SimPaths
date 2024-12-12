@@ -349,6 +349,7 @@ public class DonorTaxImputation {
         }
         throw new RuntimeException("attempt to evaluate index of unrecognised target feature");
     }
+
     private double[] getMeasurementVector(int priceYear, double originalIncomePerWeek, boolean flagSecondIncome, double secondIncomePerWeek,
                                           boolean flagChildcareCost, double childcareCostPerWeek) {
 

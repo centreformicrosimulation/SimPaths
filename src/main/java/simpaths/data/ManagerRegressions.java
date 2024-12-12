@@ -7,7 +7,6 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import simpaths.model.Person;
 import simpaths.model.enums.Labour;
-import simpaths.model.enums.ReversedIndicator;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -167,6 +166,12 @@ public class ManagerRegressions {
             throw new RuntimeException("requested ordered regression is not recognised: " + regression.name());
 
         switch (regression) {
+            case HealthH1a -> {
+                return Parameters.getRegHealthH1a();
+            }
+            case HealthH1b -> {
+                return Parameters.getRegHealthH1b();
+            }
             case EducationE2a -> {
                 return Parameters.getRegEducationE2a();
             }
@@ -182,12 +187,6 @@ public class ManagerRegressions {
             throw new RuntimeException("requested generalised ordered regression is not recognised: " + regression.name());
 
         switch (regression) {
-            case HealthH1a -> {
-                return Parameters.getRegHealthH1a();
-            }
-            case HealthH1b -> {
-                return Parameters.getRegHealthH1b();
-            }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
             }
@@ -214,6 +213,19 @@ public class ManagerRegressions {
             }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
+            }
+        }
+    }
+
+    public static boolean isDiscreteChoiceModel(RegressionName regression) {
+
+        switch (regression.getType()) {
+
+            case Logit, Probit, OrderedLogit, OrderedProbit, GenOrderedLogit, GenOrderedProbit, MultinomialLogit-> {
+                return true;
+            }
+            default -> {
+                return false;
             }
         }
     }
