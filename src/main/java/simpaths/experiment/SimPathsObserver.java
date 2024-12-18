@@ -993,16 +993,16 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
 					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
-					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDls", true);
+					Weighted_CrossSection.Integer maleCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getDls", true);
 					maleCS.setFilter(maleAgeFilter);
-					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDls", true);
+					Weighted_CrossSection.Integer femaleCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getDls", true);
 					femaleCS.setFilter(femaleAgeFilter);
 
 					TimeSeriesSimulationPlotter lifeSatisfactionAgePlotter = new TimeSeriesSimulationPlotter("Life satisfaction score by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
 					lifeSatisfactionAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
 					lifeSatisfactionAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
-//					healthMentalAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("mentalHealthMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
-//					healthMentalAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalHealthFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+					lifeSatisfactionAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("lifeSatisfactionMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					lifeSatisfactionAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("lifeSatisfactionFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
 
 					updateChartSet.add(lifeSatisfactionAgePlotter);
 					lifeSatisfactionAgePlots.add(lifeSatisfactionAgePlotter);
@@ -1026,8 +1026,8 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					TimeSeriesSimulationPlotter wellbeingMCSAgePlotter = new TimeSeriesSimulationPlotter("Mental wellbeing by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
 					wellbeingMCSAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
 					wellbeingMCSAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
-//					healthMentalAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("mentalHealthMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
-//					healthMentalAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalHealthFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+					wellbeingMCSAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("mentalWellbeingMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					wellbeingMCSAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalWellbeingFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
 
 					updateChartSet.add(wellbeingMCSAgePlotter);
 					wellbeingMCSAgePlots.add(wellbeingMCSAgePlotter);
@@ -1050,8 +1050,8 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					TimeSeriesSimulationPlotter wellbeingPCSAgePlotter = new TimeSeriesSimulationPlotter("Physical wellbeing by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
 					wellbeingPCSAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
 					wellbeingPCSAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
-//					healthMentalAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("mentalHealthMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
-//					healthMentalAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("mentalHealthFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+					wellbeingPCSAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("physicalWellbeingMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					wellbeingPCSAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("physicalWellbeingFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
 
 					updateChartSet.add(wellbeingPCSAgePlotter);
 					wellbeingPCSAgePlots.add(wellbeingPCSAgePlotter);
