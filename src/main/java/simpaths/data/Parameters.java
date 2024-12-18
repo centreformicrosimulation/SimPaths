@@ -619,6 +619,13 @@ public class Parameters {
     //Psychological distress cases by age and gender
     private static MultiKeyCoefficientMap validationPsychDistressByAge, validationPsychDistressByAgeLow, validationPsychDistressByAgeMed, validationPsychDistressByAgeHigh;
 
+
+    // Wellbeing
+    private static MultiKeyCoefficientMap validationMentalWellbeingByAge, validationPhysicalWellbeingByAge;
+
+    // Life Satisfaction
+    private static MultiKeyCoefficientMap validationLifeSatisfactionByAge;
+
     //Employment by gender
     private static MultiKeyCoefficientMap validationEmploymentByGender;
 
@@ -1031,6 +1038,9 @@ public class Parameters {
         int columnsValidationDisabledByAgeGroup = -1;
         int columnsValidationHealthByAgeGroup = -1;
         int columnsValidationMentalHealthByAgeGroup = -1;
+        int columnsValidationMentalWellbeingByAgeGroup = -1;
+        int columnsValidationPhysicalWellbeingByAgeGroup = -1;
+        int columnsValidationLifeSatisfactionByAgeGroup = -1;
         int columnsValidationEmploymentByGender = -1;
         int columnsValidationEmploymentByGenderAndAge = -1;
         int columnsValidationEmploymentByMaternity = -1;
@@ -1184,6 +1194,9 @@ public class Parameters {
             columnsValidationDisabledByAgeGroup = 6;
             columnsValidationHealthByAgeGroup = 6;
             columnsValidationMentalHealthByAgeGroup = 18;
+            columnsValidationMentalWellbeingByAgeGroup = 18;
+            columnsValidationPhysicalWellbeingByAgeGroup = 18;
+            columnsValidationLifeSatisfactionByAgeGroup = 18;
             columnsValidationEmploymentByGender = 2;
             columnsValidationEmploymentByGenderAndAge = 18;
             columnsValidationEmploymentByMaternity = 3;
@@ -1698,6 +1711,11 @@ public class Parameters {
 
         //Mental health by age and gender
         validationMentalHealthByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_mentalHealthByAgeGroup", 1, columnsValidationMentalHealthByAgeGroup);
+
+
+        validationMentalWellbeingByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_mentalWellbeingByAgeGroup", 1, columnsValidationMentalWellbeingByAgeGroup);
+        validationPhysicalWellbeingByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_physicalWellbeingByAgeGroup", 1, columnsValidationPhysicalWellbeingByAgeGroup);
+        validationLifeSatisfactionByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_lifeSatisfactionByAgeGroup", 1, columnsValidationLifeSatisfactionByAgeGroup);
 
         //Psychological distress by age and gender
         validationPsychDistressByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_psychDistressByAgeGroup", 1, columnsValidationMentalHealthByAgeGroup);
@@ -2349,6 +2367,19 @@ public class Parameters {
     public static MultiKeyCoefficientMap getValidationMentalHealthByAge() {
         return validationMentalHealthByAge;
     }
+
+    public static MultiKeyCoefficientMap getValidationMentalWellbeingByAge() {
+        return validationMentalWellbeingByAge;
+    }
+
+    public static MultiKeyCoefficientMap getValidationPhysicalWellbeingByAge() {
+        return validationPhysicalWellbeingByAge;
+    }
+
+    public static MultiKeyCoefficientMap getValidationLifeSatisfactionByAge() {
+        return validationLifeSatisfactionByAge;
+    }
+
 
     public static MultiKeyCoefficientMap getValidationPsychDistressByAge() {
         return validationPsychDistressByAge;
