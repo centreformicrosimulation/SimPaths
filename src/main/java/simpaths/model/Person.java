@@ -2216,7 +2216,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_Econ_benefits,
         D_Home_owner,
         Dag,
+        Dag_L1,
         Dag_sq,
+        Dag_sq_L1,
         DagCeiling54,
         Dag_sqCeiling54,
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
@@ -2489,8 +2491,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dag -> {
                 return (double) dag;
             }
+            case Dag_L1 -> {
+                return (double) dag - 1;
+            }
             case Dag_sq -> {
                 return (double) dag * dag;
+            }
+            case Dag_sq_L1 -> {
+                return (double) (dag - 1) * (dag - 1);
             }
             case DagCeiling54 -> {
                 return (double) Math.min(dag, 54);
