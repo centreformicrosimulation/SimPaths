@@ -40,7 +40,7 @@ import static microsim.statistics.regression.RegressionUtils.appendCoefficientMa
  */
 public class Parameters {
 
-    public static final boolean TESTING_FLAG = true;
+    public static final boolean TESTING_FLAG = false;
 
     // EUROMOD variables
 
