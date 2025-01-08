@@ -127,10 +127,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Dhe dhe;
     private Double dhm; //Psychological distress GHQ-12 Likert scale
     @Transient private Double dhm_lag1; //Lag(1) of dhm
-    private Double dwb_mcs;  //mental well-being: SF12 mental component summary score
-    @Transient private Double dwb_mcs_lag1;  //mental well-being: SF12 mental component summary score lag 1
-    private Double dwb_pcs;  //physical well-being: SF12 physical component summary score
-    @Transient private Double dwb_pcs_lag1;  //physical well-being: SF12 physical component summary score lag 1
+    private Double dhe_mcs;  //mental well-being: SF12 mental component summary score
+    @Transient private Double dhe_mcs_lag1;  //mental well-being: SF12 mental component summary score lag 1
+    private Double dhe_pcs;  //physical well-being: SF12 physical component summary score
+    @Transient private Double dhe_pcs_lag1;  //physical well-being: SF12 physical component summary score lag 1
     private Integer dls;      //life satisfaction - score 1-7
     @Transient private Double dls_temp;
     @Transient private Integer dls_lag1;      //life satisfaction - score 1-7 lag 1
@@ -457,8 +457,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhmGhq_lag1 = Objects.requireNonNullElse(originalPerson.dhmGhq_lag1, dhmGhq);
 
         dls = originalPerson.dls;
-        dwb_mcs = originalPerson.dwb_mcs;
-        dwb_pcs = originalPerson.dwb_pcs;
+        dhe_mcs = originalPerson.dhe_mcs;
+        dhe_pcs = originalPerson.dhe_pcs;
 
         if (originalPerson.dls_lag1 != null) {
             dls_lag1 = originalPerson.dls_lag1;
@@ -467,15 +467,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         if (originalPerson.dhm_lag1 != null) {
-            dwb_mcs_lag1 = originalPerson.dwb_mcs_lag1;
+            dhe_mcs_lag1 = originalPerson.dhe_mcs_lag1;
         } else {
-            dwb_mcs_lag1 = originalPerson.dwb_mcs;
+            dhe_mcs_lag1 = originalPerson.dhe_mcs;
         }
 
-        if (originalPerson.dwb_pcs_lag1 != null) {
-            dwb_pcs_lag1 = originalPerson.dwb_pcs_lag1;
+        if (originalPerson.dhe_pcs_lag1 != null) {
+            dhe_pcs_lag1 = originalPerson.dhe_pcs_lag1;
         } else {
-            dwb_pcs_lag1 = originalPerson.dwb_pcs;
+            dhe_pcs_lag1 = originalPerson.dhe_pcs;
         }
 
         if (originalPerson.labourSupplyWeekly_L1 != null) {
@@ -667,10 +667,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         HealthMentalHM1, 				//Predict level of mental health on the GHQ-12 Likert scale (Step 1)
         HealthMentalHM2,				//Modify the prediction from Step 1 by applying increments / decrements for exposure
         HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together
-        WellbeingMCS1,
-        WellbeingMCS2,
-        WellbeingPCS1,
-        WellbeingPCS2,
+        HealthMCS1,
+        HealthMCS2,
+        HealthPCS1,
+        HealthPCS2,
         LifeSatisfaction1,
         LifeSatisfaction2,
         InSchool,
@@ -732,17 +732,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case HealthMentalHM2 -> {
                 healthMentalHM2Level();
             }
-            case WellbeingMCS1 -> {
-                wellbeingMCS1();
+            case HealthMCS1 -> {
+                healthMCS1();
             }
-            case WellbeingMCS2 -> {
-                wellbeingMCS2();
+            case HealthMCS2 -> {
+                healthMCS2();
             }
-            case WellbeingPCS1 -> {
-                wellbeingPCS1();
+            case HealthPCS1 -> {
+                healthPCS1();
             }
-            case WellbeingPCS2 -> {
-                wellbeingPCS2();
+            case HealthPCS2 -> {
+                healthPCS2();
             }
             case LifeSatisfaction1 -> {
                 lifeSatisfaction1();
@@ -965,44 +965,44 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void wellbeingMCS1() {
+    protected void healthMCS1() {
 
         double mcsPrediction;
-        mcsPrediction = Parameters.getRegWellbeingMCS1().getScore(this, Person.DoublesVariables.class);
-        dwb_mcs = mcsPrediction;
+        mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
+        dhe_mcs = mcsPrediction;
 
     }
 
-    protected void wellbeingMCS2() {
+    protected void healthMCS2() {
 
         double mcsPrediction;
         if (Gender.Male.equals(getDgn())) {
-            mcsPrediction = Parameters.getRegWellbeingMCS2Males().getScore(this, Person.DoublesVariables.class);
-            dwb_mcs = constrainSF12Estimate(mcsPrediction + dwb_mcs);
+            mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
+            dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
         } else if (Gender.Female.equals(getDgn())) {
-            mcsPrediction = Parameters.getRegWellbeingMCS2Females().getScore(this, Person.DoublesVariables.class);
-            dwb_mcs = constrainSF12Estimate(mcsPrediction + dwb_mcs);
+            mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
+            dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
         }
     }
 
-    protected void wellbeingPCS1() {
+    protected void healthPCS1() {
 
         double pcsPrediction;
-        pcsPrediction = Parameters.getRegWellbeingPCS1().getScore(this, Person.DoublesVariables.class);
-        dwb_pcs = pcsPrediction;
+        pcsPrediction = Parameters.getRegHealthPCS1().getScore(this, Person.DoublesVariables.class);
+        dhe_pcs = pcsPrediction;
 
     }
 
 
-    protected void wellbeingPCS2() {
+    protected void healthPCS2() {
 
         double pcsPrediction;
         if (Gender.Male.equals(getDgn())) {
-            pcsPrediction = Parameters.getRegWellbeingPCS2Males().getScore(this, Person.DoublesVariables.class);
-            dwb_pcs = constrainSF12Estimate(pcsPrediction + dwb_pcs);
+            pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
+            dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
         } else if (Gender.Female.equals(getDgn())) {
-            pcsPrediction = Parameters.getRegWellbeingPCS2Females().getScore(this, Person.DoublesVariables.class);
-            dwb_pcs = constrainSF12Estimate(pcsPrediction + dwb_pcs);
+            pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
+            dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
         }
     }
 
@@ -1841,8 +1841,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhm_lag1 = dhm; //Update lag(1) of mental health
         dhmGhq_lag1 = dhmGhq;
         dls_lag1 = dls;
-        dwb_mcs_lag1 = dwb_mcs;
-        dwb_pcs_lag1 = dwb_pcs;
+        dhe_mcs_lag1 = dhe_mcs;
+        dhe_pcs_lag1 = dhe_pcs;
         dlltsd_lag1 = dlltsd; //Update lag(1) of long-term sick or disabled status
         needSocialCare_lag1 = needSocialCare;
         careHoursFromFormalWeekly_lag1 = careHoursFromFormalWeekly;
@@ -2285,10 +2285,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhm_L1,							//Mental health status lag(1)
         Dls,                            //Life satisfaction status
         Dls_L1,                            //Life satisfaction status lag(1)
-        Dwb_mcs,                        //Mental well-being status
-        Dwb_mcs_L1,                        //Mental well-being status lag(1)
-        Dwb_pcs,                        //Physical well-being status
-        Dwb_pcs_L1,                        //Physical well-being status lag(1)
+        Dhe_mcs,                        //Mental well-being status
+        Dhe_mcs_L1,                        //Mental well-being status lag(1)
+        Dhe_pcs,                        //Physical well-being status
+        Dhe_pcs_L1,                        //Physical well-being status lag(1)
         Dhmghq_L1,
         Dlltsd,							//Long-term sick or disabled
         Dlltsd_L1,						//Long-term sick or disabled lag(1)
@@ -2839,20 +2839,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return dhm_lag1;
                 } else return 0.;
             }
-            case Dwb_mcs -> {
-                return dwb_mcs;
+            case Dhe_mcs -> {
+                return dhe_mcs;
             }
-            case Dwb_mcs_L1 -> {
-                if (dwb_mcs_lag1 != null && dwb_mcs_lag1 >= 0.) {
-                    return dwb_mcs_lag1;
+            case Dhe_mcs_L1 -> {
+                if (dhe_mcs_lag1 != null && dhe_mcs_lag1 >= 0.) {
+                    return dhe_mcs_lag1;
                 } else return 0.;
             }
-            case Dwb_pcs -> {
-                return dwb_pcs;
+            case Dhe_pcs -> {
+                return dhe_pcs;
             }
-            case Dwb_pcs_L1 -> {
-                if (dwb_pcs_lag1 != null && dwb_pcs_lag1 >= 0.) {
-                    return dwb_pcs_lag1;
+            case Dhe_pcs_L1 -> {
+                if (dhe_pcs_lag1 != null && dhe_pcs_lag1 >= 0.) {
+                    return dhe_pcs_lag1;
                 } else return 0.;
             }
             case Dls -> {
@@ -4075,21 +4075,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
         return val;
     }
-    public double getDwb_mcs() {
+    public double getDhe_mcs() {
         double val;
-        if (dwb_mcs == null) {
+        if (dhe_mcs == null) {
             val = -1.0;
         } else {
-            val = dwb_mcs;
+            val = dhe_mcs;
         }
         return val;
     }
-    public double getDwb_pcs() {
+    public double getDhe_pcs() {
         double val;
-        if (dwb_pcs == null) {
+        if (dhe_pcs == null) {
             val = -1.0;
         } else {
-            val = dwb_pcs;
+            val = dhe_pcs;
         }
         return val;
     }

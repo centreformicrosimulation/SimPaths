@@ -210,23 +210,23 @@ public class Validator implements IDoubleSource {
         psychDistressFemale_High_40_49,
         psychDistressFemale_High_50_59,
         
-        mentalWellbeingMale_20_29,
-        mentalWellbeingMale_30_39,
-        mentalWellbeingMale_40_49,
-        mentalWellbeingMale_50_59,
-        mentalWellbeingFemale_20_29,
-        mentalWellbeingFemale_30_39,
-        mentalWellbeingFemale_40_49,
-        mentalWellbeingFemale_50_59,
+        healthMCSMale_20_29,
+        healthMCSMale_30_39,
+        healthMCSMale_40_49,
+        healthMCSMale_50_59,
+        healthMCSFemale_20_29,
+        healthMCSFemale_30_39,
+        healthMCSFemale_40_49,
+        healthMCSFemale_50_59,
 
-        physicalWellbeingMale_20_29,
-        physicalWellbeingMale_30_39,
-        physicalWellbeingMale_40_49,
-        physicalWellbeingMale_50_59,
-        physicalWellbeingFemale_20_29,
-        physicalWellbeingFemale_30_39,
-        physicalWellbeingFemale_40_49,
-        physicalWellbeingFemale_50_59,
+        healthPCSMale_20_29,
+        healthPCSMale_30_39,
+        healthPCSMale_40_49,
+        healthPCSMale_50_59,
+        healthPCSFemale_20_29,
+        healthPCSFemale_30_39,
+        healthPCSFemale_40_49,
+        healthPCSFemale_50_59,
 
         lifeSatisfactionMale_20_29,
         lifeSatisfactionMale_30_39,
@@ -1450,85 +1450,85 @@ public class Validator implements IDoubleSource {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
 
-                /////////// New validators for wellbeing and life satisfaction
-            case mentalWellbeingMale_20_29:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_male_20_29"));
+                /////////// New validators for health and life satisfaction
+            case healthMCSMale_20_29:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_male_20_29"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingMale_30_39:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_male_30_39"));
+            case healthMCSMale_30_39:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_male_30_39"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingMale_40_49:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_male_40_49"));
+            case healthMCSMale_40_49:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_male_40_49"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingMale_50_59:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_male_50_59"));
+            case healthMCSMale_50_59:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_male_50_59"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingFemale_20_29:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_female_20_29"));
+            case healthMCSFemale_20_29:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_female_20_29"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingFemale_30_39:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_female_30_39"));
+            case healthMCSFemale_30_39:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_female_30_39"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingFemale_40_49:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_female_40_49"));
+            case healthMCSFemale_40_49:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_female_40_49"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case mentalWellbeingFemale_50_59:
-                value = ((Number) Parameters.getValidationMentalWellbeingByAge().getValue(model.getYear()-1, "mental_wellbeing_female_50_59"));
+            case healthMCSFemale_50_59:
+                value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_female_50_59"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
 
-            case physicalWellbeingMale_20_29:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_male_20_29"));
+            case healthPCSMale_20_29:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_male_20_29"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingMale_30_39:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_male_30_39"));
+            case healthPCSMale_30_39:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_male_30_39"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingMale_40_49:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_male_40_49"));
+            case healthPCSMale_40_49:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_male_40_49"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingMale_50_59:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_male_50_59"));
+            case healthPCSMale_50_59:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_male_50_59"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingFemale_20_29:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_female_20_29"));
+            case healthPCSFemale_20_29:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_female_20_29"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingFemale_30_39:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_female_30_39"));
+            case healthPCSFemale_30_39:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_female_30_39"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingFemale_40_49:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_female_40_49"));
+            case healthPCSFemale_40_49:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_female_40_49"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case physicalWellbeingFemale_50_59:
-                value = ((Number) Parameters.getValidationPhysicalWellbeingByAge().getValue(model.getYear()-1, "physical_wellbeing_female_50_59"));
+            case healthPCSFemale_50_59:
+                value = ((Number) Parameters.getValidationHealthPCSByAge().getValue(model.getYear()-1, "health_pcs_score_female_50_59"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
