@@ -103,6 +103,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double careHoursFromDaughterWeekly_lag1;
     @Transient private Double careHoursFromSonWeekly_lag1;
     @Transient private Double careHoursFromOtherWeekly_lag1;
+    @Transient private Boolean isHomeOwner_lag1;
 
     // partner lags
     @Transient private Dcpst dcpst_lag1;            // lag partnership status
@@ -440,6 +441,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         weight = originalPerson.weight;
         dhe = originalPerson.dhe;
         dhm = originalPerson.dhm;
+
+        isHomeOwner_lag1 = originalPerson.dhhOwned;
 
         if (originalPerson.dhe_lag1 != null) { //If original person misses lagged level of health, assign current level of health as lagged value
             dhe_lag1 = originalPerson.dhe_lag1;
@@ -1843,6 +1846,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dls_lag1 = dls;
         dhe_mcs_lag1 = dhe_mcs;
         dhe_pcs_lag1 = dhe_pcs;
+        isHomeOwner_lag1 = getBenefitUnit().isDhhOwned();
         dlltsd_lag1 = dlltsd; //Update lag(1) of long-term sick or disabled status
         needSocialCare_lag1 = needSocialCare;
         careHoursFromFormalWeekly_lag1 = careHoursFromFormalWeekly;
@@ -2215,6 +2219,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
         D_Econ_benefits,
         D_Home_owner,
+        D_Home_owner_L1,
         Dag,
         Dag_L1,
         Dag_sq,
@@ -3466,6 +3471,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
+            } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
+            case D_Home_owner_L1 -> {
+                return isHomeOwner_lag1 ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
             case Covid_2020_D -> {
                 return (getYear() == 2020) ? 1. : 0.;
