@@ -4,9 +4,9 @@
 * DESCRIPTION:          Compiles pooled data from UKHLS for analysis
 ***************************************************************************************
 * COUNTRY:              UK
-* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave m]
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          10 Apr 2024
+* LAST UPDATE:          14 Jan 2025 DP
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -32,12 +32,12 @@ foreach w of global UKHLSwaves {
 	if (`waveno'<13) {
 		use pidp `w'_ivfho `w'_ivfio `w'_hhorig `w'_buno_dv `w'_dvage `w'_sex `w'_depchl `w'_hidp `w'_pno `w'_pns1pid `w'_pns2pid `w'_month `w'_intdaty_dv ///
 		`w'_mnspid `w'_fnspid `w'_ppid `w'_ppno `w'_sppid `w'_sex_dv `w'_mastat_dv `w'_gor_dv `w'_age_dv  /* `w'_hgbioad1 `w'_hgbioad2 */ ///
-		`w'_intdatd_dv `w'_intdatm_dv `w'_intdaty_dv using `w'_indall.dta, clear
+		`w'_intdatd_dv `w'_intdatm_dv `w'_intdaty_dv `w'_ethn_dv using `w'_indall.dta, clear
 	}
 	else {
 		use pidp `w'_ivfho `w'_ivfio `w'_hhorig `w'_buno_dv `w'_dvage `w'_sex `w'_depchl `w'_hidp `w'_pno `w'_pns1pid `w'_pns2pid `w'_month `w'_intdaty_dv ///
 		`w'_mnspid `w'_fnspid `w'_ppid `w'_ppno `w'_sppid `w'_sex_dv `w'_mastat_dv `w'_gor_dv `w'_age_dv  `w'_hgbioad1 `w'_hgbioad2 ///
-		`w'_intdatd_dv `w'_intdatm_dv `w'_intdaty_dv using `w'_indall.dta, clear
+		`w'_intdatd_dv `w'_intdatm_dv `w'_intdaty_dv `w'_ethn_dv using `w'_indall.dta, clear
 	}
 
 	gen swv = `waveno'
@@ -47,6 +47,9 @@ foreach w of global UKHLSwaves {
 	}
 	save "$dir_data\add_vars_ukhls.dta", replace
 }
+
+
+
 
 *add variables from the Responding adults (16+) dataset
 foreach w of global UKHLSwaves {
@@ -58,32 +61,43 @@ foreach w of global UKHLSwaves {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
 		`w'_j2hrs `w'_jshrs /*`w'_scsfl*/ `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
-		/*`w'_indinus_lw `w'_indscus_lw `w'_indpxub_xw `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* */ ///
-		using `w'_indresp.dta, clear
+		/*`w'_indinus_lw `w'_indscus_lw `w'_indpxub_xw `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* */ `w'_sf12mcs_dv `w'_sf12pcs_dv ///
+				using `w'_indresp.dta, clear
 	}
 	else if (`waveno'<6) {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
 		`w'_j2hrs `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
-		`w'_indinus_lw `w'_indscus_lw `w'_indpxub_xw /*`w'_indpxui_xw*/ `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* ///
+		`w'_indinus_lw `w'_indscus_lw `w'_indpxub_xw /*`w'_indpxui_xw*/ `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_sf12mcs_dv `w'_sf12pcs_dv ///
 		using `w'_indresp.dta, clear
 	}
 	else if (`waveno'<13) {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
 		`w'_j2hrs `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
-		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* ///
+		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_sf12mcs_dv `w'_sf12pcs_dv ///
 		using `w'_indresp.dta, clear
 	} 
-	else {
+
+	else if (`waveno'==13) {
 		use pidp `w'_hidp `w'_pno /*`w'_buno_dv*/ `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
 		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
-		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_indpxui_xw ///
+		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_indpxui_xw `w'_sf12mcs_dv `w'_sf12pcs_dv ///
 		using `w'_indresp.dta, clear 
 		gen m_j2hrs=-9 /*m_j2hrs not available in wave 13*/
 	}
 	
+		else if (`waveno'==14) {
+		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
+		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
+		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
+		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw `w'_indpxui_xw*/ `w'_indpxg2_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_sf12mcs_dv `w'_sf12pcs_dv ///
+		using `w'_indresp.dta, clear
+		gen m_j2hrs=-9 /*m_j2hrs not available in wave 14*/
+	} 
+	
+		
 	gen swv = `waveno'
 	rename `w'_* *
 	if (`waveno'>1) {
@@ -99,16 +113,16 @@ foreach w of global UKHLSwaves {
 	local waveno=strpos("abcdefghijklmnopqrstuvwxyz","`w'")
 
 	if (`waveno'==1) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv /*`w'_hhdenui_xw*/ `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv  `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	else if (`waveno'<6) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv /*`w'_hhdenui_xw*/ `w'_nch02_dv `w'_hhdenub_xw /*`w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_nch02_dv `w'_hhdenub_xw /*`w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
 	}
-	else if (`waveno'<13) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv /*`w'_hhdenub_xw*/ `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
+	else if (`waveno'<14) {
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
 	} 
-	else {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_hhdenui_xw     `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
+	else if (`waveno'==14) {
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hhdeng2_xw `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	
 	gen swv = `waveno'
@@ -117,7 +131,7 @@ foreach w of global UKHLSwaves {
 		append using "$dir_data\add_vars_ukhls_hhresp.dta"
 	}
 	save "$dir_data\add_vars_ukhls_hhresp.dta", replace
-}
+} 
 
 
 /**************************************************************************************
@@ -144,12 +158,14 @@ duplicates report swv pidp hidp fiseq
 
 //now collapse variables 
 preserve
-gen inc_stp = frmnthimp_dv if ficode == 1
-gen inc_tu = frmnthimp_dv if ficode == 25
-gen inc_ma = frmnthimp_dv if ficode == 26
-keep swv pidp hidp inc_stp inc_tu inc_ma
-drop if missing(inc_stp) & missing(inc_tu) & missing(inc_ma)
-collapse (sum) inc_stp inc_tu inc_ma, by(swv pidp hidp)
+gen inc_pp = frmnthimp_dv if ficode == 4 //A Private Pension/Annuity
+gen inc_tu = frmnthimp_dv if ficode == 25 //Trade Union / Friendly Society Payment
+gen inc_ma = frmnthimp_dv if ficode == 26 //Maintenance or Alimony
+gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not living here
+gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
+keep swv pidp hidp inc_pp inc_tu inc_ma inc_fm inc_oth
+drop if missing(inc_pp) & missing(inc_tu) & missing(inc_ma) & missing(inc_fm) & missing(inc_oth)
+collapse (sum) inc_pp inc_tu inc_ma inc_fm inc_oth, by(swv pidp hidp)
 save "$dir_data\tmp_income", replace
 restore
 
@@ -184,15 +200,12 @@ merge 1:1 pidp hidp swv using "$dir_data\add_vars_ukhls_youth.dta", keep(1 3) no
 //Merge variables from cross-wave file (Stable characteristics of individuals)
 merge m:1 pidp using "$dir_ukhls_data\xwavedat.dta" , keepusing(maedqf paedqf birthy) keep(1 3) nogen 
 
-//DP: check if this is needed as IEMB is dropped later on 
-replace month = 1 if month == -10 // month not available for IEMB (Ethnic Minority Boost) sample. Treat as month 1.
 
 //Merge cohabitation variables from wave 1 (a) & 6 (f)
 merge m:1 pidp using "$dir_ukhls_data\a_indresp.dta" , keepusing(a_ppid a_intdatd_dv a_intdatm_dv a_intdaty_dv a_lcmarm a_lcmary4 a_lcmcbm a_lcmcby4) keep(1 3) nogen 
 merge m:1 pidp using "$dir_ukhls_data\f_indresp.dta" , keepusing(f_ppid f_intdatd_dv f_intdatm_dv f_intdaty_dv f_lcmarm f_lcmary4 f_lcmcbm f_lcmcby4) keep(1 3) nogen
 
-replace month = 1 if month == -10 // month not available for IEMB (Ethnic Minority Boost) sample. Treat as month 1.
-//DP: IEMB is dropped later on
+replace month = 1 if month == -10 // month not available for IEMB (Ethnic Minority Boost) sample. Treat as month 1.//DP: IEMB is dropped later on
 
 
 /**************************************************************************************

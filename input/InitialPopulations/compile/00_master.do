@@ -1,13 +1,14 @@
+
 ***************************************************************************************
 * PROJECT:              ESPON: construct initial populations for SimPaths using UKHLS data 
 * DO-FILE NAME:         00_master.do
 * DESCRIPTION:          Main do-file to set the main parameters (country, paths) and call sub-scripts
 ***************************************************************************************
 * COUNTRY:              UK
-* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave m]
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 *						WAS EUL version - UKDA-7215-stata [to wave 7]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          10 Apr 2024
+* LAST UPDATE:          14 Jan 2025
 ***************************************************************************************
 
 ***************************************************************************************
@@ -35,7 +36,8 @@ set matsize 1000
 **************************************************************************************/
 
 * Working directory
-global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
+//global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
+global dir_work "D:\Dasha\ESSEX\ESPON 2024\UK\initial_populations"
 
 * Directory which contains do files
 global dir_do "${dir_work}/do"
@@ -47,13 +49,15 @@ global dir_data "${dir_work}/data"
 global dir_log "${dir_work}/log"
 
 * Directory which contains UKHLS data
-global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls"
+//global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls"
+global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls"
 
 * Directory which contains WAS data
-global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
+//global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
+global dir_was_data "D:\Dasha\UK-original-data\WAS\UKDA-7215-stata\stata\stata13_se"
 
 * Directory which contains original initial popultions 
-global dir_ipop_orig "${dir_work}/daria_data"
+global dir_ipop_orig "${dir_work}/original_initial_populations"
 
 
 /**************************************************************************************
@@ -78,8 +82,9 @@ wave 10 j 2018-2020
 wave 11 k 2019-2021
 wave 12 l 2020-2022
 wave 13 m 2021-2023
+wave 14 n 2022-2024
 */
-global UKHLSwaves "a b c d e f g h i j k l m" /*all waves*/
+global UKHLSwaves "a b c d e f g h i j k l m n" /*all waves*/
 * waves reporting social care module in ukhls - ADL questions added from wave 7 and then every other wave (from 2016)
 global scRecWaves "g i k m"
 * waves reporting social care provided in ukhls (from 2015)
@@ -99,19 +104,19 @@ do "${dir_do}/01_prepare_UKHLS_pooled_data.do"
 do "${dir_do}/02_create_UKHLS_variables.do"
 * add social care 
 do "${dir_do}/03_social_care_received.do"
-do "${dir_do}/04_social_care_provided.do"
-* screens data and identifies benefit units
-do "${dir_do}/05_drop_hholds_create_benefit_units.do"
+do "${dir_do}/04_social_care_provided.do"*/
+* screens data and identifies benefit units 
+do "${dir_do}/05_create_benefit_units.do"
 * reweight data and slice into yearly segments
 do "${dir_do}/06_reweight_and_slice.do"
-* impute wealth data for selected years
+/* impute wealth data for selected years
 do "${dir_do}/07_was_wealth_data.do"
 forvalues year = $wealthStartYear / $wealthEndYear {
 	global yearWealth = `year'
 	do "${dir_do}/08_wealth_to_ukhls.do"
-}
+}*/
 do "${dir_do}/09_finalise_input_data.do"
-*do "${dir_do}/10_check_yearly_data.do"
+do "${dir_do}/10_check_yearly_data.do"
 
 
 /**************************************************************************************
