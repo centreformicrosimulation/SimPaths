@@ -3,9 +3,13 @@
 *	WEIGHT ADJUSTMENT TO ACCOUNT FOR USING HOUSEHOLDS WITHOUT MISSING VALUES
 *	
 *	AUTH: Patryk Bronka, Daria Popova, Justin van de Ven
-*	LAST EDIT: 18/04/2024 (JV)
+*	LAST EDIT: 15 Dec 2025 DP 
 *
 **********************************************************************/
+********************************************************************************
+cap log close 
+log using "${dir_log}/06_reweight_and_slice.log", replace
+********************************************************************************
 
 use "$dir_data\ukhls_pooled_all_obs_05.dta", clear
 
@@ -15,13 +19,14 @@ sort stm idhh
 *1.1. Define a dummy variable classifying households as complete or not
 cap gen complete_hh = (dropHH != 1)
 
+
 *1.2. Define independent variables for probit
 sum dgn dag drgn1
 cap gen drop_indicator = .
 replace drop_indicator = 1 if dgn < 0 | dag < 0 | drgn1 < 0
 
 by stm idhh: egen max_drop_indicator = max(drop_indicator)
-drop if max_drop_indicator == 1 /*583 observations deleted*/
+drop if max_drop_indicator == 1 //(1,304 observations deleted)
 
 recode deh_c3 dcpst stm (-9 = .)
 sum deh_c3 dcpst
@@ -118,7 +123,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	save "$dir_data/population_initial_fs_UK_`yy'.dta", replace
 }
 
-
+cap log close
 /**************************************************************************************
 * clean-up and exit
 **************************************************************************************/

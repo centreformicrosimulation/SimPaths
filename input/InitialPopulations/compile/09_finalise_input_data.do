@@ -1,16 +1,19 @@
 ***************************************************************************************
 * PROJECT:              ESPON: construct initial populations for SimPaths using UKHLS data 
 * DO-FILE NAME:         09_finalise_input_data.do
-* DESCRIPTION:          This file generates data for importing into SimPaths
+* DESCRIPTION:          This file drops hholds and generates data for importing into SimPaths
 ***************************************************************************************
 * COUNTRY:              UK
-* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave m]
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          10 Apr 2024
+* LAST UPDATE:          15 Dec 2025
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
-
+********************************************************************************
+cap log close 
+log using "${dir_log}/09_finalise_input_data.log", replace
+********************************************************************************
 ***************************************************************************************
 * pool all waves
 ***************************************************************************************
@@ -37,37 +40,49 @@ use "$dir_data\ukhls_pooled_all_obs_09.dta", clear
 * limit sample
 ***************************************************************************************
 
-// If any person in the household has missing values, drop the whole household ( 339,941 obs):
-drop if dropHH == 1 /*61,846 obs deleted*/
+// If any person in the household has missing values, drop the whole household:
+drop if dropHH == 1 /*(62,523  out of 529,229 deleted)*/
+
 drop dropObs dropHH 
 	
 // Drop if hh weight = 0:
-count if dwt==0 /*  60,814 obs*/
+count if dwt==0 
 drop if dwt==0 
 
-// Drop same sex households
-bys stm: fre ssscp
-/* 1,429 obs deleted*/
-drop if ssscp==1 
-bys stm: fre idhh if (dgn==dgnsp) & (dgn>=0 & dgnsp>=0)
-/*1,361 obs deleted*/
-drop if (dgn==dgnsp) & (dgn>=0 & dgnsp>=0)	
- 
-// drop orphans
-drop adult child adult_count* //drop old vars 
-gen adult = dag>=$age_become_responsible 
-//replace adult = 1 if (adult==0 & dcpst==1)
-gen child = 1 - adult
-bys  idhh stm: egen adult_count = sum(adult)
-bys  idbenefitunit stm: egen adult_count2 = sum(adult)
-drop if adult_count==0 
-drop if adult_count2==0 
-drop if ((dag>0 & dag<$age_become_responsible) & (idfather == -9 & idmother == -9)) 
-/*197 obs deleted*/
+//Final check for same sex households
+assert ssscp!=1 
+assert dgn!=dgnsp if idpartner>0
+
+//Final check for number of adults 
+drop adult child  //drop old vars 
+gen child = dag<$age_become_responsible 
+gen adult = 1 - child 
+bys stm idhh: egen adult_count = sum(adult)
+bys stm idbenefitunit: egen adult_count2 = sum(adult)
+drop if adult_count==0 //(1,435 observations deleted)
+drop if adult_count2==0 //(721 observations deleted)
+drop if ((dag>0 & dag<$age_become_responsible) & (idfather == -9 & idmother == -9)) //(0 observations deleted)
 assert adult_count>0 
 assert adult_count2>0 
  
-// check for duplicates in terms of stm amd idperson
+//Final check for orphans 
+assert  (idfather>0 | idmother>0) if (dag>0 & dag<$age_become_responsible )
+
+//Final check for single adults with nonmissing idpartner 
+bys stm idbenefitunit : egen na = sum(adult)
+gen chk = (na==1 & dcpst==1 & adult==1) 
+bys stm idbenefitunit : egen chk2 = max(chk)
+fre chk2 // 30 obs    
+//two adults in benunit but not partnered 
+gen chk3 = (na==2 & dcpst!=1 & adult==1) 
+bys stm idbenefitunit : egen chk4 = max(chk3)
+fre chk4 //0 obs 
+drop if chk2==1 
+drop if chk4==1  
+drop na chk chk2 chk3 chk4
+
+
+//check for duplicates in terms of stm and idperson
 cap drop duplicate 
 duplicates tag stm idperson , generate(duplicate)
 assert duplicate==0 
@@ -76,16 +91,6 @@ cap drop duplicate
 duplicates tag swv idperson , generate(duplicate)
 assert duplicate==0 
 
-sort idbenefitunit
-by idbenefitunit : egen na = sum(adult)
-gen chk = (na==1 & dcpst==1 & adult==1)
-by idbenefitunit : egen chk2 = max(chk)
-drop if (chk2==1)
-drop chk chk2
-gen chk = (na==2 & dcpst!=1 & adult==1)
-by idbenefitunit : egen chk2 = max(chk)
-drop if (chk2==1)
-drop chk chk2
 
 		
 ***************************************************************************************
@@ -175,19 +180,30 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	sum one [w=dwt]
 
 	*limit saved variables
-	keep idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dhe ydses_c5 yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt potential_earnings_hourly l1_potential_earnings_hourly liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost ypncp ypnoab aidhrs carewho
-	order idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dhe ydses_c5 yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt potential_earnings_hourly l1_potential_earnings_hourly liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost ypncp ypnoab aidhrs carewho
+	keep idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dhe ydses_c5 ///
+	yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 ///
+	stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt ///
+	potential_earnings_hourly l1_potential_earnings_hourly liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost ///
+	ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dot unemp  
 	
-	recode idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dhe ydses_c5 yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt potential_earnings_hourly l1_potential_earnings_hourly liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost ypncp ypnoab aidhrs carewho (missing=-9)
+	order idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dhe ydses_c5 yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen ///
+	dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag ///
+	multiplier dwt potential_earnings_hourly l1_potential_earnings_hourly liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost ///
+	ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dot unemp 
+	
+	recode idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dhe ydses_c5 yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp ///
+	dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 ///
+	adultchildflag multiplier dwt potential_earnings_hourly l1_potential_earnings_hourly liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs ///
+	formal_socare_cost ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dot unemp  (missing=-9)
 	
 	gsort idhh idbenefitunit idperson
 	save "$dir_data/population_initial_UK_$year.dta", replace
 	
-	recode dgn liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
+	recode dgn liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 }
 
-
+cap log close
 ***************************************************************************************
 * finalise
 ***************************************************************************************
@@ -196,13 +212,11 @@ local files_to_drop
 	was_wealthdata.dta
 	;
 #delimit cr // cr stands for carriage return
-
+/*
 foreach file of local files_to_drop { 
 	erase "$dir_data/`file'"
 }
-
-cap log close
-
+*/
 
 ***************************************************************************************
 * end

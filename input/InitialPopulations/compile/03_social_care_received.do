@@ -7,7 +7,10 @@
 *
 ********************************************************************************/
 
-
+***************************************************************************************
+cap log close 
+log using "${dir_log}/03_social-care_received.log", replace
+***************************************************************************************
 /********************************************************************************
 	local data directories - commented out when using master program
 ********************************************************************************/
@@ -64,13 +67,12 @@ foreach waveid in $scRecWaves {
 
 		gen swv = `waveno'
 
-		gen nbrNeeded = 0
+		gen need_socare = 0
 		// need care if indicate they can only manage with help or not at all
 		foreach vv of varlist adla adlb adlc adld adle adlf adlg adlh adli adlj adlk adll adlm adln {
 
-			replace nbrNeeded = nbrNeeded + 1 if (`vv'>1)
+			replace need_socare = 1 if (`vv'>1)
 		}
-		gen need_socare = (nbrNeeded > 1)
 
 		gen formal_socare_hrs = 0
 		gen hourInfCare = 0
@@ -262,7 +264,7 @@ qui {
 
 	save "ukhls_pooled_all_obs_03.dta", replace 
 }
-
+cap log close 
 
 /**************************************************************************************
 * clean-up and exit
@@ -289,3 +291,4 @@ local files_to_drop
 foreach file of local files_to_drop { 
 	erase "$dir_data/`file'"
 }
+
