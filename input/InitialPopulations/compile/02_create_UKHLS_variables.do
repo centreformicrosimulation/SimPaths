@@ -441,7 +441,7 @@ lab var dls "DEMOGRAPHIC: Life Satisfaction"
 
 preserve
 drop if dgn < 0 | dag<0 | dhe<0
-eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dwb_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
+eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dhe_mcs, vce(robust) // Physical and mental health have a big impact, so included as covariate.  
 restore
 estimates restore predict_dls
 predict dls_prediction
