@@ -358,6 +358,7 @@ gen dhm_flag = missing(dhm)
 replace dhm = round(dhm_prediction) if missing(dhm) 
 bys dhm_flag : sum dhm 
 
+
 /**************************Subjective wellbeing (GHQ): Caseness ******************************
 0: not psychologically distressed, scghq2_dv < 4 
 1: psychologically distressed, scghq2_dv >= 4
@@ -428,6 +429,27 @@ fre dhe_pcs_prediction
 gen dhe_pcs_flag = missing(dhe_pcs)
 replace dhe_pcs = round(dhe_pcs_prediction) if missing(dhe_pcs) 
 bys dhe_pcs_flag : sum dhe_pcs
+
+/***************************** Life Satisfaction ****************************************************************************/
+/* Life satisfaction, self report. Continuous scale 0 to 7. */
+
+
+gen dls = sclfsato
+replace dls = . if sclfsato < 0
+lab var dls "DEMOGRAPHIC: Life Satisfaction"
+// fre dls if dag>0 & dag<16
+
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dwb_mcs, vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+estimates restore predict_dls
+predict dls_prediction
+// fre dls_prediction
+
+gen dls_flag = missing(dls)
+replace dls = round(dls_prediction) if missing(dls) 
+bys dls_flag : sum dls 
 
 
 /****************************Ehtnicity*****************************************/
@@ -1431,7 +1453,7 @@ keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
-	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dot unemp 
+	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dls dot unemp 
 
 sort swv idhh idperson 
 
@@ -1441,7 +1463,7 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
-	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dot unemp {
+	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dls dot unemp {
 		qui recode `var' (-9/-1=-9) (.=-9) 
 }
 
