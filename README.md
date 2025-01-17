@@ -56,7 +56,7 @@ To run the SimPathsStart setup phases and set up a population for subsequent mul
 - `-c` Country ['UK' or 'IT']
 - `-s` Start year
 - `-g` [true/false] show/hide gui
-- `-r` Re-write policy schedule from detected policy files
+- `--rewrite-policy-schedule` Re-write policy schedule from detected policy files
 - `-Setup` do setup phases (creating input populations database) only
 
 e.g.
