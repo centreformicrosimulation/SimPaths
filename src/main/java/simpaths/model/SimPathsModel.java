@@ -492,14 +492,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // Update Health - determine health (continuous) based on regression models: done here because health depends on education
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Health);
 
-        // Update mental health - determine (continuous) mental health level based on regression models
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
-
-        //Update SF12 MCS and PCS health scores step 1
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS1);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS1);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1);
-
+//        // Update mental health - determine (continuous) mental health level based on regression models
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
+//
+//        //Update SF12 MCS and PCS health scores step 1
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS1);
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS1);
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1);
         // HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
 
         // Update potential earnings so that as up to date as possible to decide partner in union matching.
