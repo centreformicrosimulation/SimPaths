@@ -550,19 +550,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // MENTAL HEALTH MODULE
         // Update mental health - determine (continuous) mental health level based on regression models + caseness
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
         // modify the outcome of Step 1 depending on individual's exposures + caseness
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
         // update case-based measure
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1HM2Cases);
 
         // HEALTH and LIFE SATISFACTION 2
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMCS1); //Step 1 of mental health
-        addCollectionEventToAllYears(persons, Person.Processes.HealthPCS1); //Step 1 of mental health
-        addCollectionEventToAllYears(persons, Person.Processes.LifeSatisfaction1); //Step 1 of mental health
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMCS2);
-        addCollectionEventToAllYears(persons, Person.Processes.HealthPCS2);
-        addCollectionEventToAllYears(persons, Person.Processes.LifeSatisfaction2);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS2);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS2);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
