@@ -885,6 +885,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 				tabSet.add(createScrollPaneFromPlots(healthAgePlots, "Health: age/gender", 2));
 
+				// mental health plots
 				Set<JInternalFrame> healthMentalAgePlots = new LinkedHashSet<>();
 				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
 					int ageFrom = ageFilter.getAgeFrom();
@@ -983,6 +984,81 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					}
 
 				tabSet.add(createScrollPaneFromPlots(psychologicalDistressCasesEducationPlots, "Share in psychological distress (case-based): gender/education", 2));
+
+				// life satisfaction plots
+				Set<JInternalFrame> lifeSatisfactionAgePlots = new LinkedHashSet<>();
+				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
+					int ageFrom = ageFilter.getAgeFrom();
+					int ageTo = ageFilter.getAgeTo();
+
+					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
+					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
+					Weighted_CrossSection.Integer maleCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getDls", true);
+					maleCS.setFilter(maleAgeFilter);
+					Weighted_CrossSection.Integer femaleCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "getDls", true);
+					femaleCS.setFilter(femaleAgeFilter);
+
+					TimeSeriesSimulationPlotter lifeSatisfactionAgePlotter = new TimeSeriesSimulationPlotter("Life satisfaction score by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
+					lifeSatisfactionAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
+					lifeSatisfactionAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
+					lifeSatisfactionAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("lifeSatisfactionMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					lifeSatisfactionAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("lifeSatisfactionFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+
+					updateChartSet.add(lifeSatisfactionAgePlotter);
+					lifeSatisfactionAgePlots.add(lifeSatisfactionAgePlotter);
+				}
+
+				tabSet.add(createScrollPaneFromPlots(lifeSatisfactionAgePlots, "Life Satisfaction score: age/gender", 2));
+
+				// health plots
+				Set<JInternalFrame> healthMCSAgePlots = new LinkedHashSet<>();
+				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
+					int ageFrom = ageFilter.getAgeFrom();
+					int ageTo = ageFilter.getAgeTo();
+
+					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
+					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_mcs", true);
+					maleCS.setFilter(maleAgeFilter);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_mcs", true);
+					femaleCS.setFilter(femaleAgeFilter);
+
+					TimeSeriesSimulationPlotter healthMCSAgePlotter = new TimeSeriesSimulationPlotter("Mental health by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
+					healthMCSAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
+					healthMCSAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
+					healthMCSAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("healthMCSMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					healthMCSAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("healthMCSFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+
+					updateChartSet.add(healthMCSAgePlotter);
+					healthMCSAgePlots.add(healthMCSAgePlotter);
+				}
+
+				tabSet.add(createScrollPaneFromPlots(healthMCSAgePlots, "Mental health MCS score: age/gender", 2));
+
+				Set<JInternalFrame> healthPCSAgePlots = new LinkedHashSet<>();
+				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
+					int ageFrom = ageFilter.getAgeFrom();
+					int ageTo = ageFilter.getAgeTo();
+
+					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
+					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_pcs", true);
+					maleCS.setFilter(maleAgeFilter);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_pcs", true);
+					femaleCS.setFilter(femaleAgeFilter);
+
+					TimeSeriesSimulationPlotter healthPCSAgePlotter = new TimeSeriesSimulationPlotter("Physical health by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
+					healthPCSAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
+					healthPCSAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
+					healthPCSAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("healthPCSMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					healthPCSAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("healthPCSFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+
+					updateChartSet.add(healthPCSAgePlotter);
+					healthPCSAgePlots.add(healthPCSAgePlotter);
+				}
+				
+				tabSet.add(createScrollPaneFromPlots(healthPCSAgePlots, "Physical health PCS score: age/gender", 2));
+
 				/*
 				TimeSeriesSimulationPlotter disabledAgePlotter = new TimeSeriesSimulationPlotter("Proportion of long-term sick or disabled by age & gender", "");
 			    disabledAgePlotter.setName("Disabled: age/gender");

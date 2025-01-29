@@ -492,9 +492,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // Update Health - determine health (continuous) based on regression models: done here because health depends on education
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Health);
 
-        // Update mental health - determine (continuous) mental health level based on regression models
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
-
+//        // Update mental health - determine (continuous) mental health level based on regression models
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
+//
+//        //Update SF12 MCS and PCS health scores step 1
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS1);
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS1);
+//        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1);
         // HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
 
         // Update potential earnings so that as up to date as possible to decide partner in union matching.
@@ -546,11 +550,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // MENTAL HEALTH MODULE
         // Update mental health - determine (continuous) mental health level based on regression models + caseness
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
         // modify the outcome of Step 1 depending on individual's exposures + caseness
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
         // update case-based measure
-        addCollectionEventToAllYears(persons, Person.Processes.HealthMentalHM1HM2Cases);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1HM2Cases);
+
+        // HEALTH and LIFE SATISFACTION 2
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction1); //Step 1 of mental health
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS2);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS2);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);

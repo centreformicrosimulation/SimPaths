@@ -5,14 +5,11 @@ package simpaths.data;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.InvalidParameterException;
 import java.util.*;
 
 // import plug-in packages
-import microsim.statistics.IDoubleSource;
 import simpaths.data.startingpop.DataParser;
 import simpaths.model.AnnuityRates;
-import simpaths.model.Person;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -120,6 +117,9 @@ public class Parameters {
 		"dhm",					//mental health status
 		"scghq2_dv",			//mental health status case based
 		"dhm_ghq",				//mental health status case based dummy (1 = psychologically distressed)
+        "dls",                  //life satisfaction
+        "dhe_mcs",              //mental health - SF12 score MCS
+        "dhe_pcs",              //physical health - SF12 score PCS
 		"dcpyy",				//years in partnership
 		"dcpagdf",				//partners age difference
 		"dnc02",				//number children aged 0-2
@@ -459,6 +459,20 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHM2CaseMales;
     private static MultiKeyCoefficientMap coeffCovarianceHM2CaseFemales;
 
+    //Health
+    private static MultiKeyCoefficientMap coeffCovarianceDHE_MCS1;
+    private static MultiKeyCoefficientMap coeffCovarianceDHE_MCS2Males;
+    private static MultiKeyCoefficientMap coeffCovarianceDHE_MCS2Females;
+
+    private static MultiKeyCoefficientMap coeffCovarianceDHE_PCS1;
+    private static MultiKeyCoefficientMap coeffCovarianceDHE_PCS2Males;
+    private static MultiKeyCoefficientMap coeffCovarianceDHE_PCS2Females;
+
+    private static MultiKeyCoefficientMap coeffCovarianceDLS1;
+    private static MultiKeyCoefficientMap coeffCovarianceDLS2Males;
+    private static MultiKeyCoefficientMap coeffCovarianceDLS2Females;
+
+
     //Education
     private static MultiKeyCoefficientMap coeffCovarianceEducationE1a;
     private static MultiKeyCoefficientMap coeffCovarianceEducationE1b;
@@ -602,6 +616,13 @@ public class Parameters {
     //Psychological distress cases by age and gender
     private static MultiKeyCoefficientMap validationPsychDistressByAge, validationPsychDistressByAgeLow, validationPsychDistressByAgeMed, validationPsychDistressByAgeHigh;
 
+
+    // Health
+    private static MultiKeyCoefficientMap validationHealthMCSByAge, validationHealthPCSByAge;
+
+    // Life Satisfaction
+    private static MultiKeyCoefficientMap validationLifeSatisfactionByAge;
+
     //Employment by gender
     private static MultiKeyCoefficientMap validationEmploymentByGender;
 
@@ -672,6 +693,19 @@ public class Parameters {
     private static BinomialRegression regHealthHM1Case;
     private static BinomialRegression regHealthHM2CaseMales;
     private static BinomialRegression regHealthHM2CaseFemales;
+
+    //Health
+    private static LinearRegression regHealthMCS1;
+    private static LinearRegression regHealthMCS2Males;
+    private static LinearRegression regHealthMCS2Females;
+
+    private static LinearRegression regHealthPCS1;
+    private static LinearRegression regHealthPCS2Males;
+    private static LinearRegression regHealthPCS2Females;
+
+    private static LinearRegression regLifeSatisfaction1;
+    private static LinearRegression regLifeSatisfaction2Males;
+    private static LinearRegression regLifeSatisfaction2Females;
 
     //Education
     private static BinomialRegression regEducationE1a;
@@ -929,6 +963,15 @@ public class Parameters {
         int columnsHealthHM1 = -1;
         int columnsHealthHM2Males = -1;
         int columnsHealthHM2Females = -1;
+        int columnsHealthMCS1 = -1;
+        int columnsHealthMCS2Males = -1;
+        int columnsHealthMCS2Females = -1;
+        int columnsHealthPCS1 = -1;
+        int columnsHealthPCS2Males = -1;
+        int columnsHealthPCS2Females = -1;
+        int columnsLifeSatisfaction1 = -1;
+        int columnsLifeSatisfaction2Males = -1;
+        int columnsLifeSatisfaction2Females = -1;
         int columnsSocialCareS1a = -1;
         int columnsSocialCareS1b = -1;
         int columnsSocialCareS2a = -1;
@@ -992,6 +1035,9 @@ public class Parameters {
         int columnsValidationDisabledByAgeGroup = -1;
         int columnsValidationHealthByAgeGroup = -1;
         int columnsValidationMentalHealthByAgeGroup = -1;
+        int columnsValidationHealthMCSByAgeGroup = -1;
+        int columnsValidationPhysicalHealthByAgeGroup = -1;
+        int columnsValidationLifeSatisfactionByAgeGroup = -1;
         int columnsValidationEmploymentByGender = -1;
         int columnsValidationEmploymentByGenderAndAge = -1;
         int columnsValidationEmploymentByMaternity = -1;
@@ -1074,9 +1120,18 @@ public class Parameters {
             columnsHealthH1a = 28;
             columnsHealthH1b = 35;
             columnsHealthH2b = 35;
-            columnsHealthHM1 = 31;
-            columnsHealthHM2Males = 11;
-            columnsHealthHM2Females = 11;
+            columnsHealthHM1 = 30;
+            columnsHealthHM2Males = 9;
+            columnsHealthHM2Females = 9;
+            columnsHealthMCS1 = 30;
+            columnsHealthMCS2Males = 9;
+            columnsHealthMCS2Females = 9;
+            columnsHealthPCS1 = 30;
+            columnsHealthPCS2Males = 9;
+            columnsHealthPCS2Females = 9;
+            columnsLifeSatisfaction1 = 30;
+            columnsLifeSatisfaction2Males = 9;
+            columnsLifeSatisfaction2Females = 9;
             columnsSocialCareS1a = 17;
             columnsSocialCareS1b = 18;
             columnsSocialCareS2a = 32;
@@ -1136,6 +1191,9 @@ public class Parameters {
             columnsValidationDisabledByAgeGroup = 6;
             columnsValidationHealthByAgeGroup = 6;
             columnsValidationMentalHealthByAgeGroup = 18;
+            columnsValidationHealthMCSByAgeGroup = 18;
+            columnsValidationPhysicalHealthByAgeGroup = 18;
+            columnsValidationLifeSatisfactionByAgeGroup = 18;
             columnsValidationEmploymentByGender = 2;
             columnsValidationEmploymentByGenderAndAge = 18;
             columnsValidationEmploymentByMaternity = 3;
@@ -1278,6 +1336,24 @@ public class Parameters {
         coeffCovarianceHM1Case = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM1_C", 1, columnsHealthHM1);
         coeffCovarianceHM2CaseMales = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM2_Males_C", 1, columnsHealthHM2Males);
         coeffCovarianceHM2CaseFemales = ExcelAssistant.loadCoefficientMap("input/reg_health_mental.xlsx", countryString + "_HM2_Females_C", 1, columnsHealthHM2Females);
+
+
+        //Health
+        coeffCovarianceDHE_MCS1 = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_MCS1", 1, columnsHealthMCS1);
+        coeffCovarianceDHE_MCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_MCS2_Males", 1, columnsHealthMCS2Males);
+        coeffCovarianceDHE_MCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_MCS2_Females", 1, columnsHealthMCS2Females);
+
+        coeffCovarianceDHE_PCS1 = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_PCS1", 1, columnsHealthPCS1);
+        coeffCovarianceDHE_PCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_PCS2_Males", 1, columnsHealthPCS2Males);
+        coeffCovarianceDHE_PCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_PCS2_Females", 1, columnsHealthPCS2Females);
+
+        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DLS1", 1, columnsLifeSatisfaction1);
+        coeffCovarianceDLS2Males = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DLS2_Males", 1, columnsLifeSatisfaction2Males);
+        coeffCovarianceDLS2Females = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DLS2_Females", 1, columnsLifeSatisfaction2Females);
+
+        //Life satisfaction
+
+//        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap("input/reg_lifesatisfaction.xlsx", countryString + "_DLS1", 1, columnsLifeSatisfaction1);
 
         //Education
         coeffCovarianceEducationE1a = ExcelAssistant.loadCoefficientMap("input/reg_education.xlsx", countryString + "_E1a", 1, columnsEducationE1a);
@@ -1483,6 +1559,17 @@ public class Parameters {
         regHealthHM2CaseMales = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM2CaseMales);
         regHealthHM2CaseFemales = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM2CaseFemales);
 
+        //Health
+        regHealthMCS1 = new LinearRegression(coeffCovarianceDHE_MCS1);
+        regHealthMCS2Males = new LinearRegression(coeffCovarianceDHE_MCS2Males);
+        regHealthMCS2Females = new LinearRegression(coeffCovarianceDHE_MCS2Females);
+        regHealthPCS1 = new LinearRegression(coeffCovarianceDHE_PCS1);
+        regHealthPCS2Males = new LinearRegression(coeffCovarianceDHE_PCS2Males);
+        regHealthPCS2Females = new LinearRegression(coeffCovarianceDHE_PCS2Females);
+        regLifeSatisfaction1 = new LinearRegression(coeffCovarianceDLS1);
+        regLifeSatisfaction2Males = new LinearRegression(coeffCovarianceDLS2Males);
+        regLifeSatisfaction2Females = new LinearRegression(coeffCovarianceDLS2Females);
+
         //Education
         regEducationE1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1a);
         regEducationE1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1b);
@@ -1621,6 +1708,11 @@ public class Parameters {
 
         //Mental health by age and gender
         validationMentalHealthByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_mentalHealthByAgeGroup", 1, columnsValidationMentalHealthByAgeGroup);
+
+
+        validationHealthMCSByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_healthMCSByAgeGroup", 1, columnsValidationHealthMCSByAgeGroup);
+        validationHealthPCSByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_healthPCSByAgeGroup", 1, columnsValidationPhysicalHealthByAgeGroup);
+        validationLifeSatisfactionByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_lifeSatisfactionByAgeGroup", 1, columnsValidationLifeSatisfactionByAgeGroup);
 
         //Psychological distress by age and gender
         validationPsychDistressByAge = ExcelAssistant.loadCoefficientMap("input/validation_statistics.xlsx", countryString + "_psychDistressByAgeGroup", 1, columnsValidationMentalHealthByAgeGroup);
@@ -1967,6 +2059,18 @@ public class Parameters {
     public static BinomialRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
     public static BinomialRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
 
+    public static LinearRegression getRegHealthMCS1() { return regHealthMCS1; }
+    public static LinearRegression getRegHealthMCS2Males() { return regHealthMCS2Males;   }
+    public static LinearRegression getRegHealthMCS2Females() { return regHealthMCS2Females; }
+
+    public static LinearRegression getRegHealthPCS1() { return regHealthPCS1; }
+    public static LinearRegression getRegHealthPCS2Males() { return regHealthPCS2Males; }
+    public static LinearRegression getRegHealthPCS2Females() { return regHealthPCS2Females; }
+
+    public static LinearRegression getRegLifeSatisfaction1() { return regLifeSatisfaction1; }
+    public static LinearRegression getRegLifeSatisfaction2Males() { return regLifeSatisfaction2Males; }
+    public static LinearRegression getRegLifeSatisfaction2Females() { return regLifeSatisfaction2Females; }
+
     public static BinomialRegression getRegEducationE1a() {return regEducationE1a;}
     public static BinomialRegression getRegEducationE1b() {return regEducationE1b;}
     public static OrderedRegression getRegEducationE2a() {return regEducationE2a;}
@@ -2260,6 +2364,19 @@ public class Parameters {
     public static MultiKeyCoefficientMap getValidationMentalHealthByAge() {
         return validationMentalHealthByAge;
     }
+
+    public static MultiKeyCoefficientMap getValidationHealthMCSByAge() {
+        return validationHealthMCSByAge;
+    }
+
+    public static MultiKeyCoefficientMap getValidationHealthPCSByAge() {
+        return validationHealthPCSByAge;
+    }
+
+    public static MultiKeyCoefficientMap getValidationLifeSatisfactionByAge() {
+        return validationLifeSatisfactionByAge;
+    }
+
 
     public static MultiKeyCoefficientMap getValidationPsychDistressByAge() {
         return validationPsychDistressByAge;

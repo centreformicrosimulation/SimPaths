@@ -1588,6 +1588,230 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_lhwByGender", replac
 
 
 ********************************************************************************
+* MCS Health score by age group and gender
+********************************************************************************
+
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 {
+import delimited "data\population_initial_UK_`year'.csv", clear
+
+cap drop _*
+
+la def dgn_lb /// 
+		0 "Female" ///
+		1 "Male"
+
+la val dgn dgn_lb
+
+*Define age groups
+gen ageGroup = .
+replace ageGroup = 0 if dag >= 0 & dag <= 9
+replace ageGroup = 1 if dag >= 10 & dag <= 19
+replace ageGroup = 2 if dag >= 20 & dag <= 29
+replace ageGroup = 3 if dag >= 30 & dag <= 39
+replace ageGroup = 4 if dag >= 40 & dag <= 49
+replace ageGroup = 5 if dag >= 50 & dag <= 59
+replace ageGroup = 6 if dag >= 60 & dag <= 69
+replace ageGroup = 7 if dag >= 70 & dag <= 79
+replace ageGroup = 8 if dag >= 80 & dag <= 100
+
+
+la def ageGrouplb /// 
+	0 "ageGroup_0_9" ///
+	1 "ageGroup_10_19" ///
+	2 "ageGroup_20_29" ///
+	3 "ageGroup_30_39" ///
+	4 "ageGroup_40_49" ///
+	5 "ageGroup_50_59" ///
+	6 "ageGroup_60_69" ///
+	7 "ageGroup_70_79" ///
+	8 "ageGroup_80_100" ///
+	
+la val ageGroup ageGrouplb
+
+gen health_mcs_score_female = dhe_mcs if dgn == 0
+gen health_mcs_score_male = dhe_mcs if dgn == 1
+
+collapse (mean) health_mcs_score_female health_mcs_score_male [aweight=dwt], by(ageGroup stm)
+drop if missing(ageGroup)
+reshape wide health_mcs_score*, i(stm) j(ageGroup)
+
+foreach var in health_mcs_score_female health_mcs_score_male {
+rename `var'0 `var'_0_9
+rename `var'1 `var'_10_19 
+rename `var'2 `var'_20_29
+rename `var'3 `var'_30_39
+rename `var'4 `var'_40_49
+rename `var'5 `var'_50_59
+rename `var'6 `var'_60_69
+rename `var'7 `var'_70_79
+rename `var'8 `var'_80_100
+}
+
+rename stm Year
+
+if `year' == 2011 {
+save validation_statistics.dta, replace
+} 
+else {
+append using validation_statistics
+save validation_statistics.dta, replace
+}
+
+}
+
+export excel using validation_statistics_UK.xlsx, sheet("UK_healthMCSByAgeGroup", replace) firstrow(variables)
+
+********************************************************************************
+* PCS Health score by age group and gender
+********************************************************************************
+
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 {
+import delimited "data\population_initial_UK_`year'.csv", clear
+
+cap drop _*
+
+la def dgn_lb /// 
+		0 "Female" ///
+		1 "Male"
+
+la val dgn dgn_lb
+
+*Define age groups
+gen ageGroup = .
+replace ageGroup = 0 if dag >= 0 & dag <= 9
+replace ageGroup = 1 if dag >= 10 & dag <= 19
+replace ageGroup = 2 if dag >= 20 & dag <= 29
+replace ageGroup = 3 if dag >= 30 & dag <= 39
+replace ageGroup = 4 if dag >= 40 & dag <= 49
+replace ageGroup = 5 if dag >= 50 & dag <= 59
+replace ageGroup = 6 if dag >= 60 & dag <= 69
+replace ageGroup = 7 if dag >= 70 & dag <= 79
+replace ageGroup = 8 if dag >= 80 & dag <= 100
+
+
+la def ageGrouplb /// 
+	0 "ageGroup_0_9" ///
+	1 "ageGroup_10_19" ///
+	2 "ageGroup_20_29" ///
+	3 "ageGroup_30_39" ///
+	4 "ageGroup_40_49" ///
+	5 "ageGroup_50_59" ///
+	6 "ageGroup_60_69" ///
+	7 "ageGroup_70_79" ///
+	8 "ageGroup_80_100" ///
+	
+la val ageGroup ageGrouplb
+
+gen health_pcs_score_female = dhe_pcs if dgn == 0
+gen health_pcs_score_male = dhe_pcs if dgn == 1
+
+collapse (mean) health_pcs_score_female health_pcs_score_male [aweight=dwt], by(ageGroup stm)
+drop if missing(ageGroup)
+reshape wide health_pcs_score*, i(stm) j(ageGroup)
+
+foreach var in health_pcs_score_female health_pcs_score_male {
+rename `var'0 `var'_0_9
+rename `var'1 `var'_10_19 
+rename `var'2 `var'_20_29
+rename `var'3 `var'_30_39
+rename `var'4 `var'_40_49
+rename `var'5 `var'_50_59
+rename `var'6 `var'_60_69
+rename `var'7 `var'_70_79
+rename `var'8 `var'_80_100
+}
+
+rename stm Year
+
+if `year' == 2011 {
+save validation_statistics.dta, replace
+} 
+else {
+append using validation_statistics
+save validation_statistics.dta, replace
+}
+
+}
+
+export excel using validation_statistics_UK.xlsx, sheet("UK_healthPCSByAgeGroup", replace) firstrow(variables)
+
+
+********************************************************************************
+* Life Satisfaction score by age group and gender
+********************************************************************************
+
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 {
+import delimited "data\population_initial_UK_`year'.csv", clear
+
+cap drop _*
+
+la def dgn_lb /// 
+		0 "Female" ///
+		1 "Male"
+
+la val dgn dgn_lb
+
+*Define age groups
+`}`}`}Group = .
+replace ageGroup = 0 if dag >= 0 & dag <= 9
+replace ageGroup = 1 if dag >= 10 & dag <= 19
+replace ageGroup = 2 if dag >= 20 & dag <= 29
+replace ageGroup = 3 if dag >= 30 & dag <= 39
+replace ageGroup = 4 if dag >= 40 & dag <= 49
+replace ageGroup = 5 if dag >= 50 & dag <= 59
+replace ageGroup = 6 if dag >= 60 & dag <= 69
+replace ageGroup = 7 if dag >= 70 & dag <= 79
+replace ageGroup = 8 if dag >= 80 & dag <= 100
+
+
+la def ageGrouplb /// 
+	0 "ageGroup_0_9" ///
+	1 "ageGroup_10_19" ///
+	2 "ageGroup_20_29" ///
+	3 "ageGroup_30_39" ///
+	4 "ageGroup_40_49" ///
+	5 "ageGroup_50_59" ///
+	6 "ageGroup_60_69" ///
+	7 "ageGroup_70_79" ///
+	8 "ageGroup_80_100" ///
+	
+la val ageGroup ageGrouplb
+
+gen life_satisfaction_female = dls if dgn == 0
+gen life_satisfaction_male = dls if dgn == 1
+
+collapse (mean) life_satisfaction_female life_satisfaction_male [aweight=dwt], by(ageGroup stm)
+drop if missing(ageGroup)
+reshape wide life_satisfaction*, i(stm) j(ageGroup)
+
+foreach var in life_satisfaction_female life_satisfaction_male {
+rename `var'0 `var'_0_9
+rename `var'1 `var'_10_19 
+rename `var'2 `var'_20_29
+rename `var'3 `var'_30_39
+rename `var'4 `var'_40_49
+rename `var'5 `var'_50_59
+rename `var'6 `var'_60_69
+rename `var'7 `var'_70_79
+rename `var'8 `var'_80_100
+}
+
+rename stm Year
+
+if `year' == 2011 {
+save validation_statistics.dta, replace
+} 
+else {
+append using validation_statistics
+save validation_statistics.dta, replace
+}
+
+}
+
+export excel using validation_statistics_UK.xlsx, sheet("UK_lifeSatisfactionByAgeGroup", replace) firstrow(variables)
+
+
+********************************************************************************
 *Poverty : share of households and share of children at risk of poverty : by region
 ********************************************************************************
 

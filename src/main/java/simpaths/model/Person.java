@@ -103,6 +103,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double careHoursFromDaughterWeekly_lag1;
     @Transient private Double careHoursFromSonWeekly_lag1;
     @Transient private Double careHoursFromOtherWeekly_lag1;
+    @Transient private Boolean isHomeOwner_lag1;
 
     // partner lags
     @Transient private Dcpst dcpst_lag1;            // lag partnership status
@@ -127,6 +128,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Dhe dhe;
     private Double dhm; //Psychological distress GHQ-12 Likert scale
     @Transient private Double dhm_lag1; //Lag(1) of dhm
+    private Double dhe_mcs;  //mental well-being: SF12 mental component summary score
+    @Transient private Double dhe_mcs_lag1;  //mental well-being: SF12 mental component summary score lag 1
+    private Double dhe_pcs;  //physical well-being: SF12 physical component summary score
+    @Transient private Double dhe_pcs_lag1;  //physical well-being: SF12 physical component summary score lag 1
+    private Integer dls;      //life satisfaction - score 1-7
+    @Transient private Double dls_temp;
+    @Transient private Integer dls_lag1;      //life satisfaction - score 1-7 lag 1
     @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
     @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
     @Transient private Boolean receivesBenefitsFlag; // Does person receive benefits
@@ -434,6 +442,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhe = originalPerson.dhe;
         dhm = originalPerson.dhm;
 
+        isHomeOwner_lag1 = originalPerson.dhhOwned;
+
         if (originalPerson.dhe_lag1 != null) { //If original person misses lagged level of health, assign current level of health as lagged value
             dhe_lag1 = originalPerson.dhe_lag1;
         } else {
@@ -448,6 +458,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         dhmGhq = Objects.requireNonNullElse(originalPerson.dhmGhq, false);
         dhmGhq_lag1 = Objects.requireNonNullElse(originalPerson.dhmGhq_lag1, dhmGhq);
+
+        dls = originalPerson.dls;
+        dhe_mcs = originalPerson.dhe_mcs;
+        dhe_pcs = originalPerson.dhe_pcs;
+
+        if (originalPerson.dls_lag1 != null) {
+            dls_lag1 = originalPerson.dls_lag1;
+        } else {
+            dls_lag1 = originalPerson.dls;
+        }
+
+        if (originalPerson.dhm_lag1 != null) {
+            dhe_mcs_lag1 = originalPerson.dhe_mcs_lag1;
+        } else {
+            dhe_mcs_lag1 = originalPerson.dhe_mcs;
+        }
+
+        if (originalPerson.dhe_pcs_lag1 != null) {
+            dhe_pcs_lag1 = originalPerson.dhe_pcs_lag1;
+        } else {
+            dhe_pcs_lag1 = originalPerson.dhe_pcs;
+        }
 
         if (originalPerson.labourSupplyWeekly_L1 != null) {
             labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
@@ -638,6 +670,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         HealthMentalHM1, 				//Predict level of mental health on the GHQ-12 Likert scale (Step 1)
         HealthMentalHM2,				//Modify the prediction from Step 1 by applying increments / decrements for exposure
         HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together
+        HealthMCS1,
+        HealthMCS2,
+        HealthPCS1,
+        HealthPCS2,
+        LifeSatisfaction1,
+        LifeSatisfaction2,
         InSchool,
         LeavingSchool,
         PartnershipDissolution,
@@ -696,6 +734,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case HealthMentalHM2 -> {
                 healthMentalHM2Level();
+            }
+            case HealthMCS1 -> {
+                healthMCS1();
+            }
+            case HealthMCS2 -> {
+                healthMCS2();
+            }
+            case HealthPCS1 -> {
+                healthPCS1();
+            }
+            case HealthPCS2 -> {
+                healthPCS2();
+            }
+            case LifeSatisfaction1 -> {
+                lifeSatisfaction1();
+            }
+            case LifeSatisfaction2 -> {
+                lifeSatisfaction2();
             }
             case HealthMentalHM1HM2Cases -> {
                 healthMentalHM1HM2Cases();
@@ -912,6 +968,68 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    protected void healthMCS1() {
+
+        double mcsPrediction;
+        mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
+        dhe_mcs = mcsPrediction;
+
+    }
+
+    protected void healthMCS2() {
+
+        double mcsPrediction;
+        if (Gender.Male.equals(getDgn())) {
+            mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
+            dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
+        } else if (Gender.Female.equals(getDgn())) {
+            mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
+            dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
+        }
+    }
+
+    protected void healthPCS1() {
+
+        double pcsPrediction;
+        pcsPrediction = Parameters.getRegHealthPCS1().getScore(this, Person.DoublesVariables.class);
+        dhe_pcs = pcsPrediction;
+
+    }
+
+
+    protected void healthPCS2() {
+
+        double pcsPrediction;
+        if (Gender.Male.equals(getDgn())) {
+            pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
+            dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
+        } else if (Gender.Female.equals(getDgn())) {
+            pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
+            dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
+        }
+    }
+
+    protected void lifeSatisfaction1() {
+
+        double dlsPrediction;
+        dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
+        dls_temp = dlsPrediction;
+
+    }
+
+
+    protected void lifeSatisfaction2() {
+
+        double dlsPrediction;
+        if (Gender.Male.equals(getDgn())) {
+            dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
+            dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+        } else if (Gender.Female.equals(getDgn())) {
+            dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
+            dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+        }
+    }
+
     /*
     Case-based measure of psychological distress, Steps 1 and 2 modelled together
     */
@@ -952,6 +1070,29 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhm = 36.;
         }
         return dhm;
+    }
+
+    protected Double constrainSF12Estimate(double sf12) {
+        if (sf12 < 0.) {
+            sf12 = 0.;
+        } else if (sf12 > 100.) {
+            sf12 = 100.;
+        }
+        return sf12;
+    }
+
+    protected Integer constrainLifeSatisfactionEstimate(double dls_estimate) {
+        if (Double.isNaN(dls_estimate) || Double.isInfinite(dls_estimate)) {
+            return null;
+        }
+
+        if (dls_estimate < 1.) {
+            dls_estimate = 1.;
+        } else if (dls_estimate > 7.) {
+            dls_estimate = 7.;
+        }
+
+        return (int) Math.round(dls_estimate);
     }
 
     //Health process defines health using H1a or H1b process
@@ -1702,6 +1843,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhe_lag1 = dhe; //Update lag(1) of health
         dhm_lag1 = dhm; //Update lag(1) of mental health
         dhmGhq_lag1 = dhmGhq;
+        dls_lag1 = dls;
+        dhe_mcs_lag1 = dhe_mcs;
+        dhe_pcs_lag1 = dhe_pcs;
+        isHomeOwner_lag1 = getBenefitUnit().isDhhOwned();
         dlltsd_lag1 = dlltsd; //Update lag(1) of long-term sick or disabled status
         needSocialCare_lag1 = needSocialCare;
         careHoursFromFormalWeekly_lag1 = careHoursFromFormalWeekly;
@@ -2074,8 +2219,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
         D_Econ_benefits,
         D_Home_owner,
+        D_Home_owner_L1,
         Dag,
+        Dag_L1,
         Dag_sq,
+        Dag_sq_L1,
         DagCeiling54,
         Dag_sqCeiling54,
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
@@ -2142,6 +2290,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhhtp_c4_SingleNoChildren_L1,
         Dhm,							//Mental health status
         Dhm_L1,							//Mental health status lag(1)
+        Dls,                            //Life satisfaction status
+        Dls_L1,                            //Life satisfaction status lag(1)
+        Dhe_mcs,                        //Mental well-being status
+        Dhe_mcs_L1,                        //Mental well-being status lag(1)
+        Dhe_pcs,                        //Physical well-being status
+        Dhe_pcs_L1,                        //Physical well-being status lag(1)
         Dhmghq_L1,
         Dlltsd,							//Long-term sick or disabled
         Dlltsd_L1,						//Long-term sick or disabled lag(1)
@@ -2342,8 +2496,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dag -> {
                 return (double) dag;
             }
+            case Dag_L1 -> {
+                return (double) dag - 1;
+            }
             case Dag_sq -> {
                 return (double) dag * dag;
+            }
+            case Dag_sq_L1 -> {
+                return (double) (dag - 1) * (dag - 1);
             }
             case DagCeiling54 -> {
                 return (double) Math.min(dag, 54);
@@ -2690,6 +2850,30 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhm_L1 -> {
                 if (dhm_lag1 != null && dhm_lag1 >= 0.) {
                     return dhm_lag1;
+                } else return 0.;
+            }
+            case Dhe_mcs -> {
+                return dhe_mcs;
+            }
+            case Dhe_mcs_L1 -> {
+                if (dhe_mcs_lag1 != null && dhe_mcs_lag1 >= 0.) {
+                    return dhe_mcs_lag1;
+                } else return 0.;
+            }
+            case Dhe_pcs -> {
+                return dhe_pcs;
+            }
+            case Dhe_pcs_L1 -> {
+                if (dhe_pcs_lag1 != null && dhe_pcs_lag1 >= 0.) {
+                    return dhe_pcs_lag1;
+                } else return 0.;
+            }
+            case Dls -> {
+                return dls;
+            }
+            case Dls_L1 -> {
+                if (dls_lag1 != null && dls_lag1 >= 0.) {
+                    return dls_lag1;
                 } else return 0.;
             }
             case Dhmghq_L1 -> {
@@ -3287,6 +3471,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
+            } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
+            case D_Home_owner_L1 -> {
+                return isHomeOwner_lag1 ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
             case Covid_2020_D -> {
                 return (getYear() == 2020) ? 1. : 0.;
@@ -3892,6 +4079,33 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             val = -1.0;
         } else {
             val = dhm;
+        }
+        return val;
+    }
+    public Integer getDls() {
+        int val;
+        if (dls == null) {
+            val = -1;
+        } else {
+            val = dls;
+        }
+        return val;
+    }
+    public double getDhe_mcs() {
+        double val;
+        if (dhe_mcs == null) {
+            val = -1.0;
+        } else {
+            val = dhe_mcs;
+        }
+        return val;
+    }
+    public double getDhe_pcs() {
+        double val;
+        if (dhe_pcs == null) {
+            val = -1.0;
+        } else {
+            val = dhe_pcs;
         }
         return val;
     }
