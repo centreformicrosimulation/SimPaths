@@ -2423,8 +2423,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
             System.out.println("Found processed dataset - preparing for simulation");
+            log.info("Found processed dataset - preparing for simulation");
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
             for ( Household originalHousehold : processed.getHouseholds()) {
+                log.info("Persistance: getting household " + householdIdCounter);
                 if (originalHousehold.getId() > householdIdCounter)
                     householdIdCounter = originalHousehold.getId();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
@@ -2451,8 +2453,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             inputDatabaseInteraction();
             System.out.println("Completed initialising input dataset");
             System.out.println("Loading survey data for starting population");
+            log.info("Loading survey data for starting population");
             List<Household> inputHouseholdList = loadStaringPopulation();
             System.out.println("completed loading survey data for starting population");
+            log.info("completed loading survey data for starting population");
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
@@ -3294,8 +3298,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
+            log.info("Submitting SQL query: " + query);
 
             List<Processed> processedList = em.createQuery(query).getResultList();
+            log.info("Query complete");
             if (!processedList.isEmpty()) {
 
                 if (processedList.size()>1)
@@ -3330,7 +3336,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
+            log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
+            log.info("Query complete");
 
             // close database connection
             em.close();
