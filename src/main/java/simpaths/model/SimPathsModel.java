@@ -63,6 +63,14 @@ import simpaths.model.taxes.database.TaxDonorDataParser;
  */
 public class SimPathsModel extends AbstractSimulationManager implements EventListener {
 
+    public static String getPersistDatabasePath() {
+        return PersistDatabasePath;
+    }
+
+    public static void setPersistDatabasePath(String persistDatabasePath) {
+        PersistDatabasePath = persistDatabasePath;
+    }
+
     public boolean isFirstRun() {
         return isFirstRun;
     }
@@ -302,6 +310,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 //    private static String RunDatabasePath = RunDatabasePath;
     private static String RunDatabasePath;
+    private static String PersistDatabasePath;
 
     /**
      *
@@ -365,6 +374,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         System.out.println("Time to load parameters: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
 
         RunDatabasePath = DatabaseUtils.databaseInputUrl;
+
+        if (null == PersistDatabasePath) setPersistDatabasePath(RunDatabasePath);
 
         elapsedTime0 = elapsedTime1;
 
@@ -3299,7 +3310,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             // query database
             Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + getPersistDatabasePath() + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
@@ -3369,13 +3380,17 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         try {
 
             Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + getPersistDatabasePath() + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
+
+            log.info("Initialising processed");
             Processed processed = new Processed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
+            log.info("Generating ID");
             em.persist(processed);  // generates processed id
+            log.info("Assigning ID across households");
 
             for (Household household : households) {
                 household.setProcessed(processed);
@@ -3388,6 +3403,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
             processed.setHouseholds(households);
 
+            log.info("Re-running em.persist()");
             em.persist(processed);
             txn.commit();
             em.close();
