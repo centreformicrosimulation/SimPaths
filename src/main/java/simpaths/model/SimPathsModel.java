@@ -2431,7 +2431,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             log.info("Found processed dataset - preparing for simulation");
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
             for ( Household originalHousehold : processed.getHouseholds()) {
-                log.info("Persistance: getting household " + householdIdCounter);
                 if (originalHousehold.getId() > householdIdCounter)
                     householdIdCounter = originalHousehold.getId();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
