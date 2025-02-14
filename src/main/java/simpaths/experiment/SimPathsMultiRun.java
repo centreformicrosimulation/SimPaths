@@ -56,6 +56,8 @@ public class SimPathsMultiRun extends MultiRun {
 	private Long counter = 0L;
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 
+	private static boolean persist_root;
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -148,6 +150,11 @@ public class SimPathsMultiRun extends MultiRun {
 		Option fileOption = new Option("f", "Output to file");
 		options.addOption(fileOption);
 
+		Option persistRoot = new Option("persistRootDatabase",
+				"Write and read processed database to root database" +
+				"(default: multirun copy in output folder)");
+		options.addOption(persistRoot);
+
 		Option helpOption = new Option("h", "help", false, "Print this help message");
 		options.addOption(helpOption);
 
@@ -189,6 +196,13 @@ public class SimPathsMultiRun extends MultiRun {
 			if (cmd.hasOption("p")) {
 				popSize = Integer.parseInt(cmd.getOptionValue("p"));
 			}
+
+			if (cmd.hasOption("persistRootDatabase")) {
+				persist_root = true;
+			} else {
+				persist_root = false;
+			}
+
 			if (cmd.hasOption("f")) {
 				try {
 					File logDir = new File("output/logs");
@@ -361,6 +375,7 @@ public class SimPathsMultiRun extends MultiRun {
 	public void buildExperiment(SimulationEngine engine) {
 
 		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
+		if (persist_root) model.setPersistDatabasePath("./input/input");
 		updateLocalParameters(model);
 		if (modelArgs != null)
 			updateParameters(model, modelArgs);

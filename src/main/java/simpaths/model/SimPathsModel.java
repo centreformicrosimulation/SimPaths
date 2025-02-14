@@ -63,6 +63,14 @@ import simpaths.model.taxes.database.TaxDonorDataParser;
  */
 public class SimPathsModel extends AbstractSimulationManager implements EventListener {
 
+    public static String getPersistDatabasePath() {
+        return PersistDatabasePath;
+    }
+
+    public static void setPersistDatabasePath(String persistDatabasePath) {
+        PersistDatabasePath = persistDatabasePath;
+    }
+
     public boolean isFirstRun() {
         return isFirstRun;
     }
@@ -300,6 +308,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     Random popAlignInnov;
     Random educationInnov;
 
+//    private static String RunDatabasePath = RunDatabasePath;
+    private static String RunDatabasePath;
+    private static String PersistDatabasePath;
 
     /**
      *
@@ -361,6 +372,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
         long elapsedTime1 = System.currentTimeMillis();
         System.out.println("Time to load parameters: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
+
+        RunDatabasePath = DatabaseUtils.databaseInputUrl;
+
+        if (null == PersistDatabasePath) setPersistDatabasePath(RunDatabasePath);
+
         elapsedTime0 = elapsedTime1;
 
         // populate tax donor references
@@ -2288,7 +2304,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             if (isFirstRun) {
 
                 Class.forName("org.h2.Driver");
-                conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+                conn = DriverManager.getConnection("jdbc:h2:file:" + RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
                 TaxDonorDataParser.updateDefaultDonorTables(conn, country);
             }
         }
@@ -2310,9 +2326,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Statement stat = null;
         try {
             Class.forName("org.h2.Driver");
-            System.out.println("Reading from database at " + DatabaseUtils.databaseInputUrl);
+            System.out.println("Reading from database at " + RunDatabasePath);
             try {
-                conn = DriverManager.getConnection("jdbc:h2:"+DatabaseUtils.databaseInputUrl + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+                conn = DriverManager.getConnection("jdbc:h2:"+ RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
             }
             catch (SQLException e) {
                 log.info(e.getMessage());
@@ -2423,6 +2439,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
             System.out.println("Found processed dataset - preparing for simulation");
+            log.info("Found processed dataset - preparing for simulation");
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
             for ( Household originalHousehold : processed.getHouseholds()) {
                 if (originalHousehold.getId() > householdIdCounter)
@@ -2451,8 +2468,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             inputDatabaseInteraction();
             System.out.println("Completed initialising input dataset");
             System.out.println("Loading survey data for starting population");
+            log.info("Loading survey data for starting population");
             List<Household> inputHouseholdList = loadStaringPopulation();
             System.out.println("completed loading survey data for starting population");
+            log.info("completed loading survey data for starting population");
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
@@ -3161,7 +3180,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 // access database and obtain donor pool
                 Map propertyMap = new HashMap();
-                propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
+                propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
                 EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
@@ -3290,12 +3309,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         try {
 
             // query database
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + getPersistDatabasePath() + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
+            log.info("Submitting SQL query: " + query);
 
             List<Processed> processedList = em.createQuery(query).getResultList();
+            log.info("Query complete");
             if (!processedList.isEmpty()) {
 
                 if (processedList.size()>1)
@@ -3325,12 +3348,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         try {
 
             Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + DatabaseUtils.databaseInputUrl);
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
+            log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
+            log.info("Query complete");
 
             // close database connection
             em.close();
@@ -3354,12 +3379,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         EntityTransaction txn = null;
         try {
 
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population").createEntityManager();
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + getPersistDatabasePath() + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
+
+            log.info("Initialising processed");
             Processed processed = new Processed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
+            log.info("Generating ID");
             em.persist(processed);  // generates processed id
+            log.info("Assigning ID across households");
 
             for (Household household : households) {
                 household.setProcessed(processed);
@@ -3372,6 +3403,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
             processed.setHouseholds(households);
 
+            log.info("Re-running em.persist()");
             em.persist(processed);
             txn.commit();
             em.close();
