@@ -87,7 +87,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Integer endYear = 2040;
 
     @GUIparameter(description = "Maximum simulated age")
-    private Integer maxAge = 100;
+    private Integer maxAge = 80;
 
     //@GUIparameter(description = "Fix year used in the regressions to one specified below")
     private boolean fixTimeTrend = true;
@@ -158,7 +158,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = true;
 
-    private boolean alignEducation = true; //Set to true to align level of education
+    private boolean alignRetirement = true;
+    private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
 
@@ -454,6 +455,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
         // Check whether persons have reached retirement Age
+        addEventToAllYears(Processes.RetirementAlignment);
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderRetirement, false);
 
         // EDUCATION MODULE
@@ -693,6 +695,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         FertilityAlignment,
         PopulationAlignment,
         CohabitationAlignment,
+        RetirementAlignment,
         // HealthAlignment,
         InSchoolAlignment,
         EducationLevelAlignment,
@@ -749,6 +752,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     if (commentsOn) log.info("Cohabitation alignment complete.");
                 }
                 clearPersonsToMatch();
+            }
+            case RetirementAlignment -> {
+                if (alignRetirement) {
+                    retirementAlignment();
+                    if (commentsOn) log.info("Retirement alignment complete.");
+                }
             }
 //			case HealthAlignment -> {
 //				healthAlignment();
@@ -1415,6 +1424,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         search.evaluate();
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.CareProvisionAdjustment);
+        }
+    }
+
+    public void retirementAlignment() {
+        RetirementAlignment retirementAlignment = new RetirementAlignment(persons);
+        double retirementAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.RetirementAdjustment);
+        RootSearch search = getRootSearch(retirementAdjustment, retirementAlignment, 1.0E-2, 1.0E-2, 10); // epsOrdinates and epsFunction determine the stopping condition for the search. For retirementAlignment error term is the difference between target and observed share of partnered individuals.
+
+        // update and exit
+        if (search.isTargetAltered()) {
+            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.RetirementAdjustment); // If adjustment is altered from the initial value, update the map
+            System.out.println("Retirement adjustment value was " + search.getTarget()[0]);
         }
     }
 
@@ -2465,9 +2486,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         return alignFertility;
     }
 
-
     public void setAlignFertility(boolean alignFertility) {
         this.alignFertility = alignFertility;
+    }
+
+    public boolean isAlignRetirement() {
+        return alignRetirement;
+    }
+
+    public void setAlignRetirement(boolean alignRetirement) {
+        this.alignRetirement = alignRetirement;
     }
 
     public void setSaveImperfectTaxDBMatches(boolean flag) {

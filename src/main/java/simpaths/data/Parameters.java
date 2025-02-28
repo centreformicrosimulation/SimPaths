@@ -315,6 +315,7 @@ public class Parameters {
     public static Map<Integer, Pair<String, Integer>> EUROMODpolicyScheduleSystemYearMap = new TreeMap<>(); // This map stores year from which policy applies, and then a Pair of <name of policy, policy system year as specified in EM>. This is used when uprating values from the policy system year to a current simulated year.
     private static MultiKeyMap<Object, Double> fertilityRateByRegionYear;
     private static Map<Integer, Double> fertilityRateByYear;
+    private static Map<Integer, Double> retiredShareByYear;
     private static MultiKeyCoefficientMap populationProjections;
     public static final int ALIGN_MIN_AGE_ASSUME_DEATH = 65;
     public static final int ALIGN_MAX_AGE_REQUIRE_MATCH = 65;
@@ -330,10 +331,10 @@ public class Parameters {
     private static boolean flagDefaultToTimeSeriesAverages;
     private static Double averageSavingReturns, averageDebtCostLow, averageDebtCostHigh;
     private static MultiKeyCoefficientMap upratingIndexMapRealGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            partnershipTimeAdjustment, fertilityTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales,
+            partnershipTimeAdjustment, retirementTimeAdjustment, fertilityTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales,
             utilityTimeAdjustmentCouples, upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
-            wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
-    public static Map<Integer, Double> partnershipAlignAdjustment, fertilityAlignAdjustment;
+            wageRateFormalSocialCare, socialCarePolicy, partneredShare, retiredShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
+    public static Map<Integer, Double> partnershipAlignAdjustment, fertilityAlignAdjustment, retirementAlignAdjustment;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
     //Education level projections
@@ -1158,8 +1159,10 @@ public class Parameters {
         regLeaveHomeP1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceLeaveHomeP1a);
 
         //Retirement
-        regRetirementR1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceRetirementR1a);
-        regRetirementR1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceRetirementR1b);
+        MultiKeyCoefficientMap coeffRetirementR1aAppended = appendCoefficientMaps(coeffCovarianceRetirementR1a, retirementTimeAdjustment, "Year");
+        MultiKeyCoefficientMap coeffRetirementR1bAppended = appendCoefficientMaps(coeffCovarianceRetirementR1b, retirementTimeAdjustment, "Year");
+        regRetirementR1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffRetirementR1aAppended);
+        regRetirementR1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffRetirementR1bAppended);
 
         //Create the age and wage differential MultivariateNormalDistribution for partnership formation, using means and var-cov matrix loaded from Excel
         targetMeanAgeDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_dag_diff")).doubleValue();
@@ -1901,6 +1904,7 @@ public class Parameters {
         upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
    //     socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
+        retirementTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_retirement_adjustment", 1, 1);
         fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_fertility_adjustment", 1, 1);
         utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_smales", 1, 1);
         utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_sfemales", 1, 1);
@@ -1914,6 +1918,7 @@ public class Parameters {
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "social care", 1, 8);
         partneredShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "partnership", 1, 1);
+        retiredShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "retirement", 1, 1);
         employedShareSingleMales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_smales", 1, 1);
         employedShareSingleFemales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_sfemales", 1, 1);
         employedShareCouples = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_couples", 1, 1);
@@ -1922,10 +1927,12 @@ public class Parameters {
 
     public static void instantiateAlignmentMaps() {
         partnershipAlignAdjustment = new HashMap<>();
+        retirementAlignAdjustment = new HashMap<>();
         fertilityAlignAdjustment = new HashMap<>();
         for (int yy=startYear; yy<=endYear; yy++) {
             partnershipAlignAdjustment.put(yy,0.0);
             fertilityAlignAdjustment.put(yy,0.0);
+            retirementAlignAdjustment.put(yy,0.0);
         }
     }
 
@@ -2001,6 +2008,9 @@ public class Parameters {
             case UtilityAdjustmentCouples -> {
                 map = utilityTimeAdjustmentCouples;
             }
+            case RetirementAdjustment -> {
+                map = retirementTimeAdjustment;
+            }
             case HighEducationRate -> {
                 map = projectionsHighEdu;
             }
@@ -2020,6 +2030,9 @@ public class Parameters {
         switch (targetShareType) {
             case Partnership -> {
                 map = partneredShare;
+            }
+            case Retirement -> {
+                map = retiredShare;
             }
             case EmploymentSingleMales -> {
                 map = employedShareSingleMales;
@@ -2645,6 +2658,12 @@ public class Parameters {
                     throw new RuntimeException("value undefined for fertilityAlignAdjustment in year " + year);
                 return val;
             }
+            case RetirementAlignment -> {
+                Double val = retirementAlignAdjustment.get(year);
+                if (val==null)
+                    throw new RuntimeException("value undefined for retirementAlignAdjustment in year " + year);
+                return val;
+            }
             default -> {
                 throw new RuntimeException("failed to identify alignment value type to get");
             }
@@ -2659,6 +2678,9 @@ public class Parameters {
             case FertilityAlignment -> {
                 fertilityAlignAdjustment.put(year, val);
             }
+            case RetirementAlignment -> {
+                retirementAlignAdjustment.put(year, val);
+            }
             default -> {
                 throw new RuntimeException("failed to identify alignment value type in set");
             }
@@ -2669,6 +2691,13 @@ public class Parameters {
         Double val = fertilityRateByYear.get(year);
         if (val==null)
             throw new RuntimeException("value undefined for getFertilityRateByYear in year " + year);
+        return val;
+    }
+
+    public static double getRetiredShareByYear(int year) {
+        Double val = retiredShareByYear.get(year);
+        if (val==null)
+            throw new RuntimeException("value undefined for getRetiredShareByYear in year " + year);
         return val;
     }
 

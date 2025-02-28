@@ -74,7 +74,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Les_c7_covid les_c7_covid; //Activity (employment) status used in the Covid-19 models
     @Transient private Les_c4 les_c4_lag1;		//Lag(1) of activity_status
     @Transient private Les_c7_covid les_c7_covid_lag1;     //Lag(1) of 7-category activity status
-    @Transient private Integer liwwh;                  //Work history in months (number of months in employment) (Note: this is monthly in EM, but simulation updates annually so increment by 12 months).
+    @Transient private Integer liwwh;                  //Work history in years (number of years in employment)
     @Enumerated(EnumType.STRING) private Indicator dlltsd;	//Long-term sick or disabled if = 1
     @Transient private Indicator dlltsd_lag1; //Lag(1) of long-term sick or disabled
     @Enumerated(EnumType.STRING) @Column(name="need_socare") private Indicator needSocialCare;
@@ -116,6 +116,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     @Enumerated(EnumType.STRING) private Indicator sedex;    // year left education
     @Transient private Boolean toGiveBirth;
+    @Transient private Boolean toRetire;
     @Transient private Boolean toLeaveSchool;
     @Transient private Boolean toBePartnered;
     @Transient private Boolean hasTestPartner;
@@ -381,7 +382,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         ypnoab_lag1 = originalPerson.ypnoab_lag1;
         ypnoab_lag2 = originalPerson.ypnoab_lag2;
 
-        liwwh = Objects.requireNonNullElseGet(originalPerson.liwwh, () -> ((Les_c4.EmployedOrSelfEmployed.equals(les_c4)) ? 12 : 0));
+        liwwh = Objects.requireNonNullElseGet(originalPerson.liwwh, () -> ((Les_c4.EmployedOrSelfEmployed.equals(les_c4)) ? 1 : 0));
         dlltsd = originalPerson.dlltsd;
         dlltsd_lag1 = originalPerson.dlltsd_lag1;
         needSocialCare = Objects.requireNonNullElse(originalPerson.needSocialCare, Indicator.False);
@@ -673,6 +674,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case ConsiderRetirement -> {
                 considerRetirement();
+                retire();
             }
             case Fertility -> {
                 fertility();
@@ -798,7 +800,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // iterate employment history
         if (Les_c4.EmployedOrSelfEmployed.equals(les_c4)) {
-            liwwh = liwwh+12;
+            liwwh += 1;
         }
 
         // iterate age and update for maturity
@@ -854,7 +856,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean considerRetirement() {
-        boolean toRetire = false;
+        double probitAdjustment = (model.isAlignRetirement()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.RetirementAdjustment) : 0.0;
+        return considerRetirement(probitAdjustment);
+    }
+
+    public boolean considerRetirement(double probitAdjustment) {
+
+        toRetire = false;
         if (dag >= Parameters.MIN_AGE_TO_RETIRE && !Les_c4.Retired.equals(les_c4) && !Les_c4.Retired.equals(les_c4_lag1)) {
             if (Parameters.enableIntertemporalOptimisations && DecisionParams.flagRetirement) {
                 if (Labour.ZERO.equals(labourSupplyWeekly_L1)) {
@@ -863,18 +871,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
            } else {
                 double prob;
                 if (getPartner() != null) {
-                    prob = Parameters.getRegRetirementR1b().getProbability(this, Person.DoublesVariables.class);
+                    double score = Parameters.getRegRetirementR1b().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegRetirementR1b().getProbability(score + probitAdjustment);
                 } else {
-                    prob = Parameters.getRegRetirementR1a().getProbability(this, Person.DoublesVariables.class);
+                    double score = Parameters.getRegRetirementR1a().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegRetirementR1a().getProbability(score + probitAdjustment);
                 }
                 toRetire = (innovations.getDoubleDraw(23) < prob);
-            }
-            if (toRetire) {
-                setLes_c4(Les_c4.Retired);
             }
         }
         return toRetire;
     }
+
+    public void retire() {
+        if (toRetire) {
+            setLes_c4(Les_c4.Retired);
+        }
+    }
+
     
     /*
     This method corresponds to Step 1 of the mental health evaluation: predict level of mental health on the GHQ-12 Likert scale based on observable characteristics
@@ -3779,6 +3793,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setToGiveBirth(boolean toGiveBirth_) {
             toGiveBirth = toGiveBirth_;
+    }
+
+    public Boolean getToRetire() {
+        return toRetire;
+    }
+
+    public void setToRetire(Boolean toRetire) {
+        this.toRetire = toRetire;
     }
 
     public boolean isToLeaveSchool() {
