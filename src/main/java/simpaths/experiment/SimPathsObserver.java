@@ -234,6 +234,8 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			AgeGroupCSfilter age40_59Filter = new AgeGroupCSfilter(40, 59);
 			AgeGroupCSfilter age60_79Filter = new AgeGroupCSfilter(60, 79);
 			AgeGroupCSfilter age80_100Filter = new AgeGroupCSfilter(80, 100);
+			AgeGroupCSfilter age18_65Filter = new AgeGroupCSfilter(18, 65);
+			AgeGroupCSfilter age66_81Filter = new AgeGroupCSfilter(66, 81);
 
 			AgeGroupCSfilter age10_19Filter = new AgeGroupCSfilter(10, 19);
 			AgeGroupCSfilter age20_29Filter = new AgeGroupCSfilter(20,29);
@@ -531,7 +533,12 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				Weighted_CrossSection.Integer notEmployedCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isNotEmployed);
 				Weighted_CrossSection.Integer studentCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isStudent);
 				Weighted_CrossSection.Integer retiredCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isRetired);
+				Weighted_CrossSection.Integer retired1865CS = new Weighted_CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isRetired);
+				Weighted_CrossSection.Integer retired6681CS = new Weighted_CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isRetired);
 				Weighted_CrossSection.Integer notEmployedRetiredCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isNotEmployedOrRetired);
+
+				retired1865CS.setFilter(age18_65Filter);
+				retired6681CS.setFilter(age66_81Filter);
 
 				TimeSeriesSimulationPlotter activityStatusPlotter = new TimeSeriesSimulationPlotter("Share of individuals by activity status", "");
 				activityStatusPlotter.addSeries("Employed", new Weighted_MeanArrayFunction(employedCS), null, colorArrayList.get(0), false);
@@ -539,6 +546,8 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				activityStatusPlotter.addSeries("Not Employed", new Weighted_MeanArrayFunction(notEmployedCS), null, colorArrayList.get(4), false);
 				activityStatusPlotter.addSeries("Student", new Weighted_MeanArrayFunction(studentCS), null, colorArrayList.get(2), false);
 				activityStatusPlotter.addSeries("Retired", new Weighted_MeanArrayFunction(retiredCS), null, colorArrayList.get(3), false);
+				activityStatusPlotter.addSeries("Retired 18_65", new Weighted_MeanArrayFunction(retired1865CS), null, colorArrayList.get(5), false);
+				activityStatusPlotter.addSeries("Retired 66_81", new Weighted_MeanArrayFunction(retired6681CS), null, colorArrayList.get(6), false);
 
 				if (showValidationStatistics) {
 					activityStatusPlotter.addSeries("Employed validation", validator, Validator.DoublesVariables.activityStatus_Employed, colorArrayList.get(0), true);

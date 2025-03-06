@@ -73,7 +73,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private static Logger log = Logger.getLogger(SimPathsModel.class);
 
     //@GUIparameter(description = "Country to be simulated")
-    private Country country; // = Country.UK;
+    private Country country;
 
     private boolean flagUpdateCountry = false;  // set to true if switch between countries
 
@@ -87,15 +87,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Integer endYear = 2040;
 
     @GUIparameter(description = "Maximum simulated age")
-    private Integer maxAge = 80;
+    private Integer maxAge = 81;
 
     //@GUIparameter(description = "Fix year used in the regressions to one specified below")
     private boolean fixTimeTrend = true;
 
     @GUIparameter(description = "Fix year used in the regressions to")
-    private Integer timeTrendStopsIn = 2020;
+    private Integer timeTrendStopsIn = 2022;
 
-    private Integer timeTrendStopsInMonetaryProcesses = 2020; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
+    private Integer timeTrendStopsInMonetaryProcesses = 2022; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
 
 //	@GUIparameter(description="Age at which people in initial population who are not employed are forced to retire")
 //	private Integer ageNonWorkPeopleRetire = 65;	//The problem is that it is difficult to find donor benefitUnits for non-zero labour supply for older people who are in the Nonwork category but not Retired.  They should, in theory, still enter the Labour Market Module, but if we cannot find donor benefitUnits, how should we proceed?  We avoid this problem by defining that people over the age specified here are retired off if they have activity_status equal to Nonwork.
@@ -158,7 +158,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = true;
 
-    private boolean alignRetirement = true;
+    private boolean alignRetirement = false;
+
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
@@ -455,8 +456,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
         // Check whether persons have reached retirement Age
-        addEventToAllYears(Processes.RetirementAlignment);
-        addCollectionEventToAllYears(persons, Person.Processes.ConsiderRetirement, false);
+        yearlySchedule.addEvent(this, Processes.RetirementAlignment);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderRetirement, false);
 
         // EDUCATION MODULE
         // Check In School - check whether still in education, and if leaving school, reset Education Level
