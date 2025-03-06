@@ -515,6 +515,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhhOwned = originalPerson.dhhOwned;
         receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
+        receivesBenefitsFlagNonUC = originalPerson.receivesBenefitsFlagNonUC;
+        receivesBenefitsFlagNonUC_L1 = originalPerson.receivesBenefitsFlagNonUC_L1;
+        receivesBenefitsFlagUC = originalPerson.receivesBenefitsFlagUC;
+        receivesBenefitsFlagUC_L1 = originalPerson.receivesBenefitsFlagUC_L1;
 
         if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
             fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
