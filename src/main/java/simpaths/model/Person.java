@@ -295,6 +295,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         bornInSimulation = true;
         dhhOwned = false;
         receivesBenefitsFlag = false;
+        receivesBenefitsFlagNonUC = false;
+        receivesBenefitsFlagUC = false;
         updateVariables(false);
     }
 
