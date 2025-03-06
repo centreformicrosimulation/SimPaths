@@ -138,6 +138,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
     @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
     @Transient private Boolean receivesBenefitsFlag; // Does person receive benefits
+    @Column(name="benefits_uc") private Boolean receivesBenefitsFlagUC; // Person receives UC
+    @Transient private Boolean receivesBenefitsFlagUC_L1;
+    @Column(name="benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
+    @Transient private Boolean receivesBenefitsFlagNonUC_L1;
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -4583,6 +4587,39 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setReceivesBenefitsFlag_L1(boolean receivesBenefitsFlag_L1) {
         this.receivesBenefitsFlag_L1 = receivesBenefitsFlag_L1;
     }
+
+    public boolean isReceivesBenefitsFlagUC() {
+        return receivesBenefitsFlagUC;
+    }
+
+    public void setReceivesBenefitsFlagUC(boolean receivesBenefitsFlagUC) {
+        this.receivesBenefitsFlagUC = receivesBenefitsFlagUC;
+    }
+
+    public boolean isReceivesBenefitsFlagUC_L1() {
+        return receivesBenefitsFlagUC_L1;
+    }
+
+    public void setReceivesBenefitsFlagUC_L1(boolean receivesBenefitsFlagUC_L1) {
+        this.receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC_L1;
+    }
+
+    public boolean isReceivesBenefitsFlagNonUC() {
+        return receivesBenefitsFlagNonUC;
+    }
+
+    public void setReceivesBenefitsFlagNonUC(boolean receivesBenefitsFlagNonUC) {
+        this.receivesBenefitsFlagNonUC = receivesBenefitsFlagNonUC;
+    }
+
+    public boolean isReceivesBenefitsFlagNonUC_L1() {
+        return receivesBenefitsFlagNonUC_L1;
+    }
+
+    public void setReceivesBenefitsFlagNonUC_L1(boolean receivesBenefitsFlagNonUC_L1) {
+        this.receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC_L1;
+    }
+
 
     public double getEquivalisedDisposableIncomeYearly() {
         return benefitUnit.getEquivalisedDisposableIncomeYearly();
