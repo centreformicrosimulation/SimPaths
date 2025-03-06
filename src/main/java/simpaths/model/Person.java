@@ -606,6 +606,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (labourSupplyWeekly==null)
             labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue());
         receivesBenefitsFlag_L1 = receivesBenefitsFlag;
+        receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC;
+        receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC;
         labourSupplyWeekly_L1 = getLabourSupplyWeekly();
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
