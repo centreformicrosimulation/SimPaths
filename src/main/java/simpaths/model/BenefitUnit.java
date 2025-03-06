@@ -304,6 +304,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case ReceivesBenefits -> {
                 setReceivesBenefitsFlag();
+                setReceivesBenefitsFlagUCNonUC();
             }
             case UpdateStates -> {
                 setStates();
@@ -438,6 +439,31 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case Single_Female -> {
                 getFemale().setReceivesBenefitsFlag(receivesBenefitsFlag);
+            }
+            default ->
+                throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());
+        }
+    }
+
+    public void setReceivesBenefitsFlagUCNonUC() {
+
+        // TO DO: this will require an additional test of whether UC is received or not - for now all receive UC if any ben
+        boolean receivesBenefitsFlag = (getBenefitsReceivedPerMonth() > 0);
+        Occupancy occupancy = getOccupancy();
+        switch (occupancy) {
+            case Couple -> {
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
+                getMale().setReceivesBenefitsFlagNonUC(false);
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagNonUC(false);
+            }
+            case Single_Male -> {
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
+                getMale().setReceivesBenefitsFlagNonUC(false);
+            }
+            case Single_Female -> {
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagNonUC(false);
             }
             default ->
                 throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());
