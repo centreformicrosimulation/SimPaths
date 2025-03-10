@@ -756,17 +756,17 @@ public class Parameters {
 
 
     /**
-     *
      * METHOD TO LOAD PARAMETERS FOR GIVEN COUNTRY
-     * @param country
      *
+     * @param country
+     * @param macroShockPopulation
      */
     public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations,
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
                                       double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
-                                      boolean flagSuppressSocialCareCosts1) {
+                                      boolean flagSuppressSocialCareCosts1, MacroScenarioPopulation macroShockPopulation) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -832,8 +832,17 @@ public class Parameters {
         probSick = new MultiKeyMap();
         */
 
-        // alignment parameters
-        populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 50); // 50 columns for Hungary
+        // macro shocks
+        switch (macroShockPopulation) {
+            case High:
+                populationProjections = ExcelAssistant.loadCoefficientMap("input/scenario_macro_shocks.xlsx", "population_high", 3, 50);
+            case Low:
+                populationProjections = ExcelAssistant.loadCoefficientMap("input/scenario_macro_shocks.xlsx", "population_low", 3, 50);
+            case Baseline:
+            default:
+                populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 50);
+        }
+
         setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels

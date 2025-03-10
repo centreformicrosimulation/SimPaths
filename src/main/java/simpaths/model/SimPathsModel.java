@@ -289,6 +289,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "whether to include geographic region in state space for IO behavioural solutions")
     private boolean responsesToRegion = false;
 
+    // Controls for macro shocks
+    @GUIparameter(description = "macro shock: high population")
+    private MacroScenarioPopulation macroShockPopulation = MacroScenarioPopulation.Baseline;
+
     RandomGenerator cohabitInnov;
     Random initialiseInnov1;
     Random initialiseInnov2;
@@ -343,7 +347,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts);
+                flagSuppressSocialCareCosts, macroShockPopulation);
         if (enableIntertemporalOptimisations) {
 
             alignEmployment = false;
@@ -2594,6 +2598,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setResponsesToRegion(boolean responsesToRegion) {
         this.responsesToRegion = responsesToRegion;
+    }
+
+    public MacroScenarioPopulation getMacroShockPopulation() {
+        return macroShockPopulation;
+    }
+
+    public void setMacroShockPopulation(MacroScenarioPopulation macroShockPopulation) {
+        this.macroShockPopulation = macroShockPopulation;
     }
 
     public boolean getFlagDefaultToTimeSeriesAverages() { return flagDefaultToTimeSeriesAverages; }
