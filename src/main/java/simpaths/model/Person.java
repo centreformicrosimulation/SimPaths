@@ -138,9 +138,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
     @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
     @Transient private Boolean receivesBenefitsFlag; // Does person receive benefits
-    @Column(name="benefits_uc") private Boolean receivesBenefitsFlagUC; // Person receives UC
+    @Column(name="econ_benefits_uc") private Boolean receivesBenefitsFlagUC; // Person receives UC
     @Transient private Boolean receivesBenefitsFlagUC_L1;
-    @Column(name="benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
+    @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
     @Transient private Boolean receivesBenefitsFlagNonUC_L1;
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
@@ -2232,8 +2232,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_children_13_17,
         D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
         D_Econ_benefits,
-        D_Econ_benefits_nonuc,
-        D_Econ_benefits_uc,
+        D_Econ_benefits_NonUC,
+        D_Econ_benefits_UC,
         D_Home_owner,
         D_Home_owner_L1,
         Dag,
@@ -3485,10 +3485,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case D_Econ_benefits -> {
                 return isReceivesBenefitsFlag_L1() ? 1. : 0.;
             }
-            case D_Econ_benefits_nonuc -> {
+            case D_Econ_benefits_NonUC -> {
                 return isReceivesBenefitsFlagNonUC_L1() ? 1. : 0.;
             }
-            case D_Econ_benefits_uc -> {
+            case D_Econ_benefits_UC -> {
                 return isReceivesBenefitsFlagUC_L1() ? 1. : 0.;
             }
             case D_Home_owner -> {
