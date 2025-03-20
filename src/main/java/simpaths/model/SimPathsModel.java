@@ -290,8 +290,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean responsesToRegion = false;
 
     // Controls for macro shocks
-    @GUIparameter(description = "macro shock: high population")
+    @GUIparameter(description = "macro shock: population")
     private MacroScenarioPopulation macroShockPopulation = MacroScenarioPopulation.Baseline;
+
+    @GUIparameter(description = "macro shock: productivity")
+    private MacroScenarioProductivity macroShockProductivity = MacroScenarioProductivity.Baseline;
+
+    @GUIparameter(description = "macro shock: green policy")
+    private MacroScenarioGreenPolicy macroShockGreenPolicy = MacroScenarioGreenPolicy.No;
 
     RandomGenerator cohabitInnov;
     Random initialiseInnov1;
@@ -347,7 +353,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts, macroShockPopulation);
+                flagSuppressSocialCareCosts, macroShockPopulation, macroShockProductivity, macroShockGreenPolicy);
         if (enableIntertemporalOptimisations) {
 
             alignEmployment = false;
@@ -2606,6 +2612,22 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setMacroShockPopulation(MacroScenarioPopulation macroShockPopulation) {
         this.macroShockPopulation = macroShockPopulation;
+    }
+
+    public MacroScenarioProductivity getMacroShockProductivity() {
+        return macroShockProductivity;
+    }
+
+    public void setMacroShockProductivity(MacroScenarioProductivity macroShockProductivity) {
+        this.macroShockProductivity = macroShockProductivity;
+    }
+
+    public MacroScenarioGreenPolicy getMacroShockGreenPolicy() {
+        return macroShockGreenPolicy;
+    }
+
+    public void setMacroShockGreenPolicy(MacroScenarioGreenPolicy macroShockGreenPolicy) {
+        this.macroShockGreenPolicy = macroShockGreenPolicy;
     }
 
     public boolean getFlagDefaultToTimeSeriesAverages() { return flagDefaultToTimeSeriesAverages; }
