@@ -3,6 +3,7 @@ package simpaths.model;
 import microsim.engine.SimulationEngine;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Education;
+import simpaths.model.enums.MacroScenarioPopulation;
 import simpaths.model.enums.Region;
 
 import java.util.*;
@@ -65,10 +66,14 @@ public class LabourMarket {
                 }
             }
 
-            if (model.isAlignEmployment() & model.getYear() <= 2019) {
+            if (model.isAlignEmployment() & model.getYear() <= 2035 & !model.isMacroShocksOn()) {
                 model.activityAlignmentSingleMales();
                 model.activityAlignmentSingleFemales();
                 model.activityAlignmentCouples();
+            }
+
+            if (model.isMacroShocksOn()) {
+                model.activityAlignmentMacroShock();
             }
 
             //Update Labour Supply

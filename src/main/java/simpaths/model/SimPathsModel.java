@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.Transient;
+import microsim.data.MultiKeyCoefficientMap;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import simpaths.data.IEvaluation;
@@ -299,6 +300,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "macro shock: green policy")
     private MacroScenarioGreenPolicy macroShockGreenPolicy = MacroScenarioGreenPolicy.No;
 
+    @GUIparameter(description = "macro shocks: on")
+    private boolean macroShocksOn = true;
+
     RandomGenerator cohabitInnov;
     Random initialiseInnov1;
     Random initialiseInnov2;
@@ -353,7 +357,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts, macroShockPopulation, macroShockProductivity, macroShockGreenPolicy);
+                flagSuppressSocialCareCosts, macroShockPopulation, macroShockProductivity, macroShockGreenPolicy, macroShocksOn);
         if (enableIntertemporalOptimisations) {
 
             alignEmployment = false;
@@ -1450,6 +1454,32 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
+    public void activityAlignmentMacroShock() {
+        Map<Occupancy, MultiKeyCoefficientMap> coefficientMaps = new HashMap<>();
+        coefficientMaps.put(Occupancy.Single_Male, Parameters.getCoeffLabourSupplyUtilityMales());
+        coefficientMaps.put(Occupancy.Single_Female, Parameters.getCoeffLabourSupplyUtilityFemales());
+        coefficientMaps.put(Occupancy.Couple, Parameters.getCoeffLabourSupplyUtilityCouples());
+
+        Map<Occupancy, String> regressorsToModify = new HashMap<>();
+        regressorsToModify.put(Occupancy.Single_Male, "MaleLeisure");
+        regressorsToModify.put(Occupancy.Single_Female, "FemaleLeisure");
+        regressorsToModify.put(Occupancy.Couple, "MaleLeisure"); // Assuming we adjust male leisure for couples
+
+        double initialUtilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustment);
+
+        ActivityAlignmentMacroShock activityAlignment = new ActivityAlignmentMacroShock(
+                persons, benefitUnits, coefficientMaps, regressorsToModify, initialUtilityAdjustment
+        );
+
+        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 4);
+
+        if (search.isTargetAltered()) {
+            double newAdjustment = search.getTarget()[0];
+            Parameters.putTimeSeriesValue(getYear(), newAdjustment, TimeSeriesVariable.UtilityAdjustment);
+            System.out.println("Utility adjustment for all types was " + newAdjustment);
+        }
+    }
+    
     public void activityAlignmentSingleMales() {
         double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentSingleMales);
         ActivityAlignment activityAlignmentSingleMales = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityMales(), new String[]{"MaleLeisure"}, Occupancy.Single_Male, utilityAdjustment);
@@ -2628,6 +2658,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setMacroShockGreenPolicy(MacroScenarioGreenPolicy macroShockGreenPolicy) {
         this.macroShockGreenPolicy = macroShockGreenPolicy;
+    }
+
+    public boolean isMacroShocksOn() {
+        return macroShocksOn;
+    }
+
+    public void setMacroShocksOn(boolean macroShocksOn) {
+        this.macroShocksOn = macroShocksOn;
     }
 
     public boolean getFlagDefaultToTimeSeriesAverages() { return flagDefaultToTimeSeriesAverages; }

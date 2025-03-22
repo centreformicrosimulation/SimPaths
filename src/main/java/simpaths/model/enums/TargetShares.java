@@ -5,5 +5,6 @@ public enum TargetShares {
     Retirement,
     EmploymentSingleMales,
     EmploymentSingleFemales,
-    EmploymentCouples;
+    EmploymentCouples,
+    Employment;
 }
