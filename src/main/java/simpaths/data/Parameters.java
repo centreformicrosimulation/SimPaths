@@ -2720,6 +2720,22 @@ public class Parameters {
         return coeffLabourSupplyUtilityMales;
     }
 
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityMalesWithDependent() {
+        return coeffLabourSupplyUtilityMalesWithDependent;
+    }
+
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityFemalesWithDependent() {
+        return coeffLabourSupplyUtilityFemalesWithDependent;
+    }
+
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityACMales() {
+        return coeffLabourSupplyUtilityACMales;
+    }
+
+    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityACFemales() {
+        return coeffLabourSupplyUtilityACFemales;
+    }
+
     public static void setCoeffLabourSupplyUtilityMales(MultiKeyCoefficientMap coeffLabourSupplyUtilityMales) {
         Parameters.coeffLabourSupplyUtilityMales = coeffLabourSupplyUtilityMales;
     }
