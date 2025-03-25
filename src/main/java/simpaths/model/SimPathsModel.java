@@ -159,7 +159,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = true;
 
-    private boolean alignRetirement = false;
+    private boolean alignRetirement = true;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
@@ -2107,7 +2107,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             // save to processed repository
             System.out.println("Saving compiled input data for future reference");
-            persistProcessed();
+        //    persistProcessed();
 
             stopwatch.stop();
             System.out.println("Time elapsed " + stopwatch.getTime()/1000 + " seconds");
