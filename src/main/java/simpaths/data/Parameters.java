@@ -335,6 +335,8 @@ public class Parameters {
     public static boolean saveImperfectTaxDBMatches = false;
     public static final int IMPERFECT_THRESHOLD = 5999;
 
+    public static String eq5dConversionParameters = "lawrence";
+
 
     /////////////////////////////////////////////////////////////////// INITIALISATION OF DATA STRUCTURES //////////////////////////////////
     public static Map<Integer, String> EUROMODpolicySchedule = new TreeMap<Integer, String>();
@@ -473,6 +475,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceDLS2Males;
     private static MultiKeyCoefficientMap coeffCovarianceDLS2Females;
 
+    private static MultiKeyCoefficientMap coeffCovarianceEQ5D;
 
     //Education
     private static MultiKeyCoefficientMap coeffCovarianceEducationE1a;
@@ -707,6 +710,8 @@ public class Parameters {
     private static LinearRegression regLifeSatisfaction1;
     private static LinearRegression regLifeSatisfaction2Males;
     private static LinearRegression regLifeSatisfaction2Females;
+
+    private static LinearRegression regHealthEQ5D;
 
     //Education
     private static BinomialRegression regEducationE1a;
@@ -973,6 +978,7 @@ public class Parameters {
         int columnsLifeSatisfaction1 = -1;
         int columnsLifeSatisfaction2Males = -1;
         int columnsLifeSatisfaction2Females = -1;
+        int columnsHealthEQ5D = -1;
         int columnsSocialCareS1a = -1;
         int columnsSocialCareS1b = -1;
         int columnsSocialCareS2a = -1;
@@ -1133,6 +1139,7 @@ public class Parameters {
             columnsLifeSatisfaction1 = 30;
             columnsLifeSatisfaction2Males = 9;
             columnsLifeSatisfaction2Females = 9;
+            columnsHealthEQ5D = 8;
             columnsSocialCareS1a = 17;
             columnsSocialCareS1b = 18;
             columnsSocialCareS2a = 32;
@@ -1351,6 +1358,8 @@ public class Parameters {
         coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DLS1", 1, columnsLifeSatisfaction1);
         coeffCovarianceDLS2Males = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DLS2_Males", 1, columnsLifeSatisfaction2Males);
         coeffCovarianceDLS2Females = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DLS2_Females", 1, columnsLifeSatisfaction2Females);
+
+        loadEQ5DParameters(countryString, columnsHealthEQ5D);
 
         //Life satisfaction
 
@@ -1571,7 +1580,6 @@ public class Parameters {
         regLifeSatisfaction2Males = new LinearRegression(coeffCovarianceDLS2Males);
         regLifeSatisfaction2Females = new LinearRegression(coeffCovarianceDLS2Females);
 
-        //Education
         regEducationE1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1a);
         regEducationE1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1b);
         regEducationE2a = new OrderedRegression<>(RegressionType.GenOrderedLogit, Education.class, coeffCovarianceEducationE2a);
@@ -2075,6 +2083,8 @@ public class Parameters {
     public static BinomialRegression getRegEducationE1a() {return regEducationE1a;}
     public static BinomialRegression getRegEducationE1b() {return regEducationE1b;}
     public static OrderedRegression getRegEducationE2a() {return regEducationE2a;}
+
+    public static LinearRegression getRegEQ5D() { return regHealthEQ5D; };
 
     public static BinomialRegression getRegPartnershipU1a() {return regPartnershipU1a;}
     public static BinomialRegression getRegPartnershipU1b() {return regPartnershipU1b;}
@@ -3331,5 +3341,13 @@ public class Parameters {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    public static void loadEQ5DParameters(String countryString, int columnsHealthEQ5D) {
+
+        coeffCovarianceEQ5D = ExcelAssistant.loadCoefficientMap("input/reg_eq5d.xlsx", countryString + "_EQ5D_" + eq5dConversionParameters, 1, columnsHealthEQ5D);
+
+        regHealthEQ5D = new LinearRegression(coeffCovarianceEQ5D);
+
     }
 }

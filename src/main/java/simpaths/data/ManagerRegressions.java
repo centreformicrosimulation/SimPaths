@@ -64,6 +64,9 @@ public class ManagerRegressions {
             case LifeSatisfaction2Females -> {
                 return Parameters.getRegLifeSatisfaction2Females();
             }
+            case HealthEQ5D -> {
+                return Parameters.getRegEQ5D();
+            }
             case SocialCareS1b -> {
                 return Parameters.getRegCareHoursS1b();
             }

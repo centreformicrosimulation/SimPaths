@@ -41,6 +41,8 @@ public enum RegressionName {
     LifeSatisfaction2Males(RegressionType.Linear),
     LifeSatisfaction2Females(RegressionType.Linear),
 
+    HealthEQ5D(RegressionType.Linear),
+
     RMSE(RegressionType.Linear),
 
     SocialCareS1a(RegressionType.Probit),

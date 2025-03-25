@@ -1377,6 +1377,26 @@ la var bdi "Disability benefits"
 gen unemp = (jbstat==3)
 label variable unemp "Labour status: unemployed"
 
+/***************************** UC and Non-UC receipt ************************/
+
+gen econ_benefits = .
+replace econ_benefits = 1 if fihhmnsben_dv > 0 & fihhmnsben_dv!=.
+replace econ_benefits = 0 if fihhmnsben_dv==0
+label var econ_benefits "Household income includes any benefits"
+
+replace benefits_uc=0 if benefits_uc==.
+* Ensure all with known UC receipt also are benefit recipients
+replace econ_benefits=1 if benefits_uc==1
+
+* Generate benefits marker without UC
+gen econ_benefits_nonuc=econ_benefits
+replace econ_benefits_nonuc=0 if benefits_uc==1
+label var econ_benefits_nonuc "Household income includes non-UC benefits"
+
+* Generate benefits marker with UC
+gen econ_benefits_uc=econ_benefits
+replace econ_benefits_uc=0 if benefits_uc==0
+label var econ_benefits_uc "Household income includes UC benefits"
 
 /*****************Was in continuous education sample***************************/
 //Generated from age_dv and ded variables. 1 includes first instance of not being in education.
@@ -1453,6 +1473,7 @@ keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
+        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
 	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dls dot unemp 
 
 sort swv idhh idperson 
@@ -1463,6 +1484,7 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
+        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
 	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dls dot unemp {
 		qui recode `var' (-9/-1=-9) (.=-9) 
 }
@@ -1484,6 +1506,8 @@ replace l1_potential_earnings_hourly = 0 if missing(l1_potential_earnings_hourly
 		
 * initialise wealth to missing 
 gen liquid_wealth = -9
+gen tot_pen = -9
+gen nvmhome = -9
 gen smp = -9
 gen rnk = -9
 gen mtc = -9
