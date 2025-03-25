@@ -150,7 +150,10 @@ public class Parameters {
         "son_socare_hrs",       //number of hours of informal care received from son
         "other_socare_hrs",     //number of hours of informal care received from other
         "aidhrs",               //number of hours of informal care provided (total)
-        "careWho"               //indicator for whom informal care is provided
+        "careWho",              //indicator for whom informal care is provided
+        "econ_benefits",        //indicator of benefit receipt
+        "econ_benefits_uc",     //indicator of UC receipt
+        "econ_benefits_nonuc"   //indicator of other benefit receipt
 		//"yem", 					//employment income
 		//"yse", 					//self-employment income
 
