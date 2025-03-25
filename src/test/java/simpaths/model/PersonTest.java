@@ -123,7 +123,7 @@ public class PersonTest {
 
             @BeforeEach
             public void setupHM2Coefficients() {
-                Parameters.loadDHE_MCS2Parameters("UK", 9, 9);
+                Parameters.loadDHE_MCS2Parameters("UK", 14, 14);
             }
 
             @Test
@@ -135,6 +135,9 @@ public class PersonTest {
                 testPerson.setLes_c4(Les_c4.NotEmployed);
                 testPerson.setLes_c4_lag1(Les_c4.EmployedOrSelfEmployed);
                 testPerson.setDlltsd(Indicator.False);
+
+                testPerson.setReceivesBenefitsFlagUC(true);
+                testPerson.setLabourSupplyWeekly(Labour.ZERO);
 
                 testPerson.setDhe_mcs(50.);
                 testPerson.setDgn(Gender.Female);
