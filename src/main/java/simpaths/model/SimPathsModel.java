@@ -1455,23 +1455,31 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     public void activityAlignmentMacroShock() {
-        Map<Occupancy, MultiKeyCoefficientMap> coefficientMaps = new HashMap<>();
-        coefficientMaps.put(Occupancy.Single_Male, Parameters.getCoeffLabourSupplyUtilityMales());
-        coefficientMaps.put(Occupancy.Single_Female, Parameters.getCoeffLabourSupplyUtilityFemales());
-        coefficientMaps.put(Occupancy.Couple, Parameters.getCoeffLabourSupplyUtilityCouples());
+        Map<OccupancyMacroShock, MultiKeyCoefficientMap> coefficientMaps = new HashMap<>();
+        coefficientMaps.put(OccupancyMacroShock.Single_Male, Parameters.getCoeffLabourSupplyUtilityMales());
+        coefficientMaps.put(OccupancyMacroShock.Single_Female, Parameters.getCoeffLabourSupplyUtilityFemales());
+        coefficientMaps.put(OccupancyMacroShock.Couple, Parameters.getCoeffLabourSupplyUtilityCouples());
+        coefficientMaps.put(OccupancyMacroShock.Male_AC, Parameters.getCoeffLabourSupplyUtilityACMales());
+        coefficientMaps.put(OccupancyMacroShock.Female_AC, Parameters.getCoeffLabourSupplyUtilityACFemales());
+        coefficientMaps.put(OccupancyMacroShock.Male_With_Dependent, Parameters.getCoeffLabourSupplyUtilityMalesWithDependent());
+        coefficientMaps.put(OccupancyMacroShock.Female_With_Dependent, Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent());
 
-        Map<Occupancy, String> regressorsToModify = new HashMap<>();
-        regressorsToModify.put(Occupancy.Single_Male, "MaleLeisure");
-        regressorsToModify.put(Occupancy.Single_Female, "FemaleLeisure");
-        regressorsToModify.put(Occupancy.Couple, "MaleLeisure"); // Assuming we adjust male leisure for couples
+        Map<OccupancyMacroShock, List<String>> regressorsToModify = new HashMap<>();
+        regressorsToModify.put(OccupancyMacroShock.Single_Male, List.of("MaleLeisure"));
+        regressorsToModify.put(OccupancyMacroShock.Single_Female, List.of("FemaleLeisure"));
+        regressorsToModify.put(OccupancyMacroShock.Couple, List.of("MaleLeisure", "FemaleLeisure"));
+        regressorsToModify.put(OccupancyMacroShock.Male_AC, List.of("MaleLeisure"));
+        regressorsToModify.put(OccupancyMacroShock.Female_AC, List.of("FemaleLeisure"));
+        regressorsToModify.put(OccupancyMacroShock.Male_With_Dependent, List.of("MaleLeisure"));
+        regressorsToModify.put(OccupancyMacroShock.Female_With_Dependent, List.of("FemaleLeisure"));
 
         double initialUtilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustment);
 
         ActivityAlignmentMacroShock activityAlignment = new ActivityAlignmentMacroShock(
                 persons, benefitUnits, coefficientMaps, regressorsToModify, initialUtilityAdjustment
         );
-
-        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 4);
+        
+        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 10);
 
         if (search.isTargetAltered()) {
             double newAdjustment = search.getTarget()[0];
