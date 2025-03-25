@@ -1131,8 +1131,8 @@ public class Parameters {
             columnsHealthHM2Males = 9;
             columnsHealthHM2Females = 9;
             columnsHealthMCS1 = 30;
-            columnsHealthMCS2Males = 9;
-            columnsHealthMCS2Females = 9;
+            columnsHealthMCS2Males = 14;
+            columnsHealthMCS2Females = 14;
             columnsHealthPCS1 = 30;
             columnsHealthPCS2Males = 9;
             columnsHealthPCS2Females = 9;
