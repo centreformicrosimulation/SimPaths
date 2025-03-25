@@ -2,7 +2,7 @@ package simpaths.model;
 
 import org.junit.jupiter.api.*;
 import simpaths.data.Parameters;
-import simpaths.model.enums.Country;
+import simpaths.model.enums.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,10 +10,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PersonTest {
 
     static Person testPerson;
+    static BenefitUnit testBenefitUnit;
+    static Household testHousehold;
 
     @BeforeAll
     static void setup() {
-        testPerson = new Person(true);
+        testPerson = new Person(true, 1);
+        testBenefitUnit = new BenefitUnit(true, 1);
+        testBenefitUnit.setRegion(Region.UKC);
+        testHousehold= new Household();
+        testBenefitUnit.setHousehold(testHousehold);
+        testPerson.setBenefitUnit(testBenefitUnit);
     }
 
     @Nested
@@ -104,6 +111,52 @@ public class PersonTest {
             }
 
         }
+    }
+
+    @Nested
+    @DisplayName("Mental health stage 2")
+    class MentalHealthStage2 {
+
+        @Nested
+        @DisplayName("MCS score updates")
+        class MCSScoreUpdates {
+
+            @BeforeEach
+            public void setupHM2Coefficients() {
+                Parameters.loadDHE_MCS2Parameters("UK", 9, 9);
+            }
+
+            @Test
+            @DisplayName("Calculates valid MCS score")
+            public void calculatesValidMCSScore() {
+
+                // This test currently sets a single person with variables required for MCS2 and test whether updating produces a valid score not equal to the starting score
+
+                testPerson.setLes_c4(Les_c4.NotEmployed);
+                testPerson.setLes_c4_lag1(Les_c4.EmployedOrSelfEmployed);
+                testPerson.setDlltsd(Indicator.False);
+
+                testPerson.setDhe_mcs(50.);
+                testPerson.setDgn(Gender.Female);
+
+                testBenefitUnit.setAtRiskOfPoverty(1);
+                testBenefitUnit.setAtRiskOfPoverty_lag1(0);
+
+                testBenefitUnit.setYearlyChangeInLogEDI(1.);
+                testBenefitUnit.setEquivalisedDisposableIncomeYearly(1000.);
+                testBenefitUnit.setEquivalisedDisposableIncomeYearly_lag1(100.);
+
+                testPerson.onEvent(Person.Processes.HealthMCS2);
+
+                assertTrue(testPerson.getDhe_mcs() <= 100);
+                assertTrue(testPerson.getDhe_mcs() >= 0);
+                assertTrue(testPerson.getDhe_pcs() != 50);
+
+            }
+
+
+        }
+
     }
 
 
