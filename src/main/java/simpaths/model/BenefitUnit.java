@@ -3625,4 +3625,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public static void setBenefitUnitIdCounter(long id) {benefitUnitIdCounter = id;}
+
+    public void setYearlyChangeInLogEDI(Double yearlyChangeInLogEDI) {
+        this.yearlyChangeInLogEDI = yearlyChangeInLogEDI;
+    }
+
+    public void setAtRiskOfPoverty_lag1(Integer atRiskOfPoverty_lag1) {
+        this.atRiskOfPoverty_lag1 = atRiskOfPoverty_lag1;
+    }
+
+
+    public void setEquivalisedDisposableIncomeYearly(Double equivalisedDisposableIncomeYearly) {
+        this.equivalisedDisposableIncomeYearly = equivalisedDisposableIncomeYearly;
+    }
+
+    public void setEquivalisedDisposableIncomeYearly_lag1(Double equivalisedDisposableIncomeYearly_lag1) {
+        this.equivalisedDisposableIncomeYearly_lag1 = equivalisedDisposableIncomeYearly_lag1;
+    }
+
+
 }
