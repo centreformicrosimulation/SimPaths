@@ -2263,6 +2263,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_Econ_benefits,
         D_Econ_benefits_NonUC,
         D_Econ_benefits_UC,
+        D_Econ_benefits_UC_Lhw_ZERO,
+        D_Econ_benefits_UC_Lhw_TEN,
+        D_Econ_benefits_UC_Lhw_TWENTY,
+        D_Econ_benefits_UC_Lhw_THIRTY,
+        D_Econ_benefits_UC_Lhw_FORTY,
         D_Home_owner,
         D_Home_owner_L1,
         Dag,
@@ -3568,6 +3573,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case D_Econ_benefits_UC -> {
                 return isReceivesBenefitsFlagUC_L1() ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_ZERO -> {
+                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_TEN -> {
+                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_TWENTY -> {
+                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_THIRTY -> {
+                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_FORTY -> {
+                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
             }
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
