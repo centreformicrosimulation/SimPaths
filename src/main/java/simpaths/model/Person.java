@@ -2193,6 +2193,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Reached_Retirement_Age,						//Indicator whether individual is at or above retirement age
         Reached_Retirement_Age_Les_c3_NotEmployed_L1, //Interaction term for being at or above retirement age and not employed in the previous year
         Reached_Retirement_Age_Sp,					//Indicator whether spouse is at or above retirement age
+        Elig_pen,
+        Elig_pen_L1,
+        Elig_pen_Sp,
+        Elig_pen_L1_Sp,
         RealGDPGrowth,
         RealIncomeChange, //Note: the above return a 0 or 1 value, but income variables will return the change in income or 0
         RealIncomeDecrease_D,
@@ -3292,6 +3296,53 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
                 }
                 return ((dag >= retirementAge) && (les_c4_lag1.equals(Les_c4.NotEmployed) || les_c4_lag1.equals(Les_c4.Retired))) ? 1. : 0.;
+            }
+            case Elig_pen -> { // Age == state retirement age
+                int retirementAge;
+                if (dgn.equals(Gender.Female)) {
+                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
+                } else {
+                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
+                }
+                return (dag == retirementAge) ? 1. : 0.;
+            }
+            case Elig_pen_L1 -> { // Age == state retirement age +1
+                int retirementAge = 1;
+                if (dgn.equals(Gender.Female)) {
+                    retirementAge += (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
+                } else {
+                    retirementAge += (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
+                }
+                return (dag == retirementAge) ? 1. : 0.;
+            }
+
+            case Elig_pen_Sp -> { // Partner's age == state retirement age
+                int retirementAgePartner;
+                Person partner = getPartner();
+                if (partner != null) {
+                    if (partner.dgn.equals(Gender.Female)) {
+                        retirementAgePartner = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
+                    } else {
+                        retirementAgePartner = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
+                    }
+                    return (partner.dag == retirementAgePartner) ? 1. : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Elig_pen_L1_Sp -> { // Partner's age == state retirement age +1
+                int retirementAgePartner = 1;
+                Person partner = getPartner();
+                if (partner != null) {
+                    if (partner.dgn.equals(Gender.Female)) {
+                        retirementAgePartner += (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
+                    } else {
+                        retirementAgePartner += (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
+                    }
+                    return (partner.dag >= retirementAgePartner) ? 1. : 0.;
+                } else {
+                    return 0.;
+                }
             }
             case EquivalisedIncomeYearly -> {
                 return getBenefitUnit().getEquivalisedDisposableIncomeYearly();
