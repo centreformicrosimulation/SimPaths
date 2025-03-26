@@ -2129,6 +2129,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhmghq_L1,
         Dlltsd,							//Long-term sick or disabled
         Dlltsd_L1,						//Long-term sick or disabled lag(1)
+        Dlltsdsp_L1,
         Dnc_L1, 						//Lag(1) of number of children of all ages in the benefitUnit
         Dnc02_L1, 						//Lag(1) of number of children aged 0-2 in the benefitUnit
         Dnc017, 						//Number of children aged 0-17 in the benefitUnit
@@ -2805,6 +2806,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Dlltsd_L1 -> {
                 return Indicator.True.equals(dlltsd_lag1) ? 1. : 0.;
+            }
+            case Dlltsdsp_L1 -> {
+                Person partner = getPartner();
+                if (partner != null && partner.dlltsd_lag1 != null) {
+                    return Indicator.True.equals(partner.dlltsd_lag1) ? 1. : 0.;
+                }
+                else return 0.;
             }
             case FertilityRate -> {
                 if (ioFlag)
