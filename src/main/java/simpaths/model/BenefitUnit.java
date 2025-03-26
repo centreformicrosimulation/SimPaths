@@ -455,21 +455,22 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // TO DO: this will require an additional test of whether UC is received or not - for now all receive UC if any ben
         boolean receivesBenefitsFlag = (getBenefitsReceivedPerMonth() > 0);
+        boolean receivesBenefitsFlagUC = receivesBenefitsFlag & Parameters.UC_ROLLOUT;
         Occupancy occupancy = getOccupancy();
         switch (occupancy) {
             case Couple -> {
-                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
-                getMale().setReceivesBenefitsFlagNonUC(false);
-                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
-                getFemale().setReceivesBenefitsFlagNonUC(false);
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getMale().setReceivesBenefitsFlagNonUC(receivesBenefitsFlag & !receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesBenefitsFlag & !receivesBenefitsFlagUC);
             }
             case Single_Male -> {
-                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
-                getMale().setReceivesBenefitsFlagNonUC(false);
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getMale().setReceivesBenefitsFlagNonUC(receivesBenefitsFlag & !receivesBenefitsFlagUC);
             }
             case Single_Female -> {
-                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlag);
-                getFemale().setReceivesBenefitsFlagNonUC(false);
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesBenefitsFlag & !receivesBenefitsFlagUC);
             }
             default ->
                 throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());

@@ -284,6 +284,8 @@ public class Parameters {
 
     public static double PROB_NEWBORN_IS_MALE = 0.5;            // Must be strictly greater than 0.0 and less than 1.0
 
+    public static final boolean UC_ROLLOUT = true;              // Whether UC is available in population or not
+
     public static final boolean systemOut = true;
 
     //Bootstrap all the regression coefficients if true, or only the female labour participation regressions when false
