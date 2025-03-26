@@ -159,7 +159,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = true;
 
-    private boolean alignRetirement = true;
+    private boolean alignRetirement = false;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
