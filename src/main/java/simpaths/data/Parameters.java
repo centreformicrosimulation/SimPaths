@@ -125,8 +125,9 @@ public class Parameters {
 		"lhw", 					//hours worked per week
 		"adultchildflag",		//flag indicating adult child living at home in the data
 		"dhh_owned",			//flag indicating if individual is a homeowner
-		"potential_earnings_hourly", //initial value of hourly earnings from the data
-		"l1_potential_earnings_hourly", //lag(1) of initial value of hourly earnings from the data
+        "obs_earnings_hourly", //initial value of hourly earnings from the data
+        "l1_obs_earnings_hourly", //lag(1) of initial value of hourly earnings from the data
+        "liwwh",                    // number of years in employment
 		//"yem", 					//employment income
 		//"yse", 					//self-employment income
 
