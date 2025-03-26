@@ -141,8 +141,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 //	age, education, civil status, number of children, etc. Hence, potential earnings
 //	is a separate process in the simulation, and it is computed for every adult
 //	individual in the simulated population, in each simulated period.
-    @Column(name="potential_earnings_hourly") private Double fullTimeHourlyEarningsPotential;		//Is hourly rate.  Initialised with value: ils_earns / (4.34 * lhw), where lhw is the weekly hours a person worked in EUROMOD input data
-    @Column(name="l1_potential_earnings_hourly") private Double L1_fullTimeHourlyEarningsPotential; // Lag(1) of potentialHourlyEarnings
+    @Column(name="obs_earnings_hourly") private Double fullTimeHourlyEarningsPotential;		//Is hourly rate.  Initialised with value: ils_earns / (4.34 * lhw), where lhw is the weekly hours a person worked in EUROMOD input data
+    @Column(name="l1_obs_earnings_hourly") private Double L1_fullTimeHourlyEarningsPotential; // Lag(1) of potentialHourlyEarnings
     @Transient private Series.Double yearlyEquivalisedDisposableIncomeSeries;
     private Double yearlyEquivalisedConsumption;
     @Transient private Series.Double yearlyEquivalisedConsumptionSeries;
