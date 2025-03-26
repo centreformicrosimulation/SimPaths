@@ -1088,24 +1088,24 @@ public class Parameters {
             columnsLabourSupplyUtilityACFemales = 13; //#
             columnsLabourSupplyUtilityCouples = 48; //#
             columnsHealthH1a = 16; //#
-            columnsHealthH1b = 77; //#
-            columnsHealthH2b = 26; //#
-            columnsEducationE1a = 8; //#
-            columnsEducationE1b = 13; //#
-            columnsEducationE2a = 13; //#
+            columnsHealthH1b = 76; //#
+            columnsHealthH2b = 28; //#
+            columnsEducationE1a = 10; //#
+            columnsEducationE1b = 15; //#
+            columnsEducationE2a = 14; //#
             columnsPartnershipU1a = 13; //#
-            columnsPartnershipU1b = 26; //#
-            columnsPartnershipU2b = 29; //#
+            columnsPartnershipU1b = 28; //#
+            columnsPartnershipU2b = 31; //#
             columnsFertilityF1a = 5; //#
-            columnsFertilityF1b = 25; //#
+            columnsFertilityF1b = 27; //#
             columnsIncomeI3a_amount = 11; //#
             columnsIncomeI3b_amount = 21; //#
             columnsIncomeI3a_selection = 11; //#
             columnsIncomeI3b_selection = 21; //#
-            columnsLeaveHomeP1a = 16; //#
-            columnsHomeownership = 29; //#
-            columnsRetirementR1a = 17; //#
-            columnsRetirementR1b = 21; //#
+            columnsLeaveHomeP1a = 18; //#
+            columnsHomeownership = 31; //#
+            columnsRetirementR1a = 21; //#
+            columnsRetirementR1b = 27; //#
         }
         else throw new IllegalArgumentException("Country not recognised in Parameters.loadParameters()!");
 

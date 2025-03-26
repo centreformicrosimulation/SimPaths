@@ -2237,6 +2237,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Year2019,
         Year2020,
         Year2021,
+        Y2020,
+        Y2021,
         Year2022,
         Year2023,
         Year2024,
@@ -2998,10 +3000,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2019 -> {
                 return (getYear() == 2019) ? 1. : 0.;
             }
-            case Year2020 -> {
+            case Year2020, Y2020 -> {
                 return (getYear() == 2020) ? 1. : 0.;
             }
-            case Year2021 -> {
+            case Year2021, Y2021 -> {
                 return (getYear() == 2021) ? 1. : 0.;
             }
             case Year2022 -> {
