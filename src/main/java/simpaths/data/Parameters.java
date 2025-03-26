@@ -122,6 +122,7 @@ public class Parameters {
 		"swv",					//system variable - wave
 		"dgn", 					//gender
 		"les_c4", 				//labour employment status
+        "l1_les_c4",
 		"lhw", 					//hours worked per week
 		"adultchildflag",		//flag indicating adult child living at home in the data
 		"dhh_owned",			//flag indicating if individual is a homeowner

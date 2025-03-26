@@ -478,11 +478,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.InSchool);
 
         // In School alignment
-        addEventToAllYears(Processes.InSchoolAlignment);
-        addCollectionEventToAllYears(persons, Person.Processes.LeavingSchool);
+        yearlySchedule.addEvent(this, Processes.InSchoolAlignment);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LeavingSchool);
 
         // Align the level of education if required
-        addEventToAllYears(Processes.EducationLevelAlignment);
+        yearlySchedule.addEvent(this, Processes.EducationLevelAlignment);
 
         // Homeownership status
         yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Homeownership);
