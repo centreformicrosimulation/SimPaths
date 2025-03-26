@@ -72,7 +72,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Indicator der;          // return to education
     @Enumerated(EnumType.STRING) private Les_c4 les_c4;      //Activity (employment) status
     @Enumerated(EnumType.STRING) private Les_c7_covid les_c7_covid; //Activity (employment) status used in the Covid-19 models
-    @Transient private Les_c4 les_c4_lag1;		//Lag(1) of activity_status
+    @Enumerated(EnumType.STRING) private Les_c4 les_c4_lag1;		//Lag(1) of activity_status
     @Transient private Les_c7_covid les_c7_covid_lag1;     //Lag(1) of 7-category activity status
     @Transient private Integer liwwh;                  //Work history in years (number of years in employment)
     @Enumerated(EnumType.STRING) private Indicator dlltsd;	//Long-term sick or disabled if = 1
