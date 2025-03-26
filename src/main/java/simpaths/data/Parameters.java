@@ -969,6 +969,8 @@ public class Parameters {
                     }
                     break;
             }
+        } else{
+            populationProjections = ExcelAssistant.loadCoefficientMap("input/align_popProjections.xlsx", countryString, 3, 50);
         }
 
 
