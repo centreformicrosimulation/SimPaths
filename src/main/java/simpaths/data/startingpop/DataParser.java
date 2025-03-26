@@ -152,13 +152,23 @@ public class DataParser {
 
 				//Labour Market Economic Status
 				+ "ALTER TABLE " + personTable + " ADD activity_status VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET les_c4 = 3 WHERE les_c4 = 1 AND CAST(potential_earnings_hourly AS FLOAT)<0.01;"
+				+ "UPDATE " + personTable + " SET les_c4 = 3 WHERE les_c4 = 1 AND CAST(obs_earnings_hourly AS FLOAT)<0.01;"
 				+ "UPDATE " + personTable + " SET activity_status = 'EmployedOrSelfEmployed' WHERE les_c4 = 1;"
 				+ "UPDATE " + personTable + " SET activity_status = 'Student' WHERE les_c4 = 2;"
 				+ "UPDATE " + personTable + " SET activity_status = 'NotEmployed' WHERE les_c4 = 3;"
 				+ "UPDATE " + personTable + " SET activity_status = 'Retired' WHERE les_c4 = 4;"
 				+ "ALTER TABLE " + personTable + " DROP COLUMN les_c4;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status RENAME TO les_c4;"
+
+				//Lag(1) of les_c4
+				+ "ALTER TABLE " + personTable + " ADD activity_status VARCHAR_IGNORECASE;"
+				+ "UPDATE " + personTable + " SET l1_les_c4 = 3 WHERE l1_les_c4 = 1 AND CAST(l1_obs_earnings_hourly AS FLOAT)<0.01;"
+				+ "UPDATE " + personTable + " SET activity_status = 'EmployedOrSelfEmployed' WHERE l1_les_c4 = 1;"
+				+ "UPDATE " + personTable + " SET activity_status = 'Student' WHERE l1_les_c4 = 2;"
+				+ "UPDATE " + personTable + " SET activity_status = 'NotEmployed' WHERE l1_les_c4 = 3;"
+				+ "UPDATE " + personTable + " SET activity_status = 'Retired' WHERE l1_les_c4 = 4;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN l1_les_c4;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status RENAME TO les_c4_lag1;"
 
 				//DEMOGRAPHIC: Long-term sick or disabled (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD sick_longterm VARCHAR_IGNORECASE;"
@@ -200,6 +210,7 @@ public class DataParser {
 				+ "UPDATE " + personTable + " SET idmother = null WHERE idmother = -9;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idfather BIGINT;"
 				+ "UPDATE " + personTable + " SET idfather = null WHERE idfather = -9;"
+				+ "UPDATE " + personTable + " SET liwwh = null WHERE liwwh = -9;"
 
 				//Rename idbenefitunit to BU_ID
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO buid;"
