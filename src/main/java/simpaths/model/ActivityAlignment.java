@@ -44,8 +44,17 @@ public class ActivityAlignment implements IEvaluation {
         this.regressor2ToModify = null;
         this.originalRegressionCoefficient2 = 0;
         this.regressionCoefficientsMap = originalRegressionCoefficientsMap;
-        Object[] valuesOriginalCopy = (Object[]) originalRegressionCoefficientsMap.getValue(regressorToModify);
-        this.originalRegressionCoefficient = ((Number) valuesOriginalCopy[0]).doubleValue();
+
+        Object coefficientObj = originalRegressionCoefficientsMap.getValue(regressorToModify);
+        if (coefficientObj instanceof Object[]) {
+            Object[] valuesOriginalCopy = (Object[]) coefficientObj;
+            this.originalRegressionCoefficient = ((Number) valuesOriginalCopy[0]).doubleValue();
+        } else if (coefficientObj instanceof Number) {
+            this.originalRegressionCoefficient = ((Number) coefficientObj).doubleValue();
+        } else {
+            throw new IllegalArgumentException("Unexpected type: " + coefficientObj.getClass());
+        }
+
         this.benefitUnitType = benefitUnitType;
 
         // Share of employed benefit unit of a particular type (Single man / single woman / couple). Couple BU counts as employed if either of the responsible persons works.
@@ -55,8 +64,15 @@ public class ActivityAlignment implements IEvaluation {
             case Couple -> {
                 targetAggregateShareOfEmployedBU = Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentCouples);
                 regressor2ToModify = regressorsToModify[1];
-                Object[] valuesOriginalCopy2 = (Object[]) originalRegressionCoefficientsMap.getValue(regressor2ToModify);
-                this.originalRegressionCoefficient2 = ((Number) valuesOriginalCopy2[0]).doubleValue();
+                Object coefficientObj2 = originalRegressionCoefficientsMap.getValue(regressor2ToModify);
+                if (coefficientObj2 instanceof Object[]) {
+                    Object[] valuesOriginalCopy2 = (Object[]) coefficientObj2;
+                    this.originalRegressionCoefficient2 = ((Number) valuesOriginalCopy2[0]).doubleValue();
+                } else if (coefficientObj2 instanceof Number) {
+                    this.originalRegressionCoefficient2 = ((Number) coefficientObj2).doubleValue();
+                } else {
+                    throw new IllegalArgumentException("Unexpected type: " + coefficientObj2.getClass());
+                }
             }
         }
     }
@@ -109,18 +125,37 @@ public class ActivityAlignment implements IEvaluation {
 
         String regressionCoefficientKey = regressorToModify; // Name of the regressor to modify
         MultiKeyCoefficientMap map = regressionCoefficientsMap; // Map of regressors and estimated coefficients
-        Object[] currentValues = (Object[]) map.getValue(regressionCoefficientKey);
-        double newValue = originalRegressionCoefficient + newUtilityAdjustment; // Adjust regression coefficient
-        currentValues[0] = newValue;
-        map.replaceValue(regressionCoefficientKey, currentValues); // Put adjusted value back in the map
+
+        // Retrieve current value from the map
+        Object currentValueObj = map.getValue(regressionCoefficientKey);
+        if (!(currentValueObj instanceof Number)) {
+            throw new IllegalArgumentException("Expected a numeric value for key: " + regressionCoefficientKey);
+        }
+
+        // Adjust regression coefficient
+        double currentValue = ((Number) currentValueObj).doubleValue();
+        double newValue = originalRegressionCoefficient + newUtilityAdjustment;
+
+        // Replace adjusted value back in the map
+        map.replaceValue(regressionCoefficientKey, newValue);
 
         if (regressor2ToModify != null) {
-            String regressionCoefficientKey2 = regressor2ToModify; // Name of the regressor to modify
-            Object[] currentValues2 = (Object[]) map.getValue(regressionCoefficientKey2);
-            double newValue2 = originalRegressionCoefficient2 + newUtilityAdjustment; // Adjust regression coefficient
-            currentValues2[0] = newValue2;
-            map.replaceValue(regressionCoefficientKey2, currentValues2); // Put adjusted value back in the map
+            String regressionCoefficientKey2 = regressor2ToModify; // Name of the second regressor to modify
+
+            // Retrieve current value for the second regressor
+            Object currentValueObj2 = map.getValue(regressionCoefficientKey2);
+            if (!(currentValueObj2 instanceof Number)) {
+                throw new IllegalArgumentException("Expected a numeric value for key: " + regressionCoefficientKey2);
+            }
+
+            // Adjust regression coefficient for the second regressor
+            double currentValue2 = ((Number) currentValueObj2).doubleValue();
+            double newValue2 = originalRegressionCoefficient2 + newUtilityAdjustment;
+
+            // Replace adjusted value back in the map
+            map.replaceValue(regressionCoefficientKey2, newValue2);
         }
+
 
         benefitUnits.parallelStream()
                 .filter(BenefitUnit::getAtRiskOfWork)
