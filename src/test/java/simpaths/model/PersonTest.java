@@ -13,19 +13,16 @@ public class PersonTest {
     static BenefitUnit testBenefitUnit;
     static Household testHousehold;
 
-    @BeforeAll
-    static void setup() {
-        testPerson = new Person(true, 1);
-        testBenefitUnit = new BenefitUnit(true, 1);
-        testBenefitUnit.setRegion(Region.UKC);
-        testHousehold= new Household();
-        testBenefitUnit.setHousehold(testHousehold);
-        testPerson.setBenefitUnit(testBenefitUnit);
-    }
+
 
     @Nested
     @DisplayName("EQ5D process")
     class Eq5dTests {
+
+        @BeforeAll
+        static void setupPerson() {
+            testPerson = new Person(true, 1);
+        }
 
         @Nested
         @DisplayName("With eq5dConversionParameters set to 'lawrence'")
@@ -114,8 +111,17 @@ public class PersonTest {
     }
 
     @Nested
-    @DisplayName("Mental health stage 2")
-    class MentalHealthStage2 {
+    @DisplayName("Health: MCS stage 2")
+    class HealthMCSStage2 {
+        @BeforeAll
+        static void setupPersonAndHousehold() {
+            testPerson = new Person(true, 1);
+            testBenefitUnit = new BenefitUnit(true, 1);
+            testBenefitUnit.setRegion(Region.UKC);
+            testHousehold= new Household();
+            testBenefitUnit.setHousehold(testHousehold);
+            testPerson.setBenefitUnit(testBenefitUnit);
+        }
 
         @Nested
         @DisplayName("MCS score updates")
@@ -161,6 +167,5 @@ public class PersonTest {
         }
 
     }
-
 
 }
