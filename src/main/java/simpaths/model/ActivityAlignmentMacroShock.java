@@ -4,36 +4,54 @@ import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
-import simpaths.model.enums.Occupancy;
 import simpaths.model.enums.OccupancyMacroShock;
 import simpaths.model.enums.TargetShares;
 import simpaths.model.enums.Les_c4;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 
 public class ActivityAlignmentMacroShock implements IEvaluation {
 
-    private double targetAggregateShareOfEmployedPersons;
+    private final double targetAggregateShareOfEmployedPersons;
     private double utilityAdjustment;
     boolean utilityAdjustmentChanged;
-    Map<OccupancyMacroShock, MultiKeyCoefficientMap> coefficientMaps;
-    Map<OccupancyMacroShock, List<String>> regressorsToModify;
-    private Set<Person> persons;
-    private Set<BenefitUnit> benefitUnits;
-    private SimPathsModel model;
+    private final Map<OccupancyMacroShock, MultiKeyCoefficientMap> coefficientMaps;
+    private final Map<OccupancyMacroShock, List<String>> regressorsToModify;
+    private final Set<Person> persons;
+    private final Set<BenefitUnit> benefitUnits;
+    private final SimPathsModel model;
+
+    // Stores original values of coefficients that will be modified
+    private final Map<OccupancyMacroShock, Map<String, Double>> originalCoefficients;
 
     public ActivityAlignmentMacroShock(Set<Person> persons, Set<BenefitUnit> benefitUnits,
                                        Map<OccupancyMacroShock, MultiKeyCoefficientMap> coefficientMaps,
                                        Map<OccupancyMacroShock, List<String>> regressorsToModify,
                                        double utilityAdjustment) {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
-        this.persons = persons;
-        this.benefitUnits = benefitUnits;
+        this.persons = Collections.unmodifiableSet(persons);
+        this.benefitUnits = Collections.unmodifiableSet(benefitUnits);
         this.utilityAdjustment = utilityAdjustment;
-        this.coefficientMaps = coefficientMaps;
-        this.regressorsToModify = regressorsToModify;
+        this.coefficientMaps = Collections.unmodifiableMap(coefficientMaps);
+        this.regressorsToModify = Collections.unmodifiableMap(regressorsToModify);
+
+        // Store original values of coefficients that will be modified
+        this.originalCoefficients = new EnumMap<>(OccupancyMacroShock.class);
+        for (Map.Entry<OccupancyMacroShock, List<String>> entry : regressorsToModify.entrySet()) {
+            OccupancyMacroShock occupancy = entry.getKey();
+            List<String> regressors = entry.getValue();
+            MultiKeyCoefficientMap coefficientMap = coefficientMaps.get(occupancy);
+
+            Map<String, Double> occupancyValues = new HashMap<>();
+            for (String regressor : regressors) {
+                Object value = coefficientMap.getValue(regressor);
+                if (!(value instanceof Number)) {
+                    throw new IllegalArgumentException("Coefficient " + regressor + " must be numeric");
+                }
+                occupancyValues.put(regressor, ((Number) value).doubleValue());
+            }
+            originalCoefficients.put(occupancy, occupancyValues);
+        }
 
         this.targetAggregateShareOfEmployedPersons = Parameters.getTargetShare(model.getYear(), TargetShares.Employment);
     }
@@ -41,48 +59,43 @@ public class ActivityAlignmentMacroShock implements IEvaluation {
     @Override
     public double evaluate(double[] args) {
         adjustEmployment(args[0]);
-        double error = targetAggregateShareOfEmployedPersons - evalAggregateShareOfEmployedPersons();
-        return error;
+        return targetAggregateShareOfEmployedPersons - evalAggregateShareOfEmployedPersons();
     }
 
     private double evalAggregateShareOfEmployedPersons() {
-        long numPersons = persons.stream()
+        long total = persons.size();
+        if (total == 0) return 0.0;
+
+        long employed = persons.stream()
+                .filter(p -> p.getLes_c4() == Les_c4.EmployedOrSelfEmployed)
                 .count();
 
-        long numPersonsEmployed = persons.stream()
-                .filter(person -> person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed))
-                .count();
-
-        return numPersons > 0
-                ? (double) numPersonsEmployed / numPersons
-                : 0.0;
+        return (double) employed / total;
     }
 
     private void adjustEmployment(double newUtilityAdjustment) {
         for (Map.Entry<OccupancyMacroShock, MultiKeyCoefficientMap> entry : coefficientMaps.entrySet()) {
             OccupancyMacroShock occupancy = entry.getKey();
-            MultiKeyCoefficientMap map = entry.getValue();
+            MultiKeyCoefficientMap currentMap = entry.getValue();
             List<String> regressors = regressorsToModify.get(occupancy);
+            Map<String, Double> originalValues = originalCoefficients.get(occupancy);
 
             for (String regressor : regressors) {
-                Object currentValueObj = map.getValue(regressor);
-                if (!(currentValueObj instanceof Number)) {
-                    throw new IllegalArgumentException("Expected a numeric value for key: " + regressor);
-                }
-
-                double currentValue = ((Number) currentValueObj).doubleValue();
-                double newValue = currentValue + newUtilityAdjustment;
-                map.replaceValue(regressor, newValue);
+                double originalValue = originalValues.get(regressor);
+                double newValue = originalValue + newUtilityAdjustment;
+                currentMap.replaceValue(regressor, newValue);
             }
         }
 
+        // Update benefit units
         benefitUnits.parallelStream()
                 .filter(BenefitUnit::getAtRiskOfWork)
-                .forEach(benefitUnit -> benefitUnit.updateLabourSupplyAndIncome());
+                .forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
         benefitUnits.parallelStream()
                 .forEach(BenefitUnit::updateActivityOfPersonsWithinBenefitUnit);
 
+        // Update state
         utilityAdjustment = newUtilityAdjustment;
         utilityAdjustmentChanged = true;
     }
