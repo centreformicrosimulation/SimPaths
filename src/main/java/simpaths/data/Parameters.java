@@ -1082,10 +1082,10 @@ public class Parameters {
             columnsEmploymentSelectionMalesE = 17; //#
             columnsEmploymentSelectionFemalesNE = 18; //#
             columnsEmploymentSelectionFemalesE = 17; //#
-            columnsLabourSupplyUtilityMales = 13; //#
-            columnsLabourSupplyUtilityFemales = 13; //#
-            columnsLabourSupplyUtilityMalesWithDependent = 19; //#
-            columnsLabourSupplyUtilityFemalesWithDependent = 19; //#
+            columnsLabourSupplyUtilityMales = 10; //#
+            columnsLabourSupplyUtilityFemales = 10; //#
+            columnsLabourSupplyUtilityMalesWithDependent = 7; //#
+            columnsLabourSupplyUtilityFemalesWithDependent = 7; //#
             columnsLabourSupplyUtilityACMales = 13; //#
             columnsLabourSupplyUtilityACFemales = 13; //#
             columnsLabourSupplyUtilityCouples = 48; //#
