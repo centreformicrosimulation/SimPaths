@@ -965,27 +965,32 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     //Health process defines health using H1a or H1b process
     protected void health() {
-
         double healthInnov1 = innovations.getDoubleDraw(3);
-        double healthInnov2 = innovations.getDoubleDraw(4);
         if((dag >= 16 && dag <= 29) && Les_c4.Student.equals(les_c4) && leftEducation == false) {
             //If age is between 16 - 29 and individual has always been in education, follow process H1a:
-
             Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1a);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             dhe = (Dhe) event.eval();
-
         } else if (dag >= 16) {
-
             Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1b);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             dhe = (Dhe) event.eval();
+        }
+    }
 
+    public void disability() {
+        double probitAdjustment = (model.isAlignDisability()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.DisabilityAdjustment) : 0.0;
+        disability(probitAdjustment);
+    }
+
+    protected void disability(double probitAdjustment) {
+        double healthInnov2 = innovations.getDoubleDraw(4);
+        if (dag >= 16 && (!Les_c4.Student.equals(les_c4) || (leftEducation == true))) {
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
             boolean becomeLTSickDisabled = false;
             if (!Parameters.enableIntertemporalOptimisations || DecisionParams.flagDisability) {
-
-                double prob = Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class);
+                double score = Parameters.getRegHealthH2b().getScore(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegHealthH2b().getProbability(score + probitAdjustment);
                 becomeLTSickDisabled = (healthInnov2 < prob);
             }
             if (becomeLTSickDisabled) {

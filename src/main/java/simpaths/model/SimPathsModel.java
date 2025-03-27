@@ -161,6 +161,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignRetirement = false;
 
+    private boolean alignDisability = true;
+
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
@@ -2546,6 +2548,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void setAlignRetirement(boolean alignRetirement) {
         this.alignRetirement = alignRetirement;
     }
+
+    public boolean isAlignDisability() {
+        return alignDisability;
+    }
+
+    public void setAlignDisability(boolean alignDisability) {
+        this.alignDisability = alignDisability;
+    }
+
 
     public void setSaveImperfectTaxDBMatches(boolean flag) {
         saveImperfectTaxDBMatches = flag;
