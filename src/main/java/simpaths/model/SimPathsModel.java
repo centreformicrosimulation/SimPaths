@@ -491,6 +491,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // HEALTH MODULE
         // Update Health - determine health (continuous) based on regression models: done here because health depends on education
+        yearlySchedule.addEvent(this, Processes.DisabilityAlignment);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Health);
 
         // HOUSEHOLD COMPOSITION MODULE: Decide whether to enter into a union (marry / cohabit), and then perform union matching (marriage) between a male and female
@@ -713,6 +714,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         PopulationAlignment,
         CohabitationAlignment,
         RetirementAlignment,
+        DisabilityAlignment,
         // HealthAlignment,
         InSchoolAlignment,
         EducationLevelAlignment,
@@ -774,6 +776,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 if (alignRetirement) {
                     retirementAlignment();
                     if (commentsOn) log.info("Retirement alignment complete.");
+                }
+            }
+            case DisabilityAlignment -> {
+                if (alignDisability) {
+                    disabilityAlignment();
+                    if (commentsOn) log.info("Disability alignment complete.");
                 }
             }
 //			case HealthAlignment -> {
