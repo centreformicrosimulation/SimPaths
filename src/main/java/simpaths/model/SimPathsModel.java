@@ -1543,6 +1543,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
+    public void disabilityAlignment() {
+        DisabilityAlignment disabilityAlignment = new DisabilityAlignment(persons);
+        double disabilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.DisabilityAdjustment);
+        RootSearch search = getRootSearch(disabilityAdjustment, disabilityAlignment, 5.0E-3, 5.0E-3, 2);
+
+        // update and exit
+        if (search.isTargetAltered()) {
+            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.DisabilityAdjustment); // If adjustment is altered from the initial value, update the map
+            System.out.println("Disability adjustment value was " + search.getTarget()[0]);
+        }
+    }
+
     @NotNull
     private static RootSearch getRootSearch(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction, double modifier) {
         double minVal = initialAdjustment - modifier;
@@ -1559,6 +1571,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         search.evaluate();
         return search;
     }
+
+
 
 
     /**
