@@ -4,4 +4,5 @@ public enum AlignmentVariable {
     PartnershipAlignment,
     FertilityAlignment,
     RetirementAlignment,
+    DisabilityAlignment,
 }
