@@ -251,10 +251,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public Person(boolean testModel, long id) {
+    public Person(boolean testModel, long id, long seed) {
         model = null;
         key = new PanelEntityKey(id);
         setAllSocialCareVariablesToFalse();
+        innovations = new Innovations(32, 1, 1, seed);
     }
 
     // used to create new people who enter the simulation during UpdateMaternityStatus
