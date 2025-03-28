@@ -455,7 +455,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // TO DO: this will require an additional test of whether UC is received or not - for now all receive UC if any ben
         boolean receivesBenefitsFlag = (getBenefitsReceivedPerMonth() > 0);
-        boolean receivesBenefitsFlagUC = receivesBenefitsFlag & Parameters.UC_ROLLOUT;
+        boolean receivesBenefitsFlagUC = receivesBenefitsFlag && Parameters.UC_ROLLOUT;
         Occupancy occupancy = getOccupancy();
         switch (occupancy) {
             case Couple -> {
