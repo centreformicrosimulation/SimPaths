@@ -1,8 +1,15 @@
 package simpaths.model;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import simpaths.data.Parameters;
 import simpaths.model.enums.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,14 +21,13 @@ public class PersonTest {
     static Household testHousehold;
 
 
-
     @Nested
     @DisplayName("EQ5D process")
     class Eq5dTests {
 
         @BeforeAll
         static void setupPerson() {
-            testPerson = new Person(true, 1);
+            testPerson = new Person(true, 1, 100);
         }
 
         @Nested
@@ -52,7 +58,7 @@ public class PersonTest {
 
             @Test
             @DisplayName("Calculates high score correctly using Lawrence and Fleishman coefficients")
-            public void calculatesHighScoreCorrectly()  {
+            public void calculatesHighScoreCorrectly() {
 
 
                 testPerson.setDhe_mcs(100.);
@@ -95,7 +101,7 @@ public class PersonTest {
 
             @Test
             @DisplayName("Calculates high score correctly using Franks coefficients")
-            public void calculatesHighScoreCorrectly(){
+            public void calculatesHighScoreCorrectly() {
 
                 testPerson.setDhe_mcs(100.);
                 testPerson.setDhe_pcs(100.);
@@ -113,59 +119,195 @@ public class PersonTest {
     @Nested
     @DisplayName("Health: MCS stage 2")
     class HealthMCSStage2 {
-        @BeforeAll
-        static void setupPersonAndHousehold() {
-            testPerson = new Person(true, 1);
-            testBenefitUnit = new BenefitUnit(true, 1);
-            testBenefitUnit.setRegion(Region.UKC);
-            testHousehold= new Household();
-            testBenefitUnit.setHousehold(testHousehold);
-            testPerson.setBenefitUnit(testBenefitUnit);
+
+
+        public static class PersonTestData {
+            final int id;
+            // Existing attributes
+            final Les_c4 les_c4;
+            final Les_c4 les_c4_lag1;
+            final Indicator dlltsd;
+            final Indicator dlltsd_lag1;
+            final boolean receivesBenefitsFlagUC;
+            final Labour labourSupplyWeekly;
+            final double dhe_mcs;
+            final Gender dgn;
+            final int atRiskOfPoverty;
+            final int atRiskOfPoverty_lag1;
+            final double yearlyChangeInLogEDI;
+            final double equivalisedDisposableIncomeYearly;
+            final double equivalisedDisposableIncomeYearly_lag1;
+            final int buid;
+
+            // New attributes for expected/predicted values
+            final Double expectedMcsScore;  // Optional predicted MCS score
+
+            // Constructor with additional prediction parameters
+            PersonTestData(
+                    int id,
+                    Les_c4 les_c4,
+                    Les_c4 les_c4_lag1,
+                    Indicator dlltsd,
+                    Indicator dlltsd_lag1,
+                    boolean receivesBenefitsFlagUC,
+                    Labour labourSupplyWeekly,
+                    double dhe_mcs,
+                    Gender dgn,
+                    int atRiskOfPoverty,
+                    int atRiskOfPoverty_lag1,
+                    double yearlyChangeInLogEDI,
+                    double equivalisedDisposableIncomeYearly,
+                    double equivalisedDisposableIncomeYearly_lag1,
+                    int buid,
+                    Double expectedMcsScore
+            ) {
+                // Assign fields
+                this.id = id;
+                this.les_c4 = les_c4;
+                this.les_c4_lag1 = les_c4_lag1;
+                this.dlltsd = dlltsd;
+                this.dlltsd_lag1 = dlltsd_lag1;
+                this.receivesBenefitsFlagUC = receivesBenefitsFlagUC;
+                this.labourSupplyWeekly = labourSupplyWeekly;
+                this.dhe_mcs = dhe_mcs;
+                this.dgn = dgn;
+                this.atRiskOfPoverty = atRiskOfPoverty;
+                this.atRiskOfPoverty_lag1 = atRiskOfPoverty_lag1;
+                this.yearlyChangeInLogEDI = yearlyChangeInLogEDI;
+                this.equivalisedDisposableIncomeYearly = equivalisedDisposableIncomeYearly;
+                this.equivalisedDisposableIncomeYearly_lag1 = equivalisedDisposableIncomeYearly_lag1;
+                this.buid = buid;
+                this.expectedMcsScore = expectedMcsScore;
+            }
         }
+
+        private static Person createTestPerson(
+                int id,
+                Les_c4 les_c4,
+                Les_c4 les_c4_lag1,
+                Indicator dlltsd,
+                Indicator dlltsd_lag1,
+                boolean receivesBenefitsFlagUC,
+                Labour labourSupplyWeekly,
+                double dhe_mcs,
+                Gender dgn,
+                int atRiskOfPoverty,
+                int atRiskOfPoverty_lag1,
+                double yearlyChangeInLogEDI,
+                double equivalisedDisposableIncomeYearly,
+                double equivalisedDisposableIncomeYearly_lag1,
+                int buid,
+                int seed
+        ) {
+            // Create person, benefit unit, and household
+            Household testHousehold = new Household();
+            BenefitUnit testBenefitUnit = new BenefitUnit(true, buid);
+            testBenefitUnit.setRegion(Region.UKC);
+            testBenefitUnit.setHousehold(testHousehold);
+
+            Person testPerson = new Person(true, id, seed);
+            testPerson.setBenefitUnit(testBenefitUnit);
+
+            // Set person attributes
+            testPerson.setLes_c4(les_c4);
+            testPerson.setLes_c4_lag1(les_c4_lag1);
+            testPerson.setDlltsd(dlltsd);
+            testPerson.setDlltsd_lag1(dlltsd_lag1);
+            testPerson.setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+            testPerson.setLabourSupplyWeekly(labourSupplyWeekly);
+            testPerson.setDhe_mcs(dhe_mcs);
+            testPerson.setDgn(dgn);
+
+            // Set benefit unit attributes
+            testBenefitUnit.setAtRiskOfPoverty(atRiskOfPoverty);
+            testBenefitUnit.setAtRiskOfPoverty_lag1(atRiskOfPoverty_lag1);
+            testBenefitUnit.setYearlyChangeInLogEDI(yearlyChangeInLogEDI);
+            testBenefitUnit.setEquivalisedDisposableIncomeYearly(equivalisedDisposableIncomeYearly);
+            testBenefitUnit.setEquivalisedDisposableIncomeYearly_lag1(equivalisedDisposableIncomeYearly_lag1);
+
+            return testPerson;
+        }
+
 
         @Nested
         @DisplayName("MCS score updates")
         class MCSScoreUpdates {
+
+            private static final List<PersonTestData> TEST_SCENARIOS = Arrays.asList(
+                    new PersonTestData(
+                            1,
+                            Les_c4.EmployedOrSelfEmployed,
+                            Les_c4.EmployedOrSelfEmployed,
+                            Indicator.False,
+                            Indicator.False,
+                            false,
+                            Labour.FORTY,
+                            50.,
+                            Gender.Female,
+                            0,
+                            0,
+                            -0.10372066,
+                            7.914312,
+                            8.018033,
+                            1,
+                            49.94559
+                    )
+            );
 
             @BeforeEach
             public void setupHM2Coefficients() {
                 Parameters.loadDHE_MCS2Parameters("UK", 14, 14);
             }
 
-            @Test
-            @DisplayName("Calculates valid MCS score")
-            public void calculatesValidMCSScore() {
+            @ParameterizedTest
+            @DisplayName("Calculates valid MCS score for multiple scenarios")
+            @MethodSource("getTestScenarios")
+            public void calculatesValidMCSScore(PersonTestData testData) {
+                // Create test person (existing logic)
+                Person testPerson = createTestPerson(
+                        testData.id,
+                        testData.les_c4,
+                        testData.les_c4_lag1,
+                        testData.dlltsd,
+                        testData.dlltsd_lag1,
+                        testData.receivesBenefitsFlagUC,
+                        testData.labourSupplyWeekly,
+                        testData.dhe_mcs,
+                        testData.dgn,
+                        testData.atRiskOfPoverty,
+                        testData.atRiskOfPoverty_lag1,
+                        testData.yearlyChangeInLogEDI,
+                        testData.equivalisedDisposableIncomeYearly,
+                        testData.equivalisedDisposableIncomeYearly_lag1,
+                        testData.buid,
+                        101
+                );
 
-                // This test currently sets a single person with variables required for MCS2 and test whether updating produces a valid score not equal to the starting score
-
-                testPerson.setLes_c4(Les_c4.NotEmployed);
-                testPerson.setLes_c4_lag1(Les_c4.EmployedOrSelfEmployed);
-                testPerson.setDlltsd(Indicator.False);
-
-                testPerson.setReceivesBenefitsFlagUC(true);
-                testPerson.setLabourSupplyWeekly(Labour.ZERO);
-
-                testPerson.setDhe_mcs(50.);
-                testPerson.setDgn(Gender.Female);
-
-                testBenefitUnit.setAtRiskOfPoverty(1);
-                testBenefitUnit.setAtRiskOfPoverty_lag1(0);
-
-                testBenefitUnit.setYearlyChangeInLogEDI(1.);
-                testBenefitUnit.setEquivalisedDisposableIncomeYearly(1000.);
-                testBenefitUnit.setEquivalisedDisposableIncomeYearly_lag1(100.);
-
+                // Trigger the event
                 testPerson.onEvent(Person.Processes.HealthMCS2);
 
+                // Basic range and change assertions
                 assertTrue(testPerson.getDhe_mcs() <= 100);
                 assertTrue(testPerson.getDhe_mcs() >= 0);
                 assertTrue(testPerson.getDhe_pcs() != 50);
 
+
+                // Allow some tolerance for floating-point comparisons
+                assertEquals(
+                        testData.expectedMcsScore,
+                        testPerson.getDhe_mcs(),
+                        0.1,  // Delta for floating-point comparison
+                        "MCS score should match expected value"
+                );
+
             }
 
+            private static Stream<Arguments> getTestScenarios() {
+                return TEST_SCENARIOS.stream()
+                        .map(Arguments::of);
+            }
 
         }
 
     }
-
 }
