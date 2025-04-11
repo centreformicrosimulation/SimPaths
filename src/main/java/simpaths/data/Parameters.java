@@ -983,7 +983,7 @@ public class Parameters {
     //    employmentAlignment = ExcelAssistant.loadCoefficientMap("input/align_employment.xlsx", countryString, 2, 40);
 
         //Fertility rates:
-        fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap("input/projections_fertility.xlsx", countryString + "_FertilityByYear", 1, 35);
+        fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap("input/projections_fertility.xlsx", countryString + "_FertilityByYear", 1, 90);
         setMapBounds(MapBounds.Fertility, countryString);
 
         //RMSE
