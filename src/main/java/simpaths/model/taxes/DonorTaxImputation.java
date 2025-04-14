@@ -42,6 +42,9 @@ public class DonorTaxImputation {
     private double grossIncomePerWeek;
     private double targetNormalisedOriginalIncome;
 
+    private Integer receivedUC;
+    private Integer receivedLegacyBenefit;
+
 
     /**
      * CONSTRUCTORS
@@ -77,6 +80,19 @@ public class DonorTaxImputation {
     }
     public long getDonorID() { return donorID; }
     public double getTargetNormalisedOriginalIncome() { return targetNormalisedOriginalIncome; }
+
+    public Integer getReceivedUC() {
+        return receivedUC;
+    }
+    public void setReceivedUC(Integer receivedUC) {
+        this.receivedUC = receivedUC;
+    }
+    public Integer getReceivedLegacyBenefit() {
+        return receivedLegacyBenefit;
+    }
+    public void setReceivedLegacyBenefit(Integer receivedLegacyBenefit) {
+        this.receivedLegacyBenefit = receivedLegacyBenefit;
+    }
 
 
     /**
@@ -259,6 +275,8 @@ public class DonorTaxImputation {
         matchCriterion += Math.min(9, candidatesList.size());
         double weightHere = 0.0;
         double infAdj = 1.0;
+        double UCmean = 0.;  // Take a weighted mean of whether received UC or not across all candidates
+        double LBmean = 0.;  // Take a weighted mean of whether received LB or not across all candidates
         if (systemYear != keys.getPriceYear())
             infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
         for (CandidateList candidateList : candidatesList) {
@@ -277,10 +295,14 @@ public class DonorTaxImputation {
                     // impute based on observed disposable income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / Parameters.WEEKS_PER_MONTH * weight * infAdj;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / Parameters.WEEKS_PER_MONTH * weight * infAdj;
+                    UCmean += candidate.getPolicyBySystemYear(systemYear).getReceivesUC() * weight * infAdj;
+                    LBmean += candidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit() * weight * infAdj;
                 } else {
                     // impute based on ratio of disposable to original income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
+                    UCmean += candidate.getPolicyBySystemYear(systemYear).getReceivesUC() * weight * infAdj;
+                    LBmean += candidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit() * weight * infAdj;
                 }
                 if (keys.getRandomDraw()>0.0 || Math.abs(keys.getRandomDraw()+2.0)<1.0E-2) {
                     donorID = candidate.getId();
@@ -297,6 +319,12 @@ public class DonorTaxImputation {
         if (keys.getHoursWorkedPerWeekMan() + keys.getHoursWorkedPerWeekWoman() > 0.1) {
             disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
             benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
+        }
+        if (UCmean > weightHere / 2) {  // This should test whether more than 50% of candidates (weighted) receive UC
+            receivedUC = 1;
+        }
+        if (LBmean > weightHere / 2) {  // This should test whether more than 50% of candidates (weighted) receive Legacy Benefits
+            receivedLegacyBenefit = 1;
         }
     }
 

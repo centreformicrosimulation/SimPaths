@@ -25,7 +25,13 @@ public class DonorPersonPolicy {
     @Column(name="ILS_ORIGY") private Double originalIncomePerMonth;
     @Column(name="ILS_EARNS") private Double earningsPerMonth;
     @Column(name="XCC") private Double childcareCostPerMonth;
-
+    @Column(name="BSAUC_S") private Double benefitUCPerMonth; //bsauc_s
+    @Column(name="BHO_S") private Double benefitHousingPerMonth; //bho_s
+    @Column(name="BWKMT_S") private Double benefitWorkingTaxCreditPerMonth; //bwkmt_s
+    @Column(name="BFAMT_S") private Double benefitChildTaxCreditPerMonth; //bfamt_s
+    @Column(name="BUNCT_S") private Double benefitJobSeekerPerMonth; //bunct_s
+    @Column(name="BSA_S") private Double benefitIncomeBasedSupportPerMonth; //bsa_s
+    @Column(name="BSADI_S") private Double benefitIncomeRelatedESAPerMonth; //bsadi_s
 
     /**
      * CONSTRUCTORS
@@ -59,4 +65,25 @@ public class DonorPersonPolicy {
     public double getEarningsPerMonth() {
         return (earningsPerMonth ==null) ? 0. : earningsPerMonth;
     }
+    public double getUCAmountPerMonth() {
+        return (benefitUCPerMonth == null) ? 0. : benefitUCPerMonth;
+    }
+    public double getLegacyBenefitsPerMonth() {
+        return
+        ((benefitHousingPerMonth == null) ? 0. : benefitHousingPerMonth) +
+        ((benefitWorkingTaxCreditPerMonth == null) ? 0. : benefitWorkingTaxCreditPerMonth) +
+        ((benefitChildTaxCreditPerMonth == null) ? 0. : benefitChildTaxCreditPerMonth) +
+        ((benefitJobSeekerPerMonth == null) ? 0. : benefitJobSeekerPerMonth) +
+        ((benefitIncomeBasedSupportPerMonth == null) ? 0. : benefitIncomeBasedSupportPerMonth) +
+        ((benefitIncomeRelatedESAPerMonth == null) ? 0. : benefitIncomeRelatedESAPerMonth);
+    }
+
+    public Integer getReceivesUC() {
+        return getUCAmountPerMonth() > 0. ? 1 :0 ;
+    }
+
+    public Integer getReceivesLegacyBenefit() {
+        return getLegacyBenefitsPerMonth() > 0. ? 1 :0 ;
+    }
+
 }
