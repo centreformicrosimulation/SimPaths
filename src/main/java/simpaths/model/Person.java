@@ -569,7 +569,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setAdditionalFieldsInInitialPopulation() {
 
         if (labourSupplyWeekly==null)
-            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue());
+            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue(), getDgn());
         receivesBenefitsFlag_L1 = receivesBenefitsFlag;
         labourSupplyWeekly_L1 = getLabourSupplyWeekly();
 

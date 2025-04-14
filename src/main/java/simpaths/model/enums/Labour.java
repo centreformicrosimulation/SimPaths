@@ -4,88 +4,73 @@ import microsim.statistics.regression.IntegerValuedEnum;
 import simpaths.data.Parameters;
 import simpaths.model.Person;
 
-/**
- * An enumeration representing different categories of weekly labour supply (work hours) provided by persons.
- */
-
 public enum Labour implements IntegerValuedEnum {
 
-    //Represents hours of work per week that a Person will supply to firms
-    ZERO(0, 0, 0), // Note: ZERO always returns 0 continuous hours but maxBound is specified as 5 here to remain consistent with the discretization used in the data
-    TWENTY(20, 1, 39),
-	FORTY(40, 40, 40),
-	FIFTY(50, 41, Parameters.MAX_LABOUR_HOURS_IN_WEEK);
+    ZERO(0, 0, 0, 0, 0),  // 0 hours for both genders
 
-    private final int hours, minBound, maxBound;
-    Labour(int hours, int minBound, int maxBound) {
-        this.hours = hours;
-        this.minBound = minBound;
-        this.maxBound = maxBound;
+                                                                                // Female categories            Male categories
+    CATEGORY_1(1, 1, 29,   1, 35),   // [1-29] vs [1-35]
+    CATEGORY_2(2, 30, 35,  36, 39),  // [30-35] vs [36-39]
+    CATEGORY_3(3, 36, 39,  40, 49),  // [36-39] vs [40-49]
+    CATEGORY_4(4, 40, Parameters.MAX_LABOUR_HOURS_IN_WEEK, 50, Parameters.MAX_LABOUR_HOURS_IN_WEEK); // [40+] vs [50+]
+
+    private final int categoryId;
+    private final int femaleMin, femaleMax;
+    private final int maleMin, maleMax;
+
+    Labour(int categoryId, int femaleMin, int femaleMax, int maleMin, int maleMax) {
+        this.categoryId = categoryId;
+        this.femaleMin = femaleMin;
+        this.femaleMax = femaleMax;
+        this.maleMin = maleMin;
+        this.maleMax = maleMax;
     }
 
     @Override
-    public int getValue() {return hours;}
-
-	/**
-	 * Converts hours worked (int) to the corresponding labour category.
-	 *
-	 * @param hoursWorked The hours worked.
-	 * @return The labour category.
-	 */
-    public static Labour convertHoursToLabour(int hoursWorked) {
-        return convertHoursToLabourInternal(hoursWorked);
+    public int getValue() {
+        return categoryId;  // Now returns category ID instead of hours
     }
 
-	/**
-	 * Converts hours worked (double) to the corresponding labour category.
-	 *
-	 * @param hoursWorked The hours worked.
-	 * @return The labour category.
-	 */
-    public static Labour convertHoursToLabour(double hoursWorked) {
-        return convertHoursToLabourInternal((int) hoursWorked);
+    // Gender-aware conversion methods
+    public static Labour convertHoursToLabour(double hoursWorked, Gender gender) {
+        if (hoursWorked <= 0) return ZERO;
+
+        return switch (gender) {
+            case Female -> convertFemaleHours(hoursWorked);
+            default -> convertMaleHours(hoursWorked);
+        };
     }
 
-    private static Labour convertHoursToLabourInternal(int hoursWorked) {
-        if (hoursWorked <= 0) {
-            return Labour.ZERO;
-        } else if (hoursWorked <= 39) {
-            return Labour.TWENTY;
-        } else if (hoursWorked <= 40) {
-            return Labour.FORTY;
-        } else {
-            return Labour.FIFTY;
-        }
+    private static Labour convertFemaleHours(double hours) {
+        if (hours <= 29) return CATEGORY_1;
+        else if (hours <= 35) return CATEGORY_2;
+        else if (hours <= 39) return CATEGORY_3;
+        else return CATEGORY_4;
     }
 
-    //
-	/**
-	 * Gets the hours of work based on the labour category and the person's draw from the uniform distribution.
-	 * A switch in Parameters class indicates if discretized or continuous hours should be used.
-	 * If discretized hours are used, returns number of hours as specified by the hours variable.
-	 * If continuous hours are used, returns continuous hours based on person's draw from the uniform distribution and minimum and maximum hours possible in each category, defined by minBound and maxBound.
-	 * Note: ZERO category always returns 0 hours of work, irrespective of whether discretized or continuous hours are requested, and irrespective of min and max bound for the ZERO category.
-	 *
-	 * @param person The person for whom the hours are calculated.
-	 * @return The calculated hours of work.
-	 */
+    private static Labour convertMaleHours(double hours) {
+        if (hours <= 35) return CATEGORY_1;
+        else if (hours <= 39) return CATEGORY_2;
+        else if (hours <= 49) return CATEGORY_3;
+        else return CATEGORY_4;
+    }
+
     public int getHours(Person person) {
-        // There were some cases in BenefitUnit where person can be null but hours of work still needed to be obtained where individual is a single adult and labour key composed of two values needs to be defined.
-        // I replaced that with a 0. value, instead of converting a ZERO labour key to hours, so person should never be null.
-        // However, added a check for null persons which should result in a default number of hours returned in such cases.
-        if (this != Labour.ZERO && Parameters.USE_CONTINUOUS_LABOUR_SUPPLY_HOURS && person != null) {
+        if (this == ZERO) return 0;
 
-            // Verify that person's draw is not null. If null, draw a value first.
-            double personDrawnValue = person.getLabourSupplySingleDraw();
+        Gender gender = person.getDgn();
+        if (Parameters.USE_CONTINUOUS_LABOUR_SUPPLY_HOURS && person != null) {
 
-            // Continuous hours are based on person's randomly drawn value. This can be considered person's "type", for example, a person always works hours in the bottom 10% of a (uniformly distributed) labour supply bracket.
-            int hours = (int) Math.round(personDrawnValue * (maxBound - minBound) + minBound);
-            return hours;
+            int min = (gender == Gender.Female) ? femaleMin : maleMin;
+            int max = (gender == Gender.Female) ? femaleMax : maleMax;
 
+            double draw = person.getLabourSupplySingleDraw();
+            return (int) Math.round(draw * (max - min) + min);
         } else {
-            return hours;
+            // Return midpoint for discrete mode
+            return (gender == Gender.Female) ?
+                    (femaleMin + femaleMax) / 2 :
+                    (maleMin + maleMax) / 2;
         }
     }
-
 }
-
