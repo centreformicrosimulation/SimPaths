@@ -3570,10 +3570,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return isReceivesBenefitsFlag_L1() ? 1. : 0.;
             }
             case D_Econ_benefits_NonUC -> {
-                return isReceivesBenefitsFlagNonUC_L1() ? 1. : 0.;
+                return isReceivesBenefitsFlagNonUC() ? 1. : 0.;
             }
             case D_Econ_benefits_UC -> {
-                return isReceivesBenefitsFlagUC_L1() ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_ZERO -> {
                 return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
