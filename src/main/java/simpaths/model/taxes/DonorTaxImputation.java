@@ -322,10 +322,10 @@ public class DonorTaxImputation {
             disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
             benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
         }
-        if (UCmean > weightHere / 2) {  // This should test whether more than 50% of candidates (weighted) receive UC
+        if (UCmean > Math.random()) {  // Weighted probability of receiving UC
             setReceivedUC(1);
         }
-        if (LBmean > weightHere / 2) {  // This should test whether more than 50% of candidates (weighted) receive Legacy Benefits
+        if (LBmean > 0 && getReceivedUC() == 0) {  // Setting as received LB if benefits but not UC
             setReceivedLegacyBenefit(1);
         }
     }
