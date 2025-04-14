@@ -53,7 +53,7 @@ jobs:
         path: .
 
     - name: Setup run
-      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
+      run: java -jar singlerun.jar -c UK -s 2019 -Setup -g false --rewrite-policy-schedule
 
     - name: Check input db exists
       id: check_file
@@ -84,7 +84,7 @@ jobs:
         path: .
 
     - name: Setup run
-      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
+      run: java -jar singlerun.jar -c UK -s 2019 -Setup -g false --rewrite-policy-schedule
 
     - name: Check input db exists
       id: check_file
@@ -115,7 +115,7 @@ jobs:
         path: .
 
     - name: Setup run
-      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
+      run: java -jar singlerun.jar -c UK -s 2019 -Setup -g false --rewrite-policy-schedule
 
     - name: Check input db exists
       id: check_file
