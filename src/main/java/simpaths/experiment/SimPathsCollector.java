@@ -9,6 +9,7 @@ import java.util.Map;
 
 import simpaths.data.filters.FlexibleInLabourSupplyFilter;
 import simpaths.data.statistics.HealthStatistics;
+import simpaths.data.statistics.EmploymentStatistics;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Quintiles;
@@ -61,6 +62,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     @GUIparameter(description="Report health statistics")
     private boolean persistHealthStatistics = true;
 
+    private boolean persistEmploymentStatistics = false;
+
     @GUIparameter(description="Toggle to turn database persistence on/off")
     private boolean exportToDatabase = false;
 
@@ -97,6 +100,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private HealthStatistics statsHealth;
 
+    private EmploymentStatistics statsEmployment;
+
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
     private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
@@ -122,6 +127,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     private DataExport exportStatistics3;
 
     private DataExport exportHealthStatistics;
+
+    private DataExport exportStatisticsEmployment;
 
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
@@ -158,7 +165,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         DumpStatistics,
         DumpStatistics2,
 		DumpStatistics3,
-        DumpHealthStatistics
+        DumpHealthStatistics,
+        DumpStatisticsEmployment
     }
 
 
@@ -234,6 +242,15 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
+            break;
+        case DumpStatisticsEmployment:
+            statsEmployment.update(model);
+            try {
+                exportStatisticsEmployment.export();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+            break;
         }
     }
 
@@ -251,6 +268,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         stats2 = new Statistics2();
         stats3 = new Statistics3();
         statsHealth = new HealthStatistics();
+        statsEmployment = new EmploymentStatistics();
 
         //For export to database or .csv files.
         if(persistPersons)
@@ -267,6 +285,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             exportStatistics3 = new DataExport(stats3, exportToDatabase, exportToCSV);
         if (persistHealthStatistics)
             exportHealthStatistics = new DataExport(statsHealth, exportToDatabase, exportToCSV);
+        if (persistEmploymentStatistics)
+            exportStatisticsEmployment = new DataExport(statsEmployment, exportToDatabase, exportToCSV);
 
 
         if (calculateGiniCoefficients) {
@@ -329,6 +349,10 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
         if (persistHealthStatistics){
 			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpHealthStatistics), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
+        }
+
+        if (persistEmploymentStatistics) {
+			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatisticsEmployment), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
         }
 
         if (persistPersons) {

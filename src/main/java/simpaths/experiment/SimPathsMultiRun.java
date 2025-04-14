@@ -47,6 +47,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
+	private static Map<String, Object> parameterArgs;
 	public static String configFile = "default.yml";
 
 	// other working variables
@@ -302,6 +303,12 @@ public class SimPathsMultiRun extends MultiRun {
 					continue;
 				}
 
+				// Read in parameter arguments - to be handled differently as no Parameters object
+				if ("parameter_args".equals(key)) {
+					parameterArgs = (Map<String, Object>) value;
+					continue;
+				}
+
 				// Use reflection to dynamically set the field based on the key
 				updateLocalParameters(key, value);
 			}
@@ -371,6 +378,40 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 	}
 
+	// Specifically for updating parameters when no object called - i.e. Parameters.java
+	public static void updateParameters(Map<String, Object> parameter_args) {
+
+		for (Map.Entry<String, Object> entry : parameter_args.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			switch (key) {
+				default:
+					try {
+						Field field = Parameters.class.getDeclaredField(key);
+						field.setAccessible(true);
+
+						// Determine the field type
+						Class<?> fieldType = field.getType();
+
+						// Convert the YAML value to the field type
+						Object convertedValue = convertToType(value, fieldType);
+
+						// Set the field value
+						field.set(Parameters.class, convertedValue);
+
+						field.setAccessible(false);
+					} catch (NoSuchFieldException | IllegalAccessException e) {
+						// Handle exceptions if the field is not found or inaccessible
+						e.printStackTrace();
+					}
+
+			}
+
+		}
+
+	}
+
 	private static Object convertToType(Object value, Class<?> targetType) {
 		// Convert the YAML value to the target type
 		if (int.class.equals(targetType)) {
@@ -393,6 +434,9 @@ public class SimPathsMultiRun extends MultiRun {
 
 	@Override
 	public void buildExperiment(SimulationEngine engine) {
+
+		if (parameterArgs != null)
+			updateParameters(parameterArgs);
 
 		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
 		if (persist_population) model.setPersistPopulation(true);

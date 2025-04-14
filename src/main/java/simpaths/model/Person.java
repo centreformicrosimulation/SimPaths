@@ -4013,6 +4013,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (Les_c4.NotEmployed.equals(les_c4)) ? 1 : 0;
     }
 
+    public int getEmployed_Lag1() {
+        return (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) ? 1 : 0;
+    }
+
+    public int getNonwork_Lag1() {
+        return (Les_c4.NotEmployed.equals(les_c4_lag1)) ? 1 : 0;
+    }
+
     public void setRegionLocal(Region region) {
         regionLocal = region;
     }
