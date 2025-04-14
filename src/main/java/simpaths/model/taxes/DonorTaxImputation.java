@@ -277,6 +277,8 @@ public class DonorTaxImputation {
         double infAdj = 1.0;
         double UCmean = 0.;  // Take a weighted mean of whether received UC or not across all candidates
         double LBmean = 0.;  // Take a weighted mean of whether received LB or not across all candidates
+        setReceivedUC(0);
+        setReceivedLegacyBenefit(0);
         if (systemYear != keys.getPriceYear())
             infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
         for (CandidateList candidateList : candidatesList) {
@@ -321,10 +323,10 @@ public class DonorTaxImputation {
             benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
         }
         if (UCmean > weightHere / 2) {  // This should test whether more than 50% of candidates (weighted) receive UC
-            receivedUC = 1;
+            setReceivedUC(1);
         }
         if (LBmean > weightHere / 2) {  // This should test whether more than 50% of candidates (weighted) receive Legacy Benefits
-            receivedLegacyBenefit = 1;
+            setReceivedLegacyBenefit(1);
         }
     }
 
