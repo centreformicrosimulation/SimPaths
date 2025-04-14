@@ -286,6 +286,42 @@ public class HealthStatistics {
         setDhe_mcs_p_75(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
         setDhe_mcs_p_90(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
 
+        // pcs score
+        CrossSection.Double personsPCS = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhe_pcs);
+        personsPCS.setFilter(ageGroupFilter);
+
+
+        MeanArrayFunction dhe_pcs_mean_f = new MeanArrayFunction(personsPCS); // Create MeanArrayFunction
+        dhe_pcs_mean_f.applyFunction();
+        setDhe_pcs_mean(dhe_pcs_mean_f.getDoubleValue(IDoubleSource.Variables.Default));
+
+        PercentileArrayFunction perc_dhe_pcs_f = new PercentileArrayFunction(personsPCS);
+        perc_dhe_pcs_f.applyFunction();
+
+        setDhe_pcs_p_10(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P10));
+        setDhe_pcs_p_25(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P25));
+        setDhe_pcs_median(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P50));
+        setDhe_pcs_p_75(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
+        setDhe_pcs_p_90(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
+
+        // Life Satisfaction score
+        CrossSection.Double personsDls = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dls);
+        personsDls.setFilter(ageGroupFilter);
+
+
+        MeanArrayFunction dls_mean_f = new MeanArrayFunction(personsDls); // Create MeanArrayFunction
+        dls_mean_f.applyFunction();
+        setDls_mean(dls_mean_f.getDoubleValue(IDoubleSource.Variables.Default));
+
+        PercentileArrayFunction perc_dls_f = new PercentileArrayFunction(personsDls);
+        perc_dls_f.applyFunction();
+
+        setDls_p_10(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P10));
+        setDls_p_25(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P25));
+        setDls_median(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P50));
+        setDls_p_75(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
+        setDls_p_90(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
+
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
