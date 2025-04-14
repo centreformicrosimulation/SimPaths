@@ -83,7 +83,13 @@ public class Parameters {
 		"ils_dispy",			//Disposable income : from EUROMOD output data after tax / benefit transfers (monthly time-scale)
 		"ils_benmt",			//EUROMOD output variable: income list: monetary benefits
 		"ils_bennt",			//EUROMOD output variable: income list: non-monetary benefits
-        "bsauc_s"               //EUROMOD output variable: simulated UC receipt
+        "bsauc_s",               //EUROMOD output variable: simulated UC receipt
+        "bho_s",
+        "bwkmt_s",
+        "bfamt_s",
+        "bunct_s",
+        "bsa_s",
+        "bsadi_s"
     };
 
     public static final String[] HOUSEHOLD_VARIABLES_INITIAL = new String[] {
