@@ -1,14 +1,6 @@
 # This file can be used to override defaults for multirun arguments.
 # Arguments of the SimPathsMultiRun object overridden by the command-line
 
-maxNumberOfRuns: 1
-executeWithGui: false
-randomSeed: 200
-startYear: 2012
-endYear: 2025
-popSize: 100000
-countryString: UK
-
 # Arguments passed to the SimPathsModel
 model_args:
 #    maxAge: 130
@@ -49,6 +41,13 @@ innovation_args:
 #    randomSeedInnov: false
 #    intertemporalElasticityInnov: false
 #    labourSupplyElasticityInnov: true
+  maxNumberOfRuns: 1
+  executeWithGui: false
+  randomSeed: 200
+  startYear: 2012
+  endYear: 2025
+  popSize: 100000
+  countryString: United Kingdom
 
 collector_args:
 #    calculateGiniCoefficients: false
