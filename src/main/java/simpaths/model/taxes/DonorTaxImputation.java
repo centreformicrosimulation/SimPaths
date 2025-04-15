@@ -275,10 +275,12 @@ public class DonorTaxImputation {
         matchCriterion += Math.min(9, candidatesList.size());
         double weightHere = 0.0;
         double infAdj = 1.0;
+        // TEMP approach - estimate UC receipt from weighted probability across candidates
         double UCmean = 0.;  // Take a weighted mean of whether received UC or not across all candidates
         double LBmean = 0.;  // Take a weighted mean of whether received LB or not across all candidates
         setReceivedUC(0);
         setReceivedLegacyBenefit(0);
+        //
         if (systemYear != keys.getPriceYear())
             infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
         for (CandidateList candidateList : candidatesList) {
@@ -297,14 +299,18 @@ public class DonorTaxImputation {
                     // impute based on observed disposable income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / Parameters.WEEKS_PER_MONTH * weight * infAdj;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / Parameters.WEEKS_PER_MONTH * weight * infAdj;
+                    // TEMP approach - estimate UC receipt from weighted probability across candidates
                     UCmean += candidate.getPolicyBySystemYear(systemYear).getReceivesUC() * weight * infAdj;
                     LBmean += candidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit() * weight * infAdj;
+                    //
                 } else {
                     // impute based on ratio of disposable to original income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
+                    // TEMP approach - estimate UC receipt from weighted probability across candidates
                     UCmean += candidate.getPolicyBySystemYear(systemYear).getReceivesUC() * weight * infAdj;
                     LBmean += candidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit() * weight * infAdj;
+                    //
                 }
                 if (keys.getRandomDraw()>0.0 || Math.abs(keys.getRandomDraw()+2.0)<1.0E-2) {
                     donorID = candidate.getId();
@@ -322,12 +328,14 @@ public class DonorTaxImputation {
             disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
             benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
         }
+        // TEMP approach - estimate UC receipt from weighted probability across candidates
         if (UCmean > Math.random()) {  // Weighted probability of receiving UC
             setReceivedUC(1);
         }
         if (LBmean > 0 && getReceivedUC() == 0) {  // Setting as received LB if benefits but not UC
             setReceivedLegacyBenefit(1);
         }
+        //
     }
 
     private int getSystemYear(int simYear) {
