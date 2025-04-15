@@ -63,7 +63,7 @@ collector_args:
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
 
-parameger_args:
+parameter_args:
     MAX_START_YEAR: 2012
     MIN_START_YEAR: 2012
     UC_ROLLOUT: true
