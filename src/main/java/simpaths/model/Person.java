@@ -2324,6 +2324,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Ydses_c5_Q4_L1,								//HH Income Lag(1) 4th Quantile
         Ydses_c5_Q5_L1,								//HH Income Lag(1) 5th Quantile
         Ydses_L1,
+        Ydses_c5_L1,
         Year_transformed,							//Year - 2000
         Year_transformed_monetary,					//Year-2000 that stops in 2017, for use with monetary processes
         Ynbcpdf_dv_L1, 								//Lag(1) of difference between own and partner's gross personal non-benefit income
@@ -3227,7 +3228,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Ydses_c5_Q5_L1 -> {
                 return (Ydses_c5.Q5.equals(getYdses_c5_lag1())) ? 1.0 : 0.0;
             }
-            case Ydses_L1 -> {
+            case Ydses_L1, Ydses_c5_L1 -> {
                 if (getYdses_c5_lag1() != null) {
                     return (double) getYdses_c5_lag1().getValue();
                 } else return 0.;

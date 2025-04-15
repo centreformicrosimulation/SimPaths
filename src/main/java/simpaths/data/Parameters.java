@@ -1119,6 +1119,7 @@ public class Parameters {
             coeffCovarianceEmploymentSelectionFemalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesNE);
 
             //Labour supply utility
+            /*
             coeffLabourSupplyUtilityMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityMales);
             coeffLabourSupplyUtilityFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityFemales);
             coeffLabourSupplyUtilityMalesWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilityMalesWithDependent);
@@ -1126,6 +1127,7 @@ public class Parameters {
             coeffLabourSupplyUtilityACMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACMales);
             coeffLabourSupplyUtilityACFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACFemales);
             coeffLabourSupplyUtilityCouples = RegressionUtils.bootstrap(coeffLabourSupplyUtilityCouples);
+            */
 
             //Education
             coeffCovarianceEducationE1a = RegressionUtils.bootstrap(coeffCovarianceEducationE1a);
@@ -2560,7 +2562,7 @@ public class Parameters {
     }
     private static void setMapBounds(MapBounds map, String countryString) {
 
-        String rgn = countryString + "2";
+        String rgn = countryString + "C";
         boolean searchBack = true;
         boolean searchForward = true;
         boolean searchAge;
