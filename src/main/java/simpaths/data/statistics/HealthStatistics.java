@@ -109,6 +109,12 @@ public class HealthStatistics {
     @Column(name = "dls_p_75")
     private double dls_p_75;
 
+    @Column(name = "qualys")
+    private double qalys;
+
+    @Column(name = "wellbys")
+    private double wellbys;
+
     //N
     @Column(name = "N")
     private int N;
@@ -225,6 +231,14 @@ public class HealthStatistics {
         N = n;
     }
 
+    public void setQalys(double qalys) {
+        this.qalys = qalys;
+    }
+
+    public void setWellbys(double wellbys) {
+        this.wellbys = wellbys;
+    }
+
     public void update(SimPathsModel model, String gender_s) {
 
 
@@ -322,6 +336,20 @@ public class HealthStatistics {
         setDls_p_75(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
         setDls_p_90(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
 
+        // QALYS as sum of EQ5D
+        CrossSection.Double personEQ5D = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.He_eq5d);
+        personEQ5D.setFilter(ageGroupFilter);
+
+        SumArrayFunction.Double qalys = new SumArrayFunction.Double(personEQ5D);
+        qalys.applyFunction();
+        setQalys(qalys.getDoubleValue(IDoubleSource.Variables.Default));
+
+        // WELLBYs as sum of 'points' in 0-10-scale life satisfaction (adjusted)
+
+        SumArrayFunction.Double wellbys = new SumArrayFunction.Double(personsDls);
+        wellbys.applyFunction();
+
+        setWellbys(wellbys.getDoubleValue(IDoubleSource.Variables.Default) * 11 / 7);
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
