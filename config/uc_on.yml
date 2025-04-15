@@ -3,7 +3,7 @@
 
 maxNumberOfRuns: 1
 executeWithGui: false
-randomSeed: 200
+randomSeed: 300
 startYear: 2012
 endYear: 2025
 popSize: 100000
@@ -63,7 +63,7 @@ collector_args:
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
 
-parameter_args:
-  UC_ROLLOUT: false
-  MIN_START_YEAR: 2012
-  MAX_START_YEAR: 2012
+parameger_args:
+    MAX_START_YEAR: 2012
+    MIN_START_YEAR: 2012
+    UC_ROLLOUT: true
