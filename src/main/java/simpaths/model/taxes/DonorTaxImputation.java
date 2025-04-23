@@ -235,6 +235,7 @@ public class DonorTaxImputation {
         int bracketInd = 0;
         double bracketDist = -999.0;
         double weightSum = 0.0;
+
         for (CandidateList candidateList : candidatesList) {
             candidateLast++;
             if (Math.abs(candidateList.getDistance() - bracketDist) > 1.0E-4) {
@@ -250,6 +251,7 @@ public class DonorTaxImputation {
         candidatesList = candidatesList.subList(0, candidateLast);
 
 
+
         //------------------------------------------------------------
         // impute disposable income from set of preferred candidates
         //------------------------------------------------------------
@@ -261,6 +263,9 @@ public class DonorTaxImputation {
         double infAdj = 1.0;
         if (systemYear != keys.getPriceYear())
             infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
+
+        boolean imputeDirectly = false;
+
         for (CandidateList candidateList : candidatesList) {
             // loop over each preferred candidate
 
@@ -273,10 +278,13 @@ public class DonorTaxImputation {
                 if (keys.getRandomDraw()>0.0 || Math.abs(keys.getRandomDraw()+2.0)<1.0E-2)
                     weight = 1.0;
                 DonorTaxUnit candidate = candidateList.getCandidate();
-                if ( keys.isLowIncome(matchRegime) ) {
+                // pre-calculate the disposable to gross income ratio
+                double ratio = candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth();
+                if ( keys.isLowIncome(matchRegime)  || ratio >= 1.64 || ratio <= 0.58) {
                     // impute based on observed disposable income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / Parameters.WEEKS_PER_MONTH * weight * infAdj;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / Parameters.WEEKS_PER_MONTH * weight * infAdj;
+                    imputeDirectly = true;
                 } else {
                     // impute based on ratio of disposable to original income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
@@ -290,7 +298,7 @@ public class DonorTaxImputation {
         }
         if (Math.abs(disposableIncomePerWeek+999.0)<1.0E-5)
             throw new RuntimeException("Failed to populate disposable income and benefits from donor with inner key value " + keys.getKey(0));
-        if ( !keys.isLowIncome(matchRegime) ) {
+        if ( !keys.isLowIncome(matchRegime) && !imputeDirectly) {
             disposableIncomePerWeek *= keys.getOriginalIncomePerWeek();
             benefitsReceivedPerWeek *= keys.getOriginalIncomePerWeek();
         }

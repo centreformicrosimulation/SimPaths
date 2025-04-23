@@ -1001,7 +1001,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     } else if (female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
                         //Follow utility process for single female
                         regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
-                    } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
+                    } else if (!model.isAlignEmployment()) throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
                     if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
                     //    throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
                           regressionScore = 0;

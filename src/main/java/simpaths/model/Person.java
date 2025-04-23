@@ -686,6 +686,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Health -> {
     //			log.debug("Health for person " + this.getKey().getId());
                 health();
+                disability();
             }
             case SocialCareReceipt -> {
                 evaluateSocialCareReceipt();
@@ -1286,7 +1287,80 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void inSchool() {
+    public boolean inSchool() {
+        double probitAdjustment = (model.isAlignInSchool()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment) : 0.0;
+        return inSchool(probitAdjustment);
+    }
+
+
+    protected boolean inSchool(double probitAdjustment) {
+        // IMPORTANT ensure each "if" returns true/false or toLeaveSchool value
+
+        // Innovation for education decisions
+        double labourInnov = innovations.getDoubleDraw(24);
+
+        // Check if the individual is eligible for education transitions
+        if (Les_c4.Retired.equals(les_c4) ||
+                dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION) {
+            return false; //inSchool stops here; Case 1 and Case 2 are not considered
+        }
+
+        // Use the same max age to leave cont. and discont. education - MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION
+
+        // Case 3: Age 30+ and is a student
+        // Ensures that a student spends max 1 year in education
+        if (dag >= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && Les_c4.Student.equals(les_c4)) {
+            // Force out of education for all individuals age 30 or older
+            toLeaveSchool = true;
+            return !toLeaveSchool; // inSchool stops here; Case 1 and Case 2 are not considered
+        }
+
+
+        // Process E1b estimated on 16-35y.o. so consider only those individuals here
+        if (dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {
+            return false; //inSchool stops here; Case 1 and Case 2 are not considered
+        }
+
+
+        // Case 1: Currently a student and always in education
+        if (Les_c4.Student.equals(les_c4) && !leftEducation) {
+            // Follow process E1a
+            double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
+            double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
+            toLeaveSchool = (labourInnov >= prob); // Stay in school if event is false, leave otherwise
+            //Ded and Les_c4 remain the same if toLeaveSchool = false, no need to respecify them
+            //if toLeaveSchool = false, then Ded and Les_c4 are modified in the leavingSchool() method
+        }
+
+
+        // Case 2: Not continuously in education
+        else {
+            // Follow process E1b
+            double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
+            double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
+
+            if (labourInnov < prob) {
+                // Remain or become a student
+                setLes_c4(Les_c4.Student);
+                setDer(Indicator.True);
+                setDed(Indicator.True);
+                toLeaveSchool = false;
+            }
+            else {
+                if (Les_c4.Student.equals(les_c4)) {
+                    // toLeaveSchool process is initialised
+                    toLeaveSchool = true;
+                }
+                else return false; // employed, not employed or retired, who do not become students, face no changes
+                                   // toLeaveSchool process is not initialised and their "inSchool" status set to false
+            }
+        }
+
+        return !toLeaveSchool;
+    }
+
+    /*
+    protected boolean inSchool(double probitAdjustment) {
         // Innovation for education decisions
         double labourInnov = innovations.getDoubleDraw(24);
 
@@ -1294,25 +1368,25 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (Les_c4.Retired.equals(les_c4) ||
                 dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION ||
                 dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {
-            return; // Skip for retired individuals or those outside the education age range
+            return false;
         }
 
         // Case 1: Currently a student and always in education
         if (Les_c4.Student.equals(les_c4) && !leftEducation) {
             if (dag <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
                 // Follow process E1a
-                double prob = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
+                double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
                 toLeaveSchool = (labourInnov >= prob); // Stay in school if event is false, leave otherwise
             } else {
                 toLeaveSchool = true; // Force out of education at age 30
             }
         }
         // Case 2: Not continuously in education
-        else if (dag <= Parameters.MAX_AGE_TO_ENTER_EDUCATION &&
-                (!Les_c4.Student.equals(les_c4) || leftEducation) &&
-                !Les_c4.Student.equals(les_c4_lag1)) {
+        else {
             // Follow process E1b
-            double prob = Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class);
+            double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
+            double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
 
             if (labourInnov < prob) {
                 // Re-enter education
@@ -1327,13 +1401,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         }
         // Case 3: Age above 35 and still a student
-        else if (dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION && Les_c4.Student.equals(les_c4)) {
+        if (dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION && Les_c4.Student.equals(les_c4)) {
             // Force out of education for individuals above age 35
             setLes_c4(Les_c4.NotEmployed);
             setDed(Indicator.False);
         }
+        return !toLeaveSchool;
     }
-
+    */
 
     protected void leavingSchool() {
 
@@ -1549,13 +1624,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (dag > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY)
             return false;
-        if (Les_c4.Retired.equals(les_c4) && !Parameters.enableIntertemporalOptimisations)
+        if (Les_c4.Retired.equals(les_c4))
             return false;
-        if (Les_c4.Student.equals(les_c4) && !Parameters.enableIntertemporalOptimisations)
+        if (Les_c4.Student.equals(les_c4))
             return false;
-        if (Indicator.True.equals(dlltsd) && !Parameters.flagSuppressSocialCareCosts)
-            return false;
-        if (Indicator.True.equals(needSocialCare) && !Parameters.flagSuppressSocialCareCosts)
+        if (Indicator.True.equals(dlltsd))
             return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.
@@ -2198,10 +2271,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Reached_Retirement_Age,						//Indicator whether individual is at or above retirement age
         Reached_Retirement_Age_Les_c3_NotEmployed_L1, //Interaction term for being at or above retirement age and not employed in the previous year
         Reached_Retirement_Age_Sp,					//Indicator whether spouse is at or above retirement age
-        Elig_pen,
-        Elig_pen_L1,
-        Elig_pen_Sp,
-        Elig_pen_L1_Sp,
+        Elig_pen,     // Age == state retirement age
+        Elig_pen_L1, // Age == state retirement age +1
+        Elig_pen_Sp, // Partner's age == state retirement age
+        Elig_pen_L1_Sp, // // Partner's age == state retirement age +1
         RealGDPGrowth,
         RealIncomeChange, //Note: the above return a 0 or 1 value, but income variables will return the change in income or 0
         RealIncomeDecrease_D,
@@ -2232,8 +2305,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         UKM,
         UKmissing,
         UKN,
-        HUA,                //HU
-        HUB,
+        PL4,
+        PL5,
+        PL6,
+        PL10,
         Year,										//Year as in the simulation, e.g. 2009
         Year2010,
         Year2011,
@@ -2246,8 +2321,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Year2018,
         Year2019,
         Year2020,
-        Year2021,
         Y2020,
+        Year2021,
         Y2021,
         Year2022,
         Year2023,
@@ -3293,15 +3368,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return 0.;
                 }
             }
-            case Reached_Retirement_Age_Les_c3_NotEmployed_L1 -> { //Reached retirement age and was not employed in the previous year
-                int retirementAge;
-                if (dgn.equals(Gender.Female)) {
-                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
-                } else {
-                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
-                }
-                return ((dag >= retirementAge) && (les_c4_lag1.equals(Les_c4.NotEmployed) || les_c4_lag1.equals(Les_c4.Retired))) ? 1. : 0.;
-            }
             case Elig_pen -> { // Age == state retirement age
                 int retirementAge;
                 if (dgn.equals(Gender.Female)) {
@@ -3348,6 +3414,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else {
                     return 0.;
                 }
+            }
+            case Reached_Retirement_Age_Les_c3_NotEmployed_L1 -> { //Reached retirement age and was not employed in the previous year
+                int retirementAge;
+                if (dgn.equals(Gender.Female)) {
+                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
+                } else {
+                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
+                }
+                return ((dag >= retirementAge) && (les_c4_lag1.equals(Les_c4.NotEmployed) || les_c4_lag1.equals(Les_c4.Retired))) ? 1. : 0.;
             }
             case EquivalisedIncomeYearly -> {
                 return getBenefitUnit().getEquivalisedDisposableIncomeYearly();
@@ -3497,11 +3572,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return 0.;        //For our purpose, all our simulated people have a region, so this enum value is always going to be 0 (false).
                 //			return (getRegion().equals(Region.UKmissing)) ? 1. : 0.;		//For people whose region info is missing.  The UK survey did not record the region in the first two waves (2006 and 2007, each for 4 years). For all those individuals we have gender, education etc but not region. If we exclude them we lose a large part of the UK sample, so this is the trick to keep them in the estimates.
             }
-            case HUA -> {
-                return Region.HUA.equals(getRegion()) ? 1.0 : 0.0;
+            case PL4 -> {
+                return Region.PL4.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case HUB -> {
-                return Region.HUB.equals(getRegion()) ? 1.0 : 0.0;
+            case PL5 -> {
+                return Region.PL5.equals(getRegion()) ? 1.0 : 0.0;
+            }
+            case PL6 -> {
+                return Region.PL6.equals(getRegion()) ? 1.0 : 0.0;
+            }
+            case PL10 -> {
+                return Region.PL10.equals(getRegion()) ? 1.0 : 0.0;
             }
             // Regressors used in the Covid-19 labour market module below:
             case Dgn_Dag -> {

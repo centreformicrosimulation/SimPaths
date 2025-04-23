@@ -44,7 +44,7 @@ public class DecisionParams {
     // TIME PARAMETERS
     public static final double FULLTIME_HOURS_WEEKLY = 35;            // hours per week associated with full-time work
     public static final double PARTTIME_HOURS_WEEKLY = 16;            // hours per week associated with part-time work
-    public static final double MIN_WORK_HOURS_WEEKLY = 5;             // minimum hours per week to be considered working
+    public static final double MIN_WORK_HOURS_WEEKLY = 1;             // minimum hours per week to be considered working
 
     // DIRECTORIES
     public static String gridsOutputDirectory;                        // directory to read/write grids data
