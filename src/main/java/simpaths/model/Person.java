@@ -1316,9 +1316,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         }
         // Case 2: Not continuously in education
-        else if (dag <= Parameters.MAX_AGE_TO_ENTER_EDUCATION &&
-                (!Les_c4.Student.equals(les_c4) || leftEducation) &&
-                !Les_c4.Student.equals(les_c4_lag1)) {
+        else {
             // Follow process E1b
             double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
             double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
@@ -1336,7 +1334,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         }
         // Case 3: Age above 35 and still a student
-        else if (dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION && Les_c4.Student.equals(les_c4)) {
+        if (dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION && Les_c4.Student.equals(les_c4)) {
             // Force out of education for individuals above age 35
             setLes_c4(Les_c4.NotEmployed);
             setDed(Indicator.False);
