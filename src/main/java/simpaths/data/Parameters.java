@@ -1026,7 +1026,7 @@ public class Parameters {
         int columnsHealthH2b = 30; //#
         int columnsEducationE1a = 12; //#
         int columnsEducationE1b = 17; //#
-        int columnsEducationE2a = 13; //#
+        int columnsEducationE2a = 14; //#
         int columnsPartnershipU1a = 9; //#
         int columnsPartnershipU1b = 30; //#
         int columnsPartnershipU2b = 32; //#

@@ -1359,56 +1359,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return !toLeaveSchool;
     }
 
-    /*
-    protected boolean inSchool(double probitAdjustment) {
-        // Innovation for education decisions
-        double labourInnov = innovations.getDoubleDraw(24);
-
-        // Check if the individual is eligible for education transitions
-        if (Les_c4.Retired.equals(les_c4) ||
-                dag < Parameters.MIN_AGE_TO_LEAVE_EDUCATION ||
-                dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {
-            return false;
-        }
-
-        // Case 1: Currently a student and always in education
-        if (Les_c4.Student.equals(les_c4) && !leftEducation) {
-            if (dag <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
-                // Follow process E1a
-                double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
-                double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
-                toLeaveSchool = (labourInnov >= prob); // Stay in school if event is false, leave otherwise
-            } else {
-                toLeaveSchool = true; // Force out of education at age 30
-            }
-        }
-        // Case 2: Not continuously in education
-        else {
-            // Follow process E1b
-            double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
-            double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
-
-            if (labourInnov < prob) {
-                // Re-enter education
-                setLes_c4(Les_c4.Student);
-                setDer(Indicator.True);
-                setDed(Indicator.True);
-            } else if (Les_c4.Student.equals(les_c4)) {
-                // Remove student status if regression evaluates to false
-                setLes_c4(Les_c4.NotEmployed);
-                setDed(Indicator.False);
-                toLeaveSchool = true;
-            }
-        }
-        // Case 3: Age above 35 and still a student
-        if (dag > Parameters.MAX_AGE_TO_ENTER_EDUCATION && Les_c4.Student.equals(les_c4)) {
-            // Force out of education for individuals above age 35
-            setLes_c4(Les_c4.NotEmployed);
-            setDed(Indicator.False);
-        }
-        return !toLeaveSchool;
-    }
-    */
 
     protected void leavingSchool() {
 
