@@ -77,6 +77,7 @@ public class PartnershipAlignment implements IEvaluation {
                 .count();
 
         long numPersonsPartnered = persons.stream()
+                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
                 .filter(person -> (person.getTestPartner() ||
                         (person.getPartner()!=null &&
                                 !person.getLeavePartner() && !person.getPartner().getLeavePartner())))
