@@ -192,6 +192,9 @@ public class Parameters {
             return 3.;
         }
     }
+
+    public static int MAX_NEIGHBOURS_IN_MATCHING = 1; // Specifies the maximum number of nearest neighbours used in matching
+
     public static final double AgeDiscrepancyConstraint = 10;	//Difference of age must equal of be below this value (so we allow 10 year cumulated age difference)
     public static final TreeSet<Double> EarningsDiscrepancyConstraint = new TreeSet<>(Arrays.asList(0.01, 0.02, 0.03, 0.04, 0.05));	//Proportional difference
 

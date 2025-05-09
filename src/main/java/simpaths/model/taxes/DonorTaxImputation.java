@@ -247,7 +247,7 @@ public class DonorTaxImputation {
                 break;
             }
         }
-        candidatesList = candidatesList.subList(0, candidateLast);
+        candidatesList = candidatesList.subList(0, Math.min(Parameters.MAX_NEIGHBOURS_IN_MATCHING,candidateLast));
 
 
         //------------------------------------------------------------
