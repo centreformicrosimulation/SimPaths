@@ -186,7 +186,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public boolean projectFormalChildcare = false;
 
     @GUIparameter(description = "Average over donor pool when imputing transfer payments")
-    public boolean donorPoolAveraging = true;
+    public boolean donorPoolAveraging = false;
 
     private int ordering = Parameters.MODEL_ORDERING;    //Used in Scheduling of model events.  Schedule model events at the same time as the collector and observer events, but a lower order, so will be fired before the collector and observer have updated.
 
