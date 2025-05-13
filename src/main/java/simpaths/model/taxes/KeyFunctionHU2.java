@@ -22,8 +22,8 @@ public class KeyFunctionHU2 implements IKeyFunction {
      */
     private final int MID_AGE = 45;
     private final int INCOME_REF_YEAR = 2018;
-    private final double LO_INCOME = 191.0;
-    private final double HI_INCOME = 573.0;
+    private final double LO_INCOME = 311.0; // 60% of mean income observed in EM data for 2015 (mean = 519)
+    private final double HI_INCOME = 1038.0; // 200% of mean income
 
 
     /**
