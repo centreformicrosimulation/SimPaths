@@ -12,7 +12,7 @@ public enum Labour implements IntegerValuedEnum {
     CATEGORY_1(1, 1, 29,   1, 35),   // [1-29] vs [1-35]
     CATEGORY_2(2, 30, 35,  36, 39),  // [30-35] vs [36-39]
     CATEGORY_3(3, 36, 39,  40, 49),  // [36-39] vs [40-49]
-    CATEGORY_4(4, 40, 50, 50, 60); // [40+] vs [50+]
+    CATEGORY_4(4, 40, 55, 50, 65); // [40+] vs [50+]
 
     private final int categoryId;
     private final int femaleMin, femaleMax;
