@@ -167,7 +167,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
-    private boolean alignEmployment = false; //Set to true to align employment share
+    private boolean alignEmployment = true; //Set to true to align employment share
 
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
@@ -1513,8 +1513,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void activityAlignmentSingleMales() {
         double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentSingleMales);
-        ActivityAlignment activityAlignmentSingleMales = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityMales(), new String[]{"MaleLeisure"}, Occupancy.Single_Male, utilityAdjustment);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleMales, 1.0E-2, 1.0E-2, 0.5); // epsOrdinates and epsFunction determine the stopping condition for the search.
+        ActivityAlignmentV2 activityAlignmentSingleMales = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityMales(), new String[]{"MaleLeisure"}, Occupancy.Single_Male);
+        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleMales, 1.0E-2, 1.0E-2, 10); // epsOrdinates and epsFunction determine the stopping condition for the search.
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentSingleMales); // If adjustment is altered from the initial value, update the map
             System.out.println("Utility adjustment for single males was " + search.getTarget()[0]);
@@ -1523,8 +1523,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void activityAlignmentSingleFemales() {
         double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentSingleFemales);
-        ActivityAlignment activityAlignmentSingleFemales = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityFemales(), new String[]{"FemaleLeisure"}, Occupancy.Single_Female, utilityAdjustment);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleFemales, 1.0E-2, 1.0E-2, 2); // epsOrdinates and epsFunction determine the stopping condition for the search.
+        ActivityAlignmentV2 activityAlignmentSingleFemales = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityFemales(), new String[]{"FemaleLeisure"}, Occupancy.Single_Female);
+        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleFemales, 1.0E-2, 1.0E-2, 10); // epsOrdinates and epsFunction determine the stopping condition for the search.
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentSingleFemales); // If adjustment is altered from the initial value, update the map
             System.out.println("Utility adjustment for single females was " + search.getTarget()[0]);
@@ -1533,8 +1533,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void activityAlignmentCouples() {
         double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentCouples);
-        ActivityAlignment activityAlignmentCouples = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityCouples(), new String[]{"MaleLeisure","FemaleLeisure"}, Occupancy.Couple, utilityAdjustment);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentCouples, 1.0E-2, 1.0E-2, 2); // epsOrdinates and epsFunction determine the stopping condition for the search.
+        ActivityAlignmentV2 activityAlignmentCouples = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityCouples(), new String[]{"MaleLeisure","FemaleLeisure"}, Occupancy.Couple);
+        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentCouples, 1.0E-2, 1.0E-2, 10); // epsOrdinates and epsFunction determine the stopping condition for the search.
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentCouples); // If adjustment is altered from the initial value, update the map
             System.out.println("Utility adjustment for couples was " + search.getTarget()[0]);
