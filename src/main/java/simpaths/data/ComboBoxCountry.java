@@ -65,7 +65,7 @@ public class ComboBoxCountry extends JPanel implements ActionListener {
 			countryNames[i] = Country.values()[i].getCountryName();
 		}
 		JComboBox<String> countryList = new JComboBox<String>(countryNames);
-		countryList.setSelectedIndex(Country.IT.ordinal());
+		countryList.setSelectedIndex(Country.EL.ordinal());
 		countryList.addActionListener(this);
 	
 		// set-up display for country flag
@@ -108,7 +108,7 @@ public class ComboBoxCountry extends JPanel implements ActionListener {
 	 *
 	 */
 	protected void updateLabel(String countryName) {
-		Country country = Country.IT.getCountryFromNameString(countryName);
+		Country country = Country.EL.getCountryFromNameString(countryName);
 		ImageIcon icon = createImageIcon("/images/" + country + ".png");
 		String text = "You have selected " + countryName;
 		picture.setText(text);
@@ -143,5 +143,5 @@ public class ComboBoxCountry extends JPanel implements ActionListener {
 	 * @return
 	 *
 	 */
-	public Country getCountryEnum() { return Country.IT.getCountryFromNameString(this.countryName); }
+	public Country getCountryEnum() { return Country.EL.getCountryFromNameString(this.countryName); }
 }

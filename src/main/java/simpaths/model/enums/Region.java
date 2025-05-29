@@ -6,6 +6,11 @@ public enum Region implements IntegerValuedEnum {
 	
 	//Uses NUTS Level 1 system for each country
 
+	// Greece
+	EL3("Attica", 3), // Attiki (Attica)
+	EL4("Aegean Islands and Crete", 4), // Nisia Aigaiou, Kriti (Aegean Islands and Crete)
+	EL7("Central and Northern Greece", 7), // Voreia Ellada (Northern Greece, 1 -> 5) + Kentriki Ellada (Central Greece, 2 -> 6)
+
 	// Poland
 	PL2("Poludniowy", 2),
 	PL4("Polnocno-Zachodni", 4),
