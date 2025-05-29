@@ -2563,7 +2563,7 @@ public class Parameters {
     }
     private static void setMapBounds(MapBounds map, String countryString) {
 
-        String rgn = countryString + "C";
+        String rgn = countryString + "3";
         boolean searchBack = true;
         boolean searchForward = true;
         boolean searchAge;
