@@ -1030,10 +1030,10 @@ public class Parameters {
         int columnsPartnershipU1b = 30; //
         int columnsPartnershipU2b = 32; //
         int columnsFertilityF1b = 28; //#
-        int columnsIncomeI3a_amount = 15; //
-        int columnsIncomeI3b_amount = 25; //
-        int columnsIncomeI3a_selection = 15; //
-        int columnsIncomeI3b_selection = 25; //
+        int columnsIncomeI3a_amount = 13; //#
+        int columnsIncomeI3b_amount = 23; //#
+        int columnsIncomeI3a_selection = 13; //#
+        int columnsIncomeI3b_selection = 23; //#
         int columnsLeaveHomeP1a = 19; //
         int columnsHomeownership = 32; //#
         int columnsRetirementR1a = 23; //
