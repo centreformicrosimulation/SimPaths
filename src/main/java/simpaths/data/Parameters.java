@@ -1005,14 +1005,14 @@ public class Parameters {
 
 
         //Load country specific data
-        int columnsWagesMalesNE = 21; //
-        int columnsWagesMalesE = 22; //
-        int columnsWagesFemalesNE = 21; //
-        int columnsWagesFemalesE = 22; //
-        int columnsEmploymentSelectionMalesNE = 21; //
-        int columnsEmploymentSelectionMalesE = 20; //
-        int columnsEmploymentSelectionFemalesNE = 21; //
-        int columnsEmploymentSelectionFemalesE = 20; //
+        int columnsWagesMalesNE = 19; //#
+        int columnsWagesMalesE = 20; //#
+        int columnsWagesFemalesNE = 19; //#
+        int columnsWagesFemalesE = 20; //#
+        int columnsEmploymentSelectionMalesNE = 19; //#
+        int columnsEmploymentSelectionMalesE = 18; //#
+        int columnsEmploymentSelectionFemalesNE = 19; //#
+        int columnsEmploymentSelectionFemalesE = 18; //#
         int columnsLabourSupplyUtilityMales = 15; //
         int columnsLabourSupplyUtilityFemales = 15; //
         int columnsLabourSupplyUtilityMalesWithDependent = 15; //
