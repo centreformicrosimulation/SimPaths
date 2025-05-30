@@ -1007,40 +1007,40 @@ public class Parameters {
 
 
         //Load country specific data
-        int columnsWagesMalesNE = 21; //#
-        int columnsWagesMalesE = 22; //#
-        int columnsWagesFemalesNE = 21; //#
-        int columnsWagesFemalesE = 22; //#
-        int columnsEmploymentSelectionMalesNE = 21; //#
-        int columnsEmploymentSelectionMalesE = 20; //#
-        int columnsEmploymentSelectionFemalesNE = 21; //#
-        int columnsEmploymentSelectionFemalesE = 20; //#
-        int columnsLabourSupplyUtilityMales = 15; //#
-        int columnsLabourSupplyUtilityFemales = 15; //#
-        int columnsLabourSupplyUtilityMalesWithDependent = 15; //#
-        int columnsLabourSupplyUtilityFemalesWithDependent = 15; //#
-        int columnsLabourSupplyUtilityACMales = 15; //#
-        int columnsLabourSupplyUtilityACFemales = 15; //#
-        int columnsLabourSupplyUtilityCouples = 60; //#
-        int columnsHealthH1a = 24; //#
-        int columnsHealthH1b = 95; //#
-        int columnsHealthH2b = 30; //#
-        int columnsEducationE1a = 12; //#
-        int columnsEducationE1b = 17; //#
-        int columnsEducationE2a = 14; //#
-        int columnsPartnershipU1a = 9; //#
-        int columnsPartnershipU1b = 30; //#
-        int columnsPartnershipU2b = 32; //#
-        int columnsFertilityF1a = 5; //#
-        int columnsFertilityF1b = 30; //#
-        int columnsIncomeI3a_amount = 15; //#
-        int columnsIncomeI3b_amount = 25; //#
-        int columnsIncomeI3a_selection = 15; //#
-        int columnsIncomeI3b_selection = 25; //#
-        int columnsLeaveHomeP1a = 19; //#
-        int columnsHomeownership = 33; //#
-        int columnsRetirementR1a = 23; //#
-        int columnsRetirementR1b = 29; //#
+        int columnsWagesMalesNE = 21; //
+        int columnsWagesMalesE = 22; //
+        int columnsWagesFemalesNE = 21; //
+        int columnsWagesFemalesE = 22; //
+        int columnsEmploymentSelectionMalesNE = 21; //
+        int columnsEmploymentSelectionMalesE = 20; //
+        int columnsEmploymentSelectionFemalesNE = 21; //
+        int columnsEmploymentSelectionFemalesE = 20; //
+        int columnsLabourSupplyUtilityMales = 15; //
+        int columnsLabourSupplyUtilityFemales = 15; //
+        int columnsLabourSupplyUtilityMalesWithDependent = 15; //
+        int columnsLabourSupplyUtilityFemalesWithDependent = 15; //
+        int columnsLabourSupplyUtilityACMales = 15; //
+        int columnsLabourSupplyUtilityACFemales = 15; //
+        int columnsLabourSupplyUtilityCouples = 60; //
+        int columnsHealthH1a = 24; //
+        int columnsHealthH1b = 95; //
+        int columnsHealthH2b = 30; //
+        int columnsEducationE1a = 10; //#
+        int columnsEducationE1b = 15; //#
+        int columnsEducationE2a = 15; //#
+        int columnsPartnershipU1a = 9; //
+        int columnsPartnershipU1b = 30; //
+        int columnsPartnershipU2b = 32; //
+        int columnsFertilityF1a = 5; //
+        int columnsFertilityF1b = 30; //
+        int columnsIncomeI3a_amount = 15; //
+        int columnsIncomeI3b_amount = 25; //
+        int columnsIncomeI3a_selection = 15; //
+        int columnsIncomeI3b_selection = 25; //
+        int columnsLeaveHomeP1a = 19; //
+        int columnsHomeownership = 33; //
+        int columnsRetirementR1a = 23; //
+        int columnsRetirementR1b = 29; //
 
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 

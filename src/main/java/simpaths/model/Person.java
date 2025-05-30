@@ -2259,6 +2259,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         PL5,
         PL6,
         PL10,
+        EL3,
+        EL4,
+        EL7,
         Year,										//Year as in the simulation, e.g. 2009
         Year2010,
         Year2011,
@@ -3534,6 +3537,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case PL10 -> {
                 return Region.PL10.equals(getRegion()) ? 1.0 : 0.0;
+            }
+            case EL3 -> {
+                return Region.EL3.equals(getRegion()) ? 1.0 : 0.0;
+            }
+            case EL4 -> {
+                return Region.EL4.equals(getRegion()) ? 1.0 : 0.0;
+            }
+            case EL7 -> {
+                return Region.EL7.equals(getRegion()) ? 1.0 : 0.0;
             }
             // Regressors used in the Covid-19 labour market module below:
             case Dgn_Dag -> {
