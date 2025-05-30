@@ -98,9 +98,6 @@ public class ManagerRegressions {
             case EducationE1b -> {
                 return Parameters.getRegEducationE1b();
             }
-            case FertilityF1a -> {
-                return Parameters.getRegFertilityF1a();
-            }
             case FertilityF1b -> {
                 return Parameters.getRegFertilityF1b();
             }

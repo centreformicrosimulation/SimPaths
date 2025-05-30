@@ -193,14 +193,9 @@ public class ExpectationsFactory {
                         }
 
                         // expand expectations
-                        if (Gender.Female == currentStates.getGenderCode() || anticipated[ii].getCohabitation()) {
+                        if ((Gender.Female == currentStates.getGenderCode() || anticipated[ii].getCohabitation()) && anticipated[ii].getStudent() != 1) {
                             // birth possible
-
-                            if (anticipated[ii].getStudent()==1) {
-                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1a);
-                            } else {
-                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
-                            }
+                            expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
                         } else {
                             // birth not possible
 

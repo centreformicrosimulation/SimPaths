@@ -451,7 +451,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovariancePartnershipITU2; //Probit exit partnership for Italy
 
     //Fertility
-    private static MultiKeyCoefficientMap coeffCovarianceFertilityF1a; //Probit fertility if in continuous education
+
     private static MultiKeyCoefficientMap coeffCovarianceFertilityF1b; //Probit fertility if not in continuous education
 
     //Fertility for Italy
@@ -662,9 +662,7 @@ public class Parameters {
     private static BinomialRegression regPartnershipITU2;
 
     //Fertility
-    private static BinomialRegression regFertilityF1a;
     private static BinomialRegression regFertilityF1b;
-    private static BinomialRegression regFertilityF1;
 
     //Income
     private static LinearRegression regIncomeI1a;
@@ -1031,8 +1029,7 @@ public class Parameters {
         int columnsPartnershipU1a = 9; //
         int columnsPartnershipU1b = 30; //
         int columnsPartnershipU2b = 32; //
-        int columnsFertilityF1a = 5; //
-        int columnsFertilityF1b = 30; //
+        int columnsFertilityF1b = 28; //#
         int columnsIncomeI3a_amount = 15; //
         int columnsIncomeI3b_amount = 25; //
         int columnsIncomeI3a_selection = 15; //
@@ -1084,7 +1081,6 @@ public class Parameters {
         meanCovarianceParametricMatching = ExcelAssistant.loadCoefficientMap("input/scenario_parametricMatching.xlsx", countryString, 1, 1);
 
         //Fertility
-        coeffCovarianceFertilityF1a = ExcelAssistant.loadCoefficientMap("input/reg_fertility.xlsx", countryString + "_F1a", 1, columnsFertilityF1a);
         coeffCovarianceFertilityF1b = ExcelAssistant.loadCoefficientMap("input/reg_fertility.xlsx", countryString + "_F1b", 1, columnsFertilityF1b);
 
         //Income
@@ -1162,7 +1158,6 @@ public class Parameters {
             coeffCovariancePartnershipU1a = RegressionUtils.bootstrap(coeffCovariancePartnershipU1a);
             coeffCovariancePartnershipU1b = RegressionUtils.bootstrap(coeffCovariancePartnershipU1b);
             coeffCovariancePartnershipU2b = RegressionUtils.bootstrap(coeffCovariancePartnershipU2b);
-            coeffCovarianceFertilityF1a = RegressionUtils.bootstrap(coeffCovarianceFertilityF1a);
             coeffCovarianceFertilityF1b = RegressionUtils.bootstrap(coeffCovarianceFertilityF1b);
 
         }
@@ -1193,9 +1188,7 @@ public class Parameters {
         regPartnershipU2b = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffPartnershipU2bAppended);
 
         //Fertility
-        MultiKeyCoefficientMap coeffFertilityF1aAppended = appendCoefficientMaps(coeffCovarianceFertilityF1a, fertilityTimeAdjustment, "Year");
         MultiKeyCoefficientMap coeffFertilityF1bAppended = appendCoefficientMaps(coeffCovarianceFertilityF1b, fertilityTimeAdjustment, "Year");
-        regFertilityF1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1aAppended);
         regFertilityF1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1bAppended);
 
         //Income
@@ -1543,9 +1536,8 @@ public class Parameters {
     public static BinomialRegression getRegPartnershipITU1() {return regPartnershipITU1;}
     public static BinomialRegression getRegPartnershipITU2() {return regPartnershipITU2;}
 
-    public static BinomialRegression getRegFertilityF1a() {return regFertilityF1a;}
+
     public static BinomialRegression getRegFertilityF1b() {return regFertilityF1b;}
-    public static BinomialRegression getRegFertilityF1() {return regFertilityF1;}
 
     public static LinearRegression getRegIncomeI1a() {
         return regIncomeI1a;
