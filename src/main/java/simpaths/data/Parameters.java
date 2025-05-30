@@ -1020,9 +1020,9 @@ public class Parameters {
         int columnsLabourSupplyUtilityACMales = 15; //
         int columnsLabourSupplyUtilityACFemales = 15; //
         int columnsLabourSupplyUtilityCouples = 60; //
-        int columnsHealthH1a = 24; //
-        int columnsHealthH1b = 95; //
-        int columnsHealthH2b = 30; //
+        int columnsHealthH1a = 24; //#
+        int columnsHealthH1b = 67; //#
+        int columnsHealthH2b = 28; //#
         int columnsEducationE1a = 10; //#
         int columnsEducationE1b = 15; //#
         int columnsEducationE2a = 15; //#
