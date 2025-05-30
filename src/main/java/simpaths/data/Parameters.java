@@ -1036,8 +1036,8 @@ public class Parameters {
         int columnsIncomeI3b_selection = 23; //#
         int columnsLeaveHomeP1a = 17; //#
         int columnsHomeownership = 32; //#
-        int columnsRetirementR1a = 23; //
-        int columnsRetirementR1b = 29; //
+        int columnsRetirementR1a = 21; //#
+        int columnsRetirementR1b = 27; //#
 
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 
