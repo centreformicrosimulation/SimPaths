@@ -742,7 +742,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             double prob;
 
                 if (getDag() <= 29 && getLes_c4().equals(Les_c4.Student) && !isLeftEducation()) {
-                    //If age below or equal to 29 and in continuous education, cannot give birth (due to lack of such cases observed in the data)
+                    //If age below or equal to 29 and in continuous education, cannot give birth (due to the lack of such cases observed in the data)
                 } else {
                     //Otherwise if not in continuous education, follow process F1b
                     double score = Parameters.getRegFertilityF1b().getScore(this, Person.DoublesVariables.class);

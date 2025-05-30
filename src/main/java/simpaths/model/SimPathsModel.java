@@ -167,7 +167,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
-    private boolean alignEmployment = true; //Set to true to align employment share
+    private boolean alignEmployment = false; //Set to true to align employment share
 
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
@@ -1767,8 +1767,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // define limits of search algorithm
         double fertilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.FertilityAdjustment);
-        double minVal = Math.max(-4.0, - fertilityAdjustment - 4.0);
-        double maxVal = Math.min(4.0, - fertilityAdjustment + 4.0);
+        double minVal = Math.max(-10.0, - fertilityAdjustment - 10.0);
+        double maxVal = Math.min(10.0, - fertilityAdjustment + 10.0);
 
         // run search
         RootSearch search = getRootSearch(0.0, minVal, maxVal, fertilityAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
