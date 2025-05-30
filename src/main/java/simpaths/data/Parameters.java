@@ -1034,7 +1034,7 @@ public class Parameters {
         int columnsIncomeI3b_amount = 23; //#
         int columnsIncomeI3a_selection = 13; //#
         int columnsIncomeI3b_selection = 23; //#
-        int columnsLeaveHomeP1a = 19; //
+        int columnsLeaveHomeP1a = 17; //#
         int columnsHomeownership = 32; //#
         int columnsRetirementR1a = 23; //
         int columnsRetirementR1b = 29; //
