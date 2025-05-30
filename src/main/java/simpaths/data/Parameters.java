@@ -1026,9 +1026,9 @@ public class Parameters {
         int columnsEducationE1a = 10; //#
         int columnsEducationE1b = 15; //#
         int columnsEducationE2a = 15; //#
-        int columnsPartnershipU1a = 9; //
-        int columnsPartnershipU1b = 30; //
-        int columnsPartnershipU2b = 32; //
+        int columnsPartnershipU1a = 10; //#
+        int columnsPartnershipU1b = 28; //#
+        int columnsPartnershipU2b = 31; //#
         int columnsFertilityF1b = 28; //#
         int columnsIncomeI3a_amount = 13; //#
         int columnsIncomeI3b_amount = 23; //#
