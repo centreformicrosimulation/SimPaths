@@ -632,7 +632,7 @@ public class TaxDonorDataParser {
 
                 counter++;
                 int age = 0, numberMembersOver17 = 0, numberChildrenUnder5 = 0, numberChildren5To9 = 0;
-                int numberChildren10To17 = 0, dlltsd1 = -1, dlltsd2 = -1, careProvision = -1;
+                int numberChildren10To17 = 0, dlltsd1 = 0, dlltsd2 = 0, careProvision = -1;
                 double hoursWorkedPerWeek1 = 0.0, hoursWorkedPerWeek2 = 0.0;
                 boolean flagInitialiseDemographics = true;
                 for (int fromYear : Parameters.EUROMODpolicyScheduleSystemYearMap.keySet()) {

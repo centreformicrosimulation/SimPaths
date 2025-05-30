@@ -16,7 +16,7 @@ public class KeyFunction {
      * ATTRIBUTES
      */
     private int simYear = -999, priceYear = -999, age, numberMembersOver17, numberChildrenUnder5, numberChildren5To9, numberChildren10To17;
-    private int dlltsdMan = -1, dlltsdWoman = -1, careProvision = -1;
+    private int dlltsdMan = 0, dlltsdWoman = 0, careProvision = -1;
     private double hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek;
 
     // define key function here - switchable
