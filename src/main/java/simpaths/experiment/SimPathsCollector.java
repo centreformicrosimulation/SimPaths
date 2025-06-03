@@ -65,9 +65,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private boolean persistEmploymentStatistics = false;
 
-    @GUIparameter(description="Report health statistics")
-    private boolean persistHealthStatistics = true;
-
     @GUIparameter(description="Toggle to turn database persistence on/off")
     private boolean exportToDatabase = false;
 
@@ -106,8 +103,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private EmploymentStatistics statsEmployment;
 
-    private HealthStatistics statsHealth;
-
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
     private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
@@ -135,9 +130,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     private DataExport exportHealthStatistics;
 
     private DataExport exportStatisticsEmployment;
-
-    private DataExport exportHealthStatistics;
-
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
     protected Map<Region, MultiTraceFunction.Double> fGiniPersonalGrossEarningsRegionalMap;
@@ -243,14 +235,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 				log.error(e.getMessage());
 			}
 			break;
-        case DumpHealthStatistics:
-            statsHealth.update(model, "Total");
-            try {
-                exportHealthStatistics.export();
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-            break;
         case DumpStatisticsEmployment:
             statsEmployment.update(model);
             try {
