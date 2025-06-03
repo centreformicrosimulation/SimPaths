@@ -1,30 +1,28 @@
 package simpaths.model;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-
 import jakarta.persistence.*;
-
-import microsim.data.db.PanelEntityKey;
-import simpaths.data.ManagerRegressions;
-import simpaths.data.MultiValEvent;
-import simpaths.data.RegressionName;
-import simpaths.data.filters.FertileFilter;
-import simpaths.model.decisions.Axis;
-import simpaths.model.enums.*;
-import microsim.statistics.Series;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.log4j.Logger;
-
-import simpaths.data.Parameters;
-import simpaths.model.decisions.DecisionParams;
 import microsim.agent.Weight;
+import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.IIntSource;
+import microsim.statistics.Series;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.log4j.Logger;
+import simpaths.data.ManagerRegressions;
+import simpaths.data.MultiValEvent;
+import simpaths.data.Parameters;
+import simpaths.data.RegressionName;
+import simpaths.data.filters.FertileFilter;
+import simpaths.model.decisions.Axis;
+import simpaths.model.decisions.DecisionParams;
+import simpaths.model.enums.*;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 
 import static simpaths.data.Parameters.getUnemploymentRateByGenderEducationAgeYear;
 
@@ -149,6 +147,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
     private Integer hoursWorkedWeekly;
+    private Integer l1_lhw; // Lag(1) of hours worked weekly - use to initialise labour supply weekly_L1 (TODO)
 
 //	Potential earnings is the gross hourly wage an individual can earn while working
 //	and is estimated, for each individual, on the basis of observable characteristics as
@@ -497,14 +496,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhe_pcs_lag1 = originalPerson.dhe_pcs;
         }
 
-        if (originalPerson.labourSupplyWeekly_L1 != null) {
-            labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
+        if (originalPerson.l1_lhw != null) {
+            labourSupplyWeekly_L1 = Labour.convertHoursToLabour(originalPerson.l1_lhw);
         } else {
-            labourSupplyWeekly_L1 = originalPerson.getLabourSupplyWeekly();
+            labourSupplyWeekly_L1 = null; // Update only if value know; null values handled by getter. Should throw an exception if required before initialised in the simulation.
         }
 
         dhesp_lag1 = originalPerson.dhesp_lag1;
         hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
+        l1_lhw = originalPerson.l1_lhw;
         labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
         double[] sampleDifferentials = setMarriageTargets();
         desiredAgeDiff = Objects.requireNonNullElseGet(originalPerson.desiredAgeDiff, () -> sampleDifferentials[0]);
@@ -620,11 +620,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setAdditionalFieldsInInitialPopulation() {
 
         if (labourSupplyWeekly==null)
-            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue());
+            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue()); // TODO: this can be simplified to obtain value from already initialised hours worked weekly variable? The entire database query on setup is redundant? See initialisation of the lag below.
         receivesBenefitsFlag_L1 = receivesBenefitsFlag;
         receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC;
         receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC;
-        labourSupplyWeekly_L1 = getLabourSupplyWeekly();
+        labourSupplyWeekly_L1 = Labour.convertHoursToLabour(l1_lhw);
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
             updateAgeGroup();

@@ -6,17 +6,16 @@
 
 	<persistence-unit name="tax-database">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<!-- define all classes annotated for database access prior to experiment execution here -->
 		<class>simpaths.model.taxes.DonorPerson</class>
 		<class>simpaths.model.taxes.DonorPersonPolicy</class>
 		<class>simpaths.model.taxes.DonorTaxUnit</class>
 		<class>simpaths.model.taxes.DonorTaxUnitPolicy</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />
 			<property name="hibernate.connection.username" value="sa" />
 			<property name="hibernate.connection.password" value="" />
-			<property name="hibernate.connection.url" value="jdbc:h2:file:./input/input" />
+			<property name="hibernate.connection.url" value="jdbc:h2:file:./input/input;AUTO_SERVER=TRUE" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 		</properties>
@@ -24,17 +23,16 @@
 
 	<persistence-unit name="starting-population">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<!-- define all classes annotated for database access prior to experiment execution here -->
 		<class>simpaths.data.startingpop.Processed</class>
 		<class>simpaths.model.Household</class>
 		<class>simpaths.model.BenefitUnit</class>
 		<class>simpaths.model.Person</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />
 			<property name="hibernate.connection.username" value="sa" />
 			<property name="hibernate.connection.password" value="" />
-			<property name="hibernate.connection.url" value="jdbc:h2:file:./input/input" />
+			<property name="hibernate.connection.url" value="jdbc:h2:file:./input/input;AUTO_SERVER=TRUE" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 		</properties>
@@ -54,8 +52,6 @@
 
 	<persistence-unit name="sim-model-out">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<mapping-file>META-INF/microsim.xml</mapping-file>
-		<!-- define all classes annotated for database access during experiment execution here -->
 		<class>simpaths.data.startingpop.Processed</class>
 		<class>simpaths.model.Household</class>
 		<class>simpaths.model.Person</class>
@@ -63,11 +59,12 @@
 		<class>simpaths.data.statistics.Statistics</class>
 		<class>simpaths.data.statistics.Statistics2</class>
 		<class>simpaths.data.statistics.Statistics3</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />
 			<property name="hibernate.connection.username" value="sa" />
 			<property name="hibernate.connection.password" value="" />
+			<property name="hibernate.connection.url" value="jdbc:h2:file:./input/input;AUTO_SERVER=TRUE" />
 			<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
 		</properties>

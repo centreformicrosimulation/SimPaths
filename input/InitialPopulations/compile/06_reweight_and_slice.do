@@ -5,7 +5,7 @@
 *	AUTH: Patryk Bronka, Daria Popova, Justin van de Ven
 *	LAST EDIT: 15 Dec 2025 DP 
 *
-**********************************************************************/
+*********************************************************************/
 ********************************************************************************
 cap log close 
 log using "${dir_log}/06_reweight_and_slice.log", replace
@@ -104,7 +104,7 @@ recode dcpyy dcpagdf ynbcpdf_dv dnc02 dnc ypnbihs_dv yptciihs_dv ypncp ypnoab yp
 save "$dir_data\ukhls_pooled_all_obs_06.dta", replace  
 
 
-/**********************Slice the original pooled dataset into years ********************************************/
+/**********************Slice the original pooled dataset into years *******************************************/
 forvalues yy = $firstSimYear/$lastSimYear {
 
 	use "$dir_data\ukhls_pooled_all_obs_06.dta", clear
@@ -126,7 +126,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 cap log close
 /**************************************************************************************
 * clean-up and exit
-**************************************************************************************/
+*************************************************************************************/
 #delimit ;
 local files_to_drop 
 	temp_adjusted_dwt.dta

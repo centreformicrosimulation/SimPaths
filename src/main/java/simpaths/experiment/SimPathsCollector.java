@@ -10,6 +10,7 @@ import java.util.Map;
 import simpaths.data.filters.FlexibleInLabourSupplyFilter;
 import simpaths.data.statistics.HealthStatistics;
 import simpaths.data.statistics.EmploymentStatistics;
+import simpaths.data.statistics.HealthStatistics;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Quintiles;
@@ -64,6 +65,9 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private boolean persistEmploymentStatistics = false;
 
+    @GUIparameter(description="Report health statistics")
+    private boolean persistHealthStatistics = true;
+
     @GUIparameter(description="Toggle to turn database persistence on/off")
     private boolean exportToDatabase = false;
 
@@ -102,6 +106,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private EmploymentStatistics statsEmployment;
 
+    private HealthStatistics statsHealth;
+
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
     private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
@@ -129,6 +135,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     private DataExport exportHealthStatistics;
 
     private DataExport exportStatisticsEmployment;
+
+    private DataExport exportHealthStatistics;
 
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
@@ -165,8 +173,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         DumpStatistics,
         DumpStatistics2,
 		DumpStatistics3,
-        DumpHealthStatistics,
-        DumpStatisticsEmployment
+        DumpStatisticsEmployment,
+        DumpHealthStatistics
     }
 
 
@@ -251,6 +259,17 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
                 log.error(e.getMessage());
             }
             break;
+        case DumpHealthStatistics:
+            String[] genders = {"Total", "Male", "Female"};
+            for (String gender_s: genders) {
+                statsHealth.update(model, gender_s);
+                try {
+                    exportHealthStatistics.export();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            }
+            break;
         }
     }
 
@@ -269,6 +288,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         stats3 = new Statistics3();
         statsHealth = new HealthStatistics();
         statsEmployment = new EmploymentStatistics();
+        statsHealth = new HealthStatistics();
 
         //For export to database or .csv files.
         if(persistPersons)
@@ -287,6 +307,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             exportHealthStatistics = new DataExport(statsHealth, exportToDatabase, exportToCSV);
         if (persistEmploymentStatistics)
             exportStatisticsEmployment = new DataExport(statsEmployment, exportToDatabase, exportToCSV);
+        if (persistHealthStatistics)
+            exportHealthStatistics = new DataExport(statsHealth, exportToDatabase, exportToCSV);
 
 
         if (calculateGiniCoefficients) {
@@ -353,6 +375,10 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
         if (persistEmploymentStatistics) {
 			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatisticsEmployment), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
+        }
+
+        if (persistHealthStatistics){
+			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpHealthStatistics), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
         }
 
         if (persistPersons) {

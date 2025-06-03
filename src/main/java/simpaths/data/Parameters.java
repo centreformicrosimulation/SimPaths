@@ -2,12 +2,12 @@
 package simpaths.data;
 
 // import Java packages
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
 
+import microsim.data.MultiKeyCoefficientMap;
+import microsim.data.excel.ExcelAssistant;
+import microsim.statistics.regression.*;
 // import plug-in packages
+import org.apache.commons.io.FileUtils;
 import simpaths.data.startingpop.DataParser;
 import simpaths.model.AnnuityRates;
 import simpaths.model.enums.*;
@@ -18,17 +18,18 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.Pair;
-
-// import JAS-mine packages
-import microsim.data.excel.ExcelAssistant;
-import microsim.data.MultiKeyCoefficientMap;
-import microsim.statistics.regression.*;
-
-// import LABOURsim packages
-import simpaths.model.taxes.DonorTaxUnit;
+import simpaths.data.startingpop.DataParser;
+import simpaths.model.AnnuityRates;
 import simpaths.model.decisions.Grids;
+import simpaths.model.enums.*;
+import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.MatchFeature;
 import simpaths.model.taxes.database.TaxDonorDataParser;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
 
 import static microsim.statistics.regression.RegressionUtils.appendCoefficientMaps;
 
@@ -144,6 +145,7 @@ public class Parameters {
 		"dgn", 					//gender
 		"les_c4", 				//labour employment status
 		"lhw", 					//hours worked per week
+        "l1_lhw",               //hours worked per week in the previous year
 		"adultchildflag",		//flag indicating adult child living at home in the data
 		"dhh_owned",			//flag indicating if individual is a homeowner
 		"potential_earnings_hourly", //initial value of hourly earnings from the data
@@ -3329,6 +3331,11 @@ public class Parameters {
         // remove database file if it exists
         String filePath = "./input" + File.separator + "input.mv.db";
         safeDelete(filePath);
+
+        // Detect if data available; set to testing data if not
+        Collection<File> testList = FileUtils.listFiles(new File(Parameters.getInputDirectoryInitialPopulations()), new String[]{"csv"}, false);
+        if (testList.isEmpty())
+            Parameters.setTrainingFlag(true);
 
         // populate new database for starting data
         DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables

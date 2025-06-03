@@ -368,10 +368,11 @@ cap erase "$dir_data/population_initial_fs_UK_sumstats.txt"
 cap log close            
    
   
-/*
+
 *************************************************************
 *clean up new initial populations - keep only required vars * 
 *************************************************************
+/*
 forvalues year=2010/2023 {
 insheet using "$dir_data/population_initial_UK_`year'.csv", clear  
 
@@ -386,5 +387,5 @@ liquid_wealth need_socare formal_socare_hrs partner_socare_hrs daughter_socare_h
 save "$dir_data/population_initial_UK_`year'.dta", replace
 outsheet using "$dir_data/population_initial_UK_`year'.csv", nolabel replace
 }
-
+*/
 

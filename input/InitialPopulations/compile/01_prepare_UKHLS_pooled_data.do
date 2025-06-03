@@ -21,7 +21,7 @@ log using "${dir_log}/01_prepare_UKHLS_pooled_data.log", replace
 
 /**************************************************************************************
 * Select and merge UKHLS data 
-**************************************************************************************/
+*************************************************************************************/
 
 *add variables from the all persons (Household grid) dataset
 foreach w of global UKHLSwaves {
@@ -86,7 +86,7 @@ foreach w of global UKHLSwaves {
 		use pidp `w'_hidp `w'_pno /*`w'_buno_dv*/ `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
 		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
-		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw*/ `w'_indpxui_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_indpxui_xw `w'_sf12mcs_dv `w'_sf12pcs_dv ///
+		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw `w'_indpxui_xw*/ `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_indpxui_xw `w'_sf12mcs_dv `w'_sf12pcs_dv ///
         `w'_sclfsato ///
 		using `w'_indresp.dta, clear 
 		gen m_j2hrs=-9 /*m_j2hrs not available in wave 13*/
@@ -140,7 +140,7 @@ foreach w of global UKHLSwaves {
 
 /**************************************************************************************
 * Prepare and merge income variables:
-**************************************************************************************/
+*************************************************************************************/
 foreach w of global UKHLSwaves {
 
 	// find the wave number
@@ -231,7 +231,7 @@ foreach w of global UKHLSwaves {
 
 /**************************************************************************************
 * merge all datasets together 
-**************************************************************************************/
+*************************************************************************************/
 use "$dir_data\add_vars_ukhls.dta", clear
 merge 1:1 pidp hidp swv using "$dir_data\add_vars_ukhls_indresp.dta", keep(1 3) nogen
 merge m:1 hidp swv using "$dir_data\add_vars_ukhls_hhresp.dta", keep(1 3) nogen
@@ -252,14 +252,14 @@ replace month = 1 if month == -10 // month not available for IEMB (Ethnic Minori
 
 /**************************************************************************************
 * save output
-**************************************************************************************/
+*************************************************************************************/
 save "$dir_data\ukhls_pooled_all_obs_01.dta", replace
 cap log close 
 
 
 /**************************************************************************************
 * clean-up and exit
-**************************************************************************************/
+*************************************************************************************/
 #delimit ;
 local files_to_drop 
 	add_vars_ukhls.dta
