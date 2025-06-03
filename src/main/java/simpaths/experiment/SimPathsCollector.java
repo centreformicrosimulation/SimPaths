@@ -10,7 +10,6 @@ import java.util.Map;
 import simpaths.data.filters.FlexibleInLabourSupplyFilter;
 import simpaths.data.statistics.HealthStatistics;
 import simpaths.data.statistics.EmploymentStatistics;
-import simpaths.data.statistics.HealthStatistics;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Quintiles;
