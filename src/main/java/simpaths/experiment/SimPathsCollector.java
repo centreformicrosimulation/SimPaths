@@ -286,8 +286,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             exportStatistics2 = new DataExport(stats2, exportToDatabase, exportToCSV);
         if (persistStatistics3)
             exportStatistics3 = new DataExport(stats3, exportToDatabase, exportToCSV);
-        if (persistHealthStatistics)
-            exportHealthStatistics = new DataExport(statsHealth, exportToDatabase, exportToCSV);
         if (persistEmploymentStatistics)
             exportStatisticsEmployment = new DataExport(statsEmployment, exportToDatabase, exportToCSV);
         if (persistHealthStatistics)
@@ -351,10 +349,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 		if (persistStatistics3) {
 			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatistics3), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
 		}
-
-        if (persistHealthStatistics){
-			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpHealthStatistics), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
-        }
 
         if (persistEmploymentStatistics) {
 			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatisticsEmployment), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
