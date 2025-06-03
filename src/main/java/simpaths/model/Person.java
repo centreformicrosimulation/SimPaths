@@ -3576,19 +3576,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return isReceivesBenefitsFlagUC() ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_ZERO -> {
-                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_TEN -> {
-                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_TWENTY -> {
-                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_THIRTY -> {
-                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_FORTY -> {
-                return isReceivesBenefitsFlagUC() & getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
             }
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
