@@ -22,8 +22,8 @@ public class KeyFunctionHU2 implements IKeyFunction {
      */
     private final int MID_AGE = 45;
     private final int INCOME_REF_YEAR = 2018;
-    private final double LO_INCOME = 191.0; // 33rd percentile observed in the EM data for 2015
-    private final double HI_INCOME = 565.0; // 67th percentile
+    private final double LO_INCOME = 154.0; // 33rd percentile observed in the EM data for 2018
+    private final double HI_INCOME = 339.0; // 67th percentile
 
 
     /**
