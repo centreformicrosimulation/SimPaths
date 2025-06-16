@@ -228,7 +228,7 @@ public class Parameters {
     public static final double ANNUITY_RATE_OF_RETURN = 0.015;
     public static AnnuityRates annuityRates;
     public static final int MIN_HOURS_FULL_TIME_EMPLOYED = 25;	// used to distinguish full-time from part-time employment (needs to be consistent with Labour enum)
-    public static final double MIN_HOURLY_WAGE_RATE = 1.5;
+    public static final double MIN_HOURLY_WAGE_RATE = 0;
     public static final double MAX_HOURLY_WAGE_RATE = 150.0;
     public static final double MAX_HOURS_WEEKLY_FORMAL_CARE = 150.0;
     public static final double MAX_HOURS_WEEKLY_INFORMAL_CARE = 16 * 7;
