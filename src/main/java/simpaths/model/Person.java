@@ -1287,13 +1287,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public boolean inSchool() {
-        double probitAdjustment = (model.isAlignInSchool()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment) : 0.0;
-        return inSchool(probitAdjustment);
-    }
 
-
-    protected boolean inSchool(double probitAdjustment) {
+    protected boolean inSchool() {
         // IMPORTANT ensure each "if" returns true/false or toLeaveSchool value
 
         // Innovation for education decisions
@@ -1326,7 +1321,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (Les_c4.Student.equals(les_c4) && !leftEducation) {
             // Follow process E1a
             double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
-            double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
+            double prob = Parameters.getRegEducationE1a().getProbability(score);
             toLeaveSchool = (labourInnov >= prob); // Stay in school if event is false, leave otherwise
             //Ded and Les_c4 remain the same if toLeaveSchool = false, no need to respecify them
             //if toLeaveSchool = false, then Ded and Les_c4 are modified in the leavingSchool() method
@@ -1337,7 +1332,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         else {
             // Follow process E1b
             double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
-            double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
+            double prob = Parameters.getRegEducationE1b().getProbability(score);
 
             if (labourInnov < prob) {
                 // Remain or become a student
@@ -2305,9 +2300,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         UKM,
         UKmissing,
         UKN,
-        PL4,
-        PL5,
-        PL6,
+        HUC,
+        HUA,
+        HUB,
         PL10,
         Year,										//Year as in the simulation, e.g. 2009
         Year2010,
@@ -3572,17 +3567,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return 0.;        //For our purpose, all our simulated people have a region, so this enum value is always going to be 0 (false).
                 //			return (getRegion().equals(Region.UKmissing)) ? 1. : 0.;		//For people whose region info is missing.  The UK survey did not record the region in the first two waves (2006 and 2007, each for 4 years). For all those individuals we have gender, education etc but not region. If we exclude them we lose a large part of the UK sample, so this is the trick to keep them in the estimates.
             }
-            case PL4 -> {
-                return Region.PL4.equals(getRegion()) ? 1.0 : 0.0;
+            case HUC -> {
+                return Region.HUC.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case PL5 -> {
-                return Region.PL5.equals(getRegion()) ? 1.0 : 0.0;
+            case HUA -> {
+                return Region.HUA.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case PL6 -> {
-                return Region.PL6.equals(getRegion()) ? 1.0 : 0.0;
-            }
-            case PL10 -> {
-                return Region.PL10.equals(getRegion()) ? 1.0 : 0.0;
+            case HUB -> {
+                return Region.HUB.equals(getRegion()) ? 1.0 : 0.0;
             }
             // Regressors used in the Covid-19 labour market module below:
             case Dgn_Dag -> {
