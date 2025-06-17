@@ -1075,7 +1075,29 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             //Sample labour supply from possible labour (pairs of) values
 //            double labourInnov = innovations.getSingleDrawDoubleInnov(0);
-            double labourInnov = getLabourInnovation(Parameters.labour_innovation_persistence_probability);
+            double labourInnov = 0;
+
+            // Check if:
+            // - single occupant is employed
+            // - or male of couple is employed
+            // - or male is not at risk of work and female is employed
+            // -> then persist employment at prob_{persist_employment}
+            // Otherwise
+            // -> persist unemployment at prob_{persist_unemployment}
+
+            if (occupancy.Single_Male.equals(occupancy) && male.atRiskOfWork() && male.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.equals(Occupancy.Couple)) {
+                if (male.atRiskOfWork() && male.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+                } else if (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+                }
+            } else {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_unemployment_persistence_probability);
+            };
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
                 labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
