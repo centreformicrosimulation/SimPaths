@@ -167,7 +167,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
 
-    private boolean alignEmployment = true; //Set to true to align employment share
+    private boolean alignEmployment = false; //Set to true to align employment share
 
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
