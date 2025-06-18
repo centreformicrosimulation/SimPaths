@@ -1190,6 +1190,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         IncomeDiv100_MeanPartnersAgeSqDiv10000,     //Income divided by 100 interacted with square of mean age of male and female in the household divided by 100
         IncomeDiv100_NChildren017,                 //Income divided by 100 interacted with the number of children aged 0-17
         IncomeDiv100_DChildren2Under,            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
+        IncomeDiv100_EL4,
+        IncomeDiv100_EL7,
         MaleLeisure,                            //24*7 - labour supply weekly for male
         MaleLeisureSq,
         MaleLeisure_IncomeDiv100,
@@ -1593,6 +1595,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case IncomeDiv100_DChildren2Under -> {            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
                         getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,2).ordinal() * 1.e-2;
+            }
+            case IncomeDiv100_EL4 -> {
+                return Region.EL4.equals(getRegion()) ? ((getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * 1.e-2) : 0.0;
+            }
+            case IncomeDiv100_EL7 -> {
+                return Region.EL7.equals(getRegion()) ? ((getDisposableIncomeMonthlyUpratedToBasePriceYear() -
+                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * 1.e-2) : 0.0;
             }
             case MaleLeisure -> {                            //24*7 - labour supply weekly for male
                 return Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly();
