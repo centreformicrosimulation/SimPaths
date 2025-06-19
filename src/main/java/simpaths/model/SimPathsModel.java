@@ -773,7 +773,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 clearPersonsToMatch();
             }
             case RetirementAlignment -> {
-                if (alignRetirement) {
+                if (alignRetirement & year <= 2025) {
                     retirementAlignment();
                     if (commentsOn) log.info("Retirement alignment complete.");
                 }
