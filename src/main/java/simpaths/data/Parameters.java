@@ -270,8 +270,8 @@ public class Parameters {
 
     //public static int MAX_AGE_IN_EDUCATION;// = MAX_AGE;//30;			// Max age a person can stay in education	//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
-    private static int MIN_START_YEAR = 2011; //Minimum allowed starting point. Should correspond to the oldest initial population.
-    private static int MAX_START_YEAR = 2021; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static int MIN_START_YEAR = 2015; //Minimum allowed starting point. Should correspond to the oldest initial population.
+    private static int MAX_START_YEAR = 2019; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static int startYear;
     public static int endYear;
     private static final int MIN_START_YEAR_TESTING = 2019;
@@ -1123,10 +1123,10 @@ public class Parameters {
             columnsEmploymentSelectionFemalesE = 29;
             columnsLabourSupplyUtilityMales = 19;
             columnsLabourSupplyUtilityFemales = 12;
-            columnsLabourSupplyUtilityMalesWithDependent = 23;
-            columnsLabourSupplyUtilityFemalesWithDependent = 23;
-            columnsLabourSupplyUtilityACMales = 17;
-            columnsLabourSupplyUtilityACFemales = 17;
+            columnsLabourSupplyUtilityMalesWithDependent = 15;
+            columnsLabourSupplyUtilityFemalesWithDependent = 15;
+            columnsLabourSupplyUtilityACMales = 31;
+            columnsLabourSupplyUtilityACFemales = 31;
             columnsLabourSupplyUtilityCouples = 64;
             columnsLabourCovid19_SE = 1;
             columnsLabourCovid19_2a_processes = 1;

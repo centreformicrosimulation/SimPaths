@@ -1096,7 +1096,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else {
                 labourInnov = getLabourInnovation(Parameters.labour_innovation_unemployment_persistence_probability);
             }
-            
+
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
                 labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
@@ -1517,6 +1517,30 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         MaleEduH_30,
         MaleEduM_40,
         MaleEduH_40,
+        MaleEduM_1,
+        MaleEduH_1,
+        MaleEduM_2,
+        MaleEduH_2,
+        MaleEduM_3,
+        MaleEduH_3,
+        MaleEduM_4,
+        MaleEduH_4,
+        FemaleEduM_10,
+        FemaleEduH_10,
+        FemaleEduM_20,
+        FemaleEduH_20,
+        FemaleEduM_30,
+        FemaleEduH_30,
+        FemaleEduM_40,
+        FemaleEduH_40,
+        FemaleEduM_1,
+        FemaleEduH_1,
+        FemaleEduM_2,
+        FemaleEduH_2,
+        FemaleEduM_3,
+        FemaleEduH_3,
+        FemaleEduM_4,
+        FemaleEduH_4,
         MaleLeisure_dnc,
         FemaleLeisure_dnc,
         MaleLeisure_dnc02,
@@ -2403,6 +2427,78 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case MaleEduH_40 -> {
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+             case FemaleEduM_10 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_10 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_20 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_20 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_30 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_30 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_40 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_40 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
             }
             case MaleLeisure_dnc02 -> {
                 return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
