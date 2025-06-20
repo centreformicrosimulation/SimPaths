@@ -1089,15 +1089,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
             } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed() == 1) {
                     labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
-            } else if (occupancy.equals(Occupancy.Couple)) {
-                if (male.atRiskOfWork() && male.getEmployed() == 1) {
-                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
-                } else if (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1) {
-                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
-                }
+            } else if (occupancy.equals(Occupancy.Couple) &&
+                    ((male.atRiskOfWork() && male.getEmployed() == 1) ||
+                            (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1))) {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
             } else {
                 labourInnov = getLabourInnovation(Parameters.labour_innovation_unemployment_persistence_probability);
-            };
+            }
+            
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
                 labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
