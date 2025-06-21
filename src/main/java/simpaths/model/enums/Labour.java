@@ -9,10 +9,9 @@ public enum Labour implements IntegerValuedEnum {
     ZERO(0, 0, 0, 0, 0),  // 0 hours for both genders
 
                                                                                 // Female categories            Male categories
-    CATEGORY_1(1, 1, 29,   1, 35),   // [1-29] vs [1-35]
-    CATEGORY_2(2, 30, 35,  36, 39),  // [30-35] vs [36-39]
-    CATEGORY_3(3, 36, 39,  40, 49),  // [36-39] vs [40-49]
-    CATEGORY_4(4, 40, 55, 50, 65); // [40+] vs [50+]
+    CATEGORY_1(1, 1, 39,   1, 39),   // [1-39]
+    CATEGORY_2(2, 40, 40,  40, 40),  // [40]
+    CATEGORY_3(3, 41, Parameters.MAX_LABOUR_HOURS_IN_WEEK,  41, Parameters.MAX_LABOUR_HOURS_IN_WEEK);  // [41+]
 
     private final int categoryId;
     private final int femaleMin, femaleMax;
@@ -42,17 +41,15 @@ public enum Labour implements IntegerValuedEnum {
     }
 
     private static Labour convertFemaleHours(double hours) {
-        if (hours <= 29) return CATEGORY_1;
-        else if (hours <= 35) return CATEGORY_2;
-        else if (hours <= 39) return CATEGORY_3;
-        else return CATEGORY_4;
+        if (hours <= 39) return CATEGORY_1;
+        else if (hours <= 40) return CATEGORY_2;
+        else return CATEGORY_3;
     }
 
     private static Labour convertMaleHours(double hours) {
-        if (hours <= 35) return CATEGORY_1;
-        else if (hours <= 39) return CATEGORY_2;
-        else if (hours <= 49) return CATEGORY_3;
-        else return CATEGORY_4;
+        if (hours <= 39) return CATEGORY_1;
+        else if (hours <= 40) return CATEGORY_2;
+        else return CATEGORY_3;
     }
 
     public int getHours(Person person) {
