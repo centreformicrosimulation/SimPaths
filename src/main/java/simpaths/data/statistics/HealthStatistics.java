@@ -11,6 +11,7 @@ import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.PercentileArrayFunction;
 import microsim.statistics.functions.SumArrayFunction;
 import simpaths.data.filters.AgeGenderCSfilter;
+import simpaths.experiment.SimPathsCollector;
 import simpaths.model.Person;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Gender;
@@ -23,6 +24,9 @@ public class HealthStatistics {
 
     @Column(name = "gender")
     private String gender;
+
+    @Column(name = "agegroup")
+    private String agegroup;
 
     // mental health numeric
     @Column(name = "dhm_mean")
@@ -115,6 +119,11 @@ public class HealthStatistics {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public void setAgegroup(SimPathsCollector.AgeRange agegroup) {
+        String agegroup_s = agegroup.toString();
+        this.agegroup = agegroup_s;
     }
 
     public void setDhm_mean(double dhm_mean) {
@@ -225,19 +234,22 @@ public class HealthStatistics {
         this.wellbys = wellbys;
     }
 
-    public void update(SimPathsModel model, String gender_s) {
+    public void update(SimPathsModel model, String gender_s, SimPathsCollector.AgeRange ageRange) {
 
 
         AgeGenderCSfilter ageGenderCSfilter;
 
         if (gender_s.equals("Total")) {
-            ageGenderCSfilter = new AgeGenderCSfilter(18, 65);
+            ageGenderCSfilter = new AgeGenderCSfilter(ageRange.lowerBound(), ageRange.upperBound());
         } else {
-            ageGenderCSfilter = new AgeGenderCSfilter(18, 65, Gender.valueOf(gender_s));
+            ageGenderCSfilter = new AgeGenderCSfilter(ageRange.lowerBound(), ageRange.upperBound(), Gender.valueOf(gender_s));
         }
 
         // set gender
         setGender(gender_s);
+
+        // set agegroup
+        setAgegroup(ageRange);
 
         // dhm score
         CrossSection.Double personsDhm = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhm); // Get cross section of simulated individuals and their mental health using the IDoubleSource interface implemented by Person class.

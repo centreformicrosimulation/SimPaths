@@ -2,10 +2,7 @@
 package simpaths.experiment;
 
 // import Java packages
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import simpaths.data.filters.FlexibleInLabourSupplyFilter;
 import simpaths.data.statistics.HealthStatistics;
@@ -138,6 +135,12 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     protected Map<Region, MultiTraceFunction.Double> fGiniEquivalisedHouseholdDisposableIncomeRegionalMap;
 
+    public record AgeRange(int lowerBound, int upperBound) {
+        @Override
+        public String toString() {
+            return lowerBound + "-" + upperBound;
+        }
+    }
 
 
     /**
@@ -245,14 +248,34 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             break;
         case DumpHealthStatistics:
             String[] genders = {"Total", "Male", "Female"};
+
+            List<AgeRange> ageGroups = Arrays.asList(
+                    new AgeRange(16, 17),
+                    new AgeRange(18, 24),
+                    new AgeRange(25, 34),
+                    new AgeRange(35, 49),
+                    new AgeRange(50, 64),
+                    new AgeRange(65, Parameters.maxAge)
+            );
+
             for (String gender_s: genders) {
-                statsHealth.update(model, gender_s);
+                statsHealth.update(model, gender_s, new AgeRange(18, 64));
                 try {
                     exportHealthStatistics.export();
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
             }
+
+            for (AgeRange ageGroup: ageGroups) {
+                statsHealth.update(model, "Total", ageGroup);
+                try {
+                    exportHealthStatistics.export();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            }
+
             break;
         }
     }
