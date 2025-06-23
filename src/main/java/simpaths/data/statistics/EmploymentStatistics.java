@@ -9,6 +9,7 @@ import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
 import simpaths.data.filters.AgeGroupCSfilter;
+import simpaths.data.filters.EmploymentCSfilter;
 import simpaths.data.filters.EmploymentHistoryFilter;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
@@ -41,6 +42,8 @@ public class EmploymentStatistics {
 
     @Column(name = "PropReceivedUC")
     private double PropReceivedUC;
+    @Column(name = "meanLabourHours")
+    private double meanLabourHours;
 
     @Column(name = "PropReceivedLegacyBenefits")
     private double PropReceivedLegacyBenefits;
@@ -91,10 +94,15 @@ public class EmploymentStatistics {
 
 
 
+    public void setMeanLabourHours(double meanLabourHours) {
+        this.meanLabourHours = meanLabourHours;
+    }
+
     public void update(SimPathsModel model) {
 
         EmploymentHistoryFilter employmentHistoryEmployed = new EmploymentHistoryFilter(Les_c4.EmployedOrSelfEmployed);
         EmploymentHistoryFilter employmentHistoryUnemployed = new EmploymentHistoryFilter(Les_c4.NotEmployed);
+        EmploymentCSfilter employmentCSfilter = new EmploymentCSfilter(Les_c4.EmployedOrSelfEmployed);
 
 
         // Entering employment transition rate
@@ -132,6 +140,9 @@ public class EmploymentStatistics {
 
 //        CrossSection.Integer benefitUnitsUCTakeup = new CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getUC_takeup", true);
         CrossSection.Double benefitUnitsUCTakeup = new CrossSection.Double(model.getBenefitUnits(), UC_TakeUp);
+        // Mean hours worked amongst employed
+        CrossSection.Integer hoursWorked = new CrossSection.Integer(model.getPersons(), Person.class, "getHoursWorkedWeekly", true);
+        hoursWorked.setFilter(employmentCSfilter);
 
         MeanArrayFunction isUCTakeup = new MeanArrayFunction(benefitUnitsUCTakeup);
         isUCTakeup.updateSource();
@@ -149,6 +160,11 @@ public class EmploymentStatistics {
         MeanArrayFunction isReceivedLegacyBenefits = new MeanArrayFunction(personsReceivedLegacyBenefits);
         isReceivedLegacyBenefits.applyFunction();
         setPropReceivedLegacyBenefits(isReceivedLegacyBenefits.getDoubleValue(IDoubleSource.Variables.Default));
+
+
+        MeanArrayFunction meanHoursWorked = new MeanArrayFunction(hoursWorked);
+        meanHoursWorked.applyFunction();
+        setMeanLabourHours(meanHoursWorked.getDoubleValue(IDoubleSource.Variables.Default));
 
 
     }
