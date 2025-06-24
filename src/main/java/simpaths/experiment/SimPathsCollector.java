@@ -4,6 +4,7 @@ package simpaths.experiment;
 // import Java packages
 import java.util.*;
 
+import microsim.data.db.PanelEntityKey;
 import simpaths.data.filters.FlexibleInLabourSupplyFilter;
 import simpaths.data.statistics.HealthStatistics;
 import simpaths.data.statistics.EmploymentStatistics;
@@ -271,6 +272,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         case DumpStatisticsEmployment:
 
             for (String gender_s: genders) {
+                statsEmployment.setKey(new PanelEntityKey(1L));
                 statsEmployment.update(model, gender_s, new AgeRange(18, 64));
                 try {
                     exportStatisticsEmployment.export();
@@ -280,6 +282,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             }
 
             for (AgeRange ageGroup: ageGroups) {
+                statsEmployment.setKey(new PanelEntityKey(2L));
                 statsEmployment.update(model, "Total", ageGroup);
                 try {
                     exportStatisticsEmployment.export();
@@ -291,6 +294,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         case DumpHealthStatistics:
 
             for (String gender_s: genders) {
+                statsHealth.setKey(new PanelEntityKey(1L));
                 statsHealth.update(model, gender_s, new AgeRange(18, 64));
                 try {
                     exportHealthStatistics.export();
@@ -300,6 +304,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             }
 
             for (AgeRange ageGroup: ageGroups) {
+                statsHealth.setKey(new PanelEntityKey(2L));
                 statsHealth.update(model, "Total", ageGroup);
                 try {
                     exportHealthStatistics.export();
