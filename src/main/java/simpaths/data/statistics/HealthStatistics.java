@@ -1,15 +1,13 @@
 package simpaths.data.statistics;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import microsim.data.db.PanelEntityKey;
 import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.PercentileArrayFunction;
 import microsim.statistics.functions.SumArrayFunction;
+import simpaths.data.Parameters;
 import simpaths.data.filters.AgeGenderCSfilter;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.Person;
@@ -21,6 +19,9 @@ public class HealthStatistics {
 
     @Id
     private PanelEntityKey key = new PanelEntityKey(1L);
+
+    @Column(name = "scenario")
+    private String scenario = Parameters.scenario;
 
     @Column(name = "gender")
     private String gender;
