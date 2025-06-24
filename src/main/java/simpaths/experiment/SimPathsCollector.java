@@ -210,7 +210,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             new HouseholdStructure(true, false, Gender.Male),
             new HouseholdStructure(false, true, Gender.Male),
             new HouseholdStructure(false, false, Gender.Male),
-            new HouseholdStructure(true, false, Gender.Female),
+            new HouseholdStructure(true, true, Gender.Female),
             new HouseholdStructure(true, false, Gender.Female),
             new HouseholdStructure(false, true, Gender.Female),
             new HouseholdStructure(false, false, Gender.Female)

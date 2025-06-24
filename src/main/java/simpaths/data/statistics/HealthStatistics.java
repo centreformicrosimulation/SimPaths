@@ -294,6 +294,8 @@ public class HealthStatistics {
 
         setAgegroup(new SimPathsCollector.AgeRange(16, 64));
 
+        setHouseholdStructure(householdStructure.toString());
+
         calculateFilteredStats(model, singleCoupledChildrenCSfilter);
 
     }

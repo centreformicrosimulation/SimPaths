@@ -35,13 +35,13 @@ public class SingleCoupledChildrenCSfilter implements ICollectionFilter {
                 return (
                         (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) &&
                         (person.getPartner() != null) == this.coupled &&
-                                person.getBenefitUnit().getIndicatorChildren(0,12).equals(Indicator.True) == this.children
+                                (person.getBenefitUnit().getNumberChildren(0,12) > 0) == this.children
                 );
             }
             return (
                     (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) &&
                     (person.getPartner() != null) == this.coupled &&
-                            person.getBenefitUnit().getIndicatorChildren(0,12).equals(Indicator.True) == this.children &&
+                            (person.getBenefitUnit().getNumberChildren(0,12) > 0) == this.children &&
                             person.getDgn().equals(this.gender)
             );
         }
