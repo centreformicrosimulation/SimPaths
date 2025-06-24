@@ -9,6 +9,7 @@ import microsim.data.db.PanelEntityKey;
 import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
+import microsim.statistics.functions.SumArrayFunction;
 import simpaths.data.Parameters;
 import simpaths.data.filters.*;
 import simpaths.experiment.SimPathsCollector;
@@ -58,6 +59,13 @@ public class EmploymentStatistics {
 
     @Column(name = "PropReceivedLegacyBenefits")
     private double PropReceivedLegacyBenefits;
+
+    @Column(name = "propLB")
+    private double propLB;
+
+    //N
+    @Column(name = "N")
+    private int N;
 
     public void setGender(String gender) {
         this.gender = gender;
@@ -117,6 +125,26 @@ public class EmploymentStatistics {
 
     public void setMeanLabourHours(double meanLabourHours) {
         this.meanLabourHours = meanLabourHours;
+    }
+
+    public void setPropUC(double propUC) {
+        this.propUC = propUC;
+    }
+
+    public void setPropLB(double propLB) {
+        this.propLB = propLB;
+    }
+
+    public void setKey(PanelEntityKey key) {
+        this.key = key;
+    }
+
+    public void setScenario(String scenario) {
+        this.scenario = scenario;
+    }
+
+    public void setN(int n) {
+        N = n;
     }
 
     public void update(SimPathsModel model, String gender_s, SimPathsCollector.AgeRange ageRange) {
@@ -207,6 +235,29 @@ public class EmploymentStatistics {
         meanHoursWorked.applyFunction();
         setMeanLabourHours(meanHoursWorked.getDoubleValue(IDoubleSource.Variables.Default));
 
+        // proportions on UC/Legacy benefits
+        CrossSection.Integer personsUC = new CrossSection.Integer(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_UC);
+        CrossSection.Integer personsLB = new CrossSection.Integer(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_NonUC);
+
+        personsUC.setFilter(ageGenderCSfilter);
+        personsLB.setFilter(ageGenderCSfilter);
+
+        MeanArrayFunction propReceivesUC = new MeanArrayFunction(personsUC);
+        MeanArrayFunction propReceivesLB = new MeanArrayFunction(personsLB);
+
+        propReceivesUC.applyFunction();
+        propReceivesLB.applyFunction();
+
+        setPropUC(propReceivesUC.getDoubleValue(IDoubleSource.Variables.Default));
+        setPropLB(propReceivesLB.getDoubleValue(IDoubleSource.Variables.Default));
+
+        // count
+        CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
+        n_persons.setFilter(ageGenderCSfilter);
+
+        SumArrayFunction.Integer count_f = new SumArrayFunction.Integer(n_persons);
+        count_f.applyFunction();
+        setN(count_f.getIntValue(IDoubleSource.Variables.Default));
 
     }
 }
