@@ -9,6 +9,7 @@ import simpaths.data.statistics.HealthStatistics;
 import simpaths.data.statistics.EmploymentStatistics;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
+import simpaths.model.enums.Gender;
 import simpaths.model.enums.Quintiles;
 import microsim.statistics.Series;
 import microsim.statistics.functions.*;
@@ -142,6 +143,13 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         }
     }
 
+    public record HouseholdStructure(boolean coupled, boolean children, Gender gender) {
+        @Override
+        public String toString() {
+            return gender.toString() + "-" + (coupled ? "Partnered" : "Single") + "-" + (children ? "Children" : "No children");
+        }
+    }
+
 
     /**
      *
@@ -181,6 +189,17 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             new AgeRange(35, 49),
             new AgeRange(50, 64),
             new AgeRange(65, 130)
+    );
+
+    List<HouseholdStructure> householdStructures = Arrays.asList(
+            new HouseholdStructure(true, true, Gender.Male),
+            new HouseholdStructure(true, false, Gender.Male),
+            new HouseholdStructure(false, true, Gender.Male),
+            new HouseholdStructure(false, false, Gender.Male),
+            new HouseholdStructure(true, false, Gender.Female),
+            new HouseholdStructure(true, false, Gender.Female),
+            new HouseholdStructure(false, true, Gender.Female),
+            new HouseholdStructure(false, false, Gender.Female)
     );
 
 
