@@ -172,6 +172,17 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         DumpHealthStatistics
     }
 
+    String[] genders = {"Total", "Male", "Female"};
+
+    List<AgeRange> ageGroups = Arrays.asList(
+            new AgeRange(16, 17),
+            new AgeRange(18, 24),
+            new AgeRange(25, 34),
+            new AgeRange(35, 49),
+            new AgeRange(50, 64),
+            new AgeRange(65, Parameters.maxAge)
+    );
+
 
     /**
      *
@@ -239,24 +250,26 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 			}
 			break;
         case DumpStatisticsEmployment:
-            statsEmployment.update(model);
-            try {
-                exportStatisticsEmployment.export();
-            } catch (Exception e) {
-                log.error(e.getMessage());
+
+            for (String gender_s: genders) {
+                statsEmployment.update(model, gender_s, new AgeRange(18, 64));
+                try {
+                    exportStatisticsEmployment.export();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            }
+
+            for (AgeRange ageGroup: ageGroups) {
+                statsEmployment.update(model, "Total", ageGroup);
+                try {
+                    exportStatisticsEmployment.export();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
             break;
         case DumpHealthStatistics:
-            String[] genders = {"Total", "Male", "Female"};
-
-            List<AgeRange> ageGroups = Arrays.asList(
-                    new AgeRange(16, 17),
-                    new AgeRange(18, 24),
-                    new AgeRange(25, 34),
-                    new AgeRange(35, 49),
-                    new AgeRange(50, 64),
-                    new AgeRange(65, Parameters.maxAge)
-            );
 
             for (String gender_s: genders) {
                 statsHealth.update(model, gender_s, new AgeRange(18, 64));

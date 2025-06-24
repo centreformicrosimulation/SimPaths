@@ -4,15 +4,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.Entity;
 
+import jakarta.persistence.Transient;
 import microsim.data.db.PanelEntityKey;
 import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
-import simpaths.data.filters.AgeGroupCSfilter;
-import simpaths.data.filters.EmploymentCSfilter;
-import simpaths.data.filters.EmploymentHistoryFilter;
+import simpaths.data.Parameters;
+import simpaths.data.filters.*;
+import simpaths.experiment.SimPathsCollector;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
+import simpaths.model.enums.Gender;
 import simpaths.model.enums.Les_c4;
 import simpaths.model.Person;
 
@@ -24,6 +26,15 @@ public class EmploymentStatistics {
 
     @Id
     private PanelEntityKey key = new PanelEntityKey(1L);
+
+    @Column(name = "scenario")
+    private String scenario = Parameters.scenario;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "agegroup")
+    private String agegroup;
 
     @Column(name= "EmpToNotEmp")
     private double EmpToNotEmp;         // Proportion of employed people becoming unemployed
@@ -47,6 +58,16 @@ public class EmploymentStatistics {
 
     @Column(name = "PropReceivedLegacyBenefits")
     private double PropReceivedLegacyBenefits;
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void setAgegroup(SimPathsCollector.AgeRange agegroup) {
+        String agegroup_s = agegroup.toString();
+        this.agegroup = agegroup_s;
+    }
+
 
     public double getEmpToNotEmp() {
         return EmpToNotEmp;
@@ -98,11 +119,28 @@ public class EmploymentStatistics {
         this.meanLabourHours = meanLabourHours;
     }
 
-    public void update(SimPathsModel model) {
+    public void update(SimPathsModel model, String gender_s, SimPathsCollector.AgeRange ageRange) {
+
+        AgeGenderCSfilter ageGenderCSfilter;
+        EmploymentAgeGenderCSfilter employmentCSfilter;
+
+        if (gender_s.equals("Total")) {
+            ageGenderCSfilter = new AgeGenderCSfilter(ageRange.lowerBound(), ageRange.upperBound());
+            employmentCSfilter = new EmploymentAgeGenderCSfilter(Les_c4.EmployedOrSelfEmployed, ageRange.lowerBound(), ageRange.upperBound());
+        } else {
+            ageGenderCSfilter = new AgeGenderCSfilter(ageRange.lowerBound(), ageRange.upperBound(), Gender.valueOf(gender_s));
+            employmentCSfilter = new EmploymentAgeGenderCSfilter(Les_c4.EmployedOrSelfEmployed, ageRange.lowerBound(), ageRange.upperBound(), Gender.valueOf(gender_s));
+        }
+
+        // set gender
+        setGender(gender_s);
+
+        // set agegroup
+        setAgegroup(ageRange);
+
 
         EmploymentHistoryFilter employmentHistoryEmployed = new EmploymentHistoryFilter(Les_c4.EmployedOrSelfEmployed);
         EmploymentHistoryFilter employmentHistoryUnemployed = new EmploymentHistoryFilter(Les_c4.NotEmployed);
-        EmploymentCSfilter employmentCSfilter = new EmploymentCSfilter(Les_c4.EmployedOrSelfEmployed);
 
 
         // Entering employment transition rate
@@ -121,14 +159,12 @@ public class EmploymentStatistics {
         isEmpToNotEmp.applyFunction();
         setEmpToNotEmp(isEmpToNotEmp.getDoubleValue(IDoubleSource.Variables.Default));
 
-        // Employment and unemployment, working age adults 16-64
-        AgeGroupCSfilter ageGroupCSfilter = new AgeGroupCSfilter(16, 64);
-
+        // Employed and unemployed in age-groups
         CrossSection.Integer personsEmployed = new CrossSection.Integer(model.getPersons(), Person.class, "getEmployed", true);
         CrossSection.Integer personsUnemployed = new CrossSection.Integer(model.getPersons(), Person.class, "getNonwork", true);
 
-        personsEmployed.setFilter(ageGroupCSfilter);
-        personsUnemployed.setFilter(ageGroupCSfilter);
+        personsEmployed.setFilter(ageGenderCSfilter);
+        personsUnemployed.setFilter(ageGenderCSfilter);
 
         MeanArrayFunction isEmployed = new MeanArrayFunction(personsEmployed);
         isEmployed.applyFunction();
@@ -141,7 +177,7 @@ public class EmploymentStatistics {
 //        CrossSection.Integer benefitUnitsUCTakeup = new CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getUC_takeup", true);
         CrossSection.Double benefitUnitsUCTakeup = new CrossSection.Double(model.getBenefitUnits(), UC_TakeUp);
         // Mean hours worked amongst employed
-        CrossSection.Integer hoursWorked = new CrossSection.Integer(model.getPersons(), Person.class, "getHoursWorkedWeekly", true);
+        CrossSection.Double hoursWorked = new CrossSection.Double(model.getPersons(), Person.class, "getHoursWorkedWeekly", true);
         hoursWorked.setFilter(employmentCSfilter);
 
         MeanArrayFunction isUCTakeup = new MeanArrayFunction(benefitUnitsUCTakeup);
