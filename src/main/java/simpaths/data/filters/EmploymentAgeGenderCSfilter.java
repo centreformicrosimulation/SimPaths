@@ -33,9 +33,9 @@ public class EmploymentAgeGenderCSfilter implements ICollectionFilter {
         if (object instanceof Person){
             Person person = (Person) object;
             if (this.gender == null) {
-                return (person.getLes_c4().equals(employment) && (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) && person.getDgn().equals(gender));
-            } else {
                 return (person.getLes_c4().equals(employment) && (person.getDag() >= ageFrom) && (person.getDag() <= ageTo));
+            } else {
+                return (person.getLes_c4().equals(employment) && (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) && person.getDgn().equals(gender));
             }
         }
         else throw new IllegalArgumentException("Argument passed to EmploymentCSfilter must be of object type Person");

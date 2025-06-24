@@ -180,7 +180,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             new AgeRange(25, 34),
             new AgeRange(35, 49),
             new AgeRange(50, 64),
-            new AgeRange(65, Parameters.maxAge)
+            new AgeRange(65, 130)
     );
 
 
