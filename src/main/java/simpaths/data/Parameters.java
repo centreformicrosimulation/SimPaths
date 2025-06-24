@@ -354,6 +354,8 @@ public class Parameters {
 
     public static String eq5dConversionParameters = "lawrence";
 
+    public static String scenario = "None";  // Label for testing competing scenarios
+
 
     /////////////////////////////////////////////////////////////////// INITIALISATION OF DATA STRUCTURES //////////////////////////////////
     public static Map<Integer, String> EUROMODpolicySchedule = new TreeMap<Integer, String>();
