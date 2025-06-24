@@ -147,6 +147,11 @@ public class EmploymentStatistics {
         N = n;
     }
 
+    public EmploymentStatistics(PanelEntityKey key) {
+        super();
+        this.setKey(key);
+    }
+
     public void update(SimPathsModel model, String gender_s, SimPathsCollector.AgeRange ageRange) {
 
         AgeGenderCSfilter ageGenderCSfilter;
@@ -236,8 +241,8 @@ public class EmploymentStatistics {
         setMeanLabourHours(meanHoursWorked.getDoubleValue(IDoubleSource.Variables.Default));
 
         // proportions on UC/Legacy benefits
-        CrossSection.Integer personsUC = new CrossSection.Integer(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_UC);
-        CrossSection.Integer personsLB = new CrossSection.Integer(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_NonUC);
+        CrossSection.Double personsUC = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_UC);
+        CrossSection.Double personsLB = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_NonUC);
 
         personsUC.setFilter(ageGenderCSfilter);
         personsLB.setFilter(ageGenderCSfilter);

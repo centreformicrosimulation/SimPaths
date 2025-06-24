@@ -98,9 +98,13 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private Statistics3 stats3;
 
-    private HealthStatistics statsHealth;
+    private EmploymentStatistics statsEmploymentGender;
 
-    private EmploymentStatistics statsEmployment;
+    private EmploymentStatistics statsEmploymentAgeGrps;
+
+    private HealthStatistics statsHealthGender;
+
+    private HealthStatistics statsHealthAgeGrps;
 
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
@@ -126,9 +130,14 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private DataExport exportStatistics3;
 
-    private DataExport exportHealthStatistics;
+    private DataExport exportStatisticsEmploymentGender;
 
-    private DataExport exportStatisticsEmployment;
+    private DataExport exportStatisticsEmploymentAgeGrps;
+
+    private DataExport exportHealthStatisticsGender;
+
+    private DataExport exportHealthStatisticsAgeGrps;
+
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
     protected Map<Region, MultiTraceFunction.Double> fGiniPersonalGrossEarningsRegionalMap;
@@ -272,20 +281,18 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         case DumpStatisticsEmployment:
 
             for (String gender_s: genders) {
-                statsEmployment.setKey(new PanelEntityKey(1L));
-                statsEmployment.update(model, gender_s, new AgeRange(18, 64));
+                statsEmploymentGender.update(model, gender_s, new AgeRange(18, 64));
                 try {
-                    exportStatisticsEmployment.export();
+                    exportStatisticsEmploymentGender.export();
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
             }
 
             for (AgeRange ageGroup: ageGroups) {
-                statsEmployment.setKey(new PanelEntityKey(2L));
-                statsEmployment.update(model, "Total", ageGroup);
+                statsEmploymentAgeGrps.update(model, "Total", ageGroup);
                 try {
-                    exportStatisticsEmployment.export();
+                    exportStatisticsEmploymentAgeGrps.export();
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
@@ -294,20 +301,18 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         case DumpHealthStatistics:
 
             for (String gender_s: genders) {
-                statsHealth.setKey(new PanelEntityKey(1L));
-                statsHealth.update(model, gender_s, new AgeRange(18, 64));
+                statsHealthGender.update(model, gender_s, new AgeRange(18, 64));
                 try {
-                    exportHealthStatistics.export();
+                    exportHealthStatisticsGender.export();
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
             }
 
             for (AgeRange ageGroup: ageGroups) {
-                statsHealth.setKey(new PanelEntityKey(2L));
-                statsHealth.update(model, "Total", ageGroup);
+                statsHealthAgeGrps.update(model, "Total", ageGroup);
                 try {
-                    exportHealthStatistics.export();
+                    exportHealthStatisticsAgeGrps.export();
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
@@ -330,9 +335,10 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         stats = new Statistics();
         stats2 = new Statistics2();
         stats3 = new Statistics3();
-        statsHealth = new HealthStatistics();
-        statsEmployment = new EmploymentStatistics();
-        statsHealth = new HealthStatistics();
+        statsEmploymentGender = new EmploymentStatistics(new PanelEntityKey(1L));
+        statsEmploymentAgeGrps = new EmploymentStatistics(new PanelEntityKey(2L));
+        statsHealthGender = new HealthStatistics(new PanelEntityKey(1L));
+        statsHealthAgeGrps = new HealthStatistics(new PanelEntityKey(2L));
 
         //For export to database or .csv files.
         if(persistPersons)
@@ -348,9 +354,11 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         if (persistStatistics3)
             exportStatistics3 = new DataExport(stats3, exportToDatabase, exportToCSV);
         if (persistEmploymentStatistics)
-            exportStatisticsEmployment = new DataExport(statsEmployment, exportToDatabase, exportToCSV);
+            exportStatisticsEmploymentGender = new DataExport(statsEmploymentGender, exportToDatabase, exportToCSV);
+            exportStatisticsEmploymentAgeGrps = new DataExport(statsEmploymentAgeGrps, exportToDatabase, exportToCSV);
         if (persistHealthStatistics)
-            exportHealthStatistics = new DataExport(statsHealth, exportToDatabase, exportToCSV);
+            exportHealthStatisticsGender = new DataExport(statsHealthGender, exportToDatabase, exportToCSV);
+            exportHealthStatisticsAgeGrps = new DataExport(statsHealthAgeGrps, exportToDatabase, exportToCSV);
 
 
         if (calculateGiniCoefficients) {

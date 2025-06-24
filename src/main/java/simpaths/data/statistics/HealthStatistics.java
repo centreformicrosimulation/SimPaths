@@ -243,6 +243,11 @@ public class HealthStatistics {
         this.scenario = scenario;
     }
 
+    public HealthStatistics(PanelEntityKey key) {
+        super();
+        this.setKey(key);
+    }
+
     public void update(SimPathsModel model, String gender_s, SimPathsCollector.AgeRange ageRange) {
 
 
