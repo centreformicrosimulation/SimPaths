@@ -235,6 +235,14 @@ public class HealthStatistics {
         this.wellbys = wellbys;
     }
 
+    public void setKey(PanelEntityKey key) {
+        this.key = key;
+    }
+
+    public void setScenario(String scenario) {
+        this.scenario = scenario;
+    }
+
     public void update(SimPathsModel model, String gender_s, SimPathsCollector.AgeRange ageRange) {
 
 
