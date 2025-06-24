@@ -10,6 +10,8 @@ public class SingleCoupledChildrenCSfilter implements ICollectionFilter {
     private boolean coupled;
     private boolean children;
     private Gender gender;
+    private int ageFrom = 18;
+    private int ageTo = 64;
 
     public SingleCoupledChildrenCSfilter(boolean coupled, boolean children, Gender gender) {
         super();
@@ -31,11 +33,13 @@ public class SingleCoupledChildrenCSfilter implements ICollectionFilter {
             Person person = (Person) object;
             if (this.gender == null) {
                 return (
+                        (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) &&
                         (person.getPartner() != null) == this.coupled &&
                                 person.getBenefitUnit().getIndicatorChildren(0,12).equals(Indicator.True) == this.children
                 );
             }
             return (
+                    (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) &&
                     (person.getPartner() != null) == this.coupled &&
                             person.getBenefitUnit().getIndicatorChildren(0,12).equals(Indicator.True) == this.children &&
                             person.getDgn().equals(this.gender)

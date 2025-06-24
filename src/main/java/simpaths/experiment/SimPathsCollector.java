@@ -106,6 +106,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private HealthStatistics statsHealthAgeGrps;
 
+    private HealthStatistics statsHealthHousehold;
+
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
     private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
@@ -137,6 +139,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     private DataExport exportHealthStatisticsGender;
 
     private DataExport exportHealthStatisticsAgeGrps;
+
+    private DataExport exportHealthStatisticsHousehold;
 
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
@@ -318,6 +322,15 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
                 }
             }
 
+            for (HouseholdStructure householdStructure: householdStructures) {
+                statsHealthHousehold.update(model, householdStructure);
+                try {
+                    exportHealthStatisticsHousehold.export();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            }
+
             break;
         }
     }
@@ -339,6 +352,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         statsEmploymentAgeGrps = new EmploymentStatistics(new PanelEntityKey(2L));
         statsHealthGender = new HealthStatistics(new PanelEntityKey(1L));
         statsHealthAgeGrps = new HealthStatistics(new PanelEntityKey(2L));
+        statsHealthHousehold = new HealthStatistics(new PanelEntityKey(3L));
 
         //For export to database or .csv files.
         if(persistPersons)
@@ -359,6 +373,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         if (persistHealthStatistics)
             exportHealthStatisticsGender = new DataExport(statsHealthGender, exportToDatabase, exportToCSV);
             exportHealthStatisticsAgeGrps = new DataExport(statsHealthAgeGrps, exportToDatabase, exportToCSV);
+            exportHealthStatisticsHousehold = new DataExport(statsHealthHousehold, exportToDatabase, exportToCSV);
 
 
         if (calculateGiniCoefficients) {
