@@ -4,7 +4,7 @@ import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
-import simpaths.model.enums.OccupancyMacroShock;
+import simpaths.model.enums.OccupancyExtended;
 import simpaths.model.enums.TargetShares;
 import simpaths.model.enums.Les_c4;
 
@@ -15,18 +15,18 @@ public class ActivityAlignmentMacroShock implements IEvaluation {
     private final double targetAggregateShareOfEmployedPersons;
     private double utilityAdjustment;
     boolean utilityAdjustmentChanged;
-    private final Map<OccupancyMacroShock, MultiKeyCoefficientMap> coefficientMaps;
-    private final Map<OccupancyMacroShock, List<String>> regressorsToModify;
+    private final Map<OccupancyExtended, MultiKeyCoefficientMap> coefficientMaps;
+    private final Map<OccupancyExtended, List<String>> regressorsToModify;
     private final Set<Person> persons;
     private final Set<BenefitUnit> benefitUnits;
     private final SimPathsModel model;
 
     // Stores original values of coefficients that will be modified
-    private final Map<OccupancyMacroShock, Map<String, Double>> originalCoefficients;
+    private final Map<OccupancyExtended, Map<String, Double>> originalCoefficients;
 
     public ActivityAlignmentMacroShock(Set<Person> persons, Set<BenefitUnit> benefitUnits,
-                                       Map<OccupancyMacroShock, MultiKeyCoefficientMap> coefficientMaps,
-                                       Map<OccupancyMacroShock, List<String>> regressorsToModify,
+                                       Map<OccupancyExtended, MultiKeyCoefficientMap> coefficientMaps,
+                                       Map<OccupancyExtended, List<String>> regressorsToModify,
                                        double utilityAdjustment) {
         this.model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         this.persons = Collections.unmodifiableSet(persons);
@@ -36,9 +36,9 @@ public class ActivityAlignmentMacroShock implements IEvaluation {
         this.regressorsToModify = Collections.unmodifiableMap(regressorsToModify);
 
         // Store original values of coefficients that will be modified
-        this.originalCoefficients = new EnumMap<>(OccupancyMacroShock.class);
-        for (Map.Entry<OccupancyMacroShock, List<String>> entry : regressorsToModify.entrySet()) {
-            OccupancyMacroShock occupancy = entry.getKey();
+        this.originalCoefficients = new EnumMap<>(OccupancyExtended.class);
+        for (Map.Entry<OccupancyExtended, List<String>> entry : regressorsToModify.entrySet()) {
+            OccupancyExtended occupancy = entry.getKey();
             List<String> regressors = entry.getValue();
             MultiKeyCoefficientMap coefficientMap = coefficientMaps.get(occupancy);
 
@@ -74,8 +74,8 @@ public class ActivityAlignmentMacroShock implements IEvaluation {
     }
 
     private void adjustEmployment(double newUtilityAdjustment) {
-        for (Map.Entry<OccupancyMacroShock, MultiKeyCoefficientMap> entry : coefficientMaps.entrySet()) {
-            OccupancyMacroShock occupancy = entry.getKey();
+        for (Map.Entry<OccupancyExtended, MultiKeyCoefficientMap> entry : coefficientMaps.entrySet()) {
+            OccupancyExtended occupancy = entry.getKey();
             MultiKeyCoefficientMap currentMap = entry.getValue();
             List<String> regressors = regressorsToModify.get(occupancy);
             Map<String, Double> originalValues = originalCoefficients.get(occupancy);

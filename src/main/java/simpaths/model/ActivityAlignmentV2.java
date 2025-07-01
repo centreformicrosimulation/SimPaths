@@ -5,14 +5,15 @@ import microsim.engine.SimulationEngine;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Occupancy;
+import simpaths.model.enums.OccupancyExtended;
 import simpaths.model.enums.TargetShares;
 
 import java.util.*;
 
 /**
- * ActivityAlignmentV2 calibrates a labor supply model by adjusting utility function coefficients,
- * so that the simulated employment rate for a specific household (benefit unit) type
- * matches a target employment rate from empirical data.
+ * ActivityAlignmentV2 calibrates the labor supply model by adjusting utility coefficients
+ * so that the simulated employment rate for a specific benefit-unit subgroup matches its target.
+ * Uses OccupancyExtended flags and the atRiskOfWork()/getAdultChildFlag() flow for classification.
  */
 public class ActivityAlignmentV2 implements IEvaluation {
 
@@ -21,109 +22,98 @@ public class ActivityAlignmentV2 implements IEvaluation {
     private final MultiKeyCoefficientMap coefficientMap;
     private final List<String> regressorsToModify;
     private final Set<BenefitUnit> benefitUnits;
-    private final Occupancy benefitUnitType;
+    private final OccupancyExtended subgroupFlag;
     private final SimPathsModel model;
 
+    /**
+     * Constructor accepting an OccupancyExtended flag to specify subgroup.
+     *
+     * @param benefitUnits          all benefit units in the simulation
+     * @param coefficientMap        map of utility coefficients
+     * @param regressorsToModify    array of coefficient keys to adjust
+     * @param subgroupFlag          extended occupancy flag for subgroup classification
+     */
     public ActivityAlignmentV2(Set<BenefitUnit> benefitUnits,
                                MultiKeyCoefficientMap coefficientMap,
                                String[] regressorsToModify,
-                               Occupancy benefitUnitType) {
+                               OccupancyExtended subgroupFlag) {
         this.model = (SimPathsModel) SimulationEngine.getInstance()
                 .getManager(SimPathsModel.class.getCanonicalName());
         this.benefitUnits = Collections.unmodifiableSet(benefitUnits);
         this.coefficientMap = coefficientMap;
         this.regressorsToModify = Arrays.asList(regressorsToModify.clone());
-        this.benefitUnitType = benefitUnitType;
+        this.subgroupFlag = subgroupFlag;
         this.originalCoefficients = extractOriginalCoefficients(coefficientMap, this.regressorsToModify);
-        this.targetAggregateShareOfEmployed = determineTargetShare(model, benefitUnitType);
+        this.targetAggregateShareOfEmployed = determineTargetShare(model.getYear(), subgroupFlag);
     }
 
     /**
-     * Extracts the original values of the coefficients to be adjusted.
-     * Handles both numeric values and single-element arrays of numbers.
+     * Extracts the original coefficient values for later restoration and relative adjustment.
      */
-    private Map<String, CoefficientValue> extractOriginalCoefficients(MultiKeyCoefficientMap map, List<String> regressors) {
+    private Map<String, CoefficientValue> extractOriginalCoefficients(
+            MultiKeyCoefficientMap map, List<String> regressors) {
         Map<String, CoefficientValue> originals = new LinkedHashMap<>();
-        for (String regressor : regressors) {
-            Object value = map.getValue(regressor);
-            if (value instanceof Number num) {
-                originals.put(regressor, new CoefficientValue(num.doubleValue()));
-            } else if (value instanceof Object[] arr && arr.length > 0 && arr[0] instanceof Number num) {
-                originals.put(regressor, new CoefficientValue(arr, num.doubleValue()));
+        for (String reg : regressors) {
+            Object v = map.getValue(reg);
+            if (v instanceof Number num) {
+                originals.put(reg, new CoefficientValue(num.doubleValue()));
+            } else if (v instanceof Object[] arr
+                    && arr.length > 0 && arr[0] instanceof Number num) {
+                originals.put(reg, new CoefficientValue(arr, num.doubleValue()));
             } else {
-                String type = value != null ? value.getClass().getSimpleName() : "null";
+                String type = v != null ? v.getClass().getSimpleName() : "null";
                 throw new IllegalArgumentException(
-                        "Regressor '" + regressor + "' must be numeric or a numeric array but is " + type + " (value: " + value + ")"
-                );
+                        "Regressor '" + reg + "' must be numeric or numeric array but is " + type);
             }
         }
         return originals;
     }
 
     /**
-     * Determines the target employment share for the given benefit unit type and simulation year.
+     * Determines the target employment share for the given subgroup.
      */
-    private double determineTargetShare(SimPathsModel model, Occupancy type) {
-        switch (type) {
-            case Couple:
-                return Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentCouples);
-            case Single_Male:
-                return Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentSingleMales);
-            case Single_Female:
-                return Parameters.getTargetShare(model.getYear(), TargetShares.EmploymentSingleFemales);
-            default:
-                throw new IllegalArgumentException("Unsupported occupancy type: " + type);
-        }
+    private double determineTargetShare(int year, OccupancyExtended flag) {
+        return switch (flag) {
+            case Couple ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentCouples);
+            case Male_With_Dependent ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentMaleWithDependent);
+            case Female_With_Dependent ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentFemaleWithDependent);
+            case Male_AC ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentMaleAdultChildren);
+            case Female_AC ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentFemaleAdultChildren);
+            case Single_Male ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentSingleMales);
+            case Single_Female ->
+                    Parameters.getTargetShare(year, TargetShares.EmploymentSingleFemales);
+        };
     }
 
     /**
-     * Applies a utility adjustment, updates the model, and returns the difference between
-     * target and simulated employment shares.
+     * Performs one evaluation: adjusts coefficients by args[0], runs the simulation update,
+     * and returns (target - simulated).
      */
     @Override
     public double evaluate(double[] args) {
-        double newUtilityAdjustment = args[0];
-        adjustEmployment(newUtilityAdjustment);
-        return targetAggregateShareOfEmployed - evalAggregateShareOfEmployedBU();
+        double adjustment = args[0];
+        adjustCoefficients(adjustment);
+        return targetAggregateShareOfEmployed - computeSimulatedShare();
     }
 
     /**
-     * Efficiently computes the employment rate for benefit units of the specified type.
+     * Adjusts each specified regressor coefficient by the given amount relative to its original.
      */
-    private double evalAggregateShareOfEmployedBU() {
-        long[] counts = benefitUnits.stream()
-                .filter(bu -> bu.getOccupancy().equals(benefitUnitType))
-                .collect(() -> new long[2],
-                        (arr, bu) -> {
-                            arr[0]++;
-                            if (bu.isEmployed()) arr[1]++;
-                        },
-                        (a, b) -> {
-                            a[0] += b[0];
-                            a[1] += b[1];
-                        });
-        return counts[0] > 0 ? (double) counts[1] / counts[0] : 0.0;
-    }
-
-    /**
-     * Adjusts the specified utility coefficients by the given amount,
-     * always relative to their original values, and updates all benefit units.
-     */
-    private void adjustEmployment(double newUtilityAdjustment) {
-        for (String regressor : regressorsToModify) {
-            CoefficientValue original = originalCoefficients.get(regressor);
-            Object newValue;
-            if (original.isArray()) {
-                Object[] newArr = Arrays.copyOf(original.arrayValue, original.arrayValue.length);
-                newArr[0] = original.baseValue + newUtilityAdjustment;
-                newValue = newArr;
-            } else {
-                newValue = original.baseValue + newUtilityAdjustment;
-            }
-            coefficientMap.replaceValue(regressor, newValue);
+    private void adjustCoefficients(double adjustment) {
+        for (String reg : regressorsToModify) {
+            CoefficientValue orig = originalCoefficients.get(reg);
+            Object newVal = orig.isArray()
+                    ? makeArray(orig, adjustment)
+                    : orig.baseValue + adjustment;
+            coefficientMap.replaceValue(reg, newVal);
         }
-
-        // Update benefit units in a single parallel pass for efficiency
+        // Update all benefit units in parallel for efficiency
         benefitUnits.parallelStream().forEach(bu -> {
             bu.updateLabourSupplyAndIncome();
             bu.updateActivityOfPersonsWithinBenefitUnit();
@@ -131,20 +121,102 @@ public class ActivityAlignmentV2 implements IEvaluation {
     }
 
     /**
-     * Helper class to track coefficient types and values.
+     * Creates a new array value for an array-valued coefficient.
+     */
+    private Object[] makeArray(CoefficientValue orig, double adjustment) {
+        Object[] arr = Arrays.copyOf(orig.arrayValue, orig.arrayValue.length);
+        arr[0] = orig.baseValue + adjustment;
+        return arr;
+    }
+
+    /**
+     * Computes the simulated employment share for benefit units in the specified subgroup.
+     */
+    private double computeSimulatedShare() {
+        long[] counts = benefitUnits.stream()
+                .filter(this::matchesSubgroup)
+                .collect(() -> new long[2],
+                        (a, bu) -> { a[0]++; if (bu.isEmployed()) a[1]++; },
+                        (a, b) -> { a[0] += b[0]; a[1] += b[1]; });
+        return counts[0] > 0 ? (double) counts[1] / counts[0] : 0.0;
+    }
+
+    /**
+     * Determines whether a BenefitUnit belongs to the subgroup defined by subgroupFlag.
+     * Mirrors the atRiskOfWork()/getAdultChildFlag() flow in your classification code.
+     *
+     * Determines whether a BenefitUnit belongs to the subgroup defined by subgroupFlag.
+     * Safely handles missing male/female members and retrieves the adult-child flag
+     * from the Person instance.
+     */
+    private boolean matchesSubgroup(BenefitUnit bu) {
+        Occupancy occ = bu.getOccupancy();
+
+        // Safely retrieve the male and female Person objects (may be null)
+        Person male = bu.getMale();
+        boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+
+        Person female = bu.getFemale();
+        boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+
+        // Retrieve adult-child flag only for single‐person units
+        int acFlag = 0;
+        if (occ == Occupancy.Single_Male && male != null) {
+            acFlag = male.getAdultChildFlag();
+        } else if (occ == Occupancy.Single_Female && female != null) {
+            acFlag = female.getAdultChildFlag();
+        }
+
+        switch (subgroupFlag) {
+            case Couple:
+                return occ == Occupancy.Couple
+                        && maleAtRisk && femaleAtRisk;
+
+            case Male_With_Dependent:
+                return occ == Occupancy.Couple
+                        && maleAtRisk && !femaleAtRisk;
+
+            case Female_With_Dependent:
+                return occ == Occupancy.Couple
+                        && femaleAtRisk && !maleAtRisk;
+
+            case Single_Male:
+                return occ == Occupancy.Single_Male
+                        && acFlag != 1;
+
+            case Male_AC:
+                return occ == Occupancy.Single_Male
+                        && acFlag == 1;
+
+            case Single_Female:
+                return occ == Occupancy.Single_Female
+                        && acFlag != 1;
+
+            case Female_AC:
+                return occ == Occupancy.Single_Female
+                        && acFlag == 1;
+
+            default:
+                return false;
+        }
+    }
+
+
+    /**
+     * Helper class to store original coefficient values.
      */
     private static class CoefficientValue {
         final double baseValue;
         final Object[] arrayValue;
 
-        CoefficientValue(double scalar) {
-            this.baseValue = scalar;
+        CoefficientValue(double v) {
+            this.baseValue = v;
             this.arrayValue = null;
         }
 
-        CoefficientValue(Object[] array, double firstElement) {
-            this.baseValue = firstElement;
-            this.arrayValue = array;
+        CoefficientValue(Object[] arr, double v) {
+            this.arrayValue = arr;
+            this.baseValue = v;
         }
 
         boolean isArray() {
