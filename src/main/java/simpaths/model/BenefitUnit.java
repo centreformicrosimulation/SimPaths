@@ -2238,10 +2238,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.CATEGORY_3) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
             }
             case Hrs_40plus_Male -> {
-                return (getMale() != null && (getMale().getLabourSupplyWeekly().equals(Labour.CATEGORY_3))) ? 1. :0.;
+                return (getMale() != null && (getMale().getLabourSupplyWeekly().equals(Labour.CATEGORY_3) || getMale().getLabourSupplyWeekly().equals(Labour.CATEGORY_2))) ? 1. :0.;
             }
             case Hrs_40plus_Female -> {
-                return (getFemale() != null && (getFemale().getLabourSupplyWeekly().equals(Labour.CATEGORY_3))) ? 1. :0.;
+                return (getFemale() != null && (getFemale().getLabourSupplyWeekly().equals(Labour.CATEGORY_3) || getFemale().getLabourSupplyWeekly().equals(Labour.CATEGORY_2))) ? 1. :0.;
             }
             case MaleLeisure_dnc02 -> {
                 return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
