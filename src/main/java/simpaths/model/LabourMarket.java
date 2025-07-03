@@ -68,8 +68,12 @@ public class LabourMarket {
 
             if (model.isAlignEmployment() & model.getYear() <= 2023 & !model.isMacroShocksOn()) {
                 model.activityAlignmentSingleMales();
+                model.activityAlignmentSingleACMales();
                 model.activityAlignmentSingleFemales();
+                model.activityAlignmentSingleACFemales();
                 model.activityAlignmentCouples();
+                model.activityAlignmentMaleWithDependents();
+                model.activityAlignmentFemaleWithDependents();
             }
 
             if (model.isMacroShocksOn()) {

@@ -336,7 +336,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap upratingIndexMapRealGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
             partnershipTimeAdjustment, retirementTimeAdjustment, fertilityTimeAdjustment, disabilityTimeAdjustment, studentsTimeAdjustment, utilityTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales,
             utilityTimeAdjustmentCouples, utilityTimeAdjustmentACMales, utilityTimeAdjustmentACFemales, utilityTimeAdjustmentMaleWithDep, utilityTimeAdjustmentFemaleWithDep, upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
-            wageRateFormalSocialCare, socialCarePolicy, partneredShare, retiredShare, disabledShare, studentShare, employedShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
+            wageRateFormalSocialCare, socialCarePolicy, partneredShare, retiredShare, disabledShare, studentShare, employedShare, employedShareSingleMales, employedShareACMales, employedShareSingleFemales, employedShareACFemales, employedShareCouples, employedShareMaleWithDep, employedShareFemaleWithDep;
     public static Map<Integer, Double> partnershipAlignAdjustment, fertilityAlignAdjustment, retirementAlignAdjustment, studentsAlignAdjustment, disabilityAlignAdjustment;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
 
@@ -1978,8 +1978,12 @@ public class Parameters {
         studentsTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_students_adjustment", 1, 1);
         fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_fertility_adjustment", 1, 1);
         utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_smales", 1, 1);
+        utilityTimeAdjustmentACMales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_acmales", 1, 1);
+        utilityTimeAdjustmentACFemales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_acfemales", 1, 1);
         utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_sfemales", 1, 1);
         utilityTimeAdjustmentCouples = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_couples", 1, 1);
+        utilityTimeAdjustmentMaleWithDep = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_malewdep", 1, 1);
+        utilityTimeAdjustmentFemaleWithDep = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_femalewdep", 1, 1);
         utilityTimeAdjustment = ExcelAssistant.loadCoefficientMap("input/time_series_factor.xlsx", country.toString() + "_utility_adj_all", 1, 1);
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
@@ -1994,9 +1998,12 @@ public class Parameters {
         disabledShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "disability", 1, 1);
         studentShare = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "students", 1, 1);
         employedShareSingleMales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_smales", 1, 1);
+        employedShareACMales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_acmales", 1, 1);
         employedShareSingleFemales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_sfemales", 1, 1);
+        employedShareACFemales = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_acfemales", 1, 1);
         employedShareCouples = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_couples", 1, 1);
-
+        employedShareMaleWithDep = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_malewdep", 1, 1);
+        employedShareFemaleWithDep = ExcelAssistant.loadCoefficientMap("input/policy parameters.xlsx", "employment_femalewdep", 1, 1);
     }
 
     public static void instantiateAlignmentMaps() {
@@ -2144,6 +2151,14 @@ public class Parameters {
             case EmploymentCouples -> {
                 map = employedShareCouples;
             }
+            case EmploymentMaleAdultChildren ->
+                map = employedShareACMales;
+            case EmploymentFemaleAdultChildren ->
+                map = employedShareACFemales;
+            case EmploymentMaleWithDependent ->
+                map = employedShareMaleWithDep;
+            case EmploymentFemaleWithDependent ->
+                map = employedShareFemaleWithDep;
             case Employment -> {
                 map = employedShare;
             }
