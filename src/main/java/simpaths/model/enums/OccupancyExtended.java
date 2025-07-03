@@ -10,5 +10,4 @@ public enum OccupancyExtended {
 	Female_With_Dependent,
 	Male_AC,
 	Female_AC;
-	;
 }

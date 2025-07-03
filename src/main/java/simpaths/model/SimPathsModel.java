@@ -1508,49 +1508,95 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
-
+    /*
+    Private helper method used to set up alignment for different occupancy types
+     */
+    private void activityAlignment(
+            TimeSeriesVariable adjustmentMap, // map storing adjustment values used in the alignment process
+            MultiKeyCoefficientMap coefficientMap, // map storing original labour supply utility regression coefficients
+            String[] regressionCoefficientName, // name of regression coefficient to adjust
+            OccupancyExtended occupancy, // benefit unit occupancy extended to allow all types used in labour supply module
+            String occupancyLabel // displays the type of benefit unit to which adjustment is applied
+    ) {
+        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentMap);
+        ActivityAlignmentV2 activityAlignment = new ActivityAlignmentV2(benefitUnits, coefficientMap, regressionCoefficientName, occupancy);
+        RootSearch search = getRootSearch(utilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 500);
+        if (search.isTargetAltered()) {
+            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], adjustmentMap);
+            System.out.println("Utility adjustment for " + occupancyLabel + " was " + search.getTarget()[0]);
+        }
+    }
 
     public void activityAlignmentSingleMales() {
-        TimeSeriesVariable adjustmentVariable = TimeSeriesVariable.UtilityAdjustmentSingleMales;
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentVariable);
-        ActivityAlignmentV2 activityAlignmentSingleMales = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityMales(), new String[]{"Hrs_40plus_Male"}, OccupancyExtended.Single_Male);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleMales, 1.0E-2, 1.0E-2, 500); // epsOrdinates and epsFunction determine the stopping condition for the search.
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], adjustmentVariable); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for single males was " + search.getTarget()[0]);
-        }
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentSingleMales,
+                Parameters.getCoeffLabourSupplyUtilityMales(),
+                new String[]{"Hrs_40plus_Male"},
+                OccupancyExtended.Single_Male,
+                "single males"
+        );
     }
 
     public void activityAlignmentSingleACMales() {
-        TimeSeriesVariable adjustmentVariable = TimeSeriesVariable.UtilityAdjustmentACMales;
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentVariable);
-        ActivityAlignmentV2 activityAlignmentSingleACMales = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityACMales(), new String[]{"Hrs_40plus_Male"}, OccupancyExtended.Male_AC);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleACMales, 1.0E-2, 1.0E-2, 500); // epsOrdinates and epsFunction determine the stopping condition for the search.
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], adjustmentVariable); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for single males was " + search.getTarget()[0]);
-        }
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentACMales,
+                Parameters.getCoeffLabourSupplyUtilityACMales(),
+                new String[]{"Hrs_40plus_Male"},
+                OccupancyExtended.Male_AC,
+                "single AC males"
+        );
+    }
+
+    public void activityAlignmentSingleACFemales() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentACFemales,
+                Parameters.getCoeffLabourSupplyUtilityACFemales(),
+                new String[]{"Hrs_40plus_Female"},
+                OccupancyExtended.Female_AC,
+                "single AC females"
+        );
     }
 
     public void activityAlignmentSingleFemales() {
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentSingleFemales);
-        ActivityAlignmentV2 activityAlignmentSingleFemales = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityFemales(), new String[]{"Hrs_40plus_Female"}, OccupancyExtended.Single_Female);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleFemales, 1.0E-2, 1.0E-2, 500); // epsOrdinates and epsFunction determine the stopping condition for the search.
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentSingleFemales); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for single females was " + search.getTarget()[0]);
-        }
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentSingleFemales,
+                Parameters.getCoeffLabourSupplyUtilityFemales(),
+                new String[]{"Hrs_40plus_Female"},
+                OccupancyExtended.Single_Female,
+                "single females"
+        );
     }
 
     public void activityAlignmentCouples() {
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentCouples);
-        ActivityAlignmentV2 activityAlignmentCouples = new ActivityAlignmentV2(benefitUnits, Parameters.getCoeffLabourSupplyUtilityCouples(), new String[]{"Hrs_40plus_Male","Hrs_40plus_Female"}, OccupancyExtended.Couple);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentCouples, 1.0E-2, 1.0E-2, 500); // epsOrdinates and epsFunction determine the stopping condition for the search.
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentCouples); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for couples was " + search.getTarget()[0]);
-        }
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentCouples,
+                Parameters.getCoeffLabourSupplyUtilityCouples(),
+                new String[]{"Hrs_40plus_Male","Hrs_40plus_Female"},
+                OccupancyExtended.Couple,
+                "couples"
+        );
     }
+
+    public void activityAlignmentMaleWithDependents() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentMaleWithDep,
+                Parameters.getCoeffLabourSupplyUtilityMalesWithDependent(),
+                new String[]{"Hrs_40plus_Male"},
+                OccupancyExtended.Male_With_Dependent,
+                "males with dependents"
+        );
+    }
+
+    public void activityAlignmentFemaleWithDependents() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentFemaleWithDep,
+                Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent(),
+                new String[]{"Hrs_40plus_Female"},
+                OccupancyExtended.Female_With_Dependent,
+                "females with dependents"
+        );
+    }
+
 
     private void partnershipAlignment() {
 
