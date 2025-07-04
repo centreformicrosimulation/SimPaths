@@ -13,16 +13,16 @@
 
 ********************************************************************************
 cap log close 
-log using "${dir_log}/05_drop_hholds.log", replace
+log using "${dir_log}/05_drop_hholds_create_benefit_units.log", replace
 ********************************************************************************
 
 use "$dir_data\UKHLS_pooled_all_obs_04.dta", clear 
-/******************************************************************************/
+/*******************************************************************************/
 fre ivfio
 keep if ivfio == 1 | ivfio == 2 | ivfio == 21 | ivfio == 24 
 fre ivfio
 //(88,338 observations deleted) 
-/******************************Split households*******************************/
+/******************************Split households********************************/
 
 *DP: script from "Data management replication file"
 /**********************Rules and assumptions***********************************
@@ -44,7 +44,7 @@ In the simulation everyone starts as "Other member" and is assigned one of the r
 */
 
 
-
+/*
 *Create unique partnership identifier within each household
 /*Cond(x,a,b)
 Description:  a if x is true and nonmissing, b if x is false; a if c is not specified and x evaluates to missing
@@ -131,12 +131,12 @@ gsort +swv +idhh -dag
 by swv idhh: carryforward idfather2, replace
 replace idfather = idfather2 if dag < $age_become_responsible & idmother<0 & idfather<0 & !missing(idfather2)
 
-/**************************Drop remaining orphans *********************************************/
+/**************************Drop remaining orphans **********************************************/
 count if dag < $age_become_responsible & idmother<0 & idfather<0
 /*143 cases in total*/
 bys swv: count if dag < $age_become_responsible & idmother<0 & idfather<0
 drop if dag < $age_become_responsible & idmother<0 & idfather<0
-/**********************************************************************************************/
+/***********************************************************************************************/
 
 
 *Check for same-sex couples
@@ -202,7 +202,7 @@ count if samesex_hh==1
 bys swv: fre samesex_hh
 /* 2,855 hhds in total, aprox 230 -250 in each wave */
 drop if samesex_hh == 1
-/************************************************************************************************************/
+/*************************************************************************************************************/
 
 
 * Clean up
@@ -228,9 +228,9 @@ replace idhome = idhhmother if adultChildFlag == 1 & !missing(idhhmother)
 replace idhome = idhhfather if adultChildFlag == 1 & missing(idhhmother) & !missing(idhhfather)
 */
 
-/**************************************************************************************************************************/
+/***************************************************************************************************************************/
 *DP: script from "UK Compile do-file" - a more recent version of a split 
-/**************************************************************************************************************************/
+/***************************************************************************************************************************/
 * recode same sex couples as singles
 replace idpartner = -9 if (ssscp==1)
 replace dcpst = 2 if (ssscp==1)
@@ -431,3 +431,5 @@ bys stm idhh: egen dropHH = max(dropObs)
 bys stm: tab dropHH, mis
 drop if stm<0
 save "$dir_data\ukhls_pooled_all_obs_05.dta", replace  
+
+cap log close 

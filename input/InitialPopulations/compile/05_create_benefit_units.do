@@ -17,12 +17,12 @@ log using "${dir_log}/05_drop_hholds_create_benefit_units.log", replace
 ********************************************************************************
 
 use "$dir_data\UKHLS_pooled_all_obs_04.dta", clear 
-/******************************************************************************/
+/*******************************************************************************/
 fre ivfio
 keep if ivfio == 1 | ivfio == 2 | ivfio == 21 | ivfio == 24 
 fre ivfio
 
-/******************************Split households*******************************/
+/******************************Split households********************************/
 *DP: This procedure is revised following the approach taken for the EU-SILC based models  
 /**********************Rules and assumptions***********************************
 1. Each HH can contain: Responsible Male, and/or Responsible Female, Children, Other members.
@@ -501,3 +501,17 @@ drop if stm<0
 save "$dir_data\ukhls_pooled_all_obs_05.dta", replace  
 
 cap log close 
+/**************************************************************************************
+* clean-up and exit
+**************************************************************************************/
+#delimit ;
+local files_to_drop 
+	fatherinfo.dta
+	motherinfo.dta
+	orphans.dta
+	;
+#delimit cr // cr stands for carriage return
+
+foreach file of local files_to_drop { 
+	erase "$dir_data/`file'"
+}

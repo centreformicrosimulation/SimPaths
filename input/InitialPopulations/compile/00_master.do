@@ -8,7 +8,7 @@
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 *						WAS EUL version - UKDA-7215-stata [to wave 7]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          30 Apr 2025
+* LAST UPDATE:          1 July 2025 DP 
 ***************************************************************************************
 
 ***************************************************************************************
@@ -33,15 +33,14 @@ set matsize 1000
 
 /**************************************************************************************
 * DEFINE DIRECTORIES
-*************************************************************************************/
+**************************************************************************************/
 
 * Working directory
-*global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
-global dir_work "C:\Users\Patryk\Documents\SP_prep_pop"
+//global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
+global dir_work "D:\Dasha\ESSEX\ESPON 2024\UK\initial_populations"
 
 * Directory which contains do files
-*global dir_do "${dir_work}/do"
-global dir_do "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations\compile"
+global dir_do "${dir_work}/do"
 
 * Directory which contains data files 
 global dir_data "${dir_work}/data"
@@ -50,14 +49,12 @@ global dir_data "${dir_work}/data"
 global dir_log "${dir_work}/log"
 
 * Directory which contains UKHLS data
-*global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave14\stata\stata13_se\ukhls"
-//global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls"
-global dir_ukhls_data "C:\Users\Patryk\Documents\SP_prep_pop\ukhls\UKDA-6614-stata\stata\stata13_se\ukhls"
+//global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls"
+global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls"
 
 * Directory which contains WAS data
-*global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
-//global dir_was_data "D:\Dasha\UK-original-data\WAS\UKDA-7215-stata\stata\stata13_se"
-global dir_was_data "C:\Users\Patryk\Documents\WAS\UKDA-7215-stata\stata\stata13_se"
+//global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
+global dir_was_data "D:\Dasha\UK-original-data\WAS\UKDA-7215-stata\stata\stata13_se"
 
 * Directory which contains original initial popultions 
 global dir_ipop_orig "${dir_work}/original_initial_populations"
@@ -65,7 +62,7 @@ global dir_ipop_orig "${dir_work}/original_initial_populations"
 
 /**************************************************************************************
 * DEFINE OTHER GLOBAL VARIABLES
-*************************************************************************************/
+**************************************************************************************/
 * Define age to become responsible as defined in the simulation
 global age_become_responsible 18
 
@@ -100,7 +97,8 @@ global wealthEndYear = 2019
 
 /**************************************************************************************
 * ROUTE TO WORKER FILES 
-*************************************************************************************/
+**************************************************************************************/
+
 * Prepare simulated and observed data
 do "${dir_do}/01_prepare_UKHLS_pooled_data.do"
 * Process UKHLS data
@@ -112,12 +110,12 @@ do "${dir_do}/04_social_care_provided.do"
 do "${dir_do}/05_create_benefit_units.do"
 * reweight data and slice into yearly segments
 do "${dir_do}/06_reweight_and_slice.do"
-/* impute wealth data for selected years
+* impute wealth data for selected years
 do "${dir_do}/07_was_wealth_data.do"
 forvalues year = $wealthStartYear / $wealthEndYear {
 	global yearWealth = `year'
 	do "${dir_do}/08_wealth_to_ukhls.do"
-}*/
+} 
 do "${dir_do}/09_finalise_input_data.do"
 do "${dir_do}/10_check_yearly_data.do"
 

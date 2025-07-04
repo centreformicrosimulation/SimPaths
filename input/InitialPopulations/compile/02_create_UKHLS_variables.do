@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          14 Jan 2025 DP
+* LAST UPDATE:          30 June 2025 DP 
 * NOTE:					Called from 00_master.do - see master file for further details
 *						Use -9 for missing values 
 ***************************************************************************************
@@ -23,7 +23,7 @@ lab define dummy 1 "yes" 0 "no"
 
 /**************************************************************************************
 * SAMPLE
-*************************************************************************************/
+**************************************************************************************/
 
 ***Drop IEMB: 
 fre hhorig
@@ -72,7 +72,7 @@ fre ivfio
 
 /**************************************************************************************
 * CREATE REQUIRED VARIABLES
-*************************************************************************************/
+**************************************************************************************/
 
 
 /*****************************SYSTEM VARIABLES*********************************/
@@ -89,15 +89,35 @@ la var stm "Interview year"
 gen Int_Date = mdy(intdatm_dv, intdatd_dv ,intdaty_dv) 
 format Int_Date %d
 
-
 /**************************** HOUSEHOLD IDENTIFIER*****************************/
 clonevar idhh= hidp 
 la var idhh "Household identifier"
 
 
-/********************************* INDIVIDUALS ID*****************************/ 
+/********************************* INDIVIDUALS ID******************************/ 
 clonevar idperson=pidp 
 la var idperson "Unique cross wave identifier"
+
+
+/********************************* EUROMOD style interview date*****************/  
+// If missing, replace with household min values
+bys swv idhh: egen hhintdatd = max(intdatd_dv)
+bys swv idhh: egen hhintdatm = max(intdatm_dv)
+bys swv idhh: egen hhintdaty = max(intdaty_dv)
+
+replace intdatd_dv = hhintdatd if intdatd_dv == -9
+replace intdatm_dv = hhintdatm if intdatm_dv == -9
+replace intdaty_dv = hhintdaty if intdaty_dv == -9
+
+replace intdaty_dv = stm if intdaty_dv == -9
+replace intdatm_dv = 6 if intdatm_dv == -9
+replace intdatd_dv = 15 if intdatd_dv == -9
+
+gen double ddt=intdatd_dv+100*intdatm_dv+10000*intdaty_dv
+
+format ddt %15.0g
+la var ddt "date of interview"
+fre ddt
 
 
 *******************************************************************************
@@ -125,12 +145,12 @@ clonevar idpartner=ppid
 la var idpartner "Unique cross wave identifier of partner"
 
 
-/**********************ID FATHER (includes natural/step/adoptive)*************/
+/**********************ID FATHER (includes natural/step/adoptive)**************/
 clonevar idfather= fnspid
 la var idfather "Father unique identifier"
 
 
-/************************ID MOTHER (includes natural/step/adoptive)***********/
+/************************ID MOTHER (includes natural/step/adoptive)************/
 clonevar idmother=mnspid 
 la var idmother "Mother unique identifier"
 
@@ -164,7 +184,7 @@ lab val dun dummy
 //fre dun 
 
 
-/************************* region (NUTS 1) ***********************************/ 
+/************************* region (NUTS 1) ************************************/ 
 //fre gor_dv
 gen drgn1=-9
 replace drgn1=1 if gor_dv==1 
@@ -197,12 +217,12 @@ lab define drgn1 ///
 lab values drgn1 drgn1
 
 
-/***********************country***********************************************/
+/***********************country************************************************/
 gen dct=15
 la var dct "Country code: UK"
 
 
-/**********************Partner's gender***************************************/
+/**********************Partner's gender****************************************/
 duplicates report idpartner swv if idpartner >0
 /*
 Duplicates in terms of idpartner swv
@@ -358,7 +378,6 @@ gen dhm_flag = missing(dhm)
 replace dhm = round(dhm_prediction) if missing(dhm) 
 bys dhm_flag : sum dhm 
 
-
 /**************************Subjective wellbeing (GHQ): Caseness ******************************
 0: not psychologically distressed, scghq2_dv < 4 
 1: psychologically distressed, scghq2_dv >= 4
@@ -430,29 +449,29 @@ gen dhe_pcs_flag = missing(dhe_pcs)
 replace dhe_pcs = round(dhe_pcs_prediction) if missing(dhe_pcs) 
 bys dhe_pcs_flag : sum dhe_pcs
 
-/***************************** Life Satisfaction ***************************************************************************/
-/* Life satisfaction, self report. Continuous scale 0 to 7. */
 
-
-gen dls = sclfsato
-replace dls = . if sclfsato < 0
-lab var dls "DEMOGRAPHIC: Life Satisfaction"
-// fre dls if dag>0 & dag<16
-
+/************Partner's Self-rated health health - mental and physical component***************/
 preserve
-drop if dgn < 0 | dag<0 | dhe<0
-eststo predict_dls: reg dls c.dag i.dgn i.swv i.dhe c.dhm c.dhe_mcs, vce(robust) // Physical and mental health have a big impact, so included as covariate.  
-restore
-estimates restore predict_dls
-predict dls_prediction
-// fre dls_prediction
+keep swv idperson dhe_mcs dhe_pcs
+rename idperson idpartner 
+rename dhe_mcs dhe_mcssp 
+rename dhe_pcs dhe_pcssp
 
-gen dls_flag = missing(dls)
-replace dls = round(dls_prediction) if missing(dls) 
-bys dls_flag : sum dls 
+save "$dir_data/temp_dhe", replace
+restore
+
+merge m:1 swv idpartner using "$dir_data/temp_dhe"
+la var dhe_mcssp "Partner's Self-rated health health - mental component"
+la var dhe_pcssp "Partner's Self-rated health health - physical component"
+keep if _merge == 1 | _merge == 3
+drop _merge
+replace dhe_mcssp=-9 if missing(dhe_mcssp) & idpartner>0
+replace dhe_pcssp=-9 if missing(dhe_pcssp) & idpartner>0
+//fre dhe_mcssp dhe_pcssp if idpartner>0
 
 
 /****************************Ehtnicity*****************************************/
+fre ethn_dv
 /*Ethnic group derived from multiple sources such as self-reported as an adult, self-reported as a youth, reported by a household member, and ethnic group of biological parents.
 ethn_dv	-- Ethnic group (derived from multiple sources)
 	-9 missing	
@@ -460,36 +479,52 @@ ethn_dv	-- Ethnic group (derived from multiple sources)
 	2  irish
 	3  gypsy or irish traveller	
 	4  any other white background
+	
 	5  white and black caribbean	
 	6  white and black african	
 	7  white and asian	
 	8  any other mixed background	
+	
 	9  indian		
 	10 pakistani	
 	11 bangladeshi	
 	12 chinese	
 	13 any other asian background	
+	
 	14 caribbean	
 	15 african	
 	16 any other black background	
+	
 	17 arab	
 	97 any other ethnic group  	  
-*/		
-*Note: Missing ethnic group is combined with "Other" 	
+*/	
+
+* definition used in regression estimates 
 cap gen dot = . 
-replace dot = 1 if ethn_dv>=1 & ethn_dv <=4 //white//
-replace dot = 2 if ethn_dv>=5 & ethn_dv<=8 //mixed //
-replace dot = 3 if ethn_dv>=9 & ethn_dv<=13 //asian//
-replace dot = 4 if ethn_dv>=14 & ethn_dv<=16 //black//
-replace dot = 5 if ethn_dv==17 | ethn_dv==97 //other, arab//  
-replace dot = 5 if ethn_dv==-9 //missing// 
-lab var dot "DEMOGRAPHIC: Ethnicity"
-cap label define dot -9 "missing" 1 "White" 2 "Mixed or Multiple ethnic groups" 3 "Asian or Asian British" 4 "Black, Black British, Caribbean, or African" 5 "Other or missing ethnic group"
+replace dot = 1 if ethn_dv>=1 & ethn_dv <=7  //white and mixed with white//
+replace dot = 2 if ethn_dv>=9 & ethn_dv<=13 //asian//
+replace dot = 3 if ethn_dv>=14 & ethn_dv<=16 //black//
+replace dot = 4 if ethn_dv==17 | ethn_dv==97 | ethn_dv==-9 | ethn_dv==8 //arab, mixed non-white, other and missing  
+lab var dot "Ethnicity"
+cap label define dot 1 "White" 2 "Asian or Asian British" 3 "Black, Black British, Caribbean, or African" 4 "Other or missing ethnic group"
 label values dot dot 
-//fre dot 
+fre dot 
 
+	
+*ONS style definition (but missing is kept as a separate category)  	
+cap gen dot01 = . 
+replace dot01 = 1 if ethn_dv>=1 & ethn_dv <=4 //white//
+replace dot01 = 2 if ethn_dv>=5 & ethn_dv<=8 //mixed //
+replace dot01 = 3 if ethn_dv>=9 & ethn_dv<=13 //asian//
+replace dot01 = 4 if ethn_dv>=14 & ethn_dv<=16 //black//
+replace dot01 = 5 if ethn_dv==17 | ethn_dv==97 //other, arab//  
+replace dot01 = 6 if ethn_dv==-9 //missing// 
+lab var dot01 "Ethnicity"
+cap label define dot01  1 "White" 2 "Mixed or Multiple ethnic groups" 3 "Asian or Asian British" 4 "Black, Black British, Caribbean, or African" 5 "Other ethnic group" 6 "Missing"
+label values dot01 dot01 
+fre dot01 
 
-/******************************Education status*******************************/
+/******************************Education status********************************/
 *Use hiqual variable, code negative values to missing
 *Low education: Other qualification, no qualification
 *Medium education: Other higher degree, A-level etc, GCSE etc
@@ -675,7 +710,7 @@ replace dcpst = 2 if dag <= 17 & idpartner<0
 //fre dcpst
 
 
-/*****************************Enter partnership*******************************/
+/*****************************Enter partnership********************************/
 sort idperson swv 
 cap drop dcpen
 gen dcpen = -9
@@ -697,13 +732,13 @@ la var dcpex "Exit partnership"
 //fre dcpex
 
 
-/*****************************Age difference partners*************************/
+/*****************************Age difference partners**************************/
 gen dcpagdf = dag - dagsp if (dag > 0 & dagsp > 0) //Leave with negative values? Or should be absolute?
 la var dcpagdf "Partner's age difference"
 
 
-/*********************************Activity status*****************************/
-recode jbstat (1 2 5 12 13 14 = 1 "Employed or self-employed") ///
+/*********************************Activity status******************************/
+recode jbstat (1 2 5 12 13 14 15 = 1 "Employed or self-employed") ///
 	(7 = 2 "Student") ///
 	(3 6 8 10 11 97 9 4 = 3 "Not employed") /// /*includes apprenticeships, unpaid family business, govt training scheme+retired */
 	, into(les_c3)
@@ -726,7 +761,7 @@ lab val les_c4 les_c4
 //tab2 les_c3 les_c4
 
 
-/****************************Partner's activity status:***********************/
+/****************************Partner's activity status:************************/
 preserve
 keep swv idperson idhh les_c3
 rename les_c3 lessp_c3
@@ -755,7 +790,7 @@ drop _merge
 //fre lessp_c4
 
 
-/***********************Own and Spousal Activity Status***********************/
+/***********************Own and Spousal Activity Status************************/
 gen lesdf_c4 = -9
 replace lesdf_c4 = 1 if les_c3 == 1 & lessp_c3 == 1 & dcpst == 1 //Both employed
 replace lesdf_c4 = 2 if les_c3 == 1 & (lessp_c3 == 2 | lessp_c3 == 3) & dcpst == 1 //Employed, spouse not employed
@@ -769,7 +804,7 @@ la var lesdf_c4 "Own and spousal activity status"
 //fre lesdf_c4
 
 
-/******************************Civil servant status***************************/
+/******************************Civil servant status****************************/
 gen lcs=0
 // R.K. (11.05.2017) (we can use SIC 2007 condensed version- this is what Paola does for FRS EUROMOD)
 replace lcs=1 if jbsic07_cc==84
@@ -778,7 +813,7 @@ lab val lcs dummy
 //fre lcs 
 
 
-/***********************************Hours of work*****************************/
+/***********************************Hours of work******************************/
 recode jbhrs (-9/-1 . = .) //is it fine to recode these to 0? don't want to have missing in simulation?
 recode jbot (-9/-1 . = .)
 recode jshrs (-9/-1 . = .)
@@ -787,15 +822,6 @@ egen lhw=rowtotal(jbhrs jbot jshrs)
 replace lhw = ceil(lhw)
 la var lhw "Hours worked per week"
 //fre lhw 
-
-// Lag(1) of hours of work
-xtset // check if xtset correct 
-gen l1_lhw = l1.lhw
-
-replace l1_lhw = lhw if l1.les_c4 == 1 & les_c4 == 1 & missing(l1_lhw) // replace lagged value with current value if employed last period and this period
-replace l1_lhw = lhw if les_c4 == 1 & missing(l1_lhw) // replace lagged value with current value if above not successful 
-replace l1_lhw = 0 if l1.les_c4 != 1 // replace lagged value with zero if not compatible with lagged employment state
-replace l1_lhw = 0 if les_c4 != 1 & missing(l1_lhw) // replace with zero if not working and l1_lhw still missing
 
 
 /*****************************Number of children*******************************/
@@ -815,7 +841,7 @@ bys swv idhh: egen dnc = sum(depChild)
 la var dnc "Number of dependent children 0 - 18"
 
 
-/*******************************Flag for adult children***********************/
+/*******************************Flag for adult children************************/
 preserve
 keep if dgn == 0
 keep swv idhh idperson dag
@@ -858,31 +884,70 @@ la var dhhtp_c4 "Household composition"
 //fre dhhtp_c4
 
 
-/************************Long-term sick or disabled***************************/
+/************************Long-term sick or disabled****************************/
 gen dlltsd = 0
 replace dlltsd = 1 if jbstat == 8
 sort idperson swv 
 replace dlltsd = 1 if missing(jbstat) & l.jbstat == 8
 //replace dlltsd = 1 if missing(jbstat) & missing(l.jbstat) & l2.jbstat == 8
-la var dlltsd "DEMOGRAPHIC: LT sick or disabled"
+la var dlltsd "DEMOGRAPHIC: LT sick/disabled"
+//fre dlltsd
+
+//check if in receipt of disability benefits 
+/*
+fre bendis1 //Income: Disability benefits: Incapacity Benefit
+fre bendis2 //Income: Disability benefits: Employment and Support Allowance
+fre bendis3 //Income: Disability benefits: Severe Disablement Allowance
+fre bendis4 //Income: Disability benefits: Carer's Allowance
+fre bendis5 //Income: Disability benefits: Disability Living Allowance
+fre bendis6 //Income: Disability benefits: Return to work credit
+fre bendis7 //Income: Disability benefits: Attendance Allowance
+fre bendis8 //Income: Disability benefits: Industrial Injury Disablement Benefit
+fre bendis9 //Income: Disability benefits: War disablement pension
+fre bendis10 //Income: Disability benefits: Sickness and Accident Insurance
+fre bendis11 //Income: Disability benefits: Universal Credit
+fre bendis12 //Income: Disability benefits: Personal Independence Payments
+fre bendis13 //Income: Disability benefits: Child Disability Payment
+fre bendis14 //Income: Disability benefits: Adult Disability Payment
+fre bendis15 //Income: Disability benefits: Pension Age Disability Payment
+fre bendis97 //Income: Disability benefits: Any other disability related benefit or payment
+*/
+gen disben = 0
+replace disben = 1 if inlist(1, bendis1, bendis2, bendis3, bendis4, bendis5, bendis6, bendis7, bendis8, bendis9, ///
+                             bendis10,  bendis12, bendis13, bendis14, bendis15)
+/*Note: exclude bendis11 (Universal credit) as it can be jointly received  and bendis97 (any other) 
+bysort swv idhh (idhh): gen hhsize = _N
+tab2 hhsize disben
+tab2 dlltsd disben */
+
+//second check: disability income based on ficode (disability income is computed in 01_prepare_ukhls_pooled_data)
+gen disben2 = (inc_disab>0 & inc_disab<.) 
+
+//select those who report being didabled & in receipt of disability benefits according to both checks  
+gen dlltsd01 = (dlltsd==1 | (disben==1 & disben2==1)) 
+la var dlltsd01 "DEMOGRAPHIC: LT sick/disabled or receives disability benefits"
+//fre dlltsd01
+//tab2 dlltsd01 dlltsd
 
 
 /*******************Long-term sick or disabled - spouse ***********************/
 preserve
-keep swv idperson dlltsd
+keep swv idperson dlltsd dlltsd01
 rename idperson idpartner
 rename dlltsd dlltsd_sp
+rename dlltsd01 dlltsd01_sp
 save "$dir_data/temp_dlltsd", replace
 restore
 
 merge m:1 swv idpartner using "$dir_data/temp_dlltsd"
-la var dlltsd_sp "Partner's long-term sick"
+la var dlltsd_sp "Partner's long-term sick/disabled"
+la var dlltsd01_sp "Partner's long-term sick/disabled or receives disability benefits"
 keep if _merge == 1 | _merge == 3
 drop _merge
 //fre dlltsd_sp
 
 
-/*******************************Retired***************************************/
+/*******************************Retired****************************************/
 gen dlrtrd = 0
 replace dlrtrd = 1 if jbstat == 4
 sort idperson swv 
@@ -952,7 +1017,7 @@ replace dagpns = 1 if dgn==0 & dag>=63 & stm>=2016 & stm<2018
 replace dagpns = 1 if dgn==0 & dag>=64 & stm>=2018 & stm<2019
 replace dagpns = 1 if dgn==0 & dag>=65 & stm>=2019 & stm<2021
 replace dagpns = 1 if dgn==0 & dag>=66 & stm>=2021 
-
+lab var dagpns "Reached state retirement age"
 
 /****************************Pension age of a spouse***************************/
 preserve
@@ -963,7 +1028,7 @@ save "$dir_data/temp_dagpns", replace
 restore
 merge m:1 swv idpartner idhh using "$dir_data/temp_dagpns"
 keep if _merge == 1 | _merge == 3
-la var dagpns_sp "Pension age - partner"
+la var dagpns_sp "Reached state retirement age - partner"
 drop _merge
 replace dagpns_sp=-9 if idpartner<0
 
@@ -977,7 +1042,7 @@ lab define lesnr_c2 1 "in work" 2 "not in work"
 lab val lesnr_c2 lesnr_c2 
 
 
-/************************Exited parental home*********************************/
+/************************Exited parental home**********************************/
 /*Generated from fnspid and/or mnspid. 1 means that individual no longer lives with a parent (fnspid & mnspid is equal to missing)
  when in the previous wave they lived with a parent  (fnspid or mnspid not equal to missing).*/
 /*
@@ -1005,14 +1070,14 @@ la val sedex dummy
 la var sedex "Left education"
 
 
-/****************************Same-sex partnership*****************************/
+/****************************Same-sex partnership******************************/
 gen ssscp = 0 if idpartner>0
 replace ssscp = 1 if idpartner>0 & (dgn == dgnsp) & dgn>=0 & dgn<. & dgnsp>=0 & dgnsp<.
 la val ssscp dummy
 la var ssscp "Same-sex partnership"
 //fre ssscp
 
-/****************************Year prior to exiting partnership*****************/
+/****************************Year prior to exiting partnership******************/
 cap gen scpexpy = 0
 replace scpexpy = 1 if f.dcpex==1 
 replace scpexpy=-9 if swv==14 //Impossible to know for the most recent wave 
@@ -1028,7 +1093,7 @@ lab val sprfm dummy
 la var sprfm "Woman in fertility range dummy (18- 44)"
 
 
-/************************UK General Fertility Rate: From ONS 2019*************/
+/************************UK General Fertility Rate: From ONS 2019**************/
 /*Source: https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/birthsummarytables
 for 2023: https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths/datasets/birthsinenglandandwalesbirthregistrations
 */
@@ -1087,7 +1152,7 @@ la val sedag dummy
 la var sedag "Educ age range"
 
 
-/****************************Partnership duration*****************************/
+/****************************Partnership duration******************************/
 *idpartner in wave a 
 clonevar idpartner_a=a_ppid
 la var idpartner_a "Unique cross wave identifier of partner in wave a"
@@ -1151,7 +1216,7 @@ la var dcpyy "Years in partnership"
 //by swv: fre dcpyy
 
 
-/**************************OECD equivalence scale*****************************/
+/**************************OECD equivalence scale******************************/
 //Temporary number of children 0-13 and 14-18 to create household OECD equivalence scale
 gen depChild_013 = 1 if (dag >= 0 & dag <= 13) & (pns1pid > 0 | pns2pid > 0) & (depchl_dv == 1)
 gen depChild_1418 = 1 if (dag >= 14 & dag <= 18) & (pns1pid > 0 | pns2pid > 0) & (depchl_dv == 1)
@@ -1188,7 +1253,6 @@ Note: This is supposed to mirror UKMOD market income
    gen inc_tu = frmnthimp_dv if ficode == 25 (Trade Union / Friendly Society Payment)
    gen inc_ma = frmnthimp_dv if ficode == 26 (Maintenance or Alimony)
 Instead of (3) and (4) , use :  
-
 gen inc_pp = frmnthimp_dv if ficode == 4 //A Private Pension/Annuity
 gen inc_tu = frmnthimp_dv if ficode == 25 //Trade Union / Friendly Society Payment
 gen inc_ma = frmnthimp_dv if ficode == 26 //Maintenance or Alimony
@@ -1329,9 +1393,9 @@ gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not li
 gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
 */
 recode fimninvnet_dv fimnprben_dv inc_fm inc_oth (-1=.) (-9=.)
-egen ypncp_temp = rowtotal (fimninvnet_dv inc_fm inc_oth fimnprben_dv) 
-assert ypncp_temp>=0
-cap gen ypncp = asinh( ypncp_temp*gross_net_ratio*(1/CPI) ) 
+egen ypncp_lvl = rowtotal (fimninvnet_dv inc_fm inc_oth fimnprben_dv) 
+assert ypncp_lvl>=0
+cap gen ypncp = asinh( ypncp_lvl*gross_net_ratio*(1/CPI) ) //IHS - inverse hyperbolic sine transformation
 lab var ypncp "Gross personal non-employment capital income"
 //sum ypncp
 
@@ -1347,7 +1411,7 @@ lab var  ypnoab "Gross personal private pension income"
 //sum ypnoab
 
 
-/******************************Home ownership dummy***************************/
+/******************************Home ownership dummy****************************/
 *Dhh_owned is the definition used in the initial population and in the model predicting house ownership 
 *in the homeownership process of the simulation.
 bys swv: fre hsownd
@@ -1356,7 +1420,7 @@ replace dhh_owned=1 if hsownd>=1 & hsownd<=3
 lab var dhh_owned "Home ownership dummy"
 
 
-/******************************Disability benefit*****************************/
+/******************************Disability benefit******************************/
 /*If any of bendis1-bendis3, bendis5-bendis12, or bendis97 = 1 then received benefits
 
 Availability of vars across waves: 
@@ -1383,54 +1447,9 @@ la val bdi dummy
 la var bdi "Disability benefits"
 
 
-/******************************Unemployment dummy***************************/
+/******************************Unemployment dummy****************************/
 gen unemp = (jbstat==3)
 label variable unemp "Labour status: unemployed"
-
-/***************************** UC and Non-UC receipt ***********************/
-
-gen econ_benefits = .
-replace econ_benefits = 1 if fihhmnsben_dv > 0 & fihhmnsben_dv!=.
-replace econ_benefits = 0 if fihhmnsben_dv==0
-label var econ_benefits "Household income includes any benefits"
-
-replace benefits_uc=0 if benefits_uc==.
-* Ensure all with known UC receipt also are benefit recipients
-replace econ_benefits=1 if benefits_uc==1
-
-* Generate benefits marker without UC
-gen econ_benefits_nonuc=econ_benefits
-replace econ_benefits_nonuc=0 if benefits_uc==1
-label var econ_benefits_nonuc "Household income includes non-UC benefits"
-
-* Generate benefits marker with UC
-gen econ_benefits_uc=econ_benefits
-replace econ_benefits_uc=0 if benefits_uc==0
-label var econ_benefits_uc "Household income includes UC benefits"
-
-
-/***************************** Financial Distress ***************************************************************************/
-// This is a measure of subjective financial distress, corresponding to answering 4 or 5 to the question below:
-// How well would you say you yourself are managing financially these days? Would you say you are...
-// 1. Living comfortably
-// 2. Doing alright
-// 3. Just about getting by
-// 4. Finding it quite difficult
-// 5. Finding it very difficult
-
-recode finnow (1 2 3 = 0) (4 5 = 1) (else = .), gen(financial_distress)
-lab var financial_distress "DEMOGRAPHIC: Financial Distress"
-
-// Impute financial distress when missing
-preserve
-drop if dgn < 0 | dag < 0 | dhe < 0 | drgn1 < 0
-eststo predict_financial_distress: logit financial_distress c.dag i.dgn i.drgn1 i.swv i.dhe c.dls i.unemp i.dhh_owned c.yhhnb_asinh, vce(robust)
-restore
-estimates restore predict_financial_distress
-predict financial_distress_prediction
-
-replace financial_distress = 1 if missing(financial_distress) & financial_distress_prediction >= 0.5
-replace financial_distress = 0 if missing(financial_distress) & financial_distress_prediction < 0.5
 
 
 /*****************Was in continuous education sample***************************/
@@ -1450,7 +1469,7 @@ lab define sedcsmpl  1 "Aged 16-29 and were in continuous education"
 lab values sedcsmpl sedcsmpl
 
 
-/**********************Return to education sample*****************************/
+/**********************Return to education sample******************************/
 //Generated from age_dv and drtren 
 gen sedrsmpl =0 
 replace sedrsmpl = 1 if (dag>=16 & dag<=35 & ded==0) 
@@ -1458,7 +1477,7 @@ lab var sedrsmpl "SYSTEM : Return to education sample"
 lab define  sedrsmpl  1 "Aged 16-35 and not in continuous education"
 lab values sedrsmpl sedrsmpl
 
-/**********************In Continuous education sample*************************/
+/**********************In Continuous education sample**************************/
 //Generated from sedcsmpl and ded variables. Sample: Respondents who were in continious education and left it. 
 cap gen scedsmpl = 0 
 replace scedsmpl=1 if sedcsmpl==1 & ded == 0 /*were but currently not in continuous full-time education*/
@@ -1467,7 +1486,7 @@ lab define  scedsmpl  1 "Left continuous education"
 lab values scedsmpl scedsmpl
 
 
-/*****************************Weights*****************************************/
+/*****************************Weights******************************************/
 /*dimlwt	indinus_l DEMOGRAPHIC : Individual Longitudinal Weight - Main survey	
 Longitudinal individual main survey weight from indinus_lw (waves 2 onward) variable*/
 gen dimlwt = indinus_lw 
@@ -1503,27 +1522,25 @@ replace dwt = max_dwt if missing(dhhwt )
 replace dwt = 0 if missing(dwt)
 
 
-/***************************Keep required variables***************************/
+/***************************Keep required variables****************************/
 keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst  ///
-	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
+	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlltsd01  dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
-	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
-        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
-	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dls dot unemp financial_distress
+	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
+	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dot dot01 unemp dhe_mcssp dhe_pcssp ddt
 
 sort swv idhh idperson 
 
 
 /**************************Recode missing values*******************************/
 foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst ///
-	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
+	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
-	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
-        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
-	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dls dot unemp {
+	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
+	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dot dot01 unemp dhe_mcssp dhe_pcssp {
 		qui recode `var' (-9/-1=-9) (.=-9) 
 }
-
+replace ddt = -9 if ddt<0
 *recode missings in weights to zero. 
 foreach var in dimlwt disclwt dimxwt dhhwt {
 	qui recode `var' (.=0) (-9/-1=0) 
@@ -1541,8 +1558,6 @@ replace l1_potential_earnings_hourly = 0 if missing(l1_potential_earnings_hourly
 		
 * initialise wealth to missing 
 gen liquid_wealth = -9
-gen tot_pen = -9
-gen nvmhome = -9
 gen smp = -9
 gen rnk = -9
 gen mtc = -9
@@ -1554,6 +1569,8 @@ drop if dup == 1 //0 duplicates
 drop dup
 isid idperson idhh swv	
 
+duplicates tag idperson ddt, gen(dup2)
+fre dup2
 
 /*******************************************************************************
 * save the whole pooled dataset that will be used for regression estimates
@@ -1564,7 +1581,7 @@ cap log close
 
 /**************************************************************************************
 * clean-up and exit
-*************************************************************************************/
+**************************************************************************************/
 #delimit ;
 local files_to_drop 
 	father_edu.dta

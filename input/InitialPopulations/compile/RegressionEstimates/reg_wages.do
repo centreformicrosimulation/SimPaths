@@ -2,8 +2,8 @@
 * PROJECT:  		ESPON 
 * SECTION:			Wage regression 
 * OBJECT: 			Heckman regressions 
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		21/04/2024 (JV)
+* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven
+* LAST UPDATE:		3 July 2025 DP 
 ********************************************************************************
 clear all
 set more off
@@ -11,25 +11,6 @@ set mem 200m
 set type double
 //set maxvar 120000
 set maxvar 30000
-
-
-/*******************************************************************************
-*	DEFINE DIRECTORIES
-*******************************************************************************/
-* Working directory
-global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates"
-
-* Directory which contains do files
-global dir_do "${dir_work}/do"
-
-* Directory which contains data files 
-global dir_data "${dir_work}/data"
-
-* Directory which contains log files 
-global dir_log "${dir_work}/log"
-
-* Directory which contains pooled UKHLS dataset 
-global dir_ukhls_data "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations\data"
 
 
 *******************************************************************
@@ -75,45 +56,45 @@ program computePredicted
 	
 end
 
-capture program drop analyseFit
+capture program drop analyseFit 
 program analyseFit
 
-	local filter = "`1'"
+    // 1 = filter
+    // 2 = optional flag "nocorr"
+    // 3 = title
+    // 4 = suffix for filename
 
-	sum lwage_hour lwage_hour_hat wage_hour wage_hour_hat if `filter'
-	if ("`2'" != "nocorr") {
-		corr wage_hour L1.wage_hour if `filter' & previouslyWorking
-		corr wage_hour_hat L1.wage_hour_hat if `filter' & previouslyWorking
-	}
-		
-	twoway (hist lwage_hour if `filter', lcolor(gs12) fcolor(gs12)) ///
-		(hist lwage_hour_hat if `filter', fcolor(none) lcolor(red)), xtitle (log gross hourly wages (GBP)) legend(lab(1 "observed") lab( 2 "predicted")) name(log, replace)
-	
-	twoway (hist wage_hour if `filter' & wage_hour < 150, lcolor(gs12) fcolor(gs12)) ///
-		(hist wage_hour_hat if `filter' & wage_hour_hat < 150, fcolor(none) lcolor(red)), xtitle (gross hourly wages (GBP)) legend(lab(1 "observed") lab( 2 "predicted")) name(levels, replace)
-		
+    local filter = "`1'"
+
+    quietly sum lwage_hour lwage_hour_hat wage_hour wage_hour_hat if `filter'
+
+    if "`2'" != "nocorr" {
+        corr wage_hour L1.wage_hour if `filter' & previouslyWorking
+        corr wage_hour_hat L1.wage_hour_hat if `filter' & previouslyWorking
+    }
+
+    // Log wage graph
+    twoway (hist lwage_hour if `filter', lcolor(gs12) fcolor(gs12) ) ///
+        (hist lwage_hour_hat if `filter', fcolor(none) lcolor(red) ), ///
+        xtitle("log gross hourly wages (GBP)") ///
+        legend(label(1 "observed") label(2 "predicted")) ///
+        name(log, replace) ///
+        title("`3'")
+    
+    graph export "${dir_validation_graphs}/wages/log_`4'.png", replace
+
+    // Level wage graph
+    twoway (hist wage_hour if `filter' & wage_hour < 150, percent lcolor(gs12) fcolor(gs12) start(0) width(1)) ///
+        (hist wage_hour_hat if `filter' & wage_hour_hat < 150, percent fcolor(none) lcolor(red) start(0) width(1)), ///
+        xtitle("gross hourly wages (GBP)") ///
+        legend(label(1 "observed") label(2 "predicted")) ///
+        name(levels, replace) ///
+        title("`3'")
+    
+    graph export "${dir_validation_graphs}/wages/level_`4'.png", replace
+
 end
 
-capture program drop analyseFit2
-program analyseFit2
-
-	local filter = "`1'"
-
-	sum lwage_hour lwage_hour_hat wage_hour wage_hour_hat if `filter'
-	if ("`2'" != "nocorr") {
-		corr wage_hour L1.wage_hour if `filter' & previouslyWorking
-		corr wage_hour_hat L1.wage_hour_hat if `filter' & previouslyWorking
-	}
-		
-	twoway (hist lwage_hour if `filter', lcolor(gs12) fcolor(gs12)) ///
-		(hist lwage_hour_hat if `filter', fcolor(none) lcolor(red)), xtitle (log gross hourly wages (GBP)) legend(lab(1 "observed") lab( 2 "predicted")) name(log, replace) title("`3'")
-		graph export "${dir_graphs}/log_`4'", replace 
-	
-	twoway (hist wage_hour if `filter' & wage_hour < 150, lcolor(gs12) fcolor(gs12)) ///
-		(hist wage_hour_hat if `filter' & wage_hour_hat < 150, fcolor(none) lcolor(red)), xtitle (gross hourly wages (GBP)) legend(lab(1 "observed") lab( 2 "predicted")) name(levels, replace) title("`3'") 
-		graph export "${dir_graphs}/level_`4'", replace
-
-end
 
 capture program drop outputResults
 program outputResults
@@ -122,12 +103,12 @@ program outputResults
 	
 	matrix results = r(table)
 	matrix results = results[1..6,1...]'   //extract the first six rows of results, and then transpose results
-	putexcel set "$dir_data/`outputFile'.xlsx", sheet("Estimates") replace 
+	putexcel set "$dir_raw_results/wages/`outputFile'.xlsx", sheet("Estimates") replace 
 	
 	putexcel A3 = matrix(results), names nformat(number_d2)
 	
 	matrix results = e(V)
-	putexcel set "$dir_data/`outputFile'.xlsx", sheet("Varcov") modify
+	putexcel set "$dir_raw_results/wages/`outputFile'.xlsx", sheet("Varcov") modify
 	putexcel A3 = matrix(results), names nformat(number_d2)
 		
 end
@@ -171,7 +152,7 @@ save "$work_dir/growth_rates", replace
 
 // Note: use code above if calculating real wage growth inside of the simulation, but if loading from excel use values from excel in Stata too. 
 //They *should* be the same but it is more consistent to have one source of values. 
-import excel "$dir_data/time_series_factor.xlsx", sheet("UK_wage_growth") firstrow clear // Import real wage growth rates
+import excel "$dir_external_data/time_series_factor.xlsx", sheet("UK_wage_growth") firstrow clear // Import real wage growth rates
 rename Year stm
 rename Value real_wage_growth
 replace stm = stm - 2000
@@ -179,7 +160,7 @@ sum real_wage_growth if stm == 15
 gen base = r(mean)
 replace real_wage_growth = real_wage_growth / base // Note: switching from 100 base to 1 base as that's what happens in the simulation when rebasing indices
 drop base
-save "$dir_data/growth_rates", replace
+save "$dir_external_data/growth_rates", replace
 
 
 /**************************************************************/
@@ -189,31 +170,16 @@ save "$dir_data/growth_rates", replace
 /**************************************************************/
 use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
 
-drop if dag < $min_age
+do "$dir_do/variable_update"
+
+drop if dag < $min_age 
+
 * screen data to ensure that idperson and swv uniquely identify observations
 sort idperson swv
+duplicates report idperson swv
 gen chk = 0
 replace chk = 1 if (idperson == idperson[_n-1] & swv == swv[_n-1])
 drop if chk == 1
-
-* Fill in missing information on year (stm) based on wave (swv)
-/*
-replace stm = 2009 if swv == 1 & missing(stm)
-replace stm = 2010 if swv == 2 & missing(stm)
-replace stm = 2011 if swv == 3 & missing(stm)
-replace stm = 2012 if swv == 4 & missing(stm)
-replace stm = 2013 if swv == 5 & missing(stm)
-replace stm = 2014 if swv == 6 & missing(stm)
-replace stm = 2015 if swv == 7 & missing(stm)
-replace stm = 2016 if swv == 8 & missing(stm)
-replace stm = 2017 if swv == 9 & missing(stm)
-replace stm = 2018 if swv == 10 & missing(stm)
-replace stm = 2019 if swv == 11 & missing(stm)
-replace stm = 2020 if swv == 12 & missing(stm)
-replace stm = 2021 if swv == 13 & missing(stm)
-*/
-
-replace stm = stm - 2000
 
 
 /**************************************************************/
@@ -221,14 +187,15 @@ replace stm = stm - 2000
 *	merge in real growth index from microsimulation's input folder
 *
 /**************************************************************/
-merge m:1 stm using "$dir_data/growth_rates", keep(3) nogen keepusing(real_wage_growth)
+merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(real_wage_growth)
 
 //rename drgnl drgn1 // Rename region variable to drgn1 (one, not "l")
 
 *Variable stm identifies time periods. Need to ensure that combining idperson and stm ensures uniqueness.
+duplicates report idperson stm
 duplicates tag idperson stm, gen(dup)
-sort idperson stm
-//DP: no such cases //
+sort idperson stm 
+/*DP: no duplicates in terms of idperson and stm therefore the code below in no longer needed 
 
 *However, this affects many variables: idhh, dag, ddt, dpd, ddt01, potentially idpartner. Might be best to move entire household. 
 *Furthermore, the duplicated observation can occur in a year for which y-1 and y+1 have been observed. 
@@ -250,19 +217,16 @@ gen count_year = stm - min_observed_year
 sort idperson stm swv // Sort interview date in ascending order - earliest interview will be the one with the gap_prev set to 1
 by idperson: gen gap_prev = (((count_year - count_year[_n-1]) > 1) & count_year>0) // There is a gap in year -1
 by idperson: replace gap_prev = 1 if _n == 1 & dup == 1 & stm > 2009
-//DP: 0 cases 
 
 gsort +idperson -stm -swv // Sort years in reverse order. Sort int date in descending order - later interview will be the one with gap_next set to 1
 by idperson: gen gap_next = (((count_year - count_year[_n-1]) < -1) & stm != 2018) // There is a gap in year +1
 sort idperson stm swv
 by idperson: replace gap_next = 1 if _n == _N & dup == 1 
-//DP: 1,547 real changes made
 by idperson: replace gap_prev = 0 if gap_next[_n-1] == 1 & dup[_n-1] == 1 // If previous observation already has flag set to move to next period, can't move another one to the same period
-//DP: 3,193 real changes made
+
 
 *Check if whole household is duplicated
 bys idhh swv: egen min_dup = min(dup) // If == 1, then every observation for that household is duplicated
-// 18480 cases 
 
 *Check if whole household can be moved either back or forward:
 bys idhh stm: egen hh_gap_prev = min(gap_prev)
@@ -270,11 +234,11 @@ bys idhh stm: egen hh_gap_next = min(gap_next)
 
 *Generate identifier for the whole household which should be moved: move the observation from the wave which is closer to the gap
 gen move = 1 if dup == 1 & (hh_gap_prev == 1 | hh_gap_next == 1) & min_dup == 1
-//DP: 6548 cases 
 
 *Move observations:
 replace stm = stm-1 if move == 1 & hh_gap_prev == 1 /*3,425 real changes made*/
 replace stm = stm+1 if move == 1 & hh_gap_next == 1 /*3,123 real changes made*/
+
 
 *Drop households with duplicated observations, keeping observations from more recent waves if duplicated years:
 sort stm idperson swv
@@ -284,13 +248,18 @@ by stm idperson: egen max_wave = max(swv) // Keep more recent obs
 gen drop_idhh = idhh if max_wave == swv & dup == 1 // This identifies idhh which should be dropped
 bys idhh stm: egen drop_idhh_max = max(drop_idhh) 
 drop if !missing(drop_idhh_max)
-//DP: 8,119 observations deleted
-duplicates drop idperson stm, force // Few duplicates left, drop
 
-
-****************************************
+duplicates drop idperson stm, force 
+*/
+ 
+/**************************************************************/
+*
+*	preliminaries
+*
+/**************************************************************/
 * Setting STATA to recognize Panel Data
 xtset idperson stm
+
 * total hours work per week (average)
 gen hours = 0
 replace hours = jbhrs if ((jbhrs > 0) & (jbhrs < .))
@@ -334,9 +303,13 @@ gen yplgrs_dv_level = sinh(yplgrs_dv)
 gen wage_hour = .
 replace wage_hour = yplgrs_dv_level / hours / 4.333 if (yplgrs_dv_level >= 50 & yplgrs_dv_level <= 83333 & hours >= 1 & hours <= 100)
 sum wage_hour, det
+fre wage_hour if wage_hour==0
+fre wage_hour if wage_hour==.
 *replace wage_hour = . if wage_hour < 4 | wage_hour > 70
+
 * relationship status (1=cohabitating)
 gen mar = (dcpst==1)
+
 * children
 gen any02 = dnc02 > 0
 gen dnc4p = dnc
@@ -344,17 +317,14 @@ replace dnc4p = 1 if (dnc>4)
 gen dnc2p = dnc
 replace dnc2p = 2 if (dnc>2)
 cap gen child = (dnc>0)
+
 * individual weights
-by idperson: egen wgt = mean(dimlwt)
-* 
-
-
-/**************************************************************/
-*
-*	preliminaries
-*
-/**************************************************************/
+//by idperson: egen wgt = mean(dimlwt)
+by idperson: egen wgt = mean(dimxwt)
+ 
+* ln wages 
 gen lwage_hour = ln(wage_hour)
+
 hist lwage_hour if lwage_hour > 0 & lwage_hour < 4.4
 
 gen swage_hour = asinh(wage_hour)
@@ -362,20 +332,77 @@ hist swage_hour if (swage_hour > 1 & swage_hour < 5)
 
 replace lwage_hour = . if (wage_hour<5 | wage_hour>1000)
 
+gen lwage_hour_2 = lwage_hour^2
+
+*correct employment status 
 replace les_c3 = 3 if lwage_hour == . & les_c3 ! = 2 // PB: employment status is set on the basis of hourly wage not missing, so recode labour market activity status to match this for non-students
 replace les_c3 = 1 if lwage_hour != . // PB: as above, if wage present consider as employed
 
 recode deh_c3 dehm_c3 dehf_c3 drgn1 dhe (-9=.)
 
+gen L1les_c3 = L1.les_c3
 
-/**************************************************************/
-*
-*	pooled cross-sectional regressions
-*
-/**************************************************************/
+*part time work 
 gen pt = (hours >  0) * (hours <= 25)
 drop hrs0_m1 hrs1_m1
 
+
+
+*****************************************************************************************************************************
+* Set Excel file 
+* Info sheet - first stage 
+putexcel set "$dir_results/reg_employmentSelection", sheet("Info") replace
+putexcel A1 = "Description:"
+putexcel B1 = "This file contains regression estimates from the first stage of the Heckman selection model used to estimates wages."
+putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova" 
+putexcel A3 = "Last edit: 1 July 2025 DP"
+
+putexcel A4 = "Process:", bold
+putexcel B4 = "Description:", bold
+putexcel A5 = "EmploymentSelection_FemaleNE"
+putexcel B5 = "First stage Heckman selection estimates for women that do not have an observed wage in the previous year"
+putexcel A6 = "EmploymentSelection_MaleNE"
+putexcel B6 = "First stage Heckman selection estimates for women that do not have an observed wage in the previous year"
+putexcel A7 = "EmploymentSelection_FemaleE"
+putexcel B7 = "First stage Heckman selection estimates for women that have an observed wage in the previous year"
+putexcel A8 = "EmploymentSelection_MaleE"
+putexcel B8 = "First stage Heckman selection estimates for men that have an observed wage in the previous year"
+
+putexcel A11 = "Notes:", bold
+putexcel B11 = "Estimated on panel data unlike the labour supply estimates"
+putexcel B12 = "Predicted wages used as input into union parameters and income process estimates"
+putexcel B13 = "Two-step Heckman command is used which does not permit weights"
+
+* Info sheet - second stage 
+putexcel set "$dir_results/reg_wages", sheet("Info") replace
+putexcel A1 = "Description:"
+putexcel B1 = "This file contains regression estimates used to calculate potential wages for males and females in the simulation."
+putexcel A2 = "Authors:	Patryk Bronka, Daria Popova" 
+putexcel A3 = "Last edit: 1 July 2025 DP"
+
+putexcel A4 = "Process:", bold
+putexcel B4 = "Description:", bold
+putexcel A5 = "Wages_FemalesNE"
+putexcel B5 = "Heckman selection estimates using women that do not have an observed wage in the previous year"
+putexcel A6 = "Wages_MalesNE"
+putexcel B6 = "Heckman selection estimates using men that do not have an observed wage in the previous year"
+putexcel A7 = "Wages_FemalesE"
+putexcel B7 = "Heckman selection estimates using women that have an observed wage in the previous year"
+putexcel A8 = "Wages_MalesE"
+putexcel B8 = "Heckman selection estimates using men that have an observed wage in the previous year"
+
+putexcel A11 = "Notes:", bold
+putexcel B11 = "Estimated on panel data unlike the labour supply estimates"
+putexcel B12 = "Predicted wages used as input into union parameters and income process estimates"
+putexcel B13 = "Two-step Heckman command is used which does not permit weights"
+putexcel B14 = "Regions: London is the reference region" 
+
+
+/**************************************************************/
+*
+*	Regressions
+*
+/**************************************************************/
 * Strategy: 
 * 1) Heckman estimated on the sub-sample of individuals who were not observed working in previous period. 
 *    Wage equation does not controls for lagged wage
@@ -384,103 +411,880 @@ drop hrs0_m1 hrs1_m1
 * Specification of selection equation is the same in the two samples
 
 * Flag to identify observations to be included in the estimation sample 
+/* The sample should include only individuals who are observed for at least two periods, and then the first observation should not be used in the estimation. */
 bys idperson: gen obs_count = _N
-gen in_sample = (obs_count > 1 & swv > 1)
+gen in_sample = (obs_count > 1 & swv > 1) 
 
 * Flag to distinguish the two samples
 capture drop previouslyWorking
-gen previouslyWorking = (L1.lwage_hour != .) /* PB 07.02.2023: I think this will set previosuly working to 0 for everyone 
-who is not observed in the previous period, e.g. all observations at Wave 1. I think the sample should include only individuals 
-who are observed for at least two periods, and then the first observation should not be used in the estimation. */
+gen previouslyWorking = (L1.lwage_hour != .) 
+fre previouslyWorking
 
+* Prep storage 
 capture drop lwage_hour_hat wage_hour_hat esample
 gen lwage_hour_hat = .
 gen wage_hour_hat = .
 gen esample = .
-
-gen L1les_c3 = L1.les_c3
-gen lwage_hour_2 = lwage_hour^2
-
 gen pred_hourly_wage = .
 
 *** 1) Heckman estimated on the sub-sample of individuals who were not observed working in previous period. 
 ****   Wage equation does not control for lagged wage
-
+**************************************************************************************************************************
 * women
-global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd i.dhe ib8.drgn1  pt real_wage_growth"
-global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd i.dhe ib8.drgn1 " 
+**************************************************************************************************************************
+global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
+global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
 local filter = "dgn==0 & dag>=$min_age & dag<=$max_age & !previouslyWorking"
 *heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep
+heckman $wage_eqn if `filter', select($seln_eqn) twostep 
 outputResults "Not-working women3"
 
-outreg2 stats(coef se pval) using "$dir_data/Output_NWW.doc", replace ///
+outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_NWW.doc", replace ///
 title("Heckman-corrected wage equation estimated on the sample of women who were not in employment last year") ///
- ctitle(In education) label side dec(2) noparen 
-
+ ctitle(Not working women) label side dec(2) noparen 
+ 
+ 
 *xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
 computePredicted "heckman" `filter'
-analyseFit "e(sample)" "nocorr"
-replace esample = 1 if e(sample)
-replace pred_hourly_wage = wage_hour_hat if e(sample)
+analyseFit "e(sample)" "nocorr" "Not working women, 17-64 years" "NWW"
+gen in_sample_fnpw = e(sample)
+replace pred_hourly_wage = wage_hour_hat if in_sample_fnpw
+
+* Save sample for later use (internal validation)
+save "$dir_validation_data/Female_NPW_sample", replace 
+
+* Formatted results
+* Clean up matrix of estimates 
+* Note: Zeros values are eliminated 
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/wages/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/wages/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+
+* Second stage
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Females_NLW") replace
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+* Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Females_NLW") modify
+putexcel A1 = matrix(nonzero_b'), names //nformat(number_d2) 
+
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Females_NLW") firstrow ///
+	clear
+ds 
+
+drop if C == 0 // UPDATE 
+drop A 
+drop AH-BM // UPDATE
 
 
 
+mkmat *, matrix(Females_NLW)
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_FemalesNE") modify 
+putexcel B2 = matrix(Females_NLW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_FemalesNE") modify 
+
+local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
+
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+
+* First stage
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Females_NLW") firstrow ///
+	clear
+ds 
+
+drop if AN == 0 // UPDATE
+drop A 
+drop C-AG // UPDATE
+drop BN // UPDATE
+
+
+mkmat *, matrix(Females_NLW)
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_FemaleNE") modify 
+putexcel B2 = matrix(Females_NLW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_FemaleNE") modify 
+	
+local var_list Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other  Constant 
+	
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+cap drop lambda
+
+
+* Calculate RMSE 
+cap drop residuals squared_residuals  
+gen residuals = lwage_hour - lwage_hour_hat
+gen squared_residuals = residuals^2
+
+preserve 
+keep if `filter'
+sum squared_residuals 
+di "RMSE for Not employed women:  " sqrt(r(mean))
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
+A2=("Wages_FemalesNE") B2=(sqrt(r(mean))) 
+restore 
+
+
+****************************************************************************************************************************
 * men
-global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd i.dhe ib8.drgn1  pt real_wage_growth"
-global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd i.dhe ib8.drgn1 " 
+****************************************************************************************************************************
+global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
+global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
 local filter = "dgn==1 & dag>=$min_age & dag<=$max_age & !previouslyWorking"
 *heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep
+heckman $wage_eqn if `filter', select($seln_eqn) twostep 
 outputResults "Not-working men3"
 
-outreg2 stats(coef se pval) using "$dir_data/Output_NWM.doc", replace ///
-title("Heckman-corrected wage equation estimated on the sample of men who were not in employment in the previous year") ///
-ctitle(Wage equation coef.) label side dec(2) noparen 
-
+outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_NWM.doc", replace ///
+title("Heckman-corrected wage equation estimated on the sample of men who were not in employment last year") ///
+ ctitle(Not working men) label side dec(2) noparen 
+ 
+ 
+*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
 computePredicted "heckman" `filter'
-analyseFit "e(sample)" "nocorr"
-replace esample = 1 if e(sample)
-replace pred_hourly_wage = wage_hour_hat if e(sample)
+analyseFit "e(sample)" "nocorr" "Not working men, 17-64 years" "NWM"
+gen in_sample_mnpw = e(sample)
+replace pred_hourly_wage = wage_hour_hat if in_sample_mnpw
+
+* Save sample for later use (internal validation)
+save "$dir_validation_data/Male_NPW_sample", replace 
+
+* Formatted results
+* Clean up matrix of estimates 
+* Note: Zeros values are eliminated 
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/wages/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/wages/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+
+* Second stage
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Males_NLW") replace
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+* Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Males_NLW") modify
+putexcel A1 = matrix(nonzero_b'), names //nformat(number_d2) 
+
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Males_NLW") firstrow ///
+	clear
+ds 
+
+drop if C == 0 // UPDATE 
+drop A 
+drop AH-BM // UPDATE
+
+
+
+mkmat *, matrix(Males_NLW)
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_MalesNE") modify 
+putexcel B2 = matrix(Males_NLW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_MalesNE") modify 
+
+local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
+
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+
+* First stage
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Males_NLW") firstrow ///
+	clear
+ds 
+
+drop if AN == 0 // UPDATE
+drop A 
+drop C-AG // UPDATE
+drop BN // UPDATE
+
+
+mkmat *, matrix(Males_NLW)
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_MaleNE") modify 
+putexcel B2 = matrix(Males_NLW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_MaleNE") modify 
+	
+local var_list Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other Constant 
+	
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+cap drop lambda
+
+* Calculate RMSE 
+cap drop residuals squared_residuals  
+gen residuals = lwage_hour - lwage_hour_hat
+gen squared_residuals = residuals^2
+
+preserve 
+keep if `filter'
+sum squared_residuals 
+di "RMSE for Not employed men:  " sqrt(r(mean))
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
+A3=("Wages_MalesNE") B3=(sqrt(r(mean))) 
+restore 
+
 
 *** 2) Heckman estimated on the sub-sample of individuals who were observed working in previous period. 
 ***    Wage equation controls for lagged wage
-
+***************************************************************************************************************************************
 * women
-global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd i.dhe ib8.drgn1 pt real_wage_growth"
-global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd i.dhe ib8.drgn1 " 
-local filter = "dgn==0 & dag>=$min_age & dag<=$max_age & swv > 1 & previouslyWorking"
+***************************************************************************************************************************************
+global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
+global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
+local filter = "dgn==0 & dag>=$min_age & dag<=$max_age & previouslyWorking"
 *heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep
+heckman $wage_eqn if `filter', select($seln_eqn) twostep 
 outputResults "Working women3"
 
-outreg2 stats(coef se pval) using "$dir_data/Output_WW.doc", replace ///
-title("Heckman-corrected wage equation estimated on the sample of women who were in employment in the previous year") ///
- ctitle(Wage equation coef.) label side dec(2) noparen 
-
+outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_WW.doc", replace ///
+title("Heckman-corrected wage equation estimated on the sample of women who were in employment last year") ///
+ ctitle(Working women) label side dec(2) noparen 
+ 
+ 
+*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
 computePredicted "heckman" `filter'
-analyseFit "e(sample)" 
-replace esample = 1 if e(sample)
-replace pred_hourly_wage = wage_hour_hat if e(sample)
+analyseFit "e(sample)" "nocorr" "Working women, 17-64 years" "WW"
+gen in_sample_fpw = e(sample)
+replace pred_hourly_wage = wage_hour_hat if in_sample_fpw
 
+* Save sample for later use (internal validation)
+save "$dir_validation_data/Female_PW_sample", replace 
+
+* Formatted results
+* Clean up matrix of estimates 
+* Note: Zeros values are eliminated 
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/wages/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/wages/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+
+* Second stage
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Females_LW") replace
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+* Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Females_LW") modify
+putexcel A1 = matrix(nonzero_b'), names //nformat(number_d2) 
+
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Females_LW") firstrow ///
+	clear
+ds 
+
+drop if C == 0 // UPDATE 
+drop A 
+drop AI-BM // UPDATE
+
+
+mkmat *, matrix(Females_LW)
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_FemalesE") modify 
+putexcel B2 = matrix(Females_LW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_FemalesE") modify 
+
+local var_list L1_log_hourly_wage Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
+
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+
+* First stage
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Females_LW") firstrow ///
+	clear
+ds 
+
+drop if AO == 0 // UPDATE
+drop A 
+drop C-AH // UPDATE
+drop BN // UPDATE
+
+
+mkmat *, matrix(Females_LW)
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_FemaleE") modify 
+putexcel B2 = matrix(Females_LW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_FemaleE") modify 
+	
+local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other  Constant 
+	
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+cap drop lambda
+
+
+* Calculate RMSE 
+cap drop residuals squared_residuals  
+gen residuals = lwage_hour - lwage_hour_hat
+gen squared_residuals = residuals^2
+
+preserve 
+keep if `filter'
+sum squared_residuals 
+di "RMSE for Employed women:  " sqrt(r(mean))
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
+A4=("Wages_FemalesE") B4=(sqrt(r(mean))) 
+restore 
+
+
+****************************************************************************************************************************************
 * men
-global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd i.dhe ib8.drgn1 pt real_wage_growth"
-global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd i.dhe ib8.drgn1" 
-local filter = "dgn==1 & dag>=$min_age & dag<=$max_age & swv > 1 & previouslyWorking"
+****************************************************************************************************************************************
+global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
+global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
+local filter = "dgn==1 & dag>=$min_age & dag<=$max_age & previouslyWorking"
 *heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep
+heckman $wage_eqn if `filter', select($seln_eqn) twostep 
 outputResults "Working men3"
 
-outreg2 stats(coef se pval) using "$dir_data/Output_WM.doc", replace ///
-title("Heckman-corrected wage equation estimated on the sample of men who were in employment in the previous year") ///
- ctitle(Wage equation coef.) label side dec(2) noparen 
-
-
+outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_WM.doc", replace ///
+title("Heckman-corrected wage equation estimated on the sample of men who were in employment last year") ///
+ ctitle(Working women) label side dec(2) noparen 
+ 
+ 
+*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
 computePredicted "heckman" `filter'
-analyseFit "e(sample)"
-replace esample = 1 if e(sample)
-replace pred_hourly_wage = wage_hour_hat if e(sample)
+analyseFit "e(sample)" "nocorr" "Working men, 17-64 years" "WM"
+gen in_sample_mpw = e(sample)
+replace pred_hourly_wage = wage_hour_hat if in_sample_mpw
 
+* Save sample for later use (internal validation)
+save "$dir_validation_data/Male_PW_sample", replace 
+
+* Formatted results
+* Clean up matrix of estimates 
+* Note: Zeros values are eliminated 
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/wages/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/wages/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+
+* Second stage
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Males_LW") replace
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+* Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_raw_results/wages/reg_wages", sheet("Males_LW") modify
+putexcel A1 = matrix(nonzero_b'), names //nformat(number_d2) 
+
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Males_LW") firstrow ///
+	clear
+ds 
+
+drop if C == 0 // UPDATE 
+drop A 
+drop AI-BM // UPDATE
+
+
+mkmat *, matrix(Males_LW)
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_MalesE") modify 
+putexcel B2 = matrix(Males_LW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_wages", ///
+	sheet("Wages_MalesE") modify 
+
+local var_list L1_log_hourly_wage Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
+
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+
+* First stage
+preserve
+
+import excel "$dir_raw_results/wages/reg_wages", sheet("Males_LW") firstrow ///
+	clear
+ds 
+
+drop if AO == 0 // UPDATE
+drop A 
+drop C-AH // UPDATE
+drop BN // UPDATE
+
+
+mkmat *, matrix(Males_LW)
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_MaleE") modify 
+putexcel B2 = matrix(Males_LW)
+
+restore 
+
+* Labelling 
+putexcel set "$dir_results/reg_employmentSelection", ///
+	sheet("EmploymentSelection_MaleE") modify 
+	
+local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
+	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
+	Ethn_Asian Ethn_Black Ethn_Other Constant 
+	
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+
+cap drop lambda
+
+
+* Calculate RMSE 
+cap drop residuals squared_residuals  
+gen residuals = lwage_hour - lwage_hour_hat
+gen squared_residuals = residuals^2
+
+preserve 
+keep if `filter'
+sum squared_residuals 
+di "RMSE for Employed men:  " sqrt(r(mean))
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
+A5=("Wages_MalesE") B5=(sqrt(r(mean))) 
+restore 
+
+
+sum wage_hour if wage_hour >0& stm==19, d
+sum pred_hourly_wage if pred_hourly_wage >0& stm==19, d
+
+/*
+******************************************************************************************************************************************
 * all
 analyseFit "esample == 1"
 analyseFit "esample == 1 & dgn == 0"	// women
@@ -496,15 +1300,14 @@ forvalues year = 11/23 {
 	analyseFit2 "esample == 1 & dgn == 1 & deh_c3 == 1 & stm == `year'" "nocorr" "Year 20`year' men prv emp high ed" "men_highed_`year'_graph.png"	// men
 }
 
-
+*/
 
 // Note: sigma reported in the estimated regressions is the standard deviation of the residuals (=RMSE, assuming residuals are normally distributed)
 
 *** Save for use in the do file estimating non-employment income
 replace pred_hourly_wage = exp(lwage_hour) if missing(pred_hourly_wage)
 
-save "$dir_ukhls_data/ukhls_pooled_all_obs.dta", replace
-
+save "$dir_ukhls_data/ukhls_pooled_all_obs_10.dta", replace
 
 *** Calculate the proportion of "true zero" hours of work among those in the "ZERO" weekly hours of labour supply bracket. 
 *I.e. the share of zero hours among 0-5 hours for those at risk of work. 

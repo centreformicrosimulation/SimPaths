@@ -7,19 +7,19 @@
 *	AUTH: Justin van de Ven (JV)
 *	LAST EDIT: 01/11/2023 (JV)
 *
-*********************************************************************/
+**********************************************************************/
 
 
 /**********************************************************************
 *	start analysis
-*********************************************************************/
+**********************************************************************/
 cd "${dir_data}"
 disp "imputing wealth data"
 *global yearWealth = 2019
 
 /**********************************************************************
 *	preliminaries
-*********************************************************************/
+**********************************************************************/
 * define seed to ensure replicatability of results
 global seedBase = 3141592
 global seedAdjust = 0
@@ -27,7 +27,7 @@ global seedAdjust = 0
 
 /**********************************************************************
 *	adjust UKHLS data to facilitate imputation
-*********************************************************************/
+**********************************************************************/
 use "population_initial_fs_UK_$yearWealth", clear
 sort idperson
 drop liquid_wealth smp rnk mtc
@@ -35,7 +35,7 @@ drop liquid_wealth smp rnk mtc
 
 /**********************************************************************
 *	align variable definitions
-*********************************************************************/
+**********************************************************************/
 gen dvage17 = 0
 forval ii = 1/16 {
 	
@@ -147,13 +147,13 @@ drop pct1
 
 /**********************************************************************
 *	save working data
-*********************************************************************/
+**********************************************************************/
 save "ukhls_wealthtemp.dta", replace
 
 
 /**********************************************************************
 *	analyse sample
-*********************************************************************/
+**********************************************************************/
 /*
 use "ukhls_wealthtemp.dta", clear
 tab gor2 [fweight=dwt2]
@@ -179,7 +179,7 @@ sum inc [fweight=dwt2] if (chk==0)
 *	matching organised around 3 sets of ranking criteria, where rank 1
 *	criteria are the most fine grained, and rank 3 are the most coarse
 *	grained.
-*********************************************************************/
+**********************************************************************/
 * identify non-reference population and save for retrieval
 use "ukhls_wealthtemp.dta", clear
 gen treat = (single_woman + single_man + couple_ref)
@@ -368,7 +368,7 @@ keep if (treat)
 
 /**********************************************************************
 *	append non-reference population
-*********************************************************************/
+**********************************************************************/
 append using "ukhls_wealthtemp2.dta"
 sort bu
 recode wealthi (mis=0)
@@ -391,7 +391,7 @@ sum liquid_wealth [fweight=dwt2], detail
 
 /**********************************************************************
 *	clean data and save
-*********************************************************************/
+**********************************************************************/
 use ukhls_wealthtemp3, clear
 drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi
 recode rnk smp mtc (missing = -9)
@@ -401,10 +401,10 @@ label var mtc "benefit unit id (bu) of matched observation"
 label var liquid_wealth "total wealth including housing, business and private (personal and occupational) pensions" 
 save "population_initial_fs_UK_$yearWealth", replace
 
-
+/*
 /**************************************************************************************
 * clean-up and exit
-*************************************************************************************/
+**************************************************************************************/
 #delimit ;
 local files_to_drop 
 	ukhls_wealthtemp.dta
