@@ -157,6 +157,7 @@ public class Parameters {
     public static final int MinimumIterationsBeforeTestingConvergenceCriteria = 20;	//Run this number of iterations to accumulate estimates of (aggregate) labour supply (cross) elasticities before testing the convergence criterion (i.e. the norm of (supply * demand elasticities) matrix < 1)
     public static final int MaxConvergenceAttempts = 2 * MinimumIterationsBeforeTestingConvergenceCriteria;		//Allow the equilibrium convergence criterion to fail the test this number of times before potentially terminating the simulation.
     public static final double RateOfConvergenceFactor = 0.9;
+    public static final int MAX_EMPLOYMENT_ALIGNMENT = 500; // the amount by which the coefficient used in the employment alignment can be shifted up or down;
 
     // parameters to manage simulation of optimised decisions
     public static boolean projectLiquidWealth = false;

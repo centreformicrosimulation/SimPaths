@@ -1485,13 +1485,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         coefficientMaps.put(OccupancyExtended.Female_With_Dependent, Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent());
 
         Map<OccupancyExtended, List<String>> regressorsToModify = new HashMap<>();
-        regressorsToModify.put(OccupancyExtended.Single_Male, List.of("MaleLeisure"));
-        regressorsToModify.put(OccupancyExtended.Single_Female, List.of("FemaleLeisure"));
-        regressorsToModify.put(OccupancyExtended.Couple, List.of("MaleLeisure", "FemaleLeisure"));
-        regressorsToModify.put(OccupancyExtended.Male_AC, List.of("MaleLeisure"));
-        regressorsToModify.put(OccupancyExtended.Female_AC, List.of("FemaleLeisure"));
-        regressorsToModify.put(OccupancyExtended.Male_With_Dependent, List.of("MaleLeisure"));
-        regressorsToModify.put(OccupancyExtended.Female_With_Dependent, List.of("FemaleLeisure"));
+        regressorsToModify.put(OccupancyExtended.Single_Male, List.of("Hrs_40plus_Male"));
+        regressorsToModify.put(OccupancyExtended.Single_Female, List.of("Hrs_40plus_Female"));
+        regressorsToModify.put(OccupancyExtended.Couple, List.of("Hrs_40plus_Male", "Hrs_40plus_Female"));
+        regressorsToModify.put(OccupancyExtended.Male_AC, List.of("Hrs_40plus_Male"));
+        regressorsToModify.put(OccupancyExtended.Female_AC, List.of("Hrs_40plus_Female"));
+        regressorsToModify.put(OccupancyExtended.Male_With_Dependent, List.of("Hrs_40plus_Male"));
+        regressorsToModify.put(OccupancyExtended.Female_With_Dependent, List.of("Hrs_40plus_Female"));
 
         double initialUtilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustment);
 
@@ -1499,7 +1499,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 persons, benefitUnits, coefficientMaps, regressorsToModify, initialUtilityAdjustment
         );
 
-        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 1);
+        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
 
         if (search.isTargetAltered()) {
             double newAdjustment = search.getTarget()[0];
@@ -1520,7 +1520,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     ) {
         double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentMap);
         ActivityAlignmentV2 activityAlignment = new ActivityAlignmentV2(benefitUnits, coefficientMap, regressionCoefficientName, occupancy);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, 500);
+        RootSearch search = getRootSearch(utilityAdjustment, activityAlignment, 1.0E-2, 1.0E-2, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], adjustmentMap);
             System.out.println("Utility adjustment for " + occupancyLabel + " was " + search.getTarget()[0]);
