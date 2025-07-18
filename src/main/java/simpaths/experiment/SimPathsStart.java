@@ -84,7 +84,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		}
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
-		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
+		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
 		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
 			country = Country.IT;
 		} else {
@@ -245,8 +245,8 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		// Create EUROMODPolicySchedule input from files
 		if (!rewritePolicySchedule &&
-				!new File("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
-			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + "input" + File.separator +
+				!new File(Parameters.getInputDirectory() + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
+			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + Parameters.getInputDirectory() +
 					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist. " +
 					"Provide excel file or use `--rewrite-policy-schedule` to re-construct from available policy files.");
 		};
@@ -378,7 +378,7 @@ public class SimPathsStart implements ExperimentBuilder {
 			// call to select policies
 
 			// load previously stored values for policy description and initiation year
-			MultiKeyCoefficientMap previousEUROMODfileInfo = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1, 3);
+			MultiKeyCoefficientMap previousEUROMODfileInfo = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1, 3);
 			Collection<File> euromodOutputTextFiles = FileUtils.listFiles(new File(Parameters.getEuromodOutputDirectory()), new String[]{"txt"}, false);
 			Iterator<File> fIter = euromodOutputTextFiles.iterator();
 			while (fIter.hasNext()) {

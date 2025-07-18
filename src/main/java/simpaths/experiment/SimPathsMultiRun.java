@@ -13,6 +13,7 @@ import java.util.Map;
 import simpaths.data.Parameters;
 import simpaths.data.XLSXfileWriter;
 import simpaths.model.SimPathsModel;
+import microsim.data.db.Experiment;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
 import microsim.engine.MultiRun;
@@ -73,21 +74,26 @@ public class SimPathsMultiRun extends MultiRun {
 			// if parseYamlConfig returns false (indicating bad filename passed), exit main
 			return;
 		}
-		
+
 		if (parameterArgs != null)
 			updateParameters(parameterArgs);
-
-
 		// set default values for country and start year
-		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
-		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
-			countryString = "Italy";
-		} else {
+		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
+		try {
+			if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
+				countryString = "Italy";
+			} else {
+				countryString = "United Kingdom";
+			}
+			String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
+			startYear = Integer.parseInt(valueYear);
+		} catch (NullPointerException e) {
+			System.out.println("No last database country and year found.");
 			countryString = "United Kingdom";
+			startYear = 2019;
 		}
+
 		country = Country.getCountryFromNameString(countryString);
-		String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
-		startYear = Integer.parseInt(valueYear);
 
 		if (innovationArgs!=null)
 			updateLocalParameters(innovationArgs);
@@ -402,6 +408,20 @@ public class SimPathsMultiRun extends MultiRun {
 			Object value = entry.getValue();
 
 			switch (key) {
+				case "working_directory":
+					Parameters.setWorkingDirectory(value.toString());
+					setExperimentFolders(value.toString(), true);
+					break;
+				case "input_directory":
+					Parameters.setInputDirectory(value.toString());
+					setExperimentFolders();
+					break;
+				case "input_directory_initial_populations":
+					Parameters.setInputDirectoryInitialPopulations(value.toString());
+					break;
+				case "euromod_output_directory":
+					Parameters.setEuromodOutputDirectory(value.toString());
+					break;
 				default:
 					try {
 						Field field = Parameters.class.getDeclaredField(key);
@@ -424,6 +444,37 @@ public class SimPathsMultiRun extends MultiRun {
 
 			}
 
+		}
+
+	}
+
+	public static void setExperimentFolders() {
+
+		try {
+			Field inputDir = Experiment.class.getDeclaredField("inputFolder");
+			inputDir.setAccessible(true);
+			inputDir.set(Experiment.class, Parameters.getInputDirectory());
+			inputDir.setAccessible(false);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+	}
+	public static void setExperimentFolders(String root_dir, boolean working_dir) {
+
+		try {
+			Field inputDir = Experiment.class.getDeclaredField("inputFolder");
+			inputDir.setAccessible(true);
+			inputDir.set(null, root_dir + File.separator + "input");
+			inputDir.setAccessible(false);
+			if (working_dir) {
+				Field outputDir = Experiment.class.getDeclaredField("outputRootFolder");
+				outputDir.setAccessible(true);
+				outputDir.set(null, root_dir + File.separator + "output");
+				outputDir.setAccessible(false);
+			}
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -453,7 +504,7 @@ public class SimPathsMultiRun extends MultiRun {
 
 		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
 		if (persist_population) model.setPersistPopulation(true);
-		if (persist_root) model.setPersistDatabasePath("./input/input");
+		if (persist_root) model.setPersistDatabasePath(Parameters.getInputDirectory() + "input");
 		updateLocalParameters(model);
 		if (modelArgs != null)
 			updateParameters(model, modelArgs);
