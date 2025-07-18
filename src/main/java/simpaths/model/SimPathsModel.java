@@ -2,50 +2,40 @@
 package simpaths.model;
 
 // import Java packages
-import java.io.*;
-import java.util.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.random.RandomGenerator;
 
-// import plug-in packages
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.Transient;
-import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.NotNull;
-import simpaths.data.*;
-import simpaths.data.startingpop.Processed;
-import simpaths.experiment.SimPathsCollector;
-import simpaths.model.decisions.DecisionParams;
-import microsim.alignment.outcome.ResamplingAlignment;
-import microsim.event.*;
-import microsim.event.EventListener;
-import org.apache.commons.collections4.keyvalue.MultiKey;
-import org.apache.commons.collections4.MapIterator;
-import org.apache.commons.collections4.map.LinkedMap;
-import org.apache.commons.collections4.map.MultiKeyMap;
-import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.math3.util.Pair;
-import org.apache.log4j.Logger;
-import org.apache.commons.lang3.time.StopWatch;
-
-// import JAS-mine packages
 import microsim.alignment.outcome.AlignmentOutcomeClosure;
+import microsim.alignment.outcome.ResamplingAlignment;
 import microsim.annotation.GUIparameter;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.db.DatabaseUtils;
 import microsim.engine.AbstractSimulationManager;
 import microsim.engine.SimulationEngine;
+import microsim.event.*;
+import microsim.event.EventListener;
 import microsim.matching.IterativeSimpleMatching;
 import microsim.matching.MatchingClosure;
 import microsim.matching.MatchingScoreClosure;
-
-// import LABOURsim packages
+import org.apache.commons.collections4.MapIterator;
+import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.collections4.map.LinkedMap;
+import org.apache.commons.collections4.map.MultiKeyMap;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.math3.util.Pair;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import simpaths.data.IEvaluation;
+import simpaths.data.MahalanobisDistance;
+import simpaths.data.Parameters;
+import simpaths.data.RootSearch;
+import simpaths.data.startingpop.Processed;
+import simpaths.experiment.SimPathsCollector;
+import simpaths.model.decisions.DecisionParams;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
@@ -54,6 +44,11 @@ import simpaths.model.taxes.Match;
 import simpaths.model.taxes.Matches;
 import simpaths.model.taxes.database.DatabaseExtension;
 import simpaths.model.taxes.database.TaxDonorDataParser;
+
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+import java.util.random.RandomGenerator;
 
 
 /**
@@ -95,7 +90,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean flagUpdateCountry = false;  // set to true if switch between countries
 
     @GUIparameter(description = "Simulated population size (base year)")
-    private Integer popSize = 170000;
+    private Integer popSize = 50000;
 
     @GUIparameter(description = "Simulation first year [valid range 2011-2019]")
     private Integer startYear = 2011;
@@ -572,6 +567,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // equivalised disposable income
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
 
+        // Update financial distress
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.FinancialDistress);
+
         // MENTAL HEALTH MODULE
         // Update mental health - determine (continuous) mental health level based on regression models + caseness
         yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1); //Step 1 of mental health
@@ -588,13 +586,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthPCS2);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
-        addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
-
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
         addEventToAllYears(Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
+        addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
         addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
         addEventToAllYears(Processes.EndYear);
@@ -2479,7 +2476,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             System.out.println("Completed initialising input dataset");
             System.out.println("Loading survey data for starting population");
             log.info("Loading survey data for starting population");
-            List<Household> inputHouseholdList = loadStaringPopulation();
+            List<Household> inputHouseholdList = loadStartingPopulation();
             System.out.println("completed loading survey data for starting population");
             log.info("completed loading survey data for starting population");
             if (!useWeights) {
@@ -3353,7 +3350,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         return processed;
     }
 
-    private List<Household> loadStaringPopulation() {
+    private List<Household> loadStartingPopulation() {
 
         List<Household> households;
 

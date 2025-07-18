@@ -174,6 +174,16 @@ public class DataParser {
 				+ "ALTER TABLE " + personTable + " DROP COLUMN need_socare;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN need_care RENAME TO need_socare;"
 
+				//DEMOGRAPHIC: Ethnicity
+				+ "ALTER TABLE " + personTable + " ADD ethnicity VARCHAR_IGNORECASE;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'White' WHERE dot = 1;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE dot = 2;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE dot = 3;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot = 4;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot = 5;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN dot;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot;"
+
 				//SYSTEM: Year left education (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD education_left VARCHAR_IGNORECASE;"
 				+ "UPDATE " + personTable + " SET education_left = 'False' WHERE sedex = 0;"
@@ -187,6 +197,13 @@ public class DataParser {
 				+ "UPDATE " + personTable + " SET adult_child = 'True' WHERE adultchildflag = 1;"
 				+ "ALTER TABLE " + personTable + " DROP COLUMN adultchildflag;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN adult_child RENAME TO adultchildflag;"
+
+				//Financial distress
+				+ "ALTER TABLE " + personTable + " ADD financial_distress_add VARCHAR_IGNORECASE;"
+				+ "UPDATE " + personTable + " SET financial_distress_add = 'False' WHERE financial_distress = 0;"
+				+ "UPDATE " + personTable + " SET financial_distress_add = 'True' WHERE financial_distress = 1;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN financial_distress;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN financial_distress_add RENAME TO financial_distress;"
 
 				//Homeownership
 				+ "ALTER TABLE " + personTable + " ADD dhh_owned_add VARCHAR_IGNORECASE;"

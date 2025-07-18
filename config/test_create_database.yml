@@ -1,0 +1,10 @@
+# FOR TESTING
+# CONFIG FILE TO CREATE NEW DATABASE OBJECTS
+
+# Arguments of the SimPathsMultiRun object overridden by the command-line
+countryString: "United Kingdom"
+executeWithGui: false
+randomSeed: 606
+startYear: 2019
+endYear: 2030
+popSize: 40000

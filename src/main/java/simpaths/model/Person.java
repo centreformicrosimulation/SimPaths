@@ -1,30 +1,28 @@
 package simpaths.model;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-
 import jakarta.persistence.*;
-
-import microsim.data.db.PanelEntityKey;
-import simpaths.data.ManagerRegressions;
-import simpaths.data.MultiValEvent;
-import simpaths.data.RegressionName;
-import simpaths.data.filters.FertileFilter;
-import simpaths.model.decisions.Axis;
-import simpaths.model.enums.*;
-import microsim.statistics.Series;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.log4j.Logger;
-
-import simpaths.data.Parameters;
-import simpaths.model.decisions.DecisionParams;
 import microsim.agent.Weight;
+import microsim.data.db.PanelEntityKey;
 import microsim.engine.SimulationEngine;
 import microsim.event.EventListener;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.IIntSource;
+import microsim.statistics.Series;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.log4j.Logger;
+import simpaths.data.ManagerRegressions;
+import simpaths.data.MultiValEvent;
+import simpaths.data.Parameters;
+import simpaths.data.RegressionName;
+import simpaths.data.filters.FertileFilter;
+import simpaths.model.decisions.Axis;
+import simpaths.model.decisions.DecisionParams;
+import simpaths.model.enums.*;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 
 import static simpaths.data.Parameters.getUnemploymentRateByGenderEducationAgeYear;
 
@@ -68,6 +66,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Education deh_c3_lag1;  //Lag(1) of education level
     @Enumerated(EnumType.STRING) private Education dehm_c3;      //Mother's education level
     @Enumerated(EnumType.STRING) private Education dehf_c3;      //Father's education level
+    @Enumerated(EnumType.STRING) private Ethnicity dot;          //Ethnicity
     @Enumerated(EnumType.STRING) private Indicator ded;          // in continuous education
     @Enumerated(EnumType.STRING) private Indicator der;          // return to education
     @Enumerated(EnumType.STRING) private Les_c4 les_c4;      //Activity (employment) status
@@ -137,14 +136,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Integer dls_lag1;      //life satisfaction - score 1-7 lag 1
     @Column(name="he_eq5d")
     private Double he_eq5d;
+    @Column(name="financial_distress") private Boolean financialDistress;
 
     @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
     @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
     @Transient private Boolean receivesBenefitsFlag; // Does person receive benefits
+    @Column(name="econ_benefits_uc") private Boolean receivesBenefitsFlagUC; // Person receives UC
+    @Transient private Boolean receivesBenefitsFlagUC_L1;
+    @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
+    @Transient private Boolean receivesBenefitsFlagNonUC_L1;
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
     private Integer hoursWorkedWeekly;
+    private Integer l1_lhw; // Lag(1) of hours worked weekly - use to initialise labour supply weekly_L1 (TODO)
 
 //	Potential earnings is the gross hourly wage an individual can earn while working
 //	and is estimated, for each individual, on the basis of observable characteristics as
@@ -280,6 +285,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhm = 9.;			//Set to median for under 18's as a placeholder
         dhmGhq = false;
         deh_c3 = Education.Low;
+        dot = mother.getDot();
         les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
         leftEducation = false;
         les_c7_covid = Les_c7_covid.Student;
@@ -294,6 +300,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         bornInSimulation = true;
         dhhOwned = false;
         receivesBenefitsFlag = false;
+        receivesBenefitsFlagNonUC = false;
+        receivesBenefitsFlagUC = false;
+        financialDistress = mother.getFinancialDistress();
         updateVariables(false);
     }
 
@@ -484,14 +493,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhe_pcs_lag1 = originalPerson.dhe_pcs;
         }
 
-        if (originalPerson.labourSupplyWeekly_L1 != null) {
-            labourSupplyWeekly_L1 = originalPerson.labourSupplyWeekly_L1;
+        if (originalPerson.l1_lhw != null) {
+            labourSupplyWeekly_L1 = Labour.convertHoursToLabour(originalPerson.l1_lhw);
         } else {
-            labourSupplyWeekly_L1 = originalPerson.getLabourSupplyWeekly();
+            labourSupplyWeekly_L1 = null; // Update only if value know; null values handled by getter. Should throw an exception if required before initialised in the simulation.
         }
 
         dhesp_lag1 = originalPerson.dhesp_lag1;
         hoursWorkedWeekly = originalPerson.hoursWorkedWeekly;
+        l1_lhw = originalPerson.l1_lhw;
         labourSupplyWeekly = originalPerson.getLabourSupplyWeekly();
         double[] sampleDifferentials = setMarriageTargets();
         desiredAgeDiff = Objects.requireNonNullElseGet(originalPerson.desiredAgeDiff, () -> sampleDifferentials[0]);
@@ -512,8 +522,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yearlyEquivalisedConsumption = originalPerson.yearlyEquivalisedConsumption;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         dhhOwned = originalPerson.dhhOwned;
+        dot = originalPerson.dot;
         receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
+        receivesBenefitsFlagNonUC = originalPerson.receivesBenefitsFlagNonUC;
+        receivesBenefitsFlagNonUC_L1 = originalPerson.receivesBenefitsFlagNonUC_L1;
+        receivesBenefitsFlagUC = originalPerson.receivesBenefitsFlagUC;
+        receivesBenefitsFlagUC_L1 = originalPerson.receivesBenefitsFlagUC_L1;
+        financialDistress = originalPerson.financialDistress;
 
         if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
             fullTimeHourlyEarningsPotential = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.fullTimeHourlyEarningsPotential));
@@ -540,7 +556,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // initialise random draws
         this.seed = seed;
-        innovations = new Innovations(32, 1, 1, seed);
+        innovations = new Innovations(33, 1, 1, seed);
 
         //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
         double[] sampleDifferentials = setMarriageTargets();
@@ -603,9 +619,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setAdditionalFieldsInInitialPopulation() {
 
         if (labourSupplyWeekly==null)
-            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue());
+            labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue()); // TODO: this can be simplified to obtain value from already initialised hours worked weekly variable? The entire database query on setup is redundant? See initialisation of the lag below.
         receivesBenefitsFlag_L1 = receivesBenefitsFlag;
-        labourSupplyWeekly_L1 = getLabourSupplyWeekly();
+        labourSupplyWeekly_L1 = Labour.convertHoursToLabour(l1_lhw);
+        receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC;
+        receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC;
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
             updateAgeGroup();
@@ -668,6 +686,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         ConsiderMortality,
         ConsiderRetirement,
         Fertility,
+        FinancialDistress,
         GiveBirth,
         Health,
         HealthEQ5D,
@@ -718,6 +737,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Fertility -> {
                 fertility();
+            }
+            case FinancialDistress -> {
+                updateFinancialDistress();
             }
             case GiveBirth -> {
     //			log.debug("Check whether to give birth for person " + this.getKey().getId());
@@ -943,6 +965,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         }
         return toRetire;
+    }
+
+    private void updateFinancialDistress() {
+        double prob = Parameters.getRegFinancialDistress().getProbability(this, Person.DoublesVariables.class);
+        financialDistress = innovations.getDoubleDraw(32) < prob;
     }
     
     /*
@@ -1884,6 +1911,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         ypnbihs_dv_lag1 = getYpnbihs_dv(); //Update lag(1) of gross personal non-benefit income
         labourSupplyWeekly_L1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
         receivesBenefitsFlag_L1 = receivesBenefitsFlag; // Lag(1) of flag indicating if individual receives benefits
+        receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC; // Lag(1) of flag indicating if individual receives non-UC benefits
+        receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC; // Lag(1) of flag indicating if individual receives UC
         L1_fullTimeHourlyEarningsPotential = fullTimeHourlyEarningsPotential; // Lag(1) of potential hourly earnings
 
         if (initialUpdate) {
@@ -2241,6 +2270,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_children_13_17,
         D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
         D_Econ_benefits,
+        D_Econ_benefits_NonUC,
+        D_Econ_benefits_UC,
+        D_Econ_benefits_UC_Lhw_ZERO,
+        D_Econ_benefits_UC_Lhw_TEN,
+        D_Econ_benefits_UC_Lhw_TWENTY,
+        D_Econ_benefits_UC_Lhw_THIRTY,
+        D_Econ_benefits_UC_Lhw_FORTY,
         D_Home_owner,
         D_Home_owner_L1,
         Dag,
@@ -2342,8 +2378,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Employmentsonfullfurlough,
         EquivalisedConsumptionYearly,
         EquivalisedIncomeYearly, 							//Equivalised income for use with the security index
+        EthnicityWhite,
+        EthnicityMixed,
+        EthnicityAsian,
+        EthnicityBlack,
+        EthnicityOther,
         Female,
         FertilityRate,
+        FinancialDistress,
         GrossEarningsYearly,
         GrossLabourIncomeMonthly,
         InverseMillsRatio,
@@ -2363,6 +2405,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Ld_children_4_12IT,
         Lemployed,
         Lhw_L1,
+        Lhw_10,                         // Used by financial distress process
+        Lhw_20,                         // Used by financial distress process
+        Lhw_30,                         // Used by financial distress process
+        Lhw_40,                         // Used by financial distress process
         Les_c3_Employed_L1,
         Les_c3_NotEmployed_L1,
         Les_c3_Sick_L1,					//This is based on dlltsd
@@ -3023,6 +3069,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dlltsd_L1 -> {
                 return Indicator.True.equals(dlltsd_lag1) ? 1. : 0.;
             }
+            case EthnicityWhite -> {
+                return dot.equals(Ethnicity.White) ? 1. : 0.;
+            }
+            case EthnicityMixed -> {
+                return dot.equals(Ethnicity.Mixed) ? 1. : 0.;
+            }
+            case EthnicityAsian -> {
+                return dot.equals(Ethnicity.Asian) ? 1. : 0.;
+            }
+            case EthnicityBlack -> {
+                return dot.equals(Ethnicity.Black) ? 1. : 0.;
+            }
+            case EthnicityOther -> {
+                return dot.equals(Ethnicity.Other) ? 1. : 0.;
+            }
             case FertilityRate -> {
                 if (ioFlag)
                     return Parameters.getFertilityProjectionsByYear(getYear());
@@ -3031,6 +3092,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Female -> {
                 return dgn.equals(Gender.Female) ? 1. : 0.;
+            }
+            case FinancialDistress -> {
+                return financialDistress ? 1. : 0.;
             }
             case GrossEarningsYearly -> {
                 return getGrossEarningsYearly();
@@ -3541,6 +3605,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case D_Econ_benefits -> {
                 return isReceivesBenefitsFlag_L1() ? 1. : 0.;
             }
+            case D_Econ_benefits_NonUC -> {
+                return isReceivesBenefitsFlagNonUC() ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC -> {
+                return isReceivesBenefitsFlagUC() ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_ZERO -> {
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_TEN -> {
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_TWENTY -> {
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_THIRTY -> {
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
+            }
+            case D_Econ_benefits_UC_Lhw_FORTY -> {
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
+            }
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
@@ -3664,6 +3749,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 if (getNewWorkHours_lag1() != null && dgn.equals(Gender.Male)) {
                     return getNewWorkHours_lag1();
                 } else return 0.;
+            }
+            case Lhw_10 -> {
+                return getLabourSupplyWeekly().equals(Labour.TEN) ? 1. : 0.;
+            }
+            case Lhw_20 -> {
+                return getLabourSupplyWeekly().equals(Labour.TWENTY) ? 1. : 0.;
+            }
+            case Lhw_30 -> {
+                return getLabourSupplyWeekly().equals(Labour.THIRTY) ? 1. : 0.;
+            }
+            case Lhw_40 -> {
+                return getLabourSupplyWeekly().equals(Labour.FORTY) ? 1. : 0.;
             }
             case Covid19GrossPayMonthly_L1 -> {
                 return getCovidModuleGrossLabourIncome_lag1();
@@ -4271,6 +4368,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhmGhq = dhm_ghq;
     }
 
+    public Ethnicity getDot() {
+        return dot;
+    }
+
+    public boolean getFinancialDistress() {
+        return financialDistress;
+    }
+
     public Indicator getNeedSocialCare() {
         return needSocialCare;
     }
@@ -4672,6 +4777,39 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setReceivesBenefitsFlag_L1(boolean receivesBenefitsFlag_L1) {
         this.receivesBenefitsFlag_L1 = receivesBenefitsFlag_L1;
     }
+
+    public boolean isReceivesBenefitsFlagUC() {
+        return receivesBenefitsFlagUC;
+    }
+
+    public void setReceivesBenefitsFlagUC(boolean receivesBenefitsFlagUC) {
+        this.receivesBenefitsFlagUC = receivesBenefitsFlagUC;
+    }
+
+    public boolean isReceivesBenefitsFlagUC_L1() {
+        return (null != receivesBenefitsFlagUC_L1) ? receivesBenefitsFlagUC_L1 : false;
+    }
+
+    public void setReceivesBenefitsFlagUC_L1(boolean receivesBenefitsFlagUC_L1) {
+        this.receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC_L1;
+    }
+
+    public boolean isReceivesBenefitsFlagNonUC() {
+        return receivesBenefitsFlagNonUC;
+    }
+
+    public void setReceivesBenefitsFlagNonUC(boolean receivesBenefitsFlagNonUC) {
+        this.receivesBenefitsFlagNonUC = receivesBenefitsFlagNonUC;
+    }
+
+    public boolean isReceivesBenefitsFlagNonUC_L1() {
+        return (null != receivesBenefitsFlagNonUC_L1) ? receivesBenefitsFlagNonUC_L1 : false;
+    }
+
+    public void setReceivesBenefitsFlagNonUC_L1(boolean receivesBenefitsFlagNonUC_L1) {
+        this.receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC_L1;
+    }
+
 
     public double getEquivalisedDisposableIncomeYearly() {
         return benefitUnit.getEquivalisedDisposableIncomeYearly();

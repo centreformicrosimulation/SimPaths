@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JInternalFrame;
@@ -47,7 +48,8 @@ public class SimPathsStart implements ExperimentBuilder {
 
 	private static boolean showGui = true;  // Show GUI by default
 
-	private static boolean setupOnly = false;
+	private static boolean doSetup = true;
+	private static boolean doRun = true;
 
 	private static boolean rewritePolicySchedule = false;
 
@@ -70,13 +72,13 @@ public class SimPathsStart implements ExperimentBuilder {
 			runGUIdialog();
 		} else {
 			try {
-				runGUIlessSetup(4);
+				if (doSetup) runGUIlessSetup(4);
 			} catch (FileNotFoundException f) {
 				System.err.println(f.getMessage());
 			};
 		}
 
-		if (setupOnly) {
+		if (!doRun) {
 			System.out.println("Setup complete, exiting.");
 			return;
 		}
@@ -93,6 +95,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		startYear = Integer.parseInt(valueYear);
 
 		// start the JAS-mine simulation engine
+		System.out.println("Starting simulation...");
 		final SimulationEngine engine = SimulationEngine.getInstance();
 		MicrosimShell gui = null;
 		if (showGui) {
@@ -102,6 +105,22 @@ public class SimPathsStart implements ExperimentBuilder {
 		SimPathsStart experimentBuilder = new SimPathsStart();
 		engine.setExperimentBuilder(experimentBuilder);
 		engine.setup();
+
+		if (!showGui) {
+			engine.startSimulation();
+			try {
+				while (engine.getRunningStatus()) {
+					try {
+						TimeUnit.SECONDS.sleep(10);
+					} catch (InterruptedException e) {
+						System.err.println("Interrupted while waiting for simulation to complete.");
+						return;
+					}
+				}
+			} finally {
+				engine.quit();
+			}
+		}
 	}
 
 	private static boolean parseCommandLineArgs(String[] args) {
@@ -115,8 +134,11 @@ public class SimPathsStart implements ExperimentBuilder {
 		startYearOption.setArgName("year");
 		options.addOption(startYearOption);
 
-		Option setupOption = new Option("Setup", "Setup only");
+		Option setupOption = new Option("Setup", "Setup only (no run)");
 		options.addOption(setupOption);
+
+		Option runOption = new Option("Run", "Run only (no setup)");
+		options.addOption(runOption);
 
 		Option rewritePolicyScheduleOption = new Option("r", "rewrite-policy-schedule",false, "Re-write policy schedule from detected policy files");
 		options.addOption(rewritePolicyScheduleOption);
@@ -134,6 +156,10 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
+
+			if(cmd.hasOption("Setup") && cmd.hasOption("Run")) {
+				throw new ParseException("'Run only' and 'Setup only' options cannot be used together.");
+			}
 
 			if (cmd.hasOption("h")) {
 				printHelpMessage(formatter, options);
@@ -157,7 +183,13 @@ public class SimPathsStart implements ExperimentBuilder {
 			}
 
 			if (cmd.hasOption("Setup")) {
-				setupOnly = true;
+				doSetup = true;
+				doRun = false;
+			}
+
+			if (cmd.hasOption("Run")) {
+				doRun = true;
+				doSetup = false;
 			}
 
 			if (cmd.hasOption("r")) {
@@ -199,7 +231,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		engine.addSimulationManager(model);
 		engine.addSimulationManager(collector);
-		engine.addSimulationManager(observer);
+		if (showGui) engine.addSimulationManager(observer);
 
 		model.setCollector(collector);
 	}

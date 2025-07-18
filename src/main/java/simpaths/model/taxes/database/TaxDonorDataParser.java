@@ -650,6 +650,8 @@ public class TaxDonorDataParser {
                     double principalIncome = -999999.0;
                     double childcare = 0.0;
                     int ageTest = 0;
+                    boolean receivesUC = false;
+                    boolean receivesLB = false;
                     for(DonorPerson person : taxUnit.getPersons()) {
                         // loop through persons
 
@@ -661,6 +663,8 @@ public class TaxDonorDataParser {
                         benmt += person.getPolicy(fromYear).getMonetaryBenefitsAmount();
                         bennt += person.getPolicy(fromYear).getNonMonetaryBenefitsAmount();
                         childcare += person.getPolicy(fromYear).getChildcareCostPerMonth();
+                        receivesUC = receivesUC || person.getPolicy(fromYear).getReceivesUC() == 1;
+                        receivesLB = receivesLB || person.getPolicy(fromYear).getReceivesLegacyBenefit() == 1;
                         int agePerson = person.getAge();
                         if (flagInitialiseDemographics) {
                             // need to instantiate variables to evaluate keys
@@ -724,6 +728,8 @@ public class TaxDonorDataParser {
                         taxUnitPolicy.setBenNonMeansTestPerMonth(bennt);
                         taxUnitPolicy.setSecondIncomePerMonth(secondIncome);
                         taxUnitPolicy.setChildcareCostPerMonth(childcare);
+                        taxUnitPolicy.setReceivesUC(receivesUC ? 1 : 0);
+                        taxUnitPolicy.setReceivesLegacyBenefit(receivesLB ? 1 : 0);
                         for(int ii=0; ii<Parameters.TAXDB_REGIMES; ii++) {
                             taxUnitPolicy.setDonorKey(ii, keys.getKey(ii));
                         }

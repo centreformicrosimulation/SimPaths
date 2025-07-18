@@ -68,6 +68,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Double disposableIncomeMonthly;
     private Double grossIncomeMonthly;
     private Double benefitsReceivedPerMonth;
+    private Integer receivedUC;
+    private Integer receivedLegacyBenefits;
     private Double equivalisedDisposableIncomeYearly;
     @Transient private Double equivalisedDisposableIncomeYearly_lag1;
     @Transient private Double yearlyChangeInLogEDI;
@@ -438,6 +440,32 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case Single_Female -> {
                 getFemale().setReceivesBenefitsFlag(receivesBenefitsFlag);
+            }
+            default ->
+                throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());
+        }
+    }
+
+    public void setReceivesBenefitsFlagUCNonUC() {
+
+        // TO DO: this will require an additional test of whether UC is received or not - for now all receive UC if any ben
+        boolean receivesBenefitsFlagUC = getReceivedUC() == 1 && Parameters.UC_ROLLOUT;
+        boolean receivesLegacyBenefitsFlag = !receivesBenefitsFlagUC && getReceivedLegacyBenefits() == 1;
+        Occupancy occupancy = getOccupancy();
+        switch (occupancy) {
+            case Couple -> {
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getMale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+            }
+            case Single_Male -> {
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getMale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+            }
+            case Single_Female -> {
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
             }
             default ->
                 throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());
@@ -937,6 +965,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
             taxDbMatch = evaluatedTransfers.getMatch();
             taxDbDonorId = taxDbMatch.getCandidateID();
+            setReceivedUC(evaluatedTransfers.getReceivedUC());
+            setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
         } else {
             // intertemporal optimisations disabled
 
@@ -971,6 +1001,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                     benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                     grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                    setReceivedUC(evaluatedTransfers.getReceivedUC());
+                    setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
                     //Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
                     double regressionScore = 0.;
@@ -1012,6 +1044,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                         benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                         grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        setReceivedUC(evaluatedTransfers.getReceivedUC());
+                        setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
                         double regressionScore = 0.;
                         if (male.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for male adult children
@@ -1040,6 +1074,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
                         benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
                         grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        setReceivedUC(evaluatedTransfers.getReceivedUC());
+                        setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
                         double regressionScore = 0.;
                         if (female.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for female adult children
@@ -2932,6 +2968,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Double getBenefitsReceivedPerMonth() {
         return benefitsReceivedPerMonth;
     }
+
+    public Integer getReceivedUC() {
+        return (receivedUC == null ? 0 : receivedUC);
+    }
+
+    public void setReceivedUC(Integer receivedUC) {
+        this.receivedUC = receivedUC;
+    }
+
+    public Integer getReceivedLegacyBenefits() {
+        return (receivedLegacyBenefits == null ? 0 : receivedLegacyBenefits);
+    }
+
+    public void setReceivedLegacyBenefits(Integer receivedLegacyBenefits) {
+        this.receivedLegacyBenefits = receivedLegacyBenefits;
+    }
+
 
     public void setOccupancyLocal(Occupancy occupancy) {
         occupancyLocal = occupancy;

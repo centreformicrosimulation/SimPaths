@@ -8,6 +8,7 @@ import microsim.data.db.PanelEntityKey;
 import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
+import simpaths.data.filters.AgeGroupCSfilter;
 import simpaths.data.filters.EmploymentHistoryFilter;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Les_c4;
@@ -25,6 +26,12 @@ public class EmploymentStatistics {
     @Column(name= "NotEmpToEmp")
     private double NotEmpToEmp;         // Proportion of unemployed people becoming employed
 
+    @Column(name = "PropEmployed")
+    private double PropEmployed;
+
+    @Column(name = "PropUnemployed")
+    private double PropUnemployed;
+
 
     public double getEmpToNotEmp() {
         return EmpToNotEmp;
@@ -40,6 +47,22 @@ public class EmploymentStatistics {
 
     public void setNotEmpToEmp(double notEmpToEmp) {
         NotEmpToEmp = notEmpToEmp;
+    }
+
+    public double getPropEmployed() {
+        return PropEmployed;
+    }
+
+    public void setPropEmployed(double propEmployed) {
+        PropEmployed = propEmployed;
+    }
+
+    public double getPropUnemployed() {
+        return PropUnemployed;
+    }
+
+    public void setPropUnemployed(double propUnemployed) {
+        PropUnemployed = propUnemployed;
     }
 
     public void update(SimPathsModel model) {
@@ -64,6 +87,22 @@ public class EmploymentStatistics {
         isEmpToNotEmp.applyFunction();
         setEmpToNotEmp(isEmpToNotEmp.getDoubleValue(IDoubleSource.Variables.Default));
 
+        // Employment and unemployment, working age adults 16-64
+        AgeGroupCSfilter ageGroupCSfilter = new AgeGroupCSfilter(16, 64);
+
+        CrossSection.Integer personsEmployed = new CrossSection.Integer(model.getPersons(), Person.class, "getEmployed", true);
+        CrossSection.Integer personsUnemployed = new CrossSection.Integer(model.getPersons(), Person.class, "getNonwork", true);
+
+        personsEmployed.setFilter(ageGroupCSfilter);
+        personsUnemployed.setFilter(ageGroupCSfilter);
+
+        MeanArrayFunction isEmployed = new MeanArrayFunction(personsEmployed);
+        isEmployed.applyFunction();
+        setPropEmployed(isEmployed.getDoubleValue(IDoubleSource.Variables.Default));
+
+        MeanArrayFunction isUnemployed = new MeanArrayFunction(personsUnemployed);
+        isUnemployed.applyFunction();
+        setPropUnemployed(isUnemployed.getDoubleValue(IDoubleSource.Variables.Default));
 
 
     }

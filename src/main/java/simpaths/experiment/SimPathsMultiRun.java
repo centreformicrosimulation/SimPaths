@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import simpaths.data.Parameters;
+import simpaths.data.XLSXfileWriter;
 import simpaths.model.SimPathsModel;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
@@ -67,6 +68,16 @@ public class SimPathsMultiRun extends MultiRun {
 	 */
 	public static void main(String[] args) {
 
+		// process Yaml config file
+		if (!parseYamlConfig(args)) {
+			// if parseYamlConfig returns false (indicating bad filename passed), exit main
+			return;
+		}
+		
+		if (parameterArgs != null)
+			updateParameters(parameterArgs);
+
+
 		// set default values for country and start year
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
 		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
@@ -78,13 +89,10 @@ public class SimPathsMultiRun extends MultiRun {
 		String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
-		// process Yaml config file
-		if (!parseYamlConfig(args)) {
-			// if parseYamlConfig returns false (indicating bad filename passed), exit main
-			return;
-		}
 		if (innovationArgs!=null)
 			updateLocalParameters(innovationArgs);
+
+		parseYamlConfig(args);
 
 		// Parse command line arguments to override defaults
 		if (!parseCommandLineArgs(args)) {
@@ -92,6 +100,13 @@ public class SimPathsMultiRun extends MultiRun {
 			return;
 		}
 		country = Country.getCountryFromNameString(countryString);
+
+		//Save the last selected country and year to Excel to use in the model
+		String[] columnNames = {"Country", "Year"};
+		Object[][] data = new Object[1][columnNames.length];
+		data[0][0] = country.toString();
+		data[0][1] = startYear;
+		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.DatabaseCountryYearFilename, "Data", columnNames, data);
 
 		if (flagDatabaseSetup) {
 
@@ -218,6 +233,7 @@ public class SimPathsMultiRun extends MultiRun {
 						log.info("Not persisting processed data");
 						persist_population = false;
 						persist_root = false;
+						break;
 					default:
 						System.out.println("Persist option `" + cmd.getOptionValue("P") + "` not recognised. Valid values: `none`, `root`, `run`. Persisting processed data to run folder");
 						persist_population = true;
@@ -434,9 +450,6 @@ public class SimPathsMultiRun extends MultiRun {
 
 	@Override
 	public void buildExperiment(SimulationEngine engine) {
-
-		if (parameterArgs != null)
-			updateParameters(parameterArgs);
 
 		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
 		if (persist_population) model.setPersistPopulation(true);
