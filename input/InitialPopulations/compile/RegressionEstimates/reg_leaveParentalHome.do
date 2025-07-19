@@ -1,35 +1,20 @@
 ********************************************************************************
-* PROJECT:  		INAPP
+* PROJECT:  		ESPON
 * SECTION:			Leaving Parental Home
-* OBJECT: 			Final Probit and Linear Regression Models - Weighted
+* OBJECT: 			Final Probit Regression Model 
 * AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		21/04/2024 (JV)
-********************************************************************************
+* LAST UPDATE:		1 July 2025 DP  
+* COUNTRY: 			UK  
+* 
+* NOTES: 			
+**********************************************************************************
+
 clear all
 set more off
 set mem 200m
 set type double
 //set maxvar 120000
 set maxvar 30000
-
-
-/*******************************************************************************
-*	DEFINE DIRECTORIES
-*******************************************************************************/
-* Working directory
-global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates"
-
-* Directory which contains do files
-global dir_do "${dir_work}/do"
-
-* Directory which contains data files 
-global dir_data "${dir_work}/data"
-
-* Directory which contains log files 
-global dir_log "${dir_work}/log"
-
-* Directory which contains pooled UKHLS dataset 
-global dir_ukhls_data "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations\data"
 
 
 *******************************************************************
@@ -39,74 +24,237 @@ log using "${dir_log}/reg_leaveParentalHome.log", replace
 
 use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
 
-/*DP: note that the categories in les_c4 used by Cara are different from the ones currently used 
-so the categories in the corresponsing Excel file were updated */
+do "$dir_do/variable_update"
 
-*Labeling and formating variables
-
-label define jbg 1 "Employed" 2 "Student" 3 "Not employed" 4 "Retired"
-
-label define edd 1 "Degree"	2 "Other Higher/A-level/GCSE" 3 "Other/No Qualification"
-
-label define hht 1 "Couples with No Children" 2 "Couples with Children" ///
-				3 "Single with No Children" 4 "Single with Children"
-			
-label define gdr 1  "Male" 0 "Female"
-				
-label define rgna 1 "North East" 2 "North West" 4 "Yorkshire and the Humber" 5 "East Midlands" ///
-6 "West Midlands" 7 "East of England" 8 "London" 9 "South East" 10 "South West" 11 "Wales" ///
-12 "Scotland" 13 "Northern Ireland"
-			
-label define yn	1 "Yes" 0 "No"
-
-label variable dgn "Gender"
-label variable dag "Age"
-label variable dagsq "Age Squared"
-label variable drgn1 "Region"
-label variable dhhtp_c4 "Household Type: 4 Category"
-label variable stm "Year"
-label variable les_c4 "Employment Status: 4 Category" 
-label variable dhe "Self-rated Health"
-label variable deh_c3 "Educational Attainment: 3 Category"
-label variable ydses_c5 "Annual Household Income Quintile" 
-label variable dlltsd "Long-term Sick or Disabled"
-
-label value dgn gdr
-label value drgn1 rgna
-label value dhhtp_c4 hht 
-label value les_c4 jbg 
-label value deh_c3 edd 
-label value ded yn
-
-
+* sample selection 
 drop if dag < 16
-replace stm = stm - 2000
 
-
-/*check if all covariates are available in the data*/ 
-recode dlftphm dgn dag dagsq deh_c3 les_c4 les_c3 ydses_c5 drgn1 stm (-9=.) 
-
+ 
 xtset idperson swv
 
 
-************************************
-*Process LPH1: Leave Parental Home *
-************************************
-*Process P1a: Probability of leaving the parental home. Sample: All non-student respondents living with a parent.
-*Or Probability of leaving the parental home for those who have left education. (Students stay in the parental home).
+* Set Excel file 
 
-*sample: All non-student respondents aged 18+ who lived with a parent at t-1
-fre dlftphm if (ded==0 & dag>=18 & l.dlftphm==0) 
+* Info sheet
 
-probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm if (ded==0 & dag>=18 & l.dlftphm==0) [pweight=disclwt], vce(robust)
+putexcel set "$dir_work/reg_leave_parental_home", sheet("Info") replace
+putexcel A1 = "Description:"
+putexcel B1 = "Model parameters governing leaving parental home"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
+putexcel A3 = "Last edit: 1 July 2025 DP"
+
+putexcel A4 = "Process:", bold
+putexcel B4 = "Description:", bold
+putexcel A5 = "P1a"
+putexcel B5 = "Probit regression estimates for leaving the parental home - 18+, not in intitial education spell, living with parents in t-1"
+
+putexcel A10 = "Notes:", bold
+putexcel B10 = "Added: ethnicity-4 cat (dot); covid dummies (y2020 y2021); not partnered condition (dcpst != 1) to be consistent with the simulation"
+
+putexcel set "$dir_work/reg_leave_parental_home", sheet("Gof") modify
+putexcel A1 = "Goodness of fit", bold		
+
+
+************************************
+* Process P1a: Leave Parental Home *
+************************************
+
+* Process P1a: Probability of leaving the parental home. 
+* Sample: All respondents living with a parent in t-1, aged 18+, not in initial 
+* 			education spell 
+* DV: Left parental home dummy of those who lived with parents in t-1
+* Note: Added not partnered condition as well to be consistent with the simulation	
+fre dlftphm if (ded == 0 & dag >= 18 & dcpst != 1) //3.65%
+ 
+/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
+//check weights //////////////////////////////////////////////////////////////////////////////////	 
+probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm y2020 y2021 i.dot ///
+    if (ded==0 & dag>=18 & l.dlftphm==0 & dcpst != 1) [pweight=dimlwt], vce(robust)
+outreg2 using "${weight_checks}/weight_comparison_P1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(P1a, dimlwt) side dec(4) 
+
+probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm y2020 y2021 i.dot ///
+    if (ded==0 & dag>=18 & l.dlftphm==0 & dcpst != 1) [pweight=disclwt], vce(robust)
+outreg2 using "${weight_checks}/weight_comparison_P1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(P1a, disclwt) side dec(4)
+
+probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm y2020 y2021 i.dot ///
+    if (ded==0 & dag>=18 & l.dlftphm==0 & dcpst != 1) [pweight=dimxwt], vce(robust)
+outreg2 using "${weight_checks}/weight_comparison_P1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(P1a, dimxwt) side dec(4) 
+erase "${weight_checks}/weight_comparison_P1a.txt"
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+*/
+
+probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm y2020 y2021 i.dot ///
+    if (ded==0 & dag>=18 & l.dlftphm==0 & dcpst != 1) [pweight=dimxwt], vce(robust)	
+	
+	
+	* save raw results 	
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/leave_parent_home", sheet("Process P1a male grads") replace
+putexcel set "$dir_raw_results/leave_parental_home/leave_parental_home", sheet("Process P1a") replace
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_data/P1a.doc", replace ///
-title("Process P1a: Probability of leaving the parental home. Sample: All non-student respondents living with a parent.") ///
- ctitle(Leave parental home) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
+outreg2 stats(coef se pval) using "$dir_raw_results/leave_parental_home/P1a.doc", replace ///
+title("Process P1a: Probability of leaving the parental home. Sample: All respondents living with a parent and not in initial education spell.") ///
+ ctitle(Leave parental home) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))		
+gen in_sample = e(sample)
 
+
+predict p 
+
+save "$dir_validation_data/P1a_sample", replace
+	
+scalar r2_p = e(r2_p) 
+scalar N = e(N)	
+scalar chi2 = e(chi2)
+scalar ll = e(ll)	
+
+	
+* Results
+* Note: Zeros values are eliminated 
+	
+matrix b = e(b)	
+matrix V = e(V)
+
+
+*  Store variance-covariance matrix 
+
+preserve
+
+putexcel set "$dir_raw_results/leave_parental_home/var_cov", sheet("var_cov") ///
+	replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/leave_parental_home/var_cov", sheet("var_cov") ///
+	clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_leave_parental_home", sheet("P1a") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+
+* Store estimated coefficients 
+
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+// Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+// Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+// Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_leave_parental_home", sheet("P1a") modify
+putexcel A1 = matrix(nonzero_b'), names //nformat(number_d2) 
+	
+	
+* Labeling 
+
+putexcel A1 = "REGRESSOR"
+putexcel A2 = "Dgn"
+putexcel A3 = "Dag"
+putexcel A4 = "Dag_sq"
+putexcel A5 = "Deh_c3_Medium"
+putexcel A6 = "Deh_c3_Low"
+putexcel A7 = "Les_c3_Student_L1"
+putexcel A8 = "Les_c3_NotEmployed_L1"
+putexcel A9 = "Ydses_c5_Q2_L1"
+putexcel A10 = "Ydses_c5_Q3_L1"
+putexcel A11 = "Ydses_c5_Q4_L1"
+putexcel A12 = "Ydses_c5_Q5_L1"
+putexcel A13 = "UKC"
+putexcel A14 = "UKD"
+putexcel A15 = "UKE"
+putexcel A16 = "UKF"
+putexcel A17 = "UKG"
+putexcel A18 = "UKH"
+putexcel A19 = "UKJ"
+putexcel A20 = "UKK"
+putexcel A21 = "UKL"
+putexcel A22 = "UKM"
+putexcel A23 = "UKN"
+putexcel A24 = "Year_transformed"
+putexcel A25 = "Y2020"
+putexcel A26 = "Y2021"
+putexcel A27 = "Ethn_Asian"
+putexcel A28 = "Ethn_Black"
+putexcel A29 = "Ethn_Other"
+putexcel A30 = "Constant"
+
+putexcel B1 = "COEFFICIENT"
+putexcel C1 = "Dgn"
+putexcel D1 = "Dag"
+putexcel E1 = "Dag_sq"
+putexcel F1 = "Deh_c3_Medium"
+putexcel G1 = "Deh_c3_Low"
+putexcel H1 = "Les_c3_Student_L1"
+putexcel I1 = "Les_c3_NotEmployed_L1"
+putexcel J1 = "Ydses_c5_Q2_L1"
+putexcel K1 = "Ydses_c5_Q3_L1"
+putexcel L1 = "Ydses_c5_Q4_L1"
+putexcel M1 = "Ydses_c5_Q5_L1"
+putexcel N1 = "UKC"
+putexcel O1 = "UKD"
+putexcel P1 = "UKE"
+putexcel Q1 = "UKF"
+putexcel R1 = "UKG"
+putexcel S1 = "UKH"
+putexcel T1 = "UKJ"
+putexcel U1 = "UKK"
+putexcel V1 = "UKL"
+putexcel W1 = "UKM"
+putexcel X1 = "UKN"
+putexcel Y1 = "Year_transformed"
+putexcel Z1 = "Y2020"
+putexcel AA1 = "Y2021"
+putexcel AB1 = "Ethn_Asian"
+putexcel AC1 = "Ethn_Black"
+putexcel AD1 = "Ethn_Other"
+putexcel AE1 = "Constant"
+
+	
+* Goodness of fit 
+
+putexcel set "$dir_results/reg_leave_parental_home", sheet("Gof") modify
+
+putexcel A3 = "P1a - Leaving parental home", bold		
+
+putexcel A5 = "Pseudo R-squared" 
+putexcel B5 = r2_p 
+putexcel A6 = "N"
+putexcel B6 = N 
+putexcel E5 = "Chi^2"		
+putexcel F5 = chi2
+putexcel E6 = "Log likelihood"		
+putexcel F6 = ll		
+
+drop in_sample p
+scalar drop r2_p N chi2 ll	
  
 capture log close 

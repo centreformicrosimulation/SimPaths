@@ -13,25 +13,6 @@ set type double
 set maxvar 30000
 
 
-/*******************************************************************************
-*	DEFINE DIRECTORIES
-*******************************************************************************/
-* Working directory
-global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates"
-
-* Directory which contains do files
-global dir_do "${dir_work}/do"
-
-* Directory which contains data files 
-global dir_data "${dir_work}/data"
-
-* Directory which contains log files 
-global dir_log "${dir_work}/log"
-
-* Directory which contains pooled UKHLS dataset 
-global dir_ukhls_data "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations\data"
-
-
 *******************************************************************
 cap log close 
 log using "${dir_log}/reg_unemployment.log", replace
@@ -39,28 +20,27 @@ log using "${dir_log}/reg_unemployment.log", replace
 
 
 /*******************************************************************************
-*	START ANALYSIS
-*******************************************************************************/
-
-
-/*******************************************************************************
 *	IMPORT UNEMPLOYMENT RATES
 *******************************************************************************/
-import delimited "${dir_data}/unemp_rates.csv", clear
-save "${dir_data}/unemp_rates", replace
+//import delimited "${dir_external_data}/unemp_rates.csv", clear
+//save "${dir_external_data}/unemp_rates", replace
 
 
 /*******************************************************************************
 *	LOAD WORKING DATA
 *******************************************************************************/
 use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
+
+do "$dir_do/variable_update"
+
 keep if (dag>15 & dag<75)
 
-// append unemployment rates to data
-merge m:1 dgn deh_c3 dag stm using "${dir_data}/unemp_rates", keep(3) nogen
+/* append unemployment rates to data
+merge m:1 dgn deh_c3 dag stm using "${dir_external_data}/unemp_rates", keep(3) nogen
 label variable dukue "UK unemployment rate by age, year, gender, and graduate status"
+*/
 
-gen unemp = (jbstat==3)
+//gen unemp = (jbstat==3)
 label variable unemp "labour status unemployed"
 gen nemp = (jbstat!=1 & jbstat!=2 & jbstat!=10 & jbstat!=11)
 replace nemp = . if (jbstat==4 | jbstat==5 | jbstat==7 | jbstat==8 | jbstat==9 | jbstat==12 | jbstat==13 | jbstat==14)
@@ -88,53 +68,61 @@ gen dc02 = (dnc02>0)
 *	CALCULATE REGRESSION
 *******************************************************************************/
 xtset idperson swv
-probit unemp dukue i.dhe l.nemp ib8.drgn1 if (dgn==1 & dag>17 & dag<65 & deh_c3==1) [pweight=disclwt], vce(robust)
+
+probit unemp /*dukue i.dhe*/ l.dhe_mcs l.dhe_pcs l.nemp ib8.drgn1 i.dot if (dgn==1 & dag>17 & dag<65 & deh_c3==1) [pweight=disclwt], vce(robust)
+
+ * raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/unempoyment", sheet("Process U1a male grads") replace
+putexcel set "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/unemployment", sheet("Process U1a male grads") replace
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_data/U1a.doc", replace ///
+outreg2 stats(coef se pval) using "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/U1a.doc", replace ///
 title("Process U1a: Probability of unemployment. Sample: Men aged 18-64 with graduate education.") ///
  ctitle(Giving birth) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
-
-probit unemp dukue i.dhe l.nemp ib8.drgn1 if (dgn==1 & dag>17 & dag<65 & deh_c3>1) [pweight=disclwt], vce(robust)
+ 
+probit unemp /*dukue i.dhe*/ l.dhe_mcs l.dhe_pcs l.nemp ib8.drgn1 i.dot if (dgn==1 & dag>17 & dag<65 & deh_c3>1) [pweight=disclwt], vce(robust)
+ * raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/unempoyment", sheet("Process U1b male ngrads") modify
+putexcel set "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/unemployment", sheet("Process U1b male ngrads") modify
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_data/U1b.doc", replace ///
+outreg2 stats(coef se pval) using "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/U1b.doc", replace ///
 title("Process U1b: Probability of unemployment. Sample: Men aged 18-64 with non-graduate education.") ///
  ctitle(Giving birth) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
 
-probit unemp dukue i.dhe l.nemp ib8.drgn1 if (dgn==0 & dag>17 & dag<65 & deh_c3==1) [pweight=disclwt], vce(robust)
+
+ probit unemp /*dukue i.dhe*/ l.dhe_mcs l.dhe_pcs l.nemp ib8.drgn1 i.dot if (dgn==0 & dag>17 & dag<65 & deh_c3==1) [pweight=disclwt], vce(robust)
+ * raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/unempoyment", sheet("Process U1c female grads") modify
+putexcel set "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/unemployment", sheet("Process U1c female grads") modify
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_data/U1c.doc", replace ///
+outreg2 stats(coef se pval) using "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/U1c.doc", replace ///
 title("Process U1c: Probability of unemployment. Sample: Women aged 18-64 with graduate education.") ///
  ctitle(Giving birth) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
 
-probit unemp dukue i.dhe l.nemp ib8.drgn1 if (dgn==0 & dag>17 & dag<65 & deh_c3>1) [pweight=disclwt], vce(robust)
-matrix results = r(table)
+ 
+probit unemp /*dukue i.dhe*/ l.dhe_mcs l.dhe_pcs l.nemp ib8.drgn1 i.dot if (dgn==0 & dag>17 & dag<65 & deh_c3>1) [pweight=disclwt], vce(robust)
+
+ * raw results matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/unempoyment", sheet("Process U1d female ngrads") modify
+putexcel set "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/unemployment", sheet("Process U1d female ngrads") modify
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_data/U1d.doc", replace ///
+outreg2 stats(coef se pval) using "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\raw_results\unemployment/U1d.doc", replace ///
 title("Process U1d: Probability of unemployment. Sample: Women aged 18-64 with non-graduate education.") ///
  ctitle(Giving birth) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
 
 
-// exploratory regressions
+/* exploratory regressions
 probit unemp i.ageGroup dukue carer recare i.dhe l.unemp ib1.dcpst dnc dnc02 i.drgn1 if (dgn==0 & deh_c3==1 & stm>2017)
 probit unemp i.ageGroup dukue carer recare i.dhe l.unemp ib1.dcpst dnc dnc02 i.drgn1 if (dgn==0 & deh_c3>1 & stm>2017)
 probit unemp i.ageGroup dukue carer recare i.dhe l.unemp ib1.dcpst dnc dnc02 i.drgn1 if (dgn==1 & deh_c3==1 & stm>2017)
 probit unemp i.ageGroup dukue carer recare i.dhe l.unemp ib1.dcpst dnc dnc02 i.drgn1 if (dgn==1 & deh_c3>1 & stm>2017)
-
+*/
 
 
 capture log close 

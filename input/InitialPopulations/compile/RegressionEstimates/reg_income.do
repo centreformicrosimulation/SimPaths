@@ -1,9 +1,23 @@
 ********************************************************************************
 * PROJECT:  		ESPON
 * SECTION:			Non-employment/non-benefit income
-* OBJECT: 			Final Regresion Models - Weighted
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		21/04/2024 (JV)
+* OBJECT: 			Final Regresion Models 
+* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven
+* LAST UPDATE:		3 July 2025 DP  
+* COUNTRY: 			UK
+
+* NOTES: 			 Models for split income variable
+*                    The goal is to split the current non-labour non-benefit income variable into 3 components  
+*                    (capital returns, occupational pension, public pension) and estimate each of them separately, 
+*                    using (if possible) current set of controls. We have decided to abstain from estimating transfers at the moment. 
+*                       
+*                       The income  do file must be run after
+* 						the wage estimates are obtain because they use 
+* 						predicted wages. 
+/*******************************************************************************
+
+
+*******************************************************************************/
 ********************************************************************************
 clear all
 set more off
@@ -17,7 +31,8 @@ set maxvar 30000
 *	DEFINE DIRECTORIES
 *******************************************************************************/
 * Working directory
-global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates"
+//global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates"
+global dir_work "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates"
 
 * Directory which contains do files
 global dir_do "${dir_work}/do"
@@ -29,16 +44,15 @@ global dir_data "${dir_work}/data"
 global dir_log "${dir_work}/log"
 
 * Directory which contains pooled UKHLS dataset 
-global dir_ukhls_data "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations\data"
-
+//global dir_ukhls_data "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations\data"
+global dir_ukhls_data "D:\Dasha\ESSEX\ESPON 2024\UK\initial_populations\data"
 
 *******************************************************************
 cap log close 
 log using "${dir_log}/reg_income.log", replace
 *******************************************************************
 
-
-import excel "$dir_data/time_series_factor.xlsx", sheet("UK_wage_growth") firstrow clear // Import real growth index
+import excel "$dir_external_data/time_series_factor.xlsx", sheet("UK_gdp") firstrow clear // Import real growth index
 rename Year stm
 rename Value growth
 gen base_val = growth if stm == 2015
@@ -47,370 +61,1103 @@ replace base_val = r(mean)
 replace growth= growth/base_val
 drop base_val
 replace stm = stm - 2000
-save "$dir_data\growth_rates", replace
+save "$dir_external_data\growth_rates", replace
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
+use "$dir_ukhls_data/ukhls_pooled_all_obs_10.dta", clear //note this is a pooled dataset after Heckman has been estimated  
 
-*Labeling and formating variables
-label define jbf 1 "Employed" 2 "Student" 3 "Not Employed"
-
-label define edd 1 "Degree"	2 "Other Higher/A-level/GCSE" 3 "Other/No Qualification"
-			
-label define gdr 1  "Male" 0 "Female"
-			
-label define rgna 1 "North East" 2 "North West" 4 "Yorkshire and the Humber" 5 "East Midlands" ///
-6 "West Midlands" 7 "East of England" 8 "London" 9 "South East" 10 "South West" 11 "Wales" ///
-12 "Scotland" 13 "Northern Ireland"
-
-label define yn	1 "Yes" 0 "No"
-
-label define hht 1 "Couples with No Children" 2 "Couples with Children" ///
-				3 "Single with No Children" 4 "Single with Children" 
-
-label variable dgn "Gender"
-label variable dag "Age"
-label variable dagsq "Age Squared"
-label variable drgn1 "Region"
-label variable stm "Year"
-label variable les_c3 "Employment Status: 3 Category" 
-label variable deh_c3 "Educational Attainment: 3 Category"
-label variable dhhtp_c4 "Household Type: 4 Category"
-label variable dnc "Number of Children in Household"
-label variable dnc02 "Number of Children aged 0-2 in Household"
-label variable dhe "Self-rated Health"
-label variable ydses_c5 "Annual Household Income Quintile" 
-label variable dlltsd "Long-term Sick or Disabled"
-label variable dcpen "Entered a new Partnership"
-label variable dcpex "Partnership dissolution"
-label variable lesdf_c4 "Differntial Employment Status"
-label variable ypnbihs_dv "Personal Non-benefit Gross Income"
-
-gen  ypnbihs_dv_sq =ypnbihs_dv^2 
- 
-label variable ypnbihs_dv_sq "Personal Non-benefit Gross Income Squared"
-label variable ynbcpdf_dv "Differential Personal Non-Benefit Gross Income"
-
-label value dgn gdr
-label value drgn1 rgna
-label value les_c3 jbf 
-label value deh_c3 edd 
-label value dcpen dcpex yn
-label value lesdf_c4 dces
-label value ded dlltsd yn
-label value dhhtp_c4 hht
-
-drop if dag < 16
-//replace stm = stm - 2000
 sort stm
-merge m:1 stm using "$dir_data/growth_rates", keep(3) nogen keepusing(growth)
+merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(growth)
 
+do "$dir_do/variable_update"
 
-/**********************************************************************
-CLEAN UP VARIABLES FOR REGRESSIONS	
-***********************************************************************/
-recode  dgn dag dagsq dhe drgn1 stm scedsmpl deh_c3 les_c3 dhhtp_c4 dhe (-9=.)
-sum yplgrs_dv ypncp ypnoab pred_hourly_wage
+*sample selection 
+drop if dag < 16
 
 xtset idperson swv
-/*
-*****************************************************************
-*Process I1a: Non-employment income - In continuous education   *
-*****************************************************************
-regress yptciihs_dv i.dgn dag dagsq l.dhe l.yptciihs_dv ib8.drgn1 stm if scedsmpl==1 [pweight=disclwt], vce(robust)
-matrix results = r(table)
-matrix results = results[1..6,1...]'
-putexcel set "$dir_data/Income_mdls", sheet("Income - In education") replace
-putexcel A1 = matrix(results), names nformat(number_d2) 
-*predict fittedice
-*histogram fittedice
-*histogram yptciihs_dv
-
-*Getting Variance Covariance Matrix 
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/income_vcm", sheet("Process I1a - In education") replace
-putexcel A1 = matrix(i1a), names
-
-*******************************************************************
-*Process I1b: Non-employment income - Not in continuous education *
-*******************************************************************
-regress yptciihs_dv i.dgn dag dagsq ib1.deh_c3 i.dlrtrd li.les_c3 lib1.dhhtp_c4 l.dhe l.yplgrs_dv l.yptciihs_dv ///
-l2.yplgrs_dv l2.yptciihs_dv l3.yplgrs_dv l3.yptciihs_dv ib8.drgn1 stm if scedsmpl==0 [pweight=disclwt], vce(robust)
-matrix results = r(table)
-matrix results = results[1..6,1...]'
-putexcel set "$dir_data/Income_mdls", sheet("Income - Not in education") modify
-putexcel A1 = matrix(results), names nformat(number_d2) 
-*predict fittednice
-*histogram fittednice
-*histogram yptciihs_dv
-
-*Getting Variance Covariance Matrix 
-matrix i1b=get(VCE)
-matrix list i1b
-putexcel set "$dir_data/income_vcm", sheet("Process I1b - Not in education") modify
-putexcel A1 = matrix(i1b), names
-*/
 
 
-/*******************************************************************************
+* Set Excel file 
 
-New models for split income variable
-The goal is to split the current non-labour non-benefit income variable into 3 components  
-(capital returns, occupational pension, public pension) and estimate each of them separately, 
-using (if possible) current set of controls. We have decided to abstain from estimating transfers at the moment. 
+* Info sheet
+putexcel set "$dir_results/reg_income", sheet("Info") replace
+putexcel A1 = "Description:"
+putexcel B1 = "This file contains regression estiamtes used by processes I3 (capital income), I4 (private pension, retired last year), I5 (private pension income, not retired last year) "
+putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova" 
+putexcel A3 = "Last edit: 1 July 2025 DP"
 
-*******************************************************************************/
-bys swv idhh: gen nwa = _N
-*Replace l.dhe with dhe if aged 16
-gsort +idperson -stm
-bys idperson: carryforward dhe if dag <= 16, replace 
+putexcel A4 = "Process:", bold
+putexcel B4 = "Description:", bold
+putexcel A5 = "Process I3a selection"
+putexcel B5 = "Logit regression estimates of the probability of receiving capital income - aged 16+ in initial education spell"
+putexcel A6 = "Process I3b selection"
+putexcel B6 = "Logit regression estimates of the probability of receiving capital income - aged 16+ not in initial education spell"
+putexcel A7 = "Process I3a amount"
+putexcel B7 = "OLS regression estimates (log) capital income amount - aged 16+ in initial education spell and receive capital income"
+putexcel A8 = "Process I3b amount"
+putexcel B8 = "OLS regression estimates (log) capital income amount - not in initial education spell and receive capital income"
+putexcel A9 = "Process I4b amount"
+putexcel B9 = "OLS regression estimates (log) private pension income - aged 50+ and were retired last year, receive private pension income"
+putexcel A10 = "Process I5a selection"
+putexcel B10 = "Logit regression estimates of the probability of receiving private pension income - aged 50+ and not a student or retired last year"
+putexcel A11 = "Process I5a amount"
+putexcel B11 = "OLS regression estimates (log) private pension income - aged 50+ and not a student or retired last year"
 
-//For those who are 16, L1 of the variables below is missing as they were 15 at the time. Use current value to keep them in the sample. 
-sort idperson swv
-bys idperson: gen dhe_L1 = l.dhe
-replace dhe_L1 = dhe if missing(dhe_L1) //For those who have L1.dhe missing, use current dhe
 
-bys idperson: gen yplgrs_L1 = l.yplgrs_dv
-replace yplgrs_L1 = yplgrs_dv if missing(yplgrs_L1)
-
-bys idperson: gen ypncp_L1 = l.ypncp
-replace ypncp_L1 = ypncp if missing(ypncp_L1)
-
-bys idperson: gen yplgrs_L2 = l2.yplgrs_dv
-replace yplgrs_L2 = yplgrs_dv if missing(yplgrs_L2)
-
-bys idperson: gen ypncp_L2 = l2.ypncp
-replace ypncp_L2 = ypncp if missing(ypncp_L2)
-
-bys idperson: gen dhhtp_c4_L1 = l.dhhtp_c4
-replace dhhtp_c4_L1 = dhhtp_c4 if missing(dhhtp_c4_L1)
-
-bys idperson: gen les_c3_L1 = l.les_c3
-replace les_c3_L1 = les_c3 if missing(les_c3_L1)
-
+putexcel A15 = "Notes:", bold
+putexcel B15 = "All processes: replaced dhe with dhe_pcs and dhe_mcs, added ethnicity-4 cat (dot) and Covid dummies (y2020 y2021)"
+putexcel B16 = "All processes: reverted to using stm instead of GDP growth"
+putexcel B17 = "All processes for amounts: moved to log transformation"
 
 /**********************************************************************
-SELECTION MODELS FOR CAPITAL INCOME 
+CAPITAL INCOME 
 ***********************************************************************/
 
 *****************************************************************
-*Process I3a selection: Probability of receiving capital income. 
+*I3a selection: Probability of receiving capital income, in initial edu spell 
 *****************************************************************
-*Sample: Individuals aged 16 - 29 who are in continuous education.
-gen receives_ypncp = (ypncp > 0 & !missing(ypncp))
-logit receives_ypncp i.dgn dag dagsq l.dhe l.yplgrs_dv l.ypncp ib8.drgn1 stm if scedsmpl==1 [pweight=dimxwt], vce(cluster idperson) base
+* Sample: All individuals 16+ that are in initial edu spell
+* DV: Receiving capital income dummy
+* Note: Capital income and employment income variables in IHS version 	
 
+logit receives_ypncp i.dgn dag dagsq /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 yplgrs_dv_L1 ypncp_L1 ib8.drgn1 stm y2020 y2021 i.dot ///
+ if ded == 1 & dag >= 16 [pweight=dimxwt], ///
+ vce(cluster idperson) base
+
+* raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I3a_selection E") replace
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I3a_selection E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
-
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I3a_selection VCE") replace
-putexcel A1 = matrix(i1a), names
-
-outreg2 stats(coef se pval) using "$dir_data/I3a_sel.doc", replace ///
-title("Process I3a selection: Probability of receiving capital income. Sample: Individuals aged 16 - 29 who are in continuous education.") ///
+matrix i3a=get(VCE)
+matrix list i3a
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I3a_selection VCE") replace
+putexcel A1 = matrix(i3a), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I3a_sel.doc", replace ///
+title("Process I3a selection: Probability of receiving capital income. Sample: Individuals aged 16+ who are in initial education spell.") ///
 ctitle(Probability of capital income) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
 
- 
-********************************************************************
-*Process I3b selection: Probability of receiving capital income.
-********************************************************************
-*Sample: Individuals aged 16+ who are not in continuous education.
+cap drop in_sample
+gen in_sample = e(sample)	
 
-logit receives_ypncp i.dgn dag dagsq ib1.deh_c3 li.les_c3 lib1.dhhtp_c4 l.dhe l.yplgrs_dv l.ypncp l2.yplgrs_dv ///
-l2.ypncp ib8.drgn1 stm if scedsmpl==0 [pweight=dimxwt], vce(cluster idperson) base
+predict p
 
+save "$dir_validation_data/I3a_selection_sample", replace
+
+scalar r2_p = e(r2_p) 
+scalar N = e(N)	
+scalar chi2 = e(chi2)
+scalar ll = e(ll)	
+
+* Results
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I3a_selection") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I3a_selection") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
+	
+	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq Dhe_pcs_L1 Dhe_mcs_L1 Yplgrs_dv_L1 Ypncp_L1 UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant 
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+		
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
+
+putexcel A3 = ///
+	"I3a selection - Receiving capital income in initial education spell ", ///
+	bold		
+	
+putexcel A5 = "Pseudo R-squared" 
+putexcel B5 = r2_p 
+putexcel A6 = "N"
+putexcel B6 = N 
+putexcel E5 = "Chi^2"		
+putexcel F5 = chi2
+putexcel E6 = "Log likelihood"		
+putexcel F6 = ll		
+
+drop in_sample p
+scalar drop r2_p N chi2 ll			
+
+
+*********************************************************************
+* I3b selection: Probability of receiving capital income, not in initial edu spell *
+*********************************************************************
+* Sample: All individuals 16+, not in initial edu spell
+* DV: Receiving capital income dummy
+* Note: Capital income and employment income variables in IHS version 	
+
+logit receives_ypncp i.dgn dag dagsq ib1.deh_c3 li.les_c4 lib1.dhhtp_c4 /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 ///
+yplgrs_dv_L1 ypncp_L1 yplgrs_dv_L2 ypncp_L2 ib8.drgn1 stm /*c.growth*/ y2020 y2021 i.dot ///
+ if ded == 0 [pweight=dimxwt], ///
+ vce(cluster idperson) base
+
+* raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I3b_selection E") modify
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I3b_selection E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
-
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I3b_selection VCE") modify
-putexcel A1 = matrix(i1a), names
-
-outreg2 stats(coef se pval) using "$dir_data/I3b_sel.doc", replace ///
-title("Process I3b selection: Probability of receiving capital income. Sample: Individuals aged 16+ who are not in continuous education.") ///
+matrix i3b=get(VCE)
+matrix list i3b
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I3b_selection VCE") replace
+putexcel A1 = matrix(i3b), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I3b_sel.doc", replace ///
+title("Process I3b selection: Probability of receiving capital income. Sample: Individuals aged who are not in initial education spell.") ///
 ctitle(Probability of capital income) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
 
-/**********************************************************************/
-********************************************
-*Process I3a: Amount of capital income. 
-********************************************
-*Sample: Individuals aged 16 - 29 who are in continuous education and receive capital income.
-*Using same controls as Cara - use of lags means those observed for the first time are not taken into account
+//cap drop in_sample
+gen in_sample = e(sample)	
 
-regress ypncp i.dgn dag dagsq l.dhe l.yplgrs_dv l.ypncp ib8.drgn1 stm if scedsmpl==1 & receives_ypncp == 1 [pweight=dimxwt], ///
-vce(cluster idperson) base
+predict p
+
+save "$dir_validation_data/I3b_selection_sample", replace
+
+scalar r2_p = e(r2_p) 
+scalar N = e(N)	
+scalar chi2 = e(chi2)
+scalar ll = e(ll)	
+
+* Results
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I3b_selection") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I3b_selection") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
+	
+	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+
+local var_list Dgn Dag Dag_sq Deh_c3_Medium Deh_c3_Low Les_c4_Student_L1 ///
+	Les_c4_NotEmployed_L1 Les_c4_Retired_L1 Dhhtp_c4_CoupleChildren_L1 ///
+	Dhhtp_c4_SingleNoChildren_L1 Dhhtp_c4_SingleChildren_L1 ///
+	Dhe_pcs_L1 Dhe_mcs_L1 Yplgrs_dv_L1 Ypncp_L1 Yplgrs_dv_L2 Ypncp_L2 ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
+	
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+		
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
+
+putexcel A9 = ///
+	"I3b selection - Receiving capital income left initial education spell ", ///
+	bold		
+	
+putexcel A11 = "Pseudo R-squared" 
+putexcel B11 = r2_p 
+putexcel A12 = "N"
+putexcel B12 = N 
+putexcel E11 = "Chi^2"		
+putexcel F11 = chi2
+putexcel E12 = "Log likelihood"		
+putexcel F12 = ll		
+
+drop in_sample p
+scalar drop r2_p N chi2 ll		
+
+
+*******************************************************
+* I3a: Amount of capital income, in initial edu spell * 
+*******************************************************
+* Sample: All individuals 16+ that received capital income, in initial education spell
+* DV: IHS of capital income 
+
+regress ln_ypncp i.dgn dag dagsq /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 yplgrs_dv_L1 ypncp_L1 ///
+ib8.drgn1 stm /*c.growth*/ y2020 y2021 i.dot if dag >= 16 & receives_ypncp == 1 & ded == 1 ///
+	[pweight = dimxwt], vce(cluster idperson) 
+
+* raw results 	
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I3a CapIn E") modify
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I3a_amount E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
+matrix i3a=get(VCE)
+matrix list i3a
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I3a_amount VCE") replace
+putexcel A1 = matrix(i3a), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I3a.doc", replace ///
+title("Process I3a: Amount of capital income. Sample: Individuals aged 16+ who are in initial education spell abd receive capital income.") ///
+ ctitle(Amount of capital income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))	
+		
+	
+* Save sample inclusion indicator and predicted probabilities	
+gen in_sample = e(sample)	
+predict p 
+gen sigma = e(rmse)
 
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I3a CapIn E VCE") modify
-putexcel A1 = matrix(i1a), names
+save "$dir_validation_data/I3a_level_sample", replace
 
-outreg2 stats(coef se pval) using "$dir_data/I3a.doc", replace ///
-title("Process I3a: Amount of capital income. Sample: Individuals aged 16 - 29 who are in continuous education and receive capital income.") ///
- ctitle(Amount of capital income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))
+scalar r2 = e(r2) 
+scalar N = e(N)		
+scalar rmse= e(rmse)
 
-*******************************************
-*Process I3b: Amount of capital income. 
-*******************************************
-*Sample: Individuals aged 16+ who are not in continuous education and receive capital income.
-*Using same controls as Cara
-regress ypncp i.dgn dag dagsq ib1.deh_c3 li.les_c3 lib1.dhhtp_c4 l.dhe l.yplgrs_dv l.ypncp l2.yplgrs_dv l2.ypncp ib8.drgn1 stm ///
- if scedsmpl==0 & receives_ypncp == 1 [pweight=dimxwt], vce(cluster idperson) base
+* Results 
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I3a_amount") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I3a_amount") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
+ 	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq Dhe_pcs_L1 Dhe_mcs_L1 Yplgrs_dv_L1 Ypncp_L1 ///
+UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
+	
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+		
+* save RMSE
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A6 = ("I3a") B6 = rmse 
+
+
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
+
+putexcel A15 = ///
+	"I3a level - Receiving capital income in initial education spell ", ///
+	bold		
+	
+putexcel A17 = "R-squared" 
+putexcel B17 = r2 
+putexcel A18 = "N"
+putexcel B18 = N 
+
+drop in_sample p sigma 
+scalar drop r2 N 
+
+
+***********************************************************
+* I3b: Amount of capital income, not in initial edu spell * 
+*********************************************************** 
+* Sample: Individuals aged 16+ who are not in their initial education spell and 
+* 	receive capital income.
+
+regress ln_ypncp i.dgn dag dagsq ib1.deh_c3 li.les_c4 lib1.dhhtp_c4 /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 ///
+	yplgrs_dv_L1 ypncp_L1 yplgrs_dv_L2 ypncp_L2 ib8.drgn1 stm /*c.growth*/ y2020 y2021 i.dot ///
+	if ded == 0 & receives_ypncp == 1 [pweight = dimxwt], ///
+	vce(cluster idperson)
+	
+* raw results 	
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I3b CapIn NiE") modify
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I3b_amount E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
+matrix i3b=get(VCE)
+matrix list i3b
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I3b_amount VCE") replace
+putexcel A1 = matrix(i3b), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I3b.doc", replace ///
+title("Process I3b: Amount of capital income. Sample: Individuals aged 16+ who are not in initial education spell abd receive capital income.") ///
+ ctitle(Amount of capital income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))	
+		
+	
+* Save sample inclusion indicator and predicted probabilities	
+gen in_sample = e(sample)	
+predict p 
+gen sigma = e(rmse)
 
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I3b CapIn NiE VCE") modify
-putexcel A1 = matrix(i1a), names
+save "$dir_validation_data/I3b_level_sample", replace
 
-outreg2 stats(coef se pval) using "$dir_data/I3b.doc", replace ///
-title("Process I3b: Amount of capital income. Sample: Individuals aged 16+ who are not in continuous education and receive capital income.") ///
-ctitle(Amount of capital income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))
+scalar r2 = e(r2) 
+scalar N = e(N)	
+scalar rmse= e(rmse)
 
-replace les_c3 = 4 if dlrtrd == 1
+* Results
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
 
-label define jbf 4 "Retired", add 
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I3b_amount") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I3b_amount") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
+	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq Deh_c3_Medium Deh_c3_Low Les_c4_Student_L1 ///
+	Les_c4_NotEmployed_L1 Les_c4_Retired_L1  Dhhtp_c4_CoupleChildren_L1 ///
+	Dhhtp_c4_SingleNoChildren_L1  Dhhtp_c4_SingleChildren_L1 ///
+	Dhe_pcs_L1 Dhe_mcs_L1 Yplgrs_dv_L1 Ypncp_L1 Yplgrs_dv_L2 Ypncp_L2 ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+    Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
+		
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+	
+* Save RMSE
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A7 = ("I3b") B7 = rmse 
+
+
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
+
+putexcel A21 = ///
+	"I3b level - Receiving capital income left initial education spell ", ///
+	bold		
+	
+putexcel A23 = "R-squared" 
+putexcel B23 = r2 
+putexcel A24 = "N"
+putexcel B24 = N 
+
+drop in_sample p sigma 
+scalar drop r2 N 
+
 
 /**********************************************************************
 PRIVATE PENSION INCOME
 ***********************************************************************/
+
 ***************************************************
-*Process I4b: Amount of pension income. 
+*I4b: Amount of pension income. 
 ***************************************************
 *Sample: Retired individuals who were retired in the previous year.
-gen state_pension_age = (dag >= 68)
-gen receives_ypnoab = (ypnoab_lvl > 0 & !missing(ypnoab_lvl))
 
-regress ypnoab dag dagsq ib1.deh_c3 lib1.dhhtp_c4 l.dhe l.ypnoab l2.ypnoab ib8.drgn1 c.growth stm ///
-if dag >= 50 & les_c3 == 4 & l.les_c3 == 4 [pweight=dimxwt], vce(cluster idperson) base
+regress ln_ypnoab i.dgn dag dagsq ib1.deh_c3 lib1.dhhtp_c4 /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 ///
+ypnoab_L1 ypnoab_L2 ib8.drgn1 stm  /*c.growth*/ y2020 y2021 i.dot ///
+if dag >= 50 & receives_ypnoab & dlrtrd==1 & l.dlrtrd==1 [pweight=dimxwt], ///
+vce(cluster idperson) base
 
+
+* raw results 	
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I4b Pension Next") modify
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I4b_amount E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
+matrix i4b=get(VCE)
+matrix list i4b
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I4b_amount VCE") replace
+putexcel A1 = matrix(i4b), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I4b.doc", replace ///
+title("Process I4b: Amount of private pension income. Sample: Individuals aged 50+ who were retired in the previous year and receive private pension income.") ///
+ ctitle(Amount of private pension income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))	
+				
+	
+* Save sample inclusion indicator and predicted probabilities	
+gen in_sample = e(sample)	
+predict p 
+gen sigma = e(rmse)
 
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I4b Pension Next VCE") modify
-putexcel A1 = matrix(i1a), names
+save "$dir_validation_data/I4b_level_sample", replace
 
-outreg2 stats(coef se pval) using "$dir_data/14b.doc", ///
-replace title("Process I4b: Amount of pension income. Sample: Retired individuals who were retired in the previous year.") ///
-ctitle(Retired) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))
+scalar r2 = e(r2) 
+scalar N = e(N)	
+scalar rmse= e(rmse)
+
+* Results
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I4b_amount") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I4b_amount") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
+	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq Deh_c3_Medium Deh_c3_Low ///
+	Dhhtp_c4_CoupleChildren_L1 	Dhhtp_c4_SingleNoChildren_L1  Dhhtp_c4_SingleChildren_L1 ///
+	Dhe_pcs_L1 Dhe_mcs_L1 Ypnoab_L1 Ypnoab_L2 ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+    Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
+		
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+	
+* Save RMSE
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A8 = ("I4b") B8 = rmse  
 
 
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
 
-/**********************************************************************
-PRIVATE PENSION INCOME VERSION 2: 
-	-selection equation for recipiency of private pension income
-	-followed by level of private pension income using linear model
-***********************************************************************/
+putexcel A26 = ///
+	"I4b level - Receiving private pension income: was retired last year", ///
+	bold		
+	
+putexcel A27 = "R-squared" 
+putexcel B27 = r2 
+putexcel A28 = "N"
+putexcel B28 = N 
+
+drop in_sample p sigma 
+scalar drop r2 N 
+
+
 **************************************************************************
-*Process I5a: Probability of receiving private pension income. 
+*I5a: Probability of receiving private pension income. 
 **************************************************************************
 *Sample: Retired individuals who were not retired in the previous year.
+* DV: Receiving private pension income dummy
 /*
 Estimated on a sample of individuals retired at time t, who were not retired at t-1.
 I.e. this is probability of receiving private pension income upon retirement. 
 */
 
-logit receives_ypnoab i.dgn i.state_pension_age ib1.deh_c3 lib4.les_c3 lib1.dhhtp_c4 l.dhe l.pred_hourly_wage ib8.drgn1 c.growth stm ///
-if scedsmpl==0 & dag >= 50 & dlrtrd == 1 & l.les_c3 != 2 & l.les_c3 != 4 [pweight=dimxwt], vce(cluster idperson) base
-
+logit receives_ypnoab i.dgn i.state_pension_age ib1.deh_c3 li.les_c4 lib1.dhhtp_c4 /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 ///
+l.pred_hourly_wage ib8.drgn1 stm /*c.growth*/  y2020 y2021 i.dot ///
+if dag >= 50 & dlrtrd == 1 & l.dlrtrd!=1 & l.les_c4 != 2 [pweight=dimxwt], ///
+vce(cluster idperson) base
+ 
+* raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I5a Select") modify
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I5a_selection E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
+matrix i5a=get(VCE)
+matrix list i5a
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I5a_selection VCE") replace
+putexcel A1 = matrix(i5a), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I5a_sel.doc", replace ///
+title("Process I5a selection: Probability of receiving capital income. Sample: Individuals aged 50+ who were not retired last year.") ///
+ctitle(Probability receiving capital income) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
 
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I5a Select") modify
-putexcel A1 = matrix(i1a), names
+//cap drop in_sample
+gen in_sample = e(sample)	
 
-outreg2 stats(coef se pval) using "$dir_data/I5a.doc", replace ///
-title("Process I5a: Probability of receiving private pension income. Sample: Retired individuals who were not retired in the previous year.") ///
-ctitle(Probability of private pension income) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
+predict p
+
+save "$dir_validation_data/I5a_selection_sample", replace
+
+scalar r2_p = e(r2_p) 
+scalar N = e(N)	
+scalar chi2 = e(chi2)
+scalar ll = e(ll)	
+
+* Results
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I5a_selection") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I5a_selection") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
+	
+	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+
+local var_list Dgn StatePensionAge Deh_c3_Medium Deh_c3_Low ///
+	Les_c4_NotEmployed_L1 ///
+	Dhhtp_c4_CoupleChildren_L1 	Dhhtp_c4_SingleNoChildren_L1 Dhhtp_c4_SingleChildren_L1 ///
+	Dhe_pcs_L1 Dhe_mcs_L1 Hourly_wage_L1  ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
+
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+		
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
+
+putexcel A30 = ///
+	"I5a selection - Receiving private pension income: was not retited last year", ///
+	bold		
+	
+putexcel A32 = "Pseudo R-squared" 
+putexcel B32 = r2_p 
+putexcel A33 = "N"
+putexcel B33 = N 
+putexcel E32 = "Chi^2"		
+putexcel F32 = chi2
+putexcel E33 = "Log likelihood"		
+putexcel F33 = ll		
+
+drop in_sample p
+scalar drop r2_p N chi2 ll		
+
+
 
 ****************************************************
-*Process I5b: Amount of private pension income. 
+*I5a: Amount of private pension income. 
 ****************************************************
 *Sample: Retired individuals who were not retired in the previous year and receive private pension income.
-regress ypnoab_lvl i.dgn i.state_pension_age ib1.deh_c3 lib4.les_c3 lib1.dhhtp_c4 l.dhe l.pred_hourly_wage ib8.drgn1 c.growth stm ///
-if scedsmpl==0 & dag >= 50 & dlrtrd == 1 & l.les_c3 != 2 & l.les_c3 != 4 & receives_ypnoab [pweight=dimxwt], vce(cluster idperson) base
 
+regress ln_ypnoab i.dgn dag dagsq /*i.state_pension_age*/ ib1.deh_c3 li.les_c4 lib1.dhhtp_c4 /*l.dhe*/ dhe_pcs_L1 dhe_mcs_L1 ///
+l.pred_hourly_wage ib8.drgn1 stm /*c.growth*/ y2020 y2021 i.dot ///
+if  dag >= 50 & dlrtrd == 1 & l.dlrtrd!=1 & l.les_c4 != 2 & receives_ypnoab [pweight=dimxwt], ///
+vce(cluster idperson) base
+
+* raw results 	
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I5b Amount") modify
+putexcel set "$dir_raw_results/income/income_split", sheet("Process I5a_amount E") replace
 putexcel A1 = matrix(results), names nformat(number_d2)
+matrix i5a=get(VCE)
+matrix list i5a
+putexcel set "$dir_raw_results/income/income_split_vcm", sheet("Process I5a_amount VCE") replace
+putexcel A1 = matrix(i5a), names
+outreg2 stats(coef se pval) using "$dir_raw_results/income/I5a.doc", replace ///
+title("Process I5a: Amount of private pension income. Sample: Individuals aged 50+ who were not retired in the previous year and receive private pension income.") ///
+ ctitle(Amount of private pension income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))	
+				
+	
+* Save sample inclusion indicator and predicted probabilities	
+gen in_sample = e(sample)	
+predict p 
+gen sigma = e(rmse)
 
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I5b Amount") modify
-putexcel A1 = matrix(i1a), names
+save "$dir_validation_data/I5a_level_sample", replace
 
-outreg2 stats(coef se pval) using "$dir_data/I5b.doc", replace ///
-title("Process I5b: Amount of private pension income. Sample: Retired individuals who were not retired in the previous year and receive private pension income.") ///
-ctitle(Amount of private pension income) label side dec(2) noparen addstat(R2, e(r2), RMSE, e(rmse))
+scalar r2 = e(r2) 
+scalar N = e(N)	
+scalar rmse= e(rmse)
+
+* Results
+* Note: Zeros values are eliminated 	
+matrix b = e(b)	
+matrix V = e(V)
+
+* Store variance-covariance matrix 
+preserve
+
+putexcel set "$dir_raw_results/income/var_cov", sheet("var_cov") replace
+putexcel A1 = matrix(V)
+
+import excel "$dir_raw_results/income/var_cov", sheet("var_cov") clear
+
+describe
+local no_vars = `r(k)'	
+	
+forvalues i = 1/2 {
+	egen row_sum = rowtotal(*)
+	drop if row_sum == 0 
+	drop row_sum
+	xpose, clear	
+}	
+	
+mkmat v*, matrix(var)	
+putexcel set "$dir_results/reg_income", sheet("I5a_amount") modify
+putexcel C2 = matrix(var)
+		
+restore	
+
+* Store estimated coefficients 
+// Initialize a counter for non-zero coefficients
+local non_zero_count = 0
+//local names : colnames b
+
+* Loop through each element in `b` to count non-zero coefficients
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        local non_zero_count = `non_zero_count' + 1
+    }
+}
+
+* Create a new row vector to hold only non-zero coefficients
+matrix nonzero_b = J(1, `non_zero_count', .)
+
+* Populate nonzero_b with non-zero coefficients from b
+local index = 1
+forvalues i = 1/`no_vars' {
+    if (b[1, `i'] != 0) {
+        matrix nonzero_b[1, `index'] = b[1, `i']
+        local index = `index' + 1
+    }
+}
+
+putexcel set "$dir_results/reg_income", sheet("I5a_amount") modify
+putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
+	
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq Deh_c3_Medium Deh_c3_Low ///
+	Les_c4_NotEmployed_L1 Dhhtp_c4_CoupleChildren_L1 Dhhtp_c4_SingleNoChildren_L1  Dhhtp_c4_SingleChildren_L1 ///
+	Dhe_pcs_L1 Dhe_mcs_L1 Hourly_wage_L1 ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
+    Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
+		
+
+putexcel A1 = "REGRESSOR"
+putexcel B1 = "COEFFICIENT"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
+	
+* Save RMSE
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
+putexcel A9 = ("I5a") B9 = rmse  
+
+
+* Goodness of fit
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
+
+putexcel A35 = ///
+	"I5a level - Receiving private pension income: was not retired last year", ///
+	bold		
+	
+putexcel A37 = "R-squared" 
+putexcel B37 = r2 
+putexcel A38 = "N"
+putexcel B38 = N 
+
+drop in_sample p sigma 
+scalar drop r2 N 
+
+
+//end 
 
 capture log close 
 
-/*
-********************
-*I6a: selection
-********************
-/*
-
-Processes I6a and I6b are used to estimate private pension income among those continue retirement (retired at t and at t-1), 
-*and have not received private pension income in the previous year
-
-Estimated on a sample of individuals retired at time t
-I.e. this is probability of receiving private pension in retirement, if not received private pension income in the initial population data 
-*/
-
-logit receives_ypnoab i.dgn i.state_pension_age ib1.deh_c3 lib4.les_c3 lib1.dhhtp_c4 cl.ypncp l.dhe ib8.drgn1 c.growth stm ///
-if dag >= 50 & les_c3 == 4 & l.les_c3 == 4 & l.receives_ypnoab == 0  [pweight=dimxwt], vce(cluster idperson) base
-
-matrix results = r(table)
-matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I6a Select") modify
-putexcel A1 = matrix(results), names nformat(number_d2)
-
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I6a Select") modify
-putexcel A1 = matrix(i1a), names
-
-***********************************************************************************
-*I6b: amount of private pension income for those receiving private pension income
-***********************************************************************************
-
-regress ypnoab_lvl i.dgn i.state_pension_age ib1.deh_c3 lib1.dhhtp_c4 l.dhe ib8.drgn1 cl.ypncp c.growth stm ///
-if dag >= 50 & les_c3 == 4 & l.les_c3 == 4 & l.receives_ypnoab == 0 & receives_ypnoab == 1 [pweight=dimxwt], vce(cluster idperson) base
-
-matrix results = r(table)
-matrix results = results[1..6,1...]'
-putexcel set "$dir_data/uk_income_split", sheet("Process I6b Amount") modify
-putexcel A1 = matrix(results), names nformat(number_d2)
-
-matrix i1a=get(VCE)
-matrix list i1a
-putexcel set "$dir_data/uk_income_split_vcm", sheet("Process I6b Amount") modify
-putexcel A1 = matrix(i1a), names
-
-*/
-
-
+graph drop _all 
