@@ -230,8 +230,7 @@ public class Parameters {
     public static final double WEEKS_PER_YEAR = 365.25 / 7.;
 
     // Determine probability of yearly labour supply matches persisting from previous year
-    public static double labour_innovation_persistence_probability = 0.3;
-    public static double labour_innovation_employment_persistence_probability = 0.9;
+    public static double labour_innovation_employment_persistence_probability = 0.85;
     public static double labour_innovation_unemployment_persistence_probability = 0.5;
 
     public static final int HOURS_IN_WEEK = 24 * 7; //This is used to calculate leisure in labour supply
