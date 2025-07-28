@@ -1110,7 +1110,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
 
             //Sample labour supply from possible labour (pairs of) values
-//            double labourInnov = innovations.getSingleDrawDoubleInnov(0);
             double labourInnov = 0;
 
             // Check if:
@@ -2488,7 +2487,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case MaleEduH_4 -> {
                 return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
             }
-             case FemaleEduM_10 -> {
+            case FemaleEduM_10 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
             }
             case FemaleEduH_10 -> {
