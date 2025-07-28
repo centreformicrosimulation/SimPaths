@@ -63,7 +63,7 @@ public class TaxDonorDataParser {
         Connection conn = null;
         try {
             Class.forName("org.h2.Driver");
-            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+            conn = DriverManager.getConnection("jdbc:h2:file:" + Parameters.getInputDirectory() + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
             createTaxDonorTables(conn, country, startYear);
             updateDefaultDonorTables(conn, country);
@@ -606,8 +606,10 @@ public class TaxDonorDataParser {
         // establish session for database link
         EntityTransaction txn = null;
         try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("tax-database").createEntityManager();
+            // access database and obtain donor pool
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + Parameters.getInputDirectory() + "input" + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
@@ -650,6 +652,8 @@ public class TaxDonorDataParser {
                     double principalIncome = -999999.0;
                     double childcare = 0.0;
                     int ageTest = 0;
+                    boolean receivesUC = false;
+                    boolean receivesLB = false;
                     for(DonorPerson person : taxUnit.getPersons()) {
                         // loop through persons
 
@@ -661,6 +665,8 @@ public class TaxDonorDataParser {
                         benmt += person.getPolicy(fromYear).getMonetaryBenefitsAmount();
                         bennt += person.getPolicy(fromYear).getNonMonetaryBenefitsAmount();
                         childcare += person.getPolicy(fromYear).getChildcareCostPerMonth();
+                        receivesUC = receivesUC || person.getPolicy(fromYear).getReceivesUC() == 1;
+                        receivesLB = receivesLB || person.getPolicy(fromYear).getReceivesLegacyBenefit() == 1;
                         int agePerson = person.getAge();
                         if (flagInitialiseDemographics) {
                             // need to instantiate variables to evaluate keys
@@ -724,6 +730,8 @@ public class TaxDonorDataParser {
                         taxUnitPolicy.setBenNonMeansTestPerMonth(bennt);
                         taxUnitPolicy.setSecondIncomePerMonth(secondIncome);
                         taxUnitPolicy.setChildcareCostPerMonth(childcare);
+                        taxUnitPolicy.setReceivesUC(receivesUC ? 1 : 0);
+                        taxUnitPolicy.setReceivesLegacyBenefit(receivesLB ? 1 : 0);
                         for(int ii=0; ii<Parameters.TAXDB_REGIMES; ii++) {
                             taxUnitPolicy.setDonorKey(ii, keys.getKey(ii));
                         }

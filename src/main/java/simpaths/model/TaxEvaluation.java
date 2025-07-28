@@ -111,4 +111,11 @@ public class TaxEvaluation {
     public DonorTaxImputation getImputedTransfers() {
         return imputedTransfers;
     }
+
+    public Integer getReceivedUC() {
+        return imputedTransfers.getReceivedUC();
+    }
+    public Integer getReceivedLegacyBenefit() {
+        return imputedTransfers.getReceivedLegacyBenefit();
+    }
 }

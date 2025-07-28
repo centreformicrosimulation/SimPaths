@@ -43,6 +43,28 @@ jobs:
     - name: Run integration tests
       run: mvn verify
 
+  run-simpaths-start:
+    needs: build
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 19
+        uses: actions/setup-java@v4
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+      - uses: actions/download-artifact@v4
+        with:
+          name: simpaths_jars
+          path: .
+      - name: Do one full Setup and Run with SimPathsStart (mimicking GUI run)
+        run: java -jar singlerun.jar -c UK -s 2019 -g false --rewrite-policy-schedule
+      - name: Check input db exists
+        id: check_file
+        uses: thebinaryfelix/check-file-existence-action@1.0.0
+        with:
+          files: 'input/input.mv.db, input/EUROMODpolicySchedule.xlsx, input/DatabaseCountryYear.xlsx'
+
   run-simpaths-persist-root:
     needs: build
     runs-on: [ ubuntu-latest ]
@@ -58,14 +80,14 @@ jobs:
         name: simpaths_jars
         path: .
     - name: Setup run
-      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
+      run: java -jar multirun.jar -DBSetup -config test_create_database.yml
     - name: Check input db exists
       id: check_file
       uses: thebinaryfelix/check-file-existence-action@1.0.0
       with:
         files: 'input/input.mv.db, input/EUROMODpolicySchedule.xlsx, input/DatabaseCountryYear.xlsx'
     - name: Do two runs with persistence to root database
-      run: java -jar multirun.jar -p 20000 -s 2019 -e 2022 -r 100 -n 2 -g false --persist=root
+      run: java -jar multirun.jar -config test_run.yml --persist=root
 
   run-simpaths-no-persist:
     needs: build
@@ -82,11 +104,11 @@ jobs:
         name: simpaths_jars
         path: .
     - name: Setup run
-      run: java -jar singlerun.jar -c UK -s 2017 -Setup -g false --rewrite-policy-schedule
+      run: java -jar multirun.jar -DBSetup -config test_create_database.yml
     - name: Check input db exists
       id: check_file
       uses: thebinaryfelix/check-file-existence-action@1.0.0
       with:
         files: 'input/input.mv.db, input/EUROMODpolicySchedule.xlsx, input/DatabaseCountryYear.xlsx'
     - name: Do two runs with no persistence
-      run: java -jar multirun.jar -p 20000 -s 2019 -e 2022 -r 100 -n 2 -g false --persist=none
+      run: java -jar multirun.jar -config test_run.yml --persist=none

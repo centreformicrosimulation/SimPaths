@@ -32,6 +32,8 @@ public class DonorTaxUnitPolicy {
     @Column(name = "DONOR_KEY2") private Integer donorKey2;
     @Column(name = "DONOR_KEY3") private Integer donorKey3;
     @Column(name = "DONOR_KEY4") private Integer donorKey4;
+    @Column(name = "RECEIVES_UC") private Integer receivesUC;
+    @Column(name = "RECEIVES_LB") private Integer receivesLegacyBenefit;
 
 
     /**
@@ -49,6 +51,8 @@ public class DonorTaxUnitPolicy {
         benMeansTestPerMonth = 0.0;
         benNonMeansTestPerMonth = 0.0;
         taxUnit = tu;
+        receivesUC = 0;
+        receivesLegacyBenefit = 0;
     }
 
 
@@ -104,6 +108,23 @@ public class DonorTaxUnitPolicy {
         return benNonMeansTestPerMonth;
     }
     public void setBenNonMeansTestPerMonth(Double ils_bennt) { this.benNonMeansTestPerMonth = ils_bennt; }
+
+    public Integer getReceivesUC() {
+        return receivesUC;
+    }
+
+    public void setReceivesUC(Integer receivesUC) {
+        this.receivesUC = receivesUC;
+    }
+
+    public Integer getReceivesLegacyBenefit() {
+        return receivesLegacyBenefit;
+    }
+
+    public void setReceivesLegacyBenefit(Integer receivesLegacyBenefit) {
+        this.receivesLegacyBenefit = receivesLegacyBenefit;
+    }
+
     public DonorTaxUnit getTaxUnit() { return this.taxUnit;}
     public void setSecondIncomePerMonth(double inc) {
         secondIncomePerMonth = inc;

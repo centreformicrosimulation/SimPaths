@@ -60,3 +60,8 @@ collector_args:
 #    persistHouseholds: false
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
+
+parameter_args:
+#  input_directory: input
+#  input_directory_initial_populations: input/InitialPopulations
+#  euromod_output_directory: input/EUROMODoutput
