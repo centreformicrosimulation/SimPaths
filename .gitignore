@@ -372,3 +372,4 @@ input/EUROMODoutput/test/uk_2019_std.txt
 input/InitialPopulations/test/population_initial_UK_2019.csv
 input/EUROMODoutput/training/input.mv.db
 input/EUROMODoutput/training/input.mv.db
+input/EUROMODoutput/input.mv.db
