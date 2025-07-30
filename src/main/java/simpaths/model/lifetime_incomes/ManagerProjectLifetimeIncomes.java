@@ -26,6 +26,7 @@ public class ManagerProjectLifetimeIncomes {
                            Integer endAge, Integer simCohortSize, boolean writeToCSV, long seed, double age0StdDev) {
 
         log.info("Initialising lifetime income projections");
+        System.out.println("Initialising lifetime income projections");
 
         // initialise sets for csv reporting
         Set<BirthCohort> cohorts = new LinkedHashSet<>();
@@ -46,6 +47,8 @@ public class ManagerProjectLifetimeIncomes {
         for (int yy = startYear; yy <= endYear+endAge; yy++) {
             // loop over years
 
+            log.info("Projecting lifetime incomes for year " + yy);
+            System.out.println("Projecting lifetime incomes for year " + yy);
             for (int aa = 0; aa <= endAge; aa++) {
                 // loop over ages
 
