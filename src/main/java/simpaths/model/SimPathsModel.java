@@ -38,6 +38,7 @@ import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
+import simpaths.model.lifetime_incomes.ManagerProjectLifetimeIncomes;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
@@ -257,6 +258,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
     private boolean enableIntertemporalOptimisations = false;
 
+    private boolean generateLifetimeIncomes = false;
+    private Integer lifetimeIncomeStartYear;
+    private Integer lifetimeIncomeEndYear;
+    private Integer lifetimeIncomeEndAge;
+    private Integer lifetimeIncomeCohortSize = 10000;
+    private boolean lifetimeIncomeWriteToCSV = false;
+    private long lifetimeIncomeRandomSeed = 505;
+    private double lifetimeIncomeAge0StdDev = 0.9;
+
     @GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
     private boolean useSavedBehaviour = false;
 
@@ -363,6 +373,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
                 flagSuppressSocialCareCosts);
+        if (generateLifetimeIncomes) {
+            ManagerProjectLifetimeIncomes.run(log, getEngine().getCurrentExperiment(), lifetimeIncomeStartYear,
+                    lifetimeIncomeEndYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
+                    lifetimeIncomeRandomSeed, lifetimeIncomeAge0StdDev);
+        }
         if (enableIntertemporalOptimisations) {
 
             alignEmployment = false;
