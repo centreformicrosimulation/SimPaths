@@ -22,6 +22,7 @@ public class AnnualIncome implements IDoubleSource {
     @Transient private Double z_m2 = null;
 
     @Transient private Double rnd = null;
+    @Transient private Double innov = null;
     @Transient private Double gmIncome = null;
     @Transient private Double gmIncome_m1 = null;
 
@@ -41,6 +42,7 @@ public class AnnualIncome implements IDoubleSource {
 
     public double getValue() {return value;}
     public int getYear() {return year;}
+    public Individual getIndividual() {return individual;}
     public void setIndividual(Individual individual) {
         this.individual = individual;
     }
@@ -55,7 +57,7 @@ public class AnnualIncome implements IDoubleSource {
             double gmIncome = getGMEquivalisedIncome(year);
             this.gmIncome = gmIncome;
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(rnd);
-            this.rnd = gauss;
+            innov = gauss;
             val = Math.exp(age0StdDev*gauss) * gmIncome;
         }
         else if (age==1) {
@@ -71,8 +73,8 @@ public class AnnualIncome implements IDoubleSource {
             z_m1 = Math.log(income_m1 / gmIncome_m1);
 
             double z_score = Parameters.getRegEquivalisedIncomeDynamics2().getScore(this, AnnualIncome.DoublesVariables.class);
-            double z_innov = Parameters.getEquivalisedIncomeDraw2(rnd);
-            val = Math.exp(z_score+z_innov) * gmIncome;
+            innov = Parameters.getEquivalisedIncomeDraw2(rnd);
+            val = Math.exp(z_score+innov) * gmIncome;
         }
         else {
             // AR2 process
@@ -91,8 +93,8 @@ public class AnnualIncome implements IDoubleSource {
             z_m2 = Math.log(income_m2 / gmIncome_m2);
 
             double z_score = Parameters.getRegEquivalisedIncomeDynamics().getScore(this, AnnualIncome.DoublesVariables.class);
-            double z_innov = Parameters.getEquivalisedIncomeDraw(rnd);
-            val = Math.exp(z_score+z_innov) * gmIncome;
+            innov = Parameters.getEquivalisedIncomeDraw(rnd);
+            val = Math.exp(z_score+innov) * gmIncome;
         }
         return val;
     }

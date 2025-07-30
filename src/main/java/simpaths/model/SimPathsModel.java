@@ -259,8 +259,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean enableIntertemporalOptimisations = false;
 
     private boolean generateLifetimeIncomes = false;
-    private Integer lifetimeIncomeStartYear;
-    private Integer lifetimeIncomeEndYear;
+    private Integer lifetimeIncomeStartBirthYear;
+    private Integer lifetimeIncomeEndBirthYear;
     private Integer lifetimeIncomeEndAge;
     private Integer lifetimeIncomeCohortSize = 10000;
     private boolean lifetimeIncomeWriteToCSV = false;
@@ -374,8 +374,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
                 flagSuppressSocialCareCosts);
         if (generateLifetimeIncomes) {
-            ManagerProjectLifetimeIncomes.run(log, getEngine().getCurrentExperiment(), lifetimeIncomeStartYear,
-                    lifetimeIncomeEndYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
+            ManagerProjectLifetimeIncomes.run(log, getEngine().getCurrentExperiment(), lifetimeIncomeStartBirthYear,
+                    lifetimeIncomeEndBirthYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
                     lifetimeIncomeRandomSeed, lifetimeIncomeAge0StdDev);
         }
         if (enableIntertemporalOptimisations) {

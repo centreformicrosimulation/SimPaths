@@ -18,8 +18,7 @@ public class Population {
     @OrderBy("id ASC")
     private Set<BirthCohort> birthCohorts = new LinkedHashSet<>();
 
-    @Column(name="start_year") private Integer startYear;
-    @Column(name="end_year") private Integer endYear;
+    @Column(name="birth_year") private Integer birthYear;
     @Column(name="end_age") private Integer endAge;
 
 
@@ -27,9 +26,8 @@ public class Population {
      * CONSTRUCTOR
      */
     public Population() {}
-    public Population(Integer startYear, Integer endYear, Integer endAge) {
-        this.startYear = startYear;
-        this.endYear = endYear;
+    public Population(Integer birthYear, Integer endAge) {
+        this.birthYear = birthYear;
         this.endAge = endAge;
     }
 

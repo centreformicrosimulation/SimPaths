@@ -12,10 +12,10 @@ popSize: 5000
 model_args:
     projectSocialCare: false
     generateLifetimeIncomes: true
-    lifetimeIncomeStartYear: 1920
-    lifetimeIncomeEndYear: 2023
+    lifetimeIncomeStartBirthYear: 1920
+    lifetimeIncomeEndBirthYear: 2023
     lifetimeIncomeEndAge: 80
-    lifetimeIncomeCohortSize: 10000
+    lifetimeIncomeCohortSize: 10
     lifetimeIncomeWriteToCSV: true
     lifetimeIncomeRandomSeed: 505
     lifetimeIncomeAge0StdDev: 0.9

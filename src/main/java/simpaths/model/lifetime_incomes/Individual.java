@@ -39,9 +39,10 @@ public class Individual implements IDoubleSource {
     }
     public Individual(BirthCohort cohort) {
         this.cohort = cohort;
-        cohort.addIndividual(this);
+        //cohort.addIndividual(this);
     }
 
+    public Long getId() {return id;}
     public Integer getAge() {
         return (cohort!=null) ? year - cohort.getBirthYear() : null;
     }

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.random.RandomGenerator;
+import java.util.stream.IntStream;
 
 public class ManagerProjectLifetimeIncomes {
 
@@ -22,20 +23,15 @@ public class ManagerProjectLifetimeIncomes {
     /**
      * ENTRY POINT FOR MANAGER
      */
-    public static void run(Logger log, Experiment experiment, Integer startYear, Integer endYear,
+    public static void run(Logger log, Experiment experiment, Integer startBirthYear, Integer endBirthYear,
                            Integer endAge, Integer simCohortSize, boolean writeToCSV, long seed, double age0StdDev) {
 
         log.info("Initialising lifetime income projections");
         System.out.println("Initialising lifetime income projections");
 
-        // initialise sets for csv reporting
-        Set<BirthCohort> cohorts = new LinkedHashSet<>();
-        Set<Individual> individuals = new LinkedHashSet<>();
-        Set<AnnualIncome> annualIncomes = new LinkedHashSet<>();
-
         // start projecting lifetime incomes
+        initialiseLifetimeIncomeDatabase();
         RandomGenerator generator = new Random(seed);
-        Population population = new Population(startYear, endYear, endAge);
 
         // test
 //        BirthCohort cohort = new BirthCohort(1950, Gender.Male, population);
@@ -44,68 +40,60 @@ public class ManagerProjectLifetimeIncomes {
 //        AnnualIncome income = new AnnualIncome(1960, indiv, rnd2, age0StdDev);
         // end test
 
-        for (int yy = startYear; yy <= endYear+endAge; yy++) {
+        for (int by = startBirthYear; by <= endBirthYear; by++) {
             // loop over years
 
-            log.info("Projecting lifetime incomes for year " + yy);
-            System.out.println("Projecting lifetime incomes for year " + yy);
-            for (int aa = 0; aa <= endAge; aa++) {
-                // loop over ages
+            log.info("Projecting lifetime incomes for birth year " + by);
+            System.out.println("Projecting lifetime incomes for birth year " + by);
 
-                int birthYear = yy - aa;
-                BirthCohort bcMales, bcFemales;
-                if (aa==0 && yy<=endYear) {
+            // initialise sets for csv reporting
+            Population population = new Population(by, endAge);
+            Set<BirthCohort> cohorts = new LinkedHashSet<>();
+            Set<Individual> individuals = new LinkedHashSet<>();
+            Set<AnnualIncome> annualIncomes = new LinkedHashSet<>();
 
-                    // initialise new birth cohorts
-                    bcMales = new BirthCohort(yy, Gender.Male, population);
-                    bcFemales = new BirthCohort(yy, Gender.Female, population);
-                    if (writeToCSV) {
-                        cohorts.add(bcMales);
-                        cohorts.add(bcFemales);
-                    }
+            for (Gender gender : Gender.values()) {
 
-                    // initialise individuals for each new birth cohort
-                    for (int ii=0; ii < simCohortSize; ii++) {
-                        // loop over new individuals
+                BirthCohort birthCohort = new BirthCohort(by, gender, population);
+                cohorts.add(birthCohort);
+                Individual[] individualsLocal = new Individual[simCohortSize];
+                AnnualIncome[] annualIncomesLocal = new AnnualIncome[simCohortSize*(endAge+1)];
 
-                        Individual male = new Individual(bcMales);
-                        Individual female = new Individual(bcFemales);
-                        if (writeToCSV) {
-                            individuals.add(male);
-                            individuals.add(female);
-                        }
-                    }
-                }
-                else {
-                    bcMales = population.getBirthCohort(birthYear,Gender.Male);
-                    bcFemales = population.getBirthCohort(birthYear,Gender.Female);
-                }
-                if (bcMales!=null) {
-                    for (Individual ind : bcMales.getIndividuals()) {
+                final int birthYear = by;
+                IntStream.range(0, simCohortSize).parallel().forEach(ii -> {
+//                for (int ii=0; ii < simCohortSize; ii++) {
+                    // loop over new individuals
+
+                    Individual individual = new Individual(birthCohort);
+                    individualsLocal[ii] = individual;
+
+                    // define incomes
+                    for (int aa = 0; aa <= endAge; aa++) {
+
                         double rnd = generator.nextDouble();
-                        AnnualIncome incomeMale = new AnnualIncome(yy, ind, rnd, age0StdDev);
-                        annualIncomes.add(incomeMale);
+                        AnnualIncome income = new AnnualIncome(birthYear + aa, individual, rnd, age0StdDev);
+                        annualIncomesLocal[ii*(endAge+1)+aa] = income;
                     }
+//                }
+                });
+                for (Individual individual : individualsLocal) {
+                    birthCohort.addIndividual(individual);
+                    individuals.add(individual);
                 }
-                if (bcFemales!=null) {
-                    for (Individual ind : bcFemales.getIndividuals()) {
-                        double rnd = generator.nextDouble();
-                        AnnualIncome incomeFemale = new AnnualIncome(yy, ind, rnd, age0StdDev);
-                        annualIncomes.add(incomeFemale);
-                    }
-                }
+                annualIncomes.addAll(Arrays.asList(annualIncomesLocal));
+            }
+
+            // commit to database
+            writeLifetimeIncomeDatabase(log, population);
+
+            // write to csv
+            if (writeToCSV) {
+                ExportCSV exportCohorts = new ExportCSV(by, cohorts);
+                ExportCSV exportIndividuals = new ExportCSV(by, individuals);
+                ExportCSV exportAnnualIncomes = new ExportCSV(by, annualIncomes);
             }
         }
 
-        // commit to database
-        writeLifetimeIncomeDatabase(log, population);
-
-        // write to csv
-        if (writeToCSV) {
-            ExportCSV exportCohorts = new ExportCSV(cohorts);
-            ExportCSV exportIndividuals = new ExportCSV(individuals);
-            ExportCSV exportAnnualIncomes = new ExportCSV(annualIncomes);
-        }
         log.info("Completed lifetime income projections");
     }
 
@@ -115,7 +103,6 @@ public class ManagerProjectLifetimeIncomes {
         try {
             // initialise database for storing results
             String fileName = Parameters.getInputDirectory() + "lifetime_incomes";
-            initialiseDatabase(fileName);
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
             EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
@@ -133,11 +120,12 @@ public class ManagerProjectLifetimeIncomes {
         }
     }
 
-    private static void initialiseDatabase(String fileName) {
+    private static void initialiseLifetimeIncomeDatabase() {
 
         // initialise database connection
         Connection conn = null;
         try {
+            String fileName = Parameters.getInputDirectory() + "lifetime_incomes";
             Class.forName("org.h2.Driver");
             conn = DriverManager.getConnection("jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
@@ -148,8 +136,8 @@ public class ManagerProjectLifetimeIncomes {
                 stat.execute( "DROP TABLE IF EXISTS population CASCADE;");
                 stat.execute( "DROP TABLE IF EXISTS birthcohort CASCADE;");
                 stat.execute( "DROP TABLE IF EXISTS individual CASCADE;");
-                stat.execute( "DROP TABLE IF EXISTS income CASCADE;");
-                stat.execute( "CREATE TABLE population (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, START_YEAR INT DEFAULT 2019, END_YEAR INT DEFAULT 2019, END_AGE INT DEFAULT 80);");
+                stat.execute( "DROP TABLE IF EXISTS annualincome CASCADE;");
+                stat.execute( "CREATE TABLE population (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, BIRTH_YEAR INT DEFAULT 2019, END_AGE INT DEFAULT 80);");
             } catch(Exception e){
                 //	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
                 e.printStackTrace();

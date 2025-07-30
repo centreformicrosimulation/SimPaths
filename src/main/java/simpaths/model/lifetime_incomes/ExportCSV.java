@@ -25,14 +25,14 @@ public class ExportCSV {
 
     private Collection<?> targetCollection;
 
-    public ExportCSV(Object target) {
+    public ExportCSV(int birthYear, Object target) {
         try {
 
             targetCollection = (Collection<?>) target;
             Object obj = targetCollection.iterator().next();
 
             //Set up file and fileWriter - create new file and directory if required
-            String filename = obj.getClass().getSimpleName();
+            String filename = obj.getClass().getSimpleName() + birthYear;
             File ff = new File(directory + File.separator + filename + ".csv");
             boolean fAlreadyExists = ff.exists();
             if (!fAlreadyExists) {
