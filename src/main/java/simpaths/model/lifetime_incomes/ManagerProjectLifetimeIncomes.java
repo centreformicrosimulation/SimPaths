@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Gender;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -32,13 +33,6 @@ public class ManagerProjectLifetimeIncomes {
         // start projecting lifetime incomes
         initialiseLifetimeIncomeDatabase();
         RandomGenerator generator = new Random(seed);
-
-        // test
-//        BirthCohort cohort = new BirthCohort(1950, Gender.Male, population);
-//        Individual indiv = new Individual(cohort);
-//        double rnd2 = generator.nextDouble();
-//        AnnualIncome income = new AnnualIncome(1960, indiv, rnd2, age0StdDev);
-        // end test
 
         for (int by = startBirthYear; by <= endBirthYear; by++) {
             // loop over years
@@ -102,7 +96,7 @@ public class ManagerProjectLifetimeIncomes {
         EntityTransaction txn = null;
         try {
             // initialise database for storing results
-            String fileName = Parameters.getInputDirectory() + "lifetime_incomes";
+            String fileName = Parameters.getInputDirectory() + "lifetime_incomes" + File.separator + "lifetime_incomes";
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
             EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
@@ -125,7 +119,7 @@ public class ManagerProjectLifetimeIncomes {
         // initialise database connection
         Connection conn = null;
         try {
-            String fileName = Parameters.getInputDirectory() + "lifetime_incomes";
+            String fileName = Parameters.getInputDirectory() + "lifetime_incomes" + File.separator + "lifetime_incomes";
             Class.forName("org.h2.Driver");
             conn = DriverManager.getConnection("jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 

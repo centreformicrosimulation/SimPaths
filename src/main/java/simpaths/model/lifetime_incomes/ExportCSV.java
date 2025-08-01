@@ -17,7 +17,7 @@ public class ExportCSV {
     //Fields for exporting tables to output .csv files
     final static String newLine = "\n";
     final static String delimiter = ",";
-    final static String directory = Parameters.getInputDirectory() + "csv";
+    final static String directory = Parameters.getInputDirectory() + "lifetime_incomes";
 
     private Set<String> fieldsForExport;
     private BufferedWriter bufferWriter;

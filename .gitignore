@@ -406,4 +406,4 @@ input/InitialPopulations/main/population_initial_UK_2020.csv
 input/InitialPopulations/main/population_initial_UK_2021.csv
 input/InitialPopulations/main/population_initial_UK_2022.csv
 input/InitialPopulations/main/population_initial_UK_2023.csv
-input/csv/*.*
+input/lifetime_incomes/*.*
