@@ -19,6 +19,7 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.decisions.Axis;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.enums.*;
+import simpaths.model.lifetime_incomes.Individual;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,6 +43,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             @JoinColumn(name = "burun", referencedColumnName = "simulation_run"),
             @JoinColumn(name = "prid", referencedColumnName = "working_id")
     }) private BenefitUnit benefitUnit;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumns({
+            @JoinColumn(name = "ltincome_id", referencedColumnName = "id"),
+    }) private Individual ltIncomeDonor;
 
     // identifiers
     private Long idOriginalPerson;
@@ -5356,5 +5361,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setHe_eq5d(Double he_eq5d) {
         this.he_eq5d = he_eq5d;
+    }
+
+    public void setLtIncomeDonor(Individual individual) {
+        ltIncomeDonor = individual;
     }
 }

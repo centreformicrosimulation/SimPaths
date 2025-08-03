@@ -13,7 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-public class Individual implements IDoubleSource {
+public class Individual implements IDoubleSource, Comparable<Individual> {
 
 
     /**
@@ -28,8 +28,16 @@ public class Individual implements IDoubleSource {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "individual")
     @OrderBy("id ASC")
     private Set<AnnualIncome> incomes = new LinkedHashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "ltIncomeID")
+    private Set<Person> persons = new LinkedHashSet<>();
 
     @Transient int year;
+
+    @Override
+    public int compareTo(Individual otherIndividual) {
+        return Double.compare(getAnnualIncome(Parameters.startYear).getValue(), otherIndividual.getAnnualIncome(Parameters.startYear).getValue());
+    }
+
 
 
     /**

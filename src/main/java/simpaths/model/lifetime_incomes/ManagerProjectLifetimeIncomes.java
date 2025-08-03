@@ -24,7 +24,7 @@ public class ManagerProjectLifetimeIncomes {
     /**
      * ENTRY POINT FOR MANAGER
      */
-    public static void run(Logger log, Experiment experiment, Integer startBirthYear, Integer endBirthYear,
+    public static void run(Logger log, Integer startBirthYear, Integer endBirthYear,
                            Integer endAge, Integer simCohortSize, boolean writeToCSV, long seed, double age0StdDev) {
 
         log.info("Initialising lifetime income projections");
@@ -41,14 +41,13 @@ public class ManagerProjectLifetimeIncomes {
             System.out.println("Projecting lifetime incomes for birth year " + by);
 
             // initialise sets for csv reporting
-            Population population = new Population(by, endAge);
             Set<BirthCohort> cohorts = new LinkedHashSet<>();
             Set<Individual> individuals = new LinkedHashSet<>();
             Set<AnnualIncome> annualIncomes = new LinkedHashSet<>();
 
             for (Gender gender : Gender.values()) {
 
-                BirthCohort birthCohort = new BirthCohort(by, gender, population);
+                BirthCohort birthCohort = new BirthCohort(by, gender, endAge);
                 cohorts.add(birthCohort);
                 Individual[] individualsLocal = new Individual[simCohortSize];
                 AnnualIncome[] annualIncomesLocal = new AnnualIncome[simCohortSize*(endAge+1)];
@@ -75,10 +74,10 @@ public class ManagerProjectLifetimeIncomes {
                     individuals.add(individual);
                 }
                 annualIncomes.addAll(Arrays.asList(annualIncomesLocal));
-            }
 
-            // commit to database
-            writeLifetimeIncomeDatabase(log, population);
+                // commit to database
+                writeLifetimeIncomeDatabase(log, birthCohort);
+            }
 
             // write to csv
             if (writeToCSV) {
@@ -91,19 +90,19 @@ public class ManagerProjectLifetimeIncomes {
         log.info("Completed lifetime income projections");
     }
 
-    private static void writeLifetimeIncomeDatabase(Logger log, Population population) {
+    private static void writeLifetimeIncomeDatabase(Logger log, BirthCohort cohort) {
 
         EntityTransaction txn = null;
         try {
             // initialise database for storing results
-            String fileName = Parameters.getInputDirectory() + "lifetime_incomes" + File.separator + "lifetime_incomes";
+            String fileName = Parameters.getInputDirectory() + "input";
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
             EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
             log.info("Running em.persist()");
-            em.persist(population);
+            em.persist(cohort);
             txn.commit();
             em.close();
         } catch (Exception e) {
@@ -119,7 +118,7 @@ public class ManagerProjectLifetimeIncomes {
         // initialise database connection
         Connection conn = null;
         try {
-            String fileName = Parameters.getInputDirectory() + "lifetime_incomes" + File.separator + "lifetime_incomes";
+            String fileName = Parameters.getInputDirectory() + "input";
             Class.forName("org.h2.Driver");
             conn = DriverManager.getConnection("jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
@@ -127,11 +126,10 @@ public class ManagerProjectLifetimeIncomes {
             Statement stat = null;
             try {
                 stat = conn.createStatement();
-                stat.execute( "DROP TABLE IF EXISTS population CASCADE;");
                 stat.execute( "DROP TABLE IF EXISTS birthcohort CASCADE;");
                 stat.execute( "DROP TABLE IF EXISTS individual CASCADE;");
                 stat.execute( "DROP TABLE IF EXISTS annualincome CASCADE;");
-                stat.execute( "CREATE TABLE population (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, BIRTH_YEAR INT DEFAULT 2019, END_AGE INT DEFAULT 80);");
+                stat.execute( "CREATE TABLE birthcohort (ID BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT, BIRTH_YEAR INT DEFAULT 2019, END_AGE INT DEFAULT 80, GENDER VARCHAR_IGNORECASE DEFAULT 'Male');");
             } catch(Exception e){
                 //	 throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
                 e.printStackTrace();

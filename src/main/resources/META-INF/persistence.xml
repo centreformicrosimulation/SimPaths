@@ -6,11 +6,10 @@
 
 	<persistence-unit name="lifetime-incomes">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<class>simpaths.model.lifetime_incomes.Population</class>
 		<class>simpaths.model.lifetime_incomes.BirthCohort</class>
 		<class>simpaths.model.lifetime_incomes.Individual</class>
 		<class>simpaths.model.lifetime_incomes.AnnualIncome</class>
-		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />
 			<property name="hibernate.connection.username" value="sa" />
