@@ -36,6 +36,9 @@ public class BirthCohort {
     public List<Individual> getIndividuals() {
         return individuals;
     }
+    public void setIndividuals(List<Individual> individuals) {
+        this.individuals = individuals;
+    }
     public int getBirthYear() {
         return birthYear;
     }

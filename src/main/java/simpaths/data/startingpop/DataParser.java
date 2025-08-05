@@ -295,7 +295,7 @@ public class DataParser {
 								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN household_income_qtiles RENAME TO ydses_c5;"
 
 								//Disposable income
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN disp_inc RENAME TO disposableIncomeMonthly;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN disp_inc RENAME TO disposableIncomeMonthly;"
 
 								//Homeownership
 								+ "ALTER TABLE " + benefitUnitTable + " ADD dhh_owned_add VARCHAR_IGNORECASE;"

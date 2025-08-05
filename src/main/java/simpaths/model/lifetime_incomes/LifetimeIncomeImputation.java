@@ -16,6 +16,12 @@ public class LifetimeIncomeImputation {
     public LifetimeIncomeImputation(int year, List<BirthCohort> cohorts) {
         this.year = year;
         this.cohorts = cohorts;
+        for (BirthCohort cohort : cohorts) {
+
+            List<Individual> individuals = cohort.getIndividuals();
+            Collections.sort(individuals);
+            cohort.setIndividuals(individuals);
+        }
     }
 
     public void matchDonorProfile(Person person) {
@@ -60,7 +66,6 @@ public class LifetimeIncomeImputation {
         if (targetCohort == null)
             throw new IllegalArgumentException("No cohort found for birth year " + birthYear + " and gender " + gender);
         List<Individual> individuals = targetCohort.getIndividuals();
-        Collections.sort(individuals);
         int lwr = 0;
         Double lwrValue = null, uprValue = null;
         int upr = individuals.size()-1;

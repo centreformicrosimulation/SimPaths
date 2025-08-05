@@ -44,9 +44,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             @JoinColumn(name = "prid", referencedColumnName = "working_id")
     }) private BenefitUnit benefitUnit;
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
-    @JoinColumns({
-            @JoinColumn(name = "ltincome_id", referencedColumnName = "id"),
-    }) private Individual ltIncomeDonor;
+    @JoinColumn(name = "income_id", referencedColumnName = "id")
+    private Individual ltIncomeDonor;
 
     // identifiers
     private Long idOriginalPerson;

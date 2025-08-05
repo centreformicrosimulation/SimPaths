@@ -233,3 +233,4 @@ input/initialPopulations/standard/*.*
 input/EUROMODoutput/standard/*.*
 input/initialPopulations/test/*.*
 input/EUROMODoutput/test/*.*
+input/EUROMODoutput/expanded/*.*

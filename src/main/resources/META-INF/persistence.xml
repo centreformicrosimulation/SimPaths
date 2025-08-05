@@ -72,6 +72,9 @@
 		<class>simpaths.model.Household</class>
 		<class>simpaths.model.Person</class>
 		<class>simpaths.model.BenefitUnit</class>
+        <class>simpaths.model.lifetime_incomes.BirthCohort</class>
+        <class>simpaths.model.lifetime_incomes.Individual</class>
+        <class>simpaths.model.lifetime_incomes.AnnualIncome</class>
 		<class>simpaths.data.statistics.Statistics</class>
 		<class>simpaths.data.statistics.Statistics2</class>
 		<class>simpaths.data.statistics.Statistics3</class>

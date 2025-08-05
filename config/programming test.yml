@@ -13,7 +13,7 @@ model_args:
     projectSocialCare: false
     lifetimeIncomeGenerate: true
     lifetimeIncomeStartBirthYear: 1920
-    lifetimeIncomeEndBirthYear: 1923
+    lifetimeIncomeEndBirthYear: 2023
     lifetimeIncomeEndAge: 80
     lifetimeIncomeCohortSize: 10
     lifetimeIncomeWriteToCSV: true
