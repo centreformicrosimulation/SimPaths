@@ -18,7 +18,7 @@ set more off
 global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
 
 * Directory which contains do files
-global dir_do "${dir_work}/do"
+global dir_do "C:\MyFiles\99 DEV ENV\JAS-MINE\SimPaths\input\InitialPopulations\compile"
 
 * Directory which contains data files 
 global dir_data "${dir_work}/data"

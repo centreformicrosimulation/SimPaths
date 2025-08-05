@@ -99,7 +99,7 @@ public class Parameters {
 		"idhh",				//id of household (can contain multiple benefit units)
 		"idbenefitunit",	//id of a benefit unit
 		"drgn1", 			//region (NUTS1)
-        "disposableIncomeMonthly", //disposable income
+        "disp_inc", //disposable income
 		"ydses_c5",			//household income quantile
 		"dhh_owned",		//flag indicating if benefit unit owns a house
 		"liquid_wealth",	//benefit unit net wealth non-pension non-housing wealth
