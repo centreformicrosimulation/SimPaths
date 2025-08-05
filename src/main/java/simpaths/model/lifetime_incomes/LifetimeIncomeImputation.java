@@ -5,29 +5,36 @@ import simpaths.model.Household;
 import simpaths.model.Person;
 import simpaths.model.enums.Gender;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LifetimeIncomeImputation {
 
     Integer year;
+    Integer endAge = null;
     List<BirthCohort> cohorts;
 
     public LifetimeIncomeImputation(int year, List<BirthCohort> cohorts) {
         this.year = year;
         this.cohorts = cohorts;
+        IndividualComparator comparator = new IndividualComparator(year);
         for (BirthCohort cohort : cohorts) {
+            
+            if (endAge==null)
+                endAge = cohort.getEndAge();
 
-            List<Individual> individuals = cohort.getIndividuals();
-            Collections.sort(individuals);
-            cohort.setIndividuals(individuals);
+            if (cohort.getBirthYear() <= year && cohort.getBirthYear() + endAge >= year) {
+
+                List<Individual> individuals = new ArrayList<>(cohort.getIndividuals());
+                individuals.sort(comparator);
+                cohort.setSortedIndividuals(individuals);
+            }
         }
     }
 
-    public void matchDonorProfile(Person person) {
+    public void matchDonorProfiles(Household household) {
 
-        // identify equivalised household income of person
-        Household household = person.getBenefitUnit().getHousehold();
+        // identify target equivalised household income
         double disposableIncomePerAnnum = 0.0;
         double equivalenceScale = 0.0;
         boolean firstAdult = true;
@@ -48,10 +55,58 @@ public class LifetimeIncomeImputation {
                 }
             }
         }
-        double disposableIncome = disposableIncomePerAnnum / equivalenceScale;
+        double targetIncome = disposableIncomePerAnnum / equivalenceScale;
 
-        // match birth cohort (birth year and gender)
-        int birthYear = year - person.getDag();
+        for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+
+            for (Person person : benefitUnit.getMembers()) {
+
+                // match birth cohort (birth year and gender)
+                List<Individual> individuals = getIndividuals(person);
+                if (individuals.isEmpty())
+                    throw new IllegalArgumentException("No individuals found for person " + person.getId());
+
+                // match income
+                int lwr = 0, upr = individuals.size()-1;
+                double lwrValue = individuals.get(lwr).getAnnualIncome(year).getValue() - targetIncome;
+                if (lwrValue > 0.0) {
+                    // lower bound
+                    person.setLtIncomeDonor(individuals.get(lwr));
+                }
+                else {
+
+                    double uprValue = individuals.get(upr).getAnnualIncome(year).getValue() - targetIncome;
+                    if (uprValue < 0.0) {
+                        // upper bound
+                        person.setLtIncomeDonor(individuals.get(upr));
+                    }
+                    else {
+
+                        while (lwr < upr-1) {
+                            int tstIndex = (upr + lwr) / 2;
+                            double tstValue = individuals.get(tstIndex).getAnnualIncome(year).getValue() - targetIncome;
+                            if (tstValue < 0.0) {
+                                lwr = tstIndex;
+                                lwrValue = tstValue;
+                            } else {
+                                upr = tstIndex;
+                                uprValue = tstValue;
+                            }
+                        }
+                        if (uprValue < -lwrValue) {
+                            person.setLtIncomeDonor(individuals.get(upr));
+                        }
+                        else {
+                            person.setLtIncomeDonor(individuals.get(lwr));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private List<Individual> getIndividuals(Person person) {
+        int birthYear = year - Math.min(person.getDag(),endAge);
         Gender gender = person.getDgn();
         BirthCohort targetCohort = null;
         for (BirthCohort cohort : cohorts) {
@@ -65,30 +120,7 @@ public class LifetimeIncomeImputation {
         // match income
         if (targetCohort == null)
             throw new IllegalArgumentException("No cohort found for birth year " + birthYear + " and gender " + gender);
-        List<Individual> individuals = targetCohort.getIndividuals();
-        int lwr = 0;
-        Double lwrValue = null, uprValue = null;
-        int upr = individuals.size()-1;
-        while (lwr < upr-1) {
-            int tstIndex = (upr + lwr) / 2;
-            double tstValue = individuals.get(tstIndex).getAnnualIncome(year).getValue() - disposableIncome;
-            if (tstValue < 0.0) {
-                lwr = tstIndex;
-                lwrValue = tstValue;
-            } else {
-                upr = tstIndex;
-                uprValue = tstValue;
-            }
-        }
-        if (uprValue==null || lwrValue==null)
-            throw new IllegalArgumentException("No lifetime income donor identified for individual");
-
-        // write match to person
-        if (uprValue < -lwrValue) {
-            person.setLtIncomeDonor(individuals.get(upr));
-        }
-        else {
-            person.setLtIncomeDonor(individuals.get(lwr));
-        }
+        List<Individual> individuals = targetCohort.getSortedIndividuals();
+        return individuals;
     }
 }

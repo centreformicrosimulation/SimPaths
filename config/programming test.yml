@@ -5,7 +5,7 @@ maxNumberOfRuns: 1
 executeWithGui: false
 randomSeed: 606
 startYear: 2019
-endYear: 2032
+endYear: 2099
 popSize: 5000
 
 # Arguments passed to the SimPathsModel
@@ -15,7 +15,7 @@ model_args:
     lifetimeIncomeStartBirthYear: 1920
     lifetimeIncomeEndBirthYear: 2023
     lifetimeIncomeEndAge: 80
-    lifetimeIncomeCohortSize: 10
+    lifetimeIncomeCohortSize: 10000
     lifetimeIncomeWriteToCSV: true
     lifetimeIncomeRandomSeed: 505
     lifetimeIncomeAge0StdDev: 0.9

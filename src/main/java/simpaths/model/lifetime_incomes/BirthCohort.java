@@ -16,11 +16,13 @@ public class BirthCohort {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "cohort")
     @OrderBy("id ASC")
-    private List<Individual> individuals = new ArrayList<>();
+    private Set<Individual> individuals = new TreeSet<>();
 
     @Column(name="birth_year") private Integer birthYear;
     @Column(name="end_age") private Integer endAge;
     @Enumerated(EnumType.STRING) private Gender gender;
+
+    @Transient List<Individual> sortedIndividuals = null;
 
 
     /**
@@ -33,18 +35,21 @@ public class BirthCohort {
         this.endAge = endAge;
     }
 
-    public List<Individual> getIndividuals() {
+    public Set<Individual> getIndividuals() {
         return individuals;
     }
-    public void setIndividuals(List<Individual> individuals) {
+    public void setIndividuals(Set<Individual> individuals) {
         this.individuals = individuals;
     }
+    public void setSortedIndividuals(List<Individual> sortedIndividuals) {this.sortedIndividuals = sortedIndividuals;}
+    public List<Individual> getSortedIndividuals() {return sortedIndividuals;}
     public int getBirthYear() {
         return birthYear;
     }
     public Gender getGender() {
         return gender;
     }
+    public int getEndAge() {return endAge;}
     public void addIndividual(Individual individual) {
         individuals.add(individual);
     }

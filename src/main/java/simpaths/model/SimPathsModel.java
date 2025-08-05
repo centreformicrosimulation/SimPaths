@@ -3,10 +3,7 @@ package simpaths.model;
 
 // import Java packages
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import microsim.alignment.outcome.AlignmentOutcomeClosure;
 import microsim.alignment.outcome.ResamplingAlignment;
 import microsim.annotation.GUIparameter;
@@ -2478,11 +2475,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         if (person.getId() > personIdCounter)
                             personIdCounter = person.getId();
                         person.setAdditionalFieldsInInitialPopulation();
-                        if (lifetimeIncomes!=null)
-                            lifetimeIncomes.matchDonorProfile(person);
                     }
                     benefitUnit.initializeFields();
                 }
+                if (lifetimeIncomes!=null)
+                    lifetimeIncomes.matchDonorProfiles(originalHousehold);
                 cloneHousehold(originalHousehold, SampleEntry.ProcessedInputData);
             }
             Household.setHouseholdIdCounter(householdIdCounter+1);
@@ -2524,6 +2521,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         }
                         benefitUnit.initializeFields();
                     }
+                    if (lifetimeIncomes!=null)
+                        lifetimeIncomes.matchDonorProfiles(household);
                     if (ignoreTargetsAtPopulationLoad || hasChild)
                         householdList1.add(household);
                     else
@@ -2531,6 +2530,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     if (hhweight>0.1 && (minWeight == null || hhweight < minWeight))
                         minWeight = hhweight;
                 }
+
                 double replicationFactor = 1.0 / minWeight;    // ensures each sampled household represented at least 1 time in list
 
                 List<Household> householdList1Deweighted = new LinkedList<>();
@@ -2609,7 +2609,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
 
             // save to processed repository
-
             if (PersistPopulation) {
                 System.out.println("Saving compiled input data for future reference");
                 persistProcessed();
@@ -3216,7 +3215,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
-                String query = "SELECT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";
+                String query = "SELECT DISTINCT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";
                 List<DonorTaxUnit> donorPool = em.createQuery(query).getResultList();
                 System.out.println("Completed accessing donor data from the database");
 
@@ -3342,10 +3341,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes ORDER BY cohort.id";
+            String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
             log.info("Submitting SQL query: " + query);
+//            Set<BirthCohort> cohorts = new LinkedHashSet<>(em.createQuery(query).getResultList());
             List<BirthCohort> cohorts = em.createQuery(query).getResultList();
-
             lifetimeIncomes = new LifetimeIncomeImputation(year, cohorts);
 
             // close database connection
@@ -3378,7 +3377,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
+            String query = "SELECT DISTINCT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
             log.info("Submitting SQL query: " + query);
 
             List<Processed> processedList = em.createQuery(query).getResultList();
@@ -3416,7 +3415,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
+            String query = "SELECT DISTINCT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
             log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
             log.info("Query complete");

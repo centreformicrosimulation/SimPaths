@@ -331,6 +331,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         this.sampleEntry = sampleEntry;
 
+        if (originalPerson.ltIncomeDonor!=null)
+            this.ltIncomeDonor = originalPerson.ltIncomeDonor;
+
         dag = originalPerson.dag;
         ageGroup = originalPerson.ageGroup;
         dgn = originalPerson.dgn;
