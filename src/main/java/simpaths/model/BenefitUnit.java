@@ -1129,7 +1129,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1))) {
                 labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
             } else {
-                labourInnov = getLabourInnovation(Parameters.labour_innovation_unemployment_persistence_probability);
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_notinemployment_persistence_probability);
             }
 
             try {

@@ -18,10 +18,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.Pair;
-import simpaths.data.startingpop.DataParser;
-import simpaths.model.AnnuityRates;
 import simpaths.model.decisions.Grids;
-import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.MatchFeature;
 import simpaths.model.taxes.database.TaxDonorDataParser;
@@ -242,8 +239,8 @@ public class Parameters {
     public static final double WEEKS_PER_YEAR = 365.25 / 7.;
 
     // Determine probability of yearly labour supply matches persisting from previous year
-    public static double labour_innovation_employment_persistence_probability = 0.85;
-    public static double labour_innovation_unemployment_persistence_probability = 0.5;
+    public static double labour_innovation_employment_persistence_probability = 0.9;
+    public static double labour_innovation_notinemployment_persistence_probability = 0.1;
 
     public static final int HOURS_IN_WEEK = 24 * 7; //This is used to calculate leisure in labour supply
     //Is it possible for people to start going to the labour module (e.g. age 17) while they are living with parents (until age 18)?
