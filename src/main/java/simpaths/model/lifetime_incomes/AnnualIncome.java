@@ -17,7 +17,7 @@ public class AnnualIncome implements IDoubleSource {
     private Individual individual;
 
     @Column(name="calendar_year") private int year;
-    @Column(name="income_value") private double value;
+    @Column(name="income_value") private Double value;
     @Transient private Double z_m1 = null;
     @Transient private Double z_m2 = null;
 
@@ -40,7 +40,14 @@ public class AnnualIncome implements IDoubleSource {
         individual.addAnnualIncome(this);
     }
 
-    public double getValue() {return value;}
+    public double getValue() {
+        if (value==null) {
+            throw new RuntimeException("AnnualIncome.getValue() called before value has been set");
+        }
+        else {
+            return value;
+        }
+    }
     public int getYear() {return year;}
     public Individual getIndividual() {return individual;}
     public void setIndividual(Individual individual) {

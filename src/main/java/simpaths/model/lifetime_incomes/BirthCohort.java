@@ -16,7 +16,7 @@ public class BirthCohort {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "cohort")
     @OrderBy("id ASC")
-    private Set<Individual> individuals = new TreeSet<>();
+    private Set<Individual> individuals = new LinkedHashSet<>();
 
     @Column(name="birth_year") private Integer birthYear;
     @Column(name="end_age") private Integer endAge;
