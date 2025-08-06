@@ -15,10 +15,10 @@ set more off
 *******************************************************************************/
 
 * Working directory
-global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
+global dir_work "C:\andy_local\SimPaths project files\ukhls_data"
 
 * Directory which contains do files
-global dir_do "${dir_work}/do"
+global dir_do "C:\andy_local\SimPaths project files\SimPaths\input\InitialPopulations\compile"
 
 * Directory which contains data files 
 global dir_data "${dir_work}/data"
