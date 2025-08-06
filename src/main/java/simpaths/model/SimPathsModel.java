@@ -398,13 +398,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         elapsedTime0 = elapsedTime1;
 
-        // populate tax donor references
-        if (flagUpdateCountry) {
-            taxDatabaseUpdate();
-            TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
-        }
-        populateTaxdbReferences();
-
         // run pre-simulation diagnostic tests
         //TestTaxRoutine.run();
         //TestRegressions.run(RegressionName.EducationE2a);
@@ -426,6 +419,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         elapsedTime1 = System.currentTimeMillis();
         System.out.println("Time to create initial population structures: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
         elapsedTime0 = elapsedTime1;
+
+        // populate tax donor references
+        if (flagUpdateCountry) {
+            taxDatabaseUpdate();
+            TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
+        }
+        populateTaxdbReferences();
 
         // initialise variables used to match marriage unions
         createDataStructuresForMarriageMatching();
@@ -3335,6 +3335,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private LifetimeIncomeImputation getLifetimeIncomes(int year) {
 
+        System.out.println("Loading simulated income histories");
         LifetimeIncomeImputation lifetimeIncomes = null;
         EntityTransaction txn = null;
         try {
@@ -3347,12 +3348,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
+            System.out.println("Submitting SQL query");
             log.info("Submitting SQL query: " + query);
             List<BirthCohort> cohorts = em.createQuery(query).getResultList();
             lifetimeIncomes = new LifetimeIncomeImputation(year, cohorts);
 
             // close database connection
             log.info("Query complete");
+            System.out.println("Query complete");
             em.close();
         } catch (Exception e) {
             if (txn != null) {

@@ -43,6 +43,9 @@
 		<class>simpaths.model.Household</class>
 		<class>simpaths.model.BenefitUnit</class>
 		<class>simpaths.model.Person</class>
+        <class>simpaths.model.lifetime_incomes.BirthCohort</class>
+        <class>simpaths.model.lifetime_incomes.Individual</class>
+        <class>simpaths.model.lifetime_incomes.AnnualIncome</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />

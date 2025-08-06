@@ -40,7 +40,7 @@ public class LifetimeIncomeImputation {
         if (ltIncomeNeeded(households)) {
             // require imputation of income histories
 
-            IntStream.range(0, households.size()).parallel().forEach(ii -> {
+            IntStream.range(0, households.size()).sorted().parallel().forEach(ii -> {
                 //for (int ii=0; ii < households.size(); ii++) {
 
                 if (Math.floorMod(ii, 1000) == 0)
