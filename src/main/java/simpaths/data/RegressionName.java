@@ -25,9 +25,9 @@ public enum RegressionName {
     HealthHM1Level(RegressionType.Linear),
     HealthHM2LevelMales(RegressionType.Linear),
     HealthHM2LevelFemales(RegressionType.Linear),
-    HealthHM1Case(RegressionType.Logit),
-    HealthHM2CaseMales(RegressionType.Logit),
-    HealthHM2CaseFemales(RegressionType.Logit),
+    HealthHM1Case(RegressionType.Linear),
+    HealthHM2CaseMales(RegressionType.Linear),
+    HealthHM2CaseFemales(RegressionType.Linear),
 
     HealthMCS1(RegressionType.Linear),
     HealthMCS2Males(RegressionType.Linear),
