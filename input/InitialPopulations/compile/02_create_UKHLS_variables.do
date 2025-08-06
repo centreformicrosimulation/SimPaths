@@ -358,7 +358,35 @@ gen dhm_flag = missing(dhm)
 replace dhm = round(dhm_prediction) if missing(dhm) 
 bys dhm_flag : sum dhm 
 
+/**************************Subjective well-being: GHQ 0-12 score *****************************/
+/*dhm_ghq   scghq2_dv    "DEMOGRAPHIC: Subjective wellbeing (GHQ): rescaled to 0-12, assumed to be continuous"
+This measure converts valid answers to 12 questions of the General Health Questionnaire (GHQ) to a 
+single scale by recoding the values of individual variables of 1 and 2 to 0, and values of 3 and 4 to 1 before summing them. 
+This produces a scale that ranges from 0 (indicating the least amount of distress) to 12 (indicating the greatest amount of distress).
+*/
+gen dhm_ghq	= scghq2_dv 
+replace dhm_ghq = . if scghq2_dv <0
+la var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): 0-12 score"
+fre dhm_ghq if dag>0 & dag<=18 
+fre dhm_ghq if dag>0 & dag<16 
+gen scghq2_dv_miss_flag = (scghq2_dv == .)
 
+*Imputation for all:  
+fre dag if missing(dhm_ghq)
+
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+eststo predict_dhm_ghq: reg dhm_ghq c.dag i.dgn i.swv i.dhe, vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+estimates restore predict_dhm_ghq
+predict dhm_ghq_prediction
+fre dhm_ghq_prediction
+
+gen dhm_ghq_flag = missing(dhm_ghq)
+replace dhm_ghq = round(dhm_ghq_prediction) if missing(dhm_ghq) 
+bys dhm_ghq_flag : sum dhm_ghq
+
+/* Alternative method of GHQ caseness - binary cutoff at scghq2_dv <4
 /**************************Subjective wellbeing (GHQ): Caseness ******************************
 0: not psychologically distressed, scghq2_dv < 4 
 1: psychologically distressed, scghq2_dv >= 4
@@ -390,7 +418,7 @@ replace dhm_ghq = 0 if scghq2_dv>=0 & scghq2_dv<4
 replace dhm_ghq = 1 if scghq2_dv>=4 
 lab var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): Caseness"
 //fre dhm_ghq
-
+*/
 
 /****************************Self-rated health health - mental and physical component summary scores SF12 ***************************/
 /*SF-12 Mental Component Summary (MCS). Continuous scale with a range of 0 (low functioning) to 100 (high functioning)*/
