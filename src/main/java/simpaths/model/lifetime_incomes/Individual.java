@@ -28,7 +28,7 @@ public class Individual implements IDoubleSource {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "individual")
     @OrderBy("id ASC")
     private Set<AnnualIncome> incomes = new LinkedHashSet<>();
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "ltIncomeDonor")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "ltIncomeDonor")
     private Set<Person> persons = new LinkedHashSet<>();
 
     @Transient int year;

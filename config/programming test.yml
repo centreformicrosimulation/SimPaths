@@ -15,8 +15,8 @@ model_args:
     lifetimeIncomeStartBirthYear: 1939
     lifetimeIncomeEndBirthYear: 2023
     lifetimeIncomeEndAge: 80
-    lifetimeIncomeCohortSize: 500
-    lifetimeIncomeWriteToCSV: false
+    lifetimeIncomeCohortSize: 4000
+    lifetimeIncomeWriteToCSV: true
     lifetimeIncomeRandomSeed: 505
     lifetimeIncomeAge0StdDev: 0.9
     lifetimeIncomeImpute: true

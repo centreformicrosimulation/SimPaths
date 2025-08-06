@@ -228,9 +228,9 @@ analysis/test_naive_noalign.dta
 analysis/test1.dta
 analysis/test2.dta
 .idea/dataSources.xml
-input/lifetime_incomes/*.*
-input/initialPopulations/standard/*.*
-input/EUROMODoutput/standard/*.*
-input/initialPopulations/test/*.*
-input/EUROMODoutput/test/*.*
-input/EUROMODoutput/expanded/*.*
+input/lifetime_incomes/*
+input/initialPopulations/standard/*
+input/EUROMODoutput/standard/*
+input/initialPopulations/test/*
+input/EUROMODoutput/test/*
+input/EUROMODoutput/expanded/*

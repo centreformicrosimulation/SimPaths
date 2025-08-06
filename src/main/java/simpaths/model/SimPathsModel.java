@@ -402,6 +402,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //TestTaxRoutine.run();
         //TestRegressions.run(RegressionName.EducationE2a);
 
+        // populate tax donor references
+        if (flagUpdateCountry) {
+            taxDatabaseUpdate();
+            TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
+        }
+        populateTaxdbReferences();
+
         elapsedTime1 = System.currentTimeMillis();
         System.out.println("Time to load tax database references: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
         elapsedTime0 = elapsedTime1;
@@ -419,13 +426,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         elapsedTime1 = System.currentTimeMillis();
         System.out.println("Time to create initial population structures: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
         elapsedTime0 = elapsedTime1;
-
-        // populate tax donor references
-        if (flagUpdateCountry) {
-            taxDatabaseUpdate();
-            TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
-        }
-        populateTaxdbReferences();
 
         // initialise variables used to match marriage unions
         createDataStructuresForMarriageMatching();

@@ -39,12 +39,9 @@ public class LifetimeIncomeImputation {
 
         if (ltIncomeNeeded(households)) {
             // require imputation of income histories
-
+            System.out.println("Imputing income histories for simulated population");
             IntStream.range(0, households.size()).sorted().parallel().forEach(ii -> {
                 //for (int ii=0; ii < households.size(); ii++) {
-
-                if (Math.floorMod(ii, 1000) == 0)
-                    System.out.println("Projecting incomes histories for household " + ii);
 
                 // consider each household in initialisation set
                 Household household = households.get(ii);
@@ -119,6 +116,7 @@ public class LifetimeIncomeImputation {
                 }
             });
 //            }
+            System.out.println("Completed imputing income histories for simulated population");
         }
     }
 
