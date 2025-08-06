@@ -2459,13 +2459,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Processed processed = PersistPopulation ? getProcessed() : null;
         LifetimeIncomeImputation lifetimeIncomes = lifetimeIncomeImpute ? getLifetimeIncomes(startYear) : null;
         if (processed!=null) {
-            Set<Household> households = processed.getHouseholds();
+
+            List<Household> households = new ArrayList<>(processed.getHouseholds());
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
             System.out.println("Found processed dataset - preparing for simulation");
-            log.info("Found processed dataset - preparing for simulation");
+
+            // check if need to add income histories
+            if (lifetimeIncomes!=null)
+                lifetimeIncomes.matchDonorProfiles(households);
+
+            // update counters and augment attributes
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
-            for ( Household originalHousehold : processed.getHouseholds()) {
+            for ( Household originalHousehold : households) {
                 if (originalHousehold.getId() > householdIdCounter)
                     householdIdCounter = originalHousehold.getId();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
@@ -2478,8 +2484,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     }
                     benefitUnit.initializeFields();
                 }
-                if (lifetimeIncomes!=null)
-                    lifetimeIncomes.matchDonorProfiles(originalHousehold);
                 cloneHousehold(originalHousehold, SampleEntry.ProcessedInputData);
             }
             Household.setHouseholdIdCounter(householdIdCounter+1);
@@ -2493,16 +2497,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             System.out.println("Initialising input dataset for assumed start year");
             inputDatabaseInteraction();
             System.out.println("Completed initialising input dataset");
+
             System.out.println("Loading survey data for starting population");
-            log.info("Loading survey data for starting population");
             List<Household> inputHouseholdList = loadStartingPopulation();
             System.out.println("completed loading survey data for starting population");
-            log.info("completed loading survey data for starting population");
+
+            // check if need to add income histories
+            if (lifetimeIncomes!=null)
+                lifetimeIncomes.matchDonorProfiles(inputHouseholdList);
+
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
                 System.out.println("Will expand the initial population to " + popSize + " individuals, each of whom has an equal weight.");
-
                 // approach to resampling considered here is designed to allow for surveys that over-sample some population
                 // subgroups. In this case you may have many similar observations in the sample all with low survey weights
                 // so that replicating by a factor adjustment on weight of each observation may result in none of the
@@ -2521,8 +2528,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         }
                         benefitUnit.initializeFields();
                     }
-                    if (lifetimeIncomes!=null)
-                        lifetimeIncomes.matchDonorProfiles(household);
                     if (ignoreTargetsAtPopulationLoad || hasChild)
                         householdList1.add(household);
                     else
@@ -3343,7 +3348,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             txn.begin();
             String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
             log.info("Submitting SQL query: " + query);
-//            Set<BirthCohort> cohorts = new LinkedHashSet<>(em.createQuery(query).getResultList());
             List<BirthCohort> cohorts = em.createQuery(query).getResultList();
             lifetimeIncomes = new LifetimeIncomeImputation(year, cohorts);
 

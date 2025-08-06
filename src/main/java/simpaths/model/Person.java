@@ -5368,4 +5368,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setLtIncomeDonor(Individual individual) {
         ltIncomeDonor = individual;
     }
+
+    public Individual getLtIncomeDonor() {return ltIncomeDonor;}
 }

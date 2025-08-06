@@ -6,17 +6,17 @@ executeWithGui: false
 randomSeed: 606
 startYear: 2019
 endYear: 2099
-popSize: 5000
+popSize: 75000
 
 # Arguments passed to the SimPathsModel
 model_args:
     projectSocialCare: false
-    lifetimeIncomeGenerate: true
-    lifetimeIncomeStartBirthYear: 1920
+    lifetimeIncomeGenerate: false
+    lifetimeIncomeStartBirthYear: 1939
     lifetimeIncomeEndBirthYear: 2023
     lifetimeIncomeEndAge: 80
-    lifetimeIncomeCohortSize: 10000
-    lifetimeIncomeWriteToCSV: true
+    lifetimeIncomeCohortSize: 3000
+    lifetimeIncomeWriteToCSV: false
     lifetimeIncomeRandomSeed: 505
     lifetimeIncomeAge0StdDev: 0.9
     lifetimeIncomeImpute: true
