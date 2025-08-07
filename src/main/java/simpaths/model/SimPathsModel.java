@@ -582,6 +582,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // equivalised disposable income
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
+        if (lifetimeIncomeImpute)
+            addCollectionEventToAllYears(persons, Person.Processes.ReviseLifetimeIncome);
 
         // Update financial distress
         yearlySchedule.addCollectionEvent(persons, Person.Processes.FinancialDistress);

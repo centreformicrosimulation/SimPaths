@@ -11,12 +11,12 @@ popSize: 75000
 # Arguments passed to the SimPathsModel
 model_args:
     projectSocialCare: false
-    lifetimeIncomeGenerate: true
+    lifetimeIncomeGenerate: false
     lifetimeIncomeStartBirthYear: 1939
     lifetimeIncomeEndBirthYear: 2023
     lifetimeIncomeEndAge: 80
-    lifetimeIncomeCohortSize: 4000
-    lifetimeIncomeWriteToCSV: true
+    lifetimeIncomeCohortSize: 500
+    lifetimeIncomeWriteToCSV: false
     lifetimeIncomeRandomSeed: 505
     lifetimeIncomeAge0StdDev: 0.9
     lifetimeIncomeImpute: true

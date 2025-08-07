@@ -149,6 +149,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean receivesBenefitsFlagUC_L1;
     @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
     @Transient private Boolean receivesBenefitsFlagNonUC_L1;
+    @Column(name="lifetime_income") private Double lifetimeIncome;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -710,6 +711,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         LeavingSchool,
         PartnershipDissolution,
         ProjectEquivConsumption,
+        ReviseLifetimeIncome,
         SocialCareReceipt,
         SocialCareProvision,
         Unemployment,
@@ -755,6 +757,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Health -> {
     //			log.debug("Health for person " + this.getKey().getId());
                 health();
+            }
+            case ReviseLifetimeIncome -> {
+                updateLtIncome();
             }
             case SocialCareReceipt -> {
                 evaluateSocialCareReceipt();
@@ -5366,7 +5371,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public void setLtIncomeDonor(Individual individual) {
+        lifetimeIncome = 0.0;
         ltIncomeDonor = individual;
+        int birthYear = ltIncomeDonor.getBirthYear();
+        for (int aa=0; aa<=dag; aa++) {
+            lifetimeIncome += ltIncomeDonor.getAnnualIncome(birthYear+aa).getValue();
+        }
+        lifetimeIncome /= (double)(dag+1);
+    }
+
+    public void updateLtIncome() {
+        double newVal = getBenefitUnit().getHousehold().getEquivalisedDisposableIncomeYearly();
+        double curVal = lifetimeIncome;
+        double years = dag;
+        lifetimeIncome = (curVal * (years-1) + newVal) / years;
     }
 
     public Individual getLtIncomeDonor() {return ltIncomeDonor;}
