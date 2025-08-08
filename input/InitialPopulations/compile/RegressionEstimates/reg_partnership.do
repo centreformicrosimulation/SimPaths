@@ -146,7 +146,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_partnership", sheet("U1a") modify
+putexcel set "$dir_results/reg_partnership", sheet("UK_U1a") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -177,7 +177,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_partnership", sheet("U1a") modify
+putexcel set "$dir_results/reg_partnership", sheet("UK_U1a") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 	
 
@@ -321,7 +321,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_partnership", sheet("U1b") modify
+putexcel set "$dir_results/reg_partnership", sheet("UK_U1b") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -352,7 +352,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_partnership", sheet("U1b") modify
+putexcel set "$dir_results/reg_partnership", sheet("UK_U1b") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 		
 * Labelling
@@ -533,7 +533,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_partnership", sheet("U2b") modify
+putexcel set "$dir_results/reg_partnership", sheet("UK_U2b") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -564,7 +564,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_partnership", sheet("U2b") modify
+putexcel set "$dir_results/reg_partnership", sheet("UK_U2b") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 	
 	

@@ -202,7 +202,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I3a_selection") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3a_selection") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 	
 	
@@ -318,7 +318,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_income", sheet("I3b_selection") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3b_selection") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -348,7 +348,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I3b_selection") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3b_selection") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 	
 	
@@ -468,7 +468,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_income", sheet("I3a_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3a_amount") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -497,7 +497,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I3a_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3a_amount") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
  	
 * Labelling 
@@ -613,7 +613,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_income", sheet("I3b_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3b_amount") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -642,7 +642,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I3b_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I3b_amount") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
 	
 * Labelling 
@@ -765,7 +765,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_income", sheet("I4b_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I4b_amount") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -794,7 +794,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I4b_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I4b_amount") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
 	
 * Labelling 
@@ -917,7 +917,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_income", sheet("I5a_selection") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I5a_selection") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -947,7 +947,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I5a_selection") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I5a_selection") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 	
 	
@@ -1068,7 +1068,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_income", sheet("I5a_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I5a_amount") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -1097,7 +1097,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_income", sheet("I5a_amount") modify
+putexcel set "$dir_results/reg_income", sheet("UK_I5a_amount") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 		
 	
 * Labelling 

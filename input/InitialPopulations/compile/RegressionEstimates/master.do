@@ -88,18 +88,19 @@ global countyy "UK"
 /*******************************************************************************
 * ESTIMATION FILES
 *******************************************************************************/
-
+/*
 do "${dir_do}/reg_education.do"
 
-/*
 do "${dir_do}/reg_leaveParentalHome.do"
 
 do "${dir_do}/reg_partnership.do"
 
 do "${dir_do}/reg_fertility.do"
+*/
 
 do "${dir_do}/reg_health.do"
 
+/*
 do "${dir_do}/reg_home_ownership.do"
 
 do "${dir_do}/reg_retirement.do"

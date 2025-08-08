@@ -250,7 +250,7 @@ end
 matrix list nonzero_b_structure
 
 * Export into Excel 
-putexcel set "$dir_results/reg_health", sheet("H1a") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H1a") modify
 putexcel A1 = matrix(nonzero_b_structure'), names //nformat(number_d2) 
 
 
@@ -307,12 +307,12 @@ end
 matrix list nonzero_var_structure
 
 * Export to Excel 
-putexcel set "$dir_results/reg_health", sheet("H1a") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H1a") modify
 putexcel C2 = matrix(nonzero_var_structure)
 		
 			
 * Labels
-putexcel set "$dir_results/reg_health", sheet("H1a") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H1a") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -407,7 +407,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_health", sheet("H1a") modify
+    putexcel set "$dir_results/reg_health", sheet("UK_H1a") modify
 	
 	* Vertical labels
     sum n, meanonly
@@ -623,7 +623,7 @@ end
 matrix list nonzero_b_structure
 
 * Export into Excel 
-putexcel set "$dir_results/reg_health", sheet("H1b") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H1b") modify
 putexcel A1 = matrix(nonzero_b_structure'), names //nformat(number_d2) 
 
 
@@ -680,12 +680,12 @@ end
 matrix list nonzero_var_structure
 
 * Export to Excel 
-putexcel set "$dir_results/reg_health", sheet("H1b") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H1b") modify
 putexcel C2 = matrix(nonzero_var_structure)
 		
 			
 * Labels
-putexcel set "$dir_results/reg_health", sheet("H1b") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H1b") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -782,7 +782,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_health", sheet("H1b") modify
+    putexcel set "$dir_results/reg_health", sheet("UK_H1b") modify
 	
 	* Vertical labels
     sum n, meanonly
@@ -932,13 +932,13 @@ mata:
 end	
 
 * Export into Excel 
-putexcel set "$dir_results/reg_health", sheet("H2b") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H2b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
-putexcel set "$dir_results/reg_health", sheet("H2b") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H2b") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -1014,7 +1014,7 @@ import delimited "$dir_results/temp_labels.txt", clear varnames(1) encoding(utf8
 gen n = _n
 
 * Export to Excel (vertical layout in column A)
-putexcel set "$dir_results/reg_health", sheet("H2b") modify
+putexcel set "$dir_results/reg_health", sheet("UK_H2b") modify
 summarize n, meanonly
 local N = r(max) + 1
 forvalue i = 2/`N' {

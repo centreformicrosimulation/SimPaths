@@ -140,7 +140,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_fertility", sheet("F1a") modify
+putexcel set "$dir_results/reg_fertility", sheet("UK_F1a") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -171,7 +171,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_fertility", sheet("F1a") modify
+putexcel set "$dir_results/reg_fertility", sheet("UK_F1a") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 	
 	
@@ -184,7 +184,7 @@ putexcel A4 = "Year_transformed"
 putexcel A5 = "Ethn_Black"
 putexcel A6 = "Constant"
 
-putexcel B1 = "COFFICIENT"
+putexcel B1 = "COEFFICIENT"
 putexcel C1 = "Dag"
 putexcel D1 = "Dcpst_Single"
 putexcel E1 = "Year_transformed"
@@ -295,7 +295,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_fertility", sheet("F1b") modify
+putexcel set "$dir_results/reg_fertility", sheet("UK_F1b") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -326,7 +326,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_fertility", sheet("F1b") modify
+putexcel set "$dir_results/reg_fertility", sheet("UK_F1b") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 	
  
  
@@ -369,7 +369,7 @@ putexcel A34 = "Ethn_Black"
 putexcel A35 = "Ethn_Other"
 putexcel A36 = "Constant"
 
-putexcel B1 = "COFFICIENT"
+putexcel B1 = "COEFFICIENT"
 putexcel C1 = "Dag"
 putexcel D1 = "Dag_sq"
 putexcel E1 = "Ydses_c5_Q2_L1"

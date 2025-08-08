@@ -141,7 +141,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_home_ownership", sheet("HO1a") modify 
+putexcel set "$dir_results/reg_home_ownership", sheet("UK_HO1a") modify 
 putexcel C2 = matrix(var)
 		
 restore	
@@ -172,7 +172,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_home_ownership", sheet("HO1a") modify
+putexcel set "$dir_results/reg_home_ownership", sheet("UK_HO1a") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 	
 	
 

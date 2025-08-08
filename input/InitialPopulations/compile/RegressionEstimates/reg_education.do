@@ -148,7 +148,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_education", sheet("E1a") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E1a") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -179,7 +179,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_education", sheet("E1a") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E1a") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 
@@ -338,7 +338,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_education", sheet("E1b") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E1b") modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -369,7 +369,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_education", sheet("E1b") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E1b") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 		
 		
@@ -704,7 +704,7 @@ end
 matrix list nonzero_b_structure
 
 * Export into Excel 
-putexcel set "$dir_results/reg_education", sheet("E2a") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E2a") modify
 putexcel A1 = matrix(nonzero_b_structure'), names //nformat(number_d2) 
 
 
@@ -761,12 +761,12 @@ end
 matrix list nonzero_var_structure
 
 * Export to Excel 
-putexcel set "$dir_results/reg_education", sheet("E2a") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E2a") modify
 putexcel C2 = matrix(nonzero_var_structure)
 		
 			
 * Labels
-putexcel set "$dir_results/reg_education", sheet("E2a") modify
+putexcel set "$dir_results/reg_education", sheet("UK_E2a") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -861,7 +861,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_education", sheet("E2a") modify
+    putexcel set "$dir_results/reg_education", sheet("UK_E2a") modify
 	
 	* Vertical labels
     sum n, meanonly
