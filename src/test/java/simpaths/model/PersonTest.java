@@ -27,6 +27,8 @@ public class PersonTest {
             @BeforeEach
             public void setupLawrenceCoefficients() {
 
+                Parameters.setInputDirectory("src/test/java/simpaths/testinput");
+
                 Parameters.eq5dConversionParameters = "lawrence";
                 Parameters.loadEQ5DParameters("UK", 8);
 
@@ -69,6 +71,8 @@ public class PersonTest {
 
             @BeforeEach
             public void setupFranksCoefficients() {
+
+                Parameters.setInputDirectory("src/test/java/simpaths/testinput");
 
                 Parameters.eq5dConversionParameters = "franks";
                 Parameters.loadEQ5DParameters("UK", 8);

@@ -63,7 +63,7 @@ public class TaxDonorDataParser {
         Connection conn = null;
         try {
             Class.forName("org.h2.Driver");
-            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+            conn = DriverManager.getConnection("jdbc:h2:file:" + Parameters.getInputDirectory() + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
             createTaxDonorTables(conn, country, startYear);
             updateDefaultDonorTables(conn, country);
@@ -606,8 +606,10 @@ public class TaxDonorDataParser {
         // establish session for database link
         EntityTransaction txn = null;
         try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("tax-database").createEntityManager();
+            // access database and obtain donor pool
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + Parameters.getInputDirectory() + "input" + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
