@@ -112,6 +112,7 @@ public class LifetimeIncomeImputation {
                                 }
                             }
                         }
+                        person.setLtIncome(endAge);
                     }
                 }
             });

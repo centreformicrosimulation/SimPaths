@@ -19,6 +19,7 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.decisions.Axis;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.enums.*;
+import simpaths.model.lifetime_incomes.AnnualIncome;
 import simpaths.model.lifetime_incomes.Individual;
 
 import java.math.BigDecimal;
@@ -149,7 +150,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean receivesBenefitsFlagUC_L1;
     @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
     @Transient private Boolean receivesBenefitsFlagNonUC_L1;
-    @Column(name="lifetime_income") private Double lifetimeIncome;                  // mean annual equivalised household disposable income by age
+    @Column(name="lifetime_income") private Double lifetimeIncome = 0.0;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -5371,17 +5372,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public void setLtIncomeDonor(Individual individual) {
-        lifetimeIncome = 0.0;
         ltIncomeDonor = individual;
+    }
+
+    public void setLtIncome(int maxAge) {
+        lifetimeIncome = 0.0;
         int birthYear = ltIncomeDonor.getBirthYear();
-        for (int aa=0; aa<=dag; aa++) {
-            lifetimeIncome += ltIncomeDonor.getAnnualIncome(birthYear+aa).getValue();
+        int ageLimit = Math.min(maxAge, dag);
+        for (int aa=0; aa<=ageLimit; aa++) {
+            AnnualIncome annualIncome = ltIncomeDonor.getAnnualIncome(birthYear+aa);
+            if (annualIncome == null)
+                throw new RuntimeException("Annual income for year " + (birthYear+aa) + " not found for donor " + ltIncomeDonor.getId());
+            lifetimeIncome += annualIncome.getValue();
         }
-        lifetimeIncome /= (double)(dag+1);
+        lifetimeIncome /= (double)(ageLimit+1);
     }
 
     public void updateLtIncome() {
         double newVal = getBenefitUnit().getHousehold().getEquivalisedDisposableIncomeYearly();
+        if (lifetimeIncome == null)
+            throw new RuntimeException("lifetimeIncome is null");
         double curVal = lifetimeIncome;
         double years = dag;
         lifetimeIncome = (curVal * (years-1) + newVal) / years;
