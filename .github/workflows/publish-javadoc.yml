@@ -28,11 +28,17 @@ jobs:
       - name: Generate Javadoc
         run: mvn javadoc:javadoc --file pom.xml
 
+      - name: Flatten Javadoc to temp directory
+        run: |
+          mkdir javadoc-temp
+          cp -r target/site/apidocs/* javadoc-temp/
+      
       - name: Deploy Javadoc to branch
         uses: MathieuSoysal/Javadoc-publisher.yml@v3.0.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          javadoc-branch: javadoc         # Branch to store Javadoc
+          javadoc-branch: javadoc
           java-version: 19
-          target-folder: target/site/apidocs # Javadoc output directory
+          target-folder: javadoc-temp
           project: maven
+
