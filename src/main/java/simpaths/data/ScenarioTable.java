@@ -28,7 +28,6 @@ public class ScenarioTable extends JPanel implements ActionListener {
     /**
      *
      *  CONSTRUCTOR TO INITIATE TABLE
-     * @param title
      * @param columnNames
      * @param data
      *
