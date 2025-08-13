@@ -41,7 +41,7 @@ public class AnnualIncome implements IDoubleSource {
     }
 
     public double getValue() {
-        if (value==null) {
+        if (Double.isNaN(value)) {
             throw new RuntimeException("AnnualIncome.getValue() called before value has been set");
         }
         else {
@@ -112,7 +112,7 @@ public class AnnualIncome implements IDoubleSource {
         int age = individual.getAge();
         Gender gender = individual.getGender();
         Double val = Parameters.getEquivalisedIncome(gender, age, year);
-        if (val==null) {
+        if (Double.isNaN(val)) {
             // outside observed range, use regression model
 
             if (Gender.Male.equals(gender)) {

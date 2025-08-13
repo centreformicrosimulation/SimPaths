@@ -1213,7 +1213,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             socialCareFromSon = false;
             socialCareFromOther = false;
         }
-        if (careHoursFromParentWeekly==null)
+        if (Double.isNaN(careHoursFromParentWeekly))
             careHoursFromParentWeekly = 0.0;
 
         if ((dag < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(dlltsd)) {
@@ -1867,7 +1867,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         toBePartnered = false;
         leavePartner = false;
         ded = (Les_c4.Student.equals(les_c4)) ? Indicator.True : Indicator.False;
-        if (initialUpdate && careHoursFromParentWeekly==null)
+        if (initialUpdate && Double.isNaN(careHoursFromParentWeekly))
             careHoursFromParentWeekly = 0.0;
         if (dag<Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             Person mother = benefitUnit.getFemale();
@@ -5377,24 +5377,33 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setLtIncome(int maxAge) {
         lifetimeIncome = 0.0;
-        int birthYear = ltIncomeDonor.getBirthYear();
-        int ageLimit = Math.min(maxAge, dag);
-        for (int aa=0; aa<=ageLimit; aa++) {
-            AnnualIncome annualIncome = ltIncomeDonor.getAnnualIncome(birthYear+aa);
-            if (annualIncome == null)
-                throw new RuntimeException("Annual income for year " + (birthYear+aa) + " not found for donor " + ltIncomeDonor.getId());
-            lifetimeIncome += annualIncome.getValue();
+        if (dag > 0) {
+
+            int birthYear = ltIncomeDonor.getBirthYear();
+            int ageLimit = Math.min(maxAge, dag-1);
+            for (int aa=0; aa<=ageLimit; aa++) {
+                AnnualIncome annualIncome = ltIncomeDonor.getAnnualIncome(birthYear+aa);
+                if (annualIncome == null)
+                    throw new RuntimeException("Annual income for year " + (birthYear+aa) + " not found for donor " + ltIncomeDonor.getId());
+                lifetimeIncome += annualIncome.getValue();
+            }
+            lifetimeIncome /= (double)(ageLimit+1);
         }
-        lifetimeIncome /= (double)(ageLimit+1);
     }
 
     public void updateLtIncome() {
         double newVal = getBenefitUnit().getHousehold().getEquivalisedDisposableIncomeYearly();
-        if (lifetimeIncome == null)
-            throw new RuntimeException("lifetimeIncome is null");
-        double curVal = lifetimeIncome;
-        double years = dag;
-        lifetimeIncome = (curVal * (years-1) + newVal) / years;
+        if (dag==0) {
+            lifetimeIncome = newVal;
+        }
+        else {
+
+            if (Double.isNaN(lifetimeIncome))
+                throw new RuntimeException("lifetimeIncome is not defined");
+            double curVal = lifetimeIncome;
+            double years = dag+1;
+            lifetimeIncome = (curVal * (years-1) + newVal) / years;
+        }
     }
 
     public Individual getLtIncomeDonor() {return ltIncomeDonor;}

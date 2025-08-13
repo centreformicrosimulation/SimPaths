@@ -48,29 +48,29 @@ public class DonorPersonPolicy {
         return fromYear;
     }
     public double getDisposableIncomePerMonth() {
-        return (disposableIncomePerMonth==null) ? 0. : disposableIncomePerMonth;
+        return (Double.isNaN(disposableIncomePerMonth)) ? 0. : disposableIncomePerMonth;
     }
     public double getOriginalIncomePerMonth() {
-        return (originalIncomePerMonth==null) ? 0. : originalIncomePerMonth;
+        return (Double.isNaN(originalIncomePerMonth)) ? 0. : originalIncomePerMonth;
     }
     public double getMonetaryBenefitsAmount() {
-        return (ilsBenmtPerMonth ==null) ? 0. : ilsBenmtPerMonth;
+        return (Double.isNaN(ilsBenmtPerMonth)) ? 0. : ilsBenmtPerMonth;
     }
     public double getNonMonetaryBenefitsAmount() {
-        return (ilsBenntPerMonth ==null) ? 0. : ilsBenntPerMonth;
+        return (Double.isNaN(ilsBenntPerMonth)) ? 0. : ilsBenntPerMonth;
     }
     public double getChildcareCostPerMonth() {
-        return (childcareCostPerMonth ==null) ? 0. : childcareCostPerMonth;
+        return (Double.isNaN(childcareCostPerMonth)) ? 0. : childcareCostPerMonth;
     }
     public double getEarningsPerMonth() {
-        return (earningsPerMonth ==null) ? 0. : earningsPerMonth;
+        return (Double.isNaN(earningsPerMonth)) ? 0. : earningsPerMonth;
     }
     public double getUCAmountPerMonth() {
-        return (benefitUCPerMonth == null) ? 0. : benefitUCPerMonth;
+        return (Double.isNaN(benefitUCPerMonth)) ? 0. : benefitUCPerMonth;
     }
     public double getLegacyBenefitsPerMonth() {
         return
-        ((benefitHousingPerMonth == null) ? 0. : benefitHousingPerMonth) +
+        ((Double.isNaN(benefitHousingPerMonth)) ? 0. : benefitHousingPerMonth) +
         ((benefitWorkingTaxCreditPerMonth == null) ? 0. : benefitWorkingTaxCreditPerMonth) +
         ((benefitChildTaxCreditPerMonth == null) ? 0. : benefitChildTaxCreditPerMonth) +
         ((benefitJobSeekerPerMonth == null) ? 0. : benefitJobSeekerPerMonth) +

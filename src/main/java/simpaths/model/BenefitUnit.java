@@ -2712,7 +2712,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
         yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
-        if (yearlyChangeInLogEDI==null)
+        if (Double.isNaN(yearlyChangeInLogEDI))
             throw new RuntimeException("problem evaluating yearly change in log edi");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
@@ -2752,11 +2752,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public double getLiquidWealth(boolean throwError) {
         if (throwError) {
-            if (liquidWealth == null)
+            if (Double.isNaN(liquidWealth))
                 throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
             return liquidWealth;
         } else {
-            if (liquidWealth==null) {
+            if (Double.isNaN(liquidWealth)) {
                 return 0.0;
             } else {
                 return liquidWealth;
@@ -2774,11 +2774,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public double getPensionWealth(boolean throwError) {
         if (throwError) {
-            if (pensionWealth == null)
+            if (Double.isNaN(pensionWealth))
                 throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
             return pensionWealth;
         } else {
-            if (pensionWealth==null) {
+            if (Double.isNaN(pensionWealth)) {
                 return 0.0;
             } else {
                 return pensionWealth;
@@ -2796,11 +2796,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public double getHousingWealth(boolean throwError) {
         if (throwError) {
-            if (housingWealth == null)
+            if (Double.isNaN(housingWealth))
                 throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
             return housingWealth;
         } else {
-            if (housingWealth==null) {
+            if (Double.isNaN(housingWealth)) {
                 return 0.0;
             } else {
                 return housingWealth;
@@ -3374,7 +3374,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return getDiscretionaryConsumptionPerYear(true);
     }
     public double getDiscretionaryConsumptionPerYear(boolean throwError) {
-        if (discretionaryConsumptionPerYear ==null) {
+        if (Double.isNaN(discretionaryConsumptionPerYear)) {
             if (throwError) {
                 throw new RuntimeException("annual consumption not defined (2)");
             } else {

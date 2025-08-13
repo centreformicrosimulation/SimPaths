@@ -56,7 +56,7 @@ public class TaxEvaluation {
         if (Parameters.flagSocialCare) {
 
             // consider social support for formal care expenditure
-            if (liquidWealth==null)
+            if (Double.isNaN(liquidWealth))
                 throw new RuntimeException("problem identifying wealth in evaluation of social care costs after transfer payments");
             boolean flagCouple = (numberMembersOver17 > 1) ? true : false;
             boolean flagSPA = (Parameters.getStatePensionAge(year, age) <= age) ? true : false;

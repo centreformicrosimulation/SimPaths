@@ -73,46 +73,52 @@ public class LifetimeIncomeImputation {
                     for (Person person : benefitUnit.getMembers()) {
                         // loop through each person
 
-                        // match birth cohort (birth year and gender)
-                        List<Individual> individuals = getLtIncomeDonors(person);
-                        if (individuals.isEmpty())
-                            throw new IllegalArgumentException("No individuals found for person " + person.getId());
+                        if (person.getDag()==0) {
+                            person.setLtIncome(endAge);
+                        }
+                        else {
 
-                        // match income
-                        int lwr = 0, upr = individuals.size() - 1;
-                        double lwrValue = individuals.get(lwr).getAnnualIncome(year).getValue() - targetIncome;
-                        if (lwrValue > 0.0) {
-                            // lower bound
+                            // match birth cohort (birth year and gender)
+                            List<Individual> individuals = getLtIncomeDonors(person);
+                            if (individuals.isEmpty())
+                                throw new IllegalArgumentException("No individuals found for person " + person.getId());
 
-                            person.setLtIncomeDonor(individuals.get(lwr));
-                        } else {
-                            double uprValue = individuals.get(upr).getAnnualIncome(year).getValue() - targetIncome;
-                            if (uprValue < 0.0) {
-                                // upper bound
+                            // match income
+                            int lwr = 0, upr = individuals.size() - 1;
+                            double lwrValue = individuals.get(lwr).getAnnualIncome(year).getValue() - targetIncome;
+                            if (lwrValue > 0.0) {
+                                // lower bound
 
-                                person.setLtIncomeDonor(individuals.get(upr));
+                                person.setLtIncomeDonor(individuals.get(lwr));
                             } else {
-                                // find bounded value
+                                double uprValue = individuals.get(upr).getAnnualIncome(year).getValue() - targetIncome;
+                                if (uprValue < 0.0) {
+                                    // upper bound
 
-                                while (lwr < upr - 1) {
-                                    int tstIndex = (upr + lwr) / 2;
-                                    double tstValue = individuals.get(tstIndex).getAnnualIncome(year).getValue() - targetIncome;
-                                    if (tstValue < 0.0) {
-                                        lwr = tstIndex;
-                                        lwrValue = tstValue;
-                                    } else {
-                                        upr = tstIndex;
-                                        uprValue = tstValue;
-                                    }
-                                }
-                                if (uprValue < -lwrValue) {
                                     person.setLtIncomeDonor(individuals.get(upr));
                                 } else {
-                                    person.setLtIncomeDonor(individuals.get(lwr));
+                                    // find bounded value
+
+                                    while (lwr < upr - 1) {
+                                        int tstIndex = (upr + lwr) / 2;
+                                        double tstValue = individuals.get(tstIndex).getAnnualIncome(year).getValue() - targetIncome;
+                                        if (tstValue < 0.0) {
+                                            lwr = tstIndex;
+                                            lwrValue = tstValue;
+                                        } else {
+                                            upr = tstIndex;
+                                            uprValue = tstValue;
+                                        }
+                                    }
+                                    if (uprValue < -lwrValue) {
+                                        person.setLtIncomeDonor(individuals.get(upr));
+                                    } else {
+                                        person.setLtIncomeDonor(individuals.get(lwr));
+                                    }
                                 }
                             }
+                            person.setLtIncome(endAge);
                         }
-                        person.setLtIncome(endAge);
                     }
                 }
             });

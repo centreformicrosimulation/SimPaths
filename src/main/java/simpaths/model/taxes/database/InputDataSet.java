@@ -99,7 +99,7 @@ public class InputDataSet {
                 throw new RuntimeException("problem identifying data set value for variable " + variable);
 
             Double valHere = Double.valueOf((double)oo);
-            if (val==null || (valHere!=null && valHere > val))
+            if (Double.isNaN(val) || (valHere!=null && valHere > val))
                 val = valHere;
         }
         if (val.equals(null))
