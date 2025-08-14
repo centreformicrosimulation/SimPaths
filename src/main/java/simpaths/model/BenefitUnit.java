@@ -104,6 +104,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Integer labourHoursWeekly1Local;
     @Transient private Integer labourHoursWeekly2Local;
 
+    private Integer uc_takeup;
+
 
     /*********************************************************************
      * CONSTRUCTOR FOR OBJECT USED ONLY TO INTERACT WITH REGRESSION MODELS
@@ -1585,7 +1587,204 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 //Other
         Homeownership_D, // Indicator: does the benefit unit own home?
 
-        //Enums for use with the tax-benefit matching method
+        //Enums added for Universal Credit effects on LS
+        UC_TakeUp,
+        Hrs_36Plus_Female,
+        Hrs_36Plus_Male,
+
+        UKC_1,
+        UKD_1,
+        UKE_1,
+        UKF_1,
+        UKG_1,
+        UKH_1,
+        UKI_1,
+        UKJ_1,
+        UKK_1,
+        UKL_1,
+        UKM_1,
+        UKN_1,
+        UKC_10,
+        UKD_10,
+        UKE_10,
+        UKF_10,
+        UKG_10,
+        UKH_10,
+        UKI_10,
+        UKJ_10,
+        UKK_10,
+        UKL_10,
+        UKM_10,
+        UKN_10,
+        UKC_11,
+        UKD_11,
+        UKE_11,
+        UKF_11,
+        UKG_11,
+        UKH_11,
+        UKI_11,
+        UKJ_11,
+        UKK_11,
+        UKL_11,
+        UKM_11,
+        UKN_11,
+        UKC_20,
+        UKD_20,
+        UKE_20,
+        UKF_20,
+        UKG_20,
+        UKH_20,
+        UKI_20,
+        UKJ_20,
+        UKK_20,
+        UKL_20,
+        UKM_20,
+        UKN_20,
+        UKC_21,
+        UKD_21,
+        UKE_21,
+        UKF_21,
+        UKG_21,
+        UKH_21,
+        UKI_21,
+        UKJ_21,
+        UKK_21,
+        UKL_21,
+        UKM_21,
+        UKN_21,
+        UKC_30,
+        UKD_30,
+        UKE_30,
+        UKF_30,
+        UKG_30,
+        UKH_30,
+        UKI_30,
+        UKJ_30,
+        UKK_30,
+        UKL_30,
+        UKM_30,
+        UKN_30,
+        UKC_31,
+        UKD_31,
+        UKE_31,
+        UKF_31,
+        UKG_31,
+        UKH_31,
+        UKI_31,
+        UKJ_31,
+        UKK_31,
+        UKL_31,
+        UKM_31,
+        UKN_31,
+        UKC_40,
+        UKD_40,
+        UKE_40,
+        UKF_40,
+        UKG_40,
+        UKH_40,
+        UKI_40,
+        UKJ_40,
+        UKK_40,
+        UKL_40,
+        UKM_40,
+        UKN_40,
+        UKC_41,
+        UKD_41,
+        UKE_41,
+        UKF_41,
+        UKG_41,
+        UKH_41,
+        UKI_41,
+        UKJ_41,
+        UKK_41,
+        UKL_41,
+        UKM_41,
+        UKN_41,
+
+        Liwwh_Male_1,
+        Liwwh_Female_1,
+        Liwwh_Male_10,
+        Liwwh_Female_10,
+        Liwwh_Male_11,
+        Liwwh_Female_11,
+        Liwwh_Male_20,
+        Liwwh_Female_20,
+        Liwwh_Male_21,
+        Liwwh_Female_21,
+        Liwwh_Male_30,
+        Liwwh_Female_30,
+        Liwwh_Male_31,
+        Liwwh_Female_31,
+        Liwwh_Male_40,
+        Liwwh_Female_40,
+        Liwwh_Male_41,
+        Liwwh_Female_41,
+        Liwwh_Male_100,
+        Liwwh_Female_100,
+        Liwwh_Male_101,
+        Liwwh_Female_101,
+        Liwwh_Male_110,
+        Liwwh_Female_110,
+        Liwwh_Male_111,
+        Liwwh_Female_111,
+        Liwwh_Male_120,
+        Liwwh_Female_120,
+        Liwwh_Male_121,
+        Liwwh_Female_121,
+        Liwwh_Male_130,
+        Liwwh_Female_130,
+        Liwwh_Male_131,
+        Liwwh_Female_131,
+        Liwwh_Male_140,
+        Liwwh_Female_140,
+        Liwwh_Male_141,
+        Liwwh_Female_141,
+        Liwwh_Male_200,
+        Liwwh_Female_200,
+        Liwwh_Male_201,
+        Liwwh_Female_201,
+        Liwwh_Male_210,
+        Liwwh_Female_210,
+        Liwwh_Male_211,
+        Liwwh_Female_211,
+        Liwwh_Male_220,
+        Liwwh_Female_220,
+        Liwwh_Male_230,
+        Liwwh_Female_230,
+        Liwwh_Male_240,
+        Liwwh_Female_240,
+        Liwwh_Male_300,
+        Liwwh_Female_300,
+        Liwwh_Male_301,
+        Liwwh_Female_301,
+        Liwwh_Male_310,
+        Liwwh_Female_310,
+        Liwwh_Male_311,
+        Liwwh_Female_311,
+        Liwwh_Male_320,
+        Liwwh_Female_320,
+        Liwwh_Male_330,
+        Liwwh_Female_330,
+        Liwwh_Male_340,
+        Liwwh_Female_340,
+        Liwwh_Male_400,
+        Liwwh_Female_400,
+        Liwwh_Male_401,
+        Liwwh_Female_401,
+        Liwwh_Male_410,
+        Liwwh_Female_410,
+        Liwwh_Male_411,
+        Liwwh_Female_411,
+        Liwwh_Male_420,
+        Liwwh_Female_420,
+        Liwwh_Male_430,
+        Liwwh_Female_430,
+        Liwwh_Male_440,
+        Liwwh_Female_440,
+
+
+
+                //Enums for use with the tax-benefit matching method
         MaximumAge, // Returns maximum age of responsible individuals in the benefit (tax) unit
         MinimumAge, // Returns maximum age of all people in benefit unit
         NumberMembersOver17, // Return number of members of benefit unit aged over 17
@@ -2703,6 +2902,332 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case Cut10 -> {
                 return 0.;
+            }
+            // UC labour supply case statements
+            case UC_TakeUp -> {
+                return (uc_takeup == null ? 0. : (Double) uc_takeup.doubleValue());
+            }
+            case Hrs_36Plus_Female -> {
+                return getFemale().getLabourSupplyHoursWeekly() >= 36 ? 1. : 0.;
+            }
+            case Hrs_36Plus_Male -> {
+                return getMale().getLabourSupplyHoursWeekly() >= 36 ? 1. : 0.;
+            }
+            case UKC_1 -> {
+                return (region.equals(Region.UKC) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKD_1 -> {
+                return (region.equals(Region.UKD) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKE_1 -> {
+                return (region.equals(Region.UKE) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKF_1 -> {
+                return (region.equals(Region.UKF) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKG_1 -> {
+                return (region.equals(Region.UKG) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKH_1 -> {
+                return (region.equals(Region.UKH) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKI_1 -> {
+                return (region.equals(Region.UKI) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKJ_1 -> {
+                return (region.equals(Region.UKJ) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKK_1 -> {
+                return (region.equals(Region.UKK) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKL_1 -> {
+                return (region.equals(Region.UKL) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKM_1 -> {
+                return (region.equals(Region.UKM) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKN_1 -> {
+                return (region.equals(Region.UKN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKC_10 -> {
+                return (region.equals(Region.UKC) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKC_11 -> {
+                return (region.equals(Region.UKC) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKD_10 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKD_20 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKD_11 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKD_21 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKD_30 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKD_31 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKD_40 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKD_41 -> {
+                return (region.equals(Region.UKD) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKE_10 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKE_20 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKE_11 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKE_21 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKE_30 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKE_31 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKE_40 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKE_41 -> {
+                return (region.equals(Region.UKE) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKF_10 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKF_20 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKF_11 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKF_21 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKF_30 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKF_31 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKF_40 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKF_41 -> {
+                return (region.equals(Region.UKF) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKG_10 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKG_20 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKG_11 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKG_21 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKG_30 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKG_31 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKG_40 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKG_41 -> {
+                return (region.equals(Region.UKG) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKH_10 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKH_20 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKH_11 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKH_21 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKH_30 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKH_31 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKH_40 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKH_41 -> {
+                return (region.equals(Region.UKH) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKI_10 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKI_20 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKI_11 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKI_21 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKI_30 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKI_31 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKI_40 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKI_41 -> {
+                return (region.equals(Region.UKI) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKJ_10 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKJ_20 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKJ_11 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKJ_21 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKJ_30 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKJ_31 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKJ_40 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKJ_41 -> {
+                return (region.equals(Region.UKJ) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKK_10 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKK_20 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKK_11 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKK_21 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKK_30 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKK_31 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKK_40 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKK_41 -> {
+                return (region.equals(Region.UKK) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKL_10 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKL_20 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKL_11 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKL_21 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKL_30 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKL_31 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKL_40 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKL_41 -> {
+                return (region.equals(Region.UKL) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKM_10 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKM_20 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKM_11 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKM_21 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKM_30 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKM_31 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKM_40 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKM_41 -> {
+                return (region.equals(Region.UKM) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+
+            case UKN_10 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKN_20 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKN_11 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKN_21 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKN_30 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKN_31 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? 1. : 0.;
+            }
+            case UKN_40 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? 1. : 0.;
+            }
+            case UKN_41 -> {
+                return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
             }
             default -> {
                 throw new IllegalArgumentException("Unsupported regressor " + variableID.name() + " in BenefitUnit");
