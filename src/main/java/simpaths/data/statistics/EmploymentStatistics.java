@@ -31,7 +31,9 @@ public class EmploymentStatistics {
 
     @Column(name = "PropUnemployed")
     private double PropUnemployed;
-
+    
+    @Column(name = "PropUCTakeup")
+    private double PropUCTakeup;
 
     public double getEmpToNotEmp() {
         return EmpToNotEmp;
@@ -63,6 +65,10 @@ public class EmploymentStatistics {
 
     public void setPropUnemployed(double propUnemployed) {
         PropUnemployed = propUnemployed;
+    }
+
+    public void setPropUCTakeup(double propUCTakeup) {
+        PropUCTakeup = propUCTakeup;
     }
 
     public void update(SimPathsModel model) {
@@ -103,6 +109,14 @@ public class EmploymentStatistics {
         MeanArrayFunction isUnemployed = new MeanArrayFunction(personsUnemployed);
         isUnemployed.applyFunction();
         setPropUnemployed(isUnemployed.getDoubleValue(IDoubleSource.Variables.Default));
+
+        CrossSection.Integer personsUCTakeup = new CrossSection.Integer(model.getPersons(), Person.class, "getUC_takeup", true);
+
+        personsUCTakeup.setFilter(ageGroupCSfilter);
+
+        MeanArrayFunction isUCTakeup = new MeanArrayFunction(personsUCTakeup);
+        isUCTakeup.applyFunction();
+        setPropUCTakeup(isUCTakeup.getDoubleValue(IDoubleSource.Variables.Default));
 
 
     }
