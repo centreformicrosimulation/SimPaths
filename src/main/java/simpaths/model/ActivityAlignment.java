@@ -125,7 +125,7 @@ public class ActivityAlignment implements IEvaluation {
         benefitUnits.parallelStream()
                 .filter(BenefitUnit::getAtRiskOfWork)
                 .filter(benefitUnit -> benefitUnit.getOccupancy().equals(benefitUnitType))
-                .forEach(benefitUnit -> benefitUnit.updateLabourSupplyAndIncome()); // Update labour supply and income
+                .forEach(benefitUnit -> benefitUnit.updateLabourSupplyAndIncomeWithUniversalCredit()); // Update labour supply and income
 
         // Update les_c4 variable before (re)calculating share of employed persons
         benefitUnits.parallelStream()
