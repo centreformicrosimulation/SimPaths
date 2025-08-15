@@ -5,6 +5,7 @@ import microsim.statistics.IDoubleSource;
 import microsim.statistics.regression.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
+import org.apache.commons.lang3.tuple.Triple;
 import simpaths.model.Person;
 import simpaths.model.enums.Labour;
 
@@ -450,4 +451,57 @@ public class ManagerRegressions {
         }
         return val;
     }
+
+    public static Triple<Labour, Labour, Integer> multiEvent(Map<Triple<Labour, Labour, Integer>, Double> probs, double rand) {
+
+        double cprob = 0.0;
+        List<Triple<Labour, Labour, Integer>> keys = new ArrayList<>();
+        for (Triple<Labour, Labour, Integer> ee : probs.keySet()) {
+            if (probs.get(ee) != null) {
+                cprob += probs.get(ee);
+                int eeVal = getTripleKeyValue(ee);
+                for (int ii=0; ii<keys.size(); ii++) {
+                    Triple<Labour, Labour, Integer> ee1 = keys.get(ii);
+                    int ee1Val = getTripleKeyValue(ee1);
+                    if (ee1Val > eeVal) {
+                        keys.add(ii, ee);
+                        break;
+                    }
+                }
+                if (!keys.contains(ee))
+                    keys.add(ee);
+            } else {
+                throw new RuntimeException("problem identifying probabilities for multinomial object (3)");
+            }
+        }
+
+        double prob = 0.0;
+        for (Triple<Labour, Labour, Integer> ee : keys) {
+            prob += probs.get(ee) / cprob;
+            if (rand < prob) {
+                return ee;
+            }
+        }
+        throw new RuntimeException("failed to identify new enumerator for multi-event (3)");
+    }
+
+    private static int getTripleKeyValue(Triple<Labour, Labour, Integer> key) {
+        // Replicates the old positional weighting (factor *= 100) while adding UC as the 3rd position.
+        int maleVal = key.getLeft().getValue();
+        int femaleVal = key.getMiddle().getValue();
+        int ucVal = key.getRight(); // assumed 0/1
+
+        int val = 0;
+        int fctr = 1;
+
+        val += maleVal * fctr;  // position 0
+        fctr *= 100;
+
+        val += femaleVal * fctr; // position 1
+        fctr *= 100;
+
+        val += ucVal * fctr; // position 2 (UC)
+        return val;
+    }
+
 }
