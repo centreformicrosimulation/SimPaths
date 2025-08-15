@@ -2976,7 +2976,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             // UC labour supply case statements
             case UC_TakeUp -> {
-                return (uc_takeup == null ? 0. : (Double) uc_takeup.doubleValue());
+                return (uc_takeup == null ? 0. : uc_takeup.doubleValue());
             }
             case Hrs_36Plus_Female -> {
                 return getFemale().getLabourSupplyHoursWeekly() >= 36 ? 1. : 0.;
@@ -4569,6 +4569,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public long getIdOriginalBU() {return idOriginalBU;}
 
     public long getIdOriginalHH() {return idOriginalHH;}
+
+    public Integer getUc_takeup() {
+        return uc_takeup;
+    }
+
+    public void setUc_takeup(Integer uc_takeup) {
+        this.uc_takeup = uc_takeup;
+    }
 
     public Person getFemale() {
         for (Person member : members) {
