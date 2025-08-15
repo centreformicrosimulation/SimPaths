@@ -59,7 +59,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     @GUIparameter(description="Report alignment adjustments")
     private boolean persistStatistics3 = true;
 
-    private boolean persistEmploymentStatistics = false;
+    private boolean persistEmploymentStatistics = true;
 
     @GUIparameter(description="Report health statistics")
     private boolean persistHealthStatistics = true;

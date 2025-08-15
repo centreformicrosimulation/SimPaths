@@ -557,7 +557,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.LabourMarketAndIncomeUpdate);
 
         // Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefitsUC);
 
         // CONSUMPTION AND SAVINGS MODULE
         if (enableIntertemporalOptimisations)
