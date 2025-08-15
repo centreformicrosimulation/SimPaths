@@ -4613,6 +4613,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         L1_fullTimeHourlyEarningsPotential = potentialHourlyEarnings;
     }
 
+    public Integer getLiwwh() {
+        return liwwh;
+    }
 
     public void setLiwwh(Integer liwwh) {
         this.liwwh = liwwh;
