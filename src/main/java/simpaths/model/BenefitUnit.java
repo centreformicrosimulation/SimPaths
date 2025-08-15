@@ -3229,6 +3229,246 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case UKN_41 -> {
                 return (region.equals(Region.UKN) && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? 1. : 0.;
             }
+            case Liwwh_Male_1 -> {
+                return (getMale() != null && getFemale() != null && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_1 -> {
+                return (getMale() != null && getFemale() != null && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_10 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_10 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_11 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_11 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_20 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_20 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_21 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_21 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_30 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_30 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_31 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_31 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_40 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_40 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_41 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_41 -> {
+                return (getMale() != null && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_100 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_100 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_101 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_101 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_110 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_110 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_111 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_111 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_120 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_120 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_121 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_121 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_130 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_130 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_131 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_131 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_140 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_140 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_141 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_141 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_200 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_200 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_201 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_201 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_210 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_210 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_211 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_211 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_220 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_220 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_230 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_230 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_240 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_240 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_300 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_300 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_301 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_301 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_310 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_310 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_311 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_311 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_320 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_320 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_330 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_330 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_340 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_340 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_400 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_400 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_401 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_401 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_410 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_410 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_411 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_411 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && uc_takeup == 1) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_420 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_420 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_430 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_430 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Male_440 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getMale().getLiwwh().doubleValue() : 0.;
+            }
+            case Liwwh_Female_440 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && uc_takeup == 0) ? (Double) getFemale().getLiwwh().doubleValue() : 0.;
+            }
             default -> {
                 throw new IllegalArgumentException("Unsupported regressor " + variableID.name() + " in BenefitUnit");
             }
