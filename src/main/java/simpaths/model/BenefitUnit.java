@@ -1247,6 +1247,222 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         calculateBUIncome();
     }
 
+    protected void updateLabourSupplyAndIncomeWithUniversalCredit() {
+
+        resetLabourStates();
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+            // intertemporal optimisations disabled all the time
+
+            updateNonLabourIncome();
+
+            // prepare temporary storage variables
+            Triple<Labour, Labour, Integer> labourSupplyChoice = null;
+            Map<Triple<Labour, Labour, Integer>, Double> disposableIncomeMonthlyByLabourPairs = new LinkedHashMap<>();
+            Map<Triple<Labour, Labour, Integer>, Double> benefitsReceivedMonthlyByLabourPairs = new LinkedHashMap<>();
+            Map<Triple<Labour, Labour, Integer>, Double> grossIncomeMonthlyByLabourPairs = new LinkedHashMap<>();
+            Map<Triple<Labour, Labour, Integer>, Match> taxDbMatchByLabourPairs = new LinkedHashMap<>();
+            LinkedHashSet<Triple<Labour, Labour, Integer>> possibleLabourCombinations = findPossibleLabourCombinationsWithUniversalCredit(); // Find possible labour combinations for this benefit unit
+            Map<Triple<Labour, Labour, Integer>, Double> labourSupplyUtilityRegressionScoresByLabourPairs = new LinkedHashMap<>();
+
+            //Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
+            if (Occupancy.Couple.equals(occupancy)) {
+
+                for (Triple<Labour, Labour, Integer> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
+
+                    //Sets values for regression score calculation
+                    male.setLabourSupplyWeekly(labourKey.getLeft());
+                    female.setLabourSupplyWeekly(labourKey.getMiddle());
+                    this.setUC_takeup(labourKey.getRight());
+
+                    //Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)
+                    double maleIncome = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getYptciihs_dv());
+                    double femaleIncome = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getYptciihs_dv());
+                    double originalIncomePerMonth = maleIncome + femaleIncome;
+                    double secondIncomePerMonth = Math.min(maleIncome, femaleIncome);
+
+                    TaxEvaluation evaluatedTransfers = taxWrapper(labourKey.getLeft().getHours(male), labourKey.getMiddle().getHours(female), male.getDisability(), female.getDisability(), originalIncomePerMonth, secondIncomePerMonth);
+
+                    disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
+                    benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                    grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                    setReceivedUC(evaluatedTransfers.getReceivedUC());
+                    setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
+
+                    //Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
+                    double regressionScore = 0.;
+                    if (male.atRiskOfWork()) { //If male has flexible labour supply
+                        if (female.atRiskOfWork()) { //And female has flexible labour supply
+                            //Follow utility process for couples
+                            regressionScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
+                        } else if (!female.atRiskOfWork()) { //Male has flexible labour supply, female doesn't
+                            //Follow utility process for single males for the UK
+                            regressionScore = Parameters.getRegLabourSupplyUtilityMalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                            //In Italy, this should follow a separate set of estimates. One way is to differentiate between countries here; another would be to add a set of estimates for both countries, but for the UK have the same number as for singles
+                            //Introduced a new category of estimates, Males/Females with Dependent to be used when only one of the couple is flexible in labour supply. In Italy, these have a separate set of estimates; in the UK they use the same estimates as "independent" singles
+                        }
+                    } else if (female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
+                        //Follow utility process for single female
+                        regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                    } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
+                    if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                        throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
+                    }
+
+                    disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
+                    benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
+                    grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
+                    taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
+                    labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, regressionScore); //XXX: Adult children could contribute their income to the hh, but then utility would have to be joint for a household with adult children, and they couldn't be treated separately as they are at the moment?
+                }
+            } else {
+                // single adult
+
+                if (Occupancy.Single_Male.equals(occupancy)) {
+
+                    for (Triple<Labour, Labour, Integer> labourKey : possibleLabourCombinations) {
+
+                        male.setLabourSupplyWeekly(labourKey.getLeft());
+                        this.setUC_takeup(labourKey.getRight());
+
+                        double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getYptciihs_dv());
+                        TaxEvaluation evaluatedTransfers = taxWrapper(labourKey.getLeft().getHours(male), 0.0, male.getDisability(), -1, originalIncomePerMonth, 0.0);
+
+                        disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
+                        benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                        grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        setReceivedUC(evaluatedTransfers.getReceivedUC());
+                        setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
+
+                        double regressionScore = 0.;
+                        if (male.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for male adult children
+                            regressionScore = Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class);
+                        } else {
+                            regressionScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
+                        }
+                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                            throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
+                        }
+
+                        disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
+                        benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
+                        grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
+                        taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
+                        labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, regressionScore);
+                    }
+                } else if (Occupancy.Single_Female.equals(occupancy)) {        //Occupant must be a single female
+
+                    for (Triple<Labour, Labour, Integer> labourKey : possibleLabourCombinations) {
+
+                        female.setLabourSupplyWeekly(labourKey.getMiddle());
+                        this.setUC_takeup(labourKey.getRight());
+
+                        double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getYptciihs_dv());
+                        TaxEvaluation evaluatedTransfers = taxWrapper(0.0, labourKey.getMiddle().getHours(female), -1, female.getDisability(), originalIncomePerMonth, 0.0);
+
+                        disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
+                        benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                        grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        setReceivedUC(evaluatedTransfers.getReceivedUC());
+                        setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
+
+                        double regressionScore = 0.;
+                        if (female.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for female adult children
+                            regressionScore = Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class);
+                        } else {
+                            regressionScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
+                        }
+                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                            throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
+                        }
+                        disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
+                        benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
+                        grossIncomeMonthlyByLabourPairs.put(labourKey, getGrossIncomeMonthly());
+                        taxDbMatchByLabourPairs.put(labourKey, evaluatedTransfers.getMatch());
+                        labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, regressionScore);
+                    }
+                }
+            }
+            if (labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
+                // error check
+
+                System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
+                if (male != null) {
+                    System.out.print("male : " + male.getKey().getId() + ", ");
+                }
+                if (female != null) {
+                    System.out.print("female : " + female.getKey().getId() + ", ");
+                }
+                System.out.print("is empty!");
+            }
+
+            //Sample labour supply from possible labour (pairs of) values
+            double labourInnov = 0;
+
+            // Check if:
+            // - single occupant is employed
+            // - or male of couple is employed
+            // - or male is not at risk of work and female is employed
+            // -> then persist employment at prob_{persist_employment}
+            // Otherwise
+            // -> persist unemployment at prob_{persist_unemployment}
+
+            if (occupancy.Single_Male.equals(occupancy) && male.atRiskOfWork() && male.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.equals(Occupancy.Couple) &&
+                    ((male.atRiskOfWork() && male.getEmployed() == 1) ||
+                            (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1))) {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_notinemployment_persistence_probability);
+            }
+
+            try {
+                Map<Triple<Labour, Labour, Integer>, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs =
+                        convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
+                labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
+                // labourRandomUniform is not updated here to avoid issues with search routine for labour market alignment
+            } catch (RuntimeException e) {
+                System.out.print("Could not determine labour supply choice for BU with ID: " + getKey().getId());
+            }
+            // populate labour supply
+            if(model.debugCommentsOn && labourSupplyChoice!=null) {
+                log.trace("labour supply choice " + labourSupplyChoice);
+            }
+            this.setUC_takeup(labourSupplyChoice.getRight());
+            if(Occupancy.Couple.equals(occupancy)) {
+                male.setLabourSupplyWeekly(labourSupplyChoice.getLeft());
+                female.setLabourSupplyWeekly(labourSupplyChoice.getMiddle());
+            } else {
+                if(Occupancy.Single_Male.equals(occupancy)) {
+                    male.setLabourSupplyWeekly(labourSupplyChoice.getLeft());
+                } else {        //Occupant must be single female
+                    female.setLabourSupplyWeekly(labourSupplyChoice.getMiddle());
+                }
+            }
+
+            // allow for formal childcare costs
+            if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
+                updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
+            }
+            if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
+                updateSocialCareCostPerWeek();
+            }
+
+            // populate disposable income
+            disposableIncomeMonthly = disposableIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
+            benefitsReceivedPerMonth = benefitsReceivedMonthlyByLabourPairs.get(labourSupplyChoice);
+            grossIncomeMonthly = grossIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
+            taxDbMatch = taxDbMatchByLabourPairs.get(labourSupplyChoice);
+            taxDbDonorId = taxDbMatch.getCandidateID();
+
+        //Update gross income variables for the household and all occupants:
+        calculateBUIncome();
+    }
+
     private MultiKeyMap<Labour, Double> convertRegressionScoresToProbabilities(MultiKeyMap<Labour, Double> regressionScoresMap) {
         MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>()); // Output map to update and return
         double logSumExp = getLogSumExp(regressionScoresMap);
@@ -1259,6 +1475,42 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
 
         return labourSupplyUtilityRegressionProbabilitiesByLabourPairs;
+    }
+
+    private Map<Triple<Labour, Labour, Integer>, Double> convertRegressionScoresToProbabilities(Map<Triple<Labour, Labour, Integer>, Double> regressionScoresMap) {
+        Map<Triple<Labour, Labour, Integer>, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = new LinkedHashMap<>();
+        double logSumExp = getLogSumExp(regressionScoresMap);
+
+        // Transform using the log-sum-exp
+        for (Triple<Labour, Labour, Integer> key : regressionScoresMap.keySet()) {
+            double regressionScore = regressionScoresMap.get(key);
+            double regressionProbability = Math.exp(regressionScore - logSumExp);
+            labourSupplyUtilityRegressionProbabilitiesByLabourPairs.put(key, regressionProbability);
+        }
+
+        return labourSupplyUtilityRegressionProbabilitiesByLabourPairs;
+    }
+
+    private static double getLogSumExp(Map<Triple<Labour, Labour, Integer>, Double> regressionScoresMap) {
+        double maxRegressionScore = Double.NEGATIVE_INFINITY;
+        double sumExpRegScoreMinusMax = 0.;
+        double logSumExp = 0.;
+
+        // Find maximum of regression scores
+        for (double val : regressionScoresMap.values()) {
+            if(val > maxRegressionScore){
+                maxRegressionScore = val;
+            }
+        }
+
+        // Calculate sum of exp() differences between each element and max
+        for (double val : regressionScoresMap.values()) {
+            sumExpRegScoreMinusMax += Math.exp(val - maxRegressionScore);
+        }
+
+        // Calculate log sum exp
+        logSumExp = maxRegressionScore + Math.log(sumExpRegScoreMinusMax);
+        return logSumExp;
     }
 
     private static double getLogSumExp(MultiKeyMap<Labour, Double> regressionScoresMap) {
@@ -4570,11 +4822,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public long getIdOriginalHH() {return idOriginalHH;}
 
-    public Integer getUc_takeup() {
+    public Integer getUC_takeup() {
         return uc_takeup;
     }
 
-    public void setUc_takeup(Integer uc_takeup) {
+    public void setUC_takeup(Integer uc_takeup) {
         this.uc_takeup = uc_takeup;
     }
 
