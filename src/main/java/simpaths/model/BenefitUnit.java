@@ -1770,6 +1770,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         FemaleLeisure_UKF,
         FemaleLeisure_UKG,
         FemaleLeisure_UKH,
+        FemaleLeisure_UKI,
         FemaleLeisure_UKJ,
         FemaleLeisure_UKK,
         FemaleLeisure_UKL,
@@ -2448,6 +2449,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case FemaleLeisure_UKH -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKH)) {
+                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                    } else return 0.;
+                } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
+            }
+            case FemaleLeisure_UKI -> {
+                if(model.getCountry().equals(Country.UK)) {
+                    if(getRegion().equals(Region.UKI)) {
                         return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
