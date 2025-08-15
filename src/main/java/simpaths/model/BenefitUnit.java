@@ -429,6 +429,77 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return combinationsToReturn;
     }
 
+    /**
+     * Identifies possible labour supply combinations for a benefit unit (single or couple)
+     * alongside their Universal Credit (UC) take-up status.
+     * This method considers various scenarios based on individual characteristics,
+     * such as whether each partner in a couple is at risk of work, retired, or unable to work.
+     * It generates combinations of labour supply levels for both individuals, including
+     * Universal Credit take-up status.
+     *
+     * @return A set of triplets (Triple<Labour, Labour, Double>) where each triplet represents:
+     * - Labour supply level for the male partner.
+     * - Labour supply level for the female partner.
+     * - Universal Credit take-up status (1.0 for taken, 0.0 for not taken).
+     */
+    public LinkedHashSet<Triple<Labour, Labour, Integer>> findPossibleLabourCombinationsWithUniversalCredit() {
+        LinkedHashSet<Triple<Labour, Labour, Integer>> combinationsToReturn = new LinkedHashSet<>();
+        Integer[] UC_TakeUp = {1, 0};
+        Person male = getMale();
+        Person female = getFemale();
+        if (male!=null && female!=null) {
+            //Need to use both partners individual characteristics to determine similar benefitUnits
+            //Sometimes one of the occupants of the couple will be retired (or even under the age to work,
+            // which is currently the age to leave home).  For this case, the person (not at risk of work)'s
+            // labour supply will always be zero, while the other person at risk of work has a choice over the
+            // single person Labour Supply set.
+            Labour[] labourMaleValues;
+            if (male.atRiskOfWork()) {
+                labourMaleValues = Labour.values();
+            } else {
+                labourMaleValues = new Labour[]{Labour.ZERO};
+            }
+
+            Labour[] labourFemaleValues;
+            if (female.atRiskOfWork()) {
+                labourFemaleValues = Labour.values();
+            } else {
+                labourFemaleValues = new Labour[]{Labour.ZERO};
+            }
+
+            for (Labour labourMale: labourMaleValues) {
+                for(Labour labourFemale: labourFemaleValues) {
+                    for (Integer UC: UC_TakeUp){
+                        if ((labourMale == Labour.ZERO || labourMale == Labour.TEN) &&
+                                (labourFemale == Labour.ZERO || labourFemale == Labour.TEN) ||
+                                    UC == 0.0) {
+                            combinationsToReturn.add(Triple.of(labourMale, labourFemale, UC));
+                        }
+                    }
+                }
+            }
+        } else {
+            //For single benefitUnits, no need to check for at risk of work (i.e. retired, sick or student activity status),
+            // as this has already been done when passing this household to the labour supply module (see first loop over benefitUnits
+            // in LabourMarket#update()).
+            if (male!=null) {
+                for (Labour labour : Labour.values()) {
+                    for (Integer UC: UC_TakeUp) {
+                        combinationsToReturn.add(Triple.of(labour, Labour.ZERO, UC));
+                    }
+                }
+            } else { //Must be single female
+                for (Labour labour : Labour.values()) {
+                    for (Integer UC: UC_TakeUp){
+                        combinationsToReturn.add(Triple.of(Labour.ZERO, labour, UC));
+                    }
+                }
+            }
+        }
+
+        return combinationsToReturn;
+    }
+
 
     public void setReceivesBenefitsFlag() {
 
