@@ -106,13 +106,39 @@ public class DonorTaxImputation {
         // use keys to extract candidate pool from database
         //------------------------------------------------------------
         List<Integer> candidatePool = null;
+        List<Integer> filteredPool = null;
         int matchRegime = -1;
         int systemYear = getSystemYear(keys.getSimYear());
         boolean flagSecondIncome = false, flagChildcareCost = false;
+
+        // UC filter target (null => no UC constraint)
+        Integer ucTarget = (keys != null) ? keys.getUcTakeupTarget() : null;
+
         for (int ii=0; ii<Parameters.TAXDB_REGIMES; ii++) {
 
             Triple<Integer,Integer,Integer> key = Triple.of(systemYear,ii,keys.getKey(ii));
             candidatePool = Parameters.getTaxdbReferences().get(key);
+
+            if (ucTarget != null && getPoolSize(candidatePool) > 0) {
+                filteredPool = candidatePool.stream()
+                        .filter(id -> {
+                            DonorTaxUnit candidateTaxUnit = Parameters.getDonorPool().get(id);
+                            if (candidateTaxUnit == null) return false;
+                            DonorTaxUnitPolicy pol = candidateTaxUnit.getPolicyBySystemYear(systemYear);
+                            if (pol == null) return false;
+                            Integer ruc = pol.getReceivesUC();
+                            return ruc != null && ruc.intValue() == ucTarget.intValue();
+                        })
+                        .toList();
+            }
+
+            if (filteredPool != null && getPoolSize(filteredPool) == 0) {
+                throw new RuntimeException("no donor benefitUnit found for state combination with inner key index " + keys.getKey(0));
+            } else {
+                candidatePool = filteredPool;
+            }
+
+
             int jjStart;
             if ( (getCounterVal(MatchFeature.DualIncome, ii, keys.getKey(ii))==1) ||
                     (getCounterVal(MatchFeature.Childcare, ii, keys.getKey(ii))==1) ) {
