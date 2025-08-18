@@ -239,8 +239,8 @@ public class Parameters {
     public static final double WEEKS_PER_YEAR = 365.25 / 7.;
 
     // Determine probability of yearly labour supply matches persisting from previous year
-    public static double labour_innovation_employment_persistence_probability = 0.9;
-    public static double labour_innovation_notinemployment_persistence_probability = 0.1;
+    public static double labour_innovation_employment_persistence_probability = 0.8;
+    public static double labour_innovation_notinemployment_persistence_probability = 0.8;
 
     public static final int HOURS_IN_WEEK = 24 * 7; //This is used to calculate leisure in labour supply
     //Is it possible for people to start going to the labour module (e.g. age 17) while they are living with parents (until age 18)?
