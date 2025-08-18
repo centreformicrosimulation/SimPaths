@@ -2,6 +2,7 @@ package simpaths.model.taxes;
 
 
 import jakarta.persistence.*;
+import simpaths.data.Parameters;
 
 
 /**
@@ -48,34 +49,34 @@ public class DonorPersonPolicy {
         return fromYear;
     }
     public double getDisposableIncomePerMonth() {
-        return (Double.isNaN(disposableIncomePerMonth)) ? 0. : disposableIncomePerMonth;
+        return (Parameters.checkFinite(disposableIncomePerMonth)) ? disposableIncomePerMonth : 0.0;
     }
     public double getOriginalIncomePerMonth() {
-        return (Double.isNaN(originalIncomePerMonth)) ? 0. : originalIncomePerMonth;
+        return (Parameters.checkFinite(originalIncomePerMonth)) ? originalIncomePerMonth : 0.0;
     }
     public double getMonetaryBenefitsAmount() {
-        return (Double.isNaN(ilsBenmtPerMonth)) ? 0. : ilsBenmtPerMonth;
+        return (Parameters.checkFinite(ilsBenmtPerMonth)) ? ilsBenmtPerMonth : 0.0;
     }
     public double getNonMonetaryBenefitsAmount() {
-        return (Double.isNaN(ilsBenntPerMonth)) ? 0. : ilsBenntPerMonth;
+        return (Parameters.checkFinite(ilsBenntPerMonth)) ? ilsBenntPerMonth : 0.0;
     }
     public double getChildcareCostPerMonth() {
-        return (Double.isNaN(childcareCostPerMonth)) ? 0. : childcareCostPerMonth;
+        return (Parameters.checkFinite(childcareCostPerMonth)) ? childcareCostPerMonth : 0.0;
     }
     public double getEarningsPerMonth() {
-        return (Double.isNaN(earningsPerMonth)) ? 0. : earningsPerMonth;
+        return (Parameters.checkFinite(earningsPerMonth)) ? earningsPerMonth : 0.0;
     }
     public double getUCAmountPerMonth() {
-        return (Double.isNaN(benefitUCPerMonth)) ? 0. : benefitUCPerMonth;
+        return (Parameters.checkFinite(benefitUCPerMonth)) ? benefitUCPerMonth : 0.0;
     }
     public double getLegacyBenefitsPerMonth() {
         return
-        ((Double.isNaN(benefitHousingPerMonth)) ? 0. : benefitHousingPerMonth) +
-        ((benefitWorkingTaxCreditPerMonth == null) ? 0. : benefitWorkingTaxCreditPerMonth) +
-        ((benefitChildTaxCreditPerMonth == null) ? 0. : benefitChildTaxCreditPerMonth) +
-        ((benefitJobSeekerPerMonth == null) ? 0. : benefitJobSeekerPerMonth) +
-        ((benefitIncomeBasedSupportPerMonth == null) ? 0. : benefitIncomeBasedSupportPerMonth) +
-        ((benefitIncomeRelatedESAPerMonth == null) ? 0. : benefitIncomeRelatedESAPerMonth);
+        ((Parameters.checkFinite(benefitHousingPerMonth)) ? benefitHousingPerMonth : 0.0) +
+        (Parameters.checkFinite(benefitWorkingTaxCreditPerMonth) ? benefitWorkingTaxCreditPerMonth : 0.0) +
+        (Parameters.checkFinite(benefitChildTaxCreditPerMonth) ? benefitChildTaxCreditPerMonth : 0.0) +
+        (Parameters.checkFinite(benefitJobSeekerPerMonth) ? benefitJobSeekerPerMonth : 0.0) +
+        (Parameters.checkFinite(benefitIncomeBasedSupportPerMonth) ? benefitIncomeBasedSupportPerMonth : 0.0) +
+        (Parameters.checkFinite(benefitIncomeRelatedESAPerMonth) ? benefitIncomeRelatedESAPerMonth : 0.0);
     }
 
     public Integer getReceivesUC() {

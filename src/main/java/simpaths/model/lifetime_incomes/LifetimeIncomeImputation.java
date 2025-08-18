@@ -41,7 +41,7 @@ public class LifetimeIncomeImputation {
             // require imputation of income histories
             System.out.println("Imputing income histories for simulated population");
             IntStream.range(0, households.size()).sorted().parallel().forEach(ii -> {
-                //for (int ii=0; ii < households.size(); ii++) {
+            //for (int ii=0; ii < households.size(); ii++) {
 
                 // consider each household in initialisation set
                 Household household = households.get(ii);
@@ -51,8 +51,8 @@ public class LifetimeIncomeImputation {
                 double equivalenceScale = 0.0;
                 boolean firstAdult = true;
                 for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                    disposableIncomePerAnnum += benefitUnit.getDisposableIncomeMonthly() * 12.0;
                     for (Person pp : benefitUnit.getMembers()) {
-                        disposableIncomePerAnnum += pp.getDisposableIncomeMonthly() * 12.0;
                         if (pp.getDag() > 13) {
                             if (firstAdult) {
                                 equivalenceScale += 1.0;
@@ -122,7 +122,7 @@ public class LifetimeIncomeImputation {
                     }
                 }
             });
-//            }
+            //}
             System.out.println("Completed imputing income histories for simulated population");
         }
     }

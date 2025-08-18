@@ -356,7 +356,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @Override
     public void buildObjects() {
 
-
         // time check
         elapsedTime0 = System.currentTimeMillis();
         timerStartSim = elapsedTime0;

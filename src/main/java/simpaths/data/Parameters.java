@@ -913,7 +913,7 @@ public class Parameters {
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
 //		unemploymentRates = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_unemploymentRates.xlsx", countryString, 1, 46);
-        fixedRetireAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1, 2);
+        fixedRetireAge = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1, 2);
         /*
         rawProbSick = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_probSick.xls", country.toString(), 2, 1);
         for (Object o: rawProbSick.keySet()) {
@@ -3040,7 +3040,7 @@ public class Parameters {
     public static double getSampleAverageRate(TimeVaryingRate rateType) {
 
         Double val = getTimeSeriesRateParameter(rateType);
-        if (Double.isNaN(val)) {
+        if (!checkFinite(val)) {
 
             val = 0.0;
             double nn = 0.0;
@@ -3401,13 +3401,13 @@ public class Parameters {
         switch (variableType) {
             case PartnershipAlignment -> {
                 Double val = partnershipAlignAdjustment.get(year);
-                if (Double.isNaN(val))
+                if (!checkFinite(val))
                     throw new RuntimeException("value undefined for partnershipAlignAdjustment in year " + year);
                 return val;
             }
             case FertilityAlignment -> {
                 Double val = fertilityAlignAdjustment.get(year);
-                if (Double.isNaN(val))
+                if (!checkFinite(val))
                     throw new RuntimeException("value undefined for fertilityAlignAdjustment in year " + year);
                 return val;
             }
@@ -3433,7 +3433,7 @@ public class Parameters {
 
     public static double getFertilityRateByYear(int year) {
         Double val = fertilityRateByYear.get(year);
-        if (Double.isNaN(val))
+        if (!Parameters.checkFinite(val))
             throw new RuntimeException("value undefined for getFertilityRateByYear in year " + year);
         return val;
     }
@@ -3520,5 +3520,11 @@ public class Parameters {
 
     public static String getInputDirectory() {
         return INPUT_DIRECTORY;
+    }
+
+    public static boolean checkFinite(Double dd) {
+        if (dd==null)
+            return false;
+        return !dd.isInfinite() && !dd.isNaN();
     }
 }
