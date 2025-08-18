@@ -337,7 +337,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (originalPerson.ltIncomeDonor!=null) {
             this.ltIncomeDonor = originalPerson.ltIncomeDonor;
         }
-        this.lifetimeIncome = originalPerson.getLifetimeIncome();
+        if (Parameters.lifetimeIncomeImpute)
+            this.lifetimeIncome = originalPerson.getLifetimeIncome();
 
         dag = originalPerson.dag;
         ageGroup = originalPerson.ageGroup;
