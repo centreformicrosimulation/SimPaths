@@ -1,15 +1,63 @@
 /**********************************************************************/
 
-cd "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations"
+// cd "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations"
 
 tempfile temp
+
+********************************************************************************
+* Benefits receipt
+********************************************************************************
+
+
+//UC
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
+
+
+drop if dag <16 | dag > 64
+collapse (mean) All=econ_benefits_uc [aweight=dwt], by(stm)
+
+rename stm Year
+
+if `year' == 2011 {
+save validation_statistics.dta, replace
+} 
+else {
+append using validation_statistics
+save validation_statistics.dta, replace
+}
+}
+
+export excel using validation_statistics_UK.xlsx, sheet("UK_benefitsUC") firstrow(variables) replace
+
+// NonUC
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
+
+
+drop if dag <16 | dag > 64
+collapse (mean) All=econ_benefits_nonuc [aweight=dwt], by(stm)
+
+rename stm Year
+
+if `year' == 2011 {
+save validation_statistics.dta, replace
+} 
+else {
+append using validation_statistics
+save validation_statistics.dta, replace
+}
+}
+
+export excel using validation_statistics_UK.xlsx, sheet("UK_benefitsNonUC", replace) firstrow(variables) 
+
 
 ********************************************************************************
 *Students by Age
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 *Define age groups
 gen ageGroup = .
@@ -74,14 +122,14 @@ save validation_statistics.dta, replace
 
 }
 
-export excel using validation_statistics_UK.xlsx, sheet("UK_studentsByAge") firstrow(variables) replace
+export excel using validation_statistics_UK.xlsx, sheet("UK_studentsByAge", replace) firstrow(variables) 
 
 ********************************************************************************
 *Students by Region
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 /*
 *Define regions
@@ -163,8 +211,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_studentsByRegion", r
 *Education level over 17 years old (excluding students)
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 
 
@@ -211,8 +259,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_educationLevel", rep
 *Activity status
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 
 la def les_c4_lb /// 
@@ -251,8 +299,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_activityStatus", rep
 *Education level by age group
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 *Define age groups
 gen ageGroup = .
@@ -332,8 +380,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_educationLevelByAge"
 *Education level by region
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 la def drgn1_lb /// 
 	1 "region_UKC" ///
@@ -407,8 +455,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_educationLevelByRegi
 *BenefitUnit couple occupancy by region
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -476,8 +524,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_partneredBUShareByRe
 *Disability by gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -518,8 +566,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_disabledByGender", r
 *Disability by age group and gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 drop if dag < 16 
@@ -574,8 +622,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_disabledByAgeGroup",
 *Health by age group and gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -629,8 +677,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_healthByAgeGroup", r
 *Mental health score by age group and gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -703,8 +751,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_mentalHealthByAgeGro
 *Psychological distress (caseness) by age group and gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -779,8 +827,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_psychDistressByAgeGr
 *Psychological distress (caseness) by age group and gender, low education
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -857,8 +905,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_psychDistressByAgeGr
 *Psychological distress (caseness) by age group and gender, low education
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -935,8 +983,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_psychDistressByAgeGr
 *Psychological distress (caseness) by age group and gender, high education
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1013,8 +1061,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_psychDistressByAgeGr
 *Employment rate by gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1060,8 +1108,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_employmentByGender",
 *Employment by age group and gender
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1156,8 +1204,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_employmentByGenderAn
 
 *These statistics are a bit weird - need to be double checked. 
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1195,8 +1243,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_employmentByMaternit
 *Employment by gender and region
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1259,8 +1307,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_employmentByGenderAn
 *Average yearly labour supply by education (for individuals flexible in labour supply)
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1312,8 +1360,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_labourSupplyByEducat
 *Homeownership 
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 
 cap drop _*
@@ -1338,8 +1386,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_homeownership", repl
 ********************************************************************************
 *Gross earnings yearly by education and gender (for employed persons)
 ********************************************************************************
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1413,8 +1461,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_grossEarningsByGende
 ********************************************************************************
 *Hourly wages by education and gender (for employed persons)
 ********************************************************************************
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1489,8 +1537,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_hourlywageByGenderAn
 *Hours worked weekly by education and gender (for employed persons)
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1544,8 +1592,8 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_lhwByGenderAndEdu", 
 *Hours worked weekly by gender (for employed persons)
 ********************************************************************************
 
-foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 {
-import delimited "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations - Copy\population_initial_UK_`year'.csv", clear
+foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 {
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1592,7 +1640,7 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_lhwByGender", replac
 ********************************************************************************
 
 foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 {
-import delimited "data\population_initial_UK_`year'.csv", clear
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1666,8 +1714,7 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_healthMCSByAgeGroup"
 ********************************************************************************
 
 foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 {
-import delimited "data\population_initial_UK_`year'.csv", clear
-
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 cap drop _*
 
 la def dgn_lb /// 
@@ -1741,7 +1788,7 @@ export excel using validation_statistics_UK.xlsx, sheet("UK_healthPCSByAgeGroup"
 ********************************************************************************
 
 foreach year in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 {
-import delimited "data\population_initial_UK_`year'.csv", clear
+import delimited "C:\andy_local\SimPaths project files\ukhls_data\data\population_initial_UK_`year'.csv", clear
 
 cap drop _*
 
@@ -1752,7 +1799,7 @@ la def dgn_lb ///
 la val dgn dgn_lb
 
 *Define age groups
-`}`}`}Group = .
+gen ageGroup = .
 replace ageGroup = 0 if dag >= 0 & dag <= 9
 replace ageGroup = 1 if dag >= 10 & dag <= 19
 replace ageGroup = 2 if dag >= 20 & dag <= 29
