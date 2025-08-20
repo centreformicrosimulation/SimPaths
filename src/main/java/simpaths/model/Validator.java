@@ -1452,12 +1452,12 @@ public class Validator implements IDoubleSource {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case ucReceipt:
-                value = ((Number) Parameters.getValidationUniversalCredit().getValue(model.getYear()-1, "All"));
+                value = ((Number) Parameters.getValidationUniversalCredit().getValue(model.getYear()-1));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case lbReceipt:
-                value = ((Number) Parameters.getValidationLegacyBenefits().getValue(model.getYear()-1, "All"));
+                value = ((Number) Parameters.getValidationLegacyBenefits().getValue(model.getYear()-1));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
