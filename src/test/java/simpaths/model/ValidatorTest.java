@@ -1,10 +1,8 @@
 package simpaths.model;
 
-import microsim.data.MultiKeyCoefficientMap;
-import microsim.data.excel.ExcelAssistant;
 import microsim.engine.SimulationEngine;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -14,8 +12,6 @@ import simpaths.experiment.SimPathsCollector;
 import simpaths.experiment.SimPathsObserver;
 import simpaths.model.enums.Country;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class ValidatorTest {
@@ -25,6 +21,10 @@ class ValidatorTest {
     private static SimPathsCollector mockCollector;
     private static SimPathsObserver mockObserver;
     private static SimulationEngine engineMock;
+    private static MockedStatic<Parameters> mockParameters;
+    private static MockedStatic<SimulationEngine> mockEngine;
+
+    private static String tempInputDirectory;
 
     @BeforeAll
     static void setUp() {
@@ -32,8 +32,8 @@ class ValidatorTest {
         mockCollector = mock(SimPathsCollector.class);
         mockObserver = mock(SimPathsObserver.class);
         SimulationEngine engineMock = mock(SimulationEngine.class);
-        MockedStatic<Parameters> mockParameters = mockStatic(Parameters.class, Mockito.CALLS_REAL_METHODS);
-        MockedStatic<SimulationEngine> mockEngine = mockStatic(SimulationEngine.class, Mockito.CALLS_REAL_METHODS);
+        mockParameters = mockStatic(Parameters.class, Mockito.CALLS_REAL_METHODS);
+        mockEngine = mockStatic(SimulationEngine.class, Mockito.CALLS_REAL_METHODS);
 
         mockEngine.when(() -> SimulationEngine.getInstance()).thenReturn(engineMock);
 
@@ -43,24 +43,21 @@ class ValidatorTest {
         when(engineMock.getManager(SimPathsCollector.class.getCanonicalName())).thenReturn(mockCollector);
         when(engineMock.getManager(SimPathsObserver.class.getCanonicalName())).thenReturn(mockObserver);
 
-        String countryString = "UK";
-        int columnsValidationLifeSatisfactionByAgeGroup = 18;
+        tempInputDirectory = Parameters.getInputDirectory();
 
-        MultiKeyCoefficientMap validationLifeSatisfactionByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lifeSatisfactionByAgeGroup", 1, columnsValidationLifeSatisfactionByAgeGroup);
-        MultiKeyCoefficientMap validationUniversalCredit = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsUC", 1, 1);
-        MultiKeyCoefficientMap validationLegacyBenefits = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsNonUC", 1, 1);
-        MultiKeyCoefficientMap validationLhwByGender = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lhwByGender", 1, 2);
+        Parameters.setInputDirectory("input/");
 
-        mockParameters.when(() -> Parameters.getValidationLifeSatisfactionByAge())
-                .thenReturn(validationLifeSatisfactionByAge);
-        mockParameters.when(() -> Parameters.getValidationUniversalCredit())
-                .thenReturn(validationUniversalCredit);
-        mockParameters.when(() -> Parameters.getValidationLegacyBenefits())
-                .thenReturn(validationLegacyBenefits);
-        mockParameters.when(() -> Parameters.getValidationLhwByGender())
-                .thenReturn(validationLhwByGender);
+        Parameters.updateCountryColumnNumbers(Country.UK);
+        Parameters.loadValidationStatistics(Country.UK.toString());
 
         validator = new Validator();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        if (mockEngine != null) mockEngine.close();
+        if (mockParameters != null) mockParameters.close();
+        Parameters.setInputDirectory(tempInputDirectory);
     }
 
     @Test
