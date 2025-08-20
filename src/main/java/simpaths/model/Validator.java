@@ -1412,12 +1412,12 @@ public class Validator implements IDoubleSource {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case lhw_Male:
-                value = ((Number) Parameters.getValidationLhwByGenderAndEducation().getValue(model.getYear()-1, "lhw_male"));
+                value = ((Number) Parameters.getValidationLhwByGender().getValue(model.getYear()-1, "lhw_male"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case lhw_Female:
-                value = ((Number) Parameters.getValidationLhwByGenderAndEducation().getValue(model.getYear()-1, "lhw_female"));
+                value = ((Number) Parameters.getValidationLhwByGender().getValue(model.getYear()-1, "lhw_female"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap

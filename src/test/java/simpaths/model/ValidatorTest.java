@@ -33,6 +33,9 @@ class ValidatorTest {
         mockObserver = mock(SimPathsObserver.class);
         SimulationEngine engineMock = mock(SimulationEngine.class);
         MockedStatic<Parameters> mockParameters = mockStatic(Parameters.class, Mockito.CALLS_REAL_METHODS);
+        MockedStatic<SimulationEngine> mockEngine = mockStatic(SimulationEngine.class, Mockito.CALLS_REAL_METHODS);
+
+        mockEngine.when(() -> SimulationEngine.getInstance()).thenReturn(engineMock);
 
         when(mockModel.getYear()).thenReturn(2017);
 
@@ -46,6 +49,7 @@ class ValidatorTest {
         MultiKeyCoefficientMap validationLifeSatisfactionByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lifeSatisfactionByAgeGroup", 1, columnsValidationLifeSatisfactionByAgeGroup);
         MultiKeyCoefficientMap validationUniversalCredit = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsUC", 1, 1);
         MultiKeyCoefficientMap validationLegacyBenefits = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsNonUC", 1, 1);
+        MultiKeyCoefficientMap validationLhwByGender = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lhwByGender", 1, 2);
 
         mockParameters.when(() -> Parameters.getValidationLifeSatisfactionByAge())
                 .thenReturn(validationLifeSatisfactionByAge);
@@ -53,6 +57,8 @@ class ValidatorTest {
                 .thenReturn(validationUniversalCredit);
         mockParameters.when(() -> Parameters.getValidationLegacyBenefits())
                 .thenReturn(validationLegacyBenefits);
+        mockParameters.when(() -> Parameters.getValidationLhwByGender())
+                .thenReturn(validationLhwByGender);
 
         validator = new Validator();
     }
@@ -61,7 +67,7 @@ class ValidatorTest {
     @DisplayName("Validation of Universal Credit values loaded")
     void validationUniversalCreditTest() {
 
-    Number value = ((Number) Parameters.getValidationUniversalCredit().getValue(mockModel.getYear()-1));
+    Number value = validator.getDoubleValue(Validator.DoublesVariables.ucReceipt);
 
     assert(value.doubleValue() > 0);
 
@@ -70,14 +76,23 @@ class ValidatorTest {
     @Test
     @DisplayName("Validation of Legacy Benefits values loaded")
     void validationLegacyBenefitsTest() {
-        Number value = ((Number) Parameters.getValidationLegacyBenefits().getValue(mockModel.getYear()-1));
+        Number value = validator.getDoubleValue(Validator.DoublesVariables.lbReceipt);
         assert(value.doubleValue() > 0);
     }
 
     @Test
     @DisplayName("Validation of Life Satisfaction values loaded")
     void validationLifeSatisfactionTest() {
-        Number value = ((Number) Parameters.getValidationLifeSatisfactionByAge().getValue(mockModel.getYear()-1, "life_satisfaction_female_20_29"));
+        Number value = validator.getDoubleValue(Validator.DoublesVariables.lifeSatisfactionFemale_20_29);
         assert(value.doubleValue() > 0);
+    }
+
+    @Test
+    @DisplayName("Validation of LHW values loaded")
+    void validationLhwTest() {
+        Number value_male = validator.getDoubleValue(Validator.DoublesVariables.lhw_Male);
+        Number value_female = validator.getDoubleValue(Validator.DoublesVariables.lhw_Female);
+        assert(value_male.doubleValue() > 0);
+        assert(value_female.doubleValue() > 0);
     }
 }
