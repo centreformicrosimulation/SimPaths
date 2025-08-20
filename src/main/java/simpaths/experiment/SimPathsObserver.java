@@ -12,6 +12,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.ScrollPaneConstants;
 
 // import plug-in packages
+import microsim.statistics.CrossSection;
+import microsim.statistics.functions.MeanArrayFunction;
 import simpaths.data.filters.*;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
@@ -48,6 +50,9 @@ import microsim.statistics.weighted.functions.Weighted_SumArrayFunction;
 import simpaths.model.Person;
 import simpaths.data.Parameters;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+
+import static simpaths.model.Person.DoublesVariables.D_Econ_benefits_NonUC;
+import static simpaths.model.Person.DoublesVariables.D_Econ_benefits_UC;
 
 
 /**
@@ -97,6 +102,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 	@GUIparameter(description="Toggle to turn chart on/off")
 	private boolean educationOfAdults = true;
+
+    @GUIparameter(description="Toggle to turn chart on/off")
+    private boolean benefits = true;
 
 	@GUIparameter(description="Toggle to turn chart on/off")
 	private boolean employmentByAge = true;
@@ -1106,7 +1114,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 		    	*/
 		    }
 		    
-		    
 		    //EMPLOYMENT CHARTS
 		    if(employmentOfAdults) {
 //				MaleAgeGroupCSfilter males18_64Filter = new MaleAgeGroupCSfilter(18, 64);
@@ -1135,6 +1142,36 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				updateChartSet.add(emplPlotter);			//Add to set to be updated in buildSchedule method
 				tabSet.add(emplPlotter);
 		    }
+
+            // Benefits graphs
+
+            if(benefits) {
+                Set<JInternalFrame> benefitsPlots = new LinkedHashSet<>();
+
+                AgeGroupCSfilter workingAgeFilter = new AgeGroupCSfilter(16, 64);
+
+                CrossSection.Double personsReceivedUC = new CrossSection.Double(model.getPersons(), D_Econ_benefits_UC);
+                CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), D_Econ_benefits_NonUC);
+
+                personsReceivedUC.setFilter(workingAgeFilter);
+                personsReceivedLegacyBenefits.setFilter(workingAgeFilter);
+
+                TimeSeriesSimulationPlotter ucPlotter = new TimeSeriesSimulationPlotter("Universal Credit receipt", "");
+                ucPlotter.addSeries("Recipients", new MeanArrayFunction(personsReceivedUC),null, colorArrayList.get(0), false);
+                ucPlotter.addSeries("Validation", validator, Validator.DoublesVariables.valueOf("ucReceipt"), colorArrayList.get(0), true);
+                updateChartSet.add(ucPlotter);
+                ucPlotter.setName("Universal Credit receipt");
+                benefitsPlots.add(ucPlotter);
+
+                TimeSeriesSimulationPlotter lbPlotter = new TimeSeriesSimulationPlotter("Legacy Benefit receipt", "");
+                lbPlotter.addSeries("Recipients", new MeanArrayFunction(personsReceivedLegacyBenefits),null, colorArrayList.get(1), false);
+                lbPlotter.addSeries("Validation", validator, Validator.DoublesVariables.valueOf("lbReceipt"), colorArrayList.get(1), true);
+                updateChartSet.add(lbPlotter);
+                lbPlotter.setName("Legacy Benefit receipt");
+                benefitsPlots.add(lbPlotter);
+
+                tabSet.add(createScrollPaneFromPlots(benefitsPlots, "Benefits", 2));
+            }
 		    
 		    //Male/Female employment rates by age groups
 		    if(employmentByAge) {
@@ -1971,8 +2008,15 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 		this.educationOfAdults = educationOfAdults;
 	}
 
+    public boolean isBenefits() {
+        return benefits;
+    }
 
-	public boolean isEmploymentByAge() {
+    public void setBenefits(boolean benefits) {
+        this.benefits = benefits;
+    }
+
+    public boolean isEmploymentByAge() {
 		return employmentByAge;
 	}
 

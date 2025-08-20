@@ -646,6 +646,9 @@ public class Parameters {
     // Life Satisfaction
     private static MultiKeyCoefficientMap validationLifeSatisfactionByAge;
 
+    // Benefit receipt by type
+    private static MultiKeyCoefficientMap validationUniversalCredit, validationLegacyBenefits;
+
     //Employment by gender
     private static MultiKeyCoefficientMap validationEmploymentByGender;
 
@@ -1759,6 +1762,10 @@ public class Parameters {
         validationPsychDistressByAgeMed = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupMedED", 1, columnsValidationMentalHealthByAgeGroup);
         validationPsychDistressByAgeHigh = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupHiEd", 1, columnsValidationMentalHealthByAgeGroup);
 
+        //Benefits receipt
+        validationUniversalCredit = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsUC", 1, 1);
+        validationLegacyBenefits = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsNonUC", 1, 1);
+
         //Employment by gender
         validationEmploymentByGender = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_employmentByGender", 1, columnsValidationEmploymentByGender);
 
@@ -2422,6 +2429,14 @@ public class Parameters {
 
     public static MultiKeyCoefficientMap getValidationHealthMCSByAge() {
         return validationHealthMCSByAge;
+    }
+
+    public static MultiKeyCoefficientMap getValidationUniversalCredit() {
+        return validationUniversalCredit;
+    }
+
+    public static MultiKeyCoefficientMap getValidationLegacyBenefits() {
+        return validationLegacyBenefits;
     }
 
     public static MultiKeyCoefficientMap getValidationHealthPCSByAge() {

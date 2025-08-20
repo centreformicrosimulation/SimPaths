@@ -311,6 +311,8 @@ public class Validator implements IDoubleSource {
         hourlyWage_Male_High,
         hourlyWage_Male_Medium,
         hourlyWage_Male_Low,
+        ucReceipt,
+        lbReceipt,
         }
 
     @Override
@@ -1449,7 +1451,16 @@ public class Validator implements IDoubleSource {
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-
+            case ucReceipt:
+                value = ((Number) Parameters.getValidationUniversalCredit().getValue(model.getYear()-1, "All"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
+            case lbReceipt:
+                value = ((Number) Parameters.getValidationLegacyBenefits().getValue(model.getYear()-1, "All"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
                 /////////// New validators for health and life satisfaction
             case healthMCSMale_20_29:
                 value = ((Number) Parameters.getValidationHealthMCSByAge().getValue(model.getYear()-1, "health_mcs_score_male_20_29"));
