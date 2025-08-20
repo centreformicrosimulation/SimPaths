@@ -673,7 +673,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap validationGrossEarningsByGenderAndEducation;
 
     //Hourly wages by education and gender (for employed persons)
-    private static MultiKeyCoefficientMap validationLhwByGenderAndEducation;
+    private static MultiKeyCoefficientMap validationLhwByGenderAndEducation, validationLhwByGender;
 
     //Hours worked weekly by education and gender (for employed persons)
     private static MultiKeyCoefficientMap hourlyWageByGenderAndEducation;
@@ -847,6 +847,118 @@ public class Parameters {
     public static double disposableIncomeFromLabourInnov;
 
 
+    private static int columnsWagesMales = -1;
+    private static int columnsWagesMalesNE = -1;
+    private static int columnsWagesMalesE = -1;
+    private static int columnsWagesFemales = -1;
+    private static int columnsWagesFemalesNE = -1;
+    private static int columnsWagesFemalesE = -1;
+    private static int columnsEmploymentSelectionMales = -1;
+    private static int columnsEmploymentSelectionMalesNE = -1;
+    private static int columnsEmploymentSelectionMalesE = -1;
+    private static int columnsEmploymentSelectionFemales = -1;
+    private static int columnsEmploymentSelectionFemalesNE = -1;
+    private static int columnsEmploymentSelectionFemalesE = -1;
+    private static int columnsLabourSupplyUtilityMales = -1;
+    private static int columnsLabourSupplyUtilityFemales = -1;
+    private static int columnsLabourSupplyUtilityMalesWithDependent = -1;
+    private static int columnsLabourSupplyUtilityFemalesWithDependent = -1;
+    private static int columnsLabourSupplyUtilityACMales = -1;
+    private static int columnsLabourSupplyUtilityACFemales = -1;
+    private static int columnsLabourSupplyUtilityCouples = -1;
+    private static int columnsLabourCovid19_SE = -1;
+    private static int columnsLabourCovid19_2a_processes = -1;
+    private static int columnsHealthH1a = -1;
+    private static int columnsHealthH1b = -1;
+    private static int columnsHealthH2b = -1;
+    private static int columnsHealthHM1 = -1;
+    private static int columnsHealthHM2Males = -1;
+    private static int columnsHealthHM2Females = -1;
+    private static int columnsHealthMCS1 = -1;
+    private static int columnsHealthMCS2Males = -1;
+    private static int columnsHealthMCS2Females = -1;
+    private static int columnsHealthPCS1 = -1;
+    private static int columnsHealthPCS2Males = -1;
+    private static int columnsHealthPCS2Females = -1;
+    private static int columnsLifeSatisfaction1 = -1;
+    private static int columnsLifeSatisfaction2Males = -1;
+    private static int columnsLifeSatisfaction2Females = -1;
+    private static int columnsHealthEQ5D = -1;
+    private static int columnsSocialCareS1a = -1;
+    private static int columnsSocialCareS1b = -1;
+    private static int columnsSocialCareS2a = -1;
+    private static int columnsSocialCareS2b = -1;
+    private static int columnsSocialCareS2c = -1;
+    private static int columnsSocialCareS2d = -1;
+    private static int columnsSocialCareS2e = -1;
+    private static int columnsSocialCareS2f = -1;
+    private static int columnsSocialCareS2g = -1;
+    private static int columnsSocialCareS2h = -1;
+    private static int columnsSocialCareS2i = -1;
+    private static int columnsSocialCareS2j = -1;
+    private static int columnsSocialCareS2k = -1;
+    private static int columnsSocialCareS3a = -1;
+    private static int columnsSocialCareS3b = -1;
+    private static int columnsSocialCareS3c = -1;
+    private static int columnsSocialCareS3d = -1;
+    private static int columnsSocialCareS3e = -1;
+    private static int columnsUnemploymentU1a = -1;
+    private static int columnsUnemploymentU1b = -1;
+    private static int columnsUnemploymentU1c = -1;
+    private static int columnsUnemploymentU1d = -1;
+    private static int columnsFinancialDistress = -1;
+    private static int columnsEducationE1a = -1;
+    private static int columnsEducationE1b = -1;
+    private static int columnsEducationE2a = -1;
+    private static int columnsPartnershipU1a = -1;
+    private static int columnsPartnershipU1b = -1;
+    private static int columnsPartnershipU2b = -1;
+    private static int columnsPartnershipU1 = -1;
+    private static int columnsPartnershipU2 = -1;
+    private static int columnsFertilityF1a = -1;
+    private static int columnsFertilityF1b = -1;
+    private static int columnsFertilityF1 = -1;
+    private static int columnsIncomeI1a = -1;
+    private static int columnsIncomeI1b = -1;
+    private static int columnsIncomeI3a = -1;
+    private static int columnsIncomeI3b = -1;
+    private static int columnsIncomeI3c = -1;
+    private static int columnsIncomeI4a = -1;
+    private static int columnsIncomeI4b = -1;
+    private static int columnsIncomeI5a = -1;
+    private static int columnsIncomeI5b = -1;
+    private static int columnsIncomeI6a = -1;
+    private static int columnsIncomeI6b = -1;
+    private static int columnsIncomeI3a_selection = -1;
+    private static int columnsIncomeI3b_selection = -1;
+    private static int columnsLeaveHomeP1a = -1;
+    private static int columnsHomeownership = -1;
+    private static int columnsRetirementR1a = -1;
+    private static int columnsRetirementR1b = -1;
+    private static int columnsChildcareC1a = -1;
+    private static int columnsChildcareC1b = -1;
+    //For validation below:
+    private static int columnsValidationStudentsByAge = -1;
+    private static int columnsValidationStudentsByRegion = -1;
+    private static int columnsValidationEducationLevel = -1;
+    private static int columnsValidationEducationLevelByAge = -1;
+    private static int columnsValidationEducationLevelByRegion = -1;
+    private static int columnsValidationPartneredBUShareByRegion = -1;
+    private static int columnsValidationDisabledByGender = -1;
+    private static int columnsValidationDisabledByAgeGroup = -1;
+    private static int columnsValidationHealthByAgeGroup = -1;
+    private static int columnsValidationMentalHealthByAgeGroup = -1;
+    private static int columnsValidationHealthMCSByAgeGroup = -1;
+    private static int columnsValidationPhysicalHealthByAgeGroup = -1;
+    private static int columnsValidationLifeSatisfactionByAgeGroup = -1;
+    private static int columnsValidationEmploymentByGender = -1;
+    private static int columnsValidationEmploymentByGenderAndAge = -1;
+    private static int columnsValidationEmploymentByMaternity = -1;
+    private static int columnsValidationEmploymentByGenderAndRegion = -1;
+    private static int columnsValidationActivityStatus = -1;
+    private static int columnsValidationHomeownership = -1;
+    private static int columnsValidationByGenderAndEducation = -1;
+    private static int columnsValidationLabourSupplyByEducation = -1;
     /**
      *
      * METHOD TO LOAD PARAMETERS FOR GIVEN COUNTRY
@@ -859,6 +971,8 @@ public class Parameters {
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
                                       double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
                                       boolean flagSuppressSocialCareCosts1) {
+
+
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -896,6 +1010,8 @@ public class Parameters {
         donorPoolAveraging = donorPoolAveraging1;
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
+
+        updateCountryColumnNumbers(country);
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
 //		unemploymentRates = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_unemploymentRates.xlsx", countryString, 1, 46);
@@ -966,279 +1082,6 @@ public class Parameters {
         employmentsFurloughedFull = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_employments_furloughed.xlsx", countryString + "_FullFurlough", 2, 1);
         employmentsFurloughedFlex = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_employments_furloughed.xlsx", countryString + "_FlexibleFurlough", 2, 1);
 
-        //Load country specific data
-        int columnsWagesMales = -1;
-        int columnsWagesMalesNE = -1;
-        int columnsWagesMalesE = -1;
-        int columnsWagesFemales = -1;
-        int columnsWagesFemalesNE = -1;
-        int columnsWagesFemalesE = -1;
-        int columnsEmploymentSelectionMales = -1;
-        int columnsEmploymentSelectionMalesNE = -1;
-        int columnsEmploymentSelectionMalesE = -1;
-        int columnsEmploymentSelectionFemales = -1;
-        int columnsEmploymentSelectionFemalesNE = -1;
-        int columnsEmploymentSelectionFemalesE = -1;
-        int columnsLabourSupplyUtilityMales = -1;
-        int columnsLabourSupplyUtilityFemales = -1;
-        int columnsLabourSupplyUtilityMalesWithDependent = -1;
-        int columnsLabourSupplyUtilityFemalesWithDependent = -1;
-        int columnsLabourSupplyUtilityACMales = -1;
-        int columnsLabourSupplyUtilityACFemales = -1;
-        int columnsLabourSupplyUtilityCouples = -1;
-        int columnsLabourCovid19_SE = -1;
-        int columnsLabourCovid19_2a_processes = -1;
-        int columnsHealthH1a = -1;
-        int columnsHealthH1b = -1;
-        int columnsHealthH2b = -1;
-        int columnsHealthHM1 = -1;
-        int columnsHealthHM2Males = -1;
-        int columnsHealthHM2Females = -1;
-        int columnsHealthMCS1 = -1;
-        int columnsHealthMCS2Males = -1;
-        int columnsHealthMCS2Females = -1;
-        int columnsHealthPCS1 = -1;
-        int columnsHealthPCS2Males = -1;
-        int columnsHealthPCS2Females = -1;
-        int columnsLifeSatisfaction1 = -1;
-        int columnsLifeSatisfaction2Males = -1;
-        int columnsLifeSatisfaction2Females = -1;
-        int columnsHealthEQ5D = -1;
-        int columnsSocialCareS1a = -1;
-        int columnsSocialCareS1b = -1;
-        int columnsSocialCareS2a = -1;
-        int columnsSocialCareS2b = -1;
-        int columnsSocialCareS2c = -1;
-        int columnsSocialCareS2d = -1;
-        int columnsSocialCareS2e = -1;
-        int columnsSocialCareS2f = -1;
-        int columnsSocialCareS2g = -1;
-        int columnsSocialCareS2h = -1;
-        int columnsSocialCareS2i = -1;
-        int columnsSocialCareS2j = -1;
-        int columnsSocialCareS2k = -1;
-        int columnsSocialCareS3a = -1;
-        int columnsSocialCareS3b = -1;
-        int columnsSocialCareS3c = -1;
-        int columnsSocialCareS3d = -1;
-        int columnsSocialCareS3e = -1;
-        int columnsUnemploymentU1a = -1;
-        int columnsUnemploymentU1b = -1;
-        int columnsUnemploymentU1c = -1;
-        int columnsUnemploymentU1d = -1;
-        int columnsFinancialDistress = -1;
-        int columnsEducationE1a = -1;
-        int columnsEducationE1b = -1;
-        int columnsEducationE2a = -1;
-        int columnsPartnershipU1a = -1;
-        int columnsPartnershipU1b = -1;
-        int columnsPartnershipU2b = -1;
-        int columnsPartnershipU1 = -1;
-        int columnsPartnershipU2 = -1;
-        int columnsFertilityF1a = -1;
-        int columnsFertilityF1b = -1;
-        int columnsFertilityF1 = -1;
-        int columnsIncomeI1a = -1;
-        int columnsIncomeI1b = -1;
-        int columnsIncomeI3a = -1;
-        int columnsIncomeI3b = -1;
-        int columnsIncomeI3c = -1;
-        int columnsIncomeI4a = -1;
-        int columnsIncomeI4b = -1;
-        int columnsIncomeI5a = -1;
-        int columnsIncomeI5b = -1;
-        int columnsIncomeI6a = -1;
-        int columnsIncomeI6b = -1;
-        int columnsIncomeI3a_selection = -1;
-        int columnsIncomeI3b_selection = -1;
-        int columnsLeaveHomeP1a = -1;
-        int columnsHomeownership = -1;
-        int columnsRetirementR1a = -1;
-        int columnsRetirementR1b = -1;
-        int columnsChildcareC1a = -1;
-        int columnsChildcareC1b = -1;
-        //For validation below:
-        int columnsValidationStudentsByAge = -1;
-        int columnsValidationStudentsByRegion = -1;
-        int columnsValidationEducationLevel = -1;
-        int columnsValidationEducationLevelByAge = -1;
-        int columnsValidationEducationLevelByRegion = -1;
-        int columnsValidationPartneredBUShareByRegion = -1;
-        int columnsValidationDisabledByGender = -1;
-        int columnsValidationDisabledByAgeGroup = -1;
-        int columnsValidationHealthByAgeGroup = -1;
-        int columnsValidationMentalHealthByAgeGroup = -1;
-        int columnsValidationHealthMCSByAgeGroup = -1;
-        int columnsValidationPhysicalHealthByAgeGroup = -1;
-        int columnsValidationLifeSatisfactionByAgeGroup = -1;
-        int columnsValidationEmploymentByGender = -1;
-        int columnsValidationEmploymentByGenderAndAge = -1;
-        int columnsValidationEmploymentByMaternity = -1;
-        int columnsValidationEmploymentByGenderAndRegion = -1;
-        int columnsValidationActivityStatus = -1;
-        int columnsValidationHomeownership = -1;
-        int columnsValidationByGenderAndEducation = -1;
-        int columnsValidationLabourSupplyByEducation = -1;
-        if(country.equals(Country.IT)) {
-            columnsWagesMales = 11;
-            columnsWagesFemales = 11;
-            columnsEmploymentSelectionMales = 14;
-            columnsEmploymentSelectionFemales = 14;
-            columnsLabourSupplyUtilityMales = 11;
-            columnsLabourSupplyUtilityFemales = 11;
-            columnsLabourSupplyUtilityMalesWithDependent = 10;
-            columnsLabourSupplyUtilityFemalesWithDependent = 9;
-            columnsLabourSupplyUtilityACMales = 12;
-            columnsLabourSupplyUtilityACFemales = 9;
-            columnsLabourSupplyUtilityCouples = 17;
-            columnsHealthH1a = 15; //1 for coeffs + 15 for var-cov matrix
-            columnsHealthH1b = 22;
-            columnsHealthH2b = 24;
-            columnsHealthHM1 = 6;
-            columnsHealthHM2Males = 9;
-            columnsHealthHM2Females = 9;
-            columnsEducationE1a = 14;
-            columnsEducationE1b = 19;
-            columnsEducationE2a = 22;
-            columnsPartnershipU1 = 21;
-            columnsPartnershipU2 = 27;
-            columnsFertilityF1 = 22;
-            columnsIncomeI1a = 13;
-            columnsIncomeI1b = 22;
-            columnsIncomeI3a = 13;
-            columnsIncomeI3b = 22;
-            columnsIncomeI3c = 23;
-            columnsIncomeI3a_selection = 13;
-            columnsIncomeI3b_selection = 22;
-            columnsLeaveHomeP1a = 19;
-            columnsHomeownership = 32;
-            columnsRetirementR1a = 19;
-            columnsRetirementR1b = 24;
-            columnsChildcareC1a = 37;
-            columnsChildcareC1b = 37;
-            columnsValidationStudentsByAge = 10;
-            columnsValidationStudentsByRegion = 6;
-            columnsValidationEducationLevel = 3;
-            columnsValidationEducationLevelByAge = 24;
-            columnsValidationEducationLevelByRegion = 15;
-            columnsValidationPartneredBUShareByRegion = 6;
-            columnsValidationDisabledByGender = 6;
-            columnsValidationDisabledByAgeGroup = 2;
-            columnsValidationHealthByAgeGroup = 6;
-            columnsValidationEmploymentByGender = 2;
-            columnsValidationEmploymentByGenderAndAge = 18;
-            columnsValidationEmploymentByMaternity = 3;
-            columnsValidationEmploymentByGenderAndRegion = 10;
-            columnsValidationActivityStatus = 3;
-            columnsValidationLabourSupplyByEducation = 3;
-        }
-        else if(country.equals(Country.UK)) {
-            columnsWagesMalesNE = 30;
-            columnsWagesMalesE = 31;
-            columnsWagesFemalesNE = 30;
-            columnsWagesFemalesE = 31;
-            columnsEmploymentSelectionMalesNE = 30;
-            columnsEmploymentSelectionMalesE = 29;
-            columnsEmploymentSelectionFemalesNE = 30;
-            columnsEmploymentSelectionFemalesE = 29;
-            columnsLabourSupplyUtilityMales = 8;
-            columnsLabourSupplyUtilityFemales = 107;
-            columnsLabourSupplyUtilityMalesWithDependent = 8;
-            columnsLabourSupplyUtilityFemalesWithDependent = 8;
-            columnsLabourSupplyUtilityACMales = 19;
-            columnsLabourSupplyUtilityACFemales = 19;
-            columnsLabourSupplyUtilityCouples = 93;
-            columnsLabourCovid19_SE = 1;
-            columnsLabourCovid19_2a_processes = 1;
-            columnsHealthH1a = 28;
-            columnsHealthH1b = 35;
-            columnsHealthH2b = 35;
-            columnsHealthHM1 = 30;
-            columnsHealthHM2Males = 15;
-            columnsHealthHM2Females = 15;
-            columnsHealthMCS1 = 30;
-            columnsHealthMCS2Males = 15;
-            columnsHealthMCS2Females = 15;
-            columnsHealthPCS1 = 30;
-            columnsHealthPCS2Males = 15;
-            columnsHealthPCS2Females = 15;
-            columnsLifeSatisfaction1 = 30;
-            columnsLifeSatisfaction2Males = 15;
-            columnsLifeSatisfaction2Females = 15;
-            columnsHealthEQ5D = 8;
-            columnsSocialCareS1a = 17;
-            columnsSocialCareS1b = 18;
-            columnsSocialCareS2a = 32;
-            columnsSocialCareS2b = 32;
-            columnsSocialCareS2c = 39;
-            columnsSocialCareS2d = 17;
-            columnsSocialCareS2e = 16;
-            columnsSocialCareS2f = 36;
-            columnsSocialCareS2g = 21;
-            columnsSocialCareS2h = 21;
-            columnsSocialCareS2i = 21;
-            columnsSocialCareS2j = 21;
-            columnsSocialCareS2k = 18;
-            columnsSocialCareS3a = 36;
-            columnsSocialCareS3b = 38;
-            columnsSocialCareS3c = 37;
-            columnsSocialCareS3d = 79;
-            columnsSocialCareS3e = 37;
-            columnsUnemploymentU1a = 19;
-            columnsUnemploymentU1b = 19;
-            columnsUnemploymentU1c = 19;
-            columnsUnemploymentU1d = 19;
-            columnsFinancialDistress = 50;
-            columnsEducationE1a = 19;
-            columnsEducationE1b = 25;
-            columnsEducationE2a = 11;
-            columnsPartnershipU1a = 27;
-            columnsPartnershipU1b = 31;
-            columnsPartnershipU2b = 38;
-            columnsFertilityF1a = 6;
-            columnsFertilityF1b = 26;
-            columnsIncomeI1a = 19;  //*
-            columnsIncomeI1b = 31;  //*
-            columnsIncomeI3a = 20;
-            columnsIncomeI3b = 29;
-            columnsIncomeI3c = 28;  //*
-            columnsIncomeI4a = 24;  //*
-            columnsIncomeI4b = 25;
-            columnsIncomeI5a = 25;
-            columnsIncomeI5b = 25;
-            columnsIncomeI6a = 22;  //*
-            columnsIncomeI6b = 22;  //*
-            columnsIncomeI3a_selection = 20;
-            columnsIncomeI3b_selection = 29;
-            columnsLeaveHomeP1a = 25;
-            columnsHomeownership = 33;
-            columnsRetirementR1a = 26;
-            columnsRetirementR1b = 31;
-            columnsChildcareC1a = 37;
-            columnsChildcareC1b = 37;
-            columnsValidationStudentsByAge = 10;
-            columnsValidationStudentsByRegion = 13;
-            columnsValidationEducationLevel = 3;
-            columnsValidationEducationLevelByAge = 24;
-            columnsValidationEducationLevelByRegion = 36;
-            columnsValidationPartneredBUShareByRegion = 13;
-            columnsValidationDisabledByGender = 2;
-            columnsValidationDisabledByAgeGroup = 6;
-            columnsValidationHealthByAgeGroup = 6;
-            columnsValidationMentalHealthByAgeGroup = 18;
-            columnsValidationHealthMCSByAgeGroup = 18;
-            columnsValidationPhysicalHealthByAgeGroup = 18;
-            columnsValidationLifeSatisfactionByAgeGroup = 18;
-            columnsValidationEmploymentByGender = 2;
-            columnsValidationEmploymentByGenderAndAge = 18;
-            columnsValidationEmploymentByMaternity = 3;
-            columnsValidationEmploymentByGenderAndRegion = 24;
-            columnsValidationActivityStatus = 3;
-            columnsValidationHomeownership = 1;
-            columnsValidationLabourSupplyByEducation = 3;
-            columnsValidationByGenderAndEducation = 6;
-        }
-        else throw new IllegalArgumentException("Country not recognised in Parameters.loadParameters()!");
 
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 
@@ -1721,6 +1564,10 @@ public class Parameters {
         calculateFertilityRatesFromProjections();
         calculatePopulationGrowthRatiosFromProjections();
 
+        loadValidationStatistics(countryString);
+    }
+
+    public static void loadValidationStatistics(String countryString) {
         /////////////////////////////////////////////////POPULATE STATISTICS FOR VALIDATION/////////////////////////////
         //Students by Age
         validationStudentsByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_studentsByAge", 1, columnsValidationStudentsByAge);
@@ -1759,8 +1606,8 @@ public class Parameters {
         //Psychological distress by age and gender
         validationPsychDistressByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroup", 1, columnsValidationMentalHealthByAgeGroup);
         validationPsychDistressByAgeLow = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupLowED", 1, columnsValidationMentalHealthByAgeGroup);
-        validationPsychDistressByAgeMed = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupMedED", 1, columnsValidationMentalHealthByAgeGroup);
-        validationPsychDistressByAgeHigh = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupHiEd", 1, columnsValidationMentalHealthByAgeGroup);
+        validationPsychDistressByAgeMed = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupMedED", 1, columnsValidationMentalHealthByAgeGroup - 2);
+        validationPsychDistressByAgeHigh = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupHiEd", 1, columnsValidationMentalHealthByAgeGroup - 2);
 
         //Benefits receipt
         validationUniversalCredit = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_benefitsUC", 1, 1);
@@ -1791,10 +1638,176 @@ public class Parameters {
         validationGrossEarningsByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_grossEarningsByGenderAndEdu", 1, columnsValidationByGenderAndEducation);
 
         //Hourly wages by education and gender (for employed persons)
-        validationLhwByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lhwByGenderAndEdu", 1, 8);
+        validationLhwByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lhwByGenderAndEdu", 1, 6);
+        validationLhwByGender = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lhwByGender", 1, 2);
 
         //Hours worked weekly by education and gender (for employed persons)
         hourlyWageByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_hourlywageByGenderAndEdu", 1, columnsValidationByGenderAndEducation);
+    }
+
+    public static void updateCountryColumnNumbers(Country country) {
+        //Load country specific data
+
+        if(country.equals(Country.IT)) {
+            columnsWagesMales = 11;
+            columnsWagesFemales = 11;
+            columnsEmploymentSelectionMales = 14;
+            columnsEmploymentSelectionFemales = 14;
+            columnsLabourSupplyUtilityMales = 11;
+            columnsLabourSupplyUtilityFemales = 11;
+            columnsLabourSupplyUtilityMalesWithDependent = 10;
+            columnsLabourSupplyUtilityFemalesWithDependent = 9;
+            columnsLabourSupplyUtilityACMales = 12;
+            columnsLabourSupplyUtilityACFemales = 9;
+            columnsLabourSupplyUtilityCouples = 17;
+            columnsHealthH1a = 15; //1 for coeffs + 15 for var-cov matrix
+            columnsHealthH1b = 22;
+            columnsHealthH2b = 24;
+            columnsHealthHM1 = 6;
+            columnsHealthHM2Males = 9;
+            columnsHealthHM2Females = 9;
+            columnsEducationE1a = 14;
+            columnsEducationE1b = 19;
+            columnsEducationE2a = 22;
+            columnsPartnershipU1 = 21;
+            columnsPartnershipU2 = 27;
+            columnsFertilityF1 = 22;
+            columnsIncomeI1a = 13;
+            columnsIncomeI1b = 22;
+            columnsIncomeI3a = 13;
+            columnsIncomeI3b = 22;
+            columnsIncomeI3c = 23;
+            columnsIncomeI3a_selection = 13;
+            columnsIncomeI3b_selection = 22;
+            columnsLeaveHomeP1a = 19;
+            columnsHomeownership = 32;
+            columnsRetirementR1a = 19;
+            columnsRetirementR1b = 24;
+            columnsChildcareC1a = 37;
+            columnsChildcareC1b = 37;
+            columnsValidationStudentsByAge = 10;
+            columnsValidationStudentsByRegion = 6;
+            columnsValidationEducationLevel = 3;
+            columnsValidationEducationLevelByAge = 24;
+            columnsValidationEducationLevelByRegion = 15;
+            columnsValidationPartneredBUShareByRegion = 6;
+            columnsValidationDisabledByGender = 6;
+            columnsValidationDisabledByAgeGroup = 2;
+            columnsValidationHealthByAgeGroup = 6;
+            columnsValidationEmploymentByGender = 2;
+            columnsValidationEmploymentByGenderAndAge = 18;
+            columnsValidationEmploymentByMaternity = 3;
+            columnsValidationEmploymentByGenderAndRegion = 10;
+            columnsValidationActivityStatus = 3;
+            columnsValidationLabourSupplyByEducation = 3;
+        }
+        else if(country.equals(Country.UK)) {
+            columnsWagesMalesNE = 30;
+            columnsWagesMalesE = 31;
+            columnsWagesFemalesNE = 30;
+            columnsWagesFemalesE = 31;
+            columnsEmploymentSelectionMalesNE = 30;
+            columnsEmploymentSelectionMalesE = 29;
+            columnsEmploymentSelectionFemalesNE = 30;
+            columnsEmploymentSelectionFemalesE = 29;
+            columnsLabourSupplyUtilityMales = 8;
+            columnsLabourSupplyUtilityFemales = 107;
+            columnsLabourSupplyUtilityMalesWithDependent = 8;
+            columnsLabourSupplyUtilityFemalesWithDependent = 8;
+            columnsLabourSupplyUtilityACMales = 19;
+            columnsLabourSupplyUtilityACFemales = 19;
+            columnsLabourSupplyUtilityCouples = 93;
+            columnsLabourCovid19_SE = 1;
+            columnsLabourCovid19_2a_processes = 1;
+            columnsHealthH1a = 28;
+            columnsHealthH1b = 35;
+            columnsHealthH2b = 35;
+            columnsHealthHM1 = 30;
+            columnsHealthHM2Males = 15;
+            columnsHealthHM2Females = 15;
+            columnsHealthMCS1 = 30;
+            columnsHealthMCS2Males = 15;
+            columnsHealthMCS2Females = 15;
+            columnsHealthPCS1 = 30;
+            columnsHealthPCS2Males = 15;
+            columnsHealthPCS2Females = 15;
+            columnsLifeSatisfaction1 = 30;
+            columnsLifeSatisfaction2Males = 15;
+            columnsLifeSatisfaction2Females = 15;
+            columnsHealthEQ5D = 8;
+            columnsSocialCareS1a = 17;
+            columnsSocialCareS1b = 18;
+            columnsSocialCareS2a = 32;
+            columnsSocialCareS2b = 32;
+            columnsSocialCareS2c = 39;
+            columnsSocialCareS2d = 17;
+            columnsSocialCareS2e = 16;
+            columnsSocialCareS2f = 36;
+            columnsSocialCareS2g = 21;
+            columnsSocialCareS2h = 21;
+            columnsSocialCareS2i = 21;
+            columnsSocialCareS2j = 21;
+            columnsSocialCareS2k = 18;
+            columnsSocialCareS3a = 36;
+            columnsSocialCareS3b = 38;
+            columnsSocialCareS3c = 37;
+            columnsSocialCareS3d = 79;
+            columnsSocialCareS3e = 37;
+            columnsUnemploymentU1a = 19;
+            columnsUnemploymentU1b = 19;
+            columnsUnemploymentU1c = 19;
+            columnsUnemploymentU1d = 19;
+            columnsFinancialDistress = 50;
+            columnsEducationE1a = 19;
+            columnsEducationE1b = 25;
+            columnsEducationE2a = 11;
+            columnsPartnershipU1a = 27;
+            columnsPartnershipU1b = 31;
+            columnsPartnershipU2b = 38;
+            columnsFertilityF1a = 6;
+            columnsFertilityF1b = 26;
+            columnsIncomeI1a = 19;  //*
+            columnsIncomeI1b = 31;  //*
+            columnsIncomeI3a = 20;
+            columnsIncomeI3b = 29;
+            columnsIncomeI3c = 28;  //*
+            columnsIncomeI4a = 24;  //*
+            columnsIncomeI4b = 25;
+            columnsIncomeI5a = 25;
+            columnsIncomeI5b = 25;
+            columnsIncomeI6a = 22;  //*
+            columnsIncomeI6b = 22;  //*
+            columnsIncomeI3a_selection = 20;
+            columnsIncomeI3b_selection = 29;
+            columnsLeaveHomeP1a = 25;
+            columnsHomeownership = 33;
+            columnsRetirementR1a = 26;
+            columnsRetirementR1b = 31;
+            columnsChildcareC1a = 37;
+            columnsChildcareC1b = 37;
+            columnsValidationStudentsByAge = 10;
+            columnsValidationStudentsByRegion = 13;
+            columnsValidationEducationLevel = 3;
+            columnsValidationEducationLevelByAge = 24;
+            columnsValidationEducationLevelByRegion = 36;
+            columnsValidationPartneredBUShareByRegion = 13;
+            columnsValidationDisabledByGender = 2;
+            columnsValidationDisabledByAgeGroup = 6;
+            columnsValidationHealthByAgeGroup = 6;
+            columnsValidationMentalHealthByAgeGroup = 18;
+            columnsValidationHealthMCSByAgeGroup = 18;
+            columnsValidationPhysicalHealthByAgeGroup = 18;
+            columnsValidationLifeSatisfactionByAgeGroup = 18;
+            columnsValidationEmploymentByGender = 2;
+            columnsValidationEmploymentByGenderAndAge = 18;
+            columnsValidationEmploymentByMaternity = 3;
+            columnsValidationEmploymentByGenderAndRegion = 24;
+            columnsValidationActivityStatus = 3;
+            columnsValidationHomeownership = 1;
+            columnsValidationLabourSupplyByEducation = 3;
+            columnsValidationByGenderAndEducation = 6;
+        }
+        else throw new IllegalArgumentException("Country not recognised in Parameters.loadParameters()!");
     }
 
     /**
@@ -2498,6 +2511,10 @@ public class Parameters {
 
     public static MultiKeyCoefficientMap getValidationLhwByGenderAndEducation() {
         return validationLhwByGenderAndEducation;
+    }
+
+    public static MultiKeyCoefficientMap getValidationLhwByGender() {
+        return validationLhwByGender;
     }
 
     public static MultiKeyCoefficientMap getHourlyWageByGenderAndEducation() {
