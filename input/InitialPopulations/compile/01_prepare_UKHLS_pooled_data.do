@@ -179,10 +179,12 @@ preserve
 * Generate UC benefit marker
 gen benefits_uc=(ficode==40)
 label var benefits_uc "Universal Credit indicator"
+gen benefits_lb=(ficode == 15 | ficode == 16 | ficode == 19 | ficode == 20 | ficode == 22 | ficode == 33)
+label var benefits_lb "Legacy Benefits indicator"
 
 
-keep hidp pidp swv benefits_uc
-collapse (max) benefits_uc, by(hidp swv)
+keep hidp pidp swv benefits_uc benefits_lb
+collapse (max) benefits_uc benefits_lb, by(hidp swv)
 compress
 
 save "$dir_data/tmp_ucrcpt", replace

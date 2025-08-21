@@ -1408,6 +1408,11 @@ gen econ_benefits_uc=econ_benefits
 replace econ_benefits_uc=0 if benefits_uc==0
 label var econ_benefits_uc "Household income includes UC benefits"
 
+gen econ_benefits_lb=benefits_lb
+replace econ_benefits_lb=0 if benefits_lb==.
+replace econ_benefits_lb=0 if econ_benefits_uc==1
+label var econ_benefits_lb "Household income includes Legacy Benefits"
+
 
 /***************************** Financial Distress ***************************************************************************/
 // This is a measure of subjective financial distress, corresponding to answering 4 or 5 to the question below:
@@ -1508,7 +1513,7 @@ keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
-        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
+        econ_benefits econ_benefits_nonuc econ_benefits_uc econ_benefits_lb ///
 	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dls dot unemp financial_distress
 
 sort swv idhh idperson 
@@ -1519,7 +1524,7 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
-        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
+        econ_benefits econ_benefits_nonuc econ_benefits_uc econ_benefits_lb ///
 	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dls dot unemp {
 		qui recode `var' (-9/-1=-9) (.=-9) 
 }
