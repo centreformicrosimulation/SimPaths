@@ -530,21 +530,26 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         // TO DO: this will require an additional test of whether UC is received or not - for now all receive UC if any ben
         boolean receivesBenefitsFlagUC = getReceivedUC() == 1 && Parameters.UC_ROLLOUT;
         boolean receivesLegacyBenefitsFlag = !receivesBenefitsFlagUC && getReceivedLegacyBenefits() == 1;
+        boolean receivesBenefitsNonUC = !receivesBenefitsFlagUC && getBenefitsReceivedPerMonth() > 0;
         Occupancy occupancy = getOccupancy();
         switch (occupancy) {
             case Couple -> {
                 getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
-                getMale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+                getMale().setReceivesBenefitsFlagLB(receivesLegacyBenefitsFlag);
+                getMale().setReceivesBenefitsFlagNonUC(receivesBenefitsNonUC);
                 getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
-                getFemale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagLB(receivesLegacyBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesBenefitsNonUC);
             }
             case Single_Male -> {
                 getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
-                getMale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+                getMale().setReceivesBenefitsFlagLB(receivesLegacyBenefitsFlag);
+                getMale().setReceivesBenefitsFlagNonUC(receivesBenefitsNonUC);
             }
             case Single_Female -> {
                 getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
-                getFemale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagLB(receivesLegacyBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesBenefitsNonUC);
             }
             default ->
                 throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());

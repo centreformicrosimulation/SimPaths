@@ -145,6 +145,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean receivesBenefitsFlagUC_L1;
     @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
     @Transient private Boolean receivesBenefitsFlagNonUC_L1;
+    @Column(name="econ_benefits_lb") private Boolean receivesBenefitsFlagLB;
+    @Transient private Boolean receivesBenefitsFlagLB_L1;
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -529,6 +531,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         receivesBenefitsFlagNonUC_L1 = originalPerson.receivesBenefitsFlagNonUC_L1;
         receivesBenefitsFlagUC = originalPerson.receivesBenefitsFlagUC;
         receivesBenefitsFlagUC_L1 = originalPerson.receivesBenefitsFlagUC_L1;
+        receivesBenefitsFlagLB = originalPerson.receivesBenefitsFlagLB;
+        receivesBenefitsFlagLB_L1 = originalPerson.receivesBenefitsFlagLB_L1;
         financialDistress = originalPerson.financialDistress;
 
         if (originalPerson.fullTimeHourlyEarningsPotential > Parameters.MIN_HOURLY_WAGE_RATE) {
@@ -624,6 +628,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         labourSupplyWeekly_L1 = Labour.convertHoursToLabour(l1_lhw);
         receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC;
         receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC;
+        receivesBenefitsFlagLB_L1 = receivesBenefitsFlagLB;
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
             updateAgeGroup();
@@ -1913,6 +1918,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         receivesBenefitsFlag_L1 = receivesBenefitsFlag; // Lag(1) of flag indicating if individual receives benefits
         receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC; // Lag(1) of flag indicating if individual receives non-UC benefits
         receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC; // Lag(1) of flag indicating if individual receives UC
+        receivesBenefitsFlagLB_L1 = receivesBenefitsFlagLB; // Lag(1) of flag indicating if individual receives UC
         L1_fullTimeHourlyEarningsPotential = fullTimeHourlyEarningsPotential; // Lag(1) of potential hourly earnings
 
         if (initialUpdate) {
@@ -4805,6 +4811,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.receivesBenefitsFlagNonUC = receivesBenefitsFlagNonUC;
     }
 
+
+
     public boolean isReceivesBenefitsFlagNonUC_L1() {
         return (null != receivesBenefitsFlagNonUC_L1) ? receivesBenefitsFlagNonUC_L1 : false;
     }
@@ -4813,6 +4821,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC_L1;
     }
 
+    public Boolean getReceivesBenefitsFlagLB() {
+        return receivesBenefitsFlagLB;
+    }
+
+    public void setReceivesBenefitsFlagLB(Boolean receivesBenefitsFlagLB) {
+        this.receivesBenefitsFlagLB = receivesBenefitsFlagLB;
+    }
+
+    public Boolean getReceivesBenefitsFlagLB_L1() {
+        return receivesBenefitsFlagLB_L1;
+    }
+
+    public void setReceivesBenefitsFlagLB_L1(Boolean receivesBenefitsFlagLB_L1) {
+        this.receivesBenefitsFlagLB_L1 = receivesBenefitsFlagLB_L1;
+    }
 
     public double getEquivalisedDisposableIncomeYearly() {
         return benefitUnit.getEquivalisedDisposableIncomeYearly();
