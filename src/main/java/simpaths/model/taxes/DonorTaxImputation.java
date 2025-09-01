@@ -116,6 +116,9 @@ public class DonorTaxImputation {
 
         for (int ii=0; ii<Parameters.TAXDB_REGIMES; ii++) {
 
+            // reset filtered pool for each regime iteration
+            filteredPool = null;
+
             Triple<Integer,Integer,Integer> key = Triple.of(systemYear,ii,keys.getKey(ii));
             candidatePool = Parameters.getTaxdbReferences().get(key);
 
