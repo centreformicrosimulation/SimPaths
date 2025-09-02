@@ -27,10 +27,9 @@ public class TaxEvaluation {
      * CONSTRUCTORS
      */
     public TaxEvaluation(){}
-    public TaxEvaluation(int simYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9,
-                         int numberChildren10To17, double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman,
-                         int disabilityMan, int disabilityWoman, int careProvision, double originalIncomePerMonth, double secondIncomePerMonth,
-                         double childcareCostPerMonth, double randomDraw) {
+    public TaxEvaluation(int simYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9, int numberChildren10To17,
+                         double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int disabilityMan, int disabilityWoman, int careProvision,
+                         double originalIncomePerMonth, double secondIncomePerMonth, double childcareCostPerMonth, double randomDraw) {
 
         // evaluate imputed transfer payments
         keys = new DonorKeys(randomDraw);
@@ -63,7 +62,6 @@ public class TaxEvaluation {
             socialCareSupportPerMonth = new SocialCareExpenditureSupport(year, flagCouple, flagSPA, socialCareCostPerMonth, imputedTransfers.getDisposableIncomePerMonth(), liquidWealth).getSupportPerMonth();
         }
     }
-    // used for expectations and benefit unit evaluations
     public TaxEvaluation(int year, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9, int numberChildren10To17,
                          double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int disabilityMan, int disabilityWoman, int careProvision,
                          double originalIncomePerMonth, double secondIncomePerMonth, double childcareCostPerMonth, double socialCareCostPerMonth,
@@ -83,7 +81,7 @@ public class TaxEvaluation {
         }
     }
 
-public TaxEvaluation(int simYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9,
+    public TaxEvaluation(int simYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9,
                          int numberChildren10To17, double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman,
                          int disabilityMan, int disabilityWoman, int careProvision, double originalIncomePerMonth, double secondIncomePerMonth,
                          double childcareCostPerMonth, double randomDraw, Integer ucTakeupTarget) {

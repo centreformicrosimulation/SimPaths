@@ -14,7 +14,7 @@ import java.util.Map;
  * CLASS TO MANAGE ONE SPECIFICATION FOR EVALUATING DONOR KEYS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
  *
  */
-public class KeyFunction4 implements IKeyFunction {
+public class KeyFunction5 implements IKeyFunction {
 
 
     /**
@@ -29,7 +29,7 @@ public class KeyFunction4 implements IKeyFunction {
     /**
      * CONSTRUCTORS
      */
-    public KeyFunction4() {}
+    public KeyFunction5() {}
 
 
     /**
@@ -211,6 +211,23 @@ public class KeyFunction4 implements IKeyFunction {
         }
         units.put(MatchFeature.CareProvision, localMap);
 
+        // UC take-up
+        localMap = new HashMap<>();
+        if (ucTakeUp > 0 && !Parameters.flagSuppressUCTakeup) {
+            localMap.put(0,1);
+            localMap.put(1,1);
+            localMap.put(2,1);
+            localMap.put(3,0);
+            localMap.put(4,0);
+        } else {
+            localMap.put(0,0);
+            localMap.put(1,0);
+            localMap.put(2,0);
+            localMap.put(3,0);
+            localMap.put(4,0);
+        }
+        units.put(MatchFeature.UCTakeUp, localMap);
+
         // original income
         localMap = new HashMap<>();
         double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
@@ -389,6 +406,11 @@ public class KeyFunction4 implements IKeyFunction {
             // care provision
             mapLocal = updateMap(mapLocal, ptsLocal);
             taxdbCounter.put(MatchFeature.CareProvision,mapLocal);
+            ptsLocal = new int[]{2,2,2,1,1};
+
+            // UC take-up
+            mapLocal = updateMap(mapLocal, ptsLocal);
+            taxdbCounter.put(MatchFeature.UCTakeUp,mapLocal);
             ptsLocal = new int[]{2,2,2,1,1};
 
             // original income

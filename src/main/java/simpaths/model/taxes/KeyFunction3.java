@@ -42,12 +42,13 @@ public class KeyFunction3 implements IKeyFunction {
      * @param hoursWorkedPerWeekWoman employment hours per week of adult female
      * @param dlltsdMan disability status of man
      * @param dlltsdWoman disability status of woman
+     * @param ucTakeUp indicator that at least one member of household is a UC member
      * @param originalIncomePerWeek original income per week of family (possibly negative)
      * @return Integer list of keys, ordered from most fine (0) to most coarse (2)
      */
     public Integer[] evaluateKeys(int simYear, int priceYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9,
                                       int numberChildren10To17, double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int dlltsdMan, int dlltsdWoman,
-                                      int careProvision, double originalIncomePerWeek, double secondIncomePerWeek, double childcareCostPerWeek) {
+                                      int careProvision, int ucTakeUp, double originalIncomePerWeek, double secondIncomePerWeek, double childcareCostPerWeek) {
 
         // initialise working variables
         int spa = getStatePensionAge(age, simYear);

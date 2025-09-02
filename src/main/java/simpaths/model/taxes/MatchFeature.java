@@ -7,6 +7,7 @@ public enum MatchFeature {
     Employment,
     Disability,
     CareProvision,
+    UCTakeUp,
     Income,
     DualIncome,
     Childcare,
