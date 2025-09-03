@@ -23,6 +23,7 @@ public class DonorPerson {
     private Set<DonorPersonPolicy> policies = new LinkedHashSet<>();
 
     @Column(name = "DAG") private Integer age;
+    @Column(name = "UC_TAKEUP") private Integer ucTakeUp;
     @Column(name = "WEIGHT") private Double weight;
     @Column(name = "HOURS_WORKED_WEEKLY") private Integer hoursWorkedWeekly;
     @Column(name = "DLLTSD") private Integer dlltsd;

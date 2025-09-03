@@ -25,7 +25,6 @@ public class DonorKeys {
     private Double secondIncomePerWeek = null;
     private Double childcareCostPerWeek = null;
     private double randomDraw = -1.0;  // random innovation used to select candidate for imputation - initialised to -1.0 results in averaging over set of "preferred candidates"
-    private Integer ucTakeupTarget;
 
 
     /**
@@ -68,13 +67,6 @@ public class DonorKeys {
         return lowIncome[regime];
     }
 
-    public Integer getUcTakeupTarget() {
-        return ucTakeupTarget;
-    }
-
-    public void setUcTakeupTarget(Integer ucTakeupTarget) {
-        this.ucTakeupTarget = ucTakeupTarget;
-    }
 
     /**
      * EVALUATE ATTRIBUTES USING KEYFUNCTION

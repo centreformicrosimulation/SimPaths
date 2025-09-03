@@ -22,6 +22,7 @@ public class DonorTaxUnit {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "taxUnit")
     private Set<DonorTaxUnitPolicy> policies = new LinkedHashSet<>();
 
+    @Column(name = "UC_TAKEUP") private Integer ucTakeUp;
     @Column(name = "WEIGHT") private Double weight;
 
 
@@ -36,6 +37,7 @@ public class DonorTaxUnit {
     public long getId() {return this.id;}
     public void setId(long id) {this.id = id;}
     public Double getWeight() {return this.weight;}
+    public Integer getUcTakeUp() {return this.ucTakeUp;}
     public void setWeight(double weight) { this.weight = weight;}
     public DonorTaxUnitPolicy getPolicyByFromYear(int fromYear) {
 
