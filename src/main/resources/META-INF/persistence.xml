@@ -52,6 +52,8 @@
 
 	<persistence-unit name="sim-model-out">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<mapping-file>META-INF/microsim.xml</mapping-file>
+		<!-- define all classes annotated for database access during experiment execution here -->
 		<class>simpaths.data.startingpop.Processed</class>
 		<class>simpaths.model.Household</class>
 		<class>simpaths.model.Person</class>
