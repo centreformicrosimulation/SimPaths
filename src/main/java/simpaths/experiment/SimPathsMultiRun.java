@@ -173,6 +173,9 @@ public class SimPathsMultiRun extends MultiRun {
 		Option fileOption = new Option("f", "Output to file");
 		options.addOption(fileOption);
 
+		Option logOption = new Option("l", "Output log file");
+		options.addOption(logOption);
+
 		Option persistRoot = new Option("P", "persist", true,
 				"Write and read processed database to root or run-specific database. Accepted arguments:" +
 				"\n - root: persist to root output folder (input/)" +
@@ -268,6 +271,22 @@ public class SimPathsMultiRun extends MultiRun {
 					throw new RuntimeException(e);
 				}
 			}
+            if (cmd.hasOption("l")) {
+                    File logDir = new File("output/logs");
+                    if (!logDir.exists()) {
+                        logDir.mkdirs();
+                    }
+
+                    // Writing logs to `run_[seed].log`
+                    FileAppender appender = new FileAppender();
+                    appender.setName("Run logging");
+                    appender.setFile(logDir.getPath() + "/run_" + randomSeed + ".log");
+                    appender.setAppend(false);
+                    appender.setLayout(new PatternLayout("%d{yyyy MMM dd HH:mm:ss} - %m%n"));
+                    appender.activateOptions();
+                    Logger.getRootLogger().setLevel(Level.DEBUG);
+                    Logger.getRootLogger().addAppender(appender);
+            }
 		} catch (ParseException e) {
 			System.err.println("Error parsing command line arguments: " + e.getMessage());
 			formatter.printHelp("SimPathsMultiRun", options);
