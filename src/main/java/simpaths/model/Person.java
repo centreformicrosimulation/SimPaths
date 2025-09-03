@@ -2276,6 +2276,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_children_13_17,
         D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
         D_Econ_benefits,
+        D_Econ_benefits_LB,
         D_Econ_benefits_NonUC,
         D_Econ_benefits_UC,
         D_Econ_benefits_UC_Lhw_ZERO,
@@ -3613,6 +3614,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case D_Econ_benefits_NonUC -> {
                 return isReceivesBenefitsFlagNonUC() ? 1. : 0.;
+            }
+            case D_Econ_benefits_LB -> {
+                return getReceivesBenefitsFlagLB() ? 1. : 0.;
             }
             case D_Econ_benefits_UC -> {
                 return isReceivesBenefitsFlagUC() ? 1. : 0.;
