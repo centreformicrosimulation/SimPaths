@@ -150,6 +150,7 @@ input/input.h2.db
 input/input.h2.db
 input/input.trace.db
 /input/input.mv.db
+/input_full/
 .idea/compiler.xml
 .idea/dataSources.local.xml
 .idea/encodings.xml
