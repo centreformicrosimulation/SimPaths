@@ -554,11 +554,12 @@ public class Expectations {
         }
         double childcareCostPerMonth = childcareCostAnnual / 12.0;
         double socialCareCostPerMonth = socialCareCostAnnual / 12.0;
+        int ucTakeUp = 1;
 
         // evaluate disposable income
         double originalIncomePerMonth = originalIncomePerWeek * Parameters.WEEKS_PER_MONTH;
         TaxEvaluation evaluatedTransfers = new TaxEvaluation(year, ageYearsNextPeriod, numberAdults, numberChildrenUnder5, numberChildrenAged5To9,
-                numberChildrenAged10To17, hoursWorkPerWeek1, hoursWorkPerWeek2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth,
+                numberChildrenAged10To17, hoursWorkPerWeek1, hoursWorkPerWeek2, disability1, disability2, careProvision, ucTakeUp, originalIncomePerMonth, secondIncomePerMonth,
                 childcareCostPerMonth, socialCareCostPerMonth, liquidWealth, -1.0);
 
         Match match = evaluatedTransfers.getMatch();

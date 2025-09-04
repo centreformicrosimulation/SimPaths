@@ -72,6 +72,7 @@ public class Parameters {
 		"ddi",					//disability status
         "yem", 					//employment income - used to construct work sector *NOT VALID FOR POLICY ANALYSIS*
         "yse", 					//self-employment income - used to construct work sector *NOT VALID FOR POLICY ANALYSIS*
+        "uc_takeup",
     };
 
     public static final String[] DONOR_POLICY_VARIABLES = new String[] {
@@ -81,7 +82,7 @@ public class Parameters {
 		"ils_dispy",			//Disposable income : from EUROMOD output data after tax / benefit transfers (monthly time-scale)
 		"ils_benmt",			//EUROMOD output variable: income list: monetary benefits
 		"ils_bennt",			//EUROMOD output variable: income list: non-monetary benefits
-        "bsauc_s",               //EUROMOD output variable: simulated UC receipt
+        "bsauc_s",              //EUROMOD output variable: simulated UC receipt
         "bho_s",
         "bwkmt_s",
         "bfamt_s",
@@ -841,6 +842,7 @@ public class Parameters {
     public static boolean flagSocialCare;
     public static boolean flagSuppressChildcareCosts;
     public static boolean flagSuppressSocialCareCosts;
+    public static boolean flagSuppressUCTakeup;
     public static boolean donorPoolAveraging;
 
     public static double realInterestRateInnov;
@@ -970,7 +972,7 @@ public class Parameters {
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
                                       double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
-                                      boolean flagSuppressSocialCareCosts1) {
+                                      boolean flagSuppressSocialCareCosts1, boolean flagSuppressUCTakeup1) {
 
 
 
@@ -1007,6 +1009,7 @@ public class Parameters {
         flagSocialCare = projectSocialCare;
         flagSuppressChildcareCosts = flagSuppressChildcareCosts1;
         flagSuppressSocialCareCosts = flagSuppressSocialCareCosts1;
+        flagSuppressUCTakeup = flagSuppressUCTakeup1;
         donorPoolAveraging = donorPoolAveraging1;
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;

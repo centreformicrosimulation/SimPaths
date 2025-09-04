@@ -207,6 +207,9 @@ public class TaxDonorDataParser {
                 + "UPDATE " + personTableName + " SET GENDER = 'Male' WHERE DGN = 1;"
                 + "ALTER TABLE " + personTableName + " DROP COLUMN DGN;"
                 + "ALTER TABLE " + personTableName + " ALTER COLUMN GENDER RENAME TO DGN;"
+
+                // UC treatment
+                + "ALTER TABLE " + personTableName + " ALTER COLUMN uc_takeup RENAME TO UC_TAKEUP;"
             );
             stat.execute(
 
@@ -333,7 +336,7 @@ public class TaxDonorDataParser {
             stat.execute(
                 // make copy of person table, using tuid
                 "DROP TABLE IF EXISTS TEMP CASCADE;"
-                + "CREATE TABLE TEMP AS (SELECT TUID, WEIGHT FROM " + personTableName + ");"
+                + "CREATE TABLE TEMP AS (SELECT TUID, UC_TAKEUP, WEIGHT FROM " + personTableName + ");"
 
                 // extract only unique values of tuid
                 +"DROP TABLE IF EXISTS " + taxUnitTableName + " CASCADE;"
@@ -639,6 +642,7 @@ public class TaxDonorDataParser {
                 counter++;
                 int age = 0, numberMembersOver17 = 0, numberChildrenUnder5 = 0, numberChildren5To9 = 0;
                 int numberChildren10To17 = 0, dlltsd1 = -1, dlltsd2 = -1, careProvision = -1;
+                int ucTakeUp = taxUnit.getUcTakeUp();
                 double hoursWorkedPerWeek1 = 0.0, hoursWorkedPerWeek2 = 0.0;
                 boolean flagInitialiseDemographics = true;
                 for (int fromYear : Parameters.EUROMODpolicyScheduleSystemYearMap.keySet()) {
@@ -719,7 +723,7 @@ public class TaxDonorDataParser {
                         DonorKeys keys = new DonorKeys();
                         KeyFunction keyFunction = new KeyFunction(systemYear, systemYear, age, numberMembersOver17, numberChildrenUnder5,
                                 numberChildren5To9, numberChildren10To17, hoursWorkedPerWeek1, hoursWorkedPerWeek2, dlltsd1, dlltsd2,
-                                careProvision, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek);
+                                careProvision, ucTakeUp, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek);
                         keys.evaluate(keyFunction);
 
                         // set all taxUnitPolicy attributes
