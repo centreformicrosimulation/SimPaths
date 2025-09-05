@@ -280,7 +280,7 @@ public class Parameters {
     //public static int MAX_AGE_IN_EDUCATION;// = MAX_AGE;//30;			// Max age a person can stay in education	//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     //public static int MAX_AGE_MARRIAGE;// = MAX_AGE;//75;  			// Max age a person can marry		//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
     private static int MIN_START_YEAR = 2015; //Minimum allowed starting point. Should correspond to the oldest initial population.
-    private static int MAX_START_YEAR = 2019; //Maximum allowed starting point. Should correspond to the most recent initial population.
+    private static int MAX_START_YEAR = 2015; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static int startYear;
     public static int endYear;
     private static final int MIN_START_YEAR_TESTING = 2019;
@@ -1257,9 +1257,6 @@ public class Parameters {
             coeffCovariancePartnershipITU2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", countryString + "_U2", 1, columnsPartnershipU2);
         }
 
-        //Partnership - parameters for matching based on wage and age differential
-        meanCovarianceParametricMatching = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_parametricMatching.xlsx", countryString, 1, 1);
-
         //Fertility
         if (country.equals(Country.UK)) {
             coeffCovarianceFertilityF1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_fertility.xlsx", countryString + "_F1a", 1, columnsFertilityF1a);
@@ -1557,17 +1554,25 @@ public class Parameters {
         regChildcareC1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceChildcareC1a);
         regChildcareC1b = new LinearRegression(coeffCovarianceChildcareC1b);
 
+        calculatePartnershipDifferentials(countryString);
+
+        calculateFertilityRatesFromProjections();
+        calculatePopulationGrowthRatiosFromProjections();
+
+        loadValidationStatistics(countryString);
+    }
+
+    public static void calculatePartnershipDifferentials(String countryString) {
+
+        //Partnership - parameters for matching based on wage and age differential
+        meanCovarianceParametricMatching = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_parametricMatching.xlsx", countryString, 1, 1);
+
         //Create the age and wage differential MultivariateNormalDistribution for partnership formation, using means and var-cov matrix loaded from Excel
         targetMeanAgeDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_dag_diff")).doubleValue();
         targetMeanWageDifferential = ((Number) meanCovarianceParametricMatching.getValue("mean_wage_diff")).doubleValue();
         double[] means = {targetMeanAgeDifferential, targetMeanWageDifferential};
         double[][] covariances = { {((Number) meanCovarianceParametricMatching.getValue("var_dag_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("cov_dag_wage_diff")).doubleValue()} , {((Number) meanCovarianceParametricMatching.getValue("cov_dag_wage_diff")).doubleValue(), ((Number) meanCovarianceParametricMatching.getValue("var_wage_diff")).doubleValue()}};
         wageAndAgeDifferentialMultivariateNormalDistribution = getMultivariateNormalDistribution(means, covariances);
-
-        calculateFertilityRatesFromProjections();
-        calculatePopulationGrowthRatiosFromProjections();
-
-        loadValidationStatistics(countryString);
     }
 
     public static void loadValidationStatistics(String countryString) {
