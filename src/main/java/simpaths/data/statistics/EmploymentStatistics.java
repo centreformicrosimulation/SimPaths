@@ -138,7 +138,7 @@ public class EmploymentStatistics {
         setPropUCTakeup(isUCTakeup.getDoubleValue(IDoubleSource.Variables.Default));
 
         CrossSection.Double personsReceivedUC = new CrossSection.Double(model.getPersons(), D_Econ_benefits_UC);
-        CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), D_Econ_benefits_NonUC);
+        CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), D_Econ_benefits_LB);
 
         personsReceivedUC.setFilter(ageGroupCSfilter);
         personsReceivedLegacyBenefits.setFilter(ageGroupCSfilter);

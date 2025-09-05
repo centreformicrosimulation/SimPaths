@@ -653,6 +653,8 @@ public class TaxDonorDataParser {
                     double dispIncome = 0.0;
                     double benmt = 0.0;
                     double bennt = 0.0;
+                    double ucamount = 0.0;
+                    double lbamount = 0.0;
                     double principalIncome = -999999.0;
                     double childcare = 0.0;
                     int ageTest = 0;
@@ -668,6 +670,8 @@ public class TaxDonorDataParser {
                         dispIncome += person.getPolicy(fromYear).getDisposableIncomePerMonth();
                         benmt += person.getPolicy(fromYear).getMonetaryBenefitsAmount();
                         bennt += person.getPolicy(fromYear).getNonMonetaryBenefitsAmount();
+                        ucamount += person.getPolicy(fromYear).getUCAmountPerMonth();
+                        lbamount += person.getPolicy(fromYear).getLegacyBenefitsPerMonth();
                         childcare += person.getPolicy(fromYear).getChildcareCostPerMonth();
                         receivesUC = receivesUC || person.getPolicy(fromYear).getReceivesUC() == 1;
                         receivesLB = receivesLB || person.getPolicy(fromYear).getReceivesLegacyBenefit() == 1;
@@ -732,6 +736,8 @@ public class TaxDonorDataParser {
                         taxUnitPolicy.setDisposableIncomePerMonth(dispIncome);
                         taxUnitPolicy.setBenMeansTestPerMonth(benmt);
                         taxUnitPolicy.setBenNonMeansTestPerMonth(bennt);
+                        taxUnitPolicy.setBenefitUCPerMonth(ucamount);
+                        taxUnitPolicy.setLegacyBenefitPerMonth(lbamount);
                         taxUnitPolicy.setSecondIncomePerMonth(secondIncome);
                         taxUnitPolicy.setChildcareCostPerMonth(childcare);
                         taxUnitPolicy.setReceivesUC(receivesUC ? 1 : 0);

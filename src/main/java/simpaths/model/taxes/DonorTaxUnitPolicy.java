@@ -26,6 +26,8 @@ public class DonorTaxUnitPolicy {
     @Column(name="ILS_BENMT") private Double benMeansTestPerMonth;
     @Column(name="ILS_BENNT") private Double benNonMeansTestPerMonth;
     @Column(name="SECOND_INCOME") private Double secondIncomePerMonth;
+    @Column(name="BSAUC_S") private Double benefitUCPerMonth; //bsauc_s
+    @Column(name="LEGACY_BENEFITS") private Double legacyBenefitPerMonth;
     @Column(name="XCC") private Double childcareCostPerMonth;
     @Column(name = "DONOR_KEY0") private Integer donorKey0;
     @Column(name = "DONOR_KEY1") private Integer donorKey1;
@@ -102,6 +104,22 @@ public class DonorTaxUnitPolicy {
         return benMeansTestPerMonth;
     }
     public void setBenMeansTestPerMonth(Double ils_benmt) { this.benMeansTestPerMonth = ils_benmt; }
+
+    public double getBenefitUCPerMonth() {
+        if (benefitUCPerMonth ==null)
+            throw new RuntimeException("attempt to get benefit amnount before instantiated");
+        return benefitUCPerMonth;
+    }
+    public void setBenefitUCPerMonth(Double ils_benmt) { this.benefitUCPerMonth = ils_benmt; }
+
+    public double getLegacyBenefitPerMonth() {
+        if (legacyBenefitPerMonth ==null)
+            throw new RuntimeException("attempt to get benefit amnount before instantiated");
+        return legacyBenefitPerMonth;
+    }
+
+    public void setLegacyBenefitPerMonth(Double ils_benmt) { this.legacyBenefitPerMonth = ils_benmt; }
+
     public double getBenNonMeansTestPerMonth() {
         if (benNonMeansTestPerMonth ==null)
             throw new RuntimeException("attempt to get benefit amnount before instantiated");
