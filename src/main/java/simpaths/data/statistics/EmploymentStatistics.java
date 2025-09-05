@@ -16,8 +16,7 @@ import simpaths.model.enums.Les_c4;
 import simpaths.model.Person;
 
 import static simpaths.model.BenefitUnit.Regressors.UC_TakeUp;
-import static simpaths.model.Person.DoublesVariables.D_Econ_benefits_NonUC;
-import static simpaths.model.Person.DoublesVariables.D_Econ_benefits_UC;
+import static simpaths.model.Person.DoublesVariables.*;
 
 @Entity
 public class EmploymentStatistics {

@@ -304,6 +304,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         receivesBenefitsFlag = false;
         receivesBenefitsFlagNonUC = false;
         receivesBenefitsFlagUC = false;
+        receivesBenefitsFlagLB = false;
         financialDistress = mother.getFinancialDistress();
         updateVariables(false);
     }

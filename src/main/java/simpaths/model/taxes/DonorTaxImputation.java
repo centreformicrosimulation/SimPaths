@@ -42,6 +42,9 @@ public class DonorTaxImputation {
     private double grossIncomePerWeek;
     private double targetNormalisedOriginalIncome;
 
+
+    private Double universalCreditPerMonth;
+    private Double legacyBenefitPerMonth;
     private Integer receivedUC;
     private Integer receivedLegacyBenefit;
 
@@ -94,6 +97,21 @@ public class DonorTaxImputation {
         this.receivedLegacyBenefit = receivedLegacyBenefit;
     }
 
+    public Double getLegacyBenefitPerMonth() {
+        return legacyBenefitPerMonth;
+    }
+
+    public void setLegacyBenefitPerMonth(Double legacyBenefitPerMonth) {
+        this.legacyBenefitPerMonth = legacyBenefitPerMonth;
+    }
+
+    public Double getUniversalCreditPerMonth() {
+        return universalCreditPerMonth;
+    }
+
+    public void setUniversalCreditPerMonth(Double universalCreditPerMonth) {
+        this.universalCreditPerMonth = universalCreditPerMonth;
+    }
 
     /**
      * METHOD TO PERFORM IMPUTATION AND GENERATE OUTPUTS
@@ -307,6 +325,8 @@ public class DonorTaxImputation {
         double UCmean = 0.;  // Take a weighted mean of whether received UC or not across all candidates
         double LBmean = 0.;  // Take a weighted mean of whether received LB or not across all candidates
         setReceivedUC(0);
+        setUniversalCreditPerMonth(0.0);
+        setLegacyBenefitPerMonth(0.0);
         setReceivedLegacyBenefit(0);
         if (systemYear != keys.getPriceYear())
             infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
@@ -353,9 +373,11 @@ public class DonorTaxImputation {
         }
         if (UCmean > Math.random()) {  // Weighted probability of receiving UC
             setReceivedUC(1);
+            setUniversalCreditPerMonth(UCmean * weightSum);
         }
         if (LBmean > 0 && getReceivedUC() == 0) {  // Setting as received LB if benefits but not UC
             setReceivedLegacyBenefit(1);
+            setLegacyBenefitPerMonth(LBmean * weightSum);
         }
     }
 

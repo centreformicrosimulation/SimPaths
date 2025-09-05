@@ -86,6 +86,15 @@ public class TaxEvaluation {
     public double getDisposableIncomePerMonth() {
         return imputedTransfers.getDisposableIncomePerMonth() + socialCareSupportPerMonth;
     }
+
+    public double getUniversalCreditPerMonth() {
+        return imputedTransfers.getUniversalCreditPerMonth();
+    }
+
+    public double getLegacyBenefitPerMonth() {
+        return imputedTransfers.getLegacyBenefitPerMonth();
+    }
+
     public double getDisposableIncomePerWeek() {
         return imputedTransfers.getDisposableIncomePerWeek() + socialCareSupportPerMonth / Parameters.WEEKS_PER_MONTH;
     }
