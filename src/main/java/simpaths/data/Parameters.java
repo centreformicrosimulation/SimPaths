@@ -3484,8 +3484,8 @@ public class Parameters {
 
     public static void loadDHE_MCS2Parameters(String countryString, int columnsHealthMCS2Males, int columnsHealthMCS2Females) {
 
-        coeffCovarianceDHE_MCS2Males = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_MCS2_Males", 1, columnsHealthMCS2Males);
-        coeffCovarianceDHE_MCS2Females = ExcelAssistant.loadCoefficientMap("input/reg_health_wellbeing.xlsx", countryString + "_DHE_MCS2_Females", 1, columnsHealthMCS2Females);
+        coeffCovarianceDHE_MCS2Males = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_health_wellbeing.xlsx", countryString + "_DHE_MCS2_Males", 1, columnsHealthMCS2Males);
+        coeffCovarianceDHE_MCS2Females = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_health_wellbeing.xlsx", countryString + "_DHE_MCS2_Females", 1, columnsHealthMCS2Females);
 
         regHealthMCS2Males = new LinearRegression(coeffCovarianceDHE_MCS2Males);
         regHealthMCS2Females = new LinearRegression(coeffCovarianceDHE_MCS2Females);
