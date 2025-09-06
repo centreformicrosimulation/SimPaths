@@ -2294,6 +2294,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         D_Econ_benefits_UC_Lhw_TWENTY,
         D_Econ_benefits_UC_Lhw_THIRTY,
         D_Econ_benefits_UC_Lhw_FORTY,
+        Lhw_ZERO,
+        Lhw_TEN,
+        Lhw_TWENTY,
+        Lhw_THIRTY,
+        Lhw_FORTY,
+        Lhwsp_c6_ZERO,
+        Lhwsp_c6_TEN,
+        Lhwsp_c6_TWENTY,
+        Lhwsp_c6_THIRTY,
+        Lhwsp_c6_FORTY,
         D_Home_owner,
         D_Home_owner_L1,
         Dag,
@@ -3645,6 +3655,36 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case D_Econ_benefits_UC_Lhw_FORTY -> {
                 return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
+            }
+            case Lhw_ZERO -> {
+                return getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
+            }
+            case Lhw_TEN -> {
+                return getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
+            }
+            case Lhw_TWENTY -> {
+                return getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
+            }
+            case Lhw_THIRTY -> {
+                return getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
+            }
+            case Lhw_FORTY -> {
+                return getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
+            }
+            case Lhwsp_c6_ZERO -> {
+                return null != getPartner() && getPartner().getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
+            }
+            case Lhwsp_c6_TEN -> {
+                return null != getPartner() && getPartner().getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
+            }
+            case Lhwsp_c6_TWENTY -> {
+                return null != getPartner() && getPartner().getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
+            }
+            case Lhwsp_c6_THIRTY -> {
+                return null != getPartner() && getPartner().getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
+            }
+            case Lhwsp_c6_FORTY -> {
+                return null != getPartner() && getPartner().getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
             }
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
