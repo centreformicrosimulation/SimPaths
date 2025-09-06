@@ -2410,6 +2410,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         EthnicityAsian,
         EthnicityBlack,
         EthnicityOther,
+        EthnicityMissing,
         Female,
         FertilityRate,
         FinancialDistress,
@@ -3110,6 +3111,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case EthnicityOther -> {
                 return dot.equals(Ethnicity.Other) ? 1. : 0.;
+            }
+            case EthnicityMissing -> {
+                return dot.equals(Ethnicity.Missing) ? 1. : 0.;
             }
             case FertilityRate -> {
                 if (ioFlag)
@@ -4434,6 +4438,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public boolean getFinancialDistress() {
         return financialDistress;
+    }
+
+    public void setFinancialDistress(Boolean financialDistress) {
+        this.financialDistress = financialDistress;
     }
 
     public Indicator getNeedSocialCare() {

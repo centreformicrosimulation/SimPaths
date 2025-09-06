@@ -176,11 +176,12 @@ public class DataParser {
 
 				//DEMOGRAPHIC: Ethnicity
 				+ "ALTER TABLE " + personTable + " ADD ethnicity VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'White' WHERE dot = 1;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE dot = 2;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE dot = 3;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot = 4;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot = 5;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'White' WHERE dot01 = 1;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE dot01 = 2;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE dot01 = 3;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot01 = 4;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot01 = 5;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Missing' WHERE dot01 = 6;"
 				+ "ALTER TABLE " + personTable + " DROP COLUMN dot;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot;"
 

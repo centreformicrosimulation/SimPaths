@@ -6,4 +6,5 @@ public enum Ethnicity {
 	Asian, // "Asian or Asian British"
 	Black, // "Black, Black British, Caribbean, or African"
 	Other, // "Other or missing ethnic group"
+    Missing
 }

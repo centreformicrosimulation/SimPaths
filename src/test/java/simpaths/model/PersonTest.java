@@ -147,6 +147,7 @@ public class PersonTest {
             final double yearlyChangeInLogEDI;
             final double equivalisedDisposableIncomeYearly;
             final double equivalisedDisposableIncomeYearly_lag1;
+            final Boolean financialDistress;
             final int buid;
 
             // New attributes for expected/predicted values
@@ -168,6 +169,7 @@ public class PersonTest {
                     double yearlyChangeInLogEDI,
                     double equivalisedDisposableIncomeYearly,
                     double equivalisedDisposableIncomeYearly_lag1,
+                    Boolean financialDistress,
                     int buid,
                     Double expectedMcsScore
             ) {
@@ -186,6 +188,7 @@ public class PersonTest {
                 this.yearlyChangeInLogEDI = yearlyChangeInLogEDI;
                 this.equivalisedDisposableIncomeYearly = equivalisedDisposableIncomeYearly;
                 this.equivalisedDisposableIncomeYearly_lag1 = equivalisedDisposableIncomeYearly_lag1;
+                this.financialDistress = financialDistress;
                 this.buid = buid;
                 this.expectedMcsScore = expectedMcsScore;
             }
@@ -206,6 +209,7 @@ public class PersonTest {
                 double yearlyChangeInLogEDI,
                 double equivalisedDisposableIncomeYearly,
                 double equivalisedDisposableIncomeYearly_lag1,
+                Boolean financialDistress,
                 int buid,
                 int seed
         ) {
@@ -226,6 +230,7 @@ public class PersonTest {
             testPerson.setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
             testPerson.setLabourSupplyWeekly(labourSupplyWeekly);
             testPerson.setDhe_mcs(dhe_mcs);
+            testPerson.setFinancialDistress(financialDistress);
             testPerson.setDgn(dgn);
 
             // Set benefit unit attributes
@@ -259,8 +264,9 @@ public class PersonTest {
                             -0.145413398742676,
                             8.70543670654297,
                             8.85085010528564,
+                            true,
                             1,
-                            49.9372099477434
+                            46.5496123707634
                     ),
                     new PersonTestData(
                             2,
@@ -277,8 +283,9 @@ public class PersonTest {
                             1.38567781448364,
                             7.5308051109314,
                             6.14512729644775,
+                            false,
                             2,
-                            50.879882999659
+                            51.21338634476987
                     ),
                     new PersonTestData(
                             3,
@@ -295,8 +302,9 @@ public class PersonTest {
                             0.174564361572266,
                             7.6623420715332,
                             7.48777770996094,
+                            false,
                             3,
-                            48.6827913427889
+                            48.925363375873815
                     ),
                     new PersonTestData(
                             4,
@@ -313,8 +321,9 @@ public class PersonTest {
                             0.961889743804932,
                             7.79702186584473,
                             6.83513212203979,
+                            true,
                             4,
-                            48.3680685505992
+                            46.3620154488894
                     ),
                     new PersonTestData(
                             5,
@@ -331,8 +340,9 @@ public class PersonTest {
                             -0.432616233825684,
                             6.1442699432373,
                             6.57688617706299,
+                            false,
                             5,
-                            49.019458332485
+                            48.29411861293316
                     ),
                     new PersonTestData(
                             6,
@@ -349,8 +359,9 @@ public class PersonTest {
                             0.0255169868469238,
                             6.87092781066895,
                             6.84541082382202,
+                            false,
                             6,
-                            50.2674721513464
+                            48.09269345394731
                     ),
                     new PersonTestData(
                             7,
@@ -367,8 +378,9 @@ public class PersonTest {
                             -0.2851243019104,
                             6.68376207351685,
                             6.96888637542725,
+                            false,
                             7,
-                            47.7028154414618
+                            45.83105942702703
                     ),
                     new PersonTestData(
                             8,
@@ -385,8 +397,9 @@ public class PersonTest {
                             -0.0380454063415527,
                             6.66208267211914,
                             6.70012807846069,
+                            false,
                             8,
-                            47.6323811724566
+                            46.48893274593307
                     )
             );
 
@@ -415,6 +428,7 @@ public class PersonTest {
                         testData.yearlyChangeInLogEDI,
                         testData.equivalisedDisposableIncomeYearly,
                         testData.equivalisedDisposableIncomeYearly_lag1,
+                        testData.financialDistress,
                         testData.buid,
                         101
                 );
