@@ -8,8 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import simpaths.data.filters.FlexibleInLabourSupplyFilter;
-import simpaths.data.statistics.EmploymentStatistics;
 import simpaths.data.statistics.HealthStatistics;
+import simpaths.data.statistics.EmploymentStatistics;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Quintiles;
@@ -59,10 +59,10 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     @GUIparameter(description="Report alignment adjustments")
     private boolean persistStatistics3 = true;
 
-    private boolean persistEmploymentStatistics = true;
-
     @GUIparameter(description="Report health statistics")
     private boolean persistHealthStatistics = true;
+
+    private boolean persistEmploymentStatistics = false;
 
     @GUIparameter(description="Toggle to turn database persistence on/off")
     private boolean exportToDatabase = false;
@@ -98,9 +98,9 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private Statistics3 stats3;
 
-    private EmploymentStatistics statsEmployment;
-
     private HealthStatistics statsHealth;
+
+    private EmploymentStatistics statsEmployment;
 
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
@@ -126,10 +126,9 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private DataExport exportStatistics3;
 
-    private DataExport exportStatisticsEmployment;
-
     private DataExport exportHealthStatistics;
 
+    private DataExport exportStatisticsEmployment;
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
     protected Map<Region, MultiTraceFunction.Double> fGiniPersonalGrossEarningsRegionalMap;
@@ -270,6 +269,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         stats = new Statistics();
         stats2 = new Statistics2();
         stats3 = new Statistics3();
+        statsHealth = new HealthStatistics();
         statsEmployment = new EmploymentStatistics();
         statsHealth = new HealthStatistics();
 

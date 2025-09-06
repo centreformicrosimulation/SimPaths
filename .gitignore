@@ -340,3 +340,4 @@ input/EUROMODoutput/current/uk_2027_std.txt
 input/InitialPopulations/current/*
 input/InitialPopulations/testing/*
 input/EUROMODoutput/working/*
+.Rproj.user

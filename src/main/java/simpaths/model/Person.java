@@ -254,6 +254,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    public Person(boolean testModel, long id, long seed) {
+        model = null;
+        key = new PanelEntityKey(id);
+        setAllSocialCareVariablesToFalse();
+        innovations = new Innovations(32, 1, 1, seed);
+    }
+
     // used to create new people who enter the simulation during UpdateMaternityStatus
     public Person(Gender gender, Person mother) {
 
@@ -626,6 +633,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (labourSupplyWeekly==null)
             labourSupplyWeekly = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue()); // TODO: this can be simplified to obtain value from already initialised hours worked weekly variable? The entire database query on setup is redundant? See initialisation of the lag below.
         receivesBenefitsFlag_L1 = receivesBenefitsFlag;
+        receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC;
+        receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC;
         labourSupplyWeekly_L1 = Labour.convertHoursToLabour(l1_lhw);
         receivesBenefitsFlagNonUC_L1 = receivesBenefitsFlagNonUC;
         receivesBenefitsFlagUC_L1 = receivesBenefitsFlagUC;

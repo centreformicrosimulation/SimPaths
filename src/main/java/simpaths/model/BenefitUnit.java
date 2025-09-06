@@ -137,6 +137,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
+    public BenefitUnit(boolean testModel, long id) {
+        model = null;
+        key  = new PanelEntityKey(id);
+        collector = null;
+    }
+
     // USED BY EXPECTATIONS OBJECT TO INTERACT WITH REGRESSION MODELS
     public BenefitUnit(BenefitUnit originalBenefitUnit, boolean regressionModel) {
 
@@ -317,6 +323,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case ReceivesBenefits -> {
                 setReceivesBenefitsFlag();
+                setReceivesBenefitsFlagUCNonUC();
             }
             case ReceivesBenefitsUC -> {
                 setReceivesBenefitsFlagUCNonUC();
@@ -4994,4 +5001,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
 
         }
+
+    public void setYearlyChangeInLogEDI(Double yearlyChangeInLogEDI) {
+        this.yearlyChangeInLogEDI = yearlyChangeInLogEDI;
+    }
+
+    public void setAtRiskOfPoverty_lag1(Integer atRiskOfPoverty_lag1) {
+        this.atRiskOfPoverty_lag1 = atRiskOfPoverty_lag1;
+    }
+
+
+    public void setEquivalisedDisposableIncomeYearly(Double equivalisedDisposableIncomeYearly) {
+        this.equivalisedDisposableIncomeYearly = equivalisedDisposableIncomeYearly;
+    }
+
+    public void setEquivalisedDisposableIncomeYearly_lag1(Double equivalisedDisposableIncomeYearly_lag1) {
+        this.equivalisedDisposableIncomeYearly_lag1 = equivalisedDisposableIncomeYearly_lag1;
+    }
+
+
 }
