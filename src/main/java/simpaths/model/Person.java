@@ -66,7 +66,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Education deh_c3_lag1;  //Lag(1) of education level
     @Enumerated(EnumType.STRING) private Education dehm_c3;      //Mother's education level
     @Enumerated(EnumType.STRING) private Education dehf_c3;      //Father's education level
-    @Enumerated(EnumType.STRING) private Ethnicity dot;          //Ethnicity
+//    @Enumerated(EnumType.STRING) private Ethnicity dot01;          //Ethnicity
+    @Enumerated(EnumType.STRING) private Ethnicity dot01;
     @Enumerated(EnumType.STRING) private Indicator ded;          // in continuous education
     @Enumerated(EnumType.STRING) private Indicator der;          // return to education
     @Enumerated(EnumType.STRING) private Les_c4 les_c4;      //Activity (employment) status
@@ -294,7 +295,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhm = 9.;			//Set to median for under 18's as a placeholder
         dhmGhq = false;
         deh_c3 = Education.Low;
-        dot = mother.getDot();
+        dot01 = mother.getDot01();
         les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
         leftEducation = false;
         les_c7_covid = Les_c7_covid.Student;
@@ -532,7 +533,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yearlyEquivalisedConsumption = originalPerson.yearlyEquivalisedConsumption;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         dhhOwned = originalPerson.dhhOwned;
-        dot = originalPerson.dot;
+        dot01 = originalPerson.dot01;
         receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
         receivesBenefitsFlagNonUC = originalPerson.receivesBenefitsFlagNonUC;
@@ -3098,22 +3099,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return Indicator.True.equals(dlltsd_lag1) ? 1. : 0.;
             }
             case EthnicityWhite -> {
-                return dot.equals(Ethnicity.White) ? 1. : 0.;
+                return dot01.equals(Ethnicity.White) ? 1. : 0.;
             }
             case EthnicityMixed -> {
-                return dot.equals(Ethnicity.Mixed) ? 1. : 0.;
+                return dot01.equals(Ethnicity.Mixed) ? 1. : 0.;
             }
             case EthnicityAsian -> {
-                return dot.equals(Ethnicity.Asian) ? 1. : 0.;
+                return dot01.equals(Ethnicity.Asian) ? 1. : 0.;
             }
             case EthnicityBlack -> {
-                return dot.equals(Ethnicity.Black) ? 1. : 0.;
+                return dot01.equals(Ethnicity.Black) ? 1. : 0.;
             }
             case EthnicityOther -> {
-                return dot.equals(Ethnicity.Other) ? 1. : 0.;
+                return dot01.equals(Ethnicity.Other) ? 1. : 0.;
             }
             case EthnicityMissing -> {
-                return dot.equals(Ethnicity.Missing) ? 1. : 0.;
+                return dot01.equals(Ethnicity.Missing) ? 1. : 0.;
             }
             case FertilityRate -> {
                 if (ioFlag)
@@ -4432,8 +4433,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhmGhq = dhm_ghq;
     }
 
-    public Ethnicity getDot() {
-        return dot;
+    public Ethnicity getDot01() {
+        return dot01;
     }
 
     public boolean getFinancialDistress() {

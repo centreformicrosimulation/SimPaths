@@ -182,8 +182,8 @@ public class DataParser {
 				+ "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot01 = 4;"
 				+ "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot01 = 5;"
 				+ "UPDATE " + personTable + " SET ethnicity = 'Missing' WHERE dot01 = 6;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dot;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN dot01;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot01;"
 
 				//SYSTEM: Year left education (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD education_left VARCHAR_IGNORECASE;"
