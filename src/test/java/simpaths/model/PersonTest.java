@@ -30,6 +30,12 @@ public class PersonTest {
             testPerson = new Person(true, 1, 100);
         }
 
+
+        @AfterAll
+        static void tearDown() {
+            Parameters.setInputDirectory("input");
+        }
+        
         @Nested
         @DisplayName("With eq5dConversionParameters set to 'lawrence'")
         class WithLawrenceParameters {
