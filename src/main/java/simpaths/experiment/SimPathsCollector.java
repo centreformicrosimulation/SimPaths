@@ -1018,4 +1018,13 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     public void calculateAtRiskOfPoverty() {
         calculateEquivalisedHouseholdDisposableIncome();
     }
+
+    public boolean isPersistHealthStatistics() {
+        return persistHealthStatistics;
+    }
+
+    public void setPersistHealthStatistics(boolean persistHealthStatistics) {
+        this.persistHealthStatistics = persistHealthStatistics;
+    }
+
 }

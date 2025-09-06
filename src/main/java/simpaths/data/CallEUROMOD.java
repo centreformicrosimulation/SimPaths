@@ -11,7 +11,7 @@ public class CallEUROMOD {
 
 	//-------------------------------------------------------------------------------------------------------------
     /**
-    *	CALLING EUROMOD IN THIS SIMULATION RUN TO GIVE THE USER THE OPPORTUNITY TO CREATE EUROMOD OUTPUT POPULATION from which to generate population of households and persons after tax & benefit treatment 
+    *	CALLING EUROMOD IN THIS SIMULATION RUN TO GIVE THE USER THE OPPORTUNITY TO CREATE EUROMOD OUTPUT POPULATION from which to generate population of households and persons after tax and benefit treatment
     **/
     //-------------------------------------------------------------------------------------------------------------    		
 	public static void run() {

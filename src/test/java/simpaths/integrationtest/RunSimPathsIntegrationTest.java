@@ -25,12 +25,7 @@ public class RunSimPathsIntegrationTest {
     @Order(1)
     void testRunSetup() {
         runCommand(
-            "java", "-jar", "singlerun.jar",
-            "-c", "UK",
-            "-s", "2017",
-            "-Setup",
-            "-g", "false",
-            "--rewrite-policy-schedule"
+                "java", "-jar", "multirun.jar", "-DBSetup", "-config", "test_create_database.yml"
         );
     }
 
@@ -48,13 +43,7 @@ public class RunSimPathsIntegrationTest {
     @Order(3)
     void testRunSimulation() {
         runCommand(
-            "java", "-jar", "multirun.jar",
-            "-p", "20000",
-            "-s", "2019",
-            "-e", "2022",
-            "-r", "100",
-            "-n", "2",
-            "-g", "false"
+            "java", "-jar", "multirun.jar", "-config", "test_run.yml", "-P", "root"
         );
     }
 

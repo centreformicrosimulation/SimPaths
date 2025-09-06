@@ -28,8 +28,8 @@ import simpaths.model.taxes.*;
 /**
  *
  * CLASS TO MANAGE TRANSLATION OF CSV DATA FROM EUROMOD TO DATABASE FOR DONORS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
- * csv data are processed and saved to the DONORPERSON_<country code> table in the relational database. These data
- * are used as working variables to construct the DONORTAXUNIT_<country code> table, which is then used exclusively \
+ * csv data are processed and saved to the DONORPERSON_country code table in the relational database. These data
+ * are used as working variables to construct the DONORTAXUNIT_country code table, which is then used exclusively \
  * for imputing tax and benefit payments, drawing heavily on SQL calls made via Hibernate
  *
  */
@@ -63,7 +63,7 @@ public class TaxDonorDataParser {
         Connection conn = null;
         try {
             Class.forName("org.h2.Driver");
-            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+            conn = DriverManager.getConnection("jdbc:h2:file:" + Parameters.getInputDirectory() + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
             createTaxDonorTables(conn, country, startYear);
             updateDefaultDonorTables(conn, country);
@@ -421,7 +421,6 @@ public class TaxDonorDataParser {
      * output .txt files, picking up the relevant columns for each EUROMOD policy scenario, that
      * will eventually be parsed into the JAS-mine input database.
      *
-     * @return The name of the created CSV file (without the .csv extension)
      *
      */
     public static void constructAggregateTaxDonorPopulationCSVfile(Country country, boolean showGui) {
@@ -606,8 +605,10 @@ public class TaxDonorDataParser {
         // establish session for database link
         EntityTransaction txn = null;
         try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("tax-database").createEntityManager();
+            // access database and obtain donor pool
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + Parameters.getInputDirectory() + "input" + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
