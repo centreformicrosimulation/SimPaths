@@ -74,6 +74,10 @@ public class RunSimPathsIntegrationTest {
             latestOutputDir.resolve("csv/HealthStatistics1.csv"),
             Paths.get("src/test/java/simpaths/integrationtest/expected/HealthStatistics1.csv")
         );
+        compareFiles(
+            latestOutputDir.resolve("csv/EmploymentStatistics1.csv"),
+            Paths.get("src/test/java/simpaths/integrationtest/expected/EmploymentStatistics1.csv")
+        );
     }
 
     void compareFiles(Path actualFile, Path expectedFile) throws IOException {
