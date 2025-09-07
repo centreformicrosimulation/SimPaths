@@ -51,18 +51,17 @@ innovation_args:
 #    labourSupplyElasticityInnov: true
 
 collector_args:
-  #    calculateGiniCoefficients: false
-  #    exportToDatabase: false
-  #    exportToCSV: true
-  #    persistStatistics: true
-  #    persistStatistics2: true
-  persistPersons: true
-  persistBenefitUnits: true
-  persistHouseholds: true
+#    calculateGiniCoefficients: false
+#    exportToDatabase: false
+#    exportToCSV: true
+#    persistStatistics: true
+#    persistStatistics2: true
+   persistPersons: true
+   persistBenefitUnits: true
+   persistHouseholds: true
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
 
 parameter_args:
-  #  input_directory: input_full
-  #  input_directory_initial_populations: input/InitialPopulations
-  euromod_output_directory: EUROMODoutput_LBA
+#  input_directory_initial_populations: input/InitialPopulations
+#  euromod_output_directory: input/EUROMODoutput

@@ -7,6 +7,7 @@ executeWithGui: false
 startYear: 2015
 endYear: 2035
 popSize: 200000
+persistCountryYear: false
 
 # Arguments passed to the SimPathsModel
 model_args:
