@@ -2,11 +2,13 @@
 # Arguments of the SimPathsMultiRun object overridden by the command-line
 
 maxNumberOfRuns: 1
+countryString: "United Kingdom"
 executeWithGui: false
 randomSeed: 600
 startYear: 2015
 endYear: 2020
 popSize: 80000
+persistCountryYear: false
 
 # Arguments passed to the SimPathsModel
 model_args:

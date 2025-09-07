@@ -62,6 +62,8 @@ public class SimPathsMultiRun extends MultiRun {
 	private static boolean persist_population;
 	private static boolean persist_root;
 
+    private static boolean persistCountryYear = false;
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -77,23 +79,26 @@ public class SimPathsMultiRun extends MultiRun {
 
 		if (parameterArgs != null)
 			updateParameters(parameterArgs);
-//		// set default values for country and start year
-//		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
-//		try {
-//			if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
-//				countryString = "Italy";
-//			} else {
-//				countryString = "United Kingdom";
-//			}
-//		    country = Country.getCountryFromNameString(countryString);
-//			String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
-//			startYear = Integer.parseInt(valueYear);
-//		} catch (NullPointerException e) {
-//			System.out.println("No last database country and year found.");
-//			countryString = "United Kingdom";
-//		    country = Country.getCountryFromNameString(countryString);
-//			startYear = 2019;
-//		}
+
+        if (persistCountryYear) {
+            // set default values for country and start year
+            MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
+            try {
+                if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
+                    countryString = "Italy";
+                } else {
+                    countryString = "United Kingdom";
+                }
+                country = Country.getCountryFromNameString(countryString);
+                String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
+                startYear = Integer.parseInt(valueYear);
+            } catch (NullPointerException e) {
+                System.out.println("No last database country and year found.");
+                countryString = "United Kingdom";
+                country = Country.getCountryFromNameString(countryString);
+                startYear = 2019;
+            }
+        }
 
 
 		if (innovationArgs!=null)
@@ -113,7 +118,7 @@ public class SimPathsMultiRun extends MultiRun {
 		Object[][] data = new Object[1][columnNames.length];
 		data[0][0] = country.toString();
 		data[0][1] = startYear;
-		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.DatabaseCountryYearFilename, "Data", columnNames, data);
+		if (persistCountryYear) XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.DatabaseCountryYearFilename, "Data", columnNames, data);
 
 		if (flagDatabaseSetup) {
 
