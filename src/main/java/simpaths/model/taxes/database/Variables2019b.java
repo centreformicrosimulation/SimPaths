@@ -94,7 +94,7 @@ public class Variables2019b {
                 "deh",
                 "dew",
                 "dey",
-                "dot",
+                "dot01",
                 "lfs",
                 "les",
                 "lcwnm",
