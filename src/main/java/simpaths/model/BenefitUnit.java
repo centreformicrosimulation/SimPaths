@@ -540,7 +540,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public void setReceivesBenefitsFlagUCNonUC() {
 
-        boolean receivesBenefitsFlagUC = getReceivedUC() == 1 && Parameters.UC_ROLLOUT;
+        boolean receivesBenefitsFlagUC = getReceivedUC() == 1;
         boolean receivesLegacyBenefitsFlag = !receivesBenefitsFlagUC && getReceivedLegacyBenefits() == 1;
         boolean receivesBenefitsNonUC = !receivesBenefitsFlagUC && getBenefitsReceivedPerMonth() > 0;
         Occupancy occupancy = getOccupancy();

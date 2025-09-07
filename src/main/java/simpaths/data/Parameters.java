@@ -296,7 +296,7 @@ public class Parameters {
 
     public static double PROB_NEWBORN_IS_MALE = 0.5;            // Must be strictly greater than 0.0 and less than 1.0
 
-    public static boolean UC_ROLLOUT = true;              // Whether UC is available in population or not
+    public static boolean uc_direct_effects = true;              // Whether UC effects population or not
 
     public static final boolean systemOut = true;
 

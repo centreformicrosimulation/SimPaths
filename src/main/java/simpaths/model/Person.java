@@ -3644,22 +3644,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return isReceivesBenefitsFlagLB() ? 1. : 0.;
             }
             case D_Econ_benefits_UC -> {
-                return isReceivesBenefitsFlagUC() ? 1. : 0.;
+                return Parameters.uc_direct_effects && isReceivesBenefitsFlagUC() ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_ZERO -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
+                return Parameters.uc_direct_effects && isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_TEN -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
+                return Parameters.uc_direct_effects && isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_TWENTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
+                return Parameters.uc_direct_effects && isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_THIRTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
+                return Parameters.uc_direct_effects && isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_FORTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
+                return Parameters.uc_direct_effects && isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
             }
             case Lhw_ZERO -> {
                 return getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
