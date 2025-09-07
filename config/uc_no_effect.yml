@@ -4,10 +4,9 @@
 maxNumberOfRuns: 1
 countryString: "United Kingdom"
 executeWithGui: false
-randomSeed: 600
 startYear: 2015
-endYear: 2020
-popSize: 80000
+endYear: 2035
+popSize: 200000
 persistCountryYear: false
 
 # Arguments passed to the SimPathsModel
