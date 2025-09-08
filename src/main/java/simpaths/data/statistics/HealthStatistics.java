@@ -5,15 +5,15 @@ import microsim.data.db.PanelEntityKey;
 import microsim.statistics.CrossSection;
 import microsim.statistics.ICollectionFilter;
 import microsim.statistics.IDoubleSource;
-import microsim.statistics.functions.MeanArrayFunction;
-import microsim.statistics.functions.PercentileArrayFunction;
 import microsim.statistics.functions.SumArrayFunction;
 import simpaths.data.Parameters;
 import simpaths.data.filters.AgeGenderCSfilter;
+import simpaths.data.filters.EducationCSfilter;
 import simpaths.data.filters.SingleCoupledChildrenCSfilter;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.Person;
 import simpaths.model.SimPathsModel;
+import simpaths.model.enums.Education;
 import simpaths.model.enums.Gender;
 
 @Entity
@@ -308,6 +308,20 @@ public class HealthStatistics extends StatisticsHelper {
 
     }
 
+    public void update(SimPathsModel model, Education education) {
+
+        EducationCSfilter educationCSfilter = new EducationCSfilter(education);
+
+        setGender("Total");
+
+        setAgegroup(new SimPathsCollector.AgeRange(24, 64));
+
+        setHouseholdStructure("Total");
+
+        calculateFilteredStats(model, educationCSfilter);
+
+    }
+
     public void calculateFilteredStats(SimPathsModel model, ICollectionFilter filter) {
 
         // dhm score
@@ -370,9 +384,7 @@ public class HealthStatistics extends StatisticsHelper {
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
         n_persons.setFilter(filter);
 
-        SumArrayFunction.Integer count_f = new SumArrayFunction.Integer(n_persons);
-        count_f.applyFunction();
-        setN(count_f.getIntValue(IDoubleSource.Variables.Default));
+        calculateAndSetCount(n_persons, this::setN);
 
 
 

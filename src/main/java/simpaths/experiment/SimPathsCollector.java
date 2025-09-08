@@ -10,6 +10,7 @@ import simpaths.data.statistics.HealthStatistics;
 import simpaths.data.statistics.EmploymentStatistics;
 import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
+import simpaths.model.enums.Education;
 import simpaths.model.enums.Gender;
 import simpaths.model.enums.Quintiles;
 import microsim.statistics.Series;
@@ -108,6 +109,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private HealthStatistics statsHealthHousehold;
 
+    private HealthStatistics statsHealthEducation;
+
     private GiniPersonalGrossEarnings giniPersonalGrossEarnings;
 
     private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
@@ -141,6 +144,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     private DataExport exportHealthStatisticsAgeGrps;
 
     private DataExport exportHealthStatisticsHousehold;
+
+    private DataExport exportHealthStatisticsEducation;
 
     protected MultiTraceFunction.Double fGiniPersonalGrossEarningsNational;
 
@@ -314,11 +319,13 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             }
 
             for (AgeRange ageGroup: ageGroups) {
-                statsHealthAgeGrps.update(model, "Total", ageGroup);
-                try {
-                    exportHealthStatisticsAgeGrps.export();
-                } catch (Exception e) {
-                    log.error(e.getMessage());
+                for (String gender_s: genders) {
+                    statsHealthAgeGrps.update(model, gender_s, ageGroup);
+                    try {
+                        exportHealthStatisticsAgeGrps.export();
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                    }
                 }
             }
 
@@ -326,6 +333,15 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
                 statsHealthHousehold.update(model, householdStructure);
                 try {
                     exportHealthStatisticsHousehold.export();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            }
+
+            for (Education education: Education.values()) {
+                statsHealthEducation.update(model, education);
+                try {
+                    exportHealthStatisticsEducation.export();
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
@@ -353,6 +369,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         statsHealthGender = new HealthStatistics(new PanelEntityKey(1L));
         statsHealthAgeGrps = new HealthStatistics(new PanelEntityKey(2L));
         statsHealthHousehold = new HealthStatistics(new PanelEntityKey(3L));
+        statsHealthEducation = new HealthStatistics(new PanelEntityKey(4L));
 
         //For export to database or .csv files.
         if(persistPersons)
@@ -374,6 +391,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             exportHealthStatisticsGender = new DataExport(statsHealthGender, exportToDatabase, exportToCSV);
             exportHealthStatisticsAgeGrps = new DataExport(statsHealthAgeGrps, exportToDatabase, exportToCSV);
             exportHealthStatisticsHousehold = new DataExport(statsHealthHousehold, exportToDatabase, exportToCSV);
+            exportHealthStatisticsEducation = new DataExport(statsHealthEducation, exportToDatabase, exportToCSV);
 
 
         if (calculateGiniCoefficients) {

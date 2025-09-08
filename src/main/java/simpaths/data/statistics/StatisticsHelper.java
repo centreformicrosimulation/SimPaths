@@ -4,6 +4,7 @@ import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 import microsim.statistics.functions.MeanArrayFunction;
 import microsim.statistics.functions.PercentileArrayFunction;
+import microsim.statistics.functions.SumArrayFunction;
 
 public abstract class StatisticsHelper {
     
@@ -30,9 +31,40 @@ public abstract class StatisticsHelper {
         p75Setter.setPercentile(percFunc.getDoubleValue(PercentileArrayFunction.Variables.P75));
         p90Setter.setPercentile(percFunc.getDoubleValue(PercentileArrayFunction.Variables.P90));
     }
+
+    protected void calculateAndSetCount(CrossSection.Integer data, IntegerValueSetter setter) {
+        SumArrayFunction.Integer count = new SumArrayFunction.Integer(data);
+        count.applyFunction();
+
+        setter.setValue(count.getIntValue(IDoubleSource.Variables.Default));
+    }
+
+    protected void calculateAndSetMean(CrossSection.Double data, DoubleValueSetter setter) {
+        MeanArrayFunction meanFunc = new MeanArrayFunction(data);
+        meanFunc.applyFunction();
+
+        setter.setValue(meanFunc.getDoubleValue(IDoubleSource.Variables.Default));
+    }
+
+    protected void calculateAndSetMean(CrossSection.Integer data, DoubleValueSetter setter) {
+        MeanArrayFunction meanFunc = new MeanArrayFunction(data);
+        meanFunc.applyFunction();
+
+        setter.setValue(meanFunc.getDoubleValue(IDoubleSource.Variables.Default));
+    }
     
     @FunctionalInterface
     protected interface PercentileSetter {
         void setPercentile(double value);
+    }
+
+    @FunctionalInterface
+    protected interface IntegerValueSetter {
+        void setValue(Integer value);
+    }
+
+    @FunctionalInterface
+    protected interface DoubleValueSetter {
+        void setValue(Double value);
     }
 }

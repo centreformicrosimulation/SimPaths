@@ -4,16 +4,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.Entity;
 
-import jakarta.persistence.Transient;
 import microsim.data.db.PanelEntityKey;
 import microsim.statistics.CrossSection;
-import microsim.statistics.IDoubleSource;
-import microsim.statistics.functions.MeanArrayFunction;
-import microsim.statistics.functions.SumArrayFunction;
 import simpaths.data.Parameters;
 import simpaths.data.filters.*;
 import simpaths.experiment.SimPathsCollector;
-import simpaths.model.BenefitUnit;
 import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Gender;
 import simpaths.model.enums.Les_c4;
@@ -23,7 +18,7 @@ import static simpaths.model.BenefitUnit.Regressors.UC_TakeUp;
 import static simpaths.model.Person.DoublesVariables.*;
 
 @Entity
-public class EmploymentStatistics {
+public class EmploymentStatistics extends StatisticsHelper {
 
     @Id
     private PanelEntityKey key = new PanelEntityKey(1L);
@@ -46,9 +41,15 @@ public class EmploymentStatistics {
     @Column(name = "PropEmployed")
     private double PropEmployed;
 
-    @Column(name = "PropUnemployed")
-    private double PropUnemployed;
-    
+    @Column(name = "PropNotEmployed")
+    private double PropNotEmployed;
+
+    @Column(name = "PropRetired")
+    private double PropRetired;
+
+    @Column(name = "PropStudent")
+    private double PropStudent;
+
     @Column(name = "PropUCTakeup")
     private double PropUCTakeup;
 
@@ -98,12 +99,20 @@ public class EmploymentStatistics {
         PropEmployed = propEmployed;
     }
 
-    public double getPropUnemployed() {
-        return PropUnemployed;
+    public double getPropNotEmployed() {
+        return PropNotEmployed;
     }
 
-    public void setPropUnemployed(double propUnemployed) {
-        PropUnemployed = propUnemployed;
+    public void setPropNotEmployed(double propNotEmployed) {
+        PropNotEmployed = propNotEmployed;
+    }
+
+    public void setPropRetired(double propRetired) {
+        PropRetired = propRetired;
+    }
+
+    public void setPropStudent(double propStudent) {
+        PropStudent = propStudent;
     }
 
     public void setPropUCTakeup(double propUCTakeup) {
@@ -175,29 +184,25 @@ public class EmploymentStatistics {
         CrossSection.Integer personsEmpToNotEmp = new CrossSection.Integer(model.getPersons(), Person.class, "getNonwork", true);
         personsEmpToNotEmp.setFilter(employmentHistoryEmployed);
 
-
-        MeanArrayFunction isNotEmpToEmp = new MeanArrayFunction(personsNotEmpToEmp);
-        isNotEmpToEmp.applyFunction();
-        setNotEmpToEmp(isNotEmpToEmp.getDoubleValue(IDoubleSource.Variables.Default));
-
-        MeanArrayFunction isEmpToNotEmp = new MeanArrayFunction(personsEmpToNotEmp);
-        isEmpToNotEmp.applyFunction();
-        setEmpToNotEmp(isEmpToNotEmp.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetMean(personsEmpToNotEmp, this::setEmpToNotEmp);
+        calculateAndSetMean(personsNotEmpToEmp, this::setNotEmpToEmp);
 
         // Employed and unemployed in age-groups
-        CrossSection.Integer personsEmployed = new CrossSection.Integer(model.getPersons(), Person.class, "getEmployed", true);
-        CrossSection.Integer personsUnemployed = new CrossSection.Integer(model.getPersons(), Person.class, "getNonwork", true);
+        CrossSection.Integer personsEmployed = new CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isEmployed);
+        CrossSection.Integer personsUnemployed = new CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isNotEmployed);
+        CrossSection.Integer personsRetired = new CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isRetired);
+        CrossSection.Integer personsStudent = new CrossSection.Integer(model.getPersons(), Person.IntegerVariables.isStudent);
 
         personsEmployed.setFilter(ageGenderCSfilter);
         personsUnemployed.setFilter(ageGenderCSfilter);
+        personsRetired.setFilter(ageGenderCSfilter);
+        personsStudent.setFilter(ageGenderCSfilter);
 
-        MeanArrayFunction isEmployed = new MeanArrayFunction(personsEmployed);
-        isEmployed.applyFunction();
-        setPropEmployed(isEmployed.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetMean(personsEmployed, this::setPropEmployed);
+        calculateAndSetMean(personsUnemployed, this::setPropNotEmployed);
+        calculateAndSetMean(personsRetired, this::setPropRetired);
+        calculateAndSetMean(personsStudent, this::setPropStudent);
 
-        MeanArrayFunction isUnemployed = new MeanArrayFunction(personsUnemployed);
-        isUnemployed.applyFunction();
-        setPropUnemployed(isUnemployed.getDoubleValue(IDoubleSource.Variables.Default));
 
 //        CrossSection.Integer benefitUnitsUCTakeup = new CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getUC_takeup", true);
         CrossSection.Double benefitUnitsUCTakeup = new CrossSection.Double(model.getBenefitUnits(), UC_TakeUp);
@@ -205,9 +210,7 @@ public class EmploymentStatistics {
         CrossSection.Double hoursWorked = new CrossSection.Double(model.getPersons(), Person.class, "getHoursWorkedWeekly", true);
         hoursWorked.setFilter(employmentCSfilter);
 
-        MeanArrayFunction isUCTakeup = new MeanArrayFunction(benefitUnitsUCTakeup);
-        isUCTakeup.updateSource();
-        setPropUCTakeup(isUCTakeup.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetMean(benefitUnitsUCTakeup, this::setPropUCTakeup);
 
         CrossSection.Double personsReceivedUC = new CrossSection.Double(model.getPersons(), D_Econ_benefits_UC);
         CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), D_Econ_benefits_LB);
@@ -215,26 +218,19 @@ public class EmploymentStatistics {
         personsReceivedUC.setFilter(ageGenderCSfilter);
         personsReceivedLegacyBenefits.setFilter(ageGenderCSfilter);
 
-        MeanArrayFunction isReceivedUC = new MeanArrayFunction(personsReceivedUC);
-        isReceivedUC.applyFunction();
-        setPropReceivedUC(isReceivedUC.getDoubleValue(IDoubleSource.Variables.Default));
-        MeanArrayFunction isReceivedLegacyBenefits = new MeanArrayFunction(personsReceivedLegacyBenefits);
-        isReceivedLegacyBenefits.applyFunction();
-        setPropReceivedLegacyBenefits(isReceivedLegacyBenefits.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetMean(personsReceivedUC, this::setPropReceivedUC);
+        calculateAndSetMean(personsReceivedLegacyBenefits, this::setPropReceivedLegacyBenefits);
 
 
-        MeanArrayFunction meanHoursWorked = new MeanArrayFunction(hoursWorked);
-        meanHoursWorked.applyFunction();
-        setMeanLabourHours(meanHoursWorked.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetMean(hoursWorked, this::setMeanLabourHours);
+
 
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
         n_persons.setFilter(ageGenderCSfilter);
+        calculateAndSetCount(n_persons, this::setN);
 
-        SumArrayFunction.Integer count_f = new SumArrayFunction.Integer(n_persons);
-        count_f.applyFunction();
-        setN(count_f.getIntValue(IDoubleSource.Variables.Default));
 
     }
 }
