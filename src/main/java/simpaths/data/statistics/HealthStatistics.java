@@ -17,7 +17,7 @@ import simpaths.model.SimPathsModel;
 import simpaths.model.enums.Gender;
 
 @Entity
-public class HealthStatistics {
+public class HealthStatistics extends StatisticsHelper {
 
     @Id
     private PanelEntityKey key = new PanelEntityKey(1L);
@@ -52,6 +52,10 @@ public class HealthStatistics {
 
     @Column(name = "dhm_p_75")
     private double dhm_p_75;
+
+    // mental health caseness
+    @Column(name="dhm_ghq_prop")
+    private double dhm_ghq_prop;
 
     // MCS score numeric
     @Column(name = "dhe_mcs_mean")
@@ -256,6 +260,10 @@ public class HealthStatistics {
         this.scenario = scenario;
     }
 
+    public void setDhm_ghq_prop(double dhm_ghq_prop) {
+        this.dhm_ghq_prop = dhm_ghq_prop;
+    }
+
     public HealthStatistics(PanelEntityKey key) {
         super();
         this.setKey(key);
@@ -306,73 +314,41 @@ public class HealthStatistics {
         CrossSection.Double personsDhm = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhm); // Get cross section of simulated individuals and their mental health using the IDoubleSource interface implemented by Person class.
         personsDhm.setFilter(filter);
 
+        setDhm_mean(calculateMean(personsDhm));
 
-        MeanArrayFunction dhm_mean_f = new MeanArrayFunction(personsDhm); // Create MeanArrayFunction
-        dhm_mean_f.applyFunction();
-        setDhm_mean(dhm_mean_f.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetPercentiles(personsDhm, this::setDhm_p_10, this::setDhm_p_25, this::setDhm_median, this::setDhm_p_75, this::setDhm_p_90);
 
-        PercentileArrayFunction percDhm_f = new PercentileArrayFunction(personsDhm);
-        percDhm_f.applyFunction();
-
-        setDhm_p_10(percDhm_f.getDoubleValue(PercentileArrayFunction.Variables.P10));
-        setDhm_p_25(percDhm_f.getDoubleValue(PercentileArrayFunction.Variables.P25));
-        setDhm_median(percDhm_f.getDoubleValue(PercentileArrayFunction.Variables.P50));
-        setDhm_p_75(percDhm_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
-        setDhm_p_90(percDhm_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
 
         // mcs score
         CrossSection.Double personsMCS = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhe_mcs);
         personsMCS.setFilter(filter);
 
+        setDhe_mcs_mean(calculateMean(personsMCS));
 
-        MeanArrayFunction dhe_mcs_mean_f = new MeanArrayFunction(personsMCS); // Create MeanArrayFunction
-        dhe_mcs_mean_f.applyFunction();
-        setDhe_mcs_mean(dhe_mcs_mean_f.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetPercentiles(personsMCS, this::setDhe_mcs_p_10, this::setDhe_mcs_p_25, this::setDhe_mcs_median, this::setDhe_mcs_p_75, this::setDhe_mcs_p_90);
 
-        PercentileArrayFunction perc_dhe_mcs_f = new PercentileArrayFunction(personsMCS);
-        perc_dhe_mcs_f.applyFunction();
-
-        setDhe_mcs_p_10(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P10));
-        setDhe_mcs_p_25(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P25));
-        setDhe_mcs_median(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P50));
-        setDhe_mcs_p_75(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
-        setDhe_mcs_p_90(perc_dhe_mcs_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
 
         // pcs score
         CrossSection.Double personsPCS = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhe_pcs);
         personsPCS.setFilter(filter);
 
+        setDhe_pcs_mean(calculateMean(personsPCS));
 
-        MeanArrayFunction dhe_pcs_mean_f = new MeanArrayFunction(personsPCS); // Create MeanArrayFunction
-        dhe_pcs_mean_f.applyFunction();
-        setDhe_pcs_mean(dhe_pcs_mean_f.getDoubleValue(IDoubleSource.Variables.Default));
-
-        PercentileArrayFunction perc_dhe_pcs_f = new PercentileArrayFunction(personsPCS);
-        perc_dhe_pcs_f.applyFunction();
-
-        setDhe_pcs_p_10(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P10));
-        setDhe_pcs_p_25(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P25));
-        setDhe_pcs_median(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P50));
-        setDhe_pcs_p_75(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
-        setDhe_pcs_p_90(perc_dhe_pcs_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
+        calculateAndSetPercentiles(personsPCS, this::setDhe_pcs_p_10, this::setDhe_pcs_p_25, this::setDhe_pcs_median, this::setDhe_pcs_p_75, this::setDhe_pcs_p_90);
 
         // Life Satisfaction score
         CrossSection.Double personsDls = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dls);
         personsDls.setFilter(filter);
 
+        setDls_mean(calculateMean(personsDls));
 
-        MeanArrayFunction dls_mean_f = new MeanArrayFunction(personsDls); // Create MeanArrayFunction
-        dls_mean_f.applyFunction();
-        setDls_mean(dls_mean_f.getDoubleValue(IDoubleSource.Variables.Default));
+        calculateAndSetPercentiles(personsDls, this::setDls_p_10, this::setDls_p_25, this::setDls_median, this::setDls_p_75, this::setDls_p_90);
 
-        PercentileArrayFunction perc_dls_f = new PercentileArrayFunction(personsDls);
-        perc_dls_f.applyFunction();
+        // GHQ caseness
+        CrossSection.Double personsDhm_ghq = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.Dhmghq_L1);
+        personsDhm_ghq.setFilter(filter);
 
-        setDls_p_10(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P10));
-        setDls_p_25(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P25));
-        setDls_median(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P50));
-        setDls_p_75(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P75));
-        setDls_p_90(perc_dls_f.getDoubleValue(PercentileArrayFunction.Variables.P90));
+        setDhm_ghq_prop(calculateMean(personsDhm_ghq));
 
         // QALYS as sum of EQ5D
         CrossSection.Double personEQ5D = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.He_eq5d);
