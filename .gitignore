@@ -151,6 +151,7 @@ input/input.h2.db
 input/input.trace.db
 /input/input.mv.db
 /input_full/
+/input_temp/
 .idea/compiler.xml
 .idea/dataSources.local.xml
 .idea/encodings.xml
@@ -341,3 +342,5 @@ input/InitialPopulations/current/*
 input/InitialPopulations/testing/*
 input/EUROMODoutput/working/*
 .Rproj.user
+
+.idea/data_source_mapping.xml
