@@ -63,6 +63,7 @@ collector_args:
 #    dataDumpTimePeriod: 1.0
 
 parameter_args:
+  scenario: "Legacy Benefits retained"
   #  input_directory: input_full
   #  input_directory_initial_populations: input/InitialPopulations
   euromod_output_directory: EUROMODoutput_LBA

@@ -63,6 +63,7 @@ collector_args:
 #    dataDumpTimePeriod: 1.0
 
 parameter_args:
+  scenario: "UC with no direct effects"
   uc_direct_effects: false
 #  input_directory_initial_populations: input/InitialPopulations
 #  euromod_output_directory: input/EUROMODoutput

@@ -64,6 +64,6 @@ collector_args:
 #    dataDumpTimePeriod: 1.0
 
 parameter_args:
-  input_directory: input_full
+  scenario: "UC testing"
 #  input_directory_initial_populations: input/InitialPopulations
 #  euromod_output_directory: input/EUROMODoutput
