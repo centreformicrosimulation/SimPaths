@@ -60,9 +60,6 @@ public class EmploymentStatistics {
     @Column(name = "PropReceivedLegacyBenefits")
     private double PropReceivedLegacyBenefits;
 
-    @Column(name = "propLB")
-    private double propLB;
-
     //N
     @Column(name = "N")
     private int N;
@@ -121,18 +118,8 @@ public class EmploymentStatistics {
         PropReceivedLegacyBenefits = propReceivedLegacyBenefits;
     }
 
-
-
     public void setMeanLabourHours(double meanLabourHours) {
         this.meanLabourHours = meanLabourHours;
-    }
-
-    public void setPropUC(double propUC) {
-        this.propUC = propUC;
-    }
-
-    public void setPropLB(double propLB) {
-        this.propLB = propLB;
     }
 
     public void setKey(PanelEntityKey key) {
@@ -225,8 +212,8 @@ public class EmploymentStatistics {
         CrossSection.Double personsReceivedUC = new CrossSection.Double(model.getPersons(), D_Econ_benefits_UC);
         CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), D_Econ_benefits_LB);
 
-        personsReceivedUC.setFilter(ageGroupCSfilter);
-        personsReceivedLegacyBenefits.setFilter(ageGroupCSfilter);
+        personsReceivedUC.setFilter(ageGenderCSfilter);
+        personsReceivedLegacyBenefits.setFilter(ageGenderCSfilter);
 
         MeanArrayFunction isReceivedUC = new MeanArrayFunction(personsReceivedUC);
         isReceivedUC.applyFunction();
@@ -240,21 +227,6 @@ public class EmploymentStatistics {
         meanHoursWorked.applyFunction();
         setMeanLabourHours(meanHoursWorked.getDoubleValue(IDoubleSource.Variables.Default));
 
-        // proportions on UC/Legacy benefits
-        CrossSection.Double personsUC = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_UC);
-        CrossSection.Double personsLB = new CrossSection.Double(model.getPersons(), Person.DoublesVariables.D_Econ_benefits_NonUC);
-
-        personsUC.setFilter(ageGenderCSfilter);
-        personsLB.setFilter(ageGenderCSfilter);
-
-        MeanArrayFunction propReceivesUC = new MeanArrayFunction(personsUC);
-        MeanArrayFunction propReceivesLB = new MeanArrayFunction(personsLB);
-
-        propReceivesUC.applyFunction();
-        propReceivesLB.applyFunction();
-
-        setPropUC(propReceivesUC.getDoubleValue(IDoubleSource.Variables.Default));
-        setPropLB(propReceivesLB.getDoubleValue(IDoubleSource.Variables.Default));
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
