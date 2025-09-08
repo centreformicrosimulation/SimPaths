@@ -65,5 +65,6 @@ collector_args:
 parameter_args:
   scenario: "UC with no direct effects"
   uc_direct_effects: false
+  EUROMODpolicyScheduleFilename: "EUROMODpolicySchedule_UC"
 #  input_directory_initial_populations: input/InitialPopulations
 #  euromod_output_directory: input/EUROMODoutput

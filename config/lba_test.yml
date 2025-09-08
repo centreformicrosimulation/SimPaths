@@ -64,6 +64,7 @@ collector_args:
 
 parameter_args:
   scenario: "Legacy Benefits retained"
+  EUROMODpolicyScheduleFilename: "EUROMODpolicySchedule_UC"
+  euromod_output_directory: EUROMODoutput_LBA
   #  input_directory: input_full
   #  input_directory_initial_populations: input/InitialPopulations
-  euromod_output_directory: EUROMODoutput_LBA

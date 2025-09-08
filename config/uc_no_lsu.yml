@@ -64,7 +64,8 @@ collector_args:
 
 parameter_args:
   scenario: "UC with no effects on labour supply"
-  #  input_directory: input_full
-  #  input_directory_initial_populations: input/InitialPopulations
   uc_direct_effects: false
   euromod_output_directory: EUROMODoutput_noLSU
+  EUROMODpolicyScheduleFilename: "EUROMODpolicySchedule_UC"
+  #  input_directory: input_full
+  #  input_directory_initial_populations: input/InitialPopulations

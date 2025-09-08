@@ -64,5 +64,6 @@ collector_args:
 
 parameter_args:
   scenario: "UC on full"
+  EUROMODpolicyScheduleFilename: "EUROMODpolicySchedule_UC"
 #  input_directory_initial_populations: input/InitialPopulations
 #  euromod_output_directory: input/EUROMODoutput
