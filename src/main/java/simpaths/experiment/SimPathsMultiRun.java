@@ -180,7 +180,7 @@ public class SimPathsMultiRun extends MultiRun {
 				"\n - root: persist to root output folder (input/)" +
 				"\n - run: persist to run output folder (output/[yyyymmdd_seed]/input/)" +
 				"\n - none: do not write/read processed dataset.\n" +
-				"(default: `run` - multirun copy in output folder)");
+				"(default: `root` - persist to root folder for further runs)");
 		persistRoot.setArgName("persist");
 		options.addOption(persistRoot);
 
@@ -243,9 +243,9 @@ public class SimPathsMultiRun extends MultiRun {
 						persist_root = false;
 						break;
 					default:
-						System.out.println("Persist option `" + cmd.getOptionValue("P") + "` not recognised. Valid values: `none`, `root`, `run`. Persisting processed data to run folder");
+						System.out.println("Persist option `" + cmd.getOptionValue("P") + "` not recognised. Valid values: `none`, `root`, `run`. Persisting processed data to root folder");
 						persist_population = true;
-						persist_root = false;
+						persist_root = true;
 				}
 
 			if (cmd.hasOption("f")) {
