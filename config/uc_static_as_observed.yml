@@ -1,0 +1,92 @@
+# This file can be used to override defaults for multirun arguments.
+# Arguments of the SimPathsMultiRun object overridden by the command-line
+
+maxNumberOfRuns: 1
+countryString: "United Kingdom"
+executeWithGui: false
+startYear: 2015
+endYear: 2035
+popSize: 200000
+persistCountryYear: false
+
+# Arguments passed to the SimPathsModel
+model_args:
+#    maxAge: 130
+#    fixTimeTrend: true
+#    timeTrendStopsIn: 2017
+#    fixRandomSeed: true
+#    sIndexTimeWindow: 5
+#    sIndexAlpha: 2
+#    sIndexDelta: 0
+#    savingRate: 0
+#    initialisePotentialEarningsFromDatabase: true
+#    useWeights: false
+#    useSBAMMatching:
+#    projectMortality: true
+#    alignFertility: true
+#    labourMarketCovid19On: false
+#    projectFormalChildcare: true
+#    donorPoolAveraging: true
+#    alignEmployment: false
+#    projectSocialCare: false
+#    enableIntertemporalOptimisations: true
+#    responsesToLowWageOffer: true
+#    saveImperfectTaxDBMatches: false
+#    useSavedBehaviour: false
+#    readGrid: "laptop serial"
+#    saveBehaviour: true
+#    employmentOptionsOfPrincipalWorker: 3
+#    employmentOptionsOfSecondaryWorker: 3
+#    responsesToEducation: true
+#    responsesToRetirement: false
+#    responsesToHealth: true
+#    responsesToDisability: false
+#    minAgeForPoorHealth: 50
+#    responsesToRegion: false
+
+# Arguments that alter processing of the SimPathsMultiRun object
+innovation_args:
+#    randomSeedInnov: false
+#    intertemporalElasticityInnov: false
+#    labourSupplyElasticityInnov: true
+
+collector_args:
+#    calculateGiniCoefficients: false
+#    exportToDatabase: false
+#    exportToCSV: true
+#    persistStatistics: true
+#    persistStatistics2: true
+   persistPersons: true
+   persistBenefitUnits: true
+   persistHouseholds: true
+#    dataDumpStartTime: 0L
+#    dataDumpTimePeriod: 1.0
+
+parameter_args:
+  scenario: "UC static - as observed"
+  uc_direct_effects: true
+  EUROMODpolicyScheduleFilename: "EUROMODpolicySchedule_UC"
+  healthWellbeingExcelFileName: "reg_health_wellbeing_static_uc"
+  healthMentalExcelFileName: "reg_health_mental_static_uc"
+  labourSupplyExcelFileName: "reg_labourSupplyUtility_static_uc"
+  columnsHealthHM1: 43
+  columnsHealthHM2Males: 11
+  columnsHealthHM2Females: 11
+  columnsHealthMCS1: 43
+  columnsHealthMCS2Males: 11
+  columnsHealthMCS2Females: 11
+  columnsHealthPCS1: 43
+  columnsHealthPCS2Males: 11
+  columnsHealthPCS2Females: 11
+  columnsLifeSatisfaction1: 43
+  columnsLifeSatisfaction2Males: 11
+  columnsLifeSatisfaction2Females: 11
+  columnsLabourSupplyUtilityMales: 19
+  columnsLabourSupplyUtilityFemales: 12
+  columnsLabourSupplyUtilityMalesWithDependent: 15
+  columnsLabourSupplyUtilityFemalesWithDependent: 15
+  columnsLabourSupplyUtilityACMales: 31
+  columnsLabourSupplyUtilityACFemales: 31
+  columnsLabourSupplyUtilityCouples: 64
+#  input_directory_initial_populations: input/InitialPopulations
+#  euromod_output_directory: input/EUROMODoutput
