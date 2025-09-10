@@ -70,7 +70,8 @@ public class DonorPersonPolicy {
     }
     public double getLegacyBenefitsPerMonth() {
         return
-        ((benefitHousingPerMonth == null) ? 0. : benefitHousingPerMonth) +
+//        Remove housing benefit for now as this may be a UC-applied benefit in later years?
+//        ((benefitHousingPerMonth == null) ? 0. : benefitHousingPerMonth) +
         ((benefitWorkingTaxCreditPerMonth == null) ? 0. : benefitWorkingTaxCreditPerMonth) +
         ((benefitChildTaxCreditPerMonth == null) ? 0. : benefitChildTaxCreditPerMonth) +
         ((benefitJobSeekerPerMonth == null) ? 0. : benefitJobSeekerPerMonth) +

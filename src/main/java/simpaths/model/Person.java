@@ -4858,6 +4858,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return receivesBenefitsFlagUC;
     }
 
+    public Double isReceivesBenefitsUCDouble() {
+        return receivesBenefitsFlagUC ? 1.0 : 0.0;
+    }
+
+    public Double isReceivesBenefitsLBDouble() {
+        return receivesBenefitsFlagLB ? 1.0 : 0.0;
+    }
+
     public void setReceivesBenefitsFlagUC(boolean receivesBenefitsFlagUC) {
         this.receivesBenefitsFlagUC = receivesBenefitsFlagUC;
     }

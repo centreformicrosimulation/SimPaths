@@ -212,8 +212,8 @@ public class EmploymentStatistics extends StatisticsHelper {
 
         calculateAndSetMean(benefitUnitsUCTakeup, this::setPropUCTakeup);
 
-        CrossSection.Double personsReceivedUC = new CrossSection.Double(model.getPersons(), D_Econ_benefits_UC);
-        CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), D_Econ_benefits_LB);
+        CrossSection.Double personsReceivedUC = new CrossSection.Double(model.getPersons(), Person.class, "isReceivesBenefitsUCDouble", true);
+        CrossSection.Double personsReceivedLegacyBenefits = new CrossSection.Double(model.getPersons(), Person.class, "isReceivesBenefitsLBDouble", true);
 
         personsReceivedUC.setFilter(ageGenderCSfilter);
         personsReceivedLegacyBenefits.setFilter(ageGenderCSfilter);
