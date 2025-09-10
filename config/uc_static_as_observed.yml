@@ -66,6 +66,7 @@ parameter_args:
   scenario: "UC static - as observed"
   uc_direct_effects: true
   EUROMODpolicyScheduleFilename: "EUROMODpolicySchedule_UC"
+  euromod_output_directory: "EUROMODoutput_std"
   healthWellbeingExcelFileName: "reg_health_wellbeing_static_uc"
   healthMentalExcelFileName: "reg_health_mental_static_uc"
   labourSupplyExcelFileName: "reg_labourSupplyUtility_static_uc"
