@@ -4863,7 +4863,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public Double isReceivesBenefitsLBDouble() {
-        return receivesBenefitsFlagLB ? 1.0 : 0.0;
+        return (null != receivesBenefitsFlagLB && receivesBenefitsFlagLB) ? 1.0 : 0.0;
     }
 
     public void setReceivesBenefitsFlagUC(boolean receivesBenefitsFlagUC) {
