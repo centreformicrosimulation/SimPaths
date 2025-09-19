@@ -19,6 +19,8 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.decisions.Axis;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.enums.*;
+import simpaths.model.lifetime_incomes.AnnualIncome;
+import simpaths.model.lifetime_incomes.Individual;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -42,6 +44,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             @JoinColumn(name = "burun", referencedColumnName = "simulation_run"),
             @JoinColumn(name = "prid", referencedColumnName = "working_id")
     }) private BenefitUnit benefitUnit;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "income_id", referencedColumnName = "id")
+    private Individual ltIncomeDonor;
 
     // identifiers
     private Long idOriginalPerson;
@@ -145,6 +150,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean receivesBenefitsFlagUC_L1;
     @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
     @Transient private Boolean receivesBenefitsFlagNonUC_L1;
+    @Column(name="lifetime_income") private Double lifetimeIncome;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -296,6 +302,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yearlyEquivalisedDisposableIncomeSeries = new Series.Double(this, DoublesVariables.EquivalisedIncomeYearly);
         yearlyEquivalisedConsumptionSeries = new Series.Double(this, DoublesVariables.EquivalisedConsumptionYearly);
         yearlyEquivalisedConsumption = 0.;
+        lifetimeIncome = 0.;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         bornInSimulation = true;
         dhhOwned = false;
@@ -326,6 +333,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         this.sampleEntry = sampleEntry;
+
+        if (originalPerson.ltIncomeDonor!=null) {
+            this.ltIncomeDonor = originalPerson.ltIncomeDonor;
+        }
+        if (Parameters.lifetimeIncomeImpute)
+            this.lifetimeIncome = originalPerson.getLifetimeIncome();
 
         dag = originalPerson.dag;
         ageGroup = originalPerson.ageGroup;
@@ -703,6 +716,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         LeavingSchool,
         PartnershipDissolution,
         ProjectEquivConsumption,
+        ReviseLifetimeIncome,
         SocialCareReceipt,
         SocialCareProvision,
         Unemployment,
@@ -748,6 +762,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Health -> {
     //			log.debug("Health for person " + this.getKey().getId());
                 health();
+            }
+            case ReviseLifetimeIncome -> {
+                updateLtIncome();
             }
             case SocialCareReceipt -> {
                 evaluateSocialCareReceipt();
@@ -1131,8 +1148,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return sf12;
     }
 
-    protected Integer constrainLifeSatisfactionEstimate(double dls_estimate) {
-        if (Double.isNaN(dls_estimate) || Double.isInfinite(dls_estimate)) {
+    protected Integer constrainLifeSatisfactionEstimate(Double dls_estimate) {
+        if (!Parameters.checkFinite(dls_estimate)) {
             return null;
         }
 
@@ -1200,7 +1217,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             socialCareFromSon = false;
             socialCareFromOther = false;
         }
-        if (careHoursFromParentWeekly==null)
+        if (!Parameters.checkFinite(careHoursFromParentWeekly))
             careHoursFromParentWeekly = 0.0;
 
         if ((dag < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(dlltsd)) {
@@ -1854,7 +1871,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         toBePartnered = false;
         leavePartner = false;
         ded = (Les_c4.Student.equals(les_c4)) ? Indicator.True : Indicator.False;
-        if (initialUpdate && careHoursFromParentWeekly==null)
+        if (initialUpdate && !Parameters.checkFinite(careHoursFromParentWeekly))
             careHoursFromParentWeekly = 0.0;
         if (dag<Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             Person mother = benefitUnit.getFemale();
@@ -4514,7 +4531,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setYptciihs_dv(double yptciihs_dv) {
         this.yptciihs_dv = yptciihs_dv;
-        if (Double.isNaN(this.yptciihs_dv) || Double.isInfinite(this.yptciihs_dv)) throw new IllegalArgumentException("yptciihs_dv is not finite");
+        if (!Parameters.checkFinite(this.yptciihs_dv))
+            throw new IllegalArgumentException("yptciihs_dv is not finite");
     }
 
     public double getYptciihs_dv_lag1() {
@@ -5135,41 +5153,36 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getCareHoursFromParentWeekly() {
         double hours = 0.0;
-        if (careHoursFromParentWeekly !=null)
-            if (careHoursFromParentWeekly >0.0)
-                hours = careHoursFromParentWeekly;
+        if (Parameters.checkFinite(careHoursFromParentWeekly) && careHoursFromParentWeekly > 0.0)
+            hours = careHoursFromParentWeekly;
         return hours;
     }
 
     public double getCareHoursFromDaughterWeekly() {
         double hours = 0.0;
-        if (careHoursFromDaughterWeekly !=null)
-            if (careHoursFromDaughterWeekly >0.0)
-                hours = careHoursFromDaughterWeekly;
+        if (Parameters.checkFinite(careHoursFromDaughterWeekly) && careHoursFromDaughterWeekly > 0.0)
+            hours = careHoursFromDaughterWeekly;
         return hours;
     }
 
     public double getCareHoursFromSonWeekly() {
         double hours = 0.0;
-        if (careHoursFromSonWeekly !=null)
-            if (careHoursFromSonWeekly >0.0)
-                hours = careHoursFromSonWeekly;
+        if (Parameters.checkFinite(careHoursFromSonWeekly) && careHoursFromSonWeekly > 0.0)
+            hours = careHoursFromSonWeekly;
         return hours;
     }
 
     public double getCareHoursFromOtherWeekly() {
         double hours = 0.0;
-        if (careHoursFromOtherWeekly !=null)
-            if (careHoursFromOtherWeekly >0.0)
-                hours = careHoursFromOtherWeekly;
+        if (Parameters.checkFinite(careHoursFromOtherWeekly) && careHoursFromOtherWeekly > 0.0)
+            hours = careHoursFromOtherWeekly;
         return hours;
     }
 
     public double getCareHoursProvidedWeekly() {
         double hours = 0.0;
-        if (careHoursProvidedWeekly != null)
-            if (careHoursProvidedWeekly > 0.0)
-                hours = careHoursProvidedWeekly;
+        if (Parameters.checkFinite(careHoursProvidedWeekly) && careHoursProvidedWeekly > 0.0)
+            hours = careHoursProvidedWeekly;
         return hours;
     }
 
@@ -5357,4 +5370,48 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setHe_eq5d(Double he_eq5d) {
         this.he_eq5d = he_eq5d;
     }
+
+    public void setLtIncomeDonor(Individual individual) {
+        ltIncomeDonor = individual;
+    }
+
+    public void setLtIncome(int maxAge) {
+        lifetimeIncome = 0.0;
+        if (dag > 0) {
+
+            int birthYear = ltIncomeDonor.getBirthYear();
+            int ageLimit = Math.min(maxAge, dag-1);
+            for (int aa=0; aa<=ageLimit; aa++) {
+                AnnualIncome annualIncome = ltIncomeDonor.getAnnualIncome(birthYear+aa);
+                if (annualIncome == null)
+                    throw new RuntimeException("Annual income for year " + (birthYear+aa) + " not found for donor " + ltIncomeDonor.getId());
+                lifetimeIncome += annualIncome.getValue();
+            }
+            lifetimeIncome /= (double)(ageLimit+1);
+        }
+    }
+
+    public double getLifetimeIncome() {
+        if (Parameters.checkFinite(lifetimeIncome))
+            return lifetimeIncome;
+        else
+            throw new RuntimeException("lifetimeIncome is not finite");
+    }
+
+    public void updateLtIncome() {
+        double newVal = getBenefitUnit().getHousehold().getEquivalisedDisposableIncomeYearly();
+        if (dag==0) {
+            lifetimeIncome = newVal;
+        }
+        else {
+
+            if (!Parameters.checkFinite(lifetimeIncome))
+                throw new RuntimeException("lifetimeIncome is not defined");
+            double curVal = lifetimeIncome;
+            double years = dag+1;
+            lifetimeIncome = (curVal * (years-1) + newVal) / years;
+        }
+    }
+
+    public Individual getLtIncomeDonor() {return ltIncomeDonor;}
 }

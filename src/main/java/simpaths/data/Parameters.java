@@ -18,10 +18,8 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.Pair;
-import simpaths.data.startingpop.DataParser;
-import simpaths.model.AnnuityRates;
 import simpaths.model.decisions.Grids;
-import simpaths.model.enums.*;
+import simpaths.model.lifetime_incomes.EquivalisedIncomeCDF;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.MatchFeature;
 import simpaths.model.taxes.database.TaxDonorDataParser;
@@ -101,6 +99,7 @@ public class Parameters {
 		"idhh",				//id of household (can contain multiple benefit units)
 		"idbenefitunit",	//id of a benefit unit
 		"drgn1", 			//region (NUTS1)
+        "disp_inc", //disposable income
 		"ydses_c5",			//household income quantile
 		"dhh_owned",		//flag indicating if benefit unit owns a house
 		"liquid_wealth",	//benefit unit net wealth non-pension non-housing wealth
@@ -372,7 +371,7 @@ public class Parameters {
     //Uprating factor
     private static boolean flagDefaultToTimeSeriesAverages;
     private static Double averageSavingReturns, averageDebtCostLow, averageDebtCostHigh;
-    private static MultiKeyCoefficientMap upratingIndexMapRealGDP, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
+    private static MultiKeyCoefficientMap upratingIndexMapRealGDP, mapRealGDPperCapita, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
             partnershipTimeAdjustment, fertilityTimeAdjustment, utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales,
             utilityTimeAdjustmentCouples, upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
             wageRateFormalSocialCare, socialCarePolicy, partneredShare, employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
@@ -405,6 +404,24 @@ public class Parameters {
     public final static boolean MARRIAGE_MATCH_TO_MEANS = false;
     public static double targetMeanWageDifferential, targetMeanAgeDifferential;
     private static MultivariateNormalDistribution wageAndAgeDifferentialMultivariateNormalDistribution;
+
+    //Parameters for projecting lifetime incomes
+    private static MultiKeyCoefficientMap equivalisedIncomeByGenderAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
+    private static int equivalisedIncomeMaxYear;
+    private static int equivalisedIncomeMinYear;
+    private static int equivalisedIncomeMaxAge;
+    private static MultiKeyCoefficientMap equivalisedIncomeCDFData;
+    private static MultiKeyCoefficientMap equivalisedIncomeCDFData2;
+    private static EquivalisedIncomeCDF equivalisedIncomeCDF;
+    private static EquivalisedIncomeCDF equivalisedIncomeCDF2;
+    private static MultiKeyCoefficientMap coeffCovarianceEquivalisedIncomeMales;
+    private static MultiKeyCoefficientMap coeffCovarianceEquivalisedIncomeFemales;
+    private static MultiKeyCoefficientMap coeffCovarianceEquivalisedIncomeDynamics;
+    private static MultiKeyCoefficientMap coeffCovarianceEquivalisedIncomeDynamics2;
+    private static LinearRegression regEquivalisedIncomeMales;
+    private static LinearRegression regEquivalisedIncomeFemales;
+    private static LinearRegression regEquivalisedIncomeDynamics;
+    private static LinearRegression regEquivalisedIncomeDynamics2;
 
     //Mortality, fertility, and unemployment tables for the intertemporal optimisation model
     private static MultiKeyCoefficientMap mortalityProbabilityByGenderAgeYear; //Load as MultiKeyCoefficientMap as all values are in the Excel file and just need to be accessible
@@ -838,6 +855,7 @@ public class Parameters {
     public static boolean flagSuppressChildcareCosts;
     public static boolean flagSuppressSocialCareCosts;
     public static boolean donorPoolAveraging;
+    public static boolean lifetimeIncomeImpute;
 
     public static double realInterestRateInnov;
     public static double disposableIncomeFromLabourInnov;
@@ -854,7 +872,7 @@ public class Parameters {
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
                                       double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
-                                      boolean flagSuppressSocialCareCosts1) {
+                                      boolean flagSuppressSocialCareCosts1, boolean lifetimeIncomeImpute1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -892,10 +910,11 @@ public class Parameters {
         donorPoolAveraging = donorPoolAveraging1;
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
+        lifetimeIncomeImpute = lifetimeIncomeImpute1;
 
 //		unemploymentRatesByRegion = new LinkedHashMap<>();
 //		unemploymentRates = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_unemploymentRates.xlsx", countryString, 1, 46);
-        fixedRetireAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1, 2);
+        fixedRetireAge = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1, 2);
         /*
         rawProbSick = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_probSick.xls", country.toString(), 2, 1);
         for (Object o: rawProbSick.keySet()) {
@@ -944,6 +963,19 @@ public class Parameters {
         //Fertility rates:
         fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "projections_fertility.xlsx", countryString + "_FertilityByYear", 1, 71);
         setMapBounds(MapBounds.Fertility, countryString);
+
+        //Lifetime incomes
+        equivalisedIncomeByGenderAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "geometric_means", 2, 56);
+        setMapBounds(MapBounds.EquivalisedIncome, countryString);
+        equivalisedIncomeCDFData = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI2b", 1, 1);
+        equivalisedIncomeCDF = new EquivalisedIncomeCDF(equivalisedIncomeCDFData);
+        equivalisedIncomeCDFData2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI3b", 1, 1);
+        equivalisedIncomeCDF2 = new EquivalisedIncomeCDF(equivalisedIncomeCDFData2);
+        mapRealGDPperCapita = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "gdp_pc", 1, 1);
+        coeffCovarianceEquivalisedIncomeMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI1a", 1, 83);
+        coeffCovarianceEquivalisedIncomeFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI1b", 1, 83);
+        coeffCovarianceEquivalisedIncomeDynamics = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI2a", 1, 3);
+        coeffCovarianceEquivalisedIncomeDynamics2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI3a", 1, 2);
 
         //Unemployment rates
         unemploymentRatesMaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", countryString + "_RatesMaleGraduates", 1, 49);
@@ -1506,6 +1538,12 @@ public class Parameters {
             coeffCovarianceSocialCareS3d = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3d);
             coeffCovarianceSocialCareS3e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3e);
 
+            //lifetime incomes
+            coeffCovarianceEquivalisedIncomeMales = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeMales);
+            coeffCovarianceEquivalisedIncomeFemales = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeFemales);
+            coeffCovarianceEquivalisedIncomeDynamics = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeDynamics);
+            coeffCovarianceEquivalisedIncomeDynamics2 = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeDynamics2);
+
             //Unemployment
             coeffCovarianceUnemploymentU1a = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1a);
             coeffCovarianceUnemploymentU1b = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1b);
@@ -1579,6 +1617,12 @@ public class Parameters {
         regNoPartnerProvCareToOtherS3c = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS3c);
         regInformalCareToS3d = new MultinomialRegression<>(RegressionType.MultinomialLogit, SocialCareProvision.class, coeffCovarianceSocialCareS3d);
         regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
+
+        //lifetime incomes
+        regEquivalisedIncomeMales = new LinearRegression(coeffCovarianceEquivalisedIncomeMales);
+        regEquivalisedIncomeFemales = new LinearRegression(coeffCovarianceEquivalisedIncomeFemales);
+        regEquivalisedIncomeDynamics = new LinearRegression(coeffCovarianceEquivalisedIncomeDynamics);
+        regEquivalisedIncomeDynamics2 = new LinearRegression(coeffCovarianceEquivalisedIncomeDynamics2);
 
         //Unemployment
         regUnemploymentMaleGraduateU1a = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffCovarianceUnemploymentU1a);
@@ -2097,6 +2141,11 @@ public class Parameters {
     public static MultinomialRegression getRegInformalCareToS3d() { return regInformalCareToS3d; }
     public static LinearRegression getRegCareHoursProvS3e() { return regCareHoursProvS3e; }
 
+    public static LinearRegression getRegEquivalisedIncomeMales() {return regEquivalisedIncomeMales;}
+    public static LinearRegression getRegEquivalisedIncomeFemales() {return regEquivalisedIncomeFemales;}
+    public static LinearRegression getRegEquivalisedIncomeDynamics() {return regEquivalisedIncomeDynamics;}
+    public static LinearRegression getRegEquivalisedIncomeDynamics2() {return regEquivalisedIncomeDynamics2;}
+
     public static BinomialRegression getRegUnemploymentMaleGraduateU1a() { return regUnemploymentMaleGraduateU1a; }
     public static BinomialRegression getRegUnemploymentMaleNonGraduateU1b() { return regUnemploymentMaleNonGraduateU1b; }
     public static BinomialRegression getRegUnemploymentFemaleGraduateU1c() { return regUnemploymentFemaleGraduateU1c; }
@@ -2330,6 +2379,29 @@ public class Parameters {
         mortalityProbability = prob.doubleValue() / 100000.0;
 
         return mortalityProbability;
+    }
+
+    public static double getEquivalisedIncomeDraw(double rnd) {
+        return equivalisedIncomeCDF.getValue(rnd);
+    }
+
+    public static double getEquivalisedIncomeDraw2(double rnd) {
+        return equivalisedIncomeCDF2.getValue(rnd);
+    }
+
+    public static Double getEquivalisedIncome(Gender gender, int age, int year) {
+
+        Double val = null;
+        if (year<=equivalisedIncomeMaxYear && year>=equivalisedIncomeMinYear && age<=equivalisedIncomeMaxAge) {
+            // obtain value from observed matrix
+
+            Number nn = ((Number) equivalisedIncomeByGenderAgeYear.getValue(gender.toString(), age, year));
+            if (nn==null) {
+                throw new IllegalAccessError("ERROR - problem evaluating mean equivalised income for year: " + year + ", age: " + age + " and gender " + gender.toString());
+            }
+            val = nn.doubleValue();
+        }
+        return val;
     }
 
     public static double getPopulationProjections(Gender gender, Region region, int age, int year) {
@@ -2652,6 +2724,9 @@ public class Parameters {
             case GDP -> {
                 map = upratingIndexMapRealGDP;
             }
+            case GDPperCapita -> {
+                map = mapRealGDPperCapita;
+            }
             case Inflation -> {
                 map = upratingIndexMapInflation;
             }
@@ -2966,7 +3041,7 @@ public class Parameters {
     public static double getSampleAverageRate(TimeVaryingRate rateType) {
 
         Double val = getTimeSeriesRateParameter(rateType);
-        if (val==null) {
+        if (!checkFinite(val)) {
 
             val = 0.0;
             double nn = 0.0;
@@ -3148,6 +3223,7 @@ public class Parameters {
                     case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR + ii);
                     case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR + ii);
                     case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR + ii);
+                    case EquivalisedIncome -> (Number) equivalisedIncomeByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR + ii);
                     default -> (Number) populationProjections.getValue("Female", rgn, 25, MIN_START_YEAR + ii);
                 };
                 if (val==null) {
@@ -3164,6 +3240,7 @@ public class Parameters {
                     case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(25, MIN_START_YEAR - ii);
                     case Fertility -> (Number) fertilityProjectionsByYear.getValue("Value", MIN_START_YEAR - ii);
                     case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR - ii);
+                    case EquivalisedIncome -> (Number) equivalisedIncomeByGenderAgeYear.getValue("Female", 25, MIN_START_YEAR - ii);
                     default -> (Number) populationProjections.getValue("Female", rgn, 25, MIN_START_YEAR - ii);
                 };
                 if (val==null) {
@@ -3179,6 +3256,7 @@ public class Parameters {
                     case UnemploymentFemaleGraduates -> (Number) unemploymentRatesFemaleGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
                     case UnemploymentFemaleNonGraduates -> (Number) unemploymentRatesFemaleNonGraduatesByAgeYear.getValue(55+ii, MIN_START_YEAR);
                     case Mortality -> (Number) mortalityProbabilityByGenderAgeYear.getValue("Female", 55+ii, MIN_START_YEAR);
+                    case EquivalisedIncome -> (Number) equivalisedIncomeByGenderAgeYear.getValue("Female", 55+ii, MIN_START_YEAR);
                     default -> (Number) populationProjections.getValue("Female", rgn, 55+ii, MIN_START_YEAR);
                 };
                 if (val==null) {
@@ -3217,6 +3295,11 @@ public class Parameters {
                 mortalityProbabilityMaxYear = maxYear;
                 mortalityProbabilityMinYear = minYear;
                 mortalityProbabilityMaxAge = maxAge;
+            }
+            case EquivalisedIncome -> {
+                equivalisedIncomeMaxYear = maxYear;
+                equivalisedIncomeMinYear = minYear;
+                equivalisedIncomeMaxAge = maxAge;
             }
             default -> {
                 populationProjectionsMaxYear = maxYear;
@@ -3319,13 +3402,13 @@ public class Parameters {
         switch (variableType) {
             case PartnershipAlignment -> {
                 Double val = partnershipAlignAdjustment.get(year);
-                if (val==null)
+                if (!checkFinite(val))
                     throw new RuntimeException("value undefined for partnershipAlignAdjustment in year " + year);
                 return val;
             }
             case FertilityAlignment -> {
                 Double val = fertilityAlignAdjustment.get(year);
-                if (val==null)
+                if (!checkFinite(val))
                     throw new RuntimeException("value undefined for fertilityAlignAdjustment in year " + year);
                 return val;
             }
@@ -3351,7 +3434,7 @@ public class Parameters {
 
     public static double getFertilityRateByYear(int year) {
         Double val = fertilityRateByYear.get(year);
-        if (val==null)
+        if (!Parameters.checkFinite(val))
             throw new RuntimeException("value undefined for getFertilityRateByYear in year " + year);
         return val;
     }
@@ -3438,5 +3521,11 @@ public class Parameters {
 
     public static String getInputDirectory() {
         return INPUT_DIRECTORY;
+    }
+
+    public static boolean checkFinite(Double dd) {
+        if (dd==null)
+            return false;
+        return !dd.isInfinite() && !dd.isNaN();
     }
 }
