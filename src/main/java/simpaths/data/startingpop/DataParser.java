@@ -235,10 +235,18 @@ public class DataParser {
 
 				//Rename idbenefitunit to BU_ID
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO buid;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN buid BIGINT NOT NULL;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN butime INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN burun INT DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN prid INT DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh BIGINT NOT NULL;"
+
+                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_bukey ON " + personTable + " (buid, butime, burun, prid)"
+                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_idhousehold ON " + personTable + " (idhousehold)"
+
+
+
         // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DECIMAL(4,2);"
                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DECIMAL(4,2);"
