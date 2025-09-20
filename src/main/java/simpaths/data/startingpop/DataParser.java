@@ -242,8 +242,8 @@ public class DataParser {
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhousehold BIGINT NOT NULL;"
 
-                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_bukey ON " + personTable + " (buid, butime, burun, prid)"
-                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_idhousehold ON " + personTable + " (idhousehold)"
+                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_bukey ON " + personTable + " (buid, butime, burun, prid);"
+                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_idhousehold ON " + personTable + " (idhousehold);"
 
 
 
