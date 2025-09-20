@@ -5,11 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import simpaths.data.FormattedDialogBox;
 import simpaths.data.Parameters;
@@ -27,6 +23,17 @@ public class DataParser {
 
 		//Construct tables for Simulated Persons & Households (initial population)
 		for (int year = startYear; year <= endYear; year++) {
+			DataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
+		}
+	}
+
+	public static void createDatabaseForPopulationInitialisationByYearFromCSV(Country country, String initialInputFilename, ArrayList<Integer> includeYears, Connection conn) {
+
+		//Initialise repository table for country-year-population size combinations
+		initialiseRepository(conn, includeYears.get(0));
+
+		//Construct tables for Simulated Persons & Households (initial population)
+		for (Integer year: includeYears) {
 			DataParser.parse(Parameters.getInputDirectoryInitialPopulations() + initialInputFilename + "_" + year + ".csv", initialInputFilename, conn, country, year);
 		}
 	}
@@ -425,8 +432,12 @@ public class DataParser {
 
 			Parameters.setPopulationInitialisationInputFileName("population_initial_" + country.toString());
 
-			//This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
-			DataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
+            if (null == Parameters.includeYears) {
+                //This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
+                DataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
+            } else {
+                DataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.includeYears, conn);
+            }
 
 			conn.close();
 		}
