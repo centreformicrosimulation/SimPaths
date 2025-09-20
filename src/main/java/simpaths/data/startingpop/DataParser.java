@@ -239,6 +239,15 @@ public class DataParser {
 				+ "ALTER TABLE " + personTable + " ADD COLUMN burun INT DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN prid INT DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
+        // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DECIMAL(4,2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DECIMAL(4,2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCS DECIMAL(4,2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCSSP DECIMAL(4,2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DLS INT;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM INT;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM_GHQ INT;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN SCGHQ2_DV INT;"
 
 				//Re-order by id
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"
