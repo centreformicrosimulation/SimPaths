@@ -5,6 +5,7 @@ import java.util.*;
 import jakarta.persistence.*;
 
 import microsim.data.db.PanelEntityKey;
+import org.hibernate.annotations.Fetch;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.data.filters.ValidHomeownersCSfilter;
@@ -48,7 +49,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             @JoinColumn(name="prid", referencedColumnName = "working_id")
     })
     private Household household;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    @Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private Set<Person> members = new LinkedHashSet<>();
 
     // identifiers
