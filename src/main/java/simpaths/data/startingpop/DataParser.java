@@ -248,10 +248,10 @@ public class DataParser {
 
 
         // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
-                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DOUBLE;"
-                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DOUBLE;"
-                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCS DOUBLE;"
-                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCSSP DOUBLE;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCS DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCSSP DECIMAL(4, 2);"
                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DLS INT;"
                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM INT;"
                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM_GHQ INT;"
