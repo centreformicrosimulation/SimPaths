@@ -432,7 +432,7 @@ public class DataParser {
 
 			Parameters.setPopulationInitialisationInputFileName("population_initial_" + country.toString());
 
-            if (null == Parameters.includeYears) {
+            if (null == Parameters.includeYears || Parameters.trainingFlag) {
                 //This calls a method creating both the donor population tables and initial populations for every year between minStartYear and maxStartYear.
                 DataParser.createDatabaseForPopulationInitialisationByYearFromCSV(country, Parameters.getPopulationInitialisationInputFileName(), Parameters.getMinStartYear(), Parameters.getMaxStartYear(), conn);
             } else {
