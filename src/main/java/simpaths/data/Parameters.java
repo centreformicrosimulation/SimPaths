@@ -290,6 +290,7 @@ public class Parameters {
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
     public static final boolean FLAG_SINGLE_MOTHERS = true;
     public static boolean flagUnemployment = false;
+    public static ArrayList<Integer> includeYears;
 
     public static int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
