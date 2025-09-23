@@ -226,7 +226,7 @@ public class SimPathsMultiRun extends MultiRun {
 				popSize = Integer.parseInt(cmd.getOptionValue("p"));
 			}
 
-				switch (cmd.getOptionValue("P", "run")) {
+				switch (cmd.getOptionValue("P", "root")) {
 					case "root":
 						log.info("Persisting processed data to root folder");
 						persist_population = true;
