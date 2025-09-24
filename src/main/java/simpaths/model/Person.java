@@ -3027,7 +3027,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 if (partner != null) {
                     if (partner.getDhe_mcs_lag1() != null) {return partner.getDhe_mcs_lag1();}
                     else throw new IllegalArgumentException(
-                            "No Dhe_pcssp_L1 value." + partner.getKey().getId()
+                            "No Dhe_mcssp_L1 value." + partner.getKey().getId()
                     );
                 } else throw new IllegalArgumentException(
                         "No partner found." + this.getKey().getId()
