@@ -6,7 +6,7 @@
 * LAST UPDATE:		9/2025 (AB)
 * COUNTRY: 			Greece 
 
-* NOTES: 			Equivalized dispoable income used to created ratios 
+* NOTES: 			Equivalized disposable income used to create ratios 
 ********************************************************************************
 
 //ssc install ineqdeco
@@ -250,3 +250,4 @@ graph export "$dir_output_files/inequality/validation_${country}_gini.jpg", ///
 
 	
 graph drop _all 	
+
