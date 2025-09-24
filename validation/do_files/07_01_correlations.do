@@ -17,6 +17,7 @@
 * 						sim_inactive, sim_retired : valid_employed, 
 * 						valid_student, valid_inactive, valid_retired
 
+					TO UPDATE
 ********************************************************************************
 
 global sim_varlist sim_employed sim_inactive sim_retired sim_edu_high ///
@@ -154,4 +155,5 @@ graph export ///
 
 
 graph drop _all 
+
 
