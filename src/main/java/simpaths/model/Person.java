@@ -1876,8 +1876,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // Mental and Physical health status of the partner
         if (this.getPartner() != null) {
-            this.setDhe_mcssp(getPartner().getDhe_mcssp());
-            this.setDhe_pcssp(getPartner().getDhe_pcssp());
+            this.setDhe_mcssp(getPartner().getDhe_mcs());
+            this.setDhe_pcssp(getPartner().getDhe_pcs());
         }
 
         //Lagged variables
