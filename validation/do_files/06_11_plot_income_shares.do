@@ -9,6 +9,7 @@
 * NOTES: 			This do file plots simulated and observed income shares and 
 * 					incomes by deciles of gross income
 * 					Altered pension age to 65 
+				TO UPDATE
 ********************************************************************************
 
 ********************************************************************************
@@ -455,3 +456,4 @@ tab les_c3 if obs_gross_income_group == 3 // 57% not employed, 19% students
 
 
 graph drop _all 
+
