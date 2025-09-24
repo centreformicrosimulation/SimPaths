@@ -18,10 +18,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.Pair;
-import simpaths.data.startingpop.DataParser;
-import simpaths.model.AnnuityRates;
 import simpaths.model.decisions.Grids;
-import simpaths.model.enums.*;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.MatchFeature;
 import simpaths.model.taxes.database.TaxDonorDataParser;
@@ -244,6 +241,10 @@ public class Parameters {
     public static final double WEEKS_PER_MONTH = 365.25/(7.*12.);	// = 4.348214286
     public static final double WEEKS_PER_YEAR = 365.25 / 7.;
 
+    // Determine probability of yearly labour supply matches persisting from previous year
+    public static double labour_innovation_employment_persistence_probability = 0.9;
+    public static double labour_innovation_notinemployment_persistence_probability = 0.1;
+
     public static final int HOURS_IN_WEEK = 24 * 7; //This is used to calculate leisure in labour supply
     //Is it possible for people to start going to the labour module (e.g. age 17) while they are living with parents (until age 18)?
     //Cannot see how its possible if it is the household that decides how much labour to supply.  If someone finishes school at 17, they need to leave home before they can enter the labour market.  So set age for finishing school and leaving home to 18.
@@ -292,6 +293,7 @@ public class Parameters {
     public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
     public static final boolean FLAG_SINGLE_MOTHERS = true;
     public static boolean flagUnemployment = false;
+    public static ArrayList<Integer> includeYears;
 
     public static int BASE_PRICE_YEAR = 2015; 			// Base price year of model parameters
 
@@ -1142,10 +1144,10 @@ public class Parameters {
             columnsEmploymentSelectionFemalesE = 32;
             columnsLabourSupplyUtilityMales = 19;
             columnsLabourSupplyUtilityFemales = 12;
-            columnsLabourSupplyUtilityMalesWithDependent = 23;
-            columnsLabourSupplyUtilityFemalesWithDependent = 23;
-            columnsLabourSupplyUtilityACMales = 17;
-            columnsLabourSupplyUtilityACFemales = 17;
+            columnsLabourSupplyUtilityMalesWithDependent = 15;
+            columnsLabourSupplyUtilityFemalesWithDependent = 15;
+            columnsLabourSupplyUtilityACMales = 31;
+            columnsLabourSupplyUtilityACFemales = 31;
             columnsLabourSupplyUtilityCouples = 64;
             columnsLabourCovid19_SE = 1;
             columnsLabourCovid19_2a_processes = 1;

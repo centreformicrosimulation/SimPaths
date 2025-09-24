@@ -28,8 +28,8 @@ import simpaths.model.taxes.*;
 /**
  *
  * CLASS TO MANAGE TRANSLATION OF CSV DATA FROM EUROMOD TO DATABASE FOR DONORS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
- * csv data are processed and saved to the DONORPERSON_<country code> table in the relational database. These data
- * are used as working variables to construct the DONORTAXUNIT_<country code> table, which is then used exclusively \
+ * csv data are processed and saved to the DONORPERSON_country code table in the relational database. These data
+ * are used as working variables to construct the DONORTAXUNIT_country code table, which is then used exclusively \
  * for imputing tax and benefit payments, drawing heavily on SQL calls made via Hibernate
  *
  */
@@ -421,7 +421,6 @@ public class TaxDonorDataParser {
      * output .txt files, picking up the relevant columns for each EUROMOD policy scenario, that
      * will eventually be parsed into the JAS-mine input database.
      *
-     * @return The name of the created CSV file (without the .csv extension)
      *
      */
     public static void constructAggregateTaxDonorPopulationCSVfile(Country country, boolean showGui) {

@@ -87,15 +87,16 @@ public class SimPathsMultiRun extends MultiRun {
 				countryString = "United Kingdom";
 				country = Country.UK;
 			}
+		    country = Country.getCountryFromNameString(countryString);
 			String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
 			startYear = Integer.parseInt(valueYear);
 		} catch (NullPointerException e) {
 			System.out.println("No last database country and year found.");
 			countryString = "United Kingdom";
+		    country = Country.getCountryFromNameString(countryString);
 			startYear = 2019;
 		}
 
-		country = Country.getCountryFromNameString(countryString);
 
 		if (innovationArgs!=null)
 			updateLocalParameters(innovationArgs);
