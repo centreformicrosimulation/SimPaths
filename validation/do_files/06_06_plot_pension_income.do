@@ -6,17 +6,17 @@
 * LAST UPDATE:		9/25 (AB)
 * COUNTRY: 			UK 
 
-* NOTES: 			This do file plots simulated and UKHLS capital income, 
+* NOTES: 			This do file plots simulated and UKHLS pension income, 
 *					per benefit unit
 
 ********************************************************************************
 
 ********************************************************************************
-* 1 : Time series
+* 1: Time series
 ********************************************************************************
 
 ********************************************************************************
-* 1.1 : Mean through time, bu
+* 1.1: Mean through time, bu
 ********************************************************************************
 
 * Prepare validation data
@@ -96,10 +96,9 @@ graph export ///
 
 	
 ********************************************************************************
-* 1.2 : Share with no capital income 
+* 1.2 : Share with no pension income 
 ********************************************************************************
 
-* Share with no capital income 
 * Prepare validation data
 use year dwt valid_y_gross_pension_bu_yr dag using /// 
 	"$dir_data/ukhls_validation_full_sample.dta", clear
@@ -171,7 +170,7 @@ twoway (rarea sim_no_pension_high sim_no_pension_low year, sort ///
 	xlabel(,labsize(small)) ///
 	legend(size(small)) ///
 	graphregion(color(white)) ///
-	note("Notes: Series represents share of individual that report not receiveing any gross private pension income in their benefit unit, annual." "Top and bottom percentiles trimmed.", ///
+	note("Notes: Series represents the share of individual who report not receiving any gross private pension income in their benefit unit, annual." "Top and bottom percentiles trimmed.", ///
 	size(vsmall))
 
 * Save figure
@@ -337,7 +336,7 @@ forval year = `min_year'/`max_year' {
 		size(vsmall))
 		
 	graph export ///
-"$dir_output_files/income/capital_income/validation_${country}_positive_capital_income_dist_`year'.png", ///
+"$dir_output_files/income/pension_income/validation_${country}_positive_pension_income_dist_`year'.png", ///
 		replace width(2560) height(1440) 
 	
 }
