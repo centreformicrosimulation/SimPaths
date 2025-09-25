@@ -105,9 +105,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean fixTimeTrend = true;
 
     @GUIparameter(description = "Fix year used in the regressions to")
-    private Integer timeTrendStopsIn = 2021;
+    private Integer timeTrendStopsIn = 2023;
 
-    private Integer timeTrendStopsInMonetaryProcesses = 2021; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
+    private Integer timeTrendStopsInMonetaryProcesses = timeTrendStopsIn; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
 
 //	@GUIparameter(description="Age at which people in initial population who are not employed are forced to retire")
 //	private Integer ageNonWorkPeopleRetire = 65;	//The problem is that it is difficult to find donor benefitUnits for non-zero labour supply for older people who are in the Nonwork category but not Retired.  They should, in theory, still enter the Labour Market Module, but if we cannot find donor benefitUnits, how should we proceed?  We avoid this problem by defining that people over the age specified here are retired off if they have activity_status equal to Nonwork.
@@ -3362,7 +3362,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
+            String query = "SELECT households FROM Household households";
             log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
             log.info("Query complete");

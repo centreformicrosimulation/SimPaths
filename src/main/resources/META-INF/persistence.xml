@@ -52,6 +52,7 @@
 
 	<persistence-unit name="sim-model-out">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<mapping-file>META-INF/microsim.xml</mapping-file>
 		<class>simpaths.data.startingpop.Processed</class>
 		<class>simpaths.model.Household</class>
 		<class>simpaths.model.Person</class>
@@ -59,6 +60,8 @@
 		<class>simpaths.data.statistics.Statistics</class>
 		<class>simpaths.data.statistics.Statistics2</class>
 		<class>simpaths.data.statistics.Statistics3</class>
+		<class>simpaths.data.statistics.HealthStatistics</class>
+		<class>simpaths.data.statistics.EmploymentStatistics</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />

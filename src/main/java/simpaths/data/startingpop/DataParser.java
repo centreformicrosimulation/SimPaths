@@ -169,10 +169,10 @@ public class DataParser {
 
 				//DEMOGRAPHIC: Long-term sick or disabled (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD sick_longterm VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET sick_longterm = 'False' WHERE dlltsd = 0;"
-				+ "UPDATE " + personTable + " SET sick_longterm = 'True' WHERE dlltsd = 1;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dlltsd;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN sick_longterm RENAME TO dlltsd;"
+				+ "UPDATE " + personTable + " SET sick_longterm = 'False' WHERE dlltsd01 = 0;"
+				+ "UPDATE " + personTable + " SET sick_longterm = 'True' WHERE dlltsd01 = 1;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN dlltsd01;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN sick_longterm RENAME TO dlltsd;" // There are two versions of this variable in the Initial Population files. We use the dlltsd01, but we rename it dlltsd fo simplicity
 
 				//DEMOGRAPHIC: Need social care (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD need_care VARCHAR_IGNORECASE;"
@@ -183,13 +183,14 @@ public class DataParser {
 
 				//DEMOGRAPHIC: Ethnicity
 				+ "ALTER TABLE " + personTable + " ADD ethnicity VARCHAR_IGNORECASE;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'White' WHERE dot = 1;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE dot = 2;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE dot = 3;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot = 4;"
-				+ "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot = 5;"
-				+ "ALTER TABLE " + personTable + " DROP COLUMN dot;"
-				+ "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'White' WHERE dot01 = 1;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE dot01 = 2;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE dot01 = 3;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot01 = 4;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot01 = 5;"
+				+ "UPDATE " + personTable + " SET ethnicity = 'Missing' WHERE dot01 = 6;"
+				+ "ALTER TABLE " + personTable + " DROP COLUMN dot01;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot01;"
 
 				//SYSTEM: Year left education (to be used with Indicator enum when defined in Person class)
 				+ "ALTER TABLE " + personTable + " ADD education_left VARCHAR_IGNORECASE;"
@@ -241,10 +242,27 @@ public class DataParser {
 
 				//Rename idbenefitunit to BU_ID
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO buid;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN buid BIGINT NOT NULL;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN butime INT DEFAULT " + startyear + ";"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN burun INT DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ADD COLUMN prid INT DEFAULT 0;"
 				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
+				+ "ALTER TABLE " + personTable + " ALTER COLUMN idhousehold BIGINT NOT NULL;"
+
+                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_bukey ON " + personTable + " (buid, butime, burun, prid);"
+                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_idhousehold ON " + personTable + " (idhousehold);"
+
+
+
+        // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCS DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCSSP DECIMAL(4, 2);"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DLS INT;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM INT;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM_GHQ INT;"
+                + "ALTER TABLE  " + personTable + " ALTER COLUMN SCGHQ2_DV INT;"
 
 				//Re-order by id
 				+ "SELECT * FROM " + personTable + " ORDER BY id;"

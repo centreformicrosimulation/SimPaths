@@ -12,11 +12,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+
+import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RunSimPathsIntegrationTest {
@@ -47,33 +44,59 @@ public class RunSimPathsIntegrationTest {
         );
     }
 
-    @Test
+    @Nested
     @DisplayName("Simulation runs successfully")
     @Order(4)
-    void testVerifySimulationOutput() throws IOException {
+    class testVerifySimulationOutput {
+
+        public static Path latestOutputDir;
+
+        @BeforeAll
+        public static void loadResults() throws IOException {
+
         Path outputDir = Paths.get("output");
 
-        Path latestOutputDir = Files.list(outputDir)
+        latestOutputDir = Files.list(outputDir)
                 .filter(Files::isDirectory)
                 .max(Comparator.comparingLong(p -> p.toFile().lastModified()))
                 .get();
+        }
 
-        compareFiles(
-            latestOutputDir.resolve("csv/Statistics1.csv"),
-            Paths.get("src/test/java/simpaths/integrationtest/expected/Statistics1.csv")
-        );
+        @Test
+        public void compareStatistics1() throws IOException {
+            compareFiles(
+                    latestOutputDir.resolve("csv/Statistics1.csv"),
+                    Paths.get("src/test/java/simpaths/integrationtest/expected/Statistics1.csv")
+            );
+        }
+        @Test
+        public void compareStatistics21() throws IOException {
         compareFiles(
             latestOutputDir.resolve("csv/Statistics21.csv"),
             Paths.get("src/test/java/simpaths/integrationtest/expected/Statistics21.csv")
         );
+        }
+        @Test
+        public void compareStatistics31() throws IOException {
         compareFiles(
             latestOutputDir.resolve("csv/Statistics31.csv"),
             Paths.get("src/test/java/simpaths/integrationtest/expected/Statistics31.csv")
         );
-        compareFiles(
-            latestOutputDir.resolve("csv/HealthStatistics1.csv"),
-            Paths.get("src/test/java/simpaths/integrationtest/expected/HealthStatistics1.csv")
-        );
+        }
+        @Test
+        public void compareHealthStatistics1() throws IOException {
+            compareFiles(
+                    latestOutputDir.resolve("csv/HealthStatistics1.csv"),
+                    Paths.get("src/test/java/simpaths/integrationtest/expected/HealthStatistics1.csv")
+            );
+        }
+        @Test
+        public void compareEmploymentStatistics1() throws IOException {
+            compareFiles(
+                    latestOutputDir.resolve("csv/EmploymentStatistics1.csv"),
+                    Paths.get("src/test/java/simpaths/integrationtest/expected/EmploymentStatistics1.csv")
+            );
+        }
     }
 
     void compareFiles(Path actualFile, Path expectedFile) throws IOException {
