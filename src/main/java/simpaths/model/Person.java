@@ -2297,6 +2297,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dag_L1,
         Dag_sq,
         Dag_sq_L1,
+        Dag_u22,
+        Dag_sq_u22,
+        Dag_cb_u22,
+        Dag_22o,
+        Dag_sq_22o,
+        Dag_cb_22o,
         DagCeiling54,
         Dag_sqCeiling54,
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
@@ -2643,6 +2649,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Dag_sq_L1 -> {
                 return (double) (dag - 1) * (dag - 1);
+            }
+            case Dag_u22 -> {
+                return (double) dag < 22 ? dag : 0;
+            }
+            case Dag_sq_u22 -> {
+                return (double) dag < 22 ? dag * dag : 0;
+            }
+            case Dag_cb_u22 -> {
+                return (double) dag < 22 ? dag * dag * dag  : 0;
+            }
+            case Dag_22o -> {
+                return (double) dag >= 22 ? dag : 0;
+            }
+            case Dag_sq_22o -> {
+                return (double) dag >= 22 ? dag * dag : 0;
+            }
+            case Dag_cb_22o -> {
+                return (double) dag >= 22 ? dag * dag * dag : 0;
             }
             case DagCeiling54 -> {
                 return (double) Math.min(dag, 54);
