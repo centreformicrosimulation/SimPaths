@@ -3,9 +3,9 @@
 *	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE PROVISION TO INCLUDE IN INITIAL POPULATION
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: Daria Popova 
+*	LAST EDIT: 18 July 2025 DP 
 *
-*******************************************************************************/
+********************************************************************************/
 
 ***************************************************************************************
 cap log close 
@@ -13,12 +13,12 @@ log using "${dir_log}/04_social_care_provided.log", replace
 ***************************************************************************************
 /********************************************************************************
 	local data directories - commented out when using master program
-*******************************************************************************/
+********************************************************************************/
 
 
 /**********************************************************************
 *	start analysis
-*********************************************************************/
+**********************************************************************/
 cd "${dir_data}"
 disp "identifying social care provision"
 
@@ -66,7 +66,7 @@ save "${dir_data}/ukhls_scprov_pooled0.dta", replace
 
 /**************************************************************************************
 *	process variables
-*************************************************************************************/
+**************************************************************************************/
 use "ukhls_scprov_pooled0.dta", clear
 
 // provision of care
@@ -123,22 +123,39 @@ label define careWho 1 "partner only" 2 "partner and non-partner" 3 "non-partner
 
 keep pidp swv careWho aidhrs_adj
 rename aidhrs_adj aidhrs
+
+
+
 rename pidp idperson
 save "ukhls_scprov_pooled1.dta", replace
 
 
 /**************************************************************************************
 *	merge with main data set
-*************************************************************************************/
+**************************************************************************************/
 disp "merge results with existing data"
 
 use "UKHLS_pooled_all_obs_03.dta", clear
 
 merge 1:1 idperson swv using ukhls_scprov_pooled1, keep(1 3) nogen
 
-foreach var of varlist careWho aidhrs {
+foreach var of varlist careWho /*aidhrs*/  {
 	replace `var' = -9 if (missing(`var'))
 }
+recode aidhrs (.=0) 
+
+//Add variable for capped care hours provided (as used in new labour supply estimates) 
+cap gen max_possible_aidhrs = 168 - lhw - 42 //subrtact work and sleep time 
+fre max_possible_aidhrs
+gen aidhrs_excess = (aidhrs - max_possible_aidhrs) if aidhrs > max_possible_aidhrs
+list aidhrs lhw max_possible_aidhrs aidhrs_excess if aidhrs_excess <. 
+count if aidhrs_excess <. 
+gen careHoursProvidedWeekly = aidhrs
+replace careHoursProvidedWeekly = max_possible_aidhrs if aidhrs > max_possible_aidhrs & aidhrs <. 
+assert careHoursProvidedWeekly <= max_possible_aidhrs
+assert lhw+careHoursProvidedWeekly+42 <=168 
+lab var careHoursProvidedWeekly "Weekly hours of care provided (capped)"
+fre careHoursProvidedWeekly
 
 sort idperson swv 
 save "ukhls_pooled_all_obs_04.dta", replace 
@@ -146,7 +163,7 @@ save "ukhls_pooled_all_obs_04.dta", replace
 cap log close 
 /**************************************************************************************
 * clean-up and exit
-*************************************************************************************/
+**************************************************************************************/
 #delimit ;
 local files_to_drop 
 	int_temp.dta
@@ -167,5 +184,3 @@ foreach file of local files_to_drop {
 	erase "$dir_data/`file'"
 }
 
-
-	
