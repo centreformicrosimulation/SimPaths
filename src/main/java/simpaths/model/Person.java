@@ -1720,7 +1720,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                     Private pension income when individual moves from non-retirement to retirement is modelled using:
                     i) process I5a_selection, to determine who receives private pension income
-                    ii) process I5b_amount, for those who are determined to receive private pension income by process I5a_selection. I5b_amount is modelled in levels using linear regression.
+                    ii) process I5a_amount, for those who are determined to receive private pension income by process I5a_selection. I5a_amount is modelled in levels using linear regression.
                 */
 
                 double score, rmse, pensionIncLevel = 0.;
@@ -1731,14 +1731,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     rmse = Parameters.getRMSEForRegression("I4b");
                     pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
                 } else {
-                    // For individuals in the first year of retirement, use processes I5a_selection and I5b_amount
+                    // For individuals in the first year of retirement, use processes I5a_selection and I5a
 
                     double prob = Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class);
                     boolean hasPrivatePensionIncome = (innovations.getDoubleDraw(19) < prob);
                     if (hasPrivatePensionIncome) {
 
-                        score = Parameters.getRegIncomeI5b_amount().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I5b");
+                        score = Parameters.getRegIncomeI5a().getScore(this, Person.DoublesVariables.class);
+                        rmse = Parameters.getRMSEForRegression("I5a");
                         pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
                     }
                 }
