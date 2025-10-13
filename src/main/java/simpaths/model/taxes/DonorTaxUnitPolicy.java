@@ -2,6 +2,7 @@ package simpaths.model.taxes;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import simpaths.data.Parameters;
 
 
@@ -14,7 +15,8 @@ import simpaths.data.Parameters;
 public class DonorTaxUnitPolicy {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH)
+    @BatchSize(size = 100)
     @JoinColumn(name = "TUID", referencedColumnName = "id")
     private DonorTaxUnit taxUnit;
 
