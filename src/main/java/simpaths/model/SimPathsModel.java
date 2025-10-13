@@ -3197,8 +3197,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 String query = "SELECT tu FROM DonorTaxUnit tu";
                 List<DonorTaxUnit> donorPool = em.createQuery(query).getResultList();
 
+                int minYear = Parameters.EUROMODpolicyScheduleSystemYearMap.keySet().stream().min(Comparator.naturalOrder()).get();
+
                 donorPool.sort(Comparator.comparingDouble(tu ->
-                        tu.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getOriginalIncomePerMonth()
+                        tu.getPolicyBySystemYear(minYear).getOriginalIncomePerMonth()
                 ));
 
                 System.out.println("Completed accessing donor data from the database");
