@@ -12,6 +12,12 @@ import simpaths.data.Parameters;
  *
  */
 @Entity
+@Table(
+        indexes = {
+                @Index(name = "idx_tuid", columnList = "TUID"),
+                @Index(name = "idx_original_income_per_month", columnList = "ILS_ORIGY")
+        }
+)
 public class DonorTaxUnitPolicy {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
