@@ -3194,8 +3194,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
-                String query = "SELECT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";
+                String query = "SELECT tu FROM DonorTaxUnit tu";
                 List<DonorTaxUnit> donorPool = em.createQuery(query).getResultList();
+
+
+                donorPool.sort(Comparator.comparingDouble(tu ->
+                        tu.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getOriginalIncomePerMonth()
+                ));
+
                 System.out.println("Completed accessing donor data from the database");
 
                 double[][] dataDualIncome = {}, dataChildcare = {}, dataDualIncomeChildcare = {};
