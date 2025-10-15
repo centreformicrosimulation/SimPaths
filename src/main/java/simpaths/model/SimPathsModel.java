@@ -594,6 +594,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
         addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
+        addCollectionEventToAllYears(persons, Person.Processes.UpdateOutputVariables); // Update idPartner, dhhtp_c4
         addEventToAllYears(Processes.EndYear);
 
         // UPDATE YEAR

@@ -49,6 +49,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Long idOriginalHH;
     private Long idMother;
     private Long idFather;
+    private Long idPartner;
     private Boolean clonedFlag;
     private Boolean bornInSimulation; //Flag to keep track of newborns
     private Long seed;
@@ -59,6 +60,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // person level variables
     private int dag; //Age
+    private Dcpst dcpst;
     @Enumerated(EnumType.STRING) private Indicator adultchildflag;
     @Transient private boolean ioFlag;         // true if a dummy person instantiated for IO decision solution
     @Enumerated(EnumType.STRING) private Gender dgn;             // gender
@@ -712,6 +714,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         SocialCareProvision,
         Unemployment,
         Update,
+        UpdateOutputVariables,
         UpdatePotentialHourlyEarnings,	//Needed to union matching and labour supply
     }
 
@@ -723,6 +726,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Update -> {
                 updateVariables(false);
+            }
+            case UpdateOutputVariables ->  {
+                updateOutputVariables();
             }
             case ProjectEquivConsumption -> {
                 projectEquivConsumption();
@@ -1894,6 +1900,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             innovations.getNewDoubleDraws();
         }
+    }
+
+    private void updateOutputVariables() {
+        idPartner = getPartnerID();
+        dcpst = getDcpst();
     }
 
     private void updateLaggedVariables(boolean initialUpdate) {
@@ -4330,6 +4341,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
         }
         return null;
+    }
+
+    public Long getPartnerID() {
+        Person partner = this.getPartner();
+        if (partner != null) {
+            return partner.getId();
+        } else return null;
     }
 
     private void nullPartnerVariables() {
