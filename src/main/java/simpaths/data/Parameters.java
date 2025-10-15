@@ -1194,7 +1194,7 @@ public class Parameters {
             columnsFinancialDistress = 50;
             columnsEducationE1a = 24;
             columnsEducationE1b = 29;
-            columnsEducationE2a = 24;
+            columnsEducationE2a = 30;
             columnsPartnershipU1a = 16;
             columnsPartnershipU1b = 29;
             columnsPartnershipU2b = 38;
