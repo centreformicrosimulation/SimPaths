@@ -338,4 +338,7 @@ input/EUROMODoutput/current/uk_2026_std.txt
 input/EUROMODoutput/current/uk_2027_std.txt
 input/InitialPopulations/current/*
 input/InitialPopulations/testing/*
+
+.idea/*
 *.dta
+.Rproj.user
