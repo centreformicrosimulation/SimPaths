@@ -38,6 +38,10 @@ import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
+import simpaths.model.lifetime_incomes.BirthCohort;
+import simpaths.model.lifetime_incomes.Individual;
+import simpaths.model.lifetime_incomes.LifetimeIncomeImputation;
+import simpaths.model.lifetime_incomes.ManagerProjectLifetimeIncomes;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
@@ -165,7 +169,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
+    private boolean alignPopulation = false; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
     private boolean alignFertility = false;
@@ -256,6 +260,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     @GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
     private boolean enableIntertemporalOptimisations = false;
+
+    private boolean lifetimeIncomeGenerate = false;    // request to generate new set of lifetime incomes
+    private Integer lifetimeIncomeStartBirthYear;
+    private Integer lifetimeIncomeEndBirthYear;
+    private Integer lifetimeIncomeEndAge;
+    private Integer lifetimeIncomeCohortSize = 10000;
+    private boolean lifetimeIncomeWriteToCSV = false;
+    private long lifetimeIncomeRandomSeed = 505;
+    private double lifetimeIncomeAge0StdDev = 0.9;
+    private boolean lifetimeIncomeImpute = false;       // request to impute lifetime income data for population at load
 
     @GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
     private boolean useSavedBehaviour = false;
@@ -362,7 +376,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts);
+                flagSuppressSocialCareCosts, lifetimeIncomeImpute);
+        if (lifetimeIncomeGenerate) {
+            ManagerProjectLifetimeIncomes.run(log, lifetimeIncomeStartBirthYear,
+                    lifetimeIncomeEndBirthYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
+                    lifetimeIncomeRandomSeed, lifetimeIncomeAge0StdDev);
+        }
         if (enableIntertemporalOptimisations) {
 
             alignEmployment = false;
@@ -566,6 +585,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // equivalised disposable income
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
+        if (lifetimeIncomeImpute)
+            addCollectionEventToAllYears(persons, Person.Processes.ReviseLifetimeIncome);
 
         // Update financial distress
         yearlySchedule.addCollectionEvent(persons, Person.Processes.FinancialDistress);
@@ -2442,14 +2463,21 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         //TODO: Slight differences between otherwise identical simulations arise when loading "processed" vs "unprocessed" data (distinguished by the if statement below)
         Processed processed = PersistPopulation ? getProcessed() : null;
+        LifetimeIncomeImputation lifetimeIncomes = lifetimeIncomeImpute ? getLifetimeIncomes(startYear) : null;
         if (processed!=null) {
-            Set<Household> households = processed.getHouseholds();
+
+            List<Household> households = new ArrayList<>(processed.getHouseholds());
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
             System.out.println("Found processed dataset - preparing for simulation");
-            log.info("Found processed dataset - preparing for simulation");
+
+            // check if need to add income histories
+            if (lifetimeIncomes!=null)
+                lifetimeIncomes.matchDonorProfiles(households);
+
+            // update counters and augment attributes
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
-            for ( Household originalHousehold : processed.getHouseholds()) {
+            for ( Household originalHousehold : households) {
                 if (originalHousehold.getId() > householdIdCounter)
                     householdIdCounter = originalHousehold.getId();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
@@ -2480,6 +2508,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             List<Household> inputHouseholdList = loadStartingPopulation();
             System.out.println("completed loading survey data for starting population");
             log.info("completed loading survey data for starting population");
+
+            // check if need to add income histories
+            if (lifetimeIncomes!=null)
+                lifetimeIncomes.matchDonorProfiles(inputHouseholdList);
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
@@ -3195,13 +3227,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
-                String query = "SELECT tu FROM DonorTaxUnit tu";
+                String query = "SELECT DISTINCT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";
+                //String query = "SELECT tu FROM DonorTaxUnit tu";
                 List<DonorTaxUnit> donorPool = em.createQuery(query).getResultList();
-
-
-                donorPool.sort(Comparator.comparingDouble(tu ->
-                        tu.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getOriginalIncomePerMonth()
-                ));
+//                donorPool.sort(Comparator.comparingDouble(tu ->
+//                        tu.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getOriginalIncomePerMonth()
+//                ));
 
                 System.out.println("Completed accessing donor data from the database");
 
@@ -3314,6 +3345,41 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
+    private LifetimeIncomeImputation getLifetimeIncomes(int year) {
+
+        System.out.println("Loading simulated income histories");
+        LifetimeIncomeImputation lifetimeIncomes = null;
+        EntityTransaction txn = null;
+        try {
+
+            // query database
+            String fileName = Parameters.getInputDirectory() + "input";
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
+            txn = em.getTransaction();
+            txn.begin();
+            String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
+            System.out.println("Submitting SQL query");
+            log.info("Submitting SQL query: " + query);
+            List<BirthCohort> cohorts = em.createQuery(query).getResultList();
+            lifetimeIncomes = new LifetimeIncomeImputation(year, cohorts);
+
+            // close database connection
+            log.info("Query complete");
+            System.out.println("Query complete");
+            em.close();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Problem sourcing data for starting population");
+        }
+
+        return lifetimeIncomes;
+    }
+
     private Processed getProcessed() {
         return getProcessed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
     }
@@ -3321,7 +3387,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Processed getProcessed(Country country, int startYear, int popSize, boolean ignoreTargetsAtPopulationLoad) {
 
         Processed processed = null;
-        Processed processed_return = null;
+        //Processed processed_return = null;
 
         EntityTransaction txn = null;
         try {
@@ -3332,7 +3398,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT processed FROM Processed processed WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad;
+            String query = "SELECT DISTINCT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
+//            String query = "SELECT processed FROM Processed processed WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad;
             log.info("Submitting SQL query: " + query);
 
             List<Processed> processedList = em.createQuery(query).getResultList();
@@ -3342,15 +3409,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 if (processedList.size()>1)
                     throw new RuntimeException("more than one relevant dataset returned from database");
                 processed = processedList.get(0);
+                processed.resetDependents();
 
-                // Now fetch households for THIS specific Processed instance only
-                processed_return = em.createQuery(
-                                "SELECT p FROM Processed p LEFT JOIN FETCH p.households h WHERE p = :proc ORDER BY h.key.id",
-                                Processed.class)
-                        .setParameter("proc", processed)
-                        .getSingleResult();
-
-                processed_return.resetDependents();
+//                // Now fetch households for THIS specific Processed instance only
+//                processed_return = em.createQuery(
+//                                "SELECT p FROM Processed p LEFT JOIN FETCH p.households h WHERE p = :proc ORDER BY h.key.id",
+//                                Processed.class)
+//                        .setParameter("proc", processed)
+//                        .getSingleResult();
+//
+//                processed_return.resetDependents();
             }
 
             // close database connection
@@ -3378,7 +3446,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT households FROM Household households";
+//            String query = "SELECT households FROM Household households";
+            String query = "SELECT DISTINCT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
             log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
             log.info("Query complete");

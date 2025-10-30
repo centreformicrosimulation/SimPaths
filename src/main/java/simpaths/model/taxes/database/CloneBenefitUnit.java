@@ -1,6 +1,7 @@
 package simpaths.model.taxes.database;
 
 import org.apache.commons.lang3.ArrayUtils;
+import simpaths.data.Parameters;
 import simpaths.model.decisions.DecisionParams;
 
 import java.util.*;
@@ -567,7 +568,7 @@ public class CloneBenefitUnit {
         long idchk = getLong(obs,name);
         if (idchk!=0) {
             Double val = (Double)idKey.get(idchk);
-            if (val==null) {
+            if (!Parameters.checkFinite(val)) {
                 pass = false;
                 val = 0.0;
             }

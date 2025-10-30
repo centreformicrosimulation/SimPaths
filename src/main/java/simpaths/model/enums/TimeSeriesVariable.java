@@ -6,6 +6,7 @@ public enum TimeSeriesVariable {
     EmploymentAlignment,
     FixedRetirementAge,
     GDP,
+    GDPperCapita,
     HighEducationRate,
     Inflation,
     LowEducationRate,
