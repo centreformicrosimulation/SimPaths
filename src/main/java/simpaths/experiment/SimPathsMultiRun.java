@@ -136,12 +136,15 @@ public class SimPathsMultiRun extends MultiRun {
 
             if (integrationTest) {
 
-                Experiment.outputFolder = "./output" + File.separator + "INTEGRATION_TESTS";
+                String integrationOutputFolder = "./output" + File.separator + "INTEGRATION_TESTS";
+
+                Experiment.testOutputFolder = integrationOutputFolder;
+
 
                 try {
 
-                    if (FileUtils.isDirectory(new File(Experiment.outputFolder))) {
-                        FileUtils.deleteDirectory(new File(Experiment.outputFolder));
+                    if (FileUtils.isDirectory(new File(integrationOutputFolder))) {
+                        FileUtils.deleteDirectory(new File(integrationOutputFolder));
                     }
 
                 } catch (IOException e) {
