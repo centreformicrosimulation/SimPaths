@@ -4,6 +4,7 @@ package simpaths.experiment;
 // import Java packages
 import org.apache.log4j.Level;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -61,6 +62,8 @@ public class SimPathsMultiRun extends MultiRun {
 
 	private static boolean persist_population;
 	private static boolean persist_root;
+
+    private static boolean integrationTest = false;
 
 	/**
 	 *
@@ -129,6 +132,24 @@ public class SimPathsMultiRun extends MultiRun {
 			SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
 			engine.setExperimentBuilder(experimentBuilder);
 			engine.setup();		//This is needed to update model attributes (from model_args in config file)
+
+
+            if (integrationTest) {
+
+                Experiment.outputFolder = "./output" + File.separator + "INTEGRATION_TESTS";
+
+                try {
+
+                    if (FileUtils.isDirectory(new File(Experiment.outputFolder))) {
+                        FileUtils.deleteDirectory(new File(Experiment.outputFolder));
+                    }
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Parameters.setTrainingFlag(true);
+            }
 
 			if (executeWithGui)
 				new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
