@@ -8,7 +8,7 @@
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 *
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          1 July 2025 DP  
+* LAST UPDATE:          5 Nov 2025 DP  
 ***************************************************************************************
 
 ***************************************************************************************
@@ -47,7 +47,7 @@ set matsize 1000
 **************************************************************************************/
 
 * Working directory
-global dir_work "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates"
+global dir_work "D:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\regression_estimates"
 
 * Directory which contains do files
 global dir_do "${dir_work}/do"
@@ -62,26 +62,26 @@ global dir_raw_results "${dir_work}/raw_results"
 global dir_results "${dir_work}/results"
 
 * Directory which contains pooled dataset for estimates  
-global dir_ukhls_data "D:\Dasha\ESSEX\ESPON 2024\UK\initial_populations\data"
+global dir_ukhls_data "D:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\initial_populations\data"
 
 * Directory containing external input data 
 global dir_external_data "$dir_work/external_data"
 
 * Directory containing results of comparison of various weights   
-global weight_checks "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\weight_checks"
+global weight_checks "${dir_work}/weight_checks"
 
 *********************Internal validation****************************************
 * Directory to save data for internal validation 
-global dir_validation_data "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\internal_validation\data"
+global dir_validation_data "${dir_work}/internal_validation/data"
 
 * Directory for internal validation do-files 
-global dir_do_validation "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\internal_validation\do_files"
+global dir_do_validation "${dir_work}/internal_validation/do_files"
 
 * Directory for internal validation do-files 
-global dir_do_validation "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\internal_validation\do_files"
+global dir_do_validation "${dir_work}/internal_validation/do_files"
 
 * Directory for internal validation do-files 
-global dir_validation_graphs "D:\Dasha\ESSEX\ESPON 2024\UK\regression_estimates\internal_validation\graphs"
+global dir_validation_graphs "${dir_work}/internal_validation/graphs"
 
 global countyy "UK" 
 
@@ -108,9 +108,7 @@ do "${dir_do}/reg_wages.do"
 do "${dir_do}/reg_income.do"
 
 
-
-
-/*******************************************************************************
+*******************************************************************************
 * INTERNAL VALIDATION FILES
 ******************************************************************************
 
@@ -131,7 +129,7 @@ do "$dir_do_validation/int_val_retirement.do"
 do "$dir_do_validation/int_val_wages.do"	
 
 do "$dir_do_validation/int_val_income.do"	
-*/
+
 /**************************************************************************************
 * END OF FILE
 **************************************************************************************/

@@ -8,7 +8,7 @@
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 *						WAS EUL version - UKDA-7215-stata [to wave 7]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          18 July 2025 DP 
+* LAST UPDATE:          4 Nov 2025 DP 
 ***************************************************************************************
 
 ***************************************************************************************
@@ -36,32 +36,35 @@ set matsize 1000
 *************************************************************************************/
 
 * Working directory
-*global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
-*global dir_work "C:\Users\Patryk\Documents\SP_prep_pop"
-global dir_work "D:\Dasha\ESSEX\ESPON 2024\UK\initial_populations"
+global dir_work "C:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\initial_populations"
 
 * Directory which contains do files
 global dir_do "${dir_work}/do"
-*global dir_do "C:\Users\Patryk\git\SimPathsFork\input\InitialPopulations\compile"
 
-* Directory which contains data files 
-global dir_data "${dir_work}/data"
+* Directory which contains processed data  
+global dir_data "${dir_work}/data" //data
 
 * Directory which contains log files 
 global dir_log "${dir_work}/log"
 
 * Directory which contains UKHLS data
-*global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave14\stata\stata13_se\ukhls"
-global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls"
-*global dir_ukhls_data "C:\Users\Patryk\Documents\SP_prep_pop\ukhls\UKDA-6614-stata\stata\stata13_se\ukhls"
+global dir_ukhls_data "D:\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls" //original_data
+
+* Directory which contains BHPS data
+global dir_bhps_data  "D:\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\bhps" //original_data_bhps
 
 * Directory which contains WAS data
-*global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
-global dir_was_data "D:\Dasha\UK-original-data\WAS\UKDA-7215-stata\stata\stata13_se"
-*global dir_was_data "C:\Users\Patryk\Documents\WAS\UKDA-7215-stata\stata\stata13_se"
+global dir_was_data "D:\UK-original-data\WAS\UKDA-7215-stata\stata\stata13_se"
 
-* Directory which contains original initial popultions 
-global dir_ipop_orig "${dir_work}/original_initial_populations"
+//additional paths to employment history files 
+* Directory which contains processed employment history data
+global dir_data_emphist "${dir_data}/emphist"	//data_emphist 
+ 
+* Directory which contains employment history do-files
+global dir_do_emphist "${dir_do}/do_emphist"	
+
+* Directory which contains employment history log files 
+global dir_log_emphist "${dir_log}/emphist" //log_emphist
 
 
 /**************************************************************************************
@@ -88,7 +91,15 @@ wave 12 l 2020-2022
 wave 13 m 2021-2023
 wave 14 n 2022-2024
 */
-global UKHLSwaves "a b c d e f g h i j k l m n" /*all waves*/
+
+global UKHLSwaves "a b c d e f g h i j k l m n" /*all waves*/ //ukhls_all_waves
+global UKHLSwaves_numbers "1 2 3 4 5 6 7 8 9 10 11 12 13 14" //ukhls_all_waves_numbers
+
+global UKHLS_panel_waves "b c d e f g h i j k l m n"
+global UKHLS_panel_waves_numbers "2 3 4 5 6 7 8 9 10 11 12 13 14" //ukhls_waves_numbers
+global UKHLS_waves_prefixed "b_ c_ d_ e_ f_ g_ h_ i_ j_ k_ l_ m_ n_"
+global BHPS_waves "l m n o p q r"
+
 * waves reporting social care module in ukhls - ADL questions added from wave 7 and then every other wave (from 2016)
 global scRecWaves "g i k m"
 * waves reporting social care provided in ukhls (from 2015)
@@ -118,8 +129,10 @@ do "${dir_do}/07_was_wealth_data.do"
 forvalues year = $wealthStartYear / $wealthEndYear {
 	global yearWealth = `year'
 	do "${dir_do}/08_wealth_to_ukhls.do"
-}
+} 
+*check data and slice into initial populations
 do "${dir_do}/09_finalise_input_data.do"
+*descriptives for initial populations and full sample
 do "${dir_do}/10_check_yearly_data.do"
 
 

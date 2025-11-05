@@ -41,7 +41,7 @@ putexcel set "$dir_work/reg_leaveParentalHome", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing leaving parental home"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 1 July 2025 DP"
+putexcel A3 = "Last edit: 4 Nov 2025 DP"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -49,23 +49,26 @@ putexcel A5 = "P1a"
 putexcel B5 = "Probit regression estimates for leaving the parental home - 18+, not in intitial education spell, living with parents in t-1"
 
 putexcel A10 = "Notes:", bold
-putexcel B10 = "Added: ethnicity-4 cat (dot); covid dummies (y2020 y2021); not partnered condition (dcpst != 1) to be consistent with the simulation"
+putexcel B10 = "Added: ethnicity-4 cat (dot); covid dummies (y2020 y2021)"
+putexcel B11 = "DV is synchronised with the adult child definition"
 
 putexcel set "$dir_work/reg_leaveParentalHome", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
 
-************************************
-* Process P1a: Leave Parental Home *
-************************************
-
+********************************************************************************
+* Process P1a: Leave Parental Home 
+********************************************************************************
 * Process P1a: Probability of leaving the parental home. 
-* Sample: All respondents living with a parent in t-1, aged 18+, not in initial 
+* Sample: All respondents adult child in t-1 and not currently in initial 
 * 			education spell 
-* DV: Left parental home dummy of those who lived with parents in t-1
-* Note: Added not partnered condition as well to be consistent with the simulation	
-fre dlftphm if (ded == 0 & dag >= 18 & dcpst != 1) //3.65%
- 
+* DV: Observed transitioning from adult child to non-adult child
+
+xtset idperson swv		
+//fre dlftphm if (ded == 0 & dag >= 18 & dcpst != 1) //3.65%
+fre dlftphm if (ded == 0 & dag >= 18 ) 
+tab2 stm dlftphm if (ded == 0 & dag >= 18), r 
+
 /*/////////////////////////////////////////////////////////////////////////////////////////////////	 
 //check weights //////////////////////////////////////////////////////////////////////////////////	 
 probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm y2020 y2021 i.dot ///
@@ -84,9 +87,13 @@ erase "${weight_checks}/weight_comparison_P1a.txt"
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 
-probit dlftphm i.dgn dag dagsq ib1.deh_c3 li.les_c3 li.ydses_c5 ib8.drgn1 stm y2020 y2021 i.dot ///
-    if (ded==0 & dag>=18 & l.dlftphm==0 & dcpst != 1) [pweight=dimxwt], vce(robust)	
-	
+probit dlftphm Dgn Dag Dag_sq Deh_c3_Medium Deh_c3_Low ///
+	Les_c3_Student_L1 Les_c3_NotEmployed_L1 ///
+	Ydses_c5_Q2_L1 Ydses_c5_Q3_L1 Ydses_c5_Q4_L1 Ydses_c5_Q5_L1 ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN /// 
+	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other ///
+	if (ded == 0 & dag >= 18 /*& dagpns!=1 & les_c4!=4*/ ) [pw = dimxwt], vce(robust)
+
 	
 	* save raw results 	
 matrix results = r(table)
@@ -145,98 +152,76 @@ putexcel C2 = matrix(var)
 restore	
 
 
-* Store estimated coefficients 
+* Store results in Excel 
 
-// Initialize a counter for non-zero coefficients
-local non_zero_count = 0
-//local names : colnames b
+* Store estimates
+matrix b = e(b)	
+matrix V = e(V)
 
-// Loop through each element in `b` to count non-zero coefficients
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        local non_zero_count = `non_zero_count' + 1
-    }
-}
+mata:
+	// Call matrices into mata 
+    V = st_matrix("V")
+    b = st_matrix("b")
 
-// Create a new row vector to hold only non-zero coefficients
-matrix nonzero_b = J(1, `non_zero_count', .)
+    // Find which coefficients are nonzero
+    keep = (b :!= 0)
+	
+	// Eliminate zeros
+	b_trimmed = select(b, keep)
+    V_trimmed = select(V, keep)
+    V_trimmed = select(V_trimmed', keep)'
 
-// Populate nonzero_b with non-zero coefficients from b
-local index = 1
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        matrix nonzero_b[1, `index'] = b[1, `i']
-        local index = `index' + 1
-    }
-}
+	// Inspection
+	b_trimmed 
+	V_trimmed 
+	
+    // Return to Stata
+    st_matrix("b_trimmed", b_trimmed')
+    st_matrix("V_trimmed", V_trimmed)
+	st_matrix("nonzero_b_flag", keep)
+end	
 
+* Export into Excel 
 putexcel set "$dir_results/reg_leaveParentalHome", sheet("UK_P1a") modify
-putexcel A1 = matrix(nonzero_b'), names //nformat(number_d2) 
-	
-	
-* Labeling 
+putexcel B2 = matrix(b_trimmed)
+putexcel C2 = matrix(V_trimmed)
 
+* Labelling 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq ///
+    Deh_c3_Medium Deh_c3_Low ///
+	Les_c3_Student_L1 Les_c3_NotEmployed_L1 ///
+	Ydses_c5_Q2_L1 Ydses_c5_Q3_L1 Ydses_c5_Q4_L1 Ydses_c5_Q5_L1 ///
+	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN /// 
+	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other ///
+	Constant
+	
+	
 putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dgn"
-putexcel A3 = "Dag"
-putexcel A4 = "Dag_sq"
-putexcel A5 = "Deh_c3_Medium"
-putexcel A6 = "Deh_c3_Low"
-putexcel A7 = "Les_c3_Student_L1"
-putexcel A8 = "Les_c3_NotEmployed_L1"
-putexcel A9 = "Ydses_c5_Q2_L1"
-putexcel A10 = "Ydses_c5_Q3_L1"
-putexcel A11 = "Ydses_c5_Q4_L1"
-putexcel A12 = "Ydses_c5_Q5_L1"
-putexcel A13 = "UKC"
-putexcel A14 = "UKD"
-putexcel A15 = "UKE"
-putexcel A16 = "UKF"
-putexcel A17 = "UKG"
-putexcel A18 = "UKH"
-putexcel A19 = "UKJ"
-putexcel A20 = "UKK"
-putexcel A21 = "UKL"
-putexcel A22 = "UKM"
-putexcel A23 = "UKN"
-putexcel A24 = "Year_transformed"
-putexcel A25 = "Y2020"
-putexcel A26 = "Y2021"
-putexcel A27 = "Ethn_Asian"
-putexcel A28 = "Ethn_Black"
-putexcel A29 = "Ethn_Other"
-putexcel A30 = "Constant"
-
 putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dgn"
-putexcel D1 = "Dag"
-putexcel E1 = "Dag_sq"
-putexcel F1 = "Deh_c3_Medium"
-putexcel G1 = "Deh_c3_Low"
-putexcel H1 = "Les_c3_Student_L1"
-putexcel I1 = "Les_c3_NotEmployed_L1"
-putexcel J1 = "Ydses_c5_Q2_L1"
-putexcel K1 = "Ydses_c5_Q3_L1"
-putexcel L1 = "Ydses_c5_Q4_L1"
-putexcel M1 = "Ydses_c5_Q5_L1"
-putexcel N1 = "UKC"
-putexcel O1 = "UKD"
-putexcel P1 = "UKE"
-putexcel Q1 = "UKF"
-putexcel R1 = "UKG"
-putexcel S1 = "UKH"
-putexcel T1 = "UKJ"
-putexcel U1 = "UKK"
-putexcel V1 = "UKL"
-putexcel W1 = "UKM"
-putexcel X1 = "UKN"
-putexcel Y1 = "Year_transformed"
-putexcel Z1 = "Y2020"
-putexcel AA1 = "Y2021"
-putexcel AB1 = "Ethn_Asian"
-putexcel AC1 = "Ethn_Black"
-putexcel AD1 = "Ethn_Other"
-putexcel AE1 = "Constant"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
 
 	
 * Goodness of fit 
