@@ -338,8 +338,10 @@ input/EUROMODoutput/current/uk_2026_std.txt
 input/EUROMODoutput/current/uk_2027_std.txt
 input/InitialPopulations/current/*
 input/InitialPopulations/testing/*
+.idea/*
 *.dta
 src/main/java/simpaths/data/startingpop/DataParser.new
 src/main/java/simpaths/data/startingpop/DataParser.old
 input/EUROMODoutput/limit/*
 input/InitialPopulations/limit/*
+.Rproj.user
