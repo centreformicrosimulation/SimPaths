@@ -144,4 +144,28 @@ public class Household implements EventListener, IDoubleSource {
     }
 
     public static void setHouseholdIdCounter(long id) {householdIdCounter = id;}
+
+    public double getEquivalisedDisposableIncomeYearly() {
+        double income = 0.0;
+        double eqscale = 0.0;
+        boolean firstAdult = true;
+        for (BenefitUnit benefitUnit : benefitUnits) {
+            income += benefitUnit.getDisposableIncomeMonthly() * 12.0;
+            for (Person person : benefitUnit.getMembers()) {
+                if (person.getDag() > 13) {
+                    if (firstAdult) {
+                        eqscale += 1.0;
+                        firstAdult = false;
+                    }
+                    else {
+                        eqscale += 0.5;
+                    }
+                }
+                else {
+                    eqscale += 0.3;
+                }
+            }
+        }
+        return income / eqscale;
+    }
 }

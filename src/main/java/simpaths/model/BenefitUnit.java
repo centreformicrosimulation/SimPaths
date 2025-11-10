@@ -1024,7 +1024,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         //Follow utility process for single female
                         regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
-                    if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                    if (!Parameters.checkFinite(regressionScore)) {
                         throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
                     }
 
@@ -1057,7 +1057,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         } else {
                             regressionScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
                         }
-                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                        if (!Parameters.checkFinite(regressionScore)) {
                             throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
                         }
 
@@ -1087,7 +1087,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         } else {
                             regressionScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
                         }
-                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                        if (!Parameters.checkFinite(regressionScore)) {
                             throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
                         }
                         disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
@@ -2833,7 +2833,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
         yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
-        if (yearlyChangeInLogEDI==null)
+        if (!Parameters.checkFinite(yearlyChangeInLogEDI))
             throw new RuntimeException("problem evaluating yearly change in log edi");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
@@ -2872,17 +2872,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getLiquidWealth(boolean throwError) {
-        if (throwError) {
-            if (liquidWealth == null)
+        if (!Parameters.checkFinite(liquidWealth)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
-            return liquidWealth;
-        } else {
-            if (liquidWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return liquidWealth;
-            }
         }
+        return liquidWealth;
     }
 
     public void setLiquidWealth(Double liquidWealth) {
@@ -2894,17 +2890,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getPensionWealth(boolean throwError) {
-        if (throwError) {
-            if (pensionWealth == null)
+        if (!Parameters.checkFinite(pensionWealth)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
-            return pensionWealth;
-        } else {
-            if (pensionWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return pensionWealth;
-            }
         }
+        return pensionWealth;
     }
 
     public void setPensionWealth(Double pensionWealth) {
@@ -2916,17 +2908,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getHousingWealth(boolean throwError) {
-        if (throwError) {
-            if (housingWealth == null)
+        if (!Parameters.checkFinite(housingWealth)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
-            return housingWealth;
-        } else {
-            if (housingWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return housingWealth;
-            }
         }
+        return housingWealth;
     }
 
     public void setHousingWealth(Double wealth) {
@@ -2937,30 +2925,28 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return getChildcareCostPerWeek(true);
     }
     public double getChildcareCostPerWeek(boolean throwError) {
-        if (childcareCostPerWeek == null) {
+        if (!Parameters.checkFinite(childcareCostPerWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit childcare cost before it is initialised.");
             } else {
                 return 0.0;
             }
-        } else {
-            return childcareCostPerWeek;
         }
+        return childcareCostPerWeek;
     }
 
     public double getSocialCareCostPerWeek() {
         return getSocialCareCostPerWeek(true);
     }
     public double getSocialCareCostPerWeek(boolean throwError) {
-        if (socialCareCostPerWeek == null) {
+        if (!Parameters.checkFinite(socialCareCostPerWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit social care cost before it is initialised.");
             } else {
                 return 0.0;
             }
-        } else {
-            return socialCareCostPerWeek;
         }
+        return socialCareCostPerWeek;
     }
 
     public Household getHousehold() {
@@ -3457,13 +3443,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if ( Parameters.enableIntertemporalOptimisations ) {
 
             // project benefit unit consumption
-            if ((getDisposableIncomeMonthly()==null) || (Double.isNaN(getDisposableIncomeMonthly()))) {
+            if (!Parameters.checkFinite(getDisposableIncomeMonthly())) {
                 throw new RuntimeException("Disposable income not defined.");
             }
 
             double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
                     + getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
-            if (Double.isNaN(cashOnHand)) {
+            if (!Parameters.checkFinite(cashOnHand)) {
                 throw new RuntimeException("Problem identifying cash on hand");
             }
             if (cashOnHand < 1.0E-5) {
@@ -3473,7 +3459,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 discretionaryConsumptionPerYear = Parameters.grids.consumption.interpolateAll(states, false);
                 discretionaryConsumptionPerYear *= cashOnHand;
             }
-            if ( Double.isNaN(discretionaryConsumptionPerYear) ) {
+            if ( !Parameters.checkFinite(discretionaryConsumptionPerYear) ) {
                 throw new RuntimeException("annual discretionary consumption not defined (1)");
             }
         } else {
@@ -3495,7 +3481,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return getDiscretionaryConsumptionPerYear(true);
     }
     public double getDiscretionaryConsumptionPerYear(boolean throwError) {
-        if (discretionaryConsumptionPerYear ==null) {
+        if (!Parameters.checkFinite(discretionaryConsumptionPerYear)) {
             if (throwError) {
                 throw new RuntimeException("annual consumption not defined (2)");
             } else {

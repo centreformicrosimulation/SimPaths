@@ -56,7 +56,7 @@ global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stat
 *global dir_ukhls_data "C:\Users\Patryk\Documents\SP_prep_pop\ukhls\UKDA-6614-stata\stata\stata13_se\ukhls"
 
 * Directory which contains WAS data
-*global dir_was_data "J:\01 DATA\UK\was\wave7\stata\stata13_se"
+*global dir_was_data "J:\01 DATA\UK\was\wave8\stata\stata13_se"
 global dir_was_data "D:\Dasha\UK-original-data\WAS\UKDA-7215-stata\stata\stata13_se"
 *global dir_was_data "C:\Users\Patryk\Documents\WAS\UKDA-7215-stata\stata\stata13_se"
 

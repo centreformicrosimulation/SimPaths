@@ -1326,6 +1326,33 @@ egen yhhnb = rowtotal(ypnb ypnbsp) if dhhtp_c4 == 1 | dhhtp_c4 == 2 //Household 
 replace yhhnb = ypnb if dhhtp_c4 == 3 | dhhtp_c4 == 4 //If single, household income is equal to individual income
 
 
+/*Disposable income */
+sort hidp
+gen ydisp = fimnnet_dv
+recode ydisp (missing = 0)
+by hidp: egen hhinc = sum(ydisp)
+gen res = fihhmnnet1_dv - hhinc
+gen mis = (fimnnet_dv>=.)*(age_dv>17.5)
+by hidp: egen nmis = sum(mis)
+replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
+
+drop hhinc res mis nmis
+by hidp: egen hhinc = sum(ydisp)
+gen res = fihhmnnet1_dv - hhinc
+gen mis = (fimnnet_dv>=.)*(age_dv>14.5)*(age_dv<17.5)
+by hidp: egen nmis = sum(mis)
+replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
+recode ydisp (missing=0)
+/* checks 
+by hidp: egen hhinc2 = sum(ydisp)
+gen res2 = fihhmnnet1_dv - hhinc2
+gen chk = (abs(res2) > 0.1)*(fihhmnnet1_dv<.)
+order age_dv fihhmnnet1_dv fimnnet_dv ydisp hhinc res res2 mis nmis chk, a(hidp)
+tab chk
+drop hhinc2 res2 chk
+*/
+drop hhinc res mis nmis
+
 *Income CPI 
 /*CPIH INDEX 00: ALL ITEMS 2015=100
 CDID	L522
@@ -1362,6 +1389,7 @@ replace ypnb = ypnb/CPI
 replace yptc = yptc/CPI
 replace yplgrs = yplgrs/CPI
 replace ypnbsp = ypnbsp/CPI
+replace ydisp = ydisp/CPI
 
 *Inverse hyperbolic sine transformation:
 /*This transformation is useful for data that exhibit highly skewed distributions, 
@@ -1409,6 +1437,7 @@ la var ypnbihs_dv "Gross personal non-benefit income"
 la var yptciihs_dv "Gross personal non-employment, non-benefit income"
 la var yplgrs_dv "Gross personal employment income"
 la var ynbcpdf_dv "Difference between own and spouse's gross personal non-benefit income"
+la var ydisp "Disposable income (individual)"
 
 *Gross-to-net ratio  
 gen gross_net_ratio = fimngrs_dv/fimnnet_dv 
@@ -1601,7 +1630,7 @@ replace dwt = 0 if missing(dwt)
 /***************************Keep required variables***************************/
 keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst  ///
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
-	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
+	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ydisp ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
         econ_benefits econ_benefits_nonuc econ_benefits_uc ///
 	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp financial_distress
