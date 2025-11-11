@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          14 Jan 2025 DP
+* LAST UPDATE:          18 July 2025 DP
 * NOTE:					Called from 00_master.do - see master file for further details
 *						Use -9 for missing values 
 ***************************************************************************************
@@ -430,6 +430,27 @@ gen dhe_pcs_flag = missing(dhe_pcs)
 replace dhe_pcs = round(dhe_pcs_prediction) if missing(dhe_pcs) 
 bys dhe_pcs_flag : sum dhe_pcs
 
+
+/************Partner's Self-rated health health - mental and physical component***************/
+preserve
+keep swv idperson dhe_mcs dhe_pcs
+rename idperson idpartner 
+rename dhe_mcs dhe_mcssp 
+rename dhe_pcs dhe_pcssp
+
+save "$dir_data/temp_dhe", replace
+restore
+
+merge m:1 swv idpartner using "$dir_data/temp_dhe"
+la var dhe_mcssp "Partner's Self-rated health health - mental component"
+la var dhe_pcssp "Partner's Self-rated health health - physical component"
+keep if _merge == 1 | _merge == 3
+drop _merge
+replace dhe_mcssp=-9 if missing(dhe_mcssp) & idpartner>0
+replace dhe_pcssp=-9 if missing(dhe_pcssp) & idpartner>0
+//fre dhe_mcssp dhe_pcssp if idpartner>0
+
+
 /***************************** Life Satisfaction ***************************************************************************/
 /* Life satisfaction, self report. Continuous scale 0 to 7. */
 
@@ -475,18 +496,51 @@ ethn_dv	-- Ethnic group (derived from multiple sources)
 	17 arab	
 	97 any other ethnic group  	  
 */		
-*Note: Missing ethnic group is combined with "Other" 	
+*ONS style definition (but missing is kept as a separate category)  	
+cap gen dot01 = . 
+replace dot01 = 1 if ethn_dv>=1 & ethn_dv <=4 //white//
+replace dot01 = 2 if ethn_dv>=5 & ethn_dv<=8 //mixed //
+replace dot01 = 3 if ethn_dv>=9 & ethn_dv<=13 //asian//
+replace dot01 = 4 if ethn_dv>=14 & ethn_dv<=16 //black//
+replace dot01 = 5 if ethn_dv==17 | ethn_dv==97 //other, arab//  
+replace dot01 = 6 if ethn_dv==-9 //missing// 
+lab var dot01 "Ethnicity"
+cap label define dot01  1 "White" 2 "Mixed or Multiple ethnic groups" 3 "Asian or Asian British" 4 "Black, Black British, Caribbean, or African" 5 "Other ethnic group" 6 "Missing"
+label values dot01 dot01 
+//fre dot01 
+
+/************Partner's ethnicity***************/
+preserve
+keep swv idperson dot01
+rename idperson idpartner 
+rename dot01 dot01_sp  
+save "$dir_data/temp_dot01", replace
+restore
+
+merge m:1 swv idpartner using "$dir_data/temp_dot01"
+la var dot01_sp "Partner's Ethnicity (6 cat)"
+keep if _merge == 1 | _merge == 3
+drop _merge
+replace dot01_sp=6 if missing(dot01_sp) & idpartner>0
+replace dot01_sp=-69 if missing(dot01_sp) 
+fre dot01_sp
+
+//impute missing status of a respondent by spouses status if not missing 
+fre dot01_sp if dot01==6
+replace dot01=dot01_sp if dot01==6 & (dot01_sp>=1 & dot01_sp<=5) //(9,499 real changes made) out of  21914 = 43% of missing is imputed by partner's ethnicity  
+
+
+* Ethnicity definition used in regression estimates 
 cap gen dot = . 
-replace dot = 1 if ethn_dv>=1 & ethn_dv <=4 //white//
-replace dot = 2 if ethn_dv>=5 & ethn_dv<=8 //mixed //
-replace dot = 3 if ethn_dv>=9 & ethn_dv<=13 //asian//
-replace dot = 4 if ethn_dv>=14 & ethn_dv<=16 //black//
-replace dot = 5 if ethn_dv==17 | ethn_dv==97 //other, arab//  
-replace dot = 5 if ethn_dv==-9 //missing// 
-lab var dot "DEMOGRAPHIC: Ethnicity"
-cap label define dot -9 "missing" 1 "White" 2 "Mixed or Multiple ethnic groups" 3 "Asian or Asian British" 4 "Black, Black British, Caribbean, or African" 5 "Other or missing ethnic group"
+replace dot = 1 if ethn_dv>=1 & ethn_dv <=4  //white//
+replace dot = 2 if ethn_dv>=9 & ethn_dv<=13 //asian//
+replace dot = 3 if ethn_dv>=14 & ethn_dv<=16 //black//
+replace dot = 4 if ethn_dv==17 | ethn_dv==97 | ethn_dv==-9 | (ethn_dv>=5 & ethn_dv<=8) //arab, mixed, other and missing  
+lab var dot "Ethnicity"
+cap label define dot 1 "White" 2 "Asian or Asian British" 3 "Black, Black British, Caribbean, or African" 4 "Other or missing ethnic group"
 label values dot dot 
 //fre dot 
+
 
 
 /******************************Education status*******************************/
@@ -785,7 +839,9 @@ recode jshrs (-9/-1 . = .)
 //lhw is the sum of the above, but don't want to take -9 into account. Recode into missing value. 
 egen lhw=rowtotal(jbhrs jbot jshrs)
 replace lhw = ceil(lhw)
-la var lhw "Hours worked per week"
+la var lhw "Hours worked per week (capped at 126)"
+replace lhw = 126 if lhw > 126 //ensure lhw doesn't go above weekly max 168 minus 6*7 hours of sleep.
+//(37 real changes made)
 //fre lhw 
 
 // Lag(1) of hours of work
@@ -867,16 +923,55 @@ replace dlltsd = 1 if missing(jbstat) & l.jbstat == 8
 la var dlltsd "DEMOGRAPHIC: LT sick or disabled"
 
 
+//check if in receipt of disability benefits 
+/*
+fre bendis1 //Income: Disability benefits: Incapacity Benefit
+fre bendis2 //Income: Disability benefits: Employment and Support Allowance
+fre bendis3 //Income: Disability benefits: Severe Disablement Allowance
+fre bendis4 //Income: Disability benefits: Carer's Allowance
+fre bendis5 //Income: Disability benefits: Disability Living Allowance
+fre bendis6 //Income: Disability benefits: Return to work credit
+fre bendis7 //Income: Disability benefits: Attendance Allowance
+fre bendis8 //Income: Disability benefits: Industrial Injury Disablement Benefit
+fre bendis9 //Income: Disability benefits: War disablement pension
+fre bendis10 //Income: Disability benefits: Sickness and Accident Insurance
+fre bendis11 //Income: Disability benefits: Universal Credit
+fre bendis12 //Income: Disability benefits: Personal Independence Payments
+fre bendis13 //Income: Disability benefits: Child Disability Payment
+fre bendis14 //Income: Disability benefits: Adult Disability Payment
+fre bendis15 //Income: Disability benefits: Pension Age Disability Payment
+fre bendis97 //Income: Disability benefits: Any other disability related benefit or payment
+*/
+gen disben = 0
+replace disben = 1 if inlist(1, bendis1, bendis2, bendis3, bendis4, bendis5, bendis6, bendis7, bendis8, bendis9, ///
+                             bendis10,  bendis12, bendis13, bendis14, bendis15)
+/*Note: exclude bendis11 (Universal credit) as it can be jointly received  and bendis97 (any other) 
+bysort swv idhh (idhh): gen hhsize = _N
+tab2 hhsize disben
+tab2 dlltsd disben */
+
+//second check: disability income based on ficode (disability income is computed in 01_prepare_ukhls_pooled_data)
+gen disben2 = (inc_disab>0 & inc_disab<.) 
+
+//select those who report being disabled & in receipt of disability benefits according to both checks  
+gen dlltsd01 = (dlltsd==1 | (disben==1 & disben2==1)) 
+la var dlltsd01 "DEMOGRAPHIC: LT sick/disabled or receives disability benefits"
+//fre dlltsd01
+//tab2 dlltsd01 dlltsd
+
+
 /*******************Long-term sick or disabled - spouse ***********************/
 preserve
-keep swv idperson dlltsd
+keep swv idperson dlltsd dlltsd01
 rename idperson idpartner
 rename dlltsd dlltsd_sp
+rename dlltsd01 dlltsd01_sp
 save "$dir_data/temp_dlltsd", replace
 restore
 
 merge m:1 swv idpartner using "$dir_data/temp_dlltsd"
-la var dlltsd_sp "Partner's long-term sick"
+la var dlltsd_sp "Partner's long-term sick/disabled"
+la var dlltsd01_sp "Partner's long-term sick/disabled or receives disability benefits"
 keep if _merge == 1 | _merge == 3
 drop _merge
 //fre dlltsd_sp
@@ -1194,15 +1289,6 @@ gen inc_tu = frmnthimp_dv if ficode == 25 //Trade Union / Friendly Society Payme
 gen inc_ma = frmnthimp_dv if ficode == 26 //Maintenance or Alimony
 gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not living here
 gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
-
-fihhnnet1_dv: 	Household net disposable income (over all individuals including imputed)
-fimnnet_dv:		Individual net disposable income (only for reported individuals)
-The survey documentation suggests that fihhnnet1_dv = sum fimnnet_dv over all household individuals
-Unable to identify values for fimnnet_dv recorded outside of table w_indresp
-Evaluate res = fihhnnet1_dv - sum(fimnnet_dv)
-	res is positive for around 20% of the reported sample, 99.9% of which report at least one missing observation from indresp
-=> allocate res equally between adult housheold members not reported in indresp, and then to children not reported in indresp
-
 */
 recode fimnlabgrs_dv fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth (-9=.) (-1=.)
 egen ypnb = rowtotal(fimnlabgrs_dv fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth) //Gross personal non-benefit income
@@ -1238,36 +1324,6 @@ drop _merge
 /*Household income */
 egen yhhnb = rowtotal(ypnb ypnbsp) if dhhtp_c4 == 1 | dhhtp_c4 == 2 //Household income is sum of individual income and partner's income if coupled
 replace yhhnb = ypnb if dhhtp_c4 == 3 | dhhtp_c4 == 4 //If single, household income is equal to individual income
-save "$dir_data\temp2", replace
-
-
-/*Disposable income */
-use "$dir_data\temp2", clear
-sort hidp
-gen ydisp = fimnnet_dv
-recode ydisp (missing = 0)
-by hidp: egen hhinc = sum(ydisp)
-gen res = fihhmnnet1_dv - hhinc
-gen mis = (fimnnet_dv>=.)*(age_dv>17.5)
-by hidp: egen nmis = sum(mis)
-replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
-
-drop hhinc res mis nmis
-by hidp: egen hhinc = sum(ydisp)
-gen res = fihhmnnet1_dv - hhinc
-gen mis = (fimnnet_dv>=.)*(age_dv>14.5)*(age_dv<17.5)
-by hidp: egen nmis = sum(mis)
-replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
-recode ydisp (missing=0)
-/* checks 
-by hidp: egen hhinc2 = sum(ydisp)
-gen res2 = fihhmnnet1_dv - hhinc2
-gen chk = (abs(res2) > 0.1)*(fihhmnnet1_dv<.)
-order age_dv fihhmnnet1_dv fimnnet_dv ydisp hhinc res res2 mis nmis chk, a(hidp)
-tab chk
-drop hhinc2 res2 chk
-*/
-drop hhinc res mis nmis
 
 
 *Income CPI 
@@ -1306,7 +1362,6 @@ replace ypnb = ypnb/CPI
 replace yptc = yptc/CPI
 replace yplgrs = yplgrs/CPI
 replace ypnbsp = ypnbsp/CPI
-replace ydisp = ydisp/CPI
 
 *Inverse hyperbolic sine transformation:
 /*This transformation is useful for data that exhibit highly skewed distributions, 
@@ -1354,7 +1409,6 @@ la var ypnbihs_dv "Gross personal non-benefit income"
 la var yptciihs_dv "Gross personal non-employment, non-benefit income"
 la var yplgrs_dv "Gross personal employment income"
 la var ynbcpdf_dv "Difference between own and spouse's gross personal non-benefit income"
-la var ydisp "Disposable income (individual)"
 
 *Gross-to-net ratio  
 gen gross_net_ratio = fimngrs_dv/fimnnet_dv 
@@ -1546,24 +1600,27 @@ replace dwt = 0 if missing(dwt)
 
 /***************************Keep required variables***************************/
 keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst  ///
-	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
-	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ydisp ///
+	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
+	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
-    econ_benefits econ_benefits_nonuc econ_benefits_uc ///
-	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dls dot unemp financial_distress
+        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
+	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp financial_distress
 
 sort swv idhh idperson 
 
 
 /**************************Recode missing values*******************************/
 foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst ///
-	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
+	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
         econ_benefits econ_benefits_nonuc econ_benefits_uc ///
-	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dls dot unemp {
+	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp {
 		qui recode `var' (-9/-1=-9) (.=-9) 
 }
+
+
+
 
 *recode missings in weights to zero. 
 foreach var in dimlwt disclwt dimxwt dhhwt {
@@ -1624,7 +1681,8 @@ local files_to_drop
 	temp_mother_dag.dta
 	temp_ypnb.dta
 	tmp_partnershipDuration.dta
-	temp2.dta
+	temp_dot01.dta
+	
 	;
 #delimit cr // cr stands for carriage return
 

@@ -196,15 +196,6 @@ public class ManagerRegressions {
             throw new RuntimeException("requested ordered regression is not recognised: " + regression.name());
 
         switch (regression) {
-            case HealthH1a -> {
-                return Parameters.getRegHealthH1a();
-            }
-            case HealthH1b -> {
-                return Parameters.getRegHealthH1b();
-            }
-            case EducationE2a -> {
-                return Parameters.getRegEducationE2a();
-            }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
             }
@@ -217,6 +208,15 @@ public class ManagerRegressions {
             throw new RuntimeException("requested generalised ordered regression is not recognised: " + regression.name());
 
         switch (regression) {
+            case HealthH1a -> {
+                return Parameters.getRegHealthH1a();
+            }
+            case HealthH1b -> {
+                return Parameters.getRegHealthH1b();
+            }
+            case EducationE2a -> {
+                return Parameters.getRegEducationE2a();
+            }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
             }

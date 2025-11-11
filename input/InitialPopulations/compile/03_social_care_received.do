@@ -3,7 +3,7 @@
 *	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN INITIAL POPULATION
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: Daria Popova
+*	LAST EDIT: 18 July 2025 DP 
 *
 *******************************************************************************/
 

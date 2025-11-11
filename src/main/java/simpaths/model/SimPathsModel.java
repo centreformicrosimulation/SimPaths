@@ -3,7 +3,10 @@ package simpaths.model;
 
 // import Java packages
 
-import jakarta.persistence.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.Transient;
 import microsim.alignment.outcome.AlignmentOutcomeClosure;
 import microsim.alignment.outcome.ResamplingAlignment;
 import microsim.annotation.GUIparameter;
@@ -35,10 +38,6 @@ import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.decisions.ManagerPopulateGrids;
 import simpaths.model.enums.*;
-import simpaths.model.lifetime_incomes.BirthCohort;
-import simpaths.model.lifetime_incomes.Individual;
-import simpaths.model.lifetime_incomes.LifetimeIncomeImputation;
-import simpaths.model.lifetime_incomes.ManagerProjectLifetimeIncomes;
 import simpaths.model.taxes.DonorTaxUnit;
 import simpaths.model.taxes.DonorTaxUnitPolicy;
 import simpaths.model.taxes.Match;
@@ -106,9 +105,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean fixTimeTrend = true;
 
     @GUIparameter(description = "Fix year used in the regressions to")
-    private Integer timeTrendStopsIn = 2021;
+    private Integer timeTrendStopsIn = 2023;
 
-    private Integer timeTrendStopsInMonetaryProcesses = 2021; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
+    private Integer timeTrendStopsInMonetaryProcesses = timeTrendStopsIn; // For monetary processes, time trend always continues to 2017 (last observed year in the estimation sample) and then values are grown at the growth rate read from Excel
 
 //	@GUIparameter(description="Age at which people in initial population who are not employed are forced to retire")
 //	private Integer ageNonWorkPeopleRetire = 65;	//The problem is that it is difficult to find donor benefitUnits for non-zero labour supply for older people who are in the Nonwork category but not Retired.  They should, in theory, still enter the Labour Market Module, but if we cannot find donor benefitUnits, how should we proceed?  We avoid this problem by defining that people over the age specified here are retired off if they have activity_status equal to Nonwork.
@@ -258,16 +257,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to enable intertemporal optimised consumption and labour decisions")
     private boolean enableIntertemporalOptimisations = false;
 
-    private boolean lifetimeIncomeGenerate = false;    // request to generate new set of lifetime incomes
-    private Integer lifetimeIncomeStartBirthYear;
-    private Integer lifetimeIncomeEndBirthYear;
-    private Integer lifetimeIncomeEndAge;
-    private Integer lifetimeIncomeCohortSize = 10000;
-    private boolean lifetimeIncomeWriteToCSV = false;
-    private long lifetimeIncomeRandomSeed = 505;
-    private double lifetimeIncomeAge0StdDev = 0.9;
-    private boolean lifetimeIncomeImpute = false;       // request to impute lifetime income data for population at load
-
     @GUIparameter(description = "tick to use behavioural solutions saved by a previous simulation")
     private boolean useSavedBehaviour = false;
 
@@ -356,6 +345,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @Override
     public void buildObjects() {
 
+
         // time check
         elapsedTime0 = System.currentTimeMillis();
         timerStartSim = elapsedTime0;
@@ -372,12 +362,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts, lifetimeIncomeImpute);
-        if (lifetimeIncomeGenerate) {
-            ManagerProjectLifetimeIncomes.run(log, lifetimeIncomeStartBirthYear,
-                    lifetimeIncomeEndBirthYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
-                    lifetimeIncomeRandomSeed, lifetimeIncomeAge0StdDev);
-        }
+                flagSuppressSocialCareCosts);
         if (enableIntertemporalOptimisations) {
 
             alignEmployment = false;
@@ -397,16 +382,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         elapsedTime0 = elapsedTime1;
 
-        // run pre-simulation diagnostic tests
-        //TestTaxRoutine.run();
-        //TestRegressions.run(RegressionName.EducationE2a);
-
         // populate tax donor references
         if (flagUpdateCountry) {
             taxDatabaseUpdate();
             TaxDonorDataParser.populateDonorTaxUnitTables(country, false); // Populate tax unit donor tables from person data
         }
         populateTaxdbReferences();
+
+        // run pre-simulation diagnostic tests
+        //TestTaxRoutine.run();
+        //TestRegressions.run(RegressionName.EducationE2a);
 
         elapsedTime1 = System.currentTimeMillis();
         System.out.println("Time to load tax database references: " + (elapsedTime1 - elapsedTime0)/1000. + " seconds.");
@@ -581,8 +566,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // equivalised disposable income
         addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
-        if (lifetimeIncomeImpute)
-            addCollectionEventToAllYears(persons, Person.Processes.ReviseLifetimeIncome);
 
         // Update financial distress
         yearlySchedule.addCollectionEvent(persons, Person.Processes.FinancialDistress);
@@ -611,6 +594,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
         addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
+        addCollectionEventToAllYears(persons, Person.Processes.UpdateOutputVariables); // Update idPartner, dhhtp_c4
         addEventToAllYears(Processes.EndYear);
 
         // UPDATE YEAR
@@ -2458,21 +2442,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         //TODO: Slight differences between otherwise identical simulations arise when loading "processed" vs "unprocessed" data (distinguished by the if statement below)
         Processed processed = PersistPopulation ? getProcessed() : null;
-        LifetimeIncomeImputation lifetimeIncomes = lifetimeIncomeImpute ? getLifetimeIncomes(startYear) : null;
         if (processed!=null) {
-
-            List<Household> households = new ArrayList<>(processed.getHouseholds());
+            Set<Household> households = processed.getHouseholds();
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
             System.out.println("Found processed dataset - preparing for simulation");
-
-            // check if need to add income histories
-            if (lifetimeIncomes!=null)
-                lifetimeIncomes.matchDonorProfiles(households);
-
-            // update counters and augment attributes
+            log.info("Found processed dataset - preparing for simulation");
             long householdIdCounter = 1L, benefitUnitIdCounter = 1L, personIdCounter = 1L;
-            for ( Household originalHousehold : households) {
+            for ( Household originalHousehold : processed.getHouseholds()) {
                 if (originalHousehold.getId() > householdIdCounter)
                     householdIdCounter = originalHousehold.getId();
                 for (BenefitUnit benefitUnit : originalHousehold.getBenefitUnits()) {
@@ -2498,19 +2475,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             System.out.println("Initialising input dataset for assumed start year");
             inputDatabaseInteraction();
             System.out.println("Completed initialising input dataset");
-
             System.out.println("Loading survey data for starting population");
+            log.info("Loading survey data for starting population");
             List<Household> inputHouseholdList = loadStartingPopulation();
             System.out.println("completed loading survey data for starting population");
-
-            // check if need to add income histories
-            if (lifetimeIncomes!=null)
-                lifetimeIncomes.matchDonorProfiles(inputHouseholdList);
-
+            log.info("completed loading survey data for starting population");
             if (!useWeights) {
                 // Expand population, sample, and remove weights
 
                 System.out.println("Will expand the initial population to " + popSize + " individuals, each of whom has an equal weight.");
+
                 // approach to resampling considered here is designed to allow for surveys that over-sample some population
                 // subgroups. In this case you may have many similar observations in the sample all with low survey weights
                 // so that replicating by a factor adjustment on weight of each observation may result in none of the
@@ -2536,7 +2510,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     if (hhweight>0.1 && (minWeight == null || hhweight < minWeight))
                         minWeight = hhweight;
                 }
-
                 double replicationFactor = 1.0 / minWeight;    // ensures each sampled household represented at least 1 time in list
 
                 List<Household> householdList1Deweighted = new LinkedList<>();
@@ -2615,6 +2588,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
 
             // save to processed repository
+
             if (PersistPopulation) {
                 System.out.println("Saving compiled input data for future reference");
                 persistProcessed();
@@ -3221,8 +3195,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
                 txn = em.getTransaction();
                 txn.begin();
-                String query = "SELECT DISTINCT tu FROM DonorTaxUnit tu LEFT JOIN FETCH tu.policies tp ORDER BY tp.originalIncomePerMonth";
+                String query = "SELECT tu FROM DonorTaxUnit tu";
                 List<DonorTaxUnit> donorPool = em.createQuery(query).getResultList();
+
+
+                donorPool.sort(Comparator.comparingDouble(tu ->
+                        tu.getPolicyBySystemYear(Parameters.BASE_PRICE_YEAR).getOriginalIncomePerMonth()
+                ));
+
                 System.out.println("Completed accessing donor data from the database");
 
                 double[][] dataDualIncome = {}, dataChildcare = {}, dataDualIncomeChildcare = {};
@@ -3334,41 +3314,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
-    private LifetimeIncomeImputation getLifetimeIncomes(int year) {
-
-        System.out.println("Loading simulated income histories");
-        LifetimeIncomeImputation lifetimeIncomes = null;
-        EntityTransaction txn = null;
-        try {
-
-            // query database
-            String fileName = Parameters.getInputDirectory() + "input";
-            Map propertyMap = new HashMap();
-            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + fileName + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
-            EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
-            txn = em.getTransaction();
-            txn.begin();
-            String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
-            System.out.println("Submitting SQL query");
-            log.info("Submitting SQL query: " + query);
-            List<BirthCohort> cohorts = em.createQuery(query).getResultList();
-            lifetimeIncomes = new LifetimeIncomeImputation(year, cohorts);
-
-            // close database connection
-            log.info("Query complete");
-            System.out.println("Query complete");
-            em.close();
-        } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            e.printStackTrace();
-            throw new RuntimeException("Problem sourcing data for starting population");
-        }
-
-        return lifetimeIncomes;
-    }
-
     private Processed getProcessed() {
         return getProcessed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
     }
@@ -3376,6 +3321,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Processed getProcessed(Country country, int startYear, int popSize, boolean ignoreTargetsAtPopulationLoad) {
 
         Processed processed = null;
+        Processed processed_return = null;
+
         EntityTransaction txn = null;
         try {
 
@@ -3385,7 +3332,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT DISTINCT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
+            String query = "SELECT processed FROM Processed processed WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad;
             log.info("Submitting SQL query: " + query);
 
             List<Processed> processedList = em.createQuery(query).getResultList();
@@ -3395,7 +3342,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 if (processedList.size()>1)
                     throw new RuntimeException("more than one relevant dataset returned from database");
                 processed = processedList.get(0);
-                processed.resetDependents();
+
+                // Now fetch households for THIS specific Processed instance only
+                processed_return = em.createQuery(
+                                "SELECT p FROM Processed p LEFT JOIN FETCH p.households h WHERE p = :proc ORDER BY h.key.id",
+                                Processed.class)
+                        .setParameter("proc", processed)
+                        .getSingleResult();
+
+                processed_return.resetDependents();
             }
 
             // close database connection
@@ -3423,7 +3378,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT DISTINCT households FROM Household households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members";
+            String query = "SELECT households FROM Household households";
             log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
             log.info("Query complete");

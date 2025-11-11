@@ -19,8 +19,6 @@ import simpaths.data.filters.FertileFilter;
 import simpaths.model.decisions.Axis;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.enums.*;
-import simpaths.model.lifetime_incomes.AnnualIncome;
-import simpaths.model.lifetime_incomes.Individual;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,9 +42,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             @JoinColumn(name = "burun", referencedColumnName = "simulation_run"),
             @JoinColumn(name = "prid", referencedColumnName = "working_id")
     }) private BenefitUnit benefitUnit;
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
-    @JoinColumn(name = "income_id", referencedColumnName = "id")
-    private Individual ltIncomeDonor;
 
     // identifiers
     private Long idOriginalPerson;
@@ -54,6 +49,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Long idOriginalHH;
     private Long idMother;
     private Long idFather;
+    private Long idPartner;
     private Boolean clonedFlag;
     private Boolean bornInSimulation; //Flag to keep track of newborns
     private Long seed;
@@ -64,6 +60,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // person level variables
     private int dag; //Age
+    private Dcpst dcpst;
     @Enumerated(EnumType.STRING) private Indicator adultchildflag;
     @Transient private boolean ioFlag;         // true if a dummy person instantiated for IO decision solution
     @Enumerated(EnumType.STRING) private Gender dgn;             // gender
@@ -71,7 +68,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Education deh_c3_lag1;  //Lag(1) of education level
     @Enumerated(EnumType.STRING) private Education dehm_c3;      //Mother's education level
     @Enumerated(EnumType.STRING) private Education dehf_c3;      //Father's education level
-    @Enumerated(EnumType.STRING) private Ethnicity dot;          //Ethnicity
+    @Enumerated(EnumType.STRING) private Ethnicity dot01;          //Ethnicity
     @Enumerated(EnumType.STRING) private Indicator ded;          // in continuous education
     @Enumerated(EnumType.STRING) private Indicator der;          // return to education
     @Enumerated(EnumType.STRING) private Les_c4 les_c4;      //Activity (employment) status
@@ -111,6 +108,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // partner lags
     @Transient private Dcpst dcpst_lag1;            // lag partnership status
+    @Transient private Dcpst dcpst_lag2;            // lag (2) partnership status
     @Transient private Education dehsp_c3_lag1;     //Lag(1) of partner's education
     @Transient private Dhe dhesp_lag1;
     @Transient private Lesdf_c4 lesdf_c4_lag1;      //Lag(1) of own and partner's activity status
@@ -136,6 +134,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double dhe_mcs_lag1;  //mental well-being: SF12 mental component summary score lag 1
     private Double dhe_pcs;  //physical well-being: SF12 physical component summary score
     @Transient private Double dhe_pcs_lag1;  //physical well-being: SF12 physical component summary score lag 1
+    private Double dhe_mcssp; //mental well-being: SF12 mental component summary score (partner)
+    private Double dhe_pcssp; //physical well-being: SF12 physical component summary score (partner)
     private Integer dls;      //life satisfaction - score 1-7
     @Transient private Double dls_temp;
     @Transient private Integer dls_lag1;      //life satisfaction - score 1-7 lag 1
@@ -150,7 +150,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean receivesBenefitsFlagUC_L1;
     @Column(name="econ_benefits_nonuc") private Boolean receivesBenefitsFlagNonUC;  // Person receives a benefit which is not UC
     @Transient private Boolean receivesBenefitsFlagNonUC_L1;
-    @Column(name="lifetime_income") private Double lifetimeIncome;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labourSupplyWeekly;			//Number of hours of labour supplied each week
     @Transient private Labour labourSupplyWeekly_L1; // Lag(1) (previous year's value) of weekly labour supply
@@ -291,7 +290,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhm = 9.;			//Set to median for under 18's as a placeholder
         dhmGhq = false;
         deh_c3 = Education.Low;
-        dot = mother.getDot();
+        dot01 = mother.getDot01();
         les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
         leftEducation = false;
         les_c7_covid = Les_c7_covid.Student;
@@ -302,7 +301,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yearlyEquivalisedDisposableIncomeSeries = new Series.Double(this, DoublesVariables.EquivalisedIncomeYearly);
         yearlyEquivalisedConsumptionSeries = new Series.Double(this, DoublesVariables.EquivalisedConsumptionYearly);
         yearlyEquivalisedConsumption = 0.;
-        lifetimeIncome = 0.;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         bornInSimulation = true;
         dhhOwned = false;
@@ -333,12 +331,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         this.sampleEntry = sampleEntry;
-
-        if (originalPerson.ltIncomeDonor!=null) {
-            this.ltIncomeDonor = originalPerson.ltIncomeDonor;
-        }
-        if (Parameters.lifetimeIncomeImpute)
-            this.lifetimeIncome = originalPerson.getLifetimeIncome();
 
         dag = originalPerson.dag;
         ageGroup = originalPerson.ageGroup;
@@ -389,7 +381,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             les_c4_lag1 = les_c4;
         }
-
         les_c7_covid = originalPerson.les_c7_covid;
         if (originalPerson.les_c7_covid_lag1 != null) { //If original persons misses lagged activity status, assign current activity status
             les_c7_covid_lag1 = originalPerson.les_c7_covid_lag1;
@@ -399,6 +390,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         lesdf_c4_lag1 = originalPerson.lesdf_c4_lag1;
         dcpst_lag1 = originalPerson.dcpst_lag1;
+        dcpst_lag2= originalPerson.dcpst_lag2;
         ypnbihs_dv = originalPerson.getYpnbihs_dv();
         ypnbihs_dv_lag1 = originalPerson.ypnbihs_dv_lag1;
         yptciihs_dv = Objects.requireNonNullElse(originalPerson.yptciihs_dv, 0.0);
@@ -487,6 +479,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dls = originalPerson.dls;
         dhe_mcs = originalPerson.dhe_mcs;
         dhe_pcs = originalPerson.dhe_pcs;
+        dhe_mcssp = originalPerson.dhe_mcssp;
+        dhe_pcssp = originalPerson.dhe_pcssp;
 
         if (originalPerson.dls_lag1 != null) {
             dls_lag1 = originalPerson.dls_lag1;
@@ -535,7 +529,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yearlyEquivalisedConsumption = originalPerson.yearlyEquivalisedConsumption;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         dhhOwned = originalPerson.dhhOwned;
-        dot = originalPerson.dot;
+        dot01 = originalPerson.dot01;
         receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
         receivesBenefitsFlagNonUC = originalPerson.receivesBenefitsFlagNonUC;
@@ -716,11 +710,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         LeavingSchool,
         PartnershipDissolution,
         ProjectEquivConsumption,
-        ReviseLifetimeIncome,
         SocialCareReceipt,
         SocialCareProvision,
         Unemployment,
         Update,
+        UpdateOutputVariables,
         UpdatePotentialHourlyEarnings,	//Needed to union matching and labour supply
     }
 
@@ -732,6 +726,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Update -> {
                 updateVariables(false);
+            }
+            case UpdateOutputVariables ->  {
+                updateOutputVariables();
             }
             case ProjectEquivConsumption -> {
                 projectEquivConsumption();
@@ -762,9 +759,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Health -> {
     //			log.debug("Health for person " + this.getKey().getId());
                 health();
-            }
-            case ReviseLifetimeIncome -> {
-                updateLtIncome();
             }
             case SocialCareReceipt -> {
                 evaluateSocialCareReceipt();
@@ -1148,8 +1142,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return sf12;
     }
 
-    protected Integer constrainLifeSatisfactionEstimate(Double dls_estimate) {
-        if (!Parameters.checkFinite(dls_estimate)) {
+    protected Integer constrainLifeSatisfactionEstimate(double dls_estimate) {
+        if (Double.isNaN(dls_estimate) || Double.isInfinite(dls_estimate)) {
             return null;
         }
 
@@ -1217,7 +1211,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             socialCareFromSon = false;
             socialCareFromOther = false;
         }
-        if (!Parameters.checkFinite(careHoursFromParentWeekly))
+        if (careHoursFromParentWeekly==null)
             careHoursFromParentWeekly = 0.0;
 
         if ((dag < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(dlltsd)) {
@@ -1732,7 +1726,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                     Private pension income when individual moves from non-retirement to retirement is modelled using:
                     i) process I5a_selection, to determine who receives private pension income
-                    ii) process I5b_amount, for those who are determined to receive private pension income by process I5a_selection. I5b_amount is modelled in levels using linear regression.
+                    ii) process I5a_amount, for those who are determined to receive private pension income by process I5a_selection. I5a_amount is modelled in levels using linear regression.
                 */
 
                 double score, rmse, pensionIncLevel = 0.;
@@ -1743,14 +1737,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     rmse = Parameters.getRMSEForRegression("I4b");
                     pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
                 } else {
-                    // For individuals in the first year of retirement, use processes I5a_selection and I5b_amount
+                    // For individuals in the first year of retirement, use processes I5a_selection and I5a
 
                     double prob = Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class);
                     boolean hasPrivatePensionIncome = (innovations.getDoubleDraw(19) < prob);
                     if (hasPrivatePensionIncome) {
 
-                        score = Parameters.getRegIncomeI5b_amount().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I5b");
+                        score = Parameters.getRegIncomeI5a().getScore(this, Person.DoublesVariables.class);
+                        rmse = Parameters.getRMSEForRegression("I5a");
                         pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
                     }
                 }
@@ -1871,7 +1865,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         toBePartnered = false;
         leavePartner = false;
         ded = (Les_c4.Student.equals(les_c4)) ? Indicator.True : Indicator.False;
-        if (initialUpdate && !Parameters.checkFinite(careHoursFromParentWeekly))
+        if (initialUpdate && careHoursFromParentWeekly==null)
             careHoursFromParentWeekly = 0.0;
         if (dag<Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             Person mother = benefitUnit.getFemale();
@@ -1884,6 +1878,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 idFather = father.getId();
             else
                 idFather = null;
+        }
+
+        // Mental and Physical health status of the partner
+        if (this.getPartner() != null) {
+            this.setDhe_mcssp(getPartner().getDhe_mcs());
+            this.setDhe_pcssp(getPartner().getDhe_pcs());
         }
 
         //Lagged variables
@@ -1900,6 +1900,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             innovations.getNewDoubleDraws();
         }
+    }
+
+    private void updateOutputVariables() {
+        idPartner = getPartnerID();
+        dcpst = getDcpst();
     }
 
     private void updateLaggedVariables(boolean initialUpdate) {
@@ -1961,6 +1966,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             ypnoab_lag2 = ypnoab_lag1;
             ypnoab_lag1 = getYpnoab();
         }
+
+        dcpst_lag2 = dcpst_lag1; // Updating of this lag must occur before parnters variables are updated
 
         // partner variables
         Person partner = getPartner();
@@ -2281,6 +2288,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Cut9,
         Cut10,
         D_children,
+        D_Children,
         D_children_2under,				// Indicator (dummy variables for presence of children of certain ages in the benefitUnit)
         D_children_3_6,
         D_children_7_12,
@@ -2300,6 +2308,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dag_L1,
         Dag_sq,
         Dag_sq_L1,
+        Dag_u22,
+        Dag_sq_u22,
+        Dag_cb_u22,
+        Dag_22o,
+        Dag_sq_22o,
+        Dag_cb_22o,
         DagCeiling54,
         Dag_sqCeiling54,
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
@@ -2307,6 +2321,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dcpst_Partnered,				//Partnered
         Dcpst_PreviouslyPartnered,		//Previously partnered
         Dcpst_PreviouslyPartnered_L1,   //Lag(1) of partnership status is previously partnered
+        New_rel_L1,
         Dcpst_Single,					//Single never married
         Dcpst_Single_L1, 				//Lag(1) of partnership status is Single
         Dcrisis,
@@ -2361,30 +2376,55 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhesp_Good_L1,
         Dhesp_VeryGood_L1,
         Dhesp_Excellent_L1,
+        Dhh_owned_L1,
         Dhhtp_c4_CoupleChildren_L1,
         Dhhtp_c4_CoupleNoChildren_L1,
         Dhhtp_c4_SingleChildren_L1,
         Dhhtp_c4_SingleNoChildren_L1,
+        L_Dhhtp_c4_CoupleChildren,
+        L_Dhhtp_c4_SingleChildren,
+        L_Dhhtp_c4_SingleNoChildren,
+        Dhhtp_c8_2_L1,
+        Dhhtp_c8_3_L1,
+        Dhhtp_c8_4_L1,
+        Dhhtp_c8_5_L1,
+        Dhhtp_c8_6_L1,
+        Dhhtp_c8_7_L1,
+        Dhhtp_c8_8_L1,
         Dhm,							//Mental health status
         Dhm_L1,							//Mental health status lag(1)
         Dls,                            //Life satisfaction status
-        Dls_L1,                            //Life satisfaction status lag(1)
+        Dls_L1,                         //Life satisfaction status lag(1)
         Dhe_mcs,                        //Mental well-being status
-        Dhe_mcs_L1,                        //Mental well-being status lag(1)
+        dhe_mcs,                        //Mental well-being status (lowercase)
+        Dhe_Mcs,
+        Dhe_mcs_L1,                     //Mental well-being status lag(1)
+        L_Dhe_mcs,
+        dhe_mcs_L1,                     //Mental well-being status lag(1) (lowercase)
         Dhe_mcs_sq,                     //MCS score squared
         Dhe_mcs_times_pcs,              //MCS times PCS
         Dhe_mcs_c_times_pcs_c,          //Centralised MCS times PCS
         Dhe_mcs_c,                      //MCS centralised by subtracting population mean
         Dhe_mcs_c_sq,                   //Square of centralised MCS
+        Dhe_mcssp_L1,                      //Mental well-being status of the partner
         Dhe_pcs,                        //Physical well-being status
-        Dhe_pcs_L1,                        //Physical well-being status lag(1)
+        dhe_pcs,                        //Physical well-being status (lowercase)
+        Dhe_Pcs,
+        Dhe_pcs_L1,                     //Physical well-being status lag(1)
+        L_Dhe_pcs,
+        dhe_pcs_L1,                     //Physical well-being status lag(1) (lowercase)
         Dhe_pcs_sq,                     //PCS score squared
         Dhe_pcs_cb,                     //PCS score cubed
         Dhe_pcs_c,                      //MCS centralised by subtracting population mean
         Dhe_pcs_c_sq,                   //Square of centralised MCS
+        Dhe_pcssp_L1,                      //Physical well-being status of the partner
         Dhmghq_L1,
         Dlltsd,							//Long-term sick or disabled
+        Dlltsd01,
         Dlltsd_L1,						//Long-term sick or disabled lag(1)
+        Dlltsd01_L1,
+        L_Dlltsd01,
+        Dlltsd01_sp_L1,
         Dnc_L1, 						//Lag(1) of number of children of all ages in the benefitUnit
         Dnc02_L1, 						//Lag(1) of number of children aged 0-2 in the benefitUnit
         Dnc017, 						//Number of children aged 0-17 in the benefitUnit
@@ -2395,11 +2435,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Employmentsonfullfurlough,
         EquivalisedConsumptionYearly,
         EquivalisedIncomeYearly, 							//Equivalised income for use with the security index
-        EthnicityWhite,
-        EthnicityMixed,
+        Ethn_White,
+        // Ethn_Mixed,
+        Ethn_Asian,
         EthnicityAsian,
+        Ethn_Black,
         EthnicityBlack,
+        Ethn_Other,
         EthnicityOther,
+        EthnicityMixed,
+        // Ethn_Missing,
         Female,
         FertilityRate,
         FinancialDistress,
@@ -2414,6 +2459,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         LactiveIT,
         L1_hourly_wage,
         L1_log_hourly_wage,
+        Hourly_wage_L1,
         L1_log_hourly_wage_sq,
         Ld_children_2under,
         Ld_children_3under,
@@ -2428,8 +2474,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Lhw_40,                         // Used by financial distress process
         Les_c3_Employed_L1,
         Les_c3_NotEmployed_L1,
+        L_Les_c3_NotEmployed,
         Les_c3_Sick_L1,					//This is based on dlltsd
         Les_c3_Student_L1,
+        L_Les_c3_Student,
+        Les_c4_Student_L1,
+        Les_c4_NotEmployed_L1,
+        Les_c4_Retired_L1,
         Les_c7_Covid_Furlough_L1,
         Lesdf_c4_BothNotEmployed_L1,
         Lesdf_c4_EmployedSpouseNotEmployed_L1, 					//Own and partner's activity status lag(1)
@@ -2437,6 +2488,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Lessp_c3_NotEmployed_L1,
         Lessp_c3_Sick_L1,
         Lessp_c3_Student_L1,			//Partner variables
+        Lesnr_c2_NotEmployed_L1,
+        Reached_Retirement_Age_Lesnr_c2_NotEmployed_L1,
         Liwwh,									//Work history in months
         LnAge,
         Lnonwork,
@@ -2502,7 +2555,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Year2018,
         Year2019,
         Year2020,
+        Y2020,
         Year2021,
+        Y2021,
         Year2022,
         Year2023,
         Year2024,
@@ -2562,9 +2617,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Year2078,
         Year2079,
         Ydses_c5_Q2_L1, 							//HH Income Lag(1) 2nd Quantile
+        L_Ydses_c5_Q2,
         Ydses_c5_Q3_L1,								//HH Income Lag(1) 3rd Quantile
+        L_Ydses_c5_Q3,
         Ydses_c5_Q4_L1,								//HH Income Lag(1) 4th Quantile
+        L_Ydses_c5_Q4,
         Ydses_c5_Q5_L1,								//HH Income Lag(1) 5th Quantile
+        L_Ydses_c5_Q5,
+        Ydses_c5_L1,
         Year_transformed,							//Year - 2000
         Year_transformed_monetary,					//Year-2000 that stops in 2017, for use with monetary processes
         Ynbcpdf_dv_L1, 								//Lag(1) of difference between own and partner's gross personal non-benefit income
@@ -2600,6 +2660,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Dag_sq_L1 -> {
                 return (double) (dag - 1) * (dag - 1);
+            }
+            case Dag_u22 -> {
+                return (double) dag < 22 ? dag : 0;
+            }
+            case Dag_sq_u22 -> {
+                return (double) dag < 22 ? dag * dag : 0;
+            }
+            case Dag_cb_u22 -> {
+                return (double) dag < 22 ? dag * dag * dag  : 0;
+            }
+            case Dag_22o -> {
+                return (double) dag >= 22 ? dag : 0;
+            }
+            case Dag_sq_22o -> {
+                return (double) dag >= 22 ? dag * dag : 0;
+            }
+            case Dag_cb_22o -> {
+                return (double) dag >= 22 ? dag * dag * dag : 0;
             }
             case DagCeiling54 -> {
                 return (double) Math.min(dag, 54);
@@ -2832,6 +2910,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return dcpst_lag1.equals(Dcpst.PreviouslyPartnered) ? 1. : 0.;
                 } else return 0.;
             }
+            case New_rel_L1 -> {
+                return (dcpst_lag1.equals(Dcpst.Partnered) && !dcpst_lag2.equals(Dcpst.Partnered))? 1. : 0.;
+            }
             case D_children_2under -> {
                 return (double) benefitUnit.getIndicatorChildren(0, 2).ordinal();
             }
@@ -2847,7 +2928,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case D_children_18over -> {
                 return (double) benefitUnit.getIndicatorChildren(18, 99).ordinal();
             }
-            case D_children -> {
+            case D_children, D_Children -> {
                 return (getNumberChildrenAll() > 0) ? 1. : 0.;
             }
             case Dnc_L1 -> {
@@ -2948,10 +3029,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return dhm_lag1;
                 } else return 0.;
             }
-            case Dhe_mcs -> {
+            case Dhe_mcs, dhe_mcs, Dhe_Mcs -> {
                 return dhe_mcs;
             }
-            case Dhe_mcs_L1 -> {
+            case Dhe_mcs_L1, dhe_mcs_L1, L_Dhe_mcs -> {
                 if (dhe_mcs_lag1 != null && dhe_mcs_lag1 >= 0.) {
                     return dhe_mcs_lag1;
                 } else return 0.;
@@ -2976,10 +3057,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // Used to calculate he_eq5d in regHealthEQ5D
                 return (dhe_mcs - 51.5) * (dhe_pcs - 49.9);
             }
-            case Dhe_pcs -> {
+            case Dhe_mcssp_L1 -> {
+                Person partner = getPartner();
+                if (partner != null) {
+                    if (partner.getDhe_mcs_lag1() != null) {return partner.getDhe_mcs_lag1();}
+                    else throw new IllegalArgumentException(
+                            "No Dhe_mcssp_L1 value." + partner.getKey().getId()
+                    );
+                } else throw new IllegalArgumentException(
+                        "No partner found." + this.getKey().getId()
+                );
+            }
+            case Dhe_pcs, dhe_pcs, Dhe_Pcs -> {
                 return dhe_pcs;
             }
-            case Dhe_pcs_L1 -> {
+            case Dhe_pcs_L1, dhe_pcs_L1, L_Dhe_pcs -> {
                 if (dhe_pcs_lag1 != null && dhe_pcs_lag1 >= 0.) {
                     return dhe_pcs_lag1;
                 } else return 0.;
@@ -2999,6 +3091,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhe_pcs_c_sq -> {
                 // Used to calculate he_eq5d in regHealthEQ5D
                 return Math.pow(dhe_pcs - 49.9, 2);
+            }
+            case Dhe_pcssp_L1 -> {
+                Person partner = getPartner();
+                if (partner != null) {
+                    if (partner.getDhe_pcs_lag1() != null){return partner.getDhe_pcs_lag1();}
+                    else throw new IllegalArgumentException(
+                            "No Dhe_pcssp_L1 value." + partner.getKey().getId()
+                    );
+                } else throw new IllegalArgumentException(
+                        "No partner found." + this.getKey().getId()
+                );
             }
             case Dls -> {
                 return dls;
@@ -3068,39 +3171,93 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case He_eq5d -> {
                 return getHe_eq5d();
             }
-            case Dhhtp_c4_CoupleChildren_L1 -> {
+            case Dhhtp_c4_CoupleChildren_L1, L_Dhhtp_c4_CoupleChildren -> {
                 return (Dhhtp_c4.CoupleChildren.equals(getDhhtp_c4_lag1())) ? 1.0 : 0.0;
             }
             case Dhhtp_c4_CoupleNoChildren_L1 -> {
                 return (Dhhtp_c4.CoupleNoChildren.equals(getDhhtp_c4_lag1())) ? 1.0 : 0.0;
             }
-            case Dhhtp_c4_SingleNoChildren_L1 -> {
+            case Dhhtp_c4_SingleNoChildren_L1, L_Dhhtp_c4_SingleNoChildren -> {
                 return (Dhhtp_c4.SingleNoChildren.equals(getDhhtp_c4_lag1())) ? 1.0 : 0.0;
             }
-            case Dhhtp_c4_SingleChildren_L1 -> {
+            case Dhhtp_c4_SingleChildren_L1, L_Dhhtp_c4_SingleChildren -> {
                 return (Dhhtp_c4.SingleChildren.equals(getDhhtp_c4_lag1())) ? 1.0 : 0.0;
             }
-            case Dlltsd -> {
+            case Dhhtp_c8_2_L1 -> {
+                // Couple with no children, spouse student
+                Person partner = getPartner();
+                if (partner != null && partner.les_c4_lag1 != null)
+                    return (partner.les_c4_lag1.equals(Les_c4.Student) && Dhhtp_c4.CoupleNoChildren.equals(getDhhtp_c4_lag1())) ? 1. : 0.;
+                else
+                    return 0.;
+            }
+            case Dhhtp_c8_3_L1 -> {
+                // Couple with no children, spouse not employed
+                Person partner = getPartner();
+                if (partner != null && partner.les_c4_lag1 != null)
+                    return ((partner.les_c4_lag1.equals(Les_c4.NotEmployed) || partner.les_c4_lag1.equals(Les_c4.Retired)) && Dhhtp_c4.CoupleNoChildren.equals(getDhhtp_c4_lag1())) ? 1. : 0.;
+                else
+                    return 0.;
+            }
+            case Dhhtp_c8_4_L1 -> {
+                // Couple with children, spouse employed
+                Person partner = getPartner();
+                if (partner != null && partner.les_c4_lag1 != null)
+                    return (partner.les_c4_lag1.equals(Les_c4.EmployedOrSelfEmployed) && Dhhtp_c4.CoupleChildren.equals(getDhhtp_c4_lag1())) ? 1. : 0.;
+                else
+                    return 0.;
+            }
+            case Dhhtp_c8_5_L1 -> {
+                // Couple with children, spouse student
+                Person partner = getPartner();
+                if (partner != null && partner.les_c4_lag1 != null)
+                    return (partner.les_c4_lag1.equals(Les_c4.Student) && Dhhtp_c4.CoupleChildren.equals(getDhhtp_c4_lag1())) ? 1. : 0.;
+                else
+                    return 0.;
+            }
+            case Dhhtp_c8_6_L1 -> {
+                // Couple with children, spouse not employed
+                Person partner = getPartner();
+                if (partner != null && partner.les_c4_lag1 != null)
+                    return ((partner.les_c4_lag1.equals(Les_c4.NotEmployed) || partner.les_c4_lag1.equals(Les_c4.Retired)) && Dhhtp_c4.CoupleChildren.equals(getDhhtp_c4_lag1())) ? 1. : 0.;
+                else
+                    return 0.;
+            }
+            case Dhhtp_c8_7_L1 -> {
+                // Single with no children
+                return Dhhtp_c4.SingleNoChildren.equals(getDhhtp_c4_lag1()) ? 1. : 0.;
+            }
+            case Dhhtp_c8_8_L1 -> {
+                // Single with children
+                return Dhhtp_c4.SingleChildren.equals(getDhhtp_c4_lag1()) ? 1. : 0.;
+            }
+            case Dlltsd, Dlltsd01 -> {
                 return Indicator.True.equals(dlltsd) ? 1. : 0.;
             }
-            case Dlltsd_L1 -> {
+            case Dlltsd_L1, Dlltsd01_L1, Dlltsd01_sp_L1, L_Dlltsd01 -> {
                 return Indicator.True.equals(dlltsd_lag1) ? 1. : 0.;
             }
-            case EthnicityWhite -> {
-                return dot.equals(Ethnicity.White) ? 1. : 0.;
+            case Ethn_White -> {
+                return dot01.equals(Ethnicity.White) ? 1. : 0.;
+            }
+            // case Ethn_Mixed -> {
+            //    return dot01.equals(Ethnicity.Mixed) ? 1. : 0.;
+            //}
+            case Ethn_Asian, EthnicityAsian -> {
+                return dot01.equals(Ethnicity.Asian) ? 1. : 0.;
+            }
+            case Ethn_Black, EthnicityBlack -> {
+                return dot01.equals(Ethnicity.Black) ? 1. : 0.;
+            }
+            case Ethn_Other, EthnicityOther -> {
+                return (dot01.equals(Ethnicity.Other) || dot01.equals(Ethnicity.Missing)) ? 1. : 0.;
             }
             case EthnicityMixed -> {
-                return dot.equals(Ethnicity.Mixed) ? 1. : 0.;
+                return dot01.equals(Ethnicity.Mixed) ? 1. : 0.;
             }
-            case EthnicityAsian -> {
-                return dot.equals(Ethnicity.Asian) ? 1. : 0.;
-            }
-            case EthnicityBlack -> {
-                return dot.equals(Ethnicity.Black) ? 1. : 0.;
-            }
-            case EthnicityOther -> {
-                return dot.equals(Ethnicity.Other) ? 1. : 0.;
-            }
+            // case Ethn_Missing -> {
+            //    return dot01.equals(Ethnicity.Missing) ? 1. : 0.;
+            // }
             case FertilityRate -> {
                 if (ioFlag)
                     return Parameters.getFertilityProjectionsByYear(getYear());
@@ -3148,10 +3305,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 //			log.debug("Lunion");
                 return household_status_lag.equals(HouseholdStatus.Couple) ? 1. : 0.;
             }
-            case Les_c3_Student_L1 -> {
+            case Les_c3_Student_L1, L_Les_c3_Student -> {
                 return (Les_c4.Student.equals(les_c4_lag1)) ? 1.0 : 0.0;
             }
-            case Les_c3_NotEmployed_L1 -> {
+            case Les_c3_NotEmployed_L1, L_Les_c3_NotEmployed -> {
                 return ((Les_c4.NotEmployed.equals(les_c4_lag1)) || (Les_c4.Retired.equals(les_c4_lag1))) ? 1.0 : 0.0;
             }
             case Les_c3_Employed_L1 -> {
@@ -3162,6 +3319,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return dlltsd_lag1.equals(Indicator.True) ? 1. : 0.;
                 else
                     return 0.0;
+            }
+            case Les_c4_Student_L1 -> {
+                return (Les_c4.Student.equals(les_c4_lag1)) ? 1. : 0. ;
+            }
+            case Les_c4_NotEmployed_L1 -> {
+                return (Les_c4.NotEmployed.equals(les_c4_lag1)) ? 1. : 0. ;
+            }
+            case Les_c4_Retired_L1 -> {
+                return (Les_c4.Retired.equals(les_c4_lag1)) ? 1. : 0. ;
             }
             case Lessp_c3_Student_L1 -> {
                 Person partner = getPartner();
@@ -3183,6 +3349,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return partner.dlltsd_lag1.equals(Indicator.True) ? 1. : 0.;
                 else
                     return 0.;
+            }
+            case Lesnr_c2_NotEmployed_L1 -> {
+                return (Les_c4.NotEmployed.equals(les_c4_lag1) || (Les_c4.Student.equals(les_c4_lag1))) ? 1. : 0. ;
+            }
+            case Reached_Retirement_Age_Lesnr_c2_NotEmployed_L1 -> {
+                int retirementAge;
+                if (dgn.equals(Gender.Female)) {
+                    retirementAge = (int) Parameters.getTimeSeriesValue(
+                            getYear(),
+                            Gender.Female.toString(),
+                            TimeSeriesVariable.FixedRetirementAge
+                    );
+                } else {
+                    retirementAge = (int) Parameters.getTimeSeriesValue(
+                            getYear(),
+                            Gender.Male.toString(),
+                            TimeSeriesVariable.FixedRetirementAge
+                    );
+                }
+                return (Les_c4.NotEmployed.equals(les_c4_lag1) || (Les_c4.Student.equals(les_c4_lag1)) && dag >= retirementAge) ? 1.0 : 0.0;
             }
             case Retired -> {
                 return Les_c4.Retired.equals(les_c4) ? 1. : 0.;
@@ -3280,10 +3466,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2019 -> {
                 return (getYear() == 2019) ? 1. : 0.;
             }
-            case Year2020 -> {
+            case Year2020, Y2020 -> {
                 return (getYear() == 2020) ? 1. : 0.;
             }
-            case Year2021 -> {
+            case Year2021, Y2021 -> {
                 return (getYear() == 2021) ? 1. : 0.;
             }
             case Year2022 -> {
@@ -3466,16 +3652,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year_transformed_monetary -> {
                 return (double) model.getTimeTrendStopsInMonetaryProcesses() - 2000;
             } //Note: this returns base price year - 2000 (e.g. 17 for 2017 as base price year) and monetary variables are then uprated from 2017 level to the simulated year
-            case Ydses_c5_Q2_L1 -> {
+            case Ydses_c5_Q2_L1, L_Ydses_c5_Q2, Ydses_c5_L1 -> {
                 return (Ydses_c5.Q2.equals(getYdses_c5_lag1())) ? 1.0 : 0.0;
             }
-            case Ydses_c5_Q3_L1 -> {
+            case Ydses_c5_Q3_L1, L_Ydses_c5_Q3 -> {
                 return (Ydses_c5.Q3.equals(getYdses_c5_lag1())) ? 1.0 : 0.0;
             }
-            case Ydses_c5_Q4_L1 -> {
+            case Ydses_c5_Q4_L1, L_Ydses_c5_Q4 -> {
                 return (Ydses_c5.Q4.equals(getYdses_c5_lag1())) ? 1.0 : 0.0;
             }
-            case Ydses_c5_Q5_L1 -> {
+            case Ydses_c5_Q5_L1, L_Ydses_c5_Q5 -> {
                 return (Ydses_c5.Q5.equals(getYdses_c5_lag1())) ? 1.0 : 0.0;
             }
             case Ypnbihs_dv_L1 -> {
@@ -3646,7 +3832,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case D_Home_owner -> {
                 return getBenefitUnit().isDhhOwned() ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
-            case D_Home_owner_L1 -> {
+            case D_Home_owner_L1, Dhh_owned_L1 -> {
                 return isHomeOwner_lag1 ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
             case Covid_2020_D -> {
@@ -3658,7 +3844,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Pt -> {
                 return (getLabourSupplyHoursWeekly() > 0 && getLabourSupplyHoursWeekly() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED) ? 1. : 0.;
             }
-            case L1_log_hourly_wage -> {
+            case L1_log_hourly_wage, Hourly_wage_L1 -> {
                 if (L1_fullTimeHourlyEarningsPotential == null) {
                     throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
                 } else {
@@ -3936,7 +4122,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.les_c4 = les_c4;
     }
 
-
     public void setLes_c7_covid(Les_c7_covid les_c7_covid) { this.les_c7_covid = les_c7_covid; }
 
     public Les_c7_covid getLes_c7_covid() { return les_c7_covid; }
@@ -4182,6 +4367,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return null;
     }
 
+    public Long getPartnerID() {
+        Person partner = this.getPartner();
+        if (partner != null) {
+            return partner.getId();
+        } else return null;
+    }
+
     private void nullPartnerVariables() {
 
         careHoursFromPartnerWeekly = 0.0;
@@ -4385,8 +4577,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhmGhq = dhm_ghq;
     }
 
-    public Ethnicity getDot() {
-        return dot;
+    public Ethnicity getDot01() {
+        return dot01;
+    }
+
+    public void setDot01(Ethnicity dot01) {
+        this.dot01 = dot01;
     }
 
     public boolean getFinancialDistress() {
@@ -4531,8 +4727,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setYptciihs_dv(double yptciihs_dv) {
         this.yptciihs_dv = yptciihs_dv;
-        if (!Parameters.checkFinite(this.yptciihs_dv))
-            throw new IllegalArgumentException("yptciihs_dv is not finite");
+        if (Double.isNaN(this.yptciihs_dv) || Double.isInfinite(this.yptciihs_dv)) throw new IllegalArgumentException("yptciihs_dv is not finite");
     }
 
     public double getYptciihs_dv_lag1() {
@@ -5153,36 +5348,41 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getCareHoursFromParentWeekly() {
         double hours = 0.0;
-        if (Parameters.checkFinite(careHoursFromParentWeekly) && careHoursFromParentWeekly > 0.0)
-            hours = careHoursFromParentWeekly;
+        if (careHoursFromParentWeekly !=null)
+            if (careHoursFromParentWeekly >0.0)
+                hours = careHoursFromParentWeekly;
         return hours;
     }
 
     public double getCareHoursFromDaughterWeekly() {
         double hours = 0.0;
-        if (Parameters.checkFinite(careHoursFromDaughterWeekly) && careHoursFromDaughterWeekly > 0.0)
-            hours = careHoursFromDaughterWeekly;
+        if (careHoursFromDaughterWeekly !=null)
+            if (careHoursFromDaughterWeekly >0.0)
+                hours = careHoursFromDaughterWeekly;
         return hours;
     }
 
     public double getCareHoursFromSonWeekly() {
         double hours = 0.0;
-        if (Parameters.checkFinite(careHoursFromSonWeekly) && careHoursFromSonWeekly > 0.0)
-            hours = careHoursFromSonWeekly;
+        if (careHoursFromSonWeekly !=null)
+            if (careHoursFromSonWeekly >0.0)
+                hours = careHoursFromSonWeekly;
         return hours;
     }
 
     public double getCareHoursFromOtherWeekly() {
         double hours = 0.0;
-        if (Parameters.checkFinite(careHoursFromOtherWeekly) && careHoursFromOtherWeekly > 0.0)
-            hours = careHoursFromOtherWeekly;
+        if (careHoursFromOtherWeekly !=null)
+            if (careHoursFromOtherWeekly >0.0)
+                hours = careHoursFromOtherWeekly;
         return hours;
     }
 
     public double getCareHoursProvidedWeekly() {
         double hours = 0.0;
-        if (Parameters.checkFinite(careHoursProvidedWeekly) && careHoursProvidedWeekly > 0.0)
-            hours = careHoursProvidedWeekly;
+        if (careHoursProvidedWeekly != null)
+            if (careHoursProvidedWeekly > 0.0)
+                hours = careHoursProvidedWeekly;
         return hours;
     }
 
@@ -5371,47 +5571,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.he_eq5d = he_eq5d;
     }
 
-    public void setLtIncomeDonor(Individual individual) {
-        ltIncomeDonor = individual;
+    public Double getDhe_pcssp() {
+        return dhe_pcssp;
     }
 
-    public void setLtIncome(int maxAge) {
-        lifetimeIncome = 0.0;
-        if (dag > 0) {
-
-            int birthYear = ltIncomeDonor.getBirthYear();
-            int ageLimit = Math.min(maxAge, dag-1);
-            for (int aa=0; aa<=ageLimit; aa++) {
-                AnnualIncome annualIncome = ltIncomeDonor.getAnnualIncome(birthYear+aa);
-                if (annualIncome == null)
-                    throw new RuntimeException("Annual income for year " + (birthYear+aa) + " not found for donor " + ltIncomeDonor.getId());
-                lifetimeIncome += annualIncome.getValue();
-            }
-            lifetimeIncome /= (double)(ageLimit+1);
-        }
+    public void setDhe_pcssp(Double dhe_pcssp) {
+        this.dhe_pcssp = dhe_pcssp;
     }
 
-    public double getLifetimeIncome() {
-        if (Parameters.checkFinite(lifetimeIncome))
-            return lifetimeIncome;
-        else
-            throw new RuntimeException("lifetimeIncome is not finite");
+    public Double getDhe_mcssp() {
+        return dhe_mcssp;
     }
 
-    public void updateLtIncome() {
-        double newVal = getBenefitUnit().getHousehold().getEquivalisedDisposableIncomeYearly();
-        if (dag==0) {
-            lifetimeIncome = newVal;
-        }
-        else {
-
-            if (!Parameters.checkFinite(lifetimeIncome))
-                throw new RuntimeException("lifetimeIncome is not defined");
-            double curVal = lifetimeIncome;
-            double years = dag+1;
-            lifetimeIncome = (curVal * (years-1) + newVal) / years;
-        }
+    public void setDhe_mcssp(Double dhe_mcssp) {
+        this.dhe_mcssp = dhe_mcssp;
     }
 
-    public Individual getLtIncomeDonor() {return ltIncomeDonor;}
+    public Double getDhe_mcs_lag1() {
+        return dhe_mcs_lag1;
+    }
+
+    public Double getDhe_pcs_lag1() {
+        return dhe_pcs_lag1;
+    }
+
 }
