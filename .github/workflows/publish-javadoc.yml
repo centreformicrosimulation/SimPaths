@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - develop  # Only publish when pushing to develop branch
+  pull_request:
+    branches: [ "main", "develop" ]
 
 jobs:
   publish-javadoc:
@@ -29,6 +31,7 @@ jobs:
         run: mvn javadoc:javadoc --file pom.xml
 
       - name: Deploy Javadoc to branch
+        if: github.event.push
         uses: MathieuSoysal/Javadoc-publisher.yml@v3.0.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
