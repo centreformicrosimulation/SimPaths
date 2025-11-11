@@ -3359,7 +3359,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             EntityManager em = Persistence.createEntityManagerFactory("lifetime-incomes", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
-            String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
+            String query = "SELECT DISTINCT cohort FROM BirthCohort cohort";
+//            String query = "SELECT DISTINCT cohort FROM BirthCohort cohort LEFT JOIN FETCH cohort.individuals individuals LEFT JOIN FETCH individuals.incomes incomes";
             System.out.println("Submitting SQL query");
             log.info("Submitting SQL query: " + query);
             List<BirthCohort> cohorts = em.createQuery(query).getResultList();
