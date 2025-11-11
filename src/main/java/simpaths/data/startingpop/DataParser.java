@@ -269,7 +269,11 @@ public class DataParser {
 								+ "ALTER TABLE " + personTable + " ADD COLUMN prid INT DEFAULT 0;"
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
 
-								//Re-order by id
+                                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_bukey ON " + personTable + " (buid, butime, burun, prid);"
+                                + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_idhousehold ON " + personTable + " (idhousehold);"
+
+
+                                //Re-order by id
 								+ "SELECT * FROM " + personTable + " ORDER BY id;"
 				);
 
