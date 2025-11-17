@@ -59,7 +59,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     @GUIparameter(description="Report alignment adjustments")
     private boolean persistStatistics3 = true;
 
-    private boolean persistEmploymentStatistics = false;
+    private boolean persistEmploymentStatistics = true;
 
     @GUIparameter(description="Report health statistics")
     private boolean persistHealthStatistics = true;
@@ -865,6 +865,13 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 //				log.info("WeightCounter " + WeightCounter + ", median " + median);
                 break;
             }
+        }
+
+        if (median == null) {
+            throw new IllegalStateException(
+                    "Median could not be calculated — totalWeight=" + totalWeight +
+                            ", households considered=" + arrHouse_eqHouseholdDispIncome.size()
+            );
         }
 
         double atRiskOfPovertyThreshold = median * 0.6;

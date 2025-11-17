@@ -5,6 +5,7 @@ import java.util.*;
 import jakarta.persistence.*;
 
 import microsim.data.db.PanelEntityKey;
+import org.hibernate.annotations.Fetch;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.data.filters.ValidHomeownersCSfilter;
@@ -48,7 +49,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             @JoinColumn(name="prid", referencedColumnName = "working_id")
     })
     private Household household;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    @Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private Set<Person> members = new LinkedHashSet<>();
 
     // identifiers
@@ -95,6 +97,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
 
     @Transient Innovations innovations;
+    @Transient private Double lastLabourInnov;
+    @Transient private Integer lastYear;
 
     @Transient private Integer yearLocal;
     @Transient private Occupancy occupancyLocal;
@@ -153,7 +157,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         key  = new PanelEntityKey(id);        //Sets up key
 
         this.seed = seed;
-        innovations = new Innovations(9, seed);
+        innovations = new Innovations(9, 1, seed);
 
         this.numberChildrenAll_lag1 = 0;
         this.numberChildren02_lag1 = 0;
@@ -1020,7 +1024,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         //Follow utility process for single female
                         regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
-                    if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                    if (!Parameters.checkFinite(regressionScore)) {
                         throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
                     }
 
@@ -1053,7 +1057,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         } else {
                             regressionScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
                         }
-                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                        if (!Parameters.checkFinite(regressionScore)) {
                             throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
                         }
 
@@ -1083,7 +1087,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         } else {
                             regressionScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
                         }
-                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                        if (!Parameters.checkFinite(regressionScore)) {
                             throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
                         }
                         disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
@@ -1108,7 +1112,28 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
 
             //Sample labour supply from possible labour (pairs of) values
-            double labourInnov = innovations.getDoubleDraw(5);
+            double labourInnov = 0;
+
+            // Check if:
+            // - single occupant is employed
+            // - or male of couple is employed
+            // - or male is not at risk of work and female is employed
+            // -> then persist employment at prob_{persist_employment}
+            // Otherwise
+            // -> persist unemployment at prob_{persist_unemployment}
+
+            if (occupancy.Single_Male.equals(occupancy) && male.atRiskOfWork() && male.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.equals(Occupancy.Couple) &&
+                    ((male.atRiskOfWork() && male.getEmployed() == 1) ||
+                            (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1))) {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_notinemployment_persistence_probability);
+            }
+
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
                 labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
@@ -1529,6 +1554,30 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         MaleEduH_30,
         MaleEduM_40,
         MaleEduH_40,
+        MaleEduM_1,
+        MaleEduH_1,
+        MaleEduM_2,
+        MaleEduH_2,
+        MaleEduM_3,
+        MaleEduH_3,
+        MaleEduM_4,
+        MaleEduH_4,
+        FemaleEduM_10,
+        FemaleEduH_10,
+        FemaleEduM_20,
+        FemaleEduH_20,
+        FemaleEduM_30,
+        FemaleEduH_30,
+        FemaleEduM_40,
+        FemaleEduH_40,
+        FemaleEduM_1,
+        FemaleEduH_1,
+        FemaleEduM_2,
+        FemaleEduH_2,
+        FemaleEduM_3,
+        FemaleEduH_3,
+        FemaleEduM_4,
+        FemaleEduH_4,
         MaleLeisure_dnc,
         FemaleLeisure_dnc,
         MaleLeisure_dnc02,
@@ -2416,6 +2465,78 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case MaleEduH_40 -> {
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
             }
+            case MaleEduM_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_10 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_10 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_20 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_20 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_30 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_30 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_40 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_40 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+            }
             case MaleLeisure_dnc02 -> {
                 return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
             }
@@ -2712,7 +2833,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
         yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
-        if (yearlyChangeInLogEDI==null)
+        if (!Parameters.checkFinite(yearlyChangeInLogEDI))
             throw new RuntimeException("problem evaluating yearly change in log edi");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
@@ -2751,17 +2872,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getLiquidWealth(boolean throwError) {
-        if (throwError) {
-            if (liquidWealth == null)
+        if (!Parameters.checkFinite(liquidWealth)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
-            return liquidWealth;
-        } else {
-            if (liquidWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return liquidWealth;
-            }
         }
+        return liquidWealth;
     }
 
     public void setLiquidWealth(Double liquidWealth) {
@@ -2773,17 +2890,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getPensionWealth(boolean throwError) {
-        if (throwError) {
-            if (pensionWealth == null)
+        if (!Parameters.checkFinite(pensionWealth)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
-            return pensionWealth;
-        } else {
-            if (pensionWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return pensionWealth;
-            }
         }
+        return pensionWealth;
     }
 
     public void setPensionWealth(Double pensionWealth) {
@@ -2795,17 +2908,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getHousingWealth(boolean throwError) {
-        if (throwError) {
-            if (housingWealth == null)
+        if (!Parameters.checkFinite(housingWealth)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
-            return housingWealth;
-        } else {
-            if (housingWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return housingWealth;
-            }
         }
+        return housingWealth;
     }
 
     public void setHousingWealth(Double wealth) {
@@ -2816,30 +2925,28 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return getChildcareCostPerWeek(true);
     }
     public double getChildcareCostPerWeek(boolean throwError) {
-        if (childcareCostPerWeek == null) {
+        if (!Parameters.checkFinite(childcareCostPerWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit childcare cost before it is initialised.");
             } else {
                 return 0.0;
             }
-        } else {
-            return childcareCostPerWeek;
         }
+        return childcareCostPerWeek;
     }
 
     public double getSocialCareCostPerWeek() {
         return getSocialCareCostPerWeek(true);
     }
     public double getSocialCareCostPerWeek(boolean throwError) {
-        if (socialCareCostPerWeek == null) {
+        if (!Parameters.checkFinite(socialCareCostPerWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit social care cost before it is initialised.");
             } else {
                 return 0.0;
             }
-        } else {
-            return socialCareCostPerWeek;
         }
+        return socialCareCostPerWeek;
     }
 
     public Household getHousehold() {
@@ -3336,13 +3443,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if ( Parameters.enableIntertemporalOptimisations ) {
 
             // project benefit unit consumption
-            if ((getDisposableIncomeMonthly()==null) || (Double.isNaN(getDisposableIncomeMonthly()))) {
+            if (!Parameters.checkFinite(getDisposableIncomeMonthly())) {
                 throw new RuntimeException("Disposable income not defined.");
             }
 
             double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
                     + getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
-            if (Double.isNaN(cashOnHand)) {
+            if (!Parameters.checkFinite(cashOnHand)) {
                 throw new RuntimeException("Problem identifying cash on hand");
             }
             if (cashOnHand < 1.0E-5) {
@@ -3352,7 +3459,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 discretionaryConsumptionPerYear = Parameters.grids.consumption.interpolateAll(states, false);
                 discretionaryConsumptionPerYear *= cashOnHand;
             }
-            if ( Double.isNaN(discretionaryConsumptionPerYear) ) {
+            if ( !Parameters.checkFinite(discretionaryConsumptionPerYear) ) {
                 throw new RuntimeException("annual discretionary consumption not defined (1)");
             }
         } else {
@@ -3374,7 +3481,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return getDiscretionaryConsumptionPerYear(true);
     }
     public double getDiscretionaryConsumptionPerYear(boolean throwError) {
-        if (discretionaryConsumptionPerYear ==null) {
+        if (!Parameters.checkFinite(discretionaryConsumptionPerYear)) {
             if (throwError) {
                 throw new RuntimeException("annual consumption not defined (2)");
             } else {
@@ -3646,4 +3753,55 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public static void setBenefitUnitIdCounter(long id) {benefitUnitIdCounter = id;}
+
+        /**
+         * Calculates the labour innovation value for the current period with persistence.
+         *
+         * This method implements a persistence mechanism for labour innovations where there's
+         * a probability that the previous period's innovation will persist into the current period.
+         * A new innovation is drawn each period, but it's only used with probability (1 - persistenceProbability).
+         *
+         * The persistence mechanism works as follows:
+         * 1. Draw a new potential innovation value
+         * 2. Draw a random number to determine if we should use the new value or persist with the old one
+         * 3. If it's the first period or there was a gap in years, use the new innovation
+         * 4. Otherwise, use the persistence probability to decide between new and old values
+         *
+         * @param persistenceProbability The probability (between 0 and 1) that the previous period's
+         *                              innovation will persist. A value of 0 means always use new innovations,
+         *                              while 1 means always keep the old innovation.
+         * @return The labour innovation value for this period
+         */
+    private double getLabourInnovation(double persistenceProbability) {
+
+        double newLabourInnovation = innovations.getDoubleDraw(5);
+
+        // persistenceRandomDraw - random value to determine if we keep old innovation
+        double persistenceRandomDraw = innovations.getDoubleDraw(6);
+
+        int currentYear = model.getYear();
+
+        // Initialize on first call
+        if (lastLabourInnov == null || lastYear == null) {
+            lastLabourInnov = newLabourInnovation;
+            lastYear = currentYear;
+            return newLabourInnovation;
+        }
+
+        double labourInnov;
+        if (persistenceRandomDraw < persistenceProbability) {
+            labourInnov = lastLabourInnov;
+        } else {
+            labourInnov = newLabourInnovation;
+        }
+
+        // Store values for next period
+        lastLabourInnov = labourInnov;
+        lastYear = currentYear;
+
+        return labourInnov;
+
+
+
+        }
 }

@@ -2,6 +2,7 @@ package simpaths.model.taxes;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 import simpaths.data.Parameters;
 
 
@@ -11,10 +12,17 @@ import simpaths.data.Parameters;
  *
  */
 @Entity
+@Table(
+    indexes = {
+        @Index(name = "idx_tuid", columnList = "TUID"),
+        @Index(name = "idx_original_income_per_month", columnList = "ILS_ORIGY")
+    }
+)
 public class DonorTaxUnitPolicy {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @BatchSize(size = 100)
     @JoinColumn(name = "TUID", referencedColumnName = "id")
     private DonorTaxUnit taxUnit;
 
@@ -71,7 +79,7 @@ public class DonorTaxUnitPolicy {
         this.systemYear = policyYear;
     }
     public double getDisposableIncomePerMonth() {
-        if (disposableIncomePerMonth==null)
+        if (!Parameters.checkFinite(disposableIncomePerMonth))
             throw new RuntimeException("attempt to get disposable income before instantiated");
         return this.disposableIncomePerMonth;
     }
@@ -79,7 +87,7 @@ public class DonorTaxUnitPolicy {
         this.disposableIncomePerMonth = value;
     }
     public double getOriginalIncomePerMonth() {
-        if (originalIncomePerMonth==null)
+        if (!Parameters.checkFinite(originalIncomePerMonth))
             throw new RuntimeException("attempt to get original income before instantiated");
         return originalIncomePerMonth;
     }
@@ -97,14 +105,14 @@ public class DonorTaxUnitPolicy {
         this.originalIncomePerMonth = value;
     }
     public double getBenMeansTestPerMonth() {
-        if (benMeansTestPerMonth ==null)
-            throw new RuntimeException("attempt to get benefit amnount before instantiated");
+        if (!Parameters.checkFinite(benMeansTestPerMonth))
+            throw new RuntimeException("attempt to get benefit amount before instantiated");
         return benMeansTestPerMonth;
     }
     public void setBenMeansTestPerMonth(Double ils_benmt) { this.benMeansTestPerMonth = ils_benmt; }
     public double getBenNonMeansTestPerMonth() {
-        if (benNonMeansTestPerMonth ==null)
-            throw new RuntimeException("attempt to get benefit amnount before instantiated");
+        if (!Parameters.checkFinite(benNonMeansTestPerMonth))
+            throw new RuntimeException("attempt to get benefit amount before instantiated");
         return benNonMeansTestPerMonth;
     }
     public void setBenNonMeansTestPerMonth(Double ils_bennt) { this.benNonMeansTestPerMonth = ils_bennt; }
@@ -130,7 +138,7 @@ public class DonorTaxUnitPolicy {
         secondIncomePerMonth = inc;
     }
     public double getSecondIncomePerMonth() {
-        if (secondIncomePerMonth==null)
+        if (!Parameters.checkFinite(secondIncomePerMonth))
             throw new RuntimeException("attempt to get second income before instantiated");
         return secondIncomePerMonth;
     }
@@ -138,7 +146,7 @@ public class DonorTaxUnitPolicy {
         childcareCostPerMonth = cost;
     }
     public double getChildcareCostPerMonth() {
-        if (childcareCostPerMonth==null)
+        if (!Parameters.checkFinite(childcareCostPerMonth))
             throw new RuntimeException("attempt to get childcare costs before instantiated");
         return childcareCostPerMonth;
     }
@@ -146,7 +154,7 @@ public class DonorTaxUnitPolicy {
         earningsPerMonth = earnings;
     }
     public double getEarningsPerMonth() {
-        if (earningsPerMonth==null)
+        if (!Parameters.checkFinite(earningsPerMonth))
             throw new RuntimeException("attempt to get earnings before instantiated");
         return earningsPerMonth;
     }
