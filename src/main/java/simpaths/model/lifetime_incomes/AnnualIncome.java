@@ -10,7 +10,7 @@ import simpaths.model.enums.Gender;
 public class AnnualIncome implements IDoubleSource {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
-    @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.LAZY, cascade=CascadeType.REFRESH)
     @JoinColumns({
             @JoinColumn(name = "individual_id", referencedColumnName = "id")
     })

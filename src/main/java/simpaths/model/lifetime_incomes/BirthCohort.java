@@ -14,7 +14,7 @@ public class BirthCohort {
      * ATTRIBUTES
      */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "cohort")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "cohort")
     @OrderBy("id ASC")
     private Set<Individual> individuals = new LinkedHashSet<>();
 
