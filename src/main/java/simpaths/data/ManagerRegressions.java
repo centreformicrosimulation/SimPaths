@@ -37,15 +37,6 @@ public class ManagerRegressions {
             case HealthHM2LevelFemales -> {
                 return Parameters.getRegHealthHM2LevelFemales();
             }
-            case HealthHM1Case -> {
-                return Parameters.getRegHealthHM1Case();
-            }
-            case HealthHM2CaseMales -> {
-                return Parameters.getRegHealthHM2CaseMales();
-            }
-            case HealthHM2CaseFemales -> {
-                return Parameters.getRegHealthHM2CaseFemales();
-            }
             case HealthMCS1 -> {
                 return Parameters.getRegHealthMCS1();
             }
@@ -204,6 +195,15 @@ public class ManagerRegressions {
             }
             case EducationE2a -> {
                 return Parameters.getRegEducationE2a();
+            }
+            case HealthHM1Case -> {
+                return Parameters.getRegHealthHM1Case();
+            }
+            case HealthHM2CaseMales -> {
+                return Parameters.getRegHealthHM2CaseMales();
+            }
+            case HealthHM2CaseFemales -> {
+                return Parameters.getRegHealthHM2CaseFemales();
             }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
