@@ -30,12 +30,12 @@ foreach w of global UKHLSwaves {
 	local waveno=strpos("abcdefghijklmnopqrstuvwxyz","`w'")
 	
 	if (`waveno'<13) {
-		use pidp `w'_ivfho `w'_ivfio `w'_hhorig `w'_buno_dv `w'_dvage `w'_sex `w'_depchl `w'_hidp `w'_pno `w'_pns1pid `w'_pns2pid `w'_month `w'_intdaty_dv ///
+		use pidp `w'_ivfho `w'_ivfio `w'_hhorig `w'_memorig `w'_buno_dv `w'_dvage `w'_sex `w'_depchl `w'_hidp `w'_pno `w'_pns1pid `w'_pns2pid `w'_month `w'_intdaty_dv ///
 		`w'_mnspid `w'_fnspid `w'_ppid `w'_ppno `w'_sppid `w'_sex_dv `w'_mastat_dv `w'_gor_dv `w'_age_dv  /* `w'_hgbioad1 `w'_hgbioad2 */ ///
 		`w'_intdatd_dv `w'_intdatm_dv `w'_intdaty_dv `w'_ethn_dv using `w'_indall.dta, clear
 	}
 	else {
-		use pidp `w'_ivfho `w'_ivfio `w'_hhorig `w'_buno_dv `w'_dvage `w'_sex `w'_depchl `w'_hidp `w'_pno `w'_pns1pid `w'_pns2pid `w'_month `w'_intdaty_dv ///
+		use pidp `w'_ivfho `w'_ivfio `w'_hhorig `w'_memorig `w'_buno_dv `w'_dvage `w'_sex `w'_depchl `w'_hidp `w'_pno `w'_pns1pid `w'_pns2pid `w'_month `w'_intdaty_dv ///
 		`w'_mnspid `w'_fnspid `w'_ppid `w'_ppno `w'_sppid `w'_sex_dv `w'_mastat_dv `w'_gor_dv `w'_age_dv  `w'_hgbioad1 `w'_hgbioad2 ///
 		`w'_intdatd_dv `w'_intdatm_dv `w'_intdaty_dv `w'_ethn_dv using `w'_indall.dta, clear
 	}

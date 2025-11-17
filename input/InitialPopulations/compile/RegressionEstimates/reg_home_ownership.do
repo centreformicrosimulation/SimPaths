@@ -26,12 +26,11 @@ use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
 do "$dir_do/variable_update"
 
 
-*sample selection 
+/*sample selection 
 drop if dag < 16
 
-
 xtset idperson swv
-
+*/
 
 * Set Excel file 
 
@@ -41,7 +40,7 @@ putexcel set "$dir_results/reg_home_ownership", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of home ownership"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 1 July 2025 DP"
+putexcel A3 = "Last edit: 4 Nov 2025 DP"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -51,6 +50,7 @@ putexcel B5 = "Probit regression estimates of the probability of being a home ow
 putexcel A10 = "Notes:", bold
 putexcel B10 = "Have combined dhhtp_c4 and lessp_c3 into a single variable with 8 categories, dhhtp_c8"
 putexcel B11 = "Added lagged home ownership, replaced dhe with dhe_pcs and dhe_mcs, added ethnicity (dot) and covid dummies (y2020 2021)"
+putexcel B12 = "Re-estimated process at benefit unit level to be consistent with SimPaths"
 
 putexcel set "$dir_results/reg_home_ownership", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
@@ -61,12 +61,13 @@ putexcel A1 = "Goodness of fit", bold
 ************************
 
 * Process HO1a: Probability of being a home owner 
-* Sample: Individuals aged 18+
+* Sample: Individuals aged 18+ who are benefit unit heads 
 * DV: Home ownerhip dummy
 
+/*
 fre dhh_owned if dag >= 18
 
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
+/////////////////////////////////////////////////////////////////////////////////////////////////	 
 //check weights //////////////////////////////////////////////////////////////////////////////////	 
 probit dhh_owned dgn dag dagsq il.dhhtp_c8 il.les_c3 ///
 i.deh_c3 /*il.dhe*/ l.dhe_mcs l.dhe_pcs il.ydses_c5 l.yptciihs_dv l.dhh_owned ib8.drgn1 stm y2020 y2021 i.dot if ///
@@ -85,12 +86,97 @@ outreg2 using "${weight_checks}/weight_comparison_HO1a.xls", alpha(0.001, 0.01, 
 erase "${weight_checks}/weight_comparison_HO1a.txt"
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
 ////////////////////////////////////////////////////////////////////////////////////////////////////	
-*/	
+
 	
 probit dhh_owned dgn dag dagsq il.dhhtp_c8 il.les_c3 ///
 i.deh_c3 /*il.dhe*/ l.dhe_mcs l.dhe_pcs il.ydses_c5 l.yptciihs_dv l.dhh_owned ib8.drgn1 stm y2020 y2021 i.dot if ///
 dag>=18 [pweight=dimxwt], vce(cluster idperson)
+*/	
 
+* DEFINE BENEFIT UNIT HEAD (AGED 18+)
+
+* Keep adults (18+)
+keep if dag >= 18
+
+
+* Count unique benefit-unit–wave combinations BEFORE head selection
+egen tag_bu_wave = tag(idbenefitunit swv)
+count if tag_bu_wave
+local n_bu_before = r(N)
+display "Number of benefit unit–wave combinations BEFORE selecting head: `n_bu_before'"
+
+
+* Sort benefit unit members within each wave:
+* 1. Highest non-benefit income (ypnbihs_dv)
+* 2. Highest age (dag)
+* 3. Lowest idperson (idperson)
+gsort idbenefitunit swv -ypnbihs_dv -dag idperson 
+
+* Tag the first person (the "head") per benefit unit and wave
+bysort idbenefitunit swv: gen benunit_head = (_n == 1)
+
+* Keep only benefit unit heads
+keep if benunit_head == 1
+
+* Count unique benefit-unit–wave combinations AFTER head selection
+drop tag_bu_wave
+egen tag_bu_wave = tag(idbenefitunit swv)
+count if tag_bu_wave
+local n_bu_after = r(N)
+display "Number of benefit unit–wave combinations AFTER selecting head: `n_bu_after'"
+
+* Ensure benefit unit–wave counts match before and after head selection
+assert `n_bu_before' == `n_bu_after'
+
+* Verify only one head per benefit unit per wave
+by idbenefitunit swv, sort: gen n=_N
+assert n==1
+
+* Declare panel 
+xtset idperson swv 
+
+
+********************************************************************************
+* SET EXCEL OUTPUT FILES
+********************************************************************************
+
+* Info sheet
+putexcel set "$dir_results/reg_home_ownership", sheet("Info") replace
+putexcel A1 = "Description:"
+putexcel B1 = "Model parameters governing projection of home ownership"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
+putexcel A3 = "Last edit: 4 Nov 2025 DP"
+
+putexcel A4 = "Process:", bold
+putexcel B4 = "Description:", bold
+putexcel A5 = "HO1a"
+putexcel B5 = "Probit regression estimates of the probability of being a home owner, benefit unit heads aged 18+"
+
+putexcel A10 = "Notes:", bold
+putexcel B10 = "Have combined dhhtp_c4 and lessp_c3 into a single variable with 8 categories, dhhtp_c8"
+putexcel B11 = "Added lagged home ownership, replaced dhe with dhe_pcs and dhe_mcs, added ethnicity (dot) and covid dummies (y2020, y2021)"
+putexcel B12 = "Re-estimated process at benefit unit level using heads defined by highest personal non-benefit income, or age, or lowest idperson"
+
+putexcel set "$dir_results/reg_home_ownership", sheet("Gof") modify
+putexcel A1 = "Goodness of fit", bold		
+
+
+********************************************************************************
+* HO1a: Home ownership 
+********************************************************************************
+	
+probit dhh_owned Dgn Dag Dag_sq ///
+       Dhhtp_c8_2_L1 Dhhtp_c8_3_L1 Dhhtp_c8_4_L1 Dhhtp_c8_5_L1 Dhhtp_c8_6_L1 Dhhtp_c8_7_L1 Dhhtp_c8_8_L1 ///
+       Les_c3_Student_L1 Les_c3_NotEmployed_L1 ///
+	   Deh_c3_Medium Deh_c3_Low ///
+	   Dhe_mcs_L1 Dhe_pcs_L1 ///
+	   Ydses_c5_Q2_L1 Ydses_c5_Q3_L1 Ydses_c5_Q4_L1 Ydses_c5_Q5_L1 ///
+	   Yptciihs_dv_L1 ///
+	   Dhh_owned_L1 ///
+	   UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN /// 
+	   Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other ///
+	   [pweight = dimxwt], vce(cluster idperson)  
+	   
 
 * raw results 
 matrix results = r(table)
@@ -177,90 +263,45 @@ putexcel A1 = matrix(nonzero_b'), names nformat(number_d2)
 	
 
 * Labelling 
- 
+// Need to variable label when add new variable to model. Order matters. 
+local var_list Dgn Dag Dag_sq ///
+       Dhhtp_c8_2_L1 Dhhtp_c8_3_L1 Dhhtp_c8_4_L1 Dhhtp_c8_5_L1 Dhhtp_c8_6_L1 Dhhtp_c8_7_L1 Dhhtp_c8_8_L1 ///
+       Les_c3_Student_L1 Les_c3_NotEmployed_L1 ///
+	   Deh_c3_Medium Deh_c3_Low ///
+	   Dhe_mcs_L1 Dhe_pcs_L1 ///
+	   Ydses_c5_Q2_L1 Ydses_c5_Q3_L1 Ydses_c5_Q4_L1 Ydses_c5_Q5_L1 ///
+	   Yptciihs_dv_L1 ///
+	   Dhh_owned_L1 ///
+	   UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN /// 
+	   Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other ///
+	   Constant
+	
+	
 putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dgn"
-putexcel A3 = "Dag"
-putexcel A4 = "Dag_sq"
-putexcel A5 = "Dhhtp_c8_2_L1"
-putexcel A6 = "Dhhtp_c8_3_L1"
-putexcel A7 = "Dhhtp_c8_4_L1"
-putexcel A8 = "Dhhtp_c8_5_L1"
-putexcel A9 = "Dhhtp_c8_6_L1"
-putexcel A10 = "Dhhtp_c8_7_L1"
-putexcel A11 = "Dhhtp_c8_8_L1"
-putexcel A12 = "Les_c3_Student_L1"
-putexcel A13 = "Les_c3_NotEmployed_L1"
-putexcel A14 = "Deh_c3_Medium"
-putexcel A15 = "Deh_c3_Low"
-putexcel A16 = "Dhe_mcs"
-putexcel A17 = "Dhe_pcs"
-putexcel A18 = "Ydses_c5_Q2_L1"
-putexcel A19 = "Ydses_c5_Q3_L1"
-putexcel A20 = "Ydses_c5_Q4_L1"
-putexcel A21 = "Ydses_c5_Q5_L1"
-putexcel A22 = "Yptciihs_dv_L1"
-putexcel A23 = "Dhh_owned_L1"
-putexcel A24 = "UKC"
-putexcel A25 = "UKD"
-putexcel A26 = "UKE"
-putexcel A27 = "UKF"
-putexcel A28 = "UKG"
-putexcel A29 = "UKH"
-putexcel A30 = "UKJ"
-putexcel A31 = "UKK"
-putexcel A32 = "UKL"
-putexcel A33 = "UKM"
-putexcel A34 = "UKN"
-putexcel A35 = "Year_transformed"
-putexcel A36 = "Y2020"
-putexcel A37 = "Y2021"
-putexcel A38 = "Ethn_Asian"
-putexcel A39 = "Ethn_Black"
-putexcel A40 = "Ethn_Other"
-putexcel A41 = "Constant"
-
 putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dgn"
-putexcel D1 = "Dag"
-putexcel E1 = "Dag_sq"
-putexcel F1 = "Dhhtp_c8_2_L1"
-putexcel G1 = "Dhhtp_c8_3_L1"
-putexcel H1 = "Dhhtp_c8_4_L1"
-putexcel I1 = "Dhhtp_c8_5_L1"
-putexcel J1 = "Dhhtp_c8_6_L1"
-putexcel K1 = "Dhhtp_c8_7_L1"
-putexcel L1 = "Dhhtp_c8_8_L1"
-putexcel M1 = "Les_c3_Student_L1"
-putexcel N1 = "Les_c3_NotEmployed_L1"
-putexcel O1 = "Deh_c3_Medium"
-putexcel P1 = "Deh_c3_Low"
-putexcel Q1 = "Dhe_mcs"
-putexcel R1 = "Dhe_pcs"
-putexcel S1 = "Ydses_c5_Q2_L1"
-putexcel T1 = "Ydses_c5_Q3_L1"
-putexcel U1 = "Ydses_c5_Q4_L1"
-putexcel V1 = "Ydses_c5_Q5_L1"
-putexcel W1 = "Yptciihs_dv_L1"
-putexcel X1 = "Dhh_owned_L1"
-putexcel Y1 = "UKC"
-putexcel Z1 = "UKD"
-putexcel AA1 = "UKE"
-putexcel AB1 = "UKF"
-putexcel AC1 = "UKG"
-putexcel AD1 = "UKH"
-putexcel AE1 = "UKJ"
-putexcel AF1 = "UKK"
-putexcel AG1 = "UKL"
-putexcel AH1 = "UKM"
-putexcel AI1 = "UKN"
-putexcel AJ1 = "Year_transformed"
-putexcel AK1 = "Y2020"
-putexcel AL1 = "Y2021"
-putexcel AM1 = "Ethn_Asian"
-putexcel AN1 = "Ethn_Black"
-putexcel AO1 = "Ethn_Other"
-putexcel AP1 = "Constant"
+	
+local i = 1 	
+foreach var in `var_list' {
+	local ++i
+	
+	putexcel A`i' = "`var'"
+	
+} 	
+
+local i = 2 	
+foreach var in `var_list' {
+    local ++i
+
+    if `i' <= 26 {
+        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
+        putexcel `letter'1 = "`var'"
+    }
+    else {
+        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
+        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
+        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
+    }
+}
 
 
 * Goodness of fit
