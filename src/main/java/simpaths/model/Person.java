@@ -129,8 +129,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean hasTestPartner;
     @Transient private Boolean leavePartner; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Column(name="person_weight") private Double weight;
-    @Column(name="dhm_ghq") private Boolean dhmGhq; //Psychological distress case-based
-    @Transient private Boolean dhmGhq_lag1;
+    @Column(name="dhm_ghq") private Double dhmGhq; //Psychological distress GHQ-12 0-12 caseness score
+    @Transient private Double dhmGhq_lag1;
     @Transient private Dhe dhe_lag1;
     @Enumerated(EnumType.STRING) private Dhe dhe;
     private Double dhm; //Psychological distress GHQ-12 Likert scale
@@ -294,7 +294,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         weight = mother.getWeight();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         dhe = Dhe.VeryGood;
         dhm = 9.;			//Set to median for under 18's as a placeholder
-        dhmGhq = false;
+        dhmGhq = 0.;
         deh_c3 = Education.Low;
         dot01 = mother.getDot01();
         les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
@@ -486,7 +486,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhm_lag1 = originalPerson.dhm;
         }
 
-        dhmGhq = Objects.requireNonNullElse(originalPerson.dhmGhq, false);
+        dhmGhq = Objects.requireNonNullElse(originalPerson.dhmGhq, 0.);
         dhmGhq_lag1 = Objects.requireNonNullElse(originalPerson.dhmGhq_lag1, dhmGhq);
 
         dls = originalPerson.dls;
@@ -1115,7 +1115,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (dag >= 16) {
             double tmp_step1_score = 0, tmp_step2_score = 0, tmp_total_score = 0, tmp_probability = 0;
-            boolean tmp_outcome;
+            Double tmp_outcome;
 
             tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 1 of case-based psychological distress model
             if (dag >= 25 && dag <= 64) {
@@ -1125,17 +1125,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     tmp_step2_score = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
                 } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
             }
-
-            //Put together: get total score, convert to probability, get event, set dummy
-            // 1. Sum scores from Step 1 and 2. This produces the basic score modified by the effect of transitions modelled in Step 2.
-            tmp_total_score = tmp_step1_score + tmp_step2_score;
-            // 2. Convert to probability
-            tmp_probability = 1.0 / (1.0 + Math.exp(-tmp_total_score));
-            // 3. Get event outcome
-            tmp_outcome = (innovations.getDoubleDraw(2) < tmp_probability);
-            // 4. Set dhm_ghq dummy
+            tmp_outcome = constrainDhmGhqEstimate(tmp_step1_score + tmp_step2_score);
             setDhmGhq(tmp_outcome);
         }
+    }
+
+    protected Double constrainDhmGhqEstimate(Double dhm_ghq) {
+        if (dhm_ghq < 0.) {
+            dhm_ghq = 0.;
+        } else if (dhm_ghq > 12.) {
+            dhm_ghq = 12.;
+        }
+        return dhm_ghq;
     }
 
     /*
@@ -2203,7 +2204,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (isToBePartnered())? 1 : 0;
 
         case isPsychologicallyDistressed:
-            return (dhmGhq)? 1 : 0;
+            return (dhmGhq >= 4)? 1 : 0;
 
         case isNeedSocialCare:
             return (Indicator.True.equals(needSocialCare)) ? 1 : 0;
@@ -3129,7 +3130,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else return 0.;
             }
             case Dhmghq_L1 -> {
-                return (getDhmGhq_lag1()) ? 1. : 0.;
+                return getDhmGhq_lag1();
             }
             case Dhesp_L1 -> {
                 return (dhesp_lag1 != null) ? (double) dhesp_lag1.getValue() : 0.0;
@@ -4586,11 +4587,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.dhm_lag1 = dhm;
     }
 
-    public boolean getDhmGhq() {
+    public Double getDhmGhq() {
         return dhmGhq;
     }
 
-    public void setDhmGhq(boolean dhm_ghq) {
+    public void setDhmGhq(Double dhm_ghq) {
         this.dhmGhq = dhm_ghq;
     }
 
@@ -5545,7 +5546,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public long getSeed() {return (seed!=null) ? seed : 0L;}
 
-    private boolean getDhmGhq_lag1() {
+    private Double getDhmGhq_lag1() {
         if (dhmGhq_lag1 == null)
             throw new RuntimeException("attempt to access dhmGhq_lag1 before it has been initialised");
         return dhmGhq_lag1;

@@ -331,6 +331,53 @@ lab values dhesp dhe
 replace dhesp=-9 if missing(dhesp)  & idpartner>0
 
 
+
+/**************************Subjective well-being: GHQ 0-12 score *****************************/
+/*dhm_ghq   scghq2_dv    "DEMOGRAPHIC: Subjective wellbeing (GHQ): rescaled to 0-12, assumed to be continuous"
+This measure converts valid answers to 12 questions of the General Health Questionnaire (GHQ) to a 
+single scale by recoding the values of individual variables of 1 and 2 to 0, and values of 3 and 4 to 1 before summing them. 
+This produces a scale that ranges from 0 (indicating the least amount of distress) to 12 (indicating the greatest amount of distress).
+*/
+gen dhm_ghq	= scghq2_dv 
+replace dhm_ghq = . if scghq2_dv <0
+la var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): 0-12 score"
+* fre dhm_ghq if dag>0 & dag<=18 
+* fre dhm_ghq if dag>0 & dag<16 
+gen scghq2_dv_miss_flag = (scghq2_dv == .)
+
+*Imputation for all:  
+* fre dag if missing(dhm_ghq)
+
+* fre scghq2_dv
+recode scghq2_dv (-9/-1 . = .)
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+* eststo predict_dhm_ghq: reg dhm_ghq c.dag i.dgn i.swv i.dhe, vce(robust) // Physical health has a big impact, so included as covariate.  
+zinb dhm_ghq c.dag i.dgn i.swv i.dhe, inflate(dhm_ghq c.dag i.dgn i.swv i.dhe) vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+
+scalar lnalpha = _b[/lnalpha]
+scalar theta = 1/exp(lnalpha)
+
+predict mu_hat, n              // Count component mean (μ)
+predict pi_hat, pr             // Zero-inflation probability (π)
+
+gen u = runiform()
+gen pred_score = .
+replace pred_score = 0 if u < pi_hat                                    // Structural zeros
+replace pred_score = rnbinomial(theta, theta/(theta + mu_hat)) if u >= pi_hat  // NB samples
+replace pred_score = 12 if pred_score > 12
+replace pred_score = 0 if pred_score < 0
+
+
+cap gen dhm_ghq	= 0 
+replace dhm_ghq = scghq2_dv
+lab var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): Caseness"
+
+gen dhm_ghq_flag = missing(dhm_ghq)
+replace dhm_ghq = round(pred_score) if missing(dhm_ghq) 
+
+/* Alternative method of GHQ caseness - binary cutoff at scghq2_dv <4
 /*****************************Subjective well-being ***************************/
 /*dhm	scghq1_dv	"DEMOGRAPHIC: Subjective wellbeing (GHQ): Likert Scale from 0 to 36, assumed to be continuous in the simulation."	
 This measure converts valid answers to 12 questions of the General Health Questionnaire (GHQ) to a single scale by recoding so that 
@@ -390,7 +437,7 @@ replace dhm_ghq = 0 if scghq2_dv>=0 & scghq2_dv<4
 replace dhm_ghq = 1 if scghq2_dv>=4 
 lab var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): Caseness"
 //fre dhm_ghq
-
+*/
 
 /****************************Self-rated health health - mental and physical component summary scores SF12 ***************************/
 /*SF-12 Mental Component Summary (MCS). Continuous scale with a range of 0 (low functioning) to 100 (high functioning)*/

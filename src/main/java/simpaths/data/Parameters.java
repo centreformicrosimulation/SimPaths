@@ -742,9 +742,9 @@ public class Parameters {
     private static LinearRegression regHealthHM2LevelMales;
     private static LinearRegression regHealthHM2LevelFemales;
 
-    private static BinomialRegression regHealthHM1Case;
-    private static BinomialRegression regHealthHM2CaseMales;
-    private static BinomialRegression regHealthHM2CaseFemales;
+    private static LinearRegression regHealthHM1Case;
+    private static LinearRegression regHealthHM2CaseMales;
+    private static LinearRegression regHealthHM2CaseFemales;
 
     //Health
     private static LinearRegression regHealthMCS1;
@@ -1191,9 +1191,9 @@ public class Parameters {
             columnsHealthH1a = 31;
             columnsHealthH1b = 110;
             columnsHealthH2b = 36;
-            columnsHealthHM1 = 30;
-            columnsHealthHM2Males = 15;
-            columnsHealthHM2Females = 15;
+            columnsHealthHM1 = 35;
+            columnsHealthHM2Males = 10;
+            columnsHealthHM2Females = 10;
             columnsHealthMCS1 = 30;
             columnsHealthMCS2Males = 15;
             columnsHealthMCS2Females = 15;
@@ -1648,9 +1648,9 @@ public class Parameters {
         regHealthHM2LevelMales = new LinearRegression(coeffCovarianceHM2LevelMales);
         regHealthHM2LevelFemales = new LinearRegression(coeffCovarianceHM2LevelFemales);
 
-        regHealthHM1Case = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM1Case);
-        regHealthHM2CaseMales = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM2CaseMales);
-        regHealthHM2CaseFemales = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM2CaseFemales);
+        regHealthHM1Case = new LinearRegression(coeffCovarianceHM1Case);
+        regHealthHM2CaseMales = new LinearRegression(coeffCovarianceHM2CaseMales);
+        regHealthHM2CaseFemales = new LinearRegression(coeffCovarianceHM2CaseFemales);
 
         //Health
         regHealthMCS1 = new LinearRegression(coeffCovarianceDHE_MCS1);
@@ -2166,9 +2166,9 @@ public class Parameters {
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
     public static LinearRegression getRegHealthHM2LevelFemales() { return regHealthHM2LevelFemales; }
-    public static BinomialRegression getRegHealthHM1Case() {return regHealthHM1Case;}
-    public static BinomialRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
-    public static BinomialRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
+    public static LinearRegression getRegHealthHM1Case() {return regHealthHM1Case;}
+    public static LinearRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
+    public static LinearRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
 
     public static LinearRegression getRegHealthMCS1() { return regHealthMCS1; }
     public static LinearRegression getRegHealthMCS2Males() { return regHealthMCS2Males;   }
