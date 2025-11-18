@@ -4384,8 +4384,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return null;
     }
 
-    public Boolean isPartnered() {
-        return getPartner() == null ? false: true;
+    public boolean isPartnered() {
+        return getPartner() != null;
     }
 
     public Long getPartnerID() {

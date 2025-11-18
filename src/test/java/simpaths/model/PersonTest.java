@@ -33,7 +33,7 @@ public class PersonTest {
     private Household mockHousehold;
 
     // Using the actual regression types for strong type checking and accuracy
-    private BinomialRegression mockBinomialRegression = Mockito.mock(BinomialRegression.class);
+    private BinomialRegression mockBinomialRegression;
 
     // Cohabitation and partnership constants
     private final int MIN_AGE_COHABITATION = 18;
@@ -154,10 +154,10 @@ public class PersonTest {
 
             testPerson.cohabitation();
 
-            assertEquals(testPerson.getDag(), 17);
-            assertEquals(testPerson.isPartnered(), false);
-            assertEquals(testPerson.isToBePartnered(), false);
-            assertEquals(mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), 0);
+            assertEquals(17, testPerson.getDag());
+            assertFalse(testPerson.isPartnered());
+            assertFalse(testPerson.isToBePartnered());
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size());
         }
 
         @Test
@@ -175,8 +175,8 @@ public class PersonTest {
             testPerson.partnershipDissolution();
 
             assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
-            assertEquals(true, testPerson.isPartnered(), "Person should be partnered.");
-            assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
+            assertTrue(testPerson.isPartnered(), "Person should be partnered.");
+            assertFalse(testPerson.isToBePartnered(), "Person should not be to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
 
         }
@@ -201,8 +201,8 @@ public class PersonTest {
             testPerson.partnershipDissolution();
 
             assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
-            assertEquals(false, testPerson.isPartnered(), "Person should not yet be partnered.");
-            assertEquals(true, testPerson.isToBePartnered(), "Person should be set to be partnered.");
+            assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertTrue(testPerson.isToBePartnered(), "Person should be set to be partnered.");
             assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "One person should be in persons to match.");
             assertEquals(testPerson, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).stream().findFirst().get(), "Person should be in persons to match.");
 
@@ -228,8 +228,8 @@ public class PersonTest {
             testPerson.partnershipDissolution();
 
             assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
-            assertEquals(false, testPerson.isPartnered(), "Person should not yet be partnered.");
-            assertEquals(false, testPerson.isToBePartnered(), "Person should not be set to be partnered.");
+            assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertFalse(testPerson.isToBePartnered(), "Person should not be set to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
 
         }
@@ -252,8 +252,8 @@ public class PersonTest {
             testPerson.partnershipDissolution();
 
             assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
-            assertEquals(false, testPerson.isPartnered(), "Person should not yet be partnered.");
-            assertEquals(true, testPerson.isToBePartnered(), "Person should be set to be partnered.");
+            assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertTrue(testPerson.isToBePartnered(), "Person should be set to be partnered.");
             assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "One person should be in persons to match.");
             assertEquals(testPerson, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).stream().findFirst().get(), "Person should be in persons to match.");
 
@@ -277,8 +277,8 @@ public class PersonTest {
             testPerson.partnershipDissolution();
 
             assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
-            assertEquals(false, testPerson.isPartnered(), "Person should not yet be partnered.");
-            assertEquals(false, testPerson.isToBePartnered(), "Person should not be set to be partnered.");
+            assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertFalse(testPerson.isToBePartnered(), "Person should not be set to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
 
         }
@@ -298,8 +298,8 @@ public class PersonTest {
 
             testBenefitUnit.setRegion(Region.UKD);
 
-            assertEquals(true, testPerson.isPartnered(), "Person should start partnered.");
-            assertEquals(true, testPartner.isPartnered(), "Partner should start partnered.");
+            assertTrue(testPerson.isPartnered(), "Person should start partnered.");
+            assertTrue(testPartner.isPartnered(), "Partner should start partnered.");
 
             parametersMock.when(() -> Parameters.getRegPartnershipU2b()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
@@ -343,9 +343,9 @@ public class PersonTest {
             testPerson.partnershipDissolution();
 
             assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
-            assertEquals(false, testPerson.isPartnered(), "Person should no longer be partnered.");
-            assertEquals(false, testPartner.isPartnered(), "Partner should no longer be partnered.");
-            assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
+            assertFalse(testPerson.isPartnered(), "Person should no longer be partnered.");
+            assertFalse(testPartner.isPartnered(), "Partner should no longer be partnered.");
+            assertFalse(testPerson.isToBePartnered(), "Person should not be to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Male).get(Region.UKD).size(), "Persons to match should be empty.");
 
