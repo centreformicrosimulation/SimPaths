@@ -1,15 +1,14 @@
 package simpaths.model;
 
 import microsim.statistics.regression.BinomialRegression;
-import microsim.statistics.regression.OrderedRegression;
 import org.junit.jupiter.api.*;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
-import simpaths.model.enums.Country;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import simpaths.model.enums.Les_c4;
 
 import java.lang.reflect.Field;
 
@@ -24,6 +23,7 @@ public class PersonTest {
     private SimPathsModel mockModel;
     private Innovations mockInnovations;
     private BenefitUnit mockBenefitUnit;
+    private Household mockHousehold;
 
     // Using the actual regression types for strong type checking and accuracy
     private BinomialRegression mockBinomialRegression = Mockito.mock(BinomialRegression.class);
@@ -31,8 +31,11 @@ public class PersonTest {
     // Cohabitation and partnership constants
     private final int MIN_AGE_COHABITATION = 18;
 
+    // --- Test Objects ---
     static Person testPerson;
     static Person testPartner;
+    static BenefitUnit testBenefitUnit;
+    static Household testHousehold;
 
     /**
      * Helper to mock static dependencies that are called inside the Person constructor,
@@ -82,6 +85,7 @@ public class PersonTest {
                     mockModel = Mockito.mock(SimPathsModel.class);
                     mockInnovations = Mockito.mock(Innovations.class);
                     mockBenefitUnit = Mockito.mock(BenefitUnit.class);
+                    mockHousehold = Mockito.mock(Household.class);
 
                     // Initialize regression mocks with specific types
                     mockBinomialRegression = Mockito.mock(BinomialRegression.class);
@@ -89,9 +93,15 @@ public class PersonTest {
                     // 2. Set up basic predictable environment
                     Mockito.when(mockModel.getYear()).thenReturn(2025);
                     Mockito.when(mockModel.isAlignCohabitation()).thenReturn(false);
+                    Mockito.when(mockBenefitUnit.getHousehold()).thenReturn(mockHousehold);
+                    Mockito.when(mockHousehold.getId()).thenReturn(1L);
 
                     // 3. Initialize Person and inject Mocks using Reflection
                     testPerson = new Person(1L, 123L);
+                    testPartner = new Person(2L, 123L);
+                    testBenefitUnit = new BenefitUnit(100L, 123L);
+                    testHousehold = new Household(1000L);
+                    testBenefitUnit.setHousehold(testHousehold);
 
                     setPrivateField(testPerson, "model", mockModel);
                     setPrivateField(testPerson, "innovations", mockInnovations);
@@ -127,6 +137,28 @@ public class PersonTest {
             assertEquals(testPerson.isToBePartnered(), false);
             assertEquals(mockModel.getPersonsToMatch().size(), 0);
         }
+
+        @Test
+        @DisplayName("OUTCOME B: Female over 18, student and partnered stays partnered")
+        public void over18StudentPartneredStaysPartnered() {
+            testPerson.setDag(20);
+            testPerson.setLes_c4(Les_c4.Student);
+
+            testPartner.setDag(20);
+
+            testPerson.setBenefitUnit(testBenefitUnit);
+            testPartner.setBenefitUnit(testBenefitUnit);
+
+            testPerson.cohabitation();
+            testPerson.partnershipDissolution();
+
+            assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(true, testPerson.isPartnered(), "Person should be partnered.");
+            assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
+            assertEquals(0, mockModel.getPersonsToMatch().size(), "Persons to match should be empty.");
+
+        }
+
     }
 
 
