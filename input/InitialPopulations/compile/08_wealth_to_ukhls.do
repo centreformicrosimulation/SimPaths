@@ -393,7 +393,9 @@ sum liquid_wealth [fweight=dwt2], detail
 *	clean data and save
 *********************************************************************/
 use ukhls_wealthtemp3, clear
-drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi
+drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad ///
+dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id ///
+p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi
 recode rnk smp mtc (missing = -9)
 label var rnk "matching level: 1 = most fine, 2, 3 = most coarse, 4=no match"
 label var smp "matching sample - number of matched candidates to choose from"
@@ -404,10 +406,10 @@ save "population_initial_fs_UK_$yearWealth", replace
 
 /**************************************************************************************
 * clean-up and exit
-*************************************************************************************/
+*************************************************************************************
 #delimit ;
 local files_to_drop 
-	ukhls_wealthtemp.dta
+    ukhls_wealthtemp.dta
 	ukhls_wealthtemp1.dta
 	ukhls_wealthtemp2.dta
 	ukhls_wealthtemp3.dta
@@ -417,8 +419,8 @@ local files_to_drop
 foreach file of local files_to_drop { 
 	erase "$dir_data/`file'"
 }
-
-
+	
+*/
 /**************************************************************************************
 *	fin
 **************************************************************************************/

@@ -3,7 +3,7 @@
 *	WEIGHT ADJUSTMENT TO ACCOUNT FOR USING HOUSEHOLDS WITHOUT MISSING VALUES
 *	
 *	AUTH: Patryk Bronka, Daria Popova, Justin van de Ven
-*	LAST EDIT: 18 July 2025 DP 
+*	LAST EDIT: 21 Oct 2025 DP 
 *
 *********************************************************************/
 ********************************************************************************
@@ -60,7 +60,7 @@ recode hh_size (1=1) (2=2) (3=3) (4/max=4) , gen(hhsize_cat2)
 
 /*Household-level probit. Model probabiltiy of being a complete household conditional on presence of people
  of certain education age gender combination, marital status and region.*/
-probit complete_hh _Ideh* dcpstcat* ib8.drgn1  i.stm , vce(robust) iterate(20) //i.hhsize_cat2 DP: dropped as otherwise does not converge
+probit complete_hh _Ideh* dcpstcat* ib8.drgn1  i.stm , vce(robust) iterate(20) //i.hhsize_cat2, dropped as otherwise does not converge
 
 *Predict probability of being a complete household
 predict pr_comphh

@@ -49,8 +49,17 @@ replace dhhtp_c8 = 5 if dhhtp_c4 == 2 & lessp_c3 == 2
 replace dhhtp_c8 = 6 if dhhtp_c4 == 2 & lessp_c3 == 3	
 replace dhhtp_c8 = 7 if dhhtp_c4 == 3
 replace dhhtp_c8 = 8 if dhhtp_c4 == 4
-cap label define dhhtp_c8 1 "Couple with no children, spouse employed" 2 "Couple with no children, spouse student" 3 "Couple with no children, spouse not employed" 4 "Couple with children, spouse employed" 5 "Couple with children, spouse student" 6 "Couple with children, spouse not employed" 7 "Single with no children" 8 "Single with children"
+cap label define dhhtp_c8 1 "Couple with no children, spouse employed" ///
+2 "Couple with no children, spouse student" ///
+3 "Couple with no children, spouse not employed" ///
+4 "Couple with children, spouse employed" ///
+5 "Couple with children, spouse student" ///
+6 "Couple with children, spouse not employed" ///
+7 "Single with no children" ///
+8 "Single with children"
 label values dhhtp_c8 dhhtp_c8	
+
+tab dhhtp_c8, gen(Dhhtp_c8_)
 
 // Squared income variable
 cap cap gen ypnbihs_dv_sq = ypnbihs_dv^2
@@ -89,6 +98,13 @@ cap gen l_dhe_pcs = dhe_pcs[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-
 cap gen l_dhe_mcs = dhe_mcs[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
 cap gen l_dlltsd = dlltsd[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
 cap gen l_dlltsd01 = dlltsd01[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+cap gen l_dnc = dnc[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+cap gen l_dnc02 = dnc02[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+cap gen l_dcpst = dcpst[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+cap gen l_dhhtp_c8 = dhhtp_c8[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+cap gen l_dhh_owned = dhh_owned[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+cap gen l_yptciihs_dv = yptciihs_dv[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
+
 
 // Fill in missing lags using current values at age 16
 gsort +idperson -stm
@@ -291,11 +307,24 @@ rename L_Dhhtp_c4_2 Dhhtp_c4_CoupleChildren_L1
 rename L_Dhhtp_c4_3 Dhhtp_c4_SingleNoChildren_L1
 rename L_Dhhtp_c4_4 Dhhtp_c4_SingleChildren_L1
 
+tab l_dhhtp_c8, gen(L_Dhhtp_c8_)
+forvalues i=1/8 {
+rename L_Dhhtp_c8_`i' Dhhtp_c8_`i'_L1
+}
+
 tab dot, gen(dot_)
 rename dot_1 Ethn_White
 rename dot_2 Ethn_Asian
 rename dot_3 Ethn_Black
 rename dot_4 Ethn_Other
+
+tab dcpst, gen(Dcpst_)
+rename Dcpst_1 Dcpst_Partnered
+rename Dcpst_2 Dcpst_Single
+
+tab l_dcpst, gen(L_Dcpst_)
+rename L_Dcpst_1 Dcpst_Partnered_L1
+rename L_Dcpst_2 Dcpst_Single_L1
 
 
 cap gen Year_transformed = stm  
@@ -321,5 +350,20 @@ cap gen Dlltsd01 = dlltsd01
 cap gen Dlltsd_L1 = l_dlltsd
 cap gen Dlltsd01_L1 = l_dlltsd01
 
+cap gen FertilityRate = dukfr
 
+cap gen Dnc = dnc 
 
+cap gen Dnc02 = dnc02
+
+rename l_dnc Dnc_L1 
+
+rename l_dnc02 Dnc02_L1 
+
+gen Ypnbihs_dv = ypnbihs_dv
+
+gen Yptciihs_dv = yptciihs_dv
+gen Yptciihs_dv_L1 = l_yptciihs_dv
+
+gen Dhh_owned = dhh_owned
+gen Dhh_owned_L1 = l_dhh_owned
