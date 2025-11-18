@@ -234,6 +234,74 @@ public class PersonTest {
 
         }
 
+        @Test
+        @DisplayName("OUTCOME E: Over 29 or non-student or left education - estimate remain with partner")
+        public void over29RemainWithPartner() {
+
+            testPerson.setDag(30);
+            testPerson.setDgn(Gender.Female);
+            testPartner.setDag(20);
+            testPartner.setDgn(Gender.Male);
+
+
+            testPerson.setBenefitUnit(testBenefitUnit);
+            testPartner.setBenefitUnit(testBenefitUnit);
+
+            testBenefitUnit.setRegion(Region.UKD);
+
+            assertEquals(true, testPerson.isPartnered(), "Person should start partnered.");
+            assertEquals(true, testPartner.isPartnered(), "Partner should start partnered.");
+
+            parametersMock.when(() -> Parameters.getRegPartnershipU2b()).thenReturn(mockBinomialRegression);
+            Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
+            Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
+
+            testPerson.cohabitation();
+            testPerson.partnershipDissolution();
+
+            assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(true, testPerson.isPartnered(), "Person should still be partnered.");
+            assertEquals(true, testPartner.isPartnered(), "Partner should still be partnered.");
+            assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Male).get(Region.UKD).size(), "Persons to match should be empty.");
+
+        }
+
+        @Test
+        @DisplayName("OUTCOME E: Over 29 or non-student or left education - estimate leave partner")
+        public void over29LeavesPartner() {
+
+            testPerson.setDag(30);
+            testPerson.setDgn(Gender.Female);
+            testPartner.setDag(20);
+            testPartner.setDgn(Gender.Male);
+
+
+            testPerson.setBenefitUnit(testBenefitUnit);
+            testPartner.setBenefitUnit(testBenefitUnit);
+
+            testBenefitUnit.setRegion(Region.UKD);
+
+            assertEquals(true, testPerson.isPartnered(), "Person should start partnered.");
+            assertEquals(true, testPartner.isPartnered(), "Partner should start partnered.");
+
+            parametersMock.when(() -> Parameters.getRegPartnershipU2b()).thenReturn(mockBinomialRegression);
+            Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(PROBABILITY_TO_PARTNER);
+            Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
+
+            testPerson.cohabitation();
+            testPerson.partnershipDissolution();
+
+            assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(false, testPerson.isPartnered(), "Person should no longer be partnered.");
+            assertEquals(false, testPartner.isPartnered(), "Partner should no longer be partnered.");
+            assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Male).get(Region.UKD).size(), "Persons to match should be empty.");
+
+        }
+
     }
 
 
