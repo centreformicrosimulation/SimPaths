@@ -1,24 +1,144 @@
 package simpaths.model;
 
+import microsim.statistics.regression.BinomialRegression;
+import microsim.statistics.regression.OrderedRegression;
 import org.junit.jupiter.api.*;
+import simpaths.data.ManagerRegressions;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Country;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import java.lang.reflect.Field;
 
 @DisplayName("Person class")
 public class PersonTest {
 
-    static Person testPerson;
+    // Static mock reference for Parameters
+    private MockedStatic<Parameters> parametersMock;
+    private MockedStatic<ManagerRegressions> managerRegressionsMock;
 
-    @BeforeAll
-    static void setup() {
-        testPerson = new Person(true);
+    // --- Mocks for Dependencies ---
+    private SimPathsModel mockModel;
+    private Innovations mockInnovations;
+    private BenefitUnit mockBenefitUnit;
+
+    // Using the actual regression types for strong type checking and accuracy
+    private BinomialRegression mockBinomialRegression = Mockito.mock(BinomialRegression.class);
+
+    // Cohabitation and partnership constants
+    private final int MIN_AGE_COHABITATION = 18;
+
+    static Person testPerson;
+    static Person testPartner;
+
+    /**
+     * Helper to mock static dependencies that are called inside the Person constructor,
+     * specifically to prevent the NullPointerException related to Parameter initialization.
+     */
+    private void mockStaticDependenciesForConstructor(Runnable action) {
+        // Mock the multivariate distribution needed by Person constructor's setMarriageTargets()
+        double[] mockWageAgeValues = new double[]{0.0, 0.0};
+
+        // Using explicit lambda call for robust static stubbing
+        parametersMock.when(() -> Parameters.getWageAndAgeDifferentialMultivariateNormalDistribution(Mockito.anyLong()))
+                .thenReturn(mockWageAgeValues);
+
+        // Execute the rest of the setup (including new Person() and field injection)
+        action.run();
     }
+
+    // Reflection utility to set final/private fields for test isolation
+    private void setPrivateField(Object target, String fieldName, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+
+    @Nested
+    @DisplayName("Testing Cohabitation and Partnership Dissolution")
+    class CohabitationTests {
+
+        /**
+         * Setup method to be executed before each test method.
+         */
+        @BeforeEach
+        public void setUp() throws Exception {
+
+            // Static mock setup first
+            parametersMock = Mockito.mockStatic(Parameters.class);
+            parametersMock.when(Parameters::getRegPartnershipU1a)
+                    .thenReturn(mockBinomialRegression);
+
+            // Static mock setup for ManagerRegressions
+            managerRegressionsMock = Mockito.mockStatic(ManagerRegressions.class);
+
+            // We wrap the entire setup in a mock block to handle the static dependency called by the Person constructor.
+            mockStaticDependenciesForConstructor(() -> {
+                try {
+                    // 1. Initialize Mocks
+                    mockModel = Mockito.mock(SimPathsModel.class);
+                    mockInnovations = Mockito.mock(Innovations.class);
+                    mockBenefitUnit = Mockito.mock(BenefitUnit.class);
+
+                    // Initialize regression mocks with specific types
+                    mockBinomialRegression = Mockito.mock(BinomialRegression.class);
+
+                    // 2. Set up basic predictable environment
+                    Mockito.when(mockModel.getYear()).thenReturn(2025);
+                    Mockito.when(mockModel.isAlignCohabitation()).thenReturn(false);
+
+                    // 3. Initialize Person and inject Mocks using Reflection
+                    testPerson = new Person(1L, 123L);
+
+                    setPrivateField(testPerson, "model", mockModel);
+                    setPrivateField(testPerson, "innovations", mockInnovations);
+                    setPrivateField(testPerson, "benefitUnit", mockBenefitUnit);
+
+                    // Mock the critical dependency from BenefitUnit (Set<Person> is empty for simplicity)
+                    Mockito.when(mockBenefitUnit.getChildren()).thenReturn(java.util.Collections.emptySet());
+                } catch (Exception e) {
+                    throw new RuntimeException("Setup failed during initialization or field injection.", e);
+                }
+            });
+        }
+
+        @AfterEach
+        public void tearDown() throws Exception {
+            if (parametersMock != null) {
+                parametersMock.close();
+            }
+            if (managerRegressionsMock != null) {
+                managerRegressionsMock.close();
+            }
+        }
+
+        @Test
+        @DisplayName("OUTCOME A: Person under 18 does not enter partnership")
+        public void under18DoesntEnterPartnership() {
+            testPerson.setDag(17);
+
+            testPerson.cohabitation();
+
+            assertEquals(testPerson.getDag(), 17);
+            assertEquals(testPerson.isPartnered(), false);
+            assertEquals(testPerson.isToBePartnered(), false);
+            assertEquals(mockModel.getPersonsToMatch().size(), 0);
+        }
+    }
+
+
 
     @Nested
     @DisplayName("EQ5D process")
     class Eq5dTests {
+
+        @BeforeEach
+        void setup() {
+            testPerson = new Person(true);
+        }
 
         @Nested
         @DisplayName("With eq5dConversionParameters set to 'lawrence'")
