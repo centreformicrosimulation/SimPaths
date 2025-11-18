@@ -37,7 +37,7 @@ set matsize 1000
 
 * Working directory
 global dir_work "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\initial_populations"
-*global dir_work "D:\Dasha\ESSEX\ESPON 2024\UK\initial_populations"
+*global dir_work "D:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\initial_populations"
 
 * Directory containing do files
 global dir_do "${dir_work}/do"
@@ -51,11 +51,11 @@ global dir_log "${dir_work}/log"
 
 * Directory containing UKHLS data
 global dir_ukhls_data "J:\01 DATA\UK\ukhls\wave14\stata\stata13_se\ukhls"
-*global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls"
+*global dir_ukhls_data "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\ukhls" //original_data
 
 * Directory containing BHPS data
 global dir_bhps_data "J:\01 DATA\UK\ukhls\wave14\stata\stata13_se\bhps"
-*global dir_bhps_data  "D:\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\bhps"
+*global dir_bhps_data  "D:\Dasha\UK-original-data\USoc\UKDA-6614-stata\stata\stata13_se\bhps" //original_data_bhps
 
 * Directory containing WAS data
 global dir_was_data "J:\01 DATA\UK\was\wave8\stata\stata13_se"

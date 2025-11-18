@@ -143,7 +143,7 @@ mata:
 end	
 
 * Export into Excel 
-putexcel set "$dir_results/reg_fertility", sheet("F1a") modify
+putexcel set "$dir_results/reg_fertility", sheet("UK_F1a") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
@@ -296,7 +296,7 @@ mata:
 end	
 
 * Export into Excel 
-putexcel set "$dir_results/reg_fertility", sheet("F1b") modify
+putexcel set "$dir_results/reg_fertility", sheet("UK_F1b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 

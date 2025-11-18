@@ -37,7 +37,7 @@ xtset idperson swv
 
 * Info sheet
 
-putexcel set "$dir_work/reg_leaveParentalHome", sheet("Info") replace
+putexcel set "$dir_results/reg_leaveParentalHome", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing leaving parental home"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
@@ -52,7 +52,7 @@ putexcel A10 = "Notes:", bold
 putexcel B10 = "Added: ethnicity-4 cat (dot); covid dummies (y2020 y2021)"
 putexcel B11 = "DV is synchronised with the adult child definition"
 
-putexcel set "$dir_work/reg_leaveParentalHome", sheet("Gof") modify
+putexcel set "$dir_results/reg_leaveParentalHome", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
 

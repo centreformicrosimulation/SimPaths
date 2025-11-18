@@ -88,11 +88,12 @@ global countyy "UK"
 /*******************************************************************************
 * ESTIMATION FILES
 *******************************************************************************/
-
+/*
 do "${dir_do}/reg_education.do"
+*/
 
 do "${dir_do}/reg_leaveParentalHome.do"
-
+/*
 do "${dir_do}/reg_partnership.do"
 
 do "${dir_do}/reg_fertility.do"
@@ -106,16 +107,16 @@ do "${dir_do}/reg_retirement.do"
 do "${dir_do}/reg_wages.do"
 
 do "${dir_do}/reg_income.do"
-
+*/
 
 *******************************************************************************
 * INTERNAL VALIDATION FILES
 ******************************************************************************
-
+/*
 do "$dir_do_validation/int_val_education.do"	
-
+*/
 do "$dir_do_validation/int_val_leave_parental_home.do"	
-
+/*
 do "$dir_do_validation/int_val_partnership.do"	
 
 do "$dir_do_validation/int_val_fertility.do"	

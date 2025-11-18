@@ -970,20 +970,58 @@ drop _merge
 - is at least 15 years younger than either of their parents
 - neither of their parents is of the state retirement age in that particular year & neither is retired   
 */
+/*
 gen adultchildflag = (!missing(dagmother)  | !missing(dagfather)) & dag >= $age_become_responsible & idpartner <= 0
 replace adultchildflag = 0 if dag >= dagfather-15 & dag >= dagmother-15 //was previously or ==> replaced with & 
 //fre adultchildflag 
 replace adultchildflag = 0 if (dagpnsmother==1 | les_c4mother==4) & (dagpnsfather ==1  | les_c4father==4) 
+replace adultchildflag = 0 if (dagpnsmother==1 | les_c4mother==4) & missing(dagfather)
+replace adultchildflag = 0 if (dagpnsfather==1 | les_c4father==4) & missing(dagmother) 
 tab2 adultchildflag swv , row  
+
+* check
+sum idmother 
+sum idfather 
+sum idpartner 
+fre dagmother
+fre dagfather
+fre dagpnsmother
+fre dagpnsfather
+fre les_c4mother
+fre les_c4father
+*/
+
+cap gen  adultchildflag = 0
+
+replace  adultchildflag = 1 if (idmother > 0 | idfather > 0) ///
+    & dag >= 17 & dag<=75 & idpartner <= 0  /*added upper age filter as the one used in LS model */
+
+/* Exclude if both parents retired or at statutory retirement age */
+replace  adultchildflag = 0 if dagpnsmother == 1 & dagpnsfather == .
+replace  adultchildflag = 0 if dagpnsmother == . & dagpnsfather == 1
+replace  adultchildflag = 0 if dagpnsmother == 1 & dagpnsfather == 1
+
+replace  adultchildflag = 0 if les_c4mother == 4 & les_c4father == .
+replace  adultchildflag = 0 if les_c4mother == . & les_c4father == 4
+replace  adultchildflag = 0 if les_c4mother == 4 & les_c4father == 4
+
+replace  adultchildflag = 0 if les_c4mother == 4 & dagpnsfather == 1
+replace  adultchildflag = 0 if les_c4father == 4 & dagpnsmother == 1
+
+/* Exclude if both parents < 15 years older than child */
+replace  adultchildflag = 0 if (dagfather-dag)<=15 & dagmother == .
+replace  adultchildflag = 0 if dagfather == . & (dagmother-dag) <= 15 
+replace  adultchildflag = 0 if (dagfather-dag) <= 15 & (dagmother-dag)<= 15
+
+//fre  adultchildflag
 
 /*Account for cases missing information
 replace adultchildflag = -9 if idmother>0 & ///
-	(dagmother==. | dagmother<0 | les_c4mother==. | les_c4mother<0) & dag >= 17
+	(dagmother==. | dagmother<0 | les_c4mother==. | les_c4mother<0) & dag >= 17 & dag<=75
 replace adultchildflag = -9 if idfather>0 & ///
-	(dagfather==. | dagfather<0 | les_c4father==. | les_c4father<0) & dag >= 17
-fre adultchildflag	
-2.7% have missing info on one of their parents, not sure if it is worth dropping them? 
-*/
+	(dagfather==. | dagfather<0 | les_c4father==. | les_c4father<0) & dag >= 17 & dag<=75
+fre adultchildflag*/
+//2.7% have missing info on one of their parents, not sure if it is worth dropping them? 
 
 
 /************************Household composition*********************************/
@@ -1169,6 +1207,7 @@ replace dukfr=49.8 if stm>=2023
 lab var dukfr "UK General fertility rate (ONS)"
 fre dukfr
 
+save "$dir_data\ukhls_pooled_all_obs_02.dta", replace
 
 /************************Number of newborn*************************/
 /*NOTE: The approach below was not entirely correct for identifying newborns.
@@ -1182,31 +1221,30 @@ fre dukfr
 cap gen child0 = 0
 replace child0=1 if dag<=1 
 
-cap drop dchpd
-bysort idmother swv: egen dchpd= total(child0) if idmother>0
-fre dchpd
+cap drop dchpd_old
+bysort idmother swv: egen dchpd_old= total(child0) if idmother>0
+fre dchpd_old
 
 preserve 
-keep swv idmother dchpd
+keep swv idmother dchpd_old
 rename idmother idperson 
-rename dchpd mother_dchpd
+rename dchpd_old mother_dchpd_old
 drop if idperson<0
-collapse (max) mother_dchpd, by(idperson swv)
-fre mother_dchpd
+collapse (max) mother_dchpd_old, by(idperson swv)
+fre mother_dchpd_old
 duplicates report idperson swv
-save "$dir_data/mother_dchpd", replace
+save "$dir_data/mother_dchpd_old", replace
 restore 
 
-merge 1:1 swv idperson using "$dir_data/mother_dchpd" , keepusing (mother_dchpd)
+merge 1:1 swv idperson using "$dir_data/mother_dchpd_old" , keepusing (mother_dchpd_old)
 keep if _merge == 1 | _merge == 3
 drop _merge
-replace mother_dchpd=0 if dgn==1
-drop dchpd
-rename mother_dchpd dchpd
-lab var dchpd "Women's number of newborn children"
+replace mother_dchpd_old=0 if dgn==1
+drop dchpd_old
+rename mother_dchpd_old dchpd_old
+lab var dchpd_old "Women's number of newborn children"
 */
-
-save "$dir_data\ukhls_pooled_all_obs_02.dta", replace 
+ 
 ************************************************************************
 * Number of newborn from "newborn" datasets 
 ************************************************************************
@@ -1299,7 +1337,7 @@ rename pidp idperson
 save "${dir_data}/temp_parent_dchpd.dta", replace
 
 * Merge into main person-wave dataset
-use "$dir_data\ukhls_pooled_all_obs_02.dta", clear
+use "{$dir_data}\ukhls_pooled_all_obs_02.dta", clear
 merge 1:1 idperson swv using "${dir_data}/temp_parent_dchpd.dta"
 keep if _merge ==1 | _merge==3
 drop _merge
@@ -1328,14 +1366,36 @@ tab both_parents
 restore 
 */
 
-* Note that for the estimates we will only keep newborns who are reported by mothers, but here we keep all reported newborns for each respondent  
+/* Note that for the estimates we will only keep newborns who are reported by mothers, but here we keep all reported newborns for each respondent  
 tab2 swv dchpd if dgn==1, m row 
 tab2 swv dchpd if dgn==0 & sprfm==1, m row 
 tab2 swv dchpd if dgn==0 & sprfm==0, m row
+*/
+/*-------------------------------------------------------------*
+ | Compare dchpd_old vs dchpd across waves                     |
+ *-------------------------------------------------------------
 
+* Recode missing values to 0 in both variables
+recode dchpd_old (.=0)
+recode dchpd (.=0)
+
+gen dchpd_comp = .
+replace dchpd_comp = 1 if dchpd_old > 0 & dchpd > 0         /* both show a birth */
+replace dchpd_comp = 2 if dchpd_old == 0 & dchpd > 0        /* only new shows a birth */
+replace dchpd_comp = 3 if dchpd_old > 0 & dchpd == 0        /* only old shows a birth */
+replace dchpd_comp = 4 if dchpd_old == 0 & dchpd == 0       /* both zero */
+
+cap label define dchpd_comp_lbl 1 "Both>0" ///
+                          2 "New only>0" ///
+                          3 "Old only>0" ///
+                          4 "Both zero"
+label values dchpd_comp dchpd_comp_lbl
+
+tab swv dchpd_comp if sprfm==1
+*/
 
 /*****************************In educational age range*************************/
-gen sedag = 1 if dvage >= 16 & dvage <= 29
+cap gen sedag = 1 if dvage >= 16 & dvage <= 29
 replace sedag = 0 if missing(sedag)
 la val sedag dummy
 la var sedag "Educ age range"
@@ -1824,8 +1884,8 @@ replace l1_potential_earnings_hourly = 0 if missing(l1_potential_earnings_hourly
 		
 * initialise wealth to missing 
 gen liquid_wealth = -9
-gen tot_pen = -9
-gen nvmhome = -9
+//gen tot_pen = -9
+//gen nvmhome = -9
 gen smp = -9
 gen rnk = -9
 gen mtc = -9
