@@ -8,9 +8,16 @@ import simpaths.data.Parameters;
 import static org.junit.jupiter.api.Assertions.*;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import simpaths.model.enums.Country;
+import simpaths.model.enums.Gender;
 import simpaths.model.enums.Les_c4;
+import simpaths.model.enums.Region;
 
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 @DisplayName("Person class")
 public class PersonTest {
@@ -30,12 +37,16 @@ public class PersonTest {
 
     // Cohabitation and partnership constants
     private final int MIN_AGE_COHABITATION = 18;
+    private final Double INNOVATION_TO_PARTNER = 0.5;
+    private final Double PROBABILITY_TO_PARTNER = 0.7;
+    private final Double NEGATE_PROBABILITY_TO_PARTNER = 0.2;
 
     // --- Test Objects ---
     static Person testPerson;
     static Person testPartner;
     static BenefitUnit testBenefitUnit;
     static Household testHousehold;
+    static Map<Gender, LinkedHashMap<Region, Set<Person>>> expectedPersonsToMatch;
 
     /**
      * Helper to mock static dependencies that are called inside the Person constructor,
@@ -92,6 +103,7 @@ public class PersonTest {
 
                     // 2. Set up basic predictable environment
                     Mockito.when(mockModel.getYear()).thenReturn(2025);
+                    Mockito.when(mockModel.getCountry()).thenReturn(Country.UK);
                     Mockito.when(mockModel.isAlignCohabitation()).thenReturn(false);
                     Mockito.when(mockBenefitUnit.getHousehold()).thenReturn(mockHousehold);
                     Mockito.when(mockHousehold.getId()).thenReturn(1L);
@@ -102,6 +114,16 @@ public class PersonTest {
                     testBenefitUnit = new BenefitUnit(100L, 123L);
                     testHousehold = new Household(1000L);
                     testBenefitUnit.setHousehold(testHousehold);
+
+                    expectedPersonsToMatch = new LinkedHashMap<>();
+                    for (Gender gender: Gender.values()) {
+                        expectedPersonsToMatch.put(gender, new LinkedHashMap<>());
+                        for (Region region: Region.values()) {
+                            expectedPersonsToMatch.get(gender).put(region, new LinkedHashSet<>());
+                        }
+                    }
+
+                    Mockito.when(mockModel.getPersonsToMatch()).thenReturn(expectedPersonsToMatch);
 
                     setPrivateField(testPerson, "model", mockModel);
                     setPrivateField(testPerson, "innovations", mockInnovations);
@@ -135,7 +157,7 @@ public class PersonTest {
             assertEquals(testPerson.getDag(), 17);
             assertEquals(testPerson.isPartnered(), false);
             assertEquals(testPerson.isToBePartnered(), false);
-            assertEquals(mockModel.getPersonsToMatch().size(), 0);
+            assertEquals(mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), 0);
         }
 
         @Test
@@ -155,7 +177,60 @@ public class PersonTest {
             assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
             assertEquals(true, testPerson.isPartnered(), "Person should be partnered.");
             assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
-            assertEquals(0, mockModel.getPersonsToMatch().size(), "Persons to match should be empty.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
+
+        }
+
+        @Test
+        @DisplayName("OUTCOME C: Aged 18-29, student and not partnered - estimate to be partnered")
+        public void over18StudentToBePartnered() {
+            testPerson.setDag(20);
+            testPerson.setLes_c4(Les_c4.Student);
+            testPerson.setLeftEducation(false);
+            testPerson.setDgn(Gender.Female);
+            testPerson.setBenefitUnit(testBenefitUnit);
+
+            testBenefitUnit.setRegion(Region.UKD);
+
+
+            parametersMock.when(() -> Parameters.getRegPartnershipU1a()).thenReturn(mockBinomialRegression);
+            Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(PROBABILITY_TO_PARTNER);
+            Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
+
+            testPerson.cohabitation();
+            testPerson.partnershipDissolution();
+
+            assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(false, testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertEquals(true, testPerson.isToBePartnered(), "Person should be set to be partnered.");
+            assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "One person should be in persons to match.");
+            assertEquals(testPerson, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).stream().findFirst().get(), "Person should be in persons to match.");
+
+        }
+
+        @Test
+        @DisplayName("OUTCOME D: Aged 18-29, student and not partnered - estimate not to be partnered")
+        public void over18StudentNotToBePartnered() {
+            testPerson.setDag(20);
+            testPerson.setLes_c4(Les_c4.Student);
+            testPerson.setLeftEducation(false);
+            testPerson.setDgn(Gender.Female);
+            testPerson.setBenefitUnit(testBenefitUnit);
+
+            testBenefitUnit.setRegion(Region.UKD);
+
+
+            parametersMock.when(() -> Parameters.getRegPartnershipU1a()).thenReturn(mockBinomialRegression);
+            Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
+            Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
+
+            testPerson.cohabitation();
+            testPerson.partnershipDissolution();
+
+            assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(false, testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertEquals(false, testPerson.isToBePartnered(), "Person should not be set to be partnered.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
 
         }
 
