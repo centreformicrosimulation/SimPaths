@@ -3,7 +3,7 @@
 *	FILE TO OBTAIN TRAINING DATA FOR SIMPATHS
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 30/05/2024 (JV)
+*	LAST EDIT: 19/11/2025 (JV)
 *
 *******************************************************************************/
 
@@ -175,7 +175,6 @@ rename stmb stm
 save "$dir_data/temp9", replace
 
 // adjust weights
-drop dwt_sampling multiplier
 gen ldwt = ln(dwt)
 sum ldwt
 gen dwt2 = round(exp(r(mean) + r(sd) * rnormal()))
@@ -185,7 +184,8 @@ rename dwt2 dwt
 save "$dir_data/temp10", replace
 
 // adjust continuous variables
-foreach vv of varlist yplgrs_dv ypnbihs_dv yptciihs_dv ynbcpdf_dv liquid_wealth tot_pen nvmhome disp_inc ypncp ypnoab formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs {
+foreach vv of varlist yplgrs_dv ypnbihs_dv yptciihs_dv ynbcpdf_dv total_wealth total_pensions housing_wealth mortgage_debt ///
+disp_inc ypncp ypnoab formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs {
 	gen tmp = `vv'
 	order tmp, a(`vv')
 	recode tmp (0=.)
@@ -195,7 +195,8 @@ foreach vv of varlist yplgrs_dv ypnbihs_dv yptciihs_dv ynbcpdf_dv liquid_wealth 
 	drop `vv'
 	rename tmp `vv'
 }
-foreach vv of varlist yplgrs_dv ypnbihs_dv yptciihs_dv tot_pen ypncp ypnoab formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs {
+foreach vv of varlist yplgrs_dv ypnbihs_dv yptciihs_dv ypncp ypnoab formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
+son_socare_hrs other_socare_hrs formal_socare_cost aidhrs {
 	replace `vv' = 0 if (`vv'<0.0)
 }
 gen tmp = ln(potential_earnings_hourly)
@@ -212,7 +213,7 @@ save "$dir_data/temp11", replace
 
 // set benefit unit level variables
 use "$dir_data/temp11", clear
-foreach vv of varlist drgn1 ydses_c5 dhh_owned dwt liquid_wealth tot_pen nvmhome disp_inc {
+foreach vv of varlist drgn1 ydses_c5 dhh_owned dwt total_wealth total_pensions housing_wealth mortgage_debt disp_inc {
 	
 	rename `vv' `vv'i
 	bys idbenefitunit: egen `vv' = mean(`vv'i)
@@ -223,7 +224,8 @@ foreach vv of varlist drgn1 ydses_c5 dhh_owned dwt liquid_wealth tot_pen nvmhome
 /**************************************************************************************
 *	export training data
 *************************************************************************************/
-recode dgn liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
+recode dgn total_wealth total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs ///
+daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
 export delimited using "$dir_data/training_population_initial_UK_$wealthEndYear.csv", nolabel replace
 
 
@@ -235,5 +237,6 @@ forvalues yy = $wealthStartYear/$wealthEndYear {
 	rm "$dir_data/temp_`yy'.dta"
 }
 forvalues ii = 0/11 {
+	
 	rm "$dir_data/temp`ii'.dta"
 }

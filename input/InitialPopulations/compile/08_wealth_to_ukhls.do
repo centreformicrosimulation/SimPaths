@@ -30,7 +30,7 @@ global seedAdjust = 0
 *********************************************************************/
 use "population_initial_fs_UK_$yearWealth", clear
 sort idperson
-drop liquid_wealth smp rnk mtc
+drop total_wealth total_pensions housing_wealth mortgage_debt smp rnk mtc
 
 
 /**********************************************************************
@@ -285,6 +285,9 @@ gen smp = 0
 gen rnk = 0
 gen mtc = 0
 gen wealthi = -9
+gen tot_peni = -9
+gen housingi = -9
+gen mortgagei = -9
 qui {
 	sum treat, mean
 	local nn = r(mean) * r(N)
@@ -354,9 +357,15 @@ forval kk = 1/`nn' {
 			}
 			local mtc = bu[1]
 			local ww = wealth[1]
+			local pw = tot_pen[1]
+			local hw = dvhvalue[1]
+			local mm = main_mort[1]
 			restore
 			replace mtc=`mtc' if (_n==`kk')
 			replace wealthi = `ww' if (_n==`kk')
+			replace tot_peni = `pw' if (_n==`kk')
+			replace housingi = `hw' if (_n==`kk')
+			replace mortgagei = `mm' if (_n==`kk')
 		}
 		replace rnk=`rnk' if (_n==`kk')
 		drop chk
@@ -372,20 +381,33 @@ keep if (treat)
 append using "ukhls_wealthtemp2.dta"
 sort bu
 recode wealthi (mis=0)
-by bu: egen liquid_wealth = sum(wealthi)
-recode liquid_wealth (-9=0)
+recode tot_peni (mis=0)
+recode housingi (mis=0)
+recode mortgagei (mis=0)
+by bu: egen total_wealth = sum(wealthi)
+by bu: egen total_pensions = sum(tot_peni)
+by bu: egen housing_wealth = sum(housingi)
+by bu: egen mortgage_debt = sum(mortgagei)
+recode total_wealth (-9=0)
+recode total_pensions (-9=0)
+recode housing_wealth (-9=0)
+recode mortgage_debt (-9=0)
+label var total_wealth "total wealth net of liabilities of benefit unit including housing, business and private (personal and occupational) pensions"
+label var total_pensions "value of all private (personal and occupational) pensions of benefit unit"
+label var housing_wealth "value of main home gross of mortgage debt of benefit unit"
+label var mortgage_debt "total mortgage debt owed on main home of benefit unit"
 save ukhls_wealthtemp3, replace
 
 /*
-sum liquid_wealth [fweight=dwt2] if (single_woman & rnk<4), detail
-sum liquid_wealth [fweight=dwt2] if (single_man & rnk<4), detail
-sum liquid_wealth [fweight=dwt2] if (couple_ref & rnk<4), detail
-sum liquid_wealth [fweight=dwt2] if (rnk<4), detail
+sum total_wealth [fweight=dwt2] if (single_woman & rnk<4), detail
+sum total_wealth [fweight=dwt2] if (single_man & rnk<4), detail
+sum total_wealth [fweight=dwt2] if (couple_ref & rnk<4), detail
+sum total_wealth [fweight=dwt2] if (rnk<4), detail
 
-sum liquid_wealth [fweight=dwt2] if (single_woman), detail
-sum liquid_wealth [fweight=dwt2] if (single_man), detail
-sum liquid_wealth [fweight=dwt2] if (couple_ref), detail
-sum liquid_wealth [fweight=dwt2], detail
+sum total_wealth [fweight=dwt2] if (single_woman), detail
+sum total_wealth [fweight=dwt2] if (single_man), detail
+sum total_wealth [fweight=dwt2] if (couple_ref), detail
+sum total_wealth [fweight=dwt2], detail
 */
 
 
@@ -395,12 +417,11 @@ sum liquid_wealth [fweight=dwt2], detail
 use ukhls_wealthtemp3, clear
 drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad ///
 dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id ///
-p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi
+p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi tot_peni housingi mortgagei
 recode rnk smp mtc (missing = -9)
 label var rnk "matching level: 1 = most fine, 2, 3 = most coarse, 4=no match"
 label var smp "matching sample - number of matched candidates to choose from"
 label var mtc "benefit unit id (bu) of matched observation"
-label var liquid_wealth "total wealth including housing, business and private (personal and occupational) pensions" 
 save "population_initial_fs_UK_$yearWealth", replace
 
 

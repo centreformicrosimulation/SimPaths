@@ -1337,7 +1337,7 @@ rename pidp idperson
 save "${dir_data}/temp_parent_dchpd.dta", replace
 
 * Merge into main person-wave dataset
-use "{$dir_data}\ukhls_pooled_all_obs_02.dta", clear
+use "${dir_data}\ukhls_pooled_all_obs_02.dta", clear
 merge 1:1 idperson swv using "${dir_data}/temp_parent_dchpd.dta"
 keep if _merge ==1 | _merge==3
 drop _merge
@@ -1883,12 +1883,17 @@ replace potential_earnings_hourly = 0 if missing(potential_earnings_hourly)
 replace l1_potential_earnings_hourly = 0 if missing(l1_potential_earnings_hourly)
 		
 * initialise wealth to missing 
-gen liquid_wealth = -9
-//gen tot_pen = -9
-//gen nvmhome = -9
+gen total_wealth = -9
+gen total_pensions = -9
+gen housing_wealth = -9
+gen mortgage_debt = -9
 gen smp = -9
 gen rnk = -9
 gen mtc = -9
+label var total_wealth "total wealth net of liabilities of benefit unit including housing, business and private (personal and occupational) pensions"
+label var total_pensions "value of all private (personal and occupational) pensions of benefit unit"
+label var housing_wealth "value of main home gross of mortgage debt of benefit unit"
+label var mortgage_debt "total mortgage debt owed on main home of benefit unit"
 
 *check for duplicates in the pooled dataset 
 duplicates tag idperson idhh swv, gen(dup)

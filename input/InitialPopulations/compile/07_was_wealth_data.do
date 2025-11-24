@@ -9,6 +9,14 @@
 *	NOTE: 		file currently compiles data to merge from 2016
 *				this could be extended to at least 2011
 *
+*	Approach involves identifying total net wealth (wealth), 
+*	total private pension wealth (personal and occupational), gross 
+*	value of main home (dvhvalue) and value of assocaited mortgage 
+*	debt (main_mort) at the benefit unit level. Total net wealth includes
+*	pension and housing wealth in addition to "other" wealth variously 
+*	defined. File 08_wealth_to_ukls.do uses matching methods for reference 
+*	people from each benefit unit to merge in these data to the UKHLS data.
+*
 /**************************************************************/
 
 /*
@@ -473,7 +481,9 @@ foreach file in "$dir_was_data\was_round_5_person_eul_oct_2020.dta" ///
 		drop pct1
 
 		// save control data
-		keep case person_id bu bu_rp year sex grad gradsp dvage17 na nk* single_man single_woman couple couple_ref gor2 dhe2 healths p_healths dlltsd dlltsdsp idnk04 pct emp empsp wealth inc was dwt
+		keep case person_id bu bu_rp year sex grad gradsp dvage17 na nk* single_man ///
+			single_woman couple couple_ref gor2 dhe2 healths p_healths dlltsd dlltsdsp ///
+			idnk04 pct emp empsp tot_pen dvhvalue main_mort wealth inc was dwt
 		if (`ww' > `ww0') {
 			append using "$dir_data\was_wealthdata.dta"
 		}

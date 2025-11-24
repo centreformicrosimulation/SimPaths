@@ -225,13 +225,6 @@ public class DataParser {
 								+ "ALTER TABLE " + personTable + " DROP COLUMN financial_distress;"
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN financial_distress_add RENAME TO financial_distress;"
 
-								//Homeownership
-								+ "ALTER TABLE " + personTable + " ADD dhh_owned_add VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET dhh_owned_add = 'False' WHERE dhh_owned = 0;"
-								+ "UPDATE " + personTable + " SET dhh_owned_add = 'True' WHERE dhh_owned = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN dhh_owned;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN dhh_owned_add RENAME TO dhh_owned;"
-
 								//Social care
 								+ "ALTER TABLE " + personTable + " ADD socare_provided_to VARCHAR_IGNORECASE;"
 								+ "UPDATE " + personTable + " SET socare_provided_to = 'None' WHERE careWho = 0;"
@@ -329,9 +322,10 @@ public class DataParser {
 								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN dhh_owned_add RENAME TO dhh_owned;"
 
 								//WEALTH
-								+ "UPDATE " + benefitUnitTable + " SET liquid_wealth = 0.0 WHERE liquid_wealth = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET tot_pen = 0.0 WHERE tot_pen = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET nvmhome = 0.0 WHERE nvmhome = -9.0;"
+								+ "UPDATE " + benefitUnitTable + " SET total_wealth = 0.0 WHERE total_wealth = -9.0;"
+								+ "UPDATE " + benefitUnitTable + " SET total_pensions = 0.0 WHERE total_pensions = -9.0;"
+								+ "UPDATE " + benefitUnitTable + " SET housing_wealth = 0.0 WHERE housing_wealth = -9.0;"
+                                + "UPDATE " + benefitUnitTable + " SET mortgage_debt = 0.0 WHERE mortgage_debt = -9.0;"
 
 								//Add panel entity key
 								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idbenefitunit RENAME TO id;"

@@ -179,36 +179,43 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	cap gen one =1
 	sum one [w=dwt]
 	
+	* limit employment history to integer years
+	replace liwwh = round(liwwh)
+	
 	*evaluate disposable income at household level
 	gsort idhh idbenefitunit idperson
 	by idhh idbenefitunit: egen disp_inc = sum(ydisp)
 
 	*limit saved variables
-	keep idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dlltsd01 dhe ydses_c5 ///
-	yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm dchpd dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 ///
-	stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw l1_lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt potential_earnings_hourly ///
-	l1_potential_earnings_hourly liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs ///
-	formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp ///
-	dhe_pcssp dls dot dot01 unemp financial_distress liwwh
+	keep idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
+	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
+	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
+	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
+	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
+	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
+	financial_distress liwwh
 	
-	order idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dlltsd01 dhe ydses_c5 ///
-	yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm  dchpd dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 ///
-	stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw l1_lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt potential_earnings_hourly ///
-	l1_potential_earnings_hourly liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs ///
-	formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp ///
-	dhe_pcssp dls dot dot01 unemp financial_distress liwwh
+	order idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
+	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
+	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
+	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
+	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
+	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
+	financial_distress liwwh
 	
-	recode idhh idbenefitunit idperson idpartner idmother idfather pno swv dgn dag dcpst dnc02 dnc ded deh_c3 sedex jbstat les_c3 dlltsd dlltsd01 dhe ydses_c5 ///
-	yplgrs_dv ypnbihs_dv yptciihs_dv dhhtp_c4 ssscp dcpen dcpyy dcpex dcpagdf ynbcpdf_dv der sedag sprfm  dchpd dagsp dehsp_c3 dhesp lessp_c3 dehm_c3 dehf_c3 ///
-	stm lesdf_c4 ppno dhm scghq2_dv dhh_owned lhw l1_lhw drgn1 dct dwt_sampling les_c4 dhm_ghq lessp_c4 adultchildflag multiplier dwt potential_earnings_hourly ///
-	l1_potential_earnings_hourly liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs ///
-	carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc formal_socare_cost disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp ///
-	dhe_pcssp dls dot dot01 unemp financial_distress liwwh (missing=-9)
+	recode idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
+	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
+	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
+	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
+	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
+	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
+	financial_distress liwwh (missing=-9)
 	
 	gsort idhh idbenefitunit idperson
 	save "$dir_data/population_initial_UK_$year.dta", replace
 	
-	recode dgn liquid_wealth tot_pen nvmhome need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
+	recode dgn total_wealth total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs ///
+	other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 }
 

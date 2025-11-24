@@ -64,9 +64,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Double investmentIncomeAnnual;
     private Double pensionIncomeAnnual;
     private Double discretionaryConsumptionPerYear;
-    @Column(name="liquid_wealth") private Double liquidWealth;
-    @Column(name="tot_pen") private Double pensionWealth;
-    @Column(name="nvmhome") private Double housingWealth;
+    @Column(name="total_wealth") private Double totalWealth;            // total net wealth (includes pensions assets and housing)
+    @Column(name="total_pensions") private Double pensionWealth;        // total private (personal and occupational) pensions
+    @Column(name="housing_wealth") private Double housingWealth;        // value of main home (gross of mortgage debt)
+    @Column(name="mortgage_debt") private Double mortgageDebt;          // value of outstanding mortgage debt
     private Double disposableIncomeMonthly;
     private Double grossIncomeMonthly;
     private Double benefitsReceivedPerMonth;
@@ -172,7 +173,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.benefitsReceivedPerMonth = 0.;
         this.createdByConstructor = "LongID";
         if (Parameters.projectLiquidWealth)
-            setLiquidWealth(0.);
+            setTotalWealth(0.);
     }
 
     // USED TO CONSTRUCT NEW BENEFIT UNITS FOR PEOPLE AS NEEDED
@@ -186,9 +187,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             // transfer wealth between benefit units
 
             BenefitUnit fromBenefitUnit = person.getBenefitUnit();
-            setLiquidWealth(person.getLiquidWealth());
+            setTotalWealth(person.getLiquidWealth());
             if (this != fromBenefitUnit) {
-                fromBenefitUnit.setLiquidWealth(fromBenefitUnit.getLiquidWealth() - person.getLiquidWealth());
+                fromBenefitUnit.setTotalWealth(fromBenefitUnit.getTotalWealth() - person.getLiquidWealth());
             }
         }
 
@@ -206,14 +207,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (Parameters.projectLiquidWealth) {
             // transfer wealth between benefit units
 
-            setLiquidWealth(p1.getLiquidWealth() + p2.getLiquidWealth());
+            setTotalWealth(p1.getLiquidWealth() + p2.getLiquidWealth());
             BenefitUnit pBU = p1.getBenefitUnit();
             if (this!=pBU) {
-                pBU.setLiquidWealth(pBU.getLiquidWealth() - p1.getLiquidWealth());
+                pBU.setTotalWealth(pBU.getTotalWealth() - p1.getLiquidWealth());
             }
             pBU = p2.getBenefitUnit();
             if (this!=pBU) {
-                pBU.setLiquidWealth(pBU.getLiquidWealth() - p2.getLiquidWealth());
+                pBU.setTotalWealth(pBU.getTotalWealth() - p2.getLiquidWealth());
             }
         }
 
@@ -252,7 +253,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (Parameters.projectLiquidWealth)
             initialiseLiquidWealth(
                     originalBenefitUnit.getRefPersonForDecisions().getDag(),
-                    originalBenefitUnit.getLiquidWealth(),
+                    originalBenefitUnit.getTotalWealth(),
                     originalBenefitUnit.getPensionWealth(false),
                     originalBenefitUnit.getHousingWealth(false)
             );
@@ -359,7 +360,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     protected void updateWealth() {
-        liquidWealth += disposableIncomeMonthly * 12.0 - discretionaryConsumptionPerYear - getNonDiscretionaryConsumptionPerYear();
+        totalWealth += disposableIncomeMonthly * 12.0 - discretionaryConsumptionPerYear - getNonDiscretionaryConsumptionPerYear();
     }
 
 
@@ -1016,13 +1017,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             regressionScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
                         } else if (!female.atRiskOfWork()) { //Male has flexible labour supply, female doesn't
                             //Follow utility process for single males for the UK
-                            regressionScore = Parameters.getRegLabourSupplyUtilityMalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                            regressionScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
                             //In Italy, this should follow a separate set of estimates. One way is to differentiate between countries here; another would be to add a set of estimates for both countries, but for the UK have the same number as for singles
                             //Introduced a new category of estimates, Males/Females with Dependent to be used when only one of the couple is flexible in labour supply. In Italy, these have a separate set of estimates; in the UK they use the same estimates as "independent" singles
                         }
                     } else if (female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
                         //Follow utility process for single female
-                        regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                        regressionScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
                     if (!Parameters.checkFinite(regressionScore)) {
                         throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
@@ -1370,77 +1371,55 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Regressors {
 
-        IncomeSquared,
-        HoursMaleSquared,
-        HoursFemaleSquared,
-        HoursMaleByIncome,
-        HoursFemaleByIncome,
-        HoursMaleByHoursFemale,
-        Income,
-        IncomeByAge,
-        IncomeByAgeSquared,
-        IncomeByNumberChildren,
-        HoursMale,
-        HoursMaleByAgeMale,
-        HoursMaleByAgeMaleSquared,
-        HoursMaleByNumberChildren,
-        HoursMaleByDelderly,
-        HoursMaleByDregion,
-        HoursFemale,
-        HoursFemaleByAgeFemale,
-        HoursFemaleByAgeFemaleSquared,
-        HoursFemaleByDchildren2under,
-        HoursFemaleByDchildren3_6,
-        HoursFemaleByDchildren7_12,
-        HoursFemaleByDchildren13_17,
-        HoursFemaleByDelderly,
-        HoursFemaleByDregion,
-
-        FixedCostMaleByNumberChildren,
-        FixedCostMaleByDchildren2under,
-
-        FixedCostFemaleByNumberChildren,
-        FixedCostFemaleByDchildren2under,
-        FixedCostByHighEducation,
-
-        //New set of regressors for LS models from Zhechun:
-        IncomeDiv100,                             //Disposable monthly income from donor household divided by 100
-        IncomeSqDiv10000,                        //Income squared divided by 10000
-        IncomeDiv100_MeanPartnersAgeDiv100,        //Income divided by 100 interacted with mean age of male and female in the household divided by 100
-        IncomeDiv100_MeanPartnersAgeSqDiv10000,     //Income divided by 100 interacted with square of mean age of male and female in the household divided by 100
-        IncomeDiv100_NChildren017,                 //Income divided by 100 interacted with the number of children aged 0-17
-        IncomeDiv100_DChildren2Under,            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
-        MaleLeisure,                            //24*7 - labour supply weekly for male
-        MaleLeisureSq,
-        MaleLeisure_IncomeDiv100,
-        MaleLeisure_MaleAgeDiv100,                //Male Leisure interacted with age of male
-        MaleLeisure_MaleAgeSqDiv10000,
-        MaleLeisure_NChildren017,
-        MaleLeisure_DChildren2Under,
-        MaleLeisure_MaleDeh_c3_Low,
-        MaleLeisure_MaleDeh_c3_Medium,
-        MaleLeisure_UKC,
-        MaleLeisure_UKD,
-        MaleLeisure_UKE,
-        MaleLeisure_UKF,
-        MaleLeisure_UKG,
-        MaleLeisure_UKH,
-        MaleLeisure_UKJ,
-        MaleLeisure_UKK,
-        MaleLeisure_UKL,
-        MaleLeisure_UKM,
-        MaleLeisure_UKN,
-        MaleLeisure_MaleAge50Above,         //Male leisure interacted with dummy for age >= 50
-        MaleLeisure_FemaleLeisure,            //Male leisure interacted with female leisure
+        Constant,
+        couple_emp_2ft,
+        couple_emp_2ne,
+        couple_emp_2pt,
+        couple_emp_ftne,
+        couple_emp_ftpt,
+        couple_emp_ptne,
+        Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
+        Cut10,
+        Cut2,
+        Cut3,
+        Cut4,
+        Cut5,
+        Cut6,
+        Cut7,
+        Cut8,
+        Cut9,
+        FemaleEduH_1,
+        FemaleEduH_10,
+        FemaleEduH_2,
+        FemaleEduH_20,
+        FemaleEduH_3,
+        FemaleEduH_30,
+        FemaleEduH_4,
+        FemaleEduH_40,
+        FemaleEduM_1,
+        FemaleEduM_10,
+        FemaleEduM_2,
+        FemaleEduM_20,
+        FemaleEduM_3,
+        FemaleEduM_30,
+        FemaleEduM_4,
+        FemaleEduM_40,
+        FemaleHoursAbove40,
         FemaleLeisure,                            //24*7 - labour supply weekly for Female
-        FemaleLeisureSq,
-        FemaleLeisure_IncomeDiv100,
+        FemaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
+        FemaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
+        FemaleLeisure_DChildren2Under,
+        FemaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
+        FemaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
+        FemaleLeisure_dnc,
+        FemaleLeisure_dnc02,
+        FemaleLeisure_FemaleAge50Above,         //Female leisure interacted with dummy for age >= 50
         FemaleLeisure_FemaleAgeDiv100,                //Female Leisure interacted with age of Female
         FemaleLeisure_FemaleAgeSqDiv10000,
-        FemaleLeisure_NChildren017,
-        FemaleLeisure_DChildren2Under,
         FemaleLeisure_FemaleDeh_c3_Low,
         FemaleLeisure_FemaleDeh_c3_Medium,
+        FemaleLeisure_IncomeDiv100,
+        FemaleLeisure_NChildren017,
         FemaleLeisure_UKC,
         FemaleLeisure_UKD,
         FemaleLeisure_UKE,
@@ -1452,44 +1431,69 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         FemaleLeisure_UKL,
         FemaleLeisure_UKM,
         FemaleLeisure_UKN,
-        FemaleLeisure_FemaleAge50Above,         //Female leisure interacted with dummy for age >= 50
-        FixedCostMale,
-        FixedCostMale_NorthernRegions,
-        FixedCostMale_SouthernRegions,
+        FemaleLeisureSq,
+        FixedCost_Female,
+        FixedCost_Male,
+        FixedCostByHighEducation,
         FixedCostFemale,
-        FixedCostFemale_NorthernRegions,
-        FixedCostFemale_SouthernRegions,
-        FixedCostMale_NChildren017,
-        FixedCostMale_DChildren2Under,
-        FixedCostFemale_NChildren017,
         FixedCostFemale_DChildren2Under,
-
-        MaleHoursAbove40,
-        FemaleHoursAbove40,
-
-        //Additional regressors for single female or single male benefitUnits:
-
-        MaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
-        MaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
-        MaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
-        MaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
-        FixedCostMale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
-        FixedCostMale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
-
-        FemaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
-        FemaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
-        FemaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
-        FemaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
         FixedCostFemale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
         FixedCostFemale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
-
-        // Additional variables for re-estimated LS processes
-        FixedCost_Male,
-        FixedCost_Female,
-        IncomeDiv100_MaleAgeDiv100,
-        IncomeDiv100_MaleAgeSqDiv10000,
+        FixedCostFemale_NChildren017,
+        FixedCostFemale_NorthernRegions,
+        FixedCostFemale_SouthernRegions,
+        FixedCostFemaleByDchildren2under,
+        FixedCostFemaleByNumberChildren,
+        FixedCostMale,
+        FixedCostMale_DChildren2Under,
+        FixedCostMale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
+        FixedCostMale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
+        FixedCostMale_NChildren017,
+        FixedCostMale_NorthernRegions,
+        FixedCostMale_SouthernRegions,
+        FixedCostMaleByDchildren2under,
+        FixedCostMaleByNumberChildren,
+        Graduate,
+        Homeownership_D, // Indicator: does the benefit unit own home?
+        HoursFemale,
+        HoursFemaleByAgeFemale,
+        HoursFemaleByAgeFemaleSquared,
+        HoursFemaleByDchildren13_17,
+        HoursFemaleByDchildren2under,
+        HoursFemaleByDchildren3_6,
+        HoursFemaleByDchildren7_12,
+        HoursFemaleByDelderly,
+        HoursFemaleByDregion,
+        HoursFemaleByIncome,
+        HoursFemaleSquared,
+        HoursMale,
+        HoursMaleByAgeMale,
+        HoursMaleByAgeMaleSquared,
+        HoursMaleByDelderly,
+        HoursMaleByDregion,
+        HoursMaleByHoursFemale,
+        HoursMaleByIncome,
+        HoursMaleByNumberChildren,
+        HoursMaleSquared,
+        Hrs_36plus_Female,
+        Hrs_36plus_Male,
+        Income,
+        IncomeByAge,
+        IncomeByAgeSquared,
+        IncomeByNumberChildren,
+        IncomeDiv100,                             //Disposable monthly income from donor household divided by 100
+        IncomeDiv100_DChildren2Under,            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
         IncomeDiv100_dnc,
         IncomeDiv100_dnc02,
+        IncomeDiv100_FemaleAgeDiv100,
+        IncomeDiv100_FemaleAgeSqDiv10000,
+        IncomeDiv100_MaleAgeDiv100,
+        IncomeDiv100_MaleAgeSqDiv10000,
+        IncomeDiv100_MeanPartnersAgeDiv100,        //Income divided by 100 interacted with mean age of male and female in the household divided by 100
+        IncomeDiv100_MeanPartnersAgeSqDiv10000,     //Income divided by 100 interacted with square of mean age of male and female in the household divided by 100
+        IncomeDiv100_NChildren017,                 //Income divided by 100 interacted with the number of children aged 0-17
+        IncomeSqDiv10000,                        //Income squared divided by 10000
+        IncomeSquared,
         L1_lhw_1,
         L1_lhw_10,
         L1_lhw_2,
@@ -1498,107 +1502,244 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         L1_lhw_30,
         L1_lhw_4,
         L1_lhw_40,
-        L1_lhw_Male_1,
         L1_lhw_Female_1,
-        L1_lhw_Male_2,
-        L1_lhw_Female_2,
-        L1_lhw_Male_3,
-        L1_lhw_Female_3,
-        L1_lhw_Male_4,
-        L1_lhw_Female_4,
-        L1_lhw_Male_10,
         L1_lhw_Female_10,
-        L1_lhw_Male_11,
         L1_lhw_Female_11,
-        L1_lhw_Male_12,
         L1_lhw_Female_12,
-        L1_lhw_Male_13,
         L1_lhw_Female_13,
-        L1_lhw_Male_14,
         L1_lhw_Female_14,
-        L1_lhw_Male_20,
+        L1_lhw_Female_2,
         L1_lhw_Female_20,
-        L1_lhw_Male_21,
         L1_lhw_Female_21,
-        L1_lhw_Male_22,
         L1_lhw_Female_22,
-        L1_lhw_Male_23,
         L1_lhw_Female_23,
-        L1_lhw_Male_24,
         L1_lhw_Female_24,
-        L1_lhw_Male_30,
+        L1_lhw_Female_3,
         L1_lhw_Female_30,
-        L1_lhw_Male_31,
         L1_lhw_Female_31,
-        L1_lhw_Male_32,
         L1_lhw_Female_32,
-        L1_lhw_Male_33,
         L1_lhw_Female_33,
-        L1_lhw_Male_34,
         L1_lhw_Female_34,
-        L1_lhw_Male_40,
+        L1_lhw_Female_4,
         L1_lhw_Female_40,
-        L1_lhw_Male_41,
         L1_lhw_Female_41,
-        L1_lhw_Male_42,
         L1_lhw_Female_42,
-        L1_lhw_Male_43,
         L1_lhw_Female_43,
-        L1_lhw_Male_44,
         L1_lhw_Female_44,
-        MaleEduM_10,
+        L1_lhw_Male_1,
+        L1_lhw_Male_10,
+        L1_lhw_Male_11,
+        L1_lhw_Male_12,
+        L1_lhw_Male_13,
+        L1_lhw_Male_14,
+        L1_lhw_Male_2,
+        L1_lhw_Male_20,
+        L1_lhw_Male_21,
+        L1_lhw_Male_22,
+        L1_lhw_Male_23,
+        L1_lhw_Male_24,
+        L1_lhw_Male_3,
+        L1_lhw_Male_30,
+        L1_lhw_Male_31,
+        L1_lhw_Male_32,
+        L1_lhw_Male_33,
+        L1_lhw_Male_34,
+        L1_lhw_Male_4,
+        L1_lhw_Male_40,
+        L1_lhw_Male_41,
+        L1_lhw_Male_42,
+        L1_lhw_Male_43,
+        L1_lhw_Male_44,
+        Liwwh_1,
+        Liwwh_10,
+        Liwwh_2,
+        Liwwh_20,
+        Liwwh_3,
+        Liwwh_30,
+        Liwwh_4,
+        Liwwh_40,
+        Liwwh_5,
+        Liwwh_50,
+        Liwwh_6,
+        Liwwh_60,
+        Liwwh_Female_01,
+        Liwwh_Female_02,
+        Liwwh_Female_03,
+        Liwwh_Female_04,
+        Liwwh_Female_05,
+        Liwwh_Female_06,
+        Liwwh_Female_1,
+        Liwwh_Female_10,
+        Liwwh_Female_11,
+        Liwwh_Female_12,
+        Liwwh_Female_13,
+        Liwwh_Female_14,
+        Liwwh_Female_15,
+        Liwwh_Female_16,
+        Liwwh_Female_2,
+        Liwwh_Female_20,
+        Liwwh_Female_21,
+        Liwwh_Female_22,
+        Liwwh_Female_23,
+        Liwwh_Female_24,
+        Liwwh_Female_25,
+        Liwwh_Female_26,
+        Liwwh_Female_3,
+        Liwwh_Female_30,
+        Liwwh_Female_31,
+        Liwwh_Female_32,
+        Liwwh_Female_33,
+        Liwwh_Female_34,
+        Liwwh_Female_35,
+        Liwwh_Female_36,
+        Liwwh_Female_4,
+        Liwwh_Female_40,
+        Liwwh_Female_41,
+        Liwwh_Female_42,
+        Liwwh_Female_43,
+        Liwwh_Female_44,
+        Liwwh_Female_45,
+        Liwwh_Female_46,
+        Liwwh_Female_5,
+        Liwwh_Female_50,
+        Liwwh_Female_51,
+        Liwwh_Female_52,
+        Liwwh_Female_53,
+        Liwwh_Female_54,
+        Liwwh_Female_55,
+        Liwwh_Female_56,
+        Liwwh_Female_6,
+        Liwwh_Female_60,
+        Liwwh_Female_61,
+        Liwwh_Female_62,
+        Liwwh_Female_63,
+        Liwwh_Female_64,
+        Liwwh_Female_65,
+        Liwwh_Female_66,
+        Liwwh_Male_01,
+        Liwwh_Male_02,
+        Liwwh_Male_03,
+        Liwwh_Male_04,
+        Liwwh_Male_05,
+        Liwwh_Male_06,
+        Liwwh_Male_1,
+        Liwwh_Male_10,
+        Liwwh_Male_11,
+        Liwwh_Male_12,
+        Liwwh_Male_13,
+        Liwwh_Male_14,
+        Liwwh_Male_15,
+        Liwwh_Male_16,
+        Liwwh_Male_2,
+        Liwwh_Male_20,
+        Liwwh_Male_21,
+        Liwwh_Male_22,
+        Liwwh_Male_23,
+        Liwwh_Male_24,
+        Liwwh_Male_25,
+        Liwwh_Male_26,
+        Liwwh_Male_3,
+        Liwwh_Male_30,
+        Liwwh_Male_31,
+        Liwwh_Male_32,
+        Liwwh_Male_33,
+        Liwwh_Male_34,
+        Liwwh_Male_35,
+        Liwwh_Male_36,
+        Liwwh_Male_4,
+        Liwwh_Male_40,
+        Liwwh_Male_41,
+        Liwwh_Male_42,
+        Liwwh_Male_43,
+        Liwwh_Male_44,
+        Liwwh_Male_45,
+        Liwwh_Male_46,
+        Liwwh_Male_5,
+        Liwwh_Male_50,
+        Liwwh_Male_51,
+        Liwwh_Male_52,
+        Liwwh_Male_53,
+        Liwwh_Male_54,
+        Liwwh_Male_55,
+        Liwwh_Male_56,
+        Liwwh_Male_6,
+        Liwwh_Male_60,
+        Liwwh_Male_61,
+        Liwwh_Male_62,
+        Liwwh_Male_63,
+        Liwwh_Male_64,
+        Liwwh_Male_65,
+        Liwwh_Male_66,
+        MaleEduH_1,
         MaleEduH_10,
-        MaleEduM_20,
+        MaleEduH_2,
         MaleEduH_20,
-        MaleEduM_30,
+        MaleEduH_3,
         MaleEduH_30,
-        MaleEduM_40,
+        MaleEduH_4,
         MaleEduH_40,
         MaleEduM_1,
-        MaleEduH_1,
+        MaleEduM_10,
         MaleEduM_2,
-        MaleEduH_2,
+        MaleEduM_20,
         MaleEduM_3,
-        MaleEduH_3,
+        MaleEduM_30,
         MaleEduM_4,
-        MaleEduH_4,
-        FemaleEduM_10,
-        FemaleEduH_10,
-        FemaleEduM_20,
-        FemaleEduH_20,
-        FemaleEduM_30,
-        FemaleEduH_30,
-        FemaleEduM_40,
-        FemaleEduH_40,
-        FemaleEduM_1,
-        FemaleEduH_1,
-        FemaleEduM_2,
-        FemaleEduH_2,
-        FemaleEduM_3,
-        FemaleEduH_3,
-        FemaleEduM_4,
-        FemaleEduH_4,
+        MaleEduM_40,
+        MaleHoursAbove40,
+        MaleLeisure,                            //24*7 - labour supply weekly for male
+        MaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
+        MaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
+        MaleLeisure_DChildren2Under,
+        MaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
+        MaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
         MaleLeisure_dnc,
-        FemaleLeisure_dnc,
         MaleLeisure_dnc02,
-        FemaleLeisure_dnc02,
-        IncomeDiv100_FemaleAgeDiv100,
-        IncomeDiv100_FemaleAgeSqDiv10000,
-                //Other
-        Homeownership_D, // Indicator: does the benefit unit own home?
-
-        //Enums for use with the tax-benefit matching method
+        MaleLeisure_FemaleLeisure,            //Male leisure interacted with female leisure
+        MaleLeisure_IncomeDiv100,
+        MaleLeisure_MaleAge50Above,         //Male leisure interacted with dummy for age >= 50
+        MaleLeisure_MaleAgeDiv100,                //Male Leisure interacted with age of male
+        MaleLeisure_MaleAgeSqDiv10000,
+        MaleLeisure_MaleDeh_c3_Low,
+        MaleLeisure_MaleDeh_c3_Medium,
+        MaleLeisure_NChildren017,
+        MaleLeisure_UKC,
+        MaleLeisure_UKD,
+        MaleLeisure_UKE,
+        MaleLeisure_UKF,
+        MaleLeisure_UKG,
+        MaleLeisure_UKH,
+        MaleLeisure_UKJ,
+        MaleLeisure_UKK,
+        MaleLeisure_UKL,
+        MaleLeisure_UKM,
+        MaleLeisure_UKN,
+        MaleLeisureSq,
         MaximumAge, // Returns maximum age of responsible individuals in the benefit (tax) unit
         MinimumAge, // Returns maximum age of all people in benefit unit
-        NumberMembersOver17, // Return number of members of benefit unit aged over 17
+        n_children_0,
+        n_children_1,
+        n_children_10,
+        n_children_11,
+        n_children_12,
+        n_children_13,
+        n_children_14,
+        n_children_2,
+        n_children_3,
+        n_children_4,
+        n_children_5,
+        n_children_6,
+        n_children_7,
+        n_children_8,
+        n_children_9,
         NumberChildren04,  // Return number of children aged <0;5)
-        NumberChildren59,
         NumberChildren1017,
         NumberChildren517, // Return number of children aged <5;17>
-
-        // regressors for childcare costs
-        Constant,
-        Year_transformed,
+        NumberChildren59,
+        NumberMembersOver17, // Return number of members of benefit unit aged over 17
+        single_emp_ft,
+        single_emp_ne,
+        single_emp_pt,
         UKC,
         UKD,
         UKE,
@@ -1611,41 +1752,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         UKL,
         UKM,
         UKN,
-        n_children_0,
-        n_children_1,
-        n_children_2,
-        n_children_3,
-        n_children_4,
-        n_children_5,
-        n_children_6,
-        n_children_7,
-        n_children_8,
-        n_children_9,
-        n_children_10,
-        n_children_11,
-        n_children_12,
-        n_children_13,
-        n_children_14,
-        couple_emp_2ft,
-        couple_emp_ftpt,
-        couple_emp_2pt,
-        couple_emp_ftne,
-        couple_emp_ptne,
-        couple_emp_2ne,
-        single_emp_ft,
-        single_emp_pt,
-        single_emp_ne,
-        Graduate,
-        Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
-        Cut2,
-        Cut3,
-        Cut4,
-        Cut5,
-        Cut6,
-        Cut7,
-        Cut8,
-        Cut9,
-        Cut10,
+        Year_transformed,
 
     }
 
@@ -2107,8 +2214,22 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case HoursMaleSquared -> {
                 return getMale().getLabourSupplyHoursWeekly() * getMale().getLabourSupplyHoursWeekly();
             }
+            case Hrs_36plus_Male -> {
+                if (getMale() != null) {
+                    return getMale().getLabourSupplyHoursWeekly() >=36 ? 1.:0.;
+                } else{
+                    return 0.;
+                }
+            }
             case HoursFemaleSquared -> {
                 return getFemale().getLabourSupplyHoursWeekly() * getFemale().getLabourSupplyHoursWeekly();
+            }
+            case Hrs_36plus_Female -> {
+                if (getFemale() != null) {
+                    return getFemale().getLabourSupplyHoursWeekly() >=36 ? 1.:0.;
+                } else{
+                    return 0.;
+                }
             }
             case HoursMaleByIncome -> {
                 return getMale().getLabourSupplyHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-3;
@@ -2440,6 +2561,272 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case L1_lhw_Female_44 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+            }
+            case Liwwh_1 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_1 for non-single woman");
+                }
+            }
+            case Liwwh_10 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_10 for non-single man");
+                }
+            }
+            case Liwwh_2 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_2 for non-single woman");
+                }
+            }
+            case Liwwh_20 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_20 for non-single man");
+                }
+            }
+            case Liwwh_3 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_3 for non-single woman");
+                }
+            }
+            case Liwwh_30 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_30 for non-single man");
+                }
+            }
+            case Liwwh_4 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_4 for non-single woman");
+                }
+            }
+            case Liwwh_40 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_40 for non-single man");
+                }
+            }
+            case Liwwh_5 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_5 for non-single woman");
+                }
+            }
+            case Liwwh_50 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_50 for non-single man");
+                }
+            }
+            case Liwwh_6 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_6 for non-single woman");
+                }
+            }
+            case Liwwh_60 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_60 for non-single man");
+                }
+            }
+            case Liwwh_Female_1 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_2 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_3 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_4 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_5 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_6 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_10, Liwwh_Female_20, Liwwh_Female_30, Liwwh_Female_40, Liwwh_Female_50, Liwwh_Female_60  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_01, Liwwh_Female_11, Liwwh_Female_21, Liwwh_Female_31, Liwwh_Female_41, Liwwh_Female_51, Liwwh_Female_61  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_02, Liwwh_Female_12, Liwwh_Female_22, Liwwh_Female_32, Liwwh_Female_42, Liwwh_Female_52, Liwwh_Female_62  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_03, Liwwh_Female_13, Liwwh_Female_23, Liwwh_Female_33, Liwwh_Female_43, Liwwh_Female_53, Liwwh_Female_63  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_04, Liwwh_Female_14, Liwwh_Female_24, Liwwh_Female_34, Liwwh_Female_44, Liwwh_Female_54, Liwwh_Female_64  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_05, Liwwh_Female_15, Liwwh_Female_25, Liwwh_Female_35, Liwwh_Female_45, Liwwh_Female_55, Liwwh_Female_65  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_06, Liwwh_Female_16, Liwwh_Female_26, Liwwh_Female_36, Liwwh_Female_46, Liwwh_Female_56, Liwwh_Female_66  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_1 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_2 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_3 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_4 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_5 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_6 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_01, Liwwh_Male_02, Liwwh_Male_03, Liwwh_Male_04, Liwwh_Male_05, Liwwh_Male_06  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_10, Liwwh_Male_11, Liwwh_Male_12, Liwwh_Male_13, Liwwh_Male_14, Liwwh_Male_15, Liwwh_Male_16  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_20, Liwwh_Male_21, Liwwh_Male_22, Liwwh_Male_23, Liwwh_Male_24, Liwwh_Male_25, Liwwh_Male_26  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_30, Liwwh_Male_31, Liwwh_Male_32, Liwwh_Male_33, Liwwh_Male_34, Liwwh_Male_35, Liwwh_Male_36  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_40, Liwwh_Male_41, Liwwh_Male_42, Liwwh_Male_43, Liwwh_Male_44, Liwwh_Male_45, Liwwh_Male_46  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_50, Liwwh_Male_51, Liwwh_Male_52, Liwwh_Male_53, Liwwh_Male_54, Liwwh_Male_55, Liwwh_Male_56  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_60, Liwwh_Male_61, Liwwh_Male_62, Liwwh_Male_63, Liwwh_Male_64, Liwwh_Male_65, Liwwh_Male_66  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
             }
             case MaleEduM_10 -> {
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
@@ -2794,7 +3181,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (innovations.getDoubleDraw(6) < prob) {
                     male_homeowner = true;
                 }
-                male.setDhhOwned(male_homeowner);
             }
             if (female!=null) {
 
@@ -2802,7 +3188,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (innovations.getDoubleDraw(7) < prob) {
                     female_homeowner = true;
                 }
-                female.setDhhOwned(female_homeowner);
             }
             if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
                 setDhhOwned(true);
@@ -2864,25 +3249,25 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             wealth += (1.0 - Parameters.getPensionWealthDiscount(age)) * donorPensionWealth;
         if (!Parameters.projectHousingWealth)
             wealth += (1.0 - Parameters.getHousingWealthDiscount(age)) * donorHousingWealth;
-        setLiquidWealth(wealth);
+        setTotalWealth(wealth);
     }
 
-    public double getLiquidWealth() {
+    public double getTotalWealth() {
         return getLiquidWealth(true);
     }
 
     public double getLiquidWealth(boolean throwError) {
-        if (!Parameters.checkFinite(liquidWealth)) {
+        if (!Parameters.checkFinite(totalWealth)) {
             if (throwError)
                 throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
             else
                 return 0.0;
         }
-        return liquidWealth;
+        return totalWealth;
     }
 
-    public void setLiquidWealth(Double liquidWealth) {
-        this.liquidWealth = liquidWealth;
+    public void setTotalWealth(Double liquidWealth) {
+        this.totalWealth = liquidWealth;
     }
 
     public double getPensionWealth() {
@@ -3350,10 +3735,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             Person refPerson = getRefPersonForDecisions();
             boolean toRetire = refPerson.considerRetirement();
             Occupancy occupancy = getOccupancy();
-            if (toRetire && getLiquidWealth() > 0.0) {
-                pensionIncomeAnnual = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
+            if (toRetire && getTotalWealth() > 0.0) {
+                pensionIncomeAnnual = totalWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
                         Parameters.annuityRates.getAnnuityRate(occupancy, getYear()-refPerson.getDag(), refPerson.getDag());
-                liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
+                totalWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
 
                 // upate person variables
                 double val;
@@ -3387,7 +3772,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             Person male = getMale();
             Person female = getFemale();
-            if (getLiquidWealth() < 0) {
+            if (getTotalWealth() < 0) {
 
                 double wageFactor = 0.0;
                 if (male != null) wageFactor += 0.7 * male.getEarningsWeekly(DecisionParams.FULLTIME_HOURS_WEEKLY) * 52.0;
@@ -3396,15 +3781,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (wageFactor < 0.1) {
                     phi = 1.0;
                 } else {
-                    phi = - liquidWealth / wageFactor;
+                    phi = -totalWealth / wageFactor;
                 }
                 phi = Math.min(phi, 1.0);
                 investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostLow)*(1.0-phi) +
                         Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostHigh)*phi +
-                        Parameters.realInterestRateInnov) * liquidWealth;
+                        Parameters.realInterestRateInnov) * totalWealth;
             } else {
                 investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealSavingReturns) +
-                        Parameters.realInterestRateInnov) * liquidWealth;
+                        Parameters.realInterestRateInnov) * totalWealth;
             }
             if ((investmentIncomeAnnual < -20000000.0) || (investmentIncomeAnnual > 200000000.0))
                 throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
@@ -3447,7 +3832,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 throw new RuntimeException("Disposable income not defined.");
             }
 
-            double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
+            double cashOnHand = Math.max(getTotalWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
                     + getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
             if (!Parameters.checkFinite(cashOnHand)) {
                 throw new RuntimeException("Problem identifying cash on hand");
@@ -3754,24 +4139,24 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public static void setBenefitUnitIdCounter(long id) {benefitUnitIdCounter = id;}
 
-        /**
-         * Calculates the labour innovation value for the current period with persistence.
-         *
-         * This method implements a persistence mechanism for labour innovations where there's
-         * a probability that the previous period's innovation will persist into the current period.
-         * A new innovation is drawn each period, but it's only used with probability (1 - persistenceProbability).
-         *
-         * The persistence mechanism works as follows:
-         * 1. Draw a new potential innovation value
-         * 2. Draw a random number to determine if we should use the new value or persist with the old one
-         * 3. If it's the first period or there was a gap in years, use the new innovation
-         * 4. Otherwise, use the persistence probability to decide between new and old values
-         *
-         * @param persistenceProbability The probability (between 0 and 1) that the previous period's
-         *                              innovation will persist. A value of 0 means always use new innovations,
-         *                              while 1 means always keep the old innovation.
-         * @return The labour innovation value for this period
-         */
+    /**
+     * Calculates the labour innovation value for the current period with persistence.
+     *
+     * This method implements a persistence mechanism for labour innovations where there's
+     * a probability that the previous period's innovation will persist into the current period.
+     * A new innovation is drawn each period, but it's only used with probability (1 - persistenceProbability).
+     *
+     * The persistence mechanism works as follows:
+     * 1. Draw a new potential innovation value
+     * 2. Draw a random number to determine if we should use the new value or persist with the old one
+     * 3. If it's the first period or there was a gap in years, use the new innovation
+     * 4. Otherwise, use the persistence probability to decide between new and old values
+     *
+     * @param persistenceProbability The probability (between 0 and 1) that the previous period's
+     *                              innovation will persist. A value of 0 means always use new innovations,
+     *                              while 1 means always keep the old innovation.
+     * @return The labour innovation value for this period
+     */
     private double getLabourInnovation(double persistenceProbability) {
 
         double newLabourInnovation = innovations.getDoubleDraw(5);
@@ -3800,8 +4185,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         lastYear = currentYear;
 
         return labourInnov;
+    }
 
-
-
+    private Person getSingle() {
+        if (getMale() != null & getFemale() == null) {
+            return null;
+        } else if (getMale() != null) {
+            return getMale();
+        } else {
+            return getFemale();
         }
+    }
 }

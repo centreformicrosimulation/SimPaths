@@ -80,7 +80,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Les_c7_covid les_c7_covid; //Activity (employment) status used in the Covid-19 models
     @Transient private Les_c4 les_c4_lag1;		//Lag(1) of activity_status
     @Transient private Les_c7_covid les_c7_covid_lag1;     //Lag(1) of 7-category activity status
-    @Transient private Integer liwwh;                  //Work history in months (number of months in employment) (Note: this is monthly in EM, but simulation updates annually so increment by 12 months).
+    @Column(name="liwwh") private Integer liwwh;                  //Work history in months (number of months in employment) (Note: this is monthly in EM, but simulation updates annually so increment by 12 months).
     @Enumerated(EnumType.STRING) private Indicator dlltsd;	//Long-term sick or disabled if = 1
     @Transient private Indicator dlltsd_lag1; //Lag(1) of long-term sick or disabled
     @Enumerated(EnumType.STRING) @Column(name="need_socare") private Indicator needSocialCare;
@@ -99,7 +99,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean socialCareFromDaughter;
     @Transient private Boolean socialCareFromSon;
     @Transient private Boolean socialCareFromOther;
-    @Column(name="socare_provided_hrs") private Double careHoursProvidedWeekly;
+    @Column(name="carehoursprovidedweekly") private Double careHoursProvidedWeekly;
     @Enumerated(EnumType.STRING) @Column(name="socare_provided_to") private SocialCareProvision socialCareProvision;
     @Transient private SocialCareProvision socialCareProvision_lag1;
     @Transient private Indicator needSocialCare_lag1;
@@ -147,8 +147,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="he_eq5d")
     private Double he_eq5d;
     @Column(name="financial_distress") private Boolean financialDistress;
-
-    @Column(name="dhh_owned") private Boolean dhhOwned; // Person is a homeowner, true / false
     @Transient private Boolean receivesBenefitsFlag_L1; // Lag(1) of whether person receives benefits
     @Transient private Boolean receivesBenefitsFlag; // Does person receive benefits
     @Column(name="econ_benefits_uc") private Boolean receivesBenefitsFlagUC; // Person receives UC
@@ -310,7 +308,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         lifetimeIncome = 0.;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         bornInSimulation = true;
-        dhhOwned = false;
         receivesBenefitsFlag = false;
         receivesBenefitsFlagNonUC = false;
         receivesBenefitsFlagUC = false;
@@ -472,8 +469,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhe = originalPerson.dhe;
         dhm = originalPerson.dhm;
 
-        isHomeOwner_lag1 = originalPerson.dhhOwned;
-
         if (originalPerson.dhe_lag1 != null) { //If original person misses lagged level of health, assign current level of health as lagged value
             dhe_lag1 = originalPerson.dhe_lag1;
         } else {
@@ -541,7 +536,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yearlyEquivalisedConsumptionSeries = new Series.Double(this, DoublesVariables.EquivalisedConsumptionYearly);
         yearlyEquivalisedConsumption = originalPerson.yearlyEquivalisedConsumption;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
-        dhhOwned = originalPerson.dhhOwned;
         dot01 = originalPerson.dot01;
         receivesBenefitsFlag = originalPerson.receivesBenefitsFlag;
         receivesBenefitsFlag_L1 = originalPerson.receivesBenefitsFlag_L1;
@@ -1854,7 +1848,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (dag <= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             return 0.0;
         } else if (benefitUnit != null) {
-            return (Occupancy.Couple.equals(benefitUnit.getOccupancy())) ? benefitUnit.getLiquidWealth() / 2.0 : benefitUnit.getLiquidWealth();
+            return (Occupancy.Couple.equals(benefitUnit.getOccupancy())) ? benefitUnit.getTotalWealth() / 2.0 : benefitUnit.getTotalWealth();
         } else {
             throw new RuntimeException("Call to get liquid wealth for person object without benefit unit assigned");
         }
@@ -2290,6 +2284,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         CareToPartnerOnly_L1,
         Cohort,
         Constant, 						// For the constant (intercept) term of the regression
+        Covid_D,
         Covid_2020_D,
         Covid_2021_D,
         Covid19GrossPayMonthly_L1,
@@ -3853,6 +3848,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case D_Home_owner_L1, Dhh_owned_L1 -> {
                 return isHomeOwner_lag1 ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
+            case Covid_D -> {
+                return (getYear() > 2019 & getYear() < 2023) ? 1. : 0.;
+            }
             case Covid_2020_D -> {
                 return (getYear() == 2020) ? 1. : 0.;
             }
@@ -4986,14 +4984,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.covidModuleGrossLabourIncomeBaseline_Xt5 = covidModuleGrossLabourIncomeBaseline_Xt5;
     }
 
-    public boolean isDhhOwned() {
-        return dhhOwned;
-    }
-
-    public void setDhhOwned(boolean dhh_owned) {
-        this.dhhOwned = dhh_owned;
-    }
-
     public boolean isReceivesBenefitsFlag() {
         return receivesBenefitsFlag;
     }
@@ -5651,4 +5641,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public Individual getLtIncomeDonor() {return ltIncomeDonor;}
+
+    public Integer getLiwwh() {
+        return liwwh;
+    }
 }

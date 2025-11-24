@@ -241,6 +241,9 @@ public class LabourMarket {
             }
 
             //Update Labour Supply
+//            for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
+//                benefitUnit.updateLabourSupplyAndIncome();
+//            }
             benefitUnitsAllRegions.parallelStream()
                     .forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
