@@ -64,7 +64,7 @@ public class States {
 
         // populate wealth
         double val;
-        val = Math.min(Math.max(benefitUnit.getLiquidWealth(), DecisionParams.getMinWealthByAge(ageYears)), DecisionParams.getMaxWealthByAge(ageYears));
+        val = Math.min(Math.max(benefitUnit.getTotalWealth(), DecisionParams.getMinWealthByAge(ageYears)), DecisionParams.getMaxWealthByAge(ageYears));
         val = Math.log(val + DecisionParams.C_LIQUID_WEALTH);
         populate(Axis.LiquidWealth, val);
 

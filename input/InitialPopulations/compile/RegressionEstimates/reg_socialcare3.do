@@ -14,7 +14,7 @@
 *
 **************************************************************************************/
 clear all
-global datadir = "C:\MyFiles\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls\"
+global datadir = "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls\"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates\data\"
 cd "$outdir"
 global UKHLSWaves "f g h i j k l"
@@ -336,6 +336,7 @@ save "ukhlstml_supply_pooled.dta", replace
 *	evaluate regressions
 **************************************************************************************/
 use "ukhlstml_supply_pooled.dta", clear
+gen covid = (year>2019) * (year<2023)
 
 // probit regression for people providing care to partners (3a)
 probit care_nonpartner male i.deh_c3 i.scsf1 i.careWho_l ib1.dage1 ib7.drgn [pweight=indinui_xw] if (care_partner==1 & dvage>17), vce(r)

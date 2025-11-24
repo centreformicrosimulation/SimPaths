@@ -1,8 +1,8 @@
 /**************************************************************************************
 *
 *	PROGRAM TO EVALUATE SOCIAL CARE FROM FRS DATA
-*	Last version:  Justin van de Ven, 28 Aug 2023
-*	First version: Justin van de Ven, 05 Jun 2024
+*	First version:  Justin van de Ven, 28 Aug 2023
+*	Last version: 	Justin van de Ven, 19 Nov 2025
 *	
 *
 **************************************************************************************/
@@ -180,7 +180,8 @@ regress hourInfCare i.dhe_c3 i.male i.agega ib8.gvtregno if (ltsd==1 & age80<65 
 
 // Process S1a
 gen aged = (age80<25)
-probit recInfCare i.dhe_c3 male aged ib8.gvtregno if (ltsd==1 & age80<65) [fweight=gross4], vce(r)
+gen covid = (year==2021)
+probit recInfCare i.dhe_c3 male aged ib8.gvtregno covid if (ltsd==1 & age80<65) [fweight=gross4], vce(r)
 putexcel set "$outdir/probitCareUnder65", modify
 putexcel A1 = matrix(e(b))
 putexcel A2 = matrix(e(V))
@@ -188,7 +189,7 @@ putexcel A2 = matrix(e(V))
 // Process S1b
 gen agee = (age80<25) + 2*(age80>24)*(age80<40) + 3*(age80>39)
 gen lhourInfCare = ln(hourInfCare) if (recInfCare==1)
-regress lhourInfCare i.dhe_c3 i.male i.agee ib8.gvtregno if (ltsd==1 & age80<65 & recInfCare==1) [fweight=gross4], vce(r)
+regress lhourInfCare i.dhe_c3 i.male i.agee ib8.gvtregno covid if (ltsd==1 & age80<65 & recInfCare==1) [fweight=gross4], vce(r)
 putexcel set "$outdir/linearCareUnder65", modify
 putexcel A1 = matrix(e(b))
 putexcel A2 = matrix(e(V))

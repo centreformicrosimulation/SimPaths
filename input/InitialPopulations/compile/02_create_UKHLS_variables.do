@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          18 July 2025 DP
+* LAST UPDATE:          3 Nov 2025 DP
 * NOTE:					Called from 00_master.do - see master file for further details
 *						Use -9 for missing values 
 ***************************************************************************************
@@ -713,28 +713,28 @@ la var der "Return to education"
 //fre der
 
 /*****************************Partnership status*******************************/
-recode mastat_dv (2 3 10 = 1 "Partnered") ///
-	(0 1 = 2 "Single never married") /// Includes children under 16
-	(4 5 6 7 8 9 = 3 "Previously partnered") ///
-	, into (dcpst)
-la var dcpst "Partnership status"
-recode dcpst (-8 -2 -1 = -9)
+gen dcpst = . 
+replace dcpst = 1 if idpartner > 0 & !missing(idpartner) //partnered 
+replace dcpst = 2 if idpartner < 0 | missing(idpartner)
+lab var dcpst "Partnership status"
+lab def dcpst 1 "partnered" 2 "single" 
+lab val dcpst dcpst 
 
-*If idpartner = 0 (because of household splitting), dcpst should be set to 3 depending on mastat_dv value
-replace dcpst = 3 if dcpst == 1 & idpartner <= 0 
-replace dcpst = 1 if idpartner > 0 & !missing(idpartner)
-
-//Children coded as "Never Married" (17 and under chosen as can marry from 18 years onwards)
-replace dcpst = 2 if dag <= 17 & idpartner<0
-//fre dcpst
+recode dcpst (. = -9)
+/*
+* Children coded as "Never Married" 
+Can only marry from age 18 onwards in the simulation 
+*/
+replace dcpst = 2 if dag <= 17 & idpartner < 0
+//fre dcpst  
 
 
 /*****************************Enter partnership*******************************/
 sort idperson swv 
 cap drop dcpen
 gen dcpen = -9
-replace dcpen=0 if (l.dcpst==2 | l.dcpst==3)
-replace dcpen=1 if dcpst==1 & (l.dcpst==2 | l.dcpst==3)
+replace dcpen=0 if (l.dcpst==2)
+replace dcpen=1 if dcpst==1 & (l.dcpst==2)
 la val dcpen dummy
 la var dcpen "Enter partnership"
 //fre dcpen
@@ -745,7 +745,7 @@ sort idperson swv
 cap drop dcpex 
 gen dcpex=-9
 replace dcpex = 0 if l.dcpst==1
-replace dcpex = 1 if dcpst==3 & l.dcpst==1 
+replace dcpex = 1 if dcpst==2 & l.dcpst==1 
 la val dcpex dummy
 la var dcpex "Exit partnership" 
 //fre dcpex
@@ -757,7 +757,7 @@ la var dcpagdf "Partner's age difference"
 
 
 /*********************************Activity status*****************************/
-recode jbstat (1 2 5 12 13 14 = 1 "Employed or self-employed") ///
+recode jbstat (1 2 5 12 13 14 15 = 1 "Employed or self-employed") ///
 	(7 = 2 "Student") ///
 	(3 6 8 10 11 97 9 4 = 3 "Not employed") /// /*includes apprenticeships, unpaid family business, govt training scheme+retired */
 	, into(les_c3)
@@ -767,6 +767,7 @@ la var les "Activity status"
 replace les_c3 = 2 if dag <= 16
 //People below age to leave home are not at risk of work so set activity status to not employed if not a student
 replace les_c3 = 3 if dag < $age_become_responsible & les_c3 != 2
+//fre les_c3
 
 
 /***********************Activity status variable adding retirement*************/
@@ -777,7 +778,7 @@ replace les_c4 = 4 if jbstat==4
 lab var les_c4 "LABOUR MARKET: Activity status"
 lab define les_c4  1 "Employed or self-employed"  2 "Student"  3 "Not employed"  4 "Retired"
 lab val les_c4 les_c4
-//tab2 les_c3 les_c4
+//fre les_c4
 
 
 /****************************Partner's activity status:***********************/
@@ -871,18 +872,86 @@ bys swv idhh: egen dnc = sum(depChild)
 la var dnc "Number of dependent children 0 - 18"
 
 
+/****************************Pension Age***************************************/
+/*cap gen bdt = mdy(1, 15, birthy) /*month of birth is available in special license only*/
+*/
+/*State Retirement Ages for Men in the UK (2009-2023):
+2009-2010: 65
+2010-2011: 65
+2011-2012: 65
+2012-2013: 65
+2013-2014: 65
+2014-2015: 65
+2015-2016: 65
+2016-2017: 65
+2017-2018: 65
+2018-2019: 65
+2019-2020: 65
+2020-2021: 66
+2021-2022: 66
+2022-2023: 66
+State Retirement Ages for Women in the UK (2009-2023):
+2009-2010: 60
+2010-2011: 60
+2011-2012: 60
+2012-2013: 61
+2013-2014: 61
+2014-2015: 62
+2015-2016: 62
+2016-2017: 63
+2017-2018: 63
+2018-2019: 64
+2019-2020: 65
+2020-2021: 65
+2021-2022: 66
+2022-2023: 66
+*/
+gen dagpns = 0
+//for men
+replace dagpns = 1 if dgn==1 & dag>=65 & stm>=2009 & stm<2020 
+replace dagpns = 1 if dgn==1 & dag>=66 & stm>=2020 
+//for women 
+replace dagpns = 1 if dgn==0 & dag>=60 & stm>=2009 & stm<2012
+replace dagpns = 1 if dgn==0 & dag>=61 & stm>=2012 & stm<2014
+replace dagpns = 1 if dgn==0 & dag>=62 & stm>=2014 & stm<2016
+replace dagpns = 1 if dgn==0 & dag>=63 & stm>=2016 & stm<2018
+replace dagpns = 1 if dgn==0 & dag>=64 & stm>=2018 & stm<2019
+replace dagpns = 1 if dgn==0 & dag>=65 & stm>=2019 & stm<2021
+replace dagpns = 1 if dgn==0 & dag>=66 & stm>=2021 
+//fre dagpns
+
+
+/****************************Pension age of a spouse***************************/
+preserve
+keep swv idperson idhh dagpns
+rename dagpns dagpns_sp
+rename idperson idpartner
+save "$dir_data/temp_dagpns", replace
+restore
+merge m:1 swv idpartner idhh using "$dir_data/temp_dagpns"
+keep if _merge == 1 | _merge == 3
+la var dagpns_sp "Pension age - partner"
+drop _merge
+replace dagpns_sp=-9 if idpartner<0
+
+
 /*******************************Flag for adult children***********************/
+//add parental ages & retirement status
 preserve
 keep if dgn == 0
-keep swv idhh idperson dag
+keep swv idhh idperson dag dagpns les_c4
 rename idperson idmother
 rename dag dagmother
+rename dagpns dagpnsmother
+rename les_c4 les_c4mother
 save "$dir_data/temp_mother_dag", replace
 restore, preserve
 keep if dgn == 1
-keep swv idhh idperson dag
+keep swv idhh idperson dag dagpns les_c4
 rename idperson idfather
 rename dag dagfather
+rename dagpns dagpnsfather
+rename les_c4 les_c4father
 save "$dir_data/temp_father_dag", replace 
 restore
 
@@ -893,20 +962,76 @@ merge m:1 swv idhh idfather using "$dir_data/temp_father_dag"
 keep if _merge == 1 | _merge == 3
 drop _merge
 
-//Adult child is identified on the successful merge with mother / father in the same household and age
-gen adultchildflag = (!missing(dagmother) | !missing(dagfather)) & dag >= $age_become_responsible & idpartner <= 0
-*Introduce a condition that (adult) children cannot be older than parents-15 year of age
-replace adultchildflag = 0 if dag >= dagfather-15 | dag >= dagmother-15 
+
+/*Individual is considered as adult child if 
+- they have at least one parent in the household (i.e. non-missing parental age) 
+- aged 18+
+- do not have a partner living in the same household 
+- is at least 15 years younger than either of their parents
+- neither of their parents is of the state retirement age in that particular year & neither is retired   
+*/
+/*
+gen adultchildflag = (!missing(dagmother)  | !missing(dagfather)) & dag >= $age_become_responsible & idpartner <= 0
+replace adultchildflag = 0 if dag >= dagfather-15 & dag >= dagmother-15 //was previously or ==> replaced with & 
+//fre adultchildflag 
+replace adultchildflag = 0 if (dagpnsmother==1 | les_c4mother==4) & (dagpnsfather ==1  | les_c4father==4) 
+replace adultchildflag = 0 if (dagpnsmother==1 | les_c4mother==4) & missing(dagfather)
+replace adultchildflag = 0 if (dagpnsfather==1 | les_c4father==4) & missing(dagmother) 
+tab2 adultchildflag swv , row  
+
+* check
+sum idmother 
+sum idfather 
+sum idpartner 
+fre dagmother
+fre dagfather
+fre dagpnsmother
+fre dagpnsfather
+fre les_c4mother
+fre les_c4father
+*/
+
+cap gen  adultchildflag = 0
+
+replace  adultchildflag = 1 if (idmother > 0 | idfather > 0) ///
+    & dag >= 17 & dag<=75 & idpartner <= 0  /*added upper age filter as the one used in LS model */
+
+/* Exclude if both parents retired or at statutory retirement age */
+replace  adultchildflag = 0 if dagpnsmother == 1 & dagpnsfather == .
+replace  adultchildflag = 0 if dagpnsmother == . & dagpnsfather == 1
+replace  adultchildflag = 0 if dagpnsmother == 1 & dagpnsfather == 1
+
+replace  adultchildflag = 0 if les_c4mother == 4 & les_c4father == .
+replace  adultchildflag = 0 if les_c4mother == . & les_c4father == 4
+replace  adultchildflag = 0 if les_c4mother == 4 & les_c4father == 4
+
+replace  adultchildflag = 0 if les_c4mother == 4 & dagpnsfather == 1
+replace  adultchildflag = 0 if les_c4father == 4 & dagpnsmother == 1
+
+/* Exclude if both parents < 15 years older than child */
+replace  adultchildflag = 0 if (dagfather-dag)<=15 & dagmother == .
+replace  adultchildflag = 0 if dagfather == . & (dagmother-dag) <= 15 
+replace  adultchildflag = 0 if (dagfather-dag) <= 15 & (dagmother-dag)<= 15
+
+//fre  adultchildflag
+
+/*Account for cases missing information
+replace adultchildflag = -9 if idmother>0 & ///
+	(dagmother==. | dagmother<0 | les_c4mother==. | les_c4mother<0) & dag >= 17 & dag<=75
+replace adultchildflag = -9 if idfather>0 & ///
+	(dagfather==. | dagfather<0 | les_c4father==. | les_c4father<0) & dag >= 17 & dag<=75
+fre adultchildflag*/
+//2.7% have missing info on one of their parents, not sure if it is worth dropping them? 
 
 
 /************************Household composition*********************************/
 cap gen dhhtp_c4 = -9
 replace dhhtp_c4 = 1 if dcpst == 1 & dnc == 0 //Couple, no children
 replace dhhtp_c4 = 2 if dcpst == 1 & dnc > 0 & !missing(dnc) //Couple, children
-replace dhhtp_c4 = 3 if (dcpst == 2 | dcpst == 3) & (dnc == 0 | dag <= $age_become_responsible | adultchildflag== 1) 
+replace dhhtp_c4 = 3 if (dcpst == 2) & (dnc == 0 | dag <= $age_become_responsible | adultchildflag== 1) 
 /*Single, no children (Note: adult children and children below age to become responsible 
 should be assigned "no children" category, even if there are some children in the household)*/
-replace dhhtp_c4 = 4 if (dcpst == 2 | dcpst == 3) & dnc > 0 & !missing(dnc) & dhhtp_c4 != 3 //Single, children
+replace dhhtp_c4 = 4 if (dcpst == 2) & dnc > 0 & !missing(dnc) & dhhtp_c4 != 3 //Single, children
 
 la def dhhtp_c4_lb 1"Couple with no children" 2"Couple with children" 3"Single with no children" 4"Single with children"
 la values dhhtp_c4 dhhtp_c4_lb
@@ -998,75 +1123,10 @@ la var drtren "DEMOGRAPHIC: Enter retirement"
 //fre drtren
 
 
-/****************************Pension Age***************************************/
-/*cap gen bdt = mdy(1, 15, birthy) /*month of birth is available in special license only*/
-*/
-/*State Retirement Ages for Men in the UK (2009-2023):
-
-2009-2010: 65
-2010-2011: 65
-2011-2012: 65
-2012-2013: 65
-2013-2014: 65
-2014-2015: 65
-2015-2016: 65
-2016-2017: 65
-2017-2018: 65
-2018-2019: 65
-2019-2020: 65
-2020-2021: 66
-2021-2022: 66
-2022-2023: 66
-
-State Retirement Ages for Women in the UK (2009-2023):
-
-2009-2010: 60
-2010-2011: 60
-2011-2012: 60
-2012-2013: 61
-2013-2014: 61
-2014-2015: 62
-2015-2016: 62
-2016-2017: 63
-2017-2018: 63
-2018-2019: 64
-2019-2020: 65
-2020-2021: 65
-2021-2022: 66
-2022-2023: 66
-*/
-gen dagpns = 0
-//for men
-replace dagpns = 1 if dgn==1 & dag>=65 & stm>=2009 & stm<2020 
-replace dagpns = 1 if dgn==1 & dag>=66 & stm>=2020 
-//for women 
-replace dagpns = 1 if dgn==0 & dag>=60 & stm>=2009 & stm<2012
-replace dagpns = 1 if dgn==0 & dag>=61 & stm>=2012 & stm<2014
-replace dagpns = 1 if dgn==0 & dag>=62 & stm>=2014 & stm<2016
-replace dagpns = 1 if dgn==0 & dag>=63 & stm>=2016 & stm<2018
-replace dagpns = 1 if dgn==0 & dag>=64 & stm>=2018 & stm<2019
-replace dagpns = 1 if dgn==0 & dag>=65 & stm>=2019 & stm<2021
-replace dagpns = 1 if dgn==0 & dag>=66 & stm>=2021 
-
-
-/****************************Pension age of a spouse***************************/
-preserve
-keep swv idperson idhh dagpns
-rename dagpns dagpns_sp
-rename idperson idpartner
-save "$dir_data/temp_dagpns", replace
-restore
-merge m:1 swv idpartner idhh using "$dir_data/temp_dagpns"
-keep if _merge == 1 | _merge == 3
-la var dagpns_sp "Pension age - partner"
-drop _merge
-replace dagpns_sp=-9 if idpartner<0
-
-
 /************************************JBSTAT: Not Retired***********************/
-gen lesnr_c2 = . 
-replace lesnr_c2 = 1 if (jbstat ==1 | jbstat==2) /*employed*/
-replace lesnr_c2 = 2 if jbstat==3 | jbstat==5 | jbstat==6 | jbstat==8 | jbstat==9 | jbstat==10 | jbstat==11 | jbstat==14 | jbstat==97 
+gen lesnr_c2 = -9 
+replace lesnr_c2 = 1 if les_c3==1  
+replace lesnr_c2 = 2 if les_c3==2 | les_c3==3  
 lab var lesnr_c2 "Not retired work status"
 lab define lesnr_c2 1 "in work" 2 "not in work"
 lab val lesnr_c2 lesnr_c2 
@@ -1074,21 +1134,22 @@ lab val lesnr_c2 lesnr_c2
 
 /************************Exited parental home*********************************/
 /*Generated from fnspid and/or mnspid. 1 means that individual no longer lives with a parent (fnspid & mnspid is equal to missing)
- when in the previous wave they lived with a parent  (fnspid or mnspid not equal to missing).*/
-/*
-bysort swv: fre mnspid if mnspid<=0 
-bysort swv: fre fnspid if fnspid<=0 
-bysort swv: fre mnspid if mnspid>=. 
-bysort swv: fre fnspid if fnspid>=. 
+ when in the previous wave they lived with a parent  (fnspid or mnspid not equal to missing).
+NOTE: Leaving the parental home was synchronised with the definition of adult child; 
+an individual can leave the parental home unless they are a "responsible adult" (their both parents retired). 
 */
 sort idperson swv 
-gen dlftphm = -9 if (l.fnspid<0 & l.mnspid<0) //those who did not live with parents in the same hh
-replace dlftphm=0 if (l.fnspid>0 | l.mnspid>0) //those who lived with at least one parent
-replace dlftphm =1 if (fnspid<0 & mnspid<0) & (l.fnspid>0 | l.mnspid>0) //lived with at least one parent but not anymore 
-bys idperson: replace dlftphm =-9 if _n==1  //this condition will not be applicable for first year in the panel//
-la val dlftphm dummy
-la var dlftphm "DEMOGRAPHIC: Exited Parental Home"
-//bys swv: fre dlftphm
+gen dlftphm = -9 
+replace dlftphm = 0 if adultchildflag[_n-1] == 1  & idperson == idperson[_n-1] & swv == swv[_n-1] + 1
+replace dlftphm = 0 if dag == 18 & adultchildflag == 1 
+replace dlftphm = 1 if adultchildflag == 0 & adultchildflag[_n-1] == 1 & idperson == idperson[_n-1]  & swv == swv[_n-1] + 1
+lab var dlftphm "DEMOGRAPHIC: Exit the Parental Home"
+/*
+tab dlftphm swv, col
+tab dlftphm stm, col
+tab dlftphm dun 
+tab dlftphm adultchildflag 
+*/
 
 
 /*********************************Left education*******************************/
@@ -1146,37 +1207,195 @@ replace dukfr=49.8 if stm>=2023
 lab var dukfr "UK General fertility rate (ONS)"
 fre dukfr
 
+save "$dir_data\ukhls_pooled_all_obs_02.dta", replace
 
 /************************Number of newborn*************************/
+/*NOTE: The approach below was not entirely correct for identifying newborns.
+* It defines newborns based on child age (dag <= 1), not on actual birth events.
+* As a result, it counts all children aged under one at interview, not just those 
+* born since the previous wave. The same baby can be counted twice across waves,
+* and adopted or stepchildren under one may also be included.
+* At the BHPS–UKHLS transition, this method overcounts legacy BHPS infants 
+* who were already born before the merge but still under one year old in wave B.
+* reported since the last interview, linked to the reporting parent (usually the mother).
 cap gen child0 = 0
 replace child0=1 if dag<=1 
 
-cap drop dchpd
-bysort idmother swv: egen dchpd= total(child0) if idmother>0
-fre dchpd
+cap drop dchpd_old
+bysort idmother swv: egen dchpd_old= total(child0) if idmother>0
+fre dchpd_old
 
 preserve 
-keep swv idmother dchpd
+keep swv idmother dchpd_old
 rename idmother idperson 
-rename dchpd mother_dchpd
+rename dchpd_old mother_dchpd_old
 drop if idperson<0
-collapse (max) mother_dchpd, by(idperson swv)
-fre mother_dchpd
+collapse (max) mother_dchpd_old, by(idperson swv)
+fre mother_dchpd_old
 duplicates report idperson swv
-save "$dir_data/mother_dchpd", replace
+save "$dir_data/mother_dchpd_old", replace
 restore 
 
-merge 1:1 swv idperson using "$dir_data/mother_dchpd" , keepusing (mother_dchpd)
+merge 1:1 swv idperson using "$dir_data/mother_dchpd_old" , keepusing (mother_dchpd_old)
 keep if _merge == 1 | _merge == 3
 drop _merge
-replace mother_dchpd=0 if dgn==1
-drop dchpd
-rename mother_dchpd dchpd
-lab var dchpd "Women's number of newborn children"
+replace mother_dchpd_old=0 if dgn==1
+drop dchpd_old
+rename mother_dchpd_old dchpd_old
+lab var dchpd_old "Women's number of newborn children"
+*/
+ 
+************************************************************************
+* Number of newborn from "newborn" datasets 
+************************************************************************
+/*DP: This code uses the UKHLS newborn module, where each row directly represents a birth event (not inferred from child age).
+Each record corresponds to a child newly reported since the last interview. We exclude BHPS "legacy" infants in wave B to prevent overcounting at the merge.
+- It is more conceptually exact – counts actual reported births, not inferred ones.
+- No double-counting across waves – each newborn appears only once.
+- Handles BHPS transition properly – avoids inflating wave B with pre-existing BHPS babies (note that in original Cara's SAS code all BHPS newborns were dropped which I think shoudn't happen,
+  so Cara's version was underestimating number of newborns. 
+*/
 
+* Combine newborn files (b–n) into one long-format dataset
+clear
+
+local firstwave : word 1 of $UKHLS_panel_waves
+
+* --- Load the first wave ---
+use "${dir_ukhls_data}/`firstwave'_newborn.dta", clear
+gen swv = "`firstwave'"
+
+* Remove wave prefix from variable names
+local prefix = "`firstwave'_"
+foreach var of varlist `firstwave'_* {
+    local base = subinstr("`var'", "`prefix'", "", .)
+    rename `var' `base'
+}
+
+* Save as base file
+save "${dir_data}/temp_uknbrn.dta", replace
+
+* --- Append remaining waves ---
+foreach w of global UKHLS_panel_waves {
+    if "`w'" != "`firstwave'" {
+        di as text "Appending wave `w'..."
+        use "${dir_ukhls_data}/`w'_newborn.dta", clear
+        gen swv = "`w'"
+
+        * Remove wave prefix 
+        local prefix = "`w'_"
+        capture unab prefixed : `w'_*
+        if _rc == 0 {
+            foreach var of local prefixed {
+                local base = subinstr("`var'", "`prefix'", "", .)
+                rename `var' `base'
+            }
+        }
+
+        * Append to the long dataset 
+        append using "${dir_data}/temp_uknbrn.dta"
+        save "${dir_data}/temp_uknbrn.dta", replace
+    }
+}
+//convert wave number to numeric 
+gen swv_num = .
+local i = 1
+foreach w of global UKHLS_panel_waves {
+    local num : word `i' of $UKHLS_panel_waves_numbers
+    replace swv_num = `num' if swv == "`w'"
+    local ++i
+}
+drop swv
+rename swv_num swv
+save "${dir_data}/temp_uknbrn.dta", replace
+
+* Count all genuine newborns (UKHLS + BHPS), excludes BHPS legacy infants in wave B
+use "${dir_data}/temp_uknbrn.dta", clear
+
+keep pidp swv memorig lchlv
+keep if lchlv == 1
+
+* Define newborn indicator
+gen byte nbrn = 0
+* UKHLS-origin respondents (memorig = 1, 2, 7, 8):
+* Always count their newborns. These are all part of the original or ethnic minority boost samples.
+replace nbrn = 1 if inlist(memorig, 1, 2, 7, 8)
+* BHPS-origin respondents (memorig = 3, 4, 5, 6):
+* The BHPS sample was integrated into UKHLS starting from wave B (2010–2012).
+* Infants recorded at that point include "legacy" BHPS babies already born before
+* the merge — not genuine new births within the UKHLS observation window.
+** To avoid overcounting these legacy infants, we exclude BHPS-origin newborns
+* only in their first UKHLS wave (wave B). From wave C onward, BHPS households
+* are fully integrated, so new births are genuine new births and should be counted.
+replace nbrn = 1 if inlist(memorig, 3, 4, 5, 6) & swv != 2
+
+* Collapse to parent-wave level ==> both parents may report the same child of they are in the same hh
+bys pidp swv: egen dchpd = total(nbrn)
+label var dchpd "Number of newborn children (UKHLS + BHPS, excl. BHPS legacy infants in wave B)"
+bys pidp swv: keep if _n == 1 //(376 observations deleted)
+rename pidp idperson
+save "${dir_data}/temp_parent_dchpd.dta", replace
+
+* Merge into main person-wave dataset
+use "${dir_data}\ukhls_pooled_all_obs_02.dta", clear
+merge 1:1 idperson swv using "${dir_data}/temp_parent_dchpd.dta"
+keep if _merge ==1 | _merge==3
+drop _merge
+
+* After merging: fill missing with 0 
+replace dchpd = 0 if missing(dchpd) 
+label var dchpd "Number of newborn children (UKHLS + BHPS, excl. BHPS legacy infants in wave B)"
+
+/*check how many hh reported same newborn twice because both parents are respondents
+preserve 
+* Keep only cases with at least one newborn
+keep if dchpd > 0
+* Keep only core identifiers and gender
+keep idperson idhh swv dgn dchpd
+* Count households with both male and female respondents reporting newborns
+bysort idhh swv: egen hh_births = total(dchpd>0)
+bysort idhh swv: egen men_births = total(dchpd>0 & dgn==1)
+bysort idhh swv: egen women_births = total(dchpd>0 & dgn==0)
+* Mark households where both genders reported at least one newborn
+gen both_parents = (men_births>0 & women_births>0)
+* Summarise how common these are
+tab men_births
+tab women_births
+tab both_parents
+*No such cases, new births are reported by women only 
+restore 
+*/
+
+/* Note that for the estimates we will only keep newborns who are reported by mothers, but here we keep all reported newborns for each respondent  
+tab2 swv dchpd if dgn==1, m row 
+tab2 swv dchpd if dgn==0 & sprfm==1, m row 
+tab2 swv dchpd if dgn==0 & sprfm==0, m row
+*/
+/*-------------------------------------------------------------*
+ | Compare dchpd_old vs dchpd across waves                     |
+ *-------------------------------------------------------------
+
+* Recode missing values to 0 in both variables
+recode dchpd_old (.=0)
+recode dchpd (.=0)
+
+gen dchpd_comp = .
+replace dchpd_comp = 1 if dchpd_old > 0 & dchpd > 0         /* both show a birth */
+replace dchpd_comp = 2 if dchpd_old == 0 & dchpd > 0        /* only new shows a birth */
+replace dchpd_comp = 3 if dchpd_old > 0 & dchpd == 0        /* only old shows a birth */
+replace dchpd_comp = 4 if dchpd_old == 0 & dchpd == 0       /* both zero */
+
+cap label define dchpd_comp_lbl 1 "Both>0" ///
+                          2 "New only>0" ///
+                          3 "Old only>0" ///
+                          4 "Both zero"
+label values dchpd_comp dchpd_comp_lbl
+
+tab swv dchpd_comp if sprfm==1
+*/
 
 /*****************************In educational age range*************************/
-gen sedag = 1 if dvage >= 16 & dvage <= 29
+cap gen sedag = 1 if dvage >= 16 & dvage <= 29
 replace sedag = 0 if missing(sedag)
 la val sedag dummy
 la var sedag "Educ age range"
@@ -1648,9 +1867,6 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
 		qui recode `var' (-9/-1=-9) (.=-9) 
 }
 
-
-
-
 *recode missings in weights to zero. 
 foreach var in dimlwt disclwt dimxwt dhhwt {
 	qui recode `var' (.=0) (-9/-1=0) 
@@ -1667,12 +1883,17 @@ replace potential_earnings_hourly = 0 if missing(potential_earnings_hourly)
 replace l1_potential_earnings_hourly = 0 if missing(l1_potential_earnings_hourly)
 		
 * initialise wealth to missing 
-gen liquid_wealth = -9
-gen tot_pen = -9
-gen nvmhome = -9
+gen total_wealth = -9
+gen total_pensions = -9
+gen housing_wealth = -9
+gen mortgage_debt = -9
 gen smp = -9
 gen rnk = -9
 gen mtc = -9
+label var total_wealth "total wealth net of liabilities of benefit unit including housing, business and private (personal and occupational) pensions"
+label var total_pensions "value of all private (personal and occupational) pensions of benefit unit"
+label var housing_wealth "value of main home gross of mortgage debt of benefit unit"
+label var mortgage_debt "total mortgage debt owed on main home of benefit unit"
 
 *check for duplicates in the pooled dataset 
 duplicates tag idperson idhh swv, gen(dup)
@@ -1686,6 +1907,31 @@ isid idperson idhh swv
 * save the whole pooled dataset that will be used for regression estimates
 *******************************************************************************/
 save "$dir_data\ukhls_pooled_all_obs_02.dta", replace 
+
+
+/*********************** Run employment history do-files to produce liwwh *******************************/
+* 01_Intdate.do: set up cross-wave file of interview dates 
+* ==> needed to link previous wave interview date to each respondent*/
+do "${dir_do_emphist}/00_Master_emphist.do"  
+
+use "$dir_data\ukhls_pooled_all_obs_02.dta", clear 
+
+merge 1:1 idperson swv using "${dir_data_emphist}/temp_liwwh", keepusing (liwwh)
+//This is done analogous to UKMOD input data 
+drop if _merge==2
+replace liwwh=12 if _merge==1 
+replace liwwh=0 if _merge==1 & les_c3 !=1 //assume zero months if not in employment  
+replace liwwh=-9 if swv==1
+
+replace liwwh = liwwh/12  
+label var liwwh  "Total years in employment since Jan 2007"
+
+bys swv: fre liwwh if dag<16
+bys swv: fre liwwh if dag>=16
+
+drop _merge
+save "$dir_data\ukhls_pooled_all_obs_02.dta", replace 
+
 cap log close 
 
 
@@ -1695,7 +1941,6 @@ cap log close
 #delimit ;
 local files_to_drop 
 	father_edu.dta
-	mother_dchpd.dta 
 	mother_edu.dta 
 	temp.dta
 	temp_age.dta
@@ -1711,7 +1956,8 @@ local files_to_drop
 	temp_ypnb.dta
 	tmp_partnershipDuration.dta
 	temp_dot01.dta
-	
+	temp_uknbrn.dta
+	temp_parent_dchpd.dta
 	;
 #delimit cr // cr stands for carriage return
 

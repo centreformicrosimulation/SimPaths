@@ -3,7 +3,7 @@
 *	PROGRAM TO EVALUATE SOCIAL CARE RECEIPT FROM UKHLS DATA
 *	ANALYSIS BASED ON THE SOCIAL CARE MODULE OF UKHLS
 *	First version: Justin van de Ven, 28 Aug 2023
-*	Last version:  Justin van de Ven, 05 Jun 2024
+*	Last version:  Justin van de Ven, 19 Nov 2025
 *
 **************************************************************************************/
 
@@ -14,7 +14,7 @@
 *
 **************************************************************************************/
 clear all
-global datadir = "C:\MyFiles\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls\"
+global datadir = "J:\01 DATA\UK\ukhls\wave13\stata\stata13_se\ukhls\"
 global outdir = "C:\MyFiles\99 DEV ENV\JAS-MINE\data work\regression_estimates\data\"
 cd "$outdir"
 
@@ -323,18 +323,19 @@ save "ukhlstme_pooled.dta", replace
 *	evaluate regressions
 **************************************************************************************/
 use "ukhlstme_pooled.dta", clear
+gen covid = (year>2019) * (year<2023)
 
 // london is drgn=7
 // probit for need care (2a)
 //probit needCare1 male i.deh_c3 partner needCare1_l i.scsf1 i.dage1 ib7.drgn [pweight=indinui_xw], vce(r)
-probit needCare1 male i.deh_c3 partner needCare1_l1 i.scsf1 i.dage1 ib7.drgn [pweight=wgt], vce(r)
+probit needCare1 male i.deh_c3 partner needCare1_l1 i.scsf1 i.dage1 ib7.drgn covid [pweight=wgt], vce(r)
 putexcel set "$outdir/probitNeedCareOver64", modify
 putexcel A1 = matrix(e(b))
 putexcel A2 = matrix(e(V))
 
 // probit for receive care (2b)
 //probit recCare male i.deh_c3 partner recCare_l i.scsf1 i.dage1 ib7.drgn [pweight=indinui_xw], vce(r)
-probit recCare male i.deh_c3 partner recCare_l1 i.scsf1 i.dage1 ib7.drgn [pweight=wgt], vce(r)
+probit recCare male i.deh_c3 partner recCare_l1 i.scsf1 i.dage1 ib7.drgn covid [pweight=wgt], vce(r)
 putexcel set "$outdir/probitRecCareOver64", modify
 putexcel A1 = matrix(e(b))
 putexcel A2 = matrix(e(V))

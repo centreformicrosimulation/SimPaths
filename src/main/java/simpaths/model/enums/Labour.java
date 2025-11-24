@@ -15,7 +15,10 @@ public enum Labour implements IntegerValuedEnum {
     TEN(10, 6, 15),
 	TWENTY(20, 16, 25),
 	THIRTY(30, 26, 35),
-	FORTY(40, 36, Parameters.MAX_LABOUR_HOURS_IN_WEEK);
+    THIRTY_EIGHT(38, 36, 40),
+	FORTY(40, 36, Parameters.MAX_LABOUR_HOURS_IN_WEEK),
+    FORTY_FIVE(45, 41, 49),
+    FIFTY_FIVE(55, 50, Parameters.MAX_LABOUR_HOURS_IN_WEEK);
 
     private final int hours, minBound, maxBound;
     Labour(int hours, int minBound, int maxBound) {
@@ -56,8 +59,12 @@ public enum Labour implements IntegerValuedEnum {
             return Labour.TWENTY;
         } else if (hoursWorked <= 35) {
             return Labour.THIRTY;
+        } else if (hoursWorked <= 40) {
+            return Labour.THIRTY_EIGHT;
+        } else if (hoursWorked <= 49) {
+            return Labour.FORTY_FIVE;
         } else {
-            return Labour.FORTY;
+            return Labour.FIFTY_FIVE;
         }
     }
 

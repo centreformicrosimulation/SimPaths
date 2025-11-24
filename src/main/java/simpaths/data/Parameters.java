@@ -102,9 +102,10 @@ public class Parameters {
         "disp_inc",         //disposable income
 		"ydses_c5",			//household income quantile
 		"dhh_owned",		//flag indicating if benefit unit owns a house
-		"liquid_wealth",	//benefit unit net wealth non-pension non-housing wealth
-        "tot_pen",	        //benefit unit net pension wealth
-        "nvmhome",	        //benefit unit net housing wealth
+		"total_wealth",	    //benefit unit total net wealth (includes pensions assets and housing)
+        "total_pensions",   //benefit unit total private (personal and occupational) pensions
+        "housing_wealth",   //benefit unit value of main home (gross of mortgage debt)
+        "mortgage_debt",    //benefit unit value of mortgage debt
     };
 
     public static final String[] PERSON_VARIABLES_INITIAL = new String[] {
@@ -151,7 +152,6 @@ public class Parameters {
 		"lhw", 					//hours worked per week
         "l1_lhw",               //hours worked per week in the previous year
 		"adultchildflag",		//flag indicating adult child living at home in the data
-		"dhh_owned",			//flag indicating if individual is a homeowner
 		"potential_earnings_hourly", //initial value of hourly earnings from the data
 		"l1_potential_earnings_hourly", //lag(1) of initial value of hourly earnings from the data
         "need_socare",          //indicator that the individual needs social care
@@ -161,11 +161,13 @@ public class Parameters {
         "daughter_socare_hrs",  //number of hours of informal care received from daughter
         "son_socare_hrs",       //number of hours of informal care received from son
         "other_socare_hrs",     //number of hours of informal care received from other
+        "carehoursprovidedweekly", // number of informal care hour provided per week
         "aidhrs",               //number of hours of informal care provided (total)
         "careWho",              //indicator for whom informal care is provided
         "econ_benefits",        //indicator of benefit receipt
         "econ_benefits_uc",     //indicator of UC receipt
-        "econ_benefits_nonuc"   //indicator of other benefit receipt
+        "econ_benefits_nonuc",  //indicator of other benefit receipt
+        "liwwh",                //Total years in employment since Jan 2007
 		//"yem", 					//employment income
 		//"yse", 					//self-employment income
 
@@ -567,8 +569,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceEmploymentSelectionFemales, coeffCovarianceEmploymentSelectionFemalesNE, coeffCovarianceEmploymentSelectionFemalesE;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemales;
-    private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMalesWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
-    private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemalesWithDependent;
+    private static MultiKeyCoefficientMap coeffLabourSupplyUtilitySingleWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACMales; //Adult children, male
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACFemales; //Adult children, female
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityCouples;
@@ -742,9 +743,9 @@ public class Parameters {
     private static LinearRegression regHealthHM2LevelMales;
     private static LinearRegression regHealthHM2LevelFemales;
 
-    private static BinomialRegression regHealthHM1Case;
-    private static BinomialRegression regHealthHM2CaseMales;
-    private static BinomialRegression regHealthHM2CaseFemales;
+    private static LinearRegression regHealthHM1Case;
+    private static LinearRegression regHealthHM2CaseMales;
+    private static LinearRegression regHealthHM2CaseFemales;
 
     //Health
     private static LinearRegression regHealthMCS1;
@@ -815,8 +816,7 @@ public class Parameters {
     private static LinearRegression regLabourSupplyUtilityMales;
     private static LinearRegression regLabourSupplyUtilityFemales;
 
-    private static LinearRegression regLabourSupplyUtilityMalesWithDependent;
-    private static LinearRegression regLabourSupplyUtilityFemalesWithDependent;
+    private static LinearRegression regLabourSupplyUtilitySingleWithDependent;
 
     private static LinearRegression regLabourSupplyUtilityACMales;
     private static LinearRegression regLabourSupplyUtilityACFemales;
@@ -1179,21 +1179,21 @@ public class Parameters {
             columnsEmploymentSelectionMalesE = 32;
             columnsEmploymentSelectionFemalesNE = 32;
             columnsEmploymentSelectionFemalesE = 32;
-            columnsLabourSupplyUtilityMales = 19;
-            columnsLabourSupplyUtilityFemales = 12;
-            columnsLabourSupplyUtilityMalesWithDependent = 15;
-            columnsLabourSupplyUtilityFemalesWithDependent = 15;
-            columnsLabourSupplyUtilityACMales = 31;
-            columnsLabourSupplyUtilityACFemales = 31;
-            columnsLabourSupplyUtilityCouples = 64;
+            columnsLabourSupplyUtilityMales = 13;
+            columnsLabourSupplyUtilityFemales = 13;
+            columnsLabourSupplyUtilityMalesWithDependent = 19;
+            columnsLabourSupplyUtilityFemalesWithDependent = 19;
+            columnsLabourSupplyUtilityACMales = 7;
+            columnsLabourSupplyUtilityACFemales = 7;
+            columnsLabourSupplyUtilityCouples = 108;
             columnsLabourCovid19_SE = 1;
             columnsLabourCovid19_2a_processes = 1;
             columnsHealthH1a = 31;
             columnsHealthH1b = 110;
             columnsHealthH2b = 36;
-            columnsHealthHM1 = 30;
-            columnsHealthHM2Males = 15;
-            columnsHealthHM2Females = 15;
+            columnsHealthHM1 = 35;
+            columnsHealthHM2Males = 10;
+            columnsHealthHM2Females = 10;
             columnsHealthMCS1 = 30;
             columnsHealthMCS2Males = 15;
             columnsHealthMCS2Females = 15;
@@ -1234,7 +1234,7 @@ public class Parameters {
             columnsPartnershipU1b = 29;
             columnsPartnershipU2b = 38;
             columnsFertilityF1a = 7;
-            columnsFertilityF1b = 36;
+            columnsFertilityF1b = 35;
             columnsIncomeI1a = 19;  //*
             columnsIncomeI1b = 31;  //*
             columnsIncomeI3a = 26;
@@ -1297,13 +1297,12 @@ public class Parameters {
         coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_Wages_FemalesNE", 1, columnsWagesFemalesNE);
 
         //Labour Supply coefficients from Zhechun's estimates on the EM input data
-        coeffLabourSupplyUtilityMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_Single_Males", 1, columnsLabourSupplyUtilityMales);
-        coeffLabourSupplyUtilityFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_Single_Females", 1, columnsLabourSupplyUtilityFemales);
-        coeffLabourSupplyUtilityMalesWithDependent = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_Males_With_Dep", 1, columnsLabourSupplyUtilityMalesWithDependent);
-        coeffLabourSupplyUtilityFemalesWithDependent = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_Females_With_Dep", 1, columnsLabourSupplyUtilityFemalesWithDependent);
-        coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_SingleAC_Males", 1, columnsLabourSupplyUtilityACMales);
-        coeffLabourSupplyUtilityACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_SingleAC_Females", 1, columnsLabourSupplyUtilityACFemales);
-        coeffLabourSupplyUtilityCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", countryString + "_Couples", 1, columnsLabourSupplyUtilityCouples);
+        coeffLabourSupplyUtilityMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Males", 1, columnsLabourSupplyUtilityMales);
+        coeffLabourSupplyUtilityFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Females", 1, columnsLabourSupplyUtilityFemales);
+        coeffLabourSupplyUtilitySingleWithDependent = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleDep", 1, columnsLabourSupplyUtilityMalesWithDependent);
+        coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1, columnsLabourSupplyUtilityACMales);
+        coeffLabourSupplyUtilityACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Females", 1, columnsLabourSupplyUtilityACFemales);
+        coeffLabourSupplyUtilityCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Couples", 1, columnsLabourSupplyUtilityCouples);
 
         // Load coefficients for Covid-19 labour supply models
         // Coefficients for process assigning simulated people to self-employment
@@ -1506,8 +1505,7 @@ public class Parameters {
             //Labour supply utility
             coeffLabourSupplyUtilityMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityMales);
             coeffLabourSupplyUtilityFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityFemales);
-            coeffLabourSupplyUtilityMalesWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilityMalesWithDependent);
-            coeffLabourSupplyUtilityFemalesWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilityFemalesWithDependent);
+            coeffLabourSupplyUtilitySingleWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilitySingleWithDependent);
             coeffLabourSupplyUtilityACMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACMales);
             coeffLabourSupplyUtilityACFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACFemales);
             coeffLabourSupplyUtilityCouples = RegressionUtils.bootstrap(coeffLabourSupplyUtilityCouples);
@@ -1648,9 +1646,9 @@ public class Parameters {
         regHealthHM2LevelMales = new LinearRegression(coeffCovarianceHM2LevelMales);
         regHealthHM2LevelFemales = new LinearRegression(coeffCovarianceHM2LevelFemales);
 
-        regHealthHM1Case = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM1Case);
-        regHealthHM2CaseMales = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM2CaseMales);
-        regHealthHM2CaseFemales = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceHM2CaseFemales);
+        regHealthHM1Case = new LinearRegression(coeffCovarianceHM1Case);
+        regHealthHM2CaseMales = new LinearRegression(coeffCovarianceHM2CaseMales);
+        regHealthHM2CaseFemales = new LinearRegression(coeffCovarianceHM2CaseFemales);
 
         //Health
         regHealthMCS1 = new LinearRegression(coeffCovarianceDHE_MCS1);
@@ -1728,8 +1726,7 @@ public class Parameters {
         //Labour Supply regressions from Zhechun's estimates on the EM input data
         regLabourSupplyUtilityMales = new LinearRegression(coeffLabourSupplyUtilityMales);
         regLabourSupplyUtilityFemales = new LinearRegression(coeffLabourSupplyUtilityFemales);
-        regLabourSupplyUtilityMalesWithDependent = new LinearRegression(coeffLabourSupplyUtilityMalesWithDependent);
-        regLabourSupplyUtilityFemalesWithDependent = new LinearRegression(coeffLabourSupplyUtilityFemalesWithDependent);
+        regLabourSupplyUtilitySingleWithDependent = new LinearRegression(coeffLabourSupplyUtilitySingleWithDependent);
         regLabourSupplyUtilityACMales = new LinearRegression(coeffLabourSupplyUtilityACMales);
         regLabourSupplyUtilityACFemales = new LinearRegression(coeffLabourSupplyUtilityACFemales);
         regLabourSupplyUtilityCouples = new LinearRegression(coeffLabourSupplyUtilityCouples);
@@ -2166,9 +2163,9 @@ public class Parameters {
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
     public static LinearRegression getRegHealthHM2LevelFemales() { return regHealthHM2LevelFemales; }
-    public static BinomialRegression getRegHealthHM1Case() {return regHealthHM1Case;}
-    public static BinomialRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
-    public static BinomialRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
+    public static LinearRegression getRegHealthHM1Case() {return regHealthHM1Case;}
+    public static LinearRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
+    public static LinearRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
 
     public static LinearRegression getRegHealthMCS1() { return regHealthMCS1; }
     public static LinearRegression getRegHealthMCS2Males() { return regHealthMCS2Males;   }
@@ -2293,12 +2290,8 @@ public class Parameters {
         return regLabourSupplyUtilityMales;
     }
 
-    public static LinearRegression getRegLabourSupplyUtilityFemalesWithDependent() {
-        return regLabourSupplyUtilityFemalesWithDependent;
-    }
-
-    public static LinearRegression getRegLabourSupplyUtilityMalesWithDependent() {
-        return regLabourSupplyUtilityMalesWithDependent;
+    public static LinearRegression getRegLabourSupplyUtilitySingleWithDependent() {
+        return regLabourSupplyUtilitySingleWithDependent;
     }
 
     public static LinearRegression getRegLabourSupplyUtilityACMales() {
