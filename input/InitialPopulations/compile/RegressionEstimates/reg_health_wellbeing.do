@@ -326,6 +326,8 @@ putexcel A7 = "PersistentPoverty"
 putexcel A8 = "RealIncomeChange"
 putexcel A9 = "RealIncomeDecrease_D"
 putexcel A10 = "FinancialDistress"
+putexcel A11 = "Covid_2020_D"
+putexcel A12 = "Covid_2021_D"
 
 
 putexcel B1 = "COEFFICIENT"
@@ -338,6 +340,8 @@ putexcel H1 = "PersistentPoverty"
 putexcel I1 = "RealIncomeChange"
 putexcel J1 = "RealIncomeDecrease_D"
 putexcel K1 = "FinancialDistress"
+putexcel L1 = "Covid_2020_D"
+putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
@@ -468,6 +472,8 @@ putexcel A7 = "PersistentPoverty"
 putexcel A8 = "RealIncomeChange"
 putexcel A9 = "RealIncomeDecrease_D"
 putexcel A10 = "FinancialDistress"
+putexcel A11 = "Covid_2020_D"
+putexcel A12 = "Covid_2021_D"
 
 
 putexcel B1 = "COEFFICIENT"
@@ -480,6 +486,8 @@ putexcel H1 = "PersistentPoverty"
 putexcel I1 = "RealIncomeChange"
 putexcel J1 = "RealIncomeDecrease_D"
 putexcel K1 = "FinancialDistress"
+putexcel L1 = "Covid_2020_D"
+putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
@@ -784,6 +792,8 @@ putexcel A7 = "PersistentPoverty"
 putexcel A8 = "RealIncomeChange"
 putexcel A9 = "RealIncomeDecrease_D"
 putexcel A10 = "FinancialDistress"
+putexcel A11 = "Covid_2020_D"
+putexcel A12 = "Covid_2021_D"
 
 
 putexcel B1 = "COEFFICIENT"
@@ -796,6 +806,8 @@ putexcel H1 = "PersistentPoverty"
 putexcel I1 = "RealIncomeChange"
 putexcel J1 = "RealIncomeDecrease_D"
 putexcel K1 = "FinancialDistress"
+putexcel L1 = "Covid_2020_D"
+putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
@@ -927,6 +939,8 @@ putexcel A7 = "PersistentPoverty"
 putexcel A8 = "RealIncomeChange"
 putexcel A9 = "RealIncomeDecrease_D"
 putexcel A10 = "FinancialDistress"
+putexcel A11 = "Covid_2020_D"
+putexcel A12 = "Covid_2021_D"
 
 
 putexcel B1 = "COEFFICIENT"
@@ -939,6 +953,8 @@ putexcel H1 = "PersistentPoverty"
 putexcel I1 = "RealIncomeChange"
 putexcel J1 = "RealIncomeDecrease_D"
 putexcel K1 = "FinancialDistress"
+putexcel L1 = "Covid_2020_D"
+putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
@@ -1243,6 +1259,8 @@ putexcel A7 = "PersistentPoverty"
 putexcel A8 = "RealIncomeChange"
 putexcel A9 = "RealIncomeDecrease_D"
 putexcel A10 = "FinancialDistress"
+putexcel A11 = "Covid_2020_D"
+putexcel A12 = "Covid_2021_D"
 
 
 putexcel B1 = "COEFFICIENT"
@@ -1255,6 +1273,8 @@ putexcel H1 = "PersistentPoverty"
 putexcel I1 = "RealIncomeChange"
 putexcel J1 = "RealIncomeDecrease_D"
 putexcel K1 = "FinancialDistress"
+putexcel L1 = "Covid_2020_D"
+putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
@@ -1385,6 +1405,8 @@ putexcel A7 = "PersistentPoverty"
 putexcel A8 = "RealIncomeChange"
 putexcel A9 = "RealIncomeDecrease_D"
 putexcel A10 = "FinancialDistress"
+putexcel A11 = "Covid_2020_D"
+putexcel A12 = "Covid_2021_D"
 
 
 putexcel B1 = "COEFFICIENT"
@@ -1397,6 +1419,8 @@ putexcel H1 = "PersistentPoverty"
 putexcel I1 = "RealIncomeChange"
 putexcel J1 = "RealIncomeDecrease_D"
 putexcel K1 = "FinancialDistress"
+putexcel L1 = "Covid_2020_D"
+putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
