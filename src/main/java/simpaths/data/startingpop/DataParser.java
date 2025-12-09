@@ -232,7 +232,7 @@ public class DataParser {
 								+ "UPDATE " + personTable + " SET socare_provided_to = 'PartnerAndOther' WHERE careWho = 2;"
 								+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyOther' WHERE careWho = 3;"
 								+ "ALTER TABLE " + personTable + " DROP COLUMN careWho;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN aidhrs RENAME TO socare_provided_hrs;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN carehoursprovidedweekly RENAME TO socare_provided_hrs;"
 
 								//SYSTEM : Year
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN stm RENAME TO system_year;"

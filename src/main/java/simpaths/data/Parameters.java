@@ -162,7 +162,6 @@ public class Parameters {
         "son_socare_hrs",       //number of hours of informal care received from son
         "other_socare_hrs",     //number of hours of informal care received from other
         "carehoursprovidedweekly", // number of informal care hour provided per week
-        "aidhrs",               //number of hours of informal care provided (total)
         "careWho",              //indicator for whom informal care is provided
         "econ_benefits",        //indicator of benefit receipt
         "econ_benefits_uc",     //indicator of UC receipt
