@@ -1000,7 +1000,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthMentalHM1Level() {
         if (dag >= 16) {
             double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
-            double rmse = Parameters.getRMSEForRegression("HM1");
+            double rmse = Parameters.getRMSEForRegression("HM1_L");
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(1));
             dhm = constrainDhmEstimate(score + rmse*gauss);
         }
