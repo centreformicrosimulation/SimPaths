@@ -570,7 +570,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // initialise random draws
         this.seed = seed;
-        innovations = new Innovations(33, 1, 1, seed);
+        innovations = new Innovations(37, 1, 1, seed);
 
         //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
         double[] sampleDifferentials = setMarriageTargets();
@@ -1026,9 +1026,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void healthMCS1() {
 
-        double mcsPrediction;
-        mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
-        dhe_mcs = mcsPrediction;
+        double mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
+        double rmse = Parameters.getRMSEForRegression("DHE_MCS1");
+        double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(33));
+        dhe_mcs = mcsPrediction + rmse*gauss;
 
     }
 
@@ -1046,9 +1047,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void healthPCS1() {
 
-        double pcsPrediction;
-        pcsPrediction = Parameters.getRegHealthPCS1().getScore(this, Person.DoublesVariables.class);
-        dhe_pcs = pcsPrediction;
+        double pcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
+        double rmse = Parameters.getRMSEForRegression("DHE_PCS1");
+        double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(34));
+        dhe_pcs = pcsPrediction + rmse*gauss;
 
     }
 
@@ -1067,9 +1069,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void lifeSatisfaction1() {
 
-        double dlsPrediction;
-        dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
-        dls_temp = dlsPrediction;
+        double dlsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
+        double rmse = Parameters.getRMSEForRegression("DLS1");
+        double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
+        dls_temp = dlsPrediction + rmse*gauss;
 
     }
 
@@ -1111,7 +1114,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             double tmp_step1_score = 0, tmp_step2_score = 0, tmp_total_score = 0, tmp_probability = 0;
             Double tmp_outcome;
 
-            tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 1 of case-based psychological distress model
+            tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class);
+            double rmse = Parameters.getRMSEForRegression("HM1_C");
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(36));
+
             if (dag >= 25 && dag <= 64) {
                 if (Gender.Male.equals(getDgn())) {
                     tmp_step2_score = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
@@ -1119,7 +1125,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     tmp_step2_score = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
                 } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
             }
-            tmp_outcome = constrainDhmGhqEstimate(tmp_step1_score + tmp_step2_score);
+            tmp_outcome = constrainDhmGhqEstimate(tmp_step1_score + tmp_step2_score  + (rmse + gauss));
             setDhmGhq(tmp_outcome);
         }
     }
