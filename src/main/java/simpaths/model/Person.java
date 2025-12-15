@@ -1026,81 +1026,96 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void healthMCS1() {
 
-        double mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
-        double rmse = Parameters.getRMSEForRegression("DHE_MCS1");
-        double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(33));
-        dhe_mcs = mcsPrediction + rmse*gauss;
-
+        if (dag >= 16) {
+            double mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
+            double rmse = Parameters.getRMSEForRegression("DHE_MCS1");
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(33));
+            dhe_mcs = mcsPrediction + rmse * gauss;
+        }
     }
 
     protected void healthMCS2() {
 
         double mcsPrediction;
-        if (Gender.Male.equals(getDgn())) {
-            mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
-            dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
-        } else if (Gender.Female.equals(getDgn())) {
-            mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
-            dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
+        if (dag >= 25 && dag <= 64) {
+            if (Gender.Male.equals(getDgn())) {
+                mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
+                dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
+            } else if (Gender.Female.equals(getDgn())) {
+                mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
+                dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
+            }
         }
     }
 
     protected void healthPCS1() {
 
-        double pcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
-        double rmse = Parameters.getRMSEForRegression("DHE_PCS1");
-        double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(34));
-        dhe_pcs = pcsPrediction + rmse*gauss;
-
+        if (dag >= 16) {
+            double pcsPrediction = Parameters.getRegHealthPCS1().getScore(this, Person.DoublesVariables.class);
+            double rmse = Parameters.getRMSEForRegression("DHE_PCS1");
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(34));
+            dhe_pcs = pcsPrediction + rmse * gauss;
+        }
     }
 
 
     protected void healthPCS2() {
 
         double pcsPrediction;
-        if (Gender.Male.equals(getDgn())) {
-            pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
-            dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
-        } else if (Gender.Female.equals(getDgn())) {
-            pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
-            dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
+        if (dag >= 25 && dag <= 64) {
+            if (Gender.Male.equals(getDgn())) {
+                pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
+                dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
+            } else if (Gender.Female.equals(getDgn())) {
+                pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
+                dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
+            }
         }
     }
 
     protected void lifeSatisfaction1() {
 
-        double dlsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
-        double rmse = Parameters.getRMSEForRegression("DLS1");
-        double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
-        dls_temp = dlsPrediction + rmse*gauss;
+        if (dag >= 16) {
+                double dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
+                double rmse = Parameters.getRMSEForRegression("DLS1");
+                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
+                dls_temp = dlsPrediction + rmse*gauss;
+        }
 
     }
 
 
     protected void lifeSatisfaction2() {
 
-        double dlsPrediction;
-        if (Gender.Male.equals(getDgn())) {
-            dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
-            dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
-        } else if (Gender.Female.equals(getDgn())) {
-            dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
-            dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+        if (dag >= 25 && dag <= 64) {
+
+            double dlsPrediction;
+            if (Gender.Male.equals(getDgn())) {
+                dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
+                dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+            } else if (Gender.Female.equals(getDgn())) {
+                dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
+                dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+            }
         }
     }
+
 
     private void healthEQ5D() {
 
         double eq5dPrediction;
-        eq5dPrediction = Parameters.getRegEQ5D().getScore(this, Person.DoublesVariables.class);
-        if (eq5dPrediction > 1) {
-            he_eq5d = 1.0;
-        }
-        else if (eq5dPrediction < -0.594) {
-            he_eq5d = -0.594;
-        }
-        else {
-            he_eq5d = eq5dPrediction;
+        if (dag >= 16) {
+
+            eq5dPrediction = Parameters.getRegEQ5D().getScore(this, Person.DoublesVariables.class);
+            if (eq5dPrediction > 1) {
+                he_eq5d = 1.0;
+            }
+            else if (eq5dPrediction < -0.594) {
+                he_eq5d = -0.594;
+            }
+            else {
+                he_eq5d = eq5dPrediction;
+            }
         }
 
     }
@@ -1606,6 +1621,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void updateFullTimeHourlyEarnings() {
 
         double rmse, wagesInnov = innovations.getDoubleDraw(16);
+        if (dag >= 16 ) {
+
         if (Les_c4.EmployedOrSelfEmployed.equals(les_c4_lag1)) {
             if (wageRegressionRandomComponentE == null || !model.fixRegressionStochasticComponent) {
                 if (Gender.Male.equals(dgn)) {
@@ -1651,6 +1668,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             setFullTimeHourlyEarningsPotential(Parameters.MAX_HOURLY_WAGE_RATE);
         } else {
             setFullTimeHourlyEarningsPotential(upratedFullTimeHourlyEarnings);
+        }
         }
     }
     public void setYpncp(double val) {

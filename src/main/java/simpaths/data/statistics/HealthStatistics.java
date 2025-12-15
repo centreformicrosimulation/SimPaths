@@ -231,9 +231,9 @@ public class HealthStatistics {
         AgeGenderCSfilter ageGenderCSfilter;
 
         if (gender_s.equals("Total")) {
-            ageGenderCSfilter = new AgeGenderCSfilter(18, 65);
+            ageGenderCSfilter = new AgeGenderCSfilter(25, 64);
         } else {
-            ageGenderCSfilter = new AgeGenderCSfilter(18, 65, Gender.valueOf(gender_s));
+            ageGenderCSfilter = new AgeGenderCSfilter(25, 64, Gender.valueOf(gender_s));
         }
 
         // set gender
