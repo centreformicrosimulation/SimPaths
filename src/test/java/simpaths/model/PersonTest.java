@@ -126,7 +126,7 @@ public class PersonTest {
                     Mockito.when(mockModel.getPersonsToMatch()).thenReturn(expectedPersonsToMatch);
 
                     setPrivateField(testPerson, "model", mockModel);
-                    setPrivateField(testPerson, "innovations", mockInnovations);
+                    setPrivateField(testPerson, "statInnovations", mockInnovations);
                     setPrivateField(testPerson, "benefitUnit", mockBenefitUnit);
 
                     // Mock the critical dependency from BenefitUnit (Set<Person> is empty for simplicity)
@@ -150,11 +150,11 @@ public class PersonTest {
         @Test
         @DisplayName("OUTCOME A: Person under 18 does not enter partnership")
         public void under18DoesntEnterPartnership() {
-            testPerson.setDag(17);
+            testPerson.setDemAge(17);
 
             testPerson.cohabitation();
 
-            assertEquals(17, testPerson.getDag());
+            assertEquals(17, testPerson.getDemAge());
             assertFalse(testPerson.isPartnered());
             assertFalse(testPerson.isToBePartnered());
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size());
@@ -163,10 +163,10 @@ public class PersonTest {
         @Test
         @DisplayName("OUTCOME B: Female over 18, student and partnered stays partnered")
         public void over18StudentPartneredStaysPartnered() {
-            testPerson.setDag(20);
+            testPerson.setDemAge(20);
             testPerson.setLes_c4(Les_c4.Student);
 
-            testPartner.setDag(20);
+            testPartner.setDemAge(20);
 
             testPerson.setBenefitUnit(testBenefitUnit);
             testPartner.setBenefitUnit(testBenefitUnit);
@@ -174,7 +174,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(20, testPerson.getDemAge(), "Person's age should not have changed.");
             assertTrue(testPerson.isPartnered(), "Person should be partnered.");
             assertFalse(testPerson.isToBePartnered(), "Person should not be to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
@@ -184,10 +184,10 @@ public class PersonTest {
         @Test
         @DisplayName("OUTCOME C: Aged 18-29, student and not partnered - estimate to be partnered")
         public void over18StudentToBePartnered() {
-            testPerson.setDag(20);
+            testPerson.setDemAge(20);
             testPerson.setLes_c4(Les_c4.Student);
-            testPerson.setLeftEducation(false);
-            testPerson.setDgn(Gender.Female);
+            testPerson.setEduLeftEduFlag(false);
+            testPerson.setDemMaleFlag(Gender.Female);
             testPerson.setBenefitUnit(testBenefitUnit);
 
             testBenefitUnit.setRegion(Region.UKD);
@@ -200,7 +200,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(20, testPerson.getDemAge(), "Person's age should not have changed.");
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
             assertTrue(testPerson.isToBePartnered(), "Person should be set to be partnered.");
             assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "One person should be in persons to match.");
@@ -211,10 +211,10 @@ public class PersonTest {
         @Test
         @DisplayName("OUTCOME D: Aged 18-29, student and not partnered - estimate not to be partnered")
         public void over18StudentNotToBePartnered() {
-            testPerson.setDag(20);
+            testPerson.setDemAge(20);
             testPerson.setLes_c4(Les_c4.Student);
-            testPerson.setLeftEducation(false);
-            testPerson.setDgn(Gender.Female);
+            testPerson.setEduLeftEduFlag(false);
+            testPerson.setDemMaleFlag(Gender.Female);
             testPerson.setBenefitUnit(testBenefitUnit);
 
             testBenefitUnit.setRegion(Region.UKD);
@@ -227,7 +227,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(20, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(20, testPerson.getDemAge(), "Person's age should not have changed.");
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
             assertFalse(testPerson.isToBePartnered(), "Person should not be set to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
@@ -237,8 +237,8 @@ public class PersonTest {
         @Test
         @DisplayName("OUTCOME C: Over 29 and not partnered - estimate to be partnered")
         public void over29StudentToBePartnered() {
-            testPerson.setDag(30);
-            testPerson.setDgn(Gender.Female);
+            testPerson.setDemAge(30);
+            testPerson.setDemMaleFlag(Gender.Female);
             testPerson.setBenefitUnit(testBenefitUnit);
 
             testBenefitUnit.setRegion(Region.UKD);
@@ -251,7 +251,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(30, testPerson.getDemAge(), "Person's age should not have changed.");
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
             assertTrue(testPerson.isToBePartnered(), "Person should be set to be partnered.");
             assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "One person should be in persons to match.");
@@ -262,8 +262,8 @@ public class PersonTest {
         @Test
         @DisplayName("OUTCOME D: Over 29 and not partnered - estimate not to be partnered")
         public void over29StudentNotToBePartnered() {
-            testPerson.setDag(30);
-            testPerson.setDgn(Gender.Female);
+            testPerson.setDemAge(30);
+            testPerson.setDemMaleFlag(Gender.Female);
             testPerson.setBenefitUnit(testBenefitUnit);
 
             testBenefitUnit.setRegion(Region.UKD);
@@ -276,7 +276,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(30, testPerson.getDemAge(), "Person's age should not have changed.");
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
             assertFalse(testPerson.isToBePartnered(), "Person should not be set to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
@@ -287,10 +287,10 @@ public class PersonTest {
         @DisplayName("OUTCOME E: Over 29 or non-student or left education - estimate remain with partner")
         public void over29RemainWithPartner() {
 
-            testPerson.setDag(30);
-            testPerson.setDgn(Gender.Female);
-            testPartner.setDag(20);
-            testPartner.setDgn(Gender.Male);
+            testPerson.setDemAge(30);
+            testPerson.setDemMaleFlag(Gender.Female);
+            testPartner.setDemAge(20);
+            testPartner.setDemMaleFlag(Gender.Male);
 
 
             testPerson.setBenefitUnit(testBenefitUnit);
@@ -308,7 +308,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(30, testPerson.getDemAge(), "Person's age should not have changed.");
             assertEquals(true, testPerson.isPartnered(), "Person should still be partnered.");
             assertEquals(true, testPartner.isPartnered(), "Partner should still be partnered.");
             assertEquals(false, testPerson.isToBePartnered(), "Person should not be to be partnered.");
@@ -321,10 +321,10 @@ public class PersonTest {
         @DisplayName("OUTCOME E: Over 29 or non-student or left education - estimate leave partner")
         public void over29LeavesPartner() {
 
-            testPerson.setDag(30);
-            testPerson.setDgn(Gender.Female);
-            testPartner.setDag(20);
-            testPartner.setDgn(Gender.Male);
+            testPerson.setDemAge(30);
+            testPerson.setDemMaleFlag(Gender.Female);
+            testPartner.setDemAge(20);
+            testPartner.setDemMaleFlag(Gender.Male);
 
 
             testPerson.setBenefitUnit(testBenefitUnit);
@@ -342,7 +342,7 @@ public class PersonTest {
             testPerson.cohabitation();
             testPerson.partnershipDissolution();
 
-            assertEquals(30, testPerson.getDag(), "Person's age should not have changed.");
+            assertEquals(30, testPerson.getDemAge(), "Person's age should not have changed.");
             assertFalse(testPerson.isPartnered(), "Person should no longer be partnered.");
             assertFalse(testPartner.isPartnered(), "Partner should no longer be partnered.");
             assertFalse(testPerson.isToBePartnered(), "Person should not be to be partnered.");
@@ -383,8 +383,8 @@ public class PersonTest {
             public void calculatesLowScoreCorrectly() {
 
 
-                testPerson.setDhe_mcs(1.);
-                testPerson.setDhe_pcs(1.);
+                testPerson.setHealthMentalMcs(1.);
+                testPerson.setHealthPhysicalPcs(1.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
@@ -397,8 +397,8 @@ public class PersonTest {
             public void calculatesHighScoreCorrectly()  {
 
 
-                testPerson.setDhe_mcs(100.);
-                testPerson.setDhe_pcs(100.);
+                testPerson.setHealthMentalMcs(100.);
+                testPerson.setHealthPhysicalPcs(100.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
@@ -428,8 +428,8 @@ public class PersonTest {
             @DisplayName("Calculates low score correctly using Franks coefficients")
             public void calculatesLowScoreCorrectly() {
 
-                testPerson.setDhe_mcs(1.);
-                testPerson.setDhe_pcs(1.);
+                testPerson.setHealthMentalMcs(1.);
+                testPerson.setHealthPhysicalPcs(1.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
@@ -441,8 +441,8 @@ public class PersonTest {
             @DisplayName("Calculates high score correctly using Franks coefficients")
             public void calculatesHighScoreCorrectly(){
 
-                testPerson.setDhe_mcs(100.);
-                testPerson.setDhe_pcs(100.);
+                testPerson.setHealthMentalMcs(100.);
+                testPerson.setHealthPhysicalPcs(100.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 

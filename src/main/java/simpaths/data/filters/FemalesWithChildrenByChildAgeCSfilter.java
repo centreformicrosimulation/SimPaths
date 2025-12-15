@@ -31,7 +31,7 @@ public class FemalesWithChildrenByChildAgeCSfilter implements ICollectionFilter{
 		if (childrenInBU != null) {
 			int arrayPosition = 0;
 			for (Person child : childrenInBU) {
-				ages[arrayPosition] = child.getDag();
+				ages[arrayPosition] = child.getDemAge();
 			}
 		}
 
@@ -48,7 +48,7 @@ public class FemalesWithChildrenByChildAgeCSfilter implements ICollectionFilter{
 		Set<Person> childrenInBU = person.getBenefitUnit().getChildren();
 		if (childrenInBU != null) {
 			for (Person child : childrenInBU) {
-				int age = child.getDag();
+				int age = child.getDemAge();
 				if (age < minAge) {
 					minAge = age;
 				}
@@ -62,8 +62,8 @@ public class FemalesWithChildrenByChildAgeCSfilter implements ICollectionFilter{
 		}
 */
 
-		return ( person.getDgn().equals(Gender.Female) &&
-				person.getDag() >= 20 && person.getDag() <= 65 &&
+		return ( person.getDemMaleFlag().equals(Gender.Female) &&
+				person.getDemAge() >= 20 && person.getDemAge() <= 65 &&
 				(minAge >= ageFrom && maxAge <= ageTo)
 		);
 	}

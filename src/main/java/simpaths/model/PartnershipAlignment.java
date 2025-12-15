@@ -52,7 +52,7 @@ public class PartnershipAlignment implements IEvaluation {
 
         model.clearPersonsToMatch();
         persons.parallelStream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
+                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .forEach(person -> person.cohabitation(args[0]));
 
         // "Fake" union matching (not modifying household structure) here
@@ -75,7 +75,7 @@ public class PartnershipAlignment implements IEvaluation {
     private double evalAggregateShareOfPartneredPersons() {
 
         long numPersonsWhoCanHavePartner = persons.stream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
+                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .count();
 
         long numPersonsPartnered = persons.stream()

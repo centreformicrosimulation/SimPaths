@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          3 Nov 2025 
+* LAST UPDATE:          9 Dec 2025 DP 
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -41,7 +41,7 @@ use "$dir_data\ukhls_pooled_all_obs_09.dta", clear
 ***************************************************************************************
 
 // If any person in the household has missing values, drop the whole household:
-drop if dropHH == 1 /*(62,523  out of 529,229 deleted)*/
+drop if dropHH == 1 
 
 drop dropObs dropHH 
 	
@@ -59,9 +59,9 @@ gen child = dag<$age_become_responsible
 gen adult = 1 - child 
 bys stm idhh: egen adult_count = sum(adult)
 bys stm idbenefitunit: egen adult_count2 = sum(adult)
-drop if adult_count==0 //(1,435 observations deleted)
-drop if adult_count2==0 //(721 observations deleted)
-drop if ((dag>0 & dag<$age_become_responsible) & (idfather == -9 & idmother == -9)) //(0 observations deleted)
+drop if adult_count==0 
+drop if adult_count2==0 
+drop if ((dag>0 & dag<$age_become_responsible) & (idfather == -9 & idmother == -9)) 
 assert adult_count>0 
 assert adult_count2>0 
  
@@ -72,11 +72,11 @@ assert  (idfather>0 | idmother>0) if (dag>0 & dag<$age_become_responsible )
 bys stm idbenefitunit : egen na = sum(adult)
 gen chk = (na==1 & dcpst==1 & adult==1) 
 bys stm idbenefitunit : egen chk2 = max(chk)
-fre chk2 // 30 obs    
+fre chk2 
 //two adults in benunit but not partnered 
 gen chk3 = (na==2 & dcpst!=1 & adult==1) 
 bys stm idbenefitunit : egen chk4 = max(chk3)
-fre chk4 //0 obs 
+fre chk4 
 drop if chk2==1 
 drop if chk4==1  
 drop na chk chk2 chk3 chk4
@@ -134,7 +134,6 @@ bys stm: sum dwt*
 
 save "$dir_data\UKHLS_pooled_ipop.dta", replace /*panel dataset with missing values removed*/
 
-
 ***************************************************************************************
 * slice the pooled dataset into intitial populations
 ***************************************************************************************
@@ -182,7 +181,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	* limit employment history to integer years
 	replace liwwh = round(liwwh)
 	
-	*evaluate disposable income at household level
+	*evaluate disposable income at the benefit unit level 
 	gsort idhh idbenefitunit idperson
 	by idhh idbenefitunit: egen disp_inc = sum(ydisp)
 
@@ -211,18 +210,126 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
 	financial_distress liwwh (missing=-9)
 	
-	gsort idhh idbenefitunit idperson
+	
+/*Rename variables following the new Codebook */
+	* --- Identifiers ---
+rename idhh idHh
+rename idbenefitunit idBu
+rename idperson idPers
+rename idpartner idPartner
+rename idmother idMother
+rename idfather idFather
+rename swv statCollectionWave
+
+* --- Demographics ---
+rename dgn demMaleFlag
+rename dag demAge
+//rename dcpst demPartnerStatus
+rename dnc02 demNChild0to2
+rename dnc demNChild
+rename ded eduSpellFlag
+rename deh_c3 eduHighestC3
+rename sedex eduExitSampleFlag
+//rename jbstat labStatus
+//rename les_c3 labStatusC3
+rename dlltsd01 healthDsblLongtermFlag
+rename dhe healthSelfRated
+rename ydses_c5 yHhQuintilesMonthC5
+//rename dhhtp_c4 demCompHhC4
+//rename ssscp demPartnerSameSexFlag
+//rename dcpen demEnterPartnerFlag
+rename dcpyy demPartnerNYear
+//rename dcpex demExitPartnerFlag
+rename dcpagdf demAgePartnerDiff
+rename ynbcpdf_dv yPersAndPartnerGrossDiffMonth
+rename der eduReturnFlag
+//rename sedag demAgeEduRangeFlag
+//rename sprfm demFertFlag
+//rename dchpd demNChild0
+//rename dagsp demAgePartner
+//rename dehsp_c3 eduHighestPartnerC3
+//rename dhesp healthPartnerSelfRated
+//rename lessp_c3 labStatusPartnerC3
+rename dehm_c3 eduHighestMotherC3
+rename dehf_c3 eduHighestFatherC3
+rename stm statInterviewYear
+//rename lesdf_c4 labStatusPartnerAndOwnC4
+rename dhm healthWbScore0to36
+rename scghq2_dv demWbScore0to12
+rename dhh_owned wealthPrptyFlag
+rename lhw labHrsWorkWeek
+rename l1_lhw labHrsWorkWeekL1
+rename drgn1 demRgn
+//rename dct demCountry
+rename les_c4 labC4
+rename dhm_ghq healthPsyDstrssFlag
+//rename lessp_c4 labStatusPartnerC4
+rename adultchildflag demAdultChildFlag
+//rename multiplier demPopSurveyShare
+rename dwt wgtHhCross
+
+* --- Income, labour, wealth ---
+rename potential_earnings_hourly labWageHrly
+rename l1_potential_earnings_hourly labWageHrlyL1
+//rename liquid_wealth wealthLiq
+//rename tot_pen wealthPensValue
+//rename nvmhome wealthPrptyValue
+
+rename disp_inc yDispMonth //disposable income at the benefit unit level                 
+rename total_wealth wealthTotValue   //total wealth net of liabilities of benefit unit including housing, business and
+rename mortgage_debt wealthMortgageDebtValue  //total mortgage debt owed on main home of benefit unit
+rename housing_wealth wealthPrptyValue //value of main home gross of mortgage debt of benefit unit
+rename total_pensions wealthPensValue //value of all private (personal and occupational) pensions of benefit unit
+
+rename econ_benefits yBenReceivedFlag
+rename econ_benefits_nonuc yBenNonUCReceivedFlag
+rename econ_benefits_uc yBenUCReceivedFlag
+
+rename ypncp yCapitalPersMonth
+rename ypnoab yPensPersGrossMonth
+rename yplgrs_dv yEmpPersGrossMonth
+rename ypnbihs_dv yNonBenPersGrossMonth
+rename yptciihs_dv yMiscPersGrossMonth
+
+rename unemp labUnempFlag
+rename liwwh labEmpNyear
+
+* --- Social care ---
+rename need_socare careNeedFlag
+rename formal_socare_hrs careHrsFormal
+rename partner_socare_hrs careHrsFromPartner
+rename daughter_socare_hrs careHrsFromDaughter
+rename son_socare_hrs careHrsFromSon
+rename other_socare_hrs careHrsFromOther
+rename formal_socare_cost careCareFormal
+//rename aidhrs careHrsProvidedWeek
+rename carehoursprovidedweekly careHrsProvidedWeek
+rename carewho careWho
+
+* --- Health & wellbeing ---
+rename dhe_mcs healthMentalMcs
+rename dhe_pcs healthPhysicalPcs
+rename dhe_mcssp healthMentalPartnerMcs
+rename dhe_pcssp healthPhysicalPartnerPcs
+rename dls demLifeSatScore1to7
+rename dot demEthnC4
+rename dot01 demEthnC6
+rename financial_distress yFinDstrssFlag	
+		
+	
+	gsort idHh idBu idPers
 	save "$dir_data/population_initial_UK_$year.dta", replace
 	
-	recode dgn total_wealth total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs ///
-	other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
+	recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrptyValue wealthPensValue ///
+	careNeedFlag careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek careWho (-9=0)
+
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 }
 
 cap log close
 
 
-***************************************************************************************
+/***************************************************************************************
 * finalise
 ***************************************************************************************
 #delimit ;

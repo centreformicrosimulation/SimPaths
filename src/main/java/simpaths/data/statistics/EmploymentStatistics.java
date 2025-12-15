@@ -21,48 +21,48 @@ public class EmploymentStatistics {
     private PanelEntityKey key = new PanelEntityKey(1L);
 
     @Column(name= "EmpToNotEmp")
-    private double EmpToNotEmp;         // Proportion of employed people becoming unemployed
+    private double labEmpToNotEmpShare;         // Proportion of employed people becoming unemployed
 
     @Column(name= "NotEmpToEmp")
-    private double NotEmpToEmp;         // Proportion of unemployed people becoming employed
+    private double labNotEmpToEmpShare;         // Proportion of unemployed people becoming employed
 
     @Column(name = "PropEmployed")
-    private double PropEmployed;
+    private double labEmpShare;
 
     @Column(name = "PropUnemployed")
-    private double PropUnemployed;
+    private double labUnempShare;
 
 
     public double getEmpToNotEmp() {
-        return EmpToNotEmp;
+        return labEmpToNotEmpShare;
     }
 
     public void setEmpToNotEmp(double empToNotEmp) {
-        EmpToNotEmp = empToNotEmp;
+        labEmpToNotEmpShare = empToNotEmp;
     }
 
     public double getNotEmpToEmp() {
-        return NotEmpToEmp;
+        return labNotEmpToEmpShare;
     }
 
     public void setNotEmpToEmp(double notEmpToEmp) {
-        NotEmpToEmp = notEmpToEmp;
+        labNotEmpToEmpShare = notEmpToEmp;
     }
 
     public double getPropEmployed() {
-        return PropEmployed;
+        return labEmpShare;
     }
 
     public void setPropEmployed(double propEmployed) {
-        PropEmployed = propEmployed;
+        labEmpShare = propEmployed;
     }
 
     public double getPropUnemployed() {
-        return PropUnemployed;
+        return labUnempShare;
     }
 
     public void setPropUnemployed(double propUnemployed) {
-        PropUnemployed = propUnemployed;
+        labUnempShare = propUnemployed;
     }
 
     public void update(SimPathsModel model) {

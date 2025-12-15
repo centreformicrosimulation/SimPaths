@@ -106,7 +106,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private GiniEquivalisedHouseholdDisposableIncome giniEquivalisedHouseholdDisposableIncome;
 
-    private Ydses_c5 ydses_c5;
+    private Ydses_c5 yHhQuintilesMonthC5;
 
     private EDI edi; //Equivalised disposable income statistics
 
@@ -311,7 +311,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             }
         }
 
-        ydses_c5 = new Ydses_c5();
+        yHhQuintilesMonthC5 = new Ydses_c5();
         edi = new EDI();
         sIndex = new SIndex();
         grossLabourIncome = new GrossLabourIncome();
@@ -438,9 +438,9 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
         public void update() {
             for (Person person : model.getPersons()) { //For each person, get values of income over time in a series object
-                person.getYearlyEquivalisedConsumptionSeries().updateSource(); //Update values in the series of consumption
+                person.getXEquivYearL1().updateSource(); //Update values in the series of consumption
 
-                Series.Double consumptionSeries = person.getYearlyEquivalisedConsumptionSeries();
+                Series.Double consumptionSeries = person.getXEquivYearL1();
                 double[] consumptionValues = consumptionSeries.getDoubleArray();
                 int timeWindow = model.getsIndexTimeWindow(); //Time window in which the S Index should be calculated
                 int lengthConsumptionSeries = consumptionValues.length;
@@ -528,15 +528,15 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             for (Person person : model.getPersons()) {
                 double covidModuleGrossLabourIncomeBaseline = person.getCovidModuleGrossLabourIncome_Baseline();
                 if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p20()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q1);
+                    person.setCovidYLabGrossXt5(Quintiles.Q1);
                 } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p40()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q2);
+                    person.setCovidYLabGrossXt5(Quintiles.Q2);
                 } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p60()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q3);
+                    person.setCovidYLabGrossXt5(Quintiles.Q3);
                 } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p80()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q4);
+                    person.setCovidYLabGrossXt5(Quintiles.Q4);
                 } else {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q5);
+                    person.setCovidYLabGrossXt5(Quintiles.Q5);
                 }
             }
 
@@ -905,7 +905,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     }
 
     private void calculateGrossIncome() {
-        ydses_c5.update();
+        yHhQuintilesMonthC5.update();
         grossLabourIncome.update();
     }
 

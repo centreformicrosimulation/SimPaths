@@ -123,16 +123,16 @@ public class InitialPopulationFilter {
 
             for (Person person : benefitUnit.getMembers()) {
 
-                if (person.getDag() < Parameters.MIN_AGE_COHABITATION && Dcpst.Partnered.equals(person.getDcpst()))
+                if (person.getDemAge() < Parameters.MIN_AGE_COHABITATION && Dcpst.Partnered.equals(person.getDcpst()))
                     return false;
                 else if (Dcpst.Partnered.equals(person.getDcpst()) && cohabiting <= 0)
                     return false;
                 else {
                     if (IGNORE_REGION) {
-                        if (populationByGenderAndAge.get(person.getDgn(), Math.min(censorAge,person.getDag())) <= 0)
+                        if (populationByGenderAndAge.get(person.getDemMaleFlag(), Math.min(censorAge,person.getDemAge())) <= 0)
                             return false;
                     } else {
-                        if (populationByGenderRegionAndAge.get(person.getDgn(), region, Math.min(censorAge,person.getDag())) <= 0)
+                        if (populationByGenderRegionAndAge.get(person.getDemMaleFlag(), region, Math.min(censorAge,person.getDemAge())) <= 0)
                             return false;
                     }
                 }
@@ -149,8 +149,8 @@ public class InitialPopulationFilter {
                 if (Dcpst.Partnered.equals(person.getDcpst()))
                     cohabiting -= 1;
 
-                int age = Math.min(censorAge, person.getDag());
-                Gender gender = person.getDgn();
+                int age = Math.min(censorAge, person.getDemAge());
+                Gender gender = person.getDemMaleFlag();
                 if (IGNORE_REGION) {
                     int ceil = populationByGenderAndAge.get(gender, age);
                     populationByGenderAndAge.put(gender, age, ceil-1);
