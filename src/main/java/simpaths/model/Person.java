@@ -291,8 +291,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dag = 0;
         weight = mother.getWeight();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         dhe = Dhe.VeryGood;
-        dhm = 9.;			//Set to median for under 18's as a placeholder
+        dhm = 10.;			//Set to median for under 18's as a placeholder
         dhmGhq = 0.;
+        dhe_mcs = 48.;
+        dhe_pcs = 56.;
+        dls = 6;
         deh_c3 = Education.Low;
         dot01 = mother.getDot01();
         les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
