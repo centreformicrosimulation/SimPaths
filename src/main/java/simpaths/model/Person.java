@@ -1193,7 +1193,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      *
      * @filter Age 16+
      * @updates {@code Person.dls}
-     *  @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
      */
     protected void lifeSatisfaction1() {
 
@@ -1215,7 +1215,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      *
      * @filter Age 25-64
      * @updates {@code Person.dls}
-     *  @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
      */
     protected void lifeSatisfaction2() {
 
@@ -1233,6 +1233,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
 
+    /**
+     * Generate EQ5D score from MCS and PCS
+     *
+     * <p>Calculates an EQ5D score per person from previously updated MCS and PCS scores.
+     * Loads conversion parameters selected as 'franks' or 'lawrence' at {@link Parameters#eq5dConversionParameters}.
+     * Estimates are truncated to -0.594 to 1.0.</p>
+     *
+     * @filter Age 16+
+     * @updates {@code Person.he_eq5d}
+     * @see <a href="https://journals.sagepub.com/doi/epdf/10.1177/0272989X04265477">Franks et al., 2004</a>
+     * @see <a href="https://journals.sagepub.com/doi/abs/10.1177/0272989X04264015">Lawrence & Fleishman, 2004</a>
+     */
     private void healthEQ5D() {
 
         double eq5dPrediction;
@@ -1253,18 +1265,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
 
-
-    protected Double constrainDhmGhqEstimate(Double dhm_ghq) {
-        if (dhm_ghq < 0.) {
-            dhm_ghq = 0.;
-        } else if (dhm_ghq > 12.) {
-            dhm_ghq = 12.;
-        }
-        return dhm_ghq;
-    }
-
-    /*
-    Psychological distress on the GHQ-12 scale has no meaning outside of the original values between 0 and 36, but we model this variable on a continuous scale. If the predicted value is outside of this interval, limit it to fall within these values.
+    /**
+     * Constrains GHQ12 Level estimates to valid range, 0-36
+     *
+     * @param dhm predicted GHQ12 Level score
+     * @return {@code Person.dhm}  Level score constrained to 0-36
      */
     protected Double constrainDhmEstimate(Double dhm) {
         if (dhm < 0.) {
@@ -1275,6 +1280,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return dhm;
     }
 
+    /**
+     * Constrains GHQ12 Caseness estimates to valid range, 0-12
+     *
+     * @param dhm_ghq predicted GHQ12 Caseness score
+     * @return {@code Person.dhmGqh} Caseness score constrained to 0-12
+     */
+    protected Double constrainDhmGhqEstimate(Double dhm_ghq) {
+        if (dhm_ghq < 0.) {
+            dhm_ghq = 0.;
+        } else if (dhm_ghq > 12.) {
+            dhm_ghq = 12.;
+        }
+        return dhm_ghq;
+    }
+
+
+    /**
+     * Constrains SF12 (MCS or PCS) estimates to valid range, 0-100
+     *
+     * @param sf12 predicted MCS or PCS score
+     * @return {@code Person.dhe_mcs} or {@code Person.dhe_pcs} score constrained to 0-100
+     */
     protected Double constrainSF12Estimate(double sf12) {
         if (sf12 < 0.) {
             sf12 = 0.;
@@ -1284,18 +1311,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return sf12;
     }
 
-    protected Integer constrainLifeSatisfactionEstimate(double dls_estimate) {
+    /**
+     * Constrains life satisfaction score to valid range, 0-10
+     *
+     * @param dls_estimate predicted life satisfaction score
+     * @return {@code Person.dls} score constrained to 0-10
+     */
+    protected Double constrainLifeSatisfactionEstimate(double dls_estimate) {
         if (!Parameters.checkFinite(dls_estimate)) {
             return null;
         }
 
         if (dls_estimate < 1.) {
             dls_estimate = 1.;
-        } else if (dls_estimate > 7.) {
-            dls_estimate = 7.;
+        } else if (dls_estimate > 10.) {
+            dls_estimate = 10.;
         }
 
-        return (int) Math.round(dls_estimate);
+        return dls_estimate;
     }
 
     //Health process defines health using H1a or H1b process
