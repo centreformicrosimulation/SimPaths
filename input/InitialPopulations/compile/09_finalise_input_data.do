@@ -192,7 +192,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
 	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
 	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
+	econ_benefits_uc econ_benefits_lb disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
 	financial_distress liwwh
 	
 	order idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
@@ -200,7 +200,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
 	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
 	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
+	econ_benefits_uc econ_benefits_lb disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
 	financial_distress liwwh
 	
 	recode idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
@@ -208,7 +208,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
 	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
 	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
+	econ_benefits_uc econ_benefits_lb disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
 	financial_distress liwwh (missing=-9)
 	
 	gsort idhh idbenefitunit idperson
