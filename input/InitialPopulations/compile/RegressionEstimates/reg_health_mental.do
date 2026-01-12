@@ -91,7 +91,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_mental", sheet("UK_HM1_L") modify
+putexcel set "$dir_results/reg_health_mental", sheet("UK_HM1_L", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -131,70 +131,68 @@ putexcel A1 = matrix(nonzero_b'), names nformat(number_d2)
 putexcel A1 = "REGRESSOR"
 putexcel A2 = "D_Home_owner_L1"
 putexcel A3 = "Dcpst_Single_L1"
-putexcel A4 = "Dcpst_PreviouslyPartnered_L1"
-putexcel A5 = "Dnc_L1"
-putexcel A6 = "Dhe_pcs_L1"
-putexcel A7 = "UKC"
-putexcel A8 = "UKD"
-putexcel A9 = "UKE"
-putexcel A10 = "UKF"
-putexcel A11 = "UKG"
-putexcel A12 = "UKH"
-putexcel A13 = "UKJ"
-putexcel A14 = "UKK"
-putexcel A15 = "UKL"
-putexcel A16 = "UKM"
-putexcel A17 = "UKN"
-putexcel A18 = "Ydses_c5_Q2_L1"
-putexcel A19 = "Ydses_c5_Q3_L1"
-putexcel A20 = "Ydses_c5_Q4_L1"
-putexcel A21 = "Ydses_c5_Q5_L1"
-putexcel A22 = "Dlltsd_L1"
-putexcel A23 = "Dhm_L1"
-putexcel A24 = "Dag_L1"
-putexcel A25 = "Dag_sq_L1"
-putexcel A26 = "Deh_c3_Medium"
-putexcel A27 = "Deh_c3_Low"
-putexcel A28 = "EthnicityAsian"
-putexcel A29 = "EthnicityBlack"
-putexcel A30 = "EthnicityOther"
-putexcel A31 = "Dgn"
-putexcel A32 = "Year_transformed"
-putexcel A33 = "Constant"
+putexcel A4 = "Dnc_L1"
+putexcel A5 = "Dhe_pcs_L1"
+putexcel A6 = "UKC"
+putexcel A7 = "UKD"
+putexcel A8 = "UKE"
+putexcel A9 = "UKF"
+putexcel A10 = "UKG"
+putexcel A11 = "UKH"
+putexcel A12 = "UKJ"
+putexcel A13 = "UKK"
+putexcel A14 = "UKL"
+putexcel A15 = "UKM"
+putexcel A16 = "UKN"
+putexcel A17 = "Ydses_c5_Q2_L1"
+putexcel A18 = "Ydses_c5_Q3_L1"
+putexcel A19 = "Ydses_c5_Q4_L1"
+putexcel A20 = "Ydses_c5_Q5_L1"
+putexcel A21 = "Dlltsd_L1"
+putexcel A22 = "Dhm_L1"
+putexcel A23 = "Dag_L1"
+putexcel A24 = "Dag_sq_L1"
+putexcel A25 = "Deh_c3_Medium"
+putexcel A26 = "Deh_c3_Low"
+putexcel A27 = "EthnicityAsian"
+putexcel A28 = "EthnicityBlack"
+putexcel A29 = "EthnicityOther"
+putexcel A30 = "Dgn"
+putexcel A31 = "Year_transformed"
+putexcel A32 = "Constant"
 
 putexcel B1 = "COEFFICIENT"
 putexcel C1 = "D_Home_owner_L1"
 putexcel D1 = "Dcpst_Single_L1"
-putexcel E1 = "Dcpst_PreviouslyPartnered_L1"
-putexcel F1 = "Dnc_L1"
-putexcel G1 = "Dhe_pcs_L1"
-putexcel H1 = "UKC"
-putexcel I1 = "UKD"
-putexcel J1 = "UKE"
-putexcel K1 = "UKF"
-putexcel L1 = "UKG"
-putexcel M1 = "UKH"
-putexcel N1 = "UKJ"
-putexcel O1 = "UKK"
-putexcel P1 = "UKL"
-putexcel Q1 = "UKM"
-putexcel R1 = "UKN"
-putexcel S1 = "Ydses_c5_Q2_L1"
-putexcel T1 = "Ydses_c5_Q3_L1"
-putexcel U1 = "Ydses_c5_Q4_L1"
-putexcel V1 = "Ydses_c5_Q5_L1"
-putexcel W1 = "Dlltsd_L1"
-putexcel X1 = "Dhm_L1"
-putexcel Y1 = "Dag_L1"
-putexcel Z1 = "Dag_sq_L1"
-putexcel AA1 = "Deh_c3_Medium"
-putexcel AB1 = "Deh_c3_Low"
-putexcel AC1 = "EthnicityAsian"
-putexcel AD1 = "EthnicityBlack"
-putexcel AE1 = "EthnicityOther"
-putexcel AF1 = "Dgn"
-putexcel AG1 = "Year_transformed"
-putexcel AH1 = "Constant"
+putexcel E1 = "Dnc_L1"
+putexcel F1 = "Dhe_pcs_L1"
+putexcel G1 = "UKC"
+putexcel H1 = "UKD"
+putexcel I1 = "UKE"
+putexcel J1 = "UKF"
+putexcel K1 = "UKG"
+putexcel L1 = "UKH"
+putexcel M1 = "UKJ"
+putexcel N1 = "UKK"
+putexcel O1 = "UKL"
+putexcel P1 = "UKM"
+putexcel Q1 = "UKN"
+putexcel R1 = "Ydses_c5_Q2_L1"
+putexcel S1 = "Ydses_c5_Q3_L1"
+putexcel T1 = "Ydses_c5_Q4_L1"
+putexcel U1 = "Ydses_c5_Q5_L1"
+putexcel V1 = "Dlltsd_L1"
+putexcel W1 = "Dhm_L1"
+putexcel X1 = "Dag_L1"
+putexcel Y1 = "Dag_sq_L1"
+putexcel Z1 = "Deh_c3_Medium"
+putexcel AA1 = "Deh_c3_Low"
+putexcel AB1 = "EthnicityAsian"
+putexcel AC1 = "EthnicityBlack"
+putexcel AD1 = "EthnicityOther"
+putexcel AE1 = "Dgn"
+putexcel AF1 = "Year_transformed"
+putexcel AG1 = "Constant"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
@@ -278,7 +276,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Females_L") modify
+putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Females_L", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -423,7 +421,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Males_L") modify
+putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Males_L", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -498,9 +496,12 @@ scalar drop r2_p N chi2 ll
 * HM1_C: GHQ12 score 0-12 of all working-age adults - baseline effects *
 **********************************************************************
 
-reg scghq2_dv ///
+* New ordered logistic regression model, reflecting observed distributions
+
+ologit scghq2_dv ///
 L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.scghq2_dv ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
+if stm!=20 & stm!=21 & dag>=25 & dag<=64 & swv!=12 ///
 [pweight=dimxwt]  ///
 , vce(cluster idperson)
 
@@ -553,7 +554,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_mental", sheet("UK_HM1_C") modify
+putexcel set "$dir_results/reg_health_mental", sheet("UK_HM1_C", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -593,80 +594,103 @@ putexcel A1 = matrix(nonzero_b'), names nformat(number_d2)
 putexcel A1 = "REGRESSOR"
 putexcel A2 = "D_Home_owner_L1"
 putexcel A3 = "Dcpst_Single_L1"
-putexcel A4 = "Dcpst_PreviouslyPartnered_L1"
-putexcel A5 = "Dnc_L1"
-putexcel A6 = "Dhe_pcs_L1"
-putexcel A7 = "UKC"
-putexcel A8 = "UKD"
-putexcel A9 = "UKE"
-putexcel A10 = "UKF"
-putexcel A11 = "UKG"
-putexcel A12 = "UKH"
-putexcel A13 = "UKJ"
-putexcel A14 = "UKK"
-putexcel A15 = "UKL"
-putexcel A16 = "UKM"
-putexcel A17 = "UKN"
-putexcel A18 = "Ydses_c5_Q2_L1"
-putexcel A19 = "Ydses_c5_Q3_L1"
-putexcel A20 = "Ydses_c5_Q4_L1"
-putexcel A21 = "Ydses_c5_Q5_L1"
-putexcel A22 = "Dlltsd_L1"
-putexcel A23 = "Dhm_L1"
-putexcel A24 = "Dag_L1"
-putexcel A25 = "Dag_sq_L1"
-putexcel A26 = "Deh_c3_Medium"
-putexcel A27 = "Deh_c3_Low"
-putexcel A28 = "EthnicityAsian"
-putexcel A29 = "EthnicityBlack"
-putexcel A30 = "EthnicityOther"
-putexcel A31 = "Dgn"
-putexcel A32 = "Year_transformed"
-putexcel A33 = "Constant"
+putexcel A4 = "Dnc_L1"
+putexcel A5 = "Dhe_pcs_L1"
+putexcel A6 = "UKC"
+putexcel A7 = "UKD"
+putexcel A8 = "UKE"
+putexcel A9 = "UKF"
+putexcel A10 = "UKG"
+putexcel A11 = "UKH"
+putexcel A12 = "UKJ"
+putexcel A13 = "UKK"
+putexcel A14 = "UKL"
+putexcel A15 = "UKM"
+putexcel A16 = "UKN"
+putexcel A17 = "Ydses_c5_Q2_L1"
+putexcel A18 = "Ydses_c5_Q3_L1"
+putexcel A19 = "Ydses_c5_Q4_L1"
+putexcel A20 = "Ydses_c5_Q5_L1"
+putexcel A21 = "Dlltsd_L1"
+putexcel A22 = "Dhm_L1"
+putexcel A23 = "Dag_L1"
+putexcel A24 = "Dag_sq_L1"
+putexcel A25 = "Deh_c3_Medium"
+putexcel A26 = "Deh_c3_Low"
+putexcel A27 = "EthnicityAsian"
+putexcel A28 = "EthnicityBlack"
+putexcel A29 = "EthnicityOther"
+putexcel A30 = "Dgn"
+putexcel A31 = "Year_transformed"
+putexcel A32 = "Cut1"
+putexcel A33 = "Cut2"
+putexcel A34 = "Cut3"
+putexcel A35 = "Cut4"
+putexcel A36 = "Cut5"
+putexcel A37 = "Cut6"
+putexcel A38 = "Cut7"
+putexcel A39 = "Cut8"
+putexcel A40 = "Cut9"
+putexcel A41 = "Cut10"
+putexcel A42 = "Cut11"
+putexcel A43 = "Cut12"
 
 putexcel B1 = "COEFFICIENT"
 putexcel C1 = "D_Home_owner_L1"
 putexcel D1 = "Dcpst_Single_L1"
-putexcel E1 = "Dcpst_PreviouslyPartnered_L1"
-putexcel F1 = "Dnc_L1"
-putexcel G1 = "Dhe_pcs_L1"
-putexcel H1 = "UKC"
-putexcel I1 = "UKD"
-putexcel J1 = "UKE"
-putexcel K1 = "UKF"
-putexcel L1 = "UKG"
-putexcel M1 = "UKH"
-putexcel N1 = "UKJ"
-putexcel O1 = "UKK"
-putexcel P1 = "UKL"
-putexcel Q1 = "UKM"
-putexcel R1 = "UKN"
-putexcel S1 = "Ydses_c5_Q2_L1"
-putexcel T1 = "Ydses_c5_Q3_L1"
-putexcel U1 = "Ydses_c5_Q4_L1"
-putexcel V1 = "Ydses_c5_Q5_L1"
-putexcel W1 = "Dlltsd_L1"
-putexcel X1 = "Dhm_L1"
-putexcel Y1 = "Dag_L1"
-putexcel Z1 = "Dag_sq_L1"
-putexcel AA1 = "Deh_c3_Medium"
-putexcel AB1 = "Deh_c3_Low"
-putexcel AC1 = "EthnicityAsian"
-putexcel AD1 = "EthnicityBlack"
-putexcel AE1 = "EthnicityOther"
-putexcel AF1 = "Dgn"
-putexcel AG1 = "Year_transformed"
-putexcel AH1 = "Constant"
+putexcel E1 = "Dnc_L1"
+putexcel F1 = "Dhe_pcs_L1"
+putexcel G1 = "UKC"
+putexcel H1 = "UKD"
+putexcel I1 = "UKE"
+putexcel J1 = "UKF"
+putexcel K1 = "UKG"
+putexcel L1 = "UKH"
+putexcel M1 = "UKJ"
+putexcel N1 = "UKK"
+putexcel O1 = "UKL"
+putexcel P1 = "UKM"
+putexcel Q1 = "UKN"
+putexcel R1 = "Ydses_c5_Q2_L1"
+putexcel S1 = "Ydses_c5_Q3_L1"
+putexcel T1 = "Ydses_c5_Q4_L1"
+putexcel U1 = "Ydses_c5_Q5_L1"
+putexcel V1 = "Dlltsd_L1"
+putexcel W1 = "Dhm_L1"
+putexcel X1 = "Dag_L1"
+putexcel Y1 = "Dag_sq_L1"
+putexcel Z1 = "Deh_c3_Medium"
+putexcel AA1 = "Deh_c3_Low"
+putexcel AB1 = "EthnicityAsian"
+putexcel AC1 = "EthnicityBlack"
+putexcel AD1 = "EthnicityOther"
+putexcel AE1 = "Dgn"
+putexcel AF1 = "Year_transformed"
+putexcel AG1 = "Cut1"
+putexcel AH1 = "Cut2"
+putexcel AI1 = "Cut3"
+putexcel AJ1 = "Cut4"
+putexcel AK1 = "Cut5"
+putexcel AL1 = "Cut6"
+putexcel AM1 = "Cut7"
+putexcel AN1 = "Cut8"
+putexcel AO1 = "Cut9"
+putexcel AP1 = "Cut10"
+putexcel AQ1 = "Cut11"
+putexcel AR1 = "Cut12"
 		
-* save RMSE
+* save RMSE - not strictly needed for ologit predictions
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A13 = ("HM1_C") B13 = rmse 
+putexcel A11 = ("HM1_C") B11 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
+
 ***************************************************************
 * HM2_Females_C: GHQ12 Score 0-12 - causal employment effects *
 ***************************************************************
+
+* Kept as linear as adding an 'additional' causal effect on baseline
 
 gen RealIncomeDecrease_D = log_income - L.log_income
 gen scghq2_dv_L1 = L.scghq2_dv
@@ -740,7 +764,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Females_C") modify
+putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Females_C", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -883,7 +907,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Males_C") modify
+putexcel set "$dir_results/reg_health_mental", sheet("UK_HM2_Males_C", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
