@@ -709,7 +709,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         HealthEQ5D,
         HealthMentalHM1, 				//Predict level of mental health on the GHQ-12 Likert scale (Step 1)
         HealthMentalHM2,				//Modify the prediction from Step 1 by applying increments / decrements for exposure
-        HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together
+        HealthMentalHM1HM2Cases,		//Case-based prediction for psychological distress, Steps 1 and 2 together (no longer used)
+        HealthMentalHM1Case,		//Case-based prediction for psychological distress, Step 1
+        HealthMentalHM2Case,		//Case-based prediction for psychological distress, Step 2
         HealthMCS1,
         HealthMCS2,
         HealthPCS1,
@@ -804,8 +806,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case LifeSatisfaction2 -> {
                 lifeSatisfaction2();
             }
-            case HealthMentalHM1HM2Cases -> {
-                healthMentalHM1HM2Cases();
+            case HealthMentalHM1Case -> {
+                healthMentalHM1Case();
+            }
+            case HealthMentalHM2Case -> {
+                healthMentalHM2Case();
             }
             case HealthEQ5D -> {
                 healthEQ5D();
@@ -1027,6 +1032,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    protected void healthMentalHM1Case() {
+        if (dag >= 16) {
+            double score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class);
+            double rmse = Parameters.getRMSEForRegression("HM1_C");
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(36));
+            dhmGhq = score + rmse*gauss;
+        }
+    }
+    protected void healthMentalHM2Case() {
+        double dhmGhqPrediction;
+        if (dag >= 25 && dag <= 64) {
+            if (Gender.Male.equals(getDgn())) {
+                dhmGhqPrediction = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class);
+                dhmGhq = constrainDhmGhqEstimate(dhmGhqPrediction+dhmGhq);
+            } else if (Gender.Female.equals(getDgn())) {
+                dhmGhqPrediction = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class);
+                dhmGhq = constrainDhmGhqEstimate(dhmGhqPrediction+dhmGhq);
+            } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
+        }
+    }
     protected void healthMCS1() {
 
         if (dag >= 16) {
@@ -1123,30 +1148,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     }
 
-    /*
-    Case-based measure of psychological distress, Steps 1 and 2 modelled together
-    */
-    protected void healthMentalHM1HM2Cases() {
 
-        if (dag >= 16) {
-            double tmp_step1_score = 0, tmp_step2_score = 0, tmp_total_score = 0, tmp_probability = 0;
-            Double tmp_outcome;
-
-            tmp_step1_score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class);
-            double rmse = Parameters.getRMSEForRegression("HM1_C");
-            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(36));
-
-            if (dag >= 25 && dag <= 64) {
-                if (Gender.Male.equals(getDgn())) {
-                    tmp_step2_score = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
-                } else if (Gender.Female.equals(getDgn())) {
-                    tmp_step2_score = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
-                } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
-            }
-            tmp_outcome = constrainDhmGhqEstimate(tmp_step1_score + tmp_step2_score  + (rmse + gauss));
-            setDhmGhq(tmp_outcome);
-        }
-    }
 
     protected Double constrainDhmGhqEstimate(Double dhm_ghq) {
         if (dhm_ghq < 0.) {
