@@ -451,12 +451,16 @@ replace dhe_pcssp=-9 if missing(dhe_pcssp) & idpartner>0
 //fre dhe_mcssp dhe_pcssp if idpartner>0
 
 
-/***************************** Life Satisfaction ***************************************************************************/
-/* Life satisfaction, self report. Continuous scale 0 to 7. */
+/***************************** Life Satisfaction 0-10 ****************************************************/
+/* Life satisfaction, self report. Continuous scale.
+  UKHLS variable sclfsato records scores 1-7.
+  Convert to 0-10 in line with ONS Life Satisfaction scale.
+ */
 
 
 gen dls = sclfsato
 replace dls = . if sclfsato < 0
+replace dls = (dls-1) * 10/6  // Change to 0-10 scale
 lab var dls "DEMOGRAPHIC: Life Satisfaction"
 // fre dls if dag>0 & dag<16
 
