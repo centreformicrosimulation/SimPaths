@@ -352,20 +352,43 @@ eststo predict_dhm: reg dhm c.dag i.dgn i.swv i.dhe, vce(robust) // Physical hea
 restore
 estimates restore predict_dhm
 predict dhm_prediction
-fre dhm_prediction
+// fre dhm_prediction
 
 gen dhm_flag = missing(dhm)
 replace dhm = round(dhm_prediction) if missing(dhm) 
 bys dhm_flag : sum dhm 
 
+/**************************Subjective well-being: GHQ 0-12 score *****************************/
+/*dhm_ghq   scghq2_dv    "DEMOGRAPHIC: Subjective wellbeing (GHQ): rescaled to 0-12, assumed to be continuous"
+This measure converts valid answers to 12 questions of the General Health Questionnaire (GHQ) to a 
+single scale by recoding the values of individual variables of 1 and 2 to 0, and values of 3 and 4 to 1 before summing them. 
+This produces a scale that ranges from 0 (indicating the least amount of distress) to 12 (indicating the greatest amount of distress).
+*/
+gen dhm_ghq	= scghq2_dv 
+replace dhm_ghq = . if scghq2_dv <0
+la var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): 0-12 score"
+gen scghq2_dv_miss_flag = (scghq2_dv == .)
 
+
+preserve
+drop if dgn < 0 | dag<0 | dhe<0
+eststo predict_dhm_ghq: reg dhm_ghq c.dag i.dgn i.swv i.dhe, vce(robust) // Physical health has a big impact, so included as covariate.  
+restore
+estimates restore predict_dhm_ghq
+predict dhm_ghq_prediction
+
+gen dhm_ghq_flag = missing(dhm_ghq)
+replace dhm_ghq = round(dhm_ghq_prediction) if missing(dhm_ghq) 
+bys dhm_ghq_flag : sum dhm_ghq
+
+/* Alternative method of GHQ caseness - binary cutoff at scghq2_dv <4
 /**************************Subjective wellbeing (GHQ): Caseness ******************************
 0: not psychologically distressed, scghq2_dv < 4 
 1: psychologically distressed, scghq2_dv >= 4
 This measure converts valid answers to 12 questions of the General Health Questionnaire (GHQ) to a single scale by recoding 1 and 2 values 
 on individual variables to 0, and 3 and 4 values to 1, and then summing, giving a scale running from 0 (the least distressed) to 12 
 (the most distressed). A binary indicator is then created, equal to 1 for values >= 4.*/
-fre scghq2_dv
+// fre scghq2_dv
 recode scghq2_dv (-9/-1 . = .)
 gen scghq2_dv_miss_flag = (scghq2_dv == .)
 
