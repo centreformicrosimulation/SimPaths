@@ -86,6 +86,25 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.12.0</version>
+				<configuration>
+					<tags>
+						<tag>
+							<name>filter</name>
+							<placement>m</placement>
+							<head>Applies to:</head>
+						</tag>
+						<tag>
+							<name>updates</name>
+							<placement>m</placement>
+							<head>Changes the following variables:</head>
+						</tag>
+					</tags>
+				</configuration>
+			</plugin>
         </plugins>
 	</build>
 	<dependencies>

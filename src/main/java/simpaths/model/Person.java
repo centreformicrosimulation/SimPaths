@@ -1001,22 +1001,40 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         double prob = Parameters.getRegFinancialDistress().getProbability(this, Person.DoublesVariables.class);
         financialDistress = innovations.getDoubleDraw(32) < prob;
     }
-    
-    /*
-    This method corresponds to Step 1 of the mental health evaluation: predict level of mental health on the GHQ-12 Likert scale based on observable characteristics
+
+    // * HEALTH AND WELLBEING ********************************************************************
+
+    /**
+     * Health and wellbeing - GHQ-12 subjective wellbeing, Likert scale 0-36 step 1
+     *
+     * <p>Calculates the 'baseline' yearly update to the GHQ-12 likert (level) score ({@code dhm}) based on demographic variables.
+     * Runs <b>before</b> {@link #healthMentalHM2Level()}.</p>
+     *
+     * @filter Age 16+
+     * @updates {@code Person.dhm}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq1_dv/">scghq1_dv</a>
      */
     protected void healthMentalHM1Level() {
         if (dag >= 16) {
             double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("HM1_L");
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(1));
-            dhm = constrainDhmEstimate(score + rmse*gauss);
+            dhm = score + rmse*gauss;
         }
     }
 
-    /*
-    This method corresponds to Step 2 of the mental health evaluation: increment / decrement the outcome of Step 1 depending on exposures that individual experienced.
-    Filtering: only applies to those with Age>=16 & Age<=64. Different estimates for males and females.
+
+    /**
+     * Health and wellbeing - GHQ-12 subjective wellbeing, Likert scale 0-36 step 2
+     *
+     * <p>Updates GHQ-12 likert (level) score ({@code dhm}) from the causal effects of economic transitions.
+     * Applies separate estimates for Male and Female Persons.
+     * Runs <b>after</b> {@link #healthMentalHM1Level()}</p>
+     *
+     * @filter Age 25-64
+     * @updates {@code Person.dhm}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq1_dv/">scghq1_dv</a>
+     *
      */
     protected void healthMentalHM2Level() {
 
@@ -1032,6 +1050,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+
+    /**
+     * Health and wellbeing - GHQ-12 subjective wellbeing, Caseness scale 0-12 step 1
+     *
+     * <p>Calculates the 'baseline' yearly update to the GHQ-12 Caseness (cases) score ({@code dhmGhq}) based on demographic variables.
+     * Runs <b>before</b> {@link #healthMentalHM2Case()}.</p>
+     *
+     * @filter Age 16+
+     * @updates {@code Person.dhmGhq}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq2_dv/">scghq2_dv</a>
+     */
     protected void healthMentalHM1Case() {
         if (dag >= 16) {
             double score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class);
@@ -1040,6 +1069,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             dhmGhq = score + rmse*gauss;
         }
     }
+
+    /**
+     * Health and wellbeing - GHQ-12 subjective wellbeing, Caseness scale 0-12 step 2
+     *
+     * <p>Updates GHQ-12 Caseness (cases) score ({@code dhmGhq}) from the causal effects of economic transitions.
+     * Applies separate estimates for Male and Female Persons.
+     * Runs <b>after</b> {@link #healthMentalHM1Case()}</p>
+     *
+     * @filter Age 25-64
+     * @updates {@code Person.dhmGhq}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq2_dv/">scghq2_dv</a>
+     */
     protected void healthMentalHM2Case() {
         double dhmGhqPrediction;
         if (dag >= 25 && dag <= 64) {
@@ -1052,6 +1093,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
         }
     }
+
+    /**
+     * Health and wellbeing - Mental Component Summary update step 1
+     *
+     * <p>Calculates the 'baseline' yearly update to the MCS score ({@code dhe_mcs}) based on demographic variables.
+     * Runs <b>before</b> {@link #healthMCS2()}.</p>
+     *
+     * @filter Age 16+
+     * @updates {@code Person.dhe_mcs}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sf12mcs_dv/">sf12mcs_dv</a>
+     */
     protected void healthMCS1() {
 
         if (dag >= 16) {
@@ -1062,6 +1114,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    /**
+     * Health and wellbeing - Mental Component Summary update step 2
+     *
+     * <p>Updates MCS score ({@code dhe_mcs}) from the causal effects of economic transitions.
+     * Applies separate estimates for Male and Female Persons.
+     * Runs <b>after</b> {@link #healthMCS1()}</p>
+     *
+     * @filter Age 25-64
+     * @updates {@code Person.dhe_mcs}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sf12mcs_dv/">sf12mcs_dv</a>
+     */
     protected void healthMCS2() {
 
         double mcsPrediction;
@@ -1076,6 +1139,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+    /**
+     * Health and wellbeing - Physical Component Summary update step 1
+     *
+     * <p>Calculates the 'baseline' yearly update to the PCS score ({@code dhe_pcs}) based on demographic variables.
+     * Runs <b>before</b> {@link #healthPCS2()}.</p>
+     *
+     * @filter Age 16+
+     * @updates {@code Person.dhe_pcs}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sf12pcs_dv/">sf12pcs_dv</a>
+     */
     protected void healthPCS1() {
 
         if (dag >= 16) {
@@ -1086,7 +1159,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-
+    /**
+     * Health and wellbeing - Physical Component Summary update step 2
+     *
+     * <p>Updates PCS score ({@code dhe_pcs}) from the causal effects of economic transitions.
+     * Applies separate estimates for Male and Female Persons.
+     * Runs <b>after</b> {@link #healthPCS1()}</p>
+     *
+     * @filter Age 25-64
+     * @updates {@code Person.dhe_pcs}
+     * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sf12pcs_dv/">sf12pcs_dv</a>
+     */
     protected void healthPCS2() {
 
         double pcsPrediction;
@@ -1101,6 +1184,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
+
+    /**
+     * Health and wellbeing - Life satisfaction score 0-10 step 1
+     *
+     * <p>Calculates the 'baseline' yearly update to the Life Satisfaction score ({@code dls}) based on demographic variables.
+     * Runs <b>before</b> {@link #lifeSatisfaction2()}.</p>
+     *
+     * @filter Age 16+
+     * @updates {@code Person.dls}
+     *  @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
+     */
     protected void lifeSatisfaction1() {
 
         if (dag >= 16) {
@@ -1112,7 +1206,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     }
 
-
+    /**
+     * Health and wellbeing - Life satisfaction score 0-10 step 2
+     *
+     * <p>Updates Life Satisfaction score ({@code dls}) from the causal effects of economic transitions.
+     * Applies separate estimates for Male and Female Persons.
+     * Runs <b>after</b> {@link #lifeSatisfaction1()}</p>
+     *
+     * @filter Age 25-64
+     * @updates {@code Person.dls}
+     *  @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
+     */
     protected void lifeSatisfaction2() {
 
         if (dag >= 25 && dag <= 64) {
