@@ -742,7 +742,7 @@ public class Parameters {
     private static LinearRegression regHealthHM2LevelMales;
     private static LinearRegression regHealthHM2LevelFemales;
 
-    private static LinearRegression regHealthHM1Case;
+    private static OrderedRegression regHealthHM1Case;
     private static LinearRegression regHealthHM2CaseMales;
     private static LinearRegression regHealthHM2CaseFemales;
 
@@ -1357,7 +1357,7 @@ public class Parameters {
         regHealthHM2LevelMales = new LinearRegression(coeffCovarianceHM2LevelMales);
         regHealthHM2LevelFemales = new LinearRegression(coeffCovarianceHM2LevelFemales);
 
-        regHealthHM1Case = new LinearRegression(coeffCovarianceHM1Case);
+        regHealthHM1Case = new OrderedRegression(RegressionType.OrderedLogit,DhmGhq.class,coeffCovarianceHM1Case);
         regHealthHM2CaseMales = new LinearRegression(coeffCovarianceHM2CaseMales);
         regHealthHM2CaseFemales = new LinearRegression(coeffCovarianceHM2CaseFemales);
 
@@ -1874,7 +1874,7 @@ public class Parameters {
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
     public static LinearRegression getRegHealthHM2LevelFemales() { return regHealthHM2LevelFemales; }
-    public static LinearRegression getRegHealthHM1Case() {return regHealthHM1Case;}
+    public static OrderedRegression getRegHealthHM1Case() {return regHealthHM1Case;}
     public static LinearRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
     public static LinearRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
 

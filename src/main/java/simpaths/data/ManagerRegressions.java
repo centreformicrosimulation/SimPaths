@@ -37,9 +37,6 @@ public class ManagerRegressions {
             case HealthHM2LevelFemales -> {
                 return Parameters.getRegHealthHM2LevelFemales();
             }
-            case HealthHM1Case -> {
-                return Parameters.getRegHealthHM1Case();
-            }
             case HealthHM2CaseMales -> {
                 return Parameters.getRegHealthHM2CaseMales();
             }
@@ -196,6 +193,9 @@ public class ManagerRegressions {
             throw new RuntimeException("requested ordered regression is not recognised: " + regression.name());
 
         switch (regression) {
+            case HealthHM1Case -> {
+                return Parameters.getRegHealthHM1Case();
+            }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
             }

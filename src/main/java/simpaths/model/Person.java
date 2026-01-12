@@ -1062,10 +1062,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthMentalHM1Case() {
         if (dag >= 16) {
-            double score = Parameters.getRegHealthHM1Case().getScore(this, Person.DoublesVariables.class);
-            double rmse = Parameters.getRMSEForRegression("HM1_C");
-            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(36));
-            dhmGhq = score + rmse*gauss;
+            Map<DhmGhq,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthHM1Case);
+            MultiValEvent event = new MultiValEvent(probs, innovations.getDoubleDraw(36));
+            dhmGhq = Double.valueOf(event.eval().getValue());
         }
     }
 
@@ -2465,6 +2464,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Cut8,
         Cut9,
         Cut10,
+        Cut11,
+        Cut12,
         D_children,
         D_Children,
         D_children_2under,				// Indicator (dummy variables for presence of children of certain ages in the benefitUnit)
@@ -4205,6 +4206,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return 0.;
             }
             case Cut10 -> {
+                return 0.;
+            }
+            case Cut11 -> {
+                return 0.;
+            }
+            case Cut12 -> {
                 return 0.;
             }
             default -> {
