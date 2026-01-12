@@ -141,9 +141,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double dhe_pcs_lag1;  //physical well-being: SF12 physical component summary score lag 1
     private Double dhe_mcssp; //mental well-being: SF12 mental component summary score (partner)
     private Double dhe_pcssp; //physical well-being: SF12 physical component summary score (partner)
-    private Integer dls;      //life satisfaction - score 1-7
-    @Transient private Double dls_temp;
-    @Transient private Integer dls_lag1;      //life satisfaction - score 1-7 lag 1
+    private Double dls;      //life satisfaction - score 0-10
+    @Transient private Double dls_lag1;      //life satisfaction - score 1-7 lag 1
     @Column(name="he_eq5d")
     private Double he_eq5d;
     @Column(name="financial_distress") private Boolean financialDistress;
@@ -295,7 +294,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhmGhq = 0.;
         dhe_mcs = 48.;
         dhe_pcs = 56.;
-        dls = 6;
+        dls = 6.;
         deh_c3 = Education.Low;
         dot01 = mother.getDot01();
         les_c4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
@@ -1201,7 +1200,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 double dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
                 double rmse = Parameters.getRMSEForRegression("DLS1");
                 double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
-                dls_temp = dlsPrediction + rmse*gauss;
+                dls = dlsPrediction + rmse*gauss;
         }
 
     }
@@ -1224,10 +1223,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             double dlsPrediction;
             if (Gender.Male.equals(getDgn())) {
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
-                dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+                dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls);
             } else if (Gender.Female.equals(getDgn())) {
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
-                dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls_temp);
+                dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls);
             }
         }
     }
@@ -1245,7 +1244,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * @see <a href="https://journals.sagepub.com/doi/epdf/10.1177/0272989X04265477">Franks et al., 2004</a>
      * @see <a href="https://journals.sagepub.com/doi/abs/10.1177/0272989X04264015">Lawrence & Fleishman, 2004</a>
      */
-    private void healthEQ5D() {
+    protected void healthEQ5D() {
 
         double eq5dPrediction;
         if (dag >= 16) {
@@ -4654,10 +4653,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
         return val;
     }
-    public Integer getDls() {
-        int val;
+    public Double getDls() {
+        Double val;
         if (dls == null) {
-            val = -1;
+            val = -1.;
         } else {
             val = dls;
         }

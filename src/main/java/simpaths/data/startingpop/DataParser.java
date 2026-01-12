@@ -245,15 +245,15 @@ public class DataParser {
 								+ "UPDATE " + personTable + " SET idmother = null WHERE idmother = -9;"
 								+ "UPDATE " + personTable + " SET idfather = null WHERE idfather = -9;"
 
-                                // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
+                                // Convert mental health and wellbeing scores to decimal
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCS DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCSSP DECIMAL(4, 2);"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DLS INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM_GHQ INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN SCGHQ2_DV INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DLS DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM_GHQ DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN SCGHQ2_DV DECIMAL(4, 2);"
 
                                 //Rename idbenefitunit to BU_ID
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO buid;"

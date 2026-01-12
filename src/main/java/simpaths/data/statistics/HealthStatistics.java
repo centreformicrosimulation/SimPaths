@@ -110,9 +110,6 @@ public class HealthStatistics {
     @Column(name = "N")
     private int N;
 
-    @Transient
-    final static double WELLBEING_MEASURE_ADJUSTMENT = (double) 11 / 7;
-
     public void setGender(String gender) {
         this.gender = gender;
     }
@@ -325,7 +322,7 @@ public class HealthStatistics {
         wellbys.applyFunction();
 
 
-        setWellbys(wellbys.getDoubleValue(IDoubleSource.Variables.Default) * WELLBEING_MEASURE_ADJUSTMENT);
+        setWellbys(wellbys.getDoubleValue(IDoubleSource.Variables.Default));
 
         // count
         CrossSection.Integer n_persons = new CrossSection.Integer(model.getPersons(), Person.class, "getPersonCount", true);
