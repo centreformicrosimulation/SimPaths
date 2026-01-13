@@ -1251,7 +1251,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * @filter Age 16+
      * @updates {@code Person.he_eq5d}
      * @see <a href="https://journals.sagepub.com/doi/epdf/10.1177/0272989X04265477">Franks et al., 2004</a>
-     * @see <a href="https://journals.sagepub.com/doi/abs/10.1177/0272989X04264015">Lawrence & Fleishman, 2004</a>
+     * @see <a href="https://journals.sagepub.com/doi/abs/10.1177/0272989X04264015">Lawrence &amp; Fleishman, 2004</a>
      */
     protected void healthEQ5D() {
 
