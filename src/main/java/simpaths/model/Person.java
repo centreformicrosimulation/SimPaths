@@ -1046,6 +1046,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 dhmPrediction = Parameters.getRegHealthHM2LevelFemales().getScore(this, Person.DoublesVariables.class);
                 dhm = constrainDhmEstimate(dhmPrediction+dhm);
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
+        } else if (dhm != null) {
+            dhm = constrainDhmEstimate(dhm);
         }
     }
 
@@ -1089,6 +1091,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class);
                 dhmGhq = constrainDhmGhqEstimate(dhmGhqPrediction+dhmGhq);
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
+        } else if (dhmGhq != null) {
+            dhmGhq = constrainDhmGhqEstimate(dhmGhq);
         }
     }
 
@@ -1134,6 +1138,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
                 dhe_mcs = constrainSF12Estimate(mcsPrediction + dhe_mcs);
             }
+        } else if (dhe_mcs != null) {
+            dhe_mcs = constrainSF12Estimate(dhe_mcs);
         }
     }
 
@@ -1179,6 +1185,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
                 dhe_pcs = constrainSF12Estimate(pcsPrediction + dhe_pcs);
             }
+        } else if (dhe_pcs != null) {
+            dhe_pcs = constrainSF12Estimate(dhe_pcs);
         }
     }
 
@@ -1227,6 +1235,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
                 dls = constrainLifeSatisfactionEstimate(dlsPrediction + dls);
             }
+        } else if (dls != null) {
+            dls = constrainLifeSatisfactionEstimate(dls);
         }
     }
 
