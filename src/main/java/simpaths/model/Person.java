@@ -270,10 +270,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         idMother = mother.getId();
         eduHighestMotherC3 = mother.getDeh_c3();
         if (mother.getPartner()==null) {
-            idMother = null;
+            idFather = null;
             eduHighestFatherC3 = mother.getDeh_c3();
         } else {
-            idMother = mother.getPartner().getId();
+            idFather = mother.getPartner().getId();
             eduHighestFatherC3 = mother.getPartner().getDeh_c3();
         }
 
@@ -1886,9 +1886,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 idMother = null;
             Person father = benefitUnit.getMale();
             if (father!=null)
-                idMother = father.getId();
+                idFather = father.getId();
             else
-                idMother = null;
+                idFather = null;
         }
 
         // Mental and Physical health status of the partner
@@ -1929,7 +1929,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demLifeSatScore1to7L1 = demLifeSatScore1to7;
         healthMentalMcsL1 = healthMentalMcs;
         healthPhysicalPcsL1 = healthPhysicalPcs;
-        demPrptyFlagL1 = getBenefitUnit().isDhhOwned();
+        demPrptyFlagL1 = getBenefitUnit().isHousingOwned();
         healthDsblLongtermFlagL1 = healthDsblLongtermFlag; //Update lag(1) of long-term sick or disabled status
         careNeedFlagL1 = careNeedFlag;
         careHrsFormalWeekL1 = careHrsFormalWeek;
@@ -3842,7 +3842,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
             }
             case D_Home_owner -> {
-                return getBenefitUnit().isDhhOwned() ? 1. : 0.;
+                return getBenefitUnit().isHousingOwned() ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
             case D_Home_owner_L1, Dhh_owned_L1 -> {
                 return demPrptyFlagL1 ? 1. : 0.;
@@ -4153,13 +4153,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public HouseholdStatus getHouseholdStatus() {
          Household household = benefitUnit.getHousehold();
-         if (household.getBenefitUnits().size()>1 && (idMother!=null || idMother !=null)) {
+         if (household.getBenefitUnits().size()>1 && (idMother!=null || idFather!=null)) {
              for (BenefitUnit unit : household.getBenefitUnits()) {
                  if (unit != benefitUnit) {
                      for (Person member : unit.getMembers()) {
                          if (idMother!=null && member.getId()==idMother)
                              return HouseholdStatus.Parents;
-                         if (idMother !=null && member.getId()== idMother)
+                         if (idFather!=null && member.getId()==idFather)
                              return HouseholdStatus.Parents;
                      }
                  }
@@ -4382,7 +4382,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     accept = false;
                 if (idMother!=null && member.getId()==idMother)
                     accept = false;
-                if (idMother !=null && member.getId()== idMother)
+                if (idFather!=null && member.getId()==idFather)
                     accept = false;
                 if (accept)
                     return member;

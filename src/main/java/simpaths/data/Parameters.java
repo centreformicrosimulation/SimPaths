@@ -113,7 +113,7 @@ public class Parameters {
 		"idBu",		//id of a benefit unit
 		"idPers", 			//id of person
 		"wgtHhCross", 					//household dem
-		"idMother", 			//id of father
+		"idFather", 			//id of father
 		"idMother", 			//id of mother
 		"demAge", 					//age
 		"eduHighestC3", 				//highest education level

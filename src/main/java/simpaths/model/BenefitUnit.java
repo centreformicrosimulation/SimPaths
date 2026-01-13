@@ -93,7 +93,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Double i_yNonBenHhGrossAsinh;
     @Transient private Dhhtp_c4 demCompHhC4L1;
     private String demCreatedByConstructor;
-    @Column(name="dhh_owned") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
+    @Column(name="wealthPrptyFlag") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
 
@@ -2932,7 +2932,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             }
             case Homeownership_D -> {
-                return isDhhOwned()? 1. : 0.;
+                return isHousingOwned()? 1. : 0.;
             }
             case Constant -> {
                 return 1.0;
@@ -3190,9 +3190,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 }
             }
             if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
-                setDhhOwned(true);
+                setWealthPrptyFlag(true);
             } else {
-                setDhhOwned(false);
+                setWealthPrptyFlag(false);
             }
         }
     }
@@ -3555,15 +3555,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return yDiffDispEquivPrevYear;
     }
 
-    public boolean isDhhOwned() {
+    public boolean isHousingOwned() {
         if (wealthPrptyFlag ==null) {
             wealthPrptyFlag = false;
         }
         return wealthPrptyFlag;
     }
 
-    public void setDhhOwned(boolean dhh_owned) {
-        this.wealthPrptyFlag = dhh_owned;
+    public void setWealthPrptyFlag(boolean wealthPrptyFlag) {
+        this.wealthPrptyFlag = wealthPrptyFlag;
     }
 
     public ArrayList<Triple<Les_c7_covid, Double, Integer>> getCovid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale() {

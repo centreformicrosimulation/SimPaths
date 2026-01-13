@@ -243,7 +243,7 @@ public class DataParser {
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN labHrsWorkWeek RENAME TO " + Parameters.HOURS_WORKED_WEEKLY + ";"
 								+ "ALTER TABLE " + personTable + " ADD work_sector VARCHAR_IGNORECASE DEFAULT 'Private_Employee';"		//Here we assume by default that people are employed - this is because the MultiKeyMaps holding households have work_sector as a key, and cannot handle null values for work_sector. TODO: Need to check that this assumption is OK.
 								+ "UPDATE " + personTable + " SET idMother = null WHERE idMother = -9;"
-								+ "UPDATE " + personTable + " SET idMother = null WHERE idMother = -9;"
+								+ "UPDATE " + personTable + " SET idFather = null WHERE idFather = -9;"
 
                                 // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHMENTALMCS DECIMAL(4, 2);"
