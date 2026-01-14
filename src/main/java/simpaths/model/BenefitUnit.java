@@ -71,8 +71,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Double yDispMonth;
     private Double yGrossMonth;
     private Double yBenAmountMonth;
-    private Integer yBenUCFlag;
-    private Integer yBenLegacyFlag;
+    private Integer yBenUCReceivedFlag;
+    private Integer yBenLegacyReceivedFlag;
     private Double yDispEquivYear;
     @Transient private Double yDispEquivYearL1;
     @Transient private Double yDiffDispEquivPrevYear;
@@ -3462,19 +3462,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public Integer getReceivedUC() {
-        return (yBenUCFlag == null ? 0 : yBenUCFlag);
+        return (yBenUCReceivedFlag == null ? 0 : yBenUCReceivedFlag);
     }
 
-    public void setReceivedUC(Integer yBenUCFlag) {
-        this.yBenUCFlag = yBenUCFlag;
+    public void setReceivedUC(Integer yBenUCReceivedFlag) {
+        this.yBenUCReceivedFlag = yBenUCReceivedFlag;
     }
 
     public Integer getReceivedLegacyBenefits() {
-        return (yBenLegacyFlag == null ? 0 : yBenLegacyFlag);
+        return (yBenLegacyReceivedFlag == null ? 0 : yBenLegacyReceivedFlag);
     }
 
-    public void setReceivedLegacyBenefits(Integer yBenLegacyFlag) {
-        this.yBenLegacyFlag = yBenLegacyFlag;
+    public void setReceivedLegacyBenefits(Integer yBenLegacyReceivedFlag) {
+        this.yBenLegacyReceivedFlag = yBenLegacyReceivedFlag;
     }
 
 

@@ -90,43 +90,43 @@ public class Statistics2 {
 
     //employment income
     @Column(name = "labourIncome_18_29")
-    private double statLab18to29Avg;
+    private double statYLab18to29Avg;
 
     @Column(name = "labourIncome_30_54")
-    private double statLab30to54Avg;
+    private double statYLab30to54Avg;
 
     @Column(name = "labourIncome_55_74")
-    private double statLab55to74Avg;
+    private double statYLab55to74Avg;
 
     //investment income
     @Column(name = "investmentIncome_18_29")
-    private double statInvest18to29Avg;
+    private double statYInvest18to29Avg;
 
     @Column(name = "investmentIncome_30_54")
-    private double statInvest30to54Avg;
+    private double statYInvest30to54Avg;
 
     @Column(name = "investmentIncome_55_74")
-    private double statInvest55to74Avg;
+    private double statYInvest55to74Avg;
 
     //pension income
     @Column(name = "pensionIncome_18_29")
-    private double statPens18to29Avg;
+    private double statYPens18to29Avg;
 
     @Column(name = "pensionIncome_30_54")
-    private double statPens30to54Avg;
+    private double statYPens30to54Avg;
 
     @Column(name = "pensionIncome_55_74")
-    private double statPens55to74Avg;
+    private double statYPens55to74Avg;
 
     //disposable income
     @Column(name = "disposableIncome_18_29")
-    private double statDisp18to29Avg;
+    private double statYDisp18to29Avg;
 
     @Column(name = "disposableIncome_30_54")
-    private double statDisp30to54Avg;
+    private double statYDisp30to54Avg;
 
     @Column(name = "disposableIncome_55_74")
-    private double statDisp55to74Avg;
+    private double statYDisp55to74Avg;
 
     //investment losses
     @Column(name = "investmentLosses_18_29")
@@ -140,13 +140,13 @@ public class Statistics2 {
 
     //disposable income gross of investment losses
     @Column(name = "dispInc_grossLosses_18_29")
-    private double statDispGrossOfLosses18to29Avg;
+    private double statYDispGrossOfLosses18to29Avg;
 
     @Column(name = "dispInc_grossLosses_30_54")
-    private double statDispGrossOfLosses30to54Avg;
+    private double statYDispGrossOfLosses30to54Avg;
 
     @Column(name = "dispInc_grossLosses_55_74")
-    private double statDispGrossOfLosses55to75Avg;
+    private double statYDispGrossOfLosses55to75Avg;
 
     //expenditure
     @Column(name = "expenditure_18_29")
@@ -313,99 +313,99 @@ public class Statistics2 {
     }
 
     public double getLabourIncome18to29() {
-        return statLab18to29Avg;
+        return statYLab18to29Avg;
     }
 
-    public void setLabourIncome18to29(double statLab18to29Avg) {
-        this.statLab18to29Avg = statLab18to29Avg;
+    public void setLabourIncome18to29(double statYLab18to29Avg) {
+        this.statYLab18to29Avg = statYLab18to29Avg;
     }
 
     public double getLabourIncome30to54() {
-        return statLab30to54Avg;
+        return statYLab30to54Avg;
     }
 
-    public void setLabourIncome30to54(double statLab30to54Avg) {
-        this.statLab30to54Avg = statLab30to54Avg;
+    public void setLabourIncome30to54(double statYLab30to54Avg) {
+        this.statYLab30to54Avg = statYLab30to54Avg;
     }
 
     public double getLabourIncome55to74() {
-        return statLab55to74Avg;
+        return statYLab55to74Avg;
     }
 
-    public void setLabourIncome55to74(double statLab55to74Avg) {
-        this.statLab55to74Avg = statLab55to74Avg;
+    public void setLabourIncome55to74(double statYLab55to74Avg) {
+        this.statYLab55to74Avg = statYLab55to74Avg;
     }
 
     public double getInvestmentIncome18to29() {
-        return statInvest18to29Avg;
+        return statYInvest18to29Avg;
     }
 
-    public void setInvestmentIncome18to29(double statInvest18to29Avg) {
-        this.statInvest18to29Avg = statInvest18to29Avg;
+    public void setInvestmentIncome18to29(double statYInvest18to29Avg) {
+        this.statYInvest18to29Avg = statYInvest18to29Avg;
     }
 
     public double getInvestmentIncome30to54() {
-        return statInvest30to54Avg;
+        return statYInvest30to54Avg;
     }
 
-    public void setInvestmentIncome30to54(double statInvest30to54Avg) {
-        this.statInvest30to54Avg = statInvest30to54Avg;
+    public void setInvestmentIncome30to54(double statYInvest30to54Avg) {
+        this.statYInvest30to54Avg = statYInvest30to54Avg;
     }
 
     public double getInvestmentIncome55to74() {
-        return statInvest55to74Avg;
+        return statYInvest55to74Avg;
     }
 
-    public void setInvestmentIncome55to74(double statInvest55to74Avg) {
-        this.statInvest55to74Avg = statInvest55to74Avg;
+    public void setInvestmentIncome55to74(double statYInvest55to74Avg) {
+        this.statYInvest55to74Avg = statYInvest55to74Avg;
     }
 
     public double getPensionIncome18to29() {
-        return statPens18to29Avg;
+        return statYPens18to29Avg;
     }
 
-    public void setPensionIncome18to29(double statPens18to29Avg) {
-        this.statPens18to29Avg = statPens18to29Avg;
+    public void setPensionIncome18to29(double statYPens18to29Avg) {
+        this.statYPens18to29Avg = statYPens18to29Avg;
     }
 
     public double getPensionIncome30to54() {
-        return statPens30to54Avg;
+        return statYPens30to54Avg;
     }
 
-    public void setPensionIncome30to54(double statPens30to54Avg) {
-        this.statPens30to54Avg = statPens30to54Avg;
+    public void setPensionIncome30to54(double statYPens30to54Avg) {
+        this.statYPens30to54Avg = statYPens30to54Avg;
     }
 
     public double getPensionIncome55to74() {
-        return statPens55to74Avg;
+        return statYPens55to74Avg;
     }
 
-    public void setPensionIncome55to74(double statPens55to74Avg) {
-        this.statPens55to74Avg = statPens55to74Avg;
+    public void setPensionIncome55to74(double statYPens55to74Avg) {
+        this.statYPens55to74Avg = statYPens55to74Avg;
     }
 
     public double getAadisposableIncome18to29() {
-        return statDisp18to29Avg;
+        return statYDisp18to29Avg;
     }
 
-    public void setAadisposableIncome18to29(double statDisp18to29Avg) {
-        this.statDisp18to29Avg = statDisp18to29Avg;
+    public void setAadisposableIncome18to29(double statYDisp18to29Avg) {
+        this.statYDisp18to29Avg = statYDisp18to29Avg;
     }
 
     public double getAadisposableIncome30to54() {
-        return statDisp30to54Avg;
+        return statYDisp30to54Avg;
     }
 
-    public void setAadisposableIncome30to54(double statDisp30to54Avg) {
-        this.statDisp30to54Avg = statDisp30to54Avg;
+    public void setAadisposableIncome30to54(double statYDisp30to54Avg) {
+        this.statYDisp30to54Avg = statYDisp30to54Avg;
     }
 
     public double getAadisposableIncome55to74() {
-        return statDisp55to74Avg;
+        return statYDisp55to74Avg;
     }
 
-    public void setAadisposableIncome55to74(double statDisp55to74Avg) {
-        this.statDisp55to74Avg = statDisp55to74Avg;
+    public void setAadisposableIncome55to74(double statYDisp55to74Avg) {
+        this.statYDisp55to74Avg = statYDisp55to74Avg;
     }
 
     public double getInvestmentLosses18to29() {
@@ -433,27 +433,27 @@ public class Statistics2 {
     }
 
     public double getDispIncomeGrossOfLosses18to29() {
-        return statDispGrossOfLosses18to29Avg;
+        return statYDispGrossOfLosses18to29Avg;
     }
 
-    public void setDispIncomeGrossOfLosses18to29(double statDispGrossOfLosses18to29Avg) {
-        this.statDispGrossOfLosses18to29Avg = statDispGrossOfLosses18to29Avg;
+    public void setDispIncomeGrossOfLosses18to29(double statYDispGrossOfLosses18to29Avg) {
+        this.statYDispGrossOfLosses18to29Avg = statYDispGrossOfLosses18to29Avg;
     }
 
     public double getDispIncomeGrossOfLosses30to54() {
-        return statDispGrossOfLosses30to54Avg;
+        return statYDispGrossOfLosses30to54Avg;
     }
 
-    public void setDispIncomeGrossOfLosses30to54(double statDispGrossOfLosses30to54Avg) {
-        this.statDispGrossOfLosses30to54Avg = statDispGrossOfLosses30to54Avg;
+    public void setDispIncomeGrossOfLosses30to54(double statYDispGrossOfLosses30to54Avg) {
+        this.statYDispGrossOfLosses30to54Avg = statYDispGrossOfLosses30to54Avg;
     }
 
     public double getDispIncomeGrossOfLosses55to74() {
-        return statDispGrossOfLosses55to75Avg;
+        return statYDispGrossOfLosses55to75Avg;
     }
 
-    public void setDispIncomeGrossOfLosses55to74(double statDispGrossOfLosses55to75Avg) {
-        this.statDispGrossOfLosses55to75Avg = statDispGrossOfLosses55to75Avg;
+    public void setDispIncomeGrossOfLosses55to74(double statYDispGrossOfLosses55to75Avg) {
+        this.statYDispGrossOfLosses55to75Avg = statYDispGrossOfLosses55to75Avg;
     }
 
     public double getAaexpenditure18to29() {

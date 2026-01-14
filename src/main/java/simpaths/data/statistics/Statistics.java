@@ -92,11 +92,11 @@ public class Statistics {
 	}
 
 	public double getYdses_p60() {
-		return yHhQuintilesC5P80;
+		return yHhQuintilesC5P60;
 	}
 
-	public void setYdses_p60(double yHhQuintilesC5P80) {
-		this.yHhQuintilesC5P80 = yHhQuintilesC5P80;
+	public void setYdses_p60(double yHhQuintilesC5P60) {
+		this.yHhQuintilesC5P60 = yHhQuintilesC5P60;
 	}
 
 	public double getYdses_p80() {

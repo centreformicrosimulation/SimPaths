@@ -129,8 +129,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean demAlignPartnerProcess;
     @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Column(name="wgt") private Double wgt;
-    @Column(name="healthPsyDstrssFlag") private Double healthPsyDstrssFlag; //Psychological distress GHQ-12 0-12 caseness score
-    @Transient private Double healthPsyDstrssFlagL1;
+    @Column(name="healthPsyDstrss") private Double healthPsyDstrss; //Psychological distress GHQ-12 0-12 caseness score
+    @Transient private Double healthPsyDstrssL1;
     @Transient private Dhe healthSelfRatedL1;
     @Enumerated(EnumType.STRING) private Dhe healthSelfRated;
     private Double healthWbScore0to36; //Psychological distress GHQ-12 Likert scale
@@ -146,12 +146,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Integer demLifeSatScore1to7L1;      //life satisfaction - score 1-7 lag 1
     @Column(name="demLifeSatEQ5D") private Double demLifeSatEQ5D;
     @Column(name="yFinDstrssFlag") private Boolean yFinDstrssFlag;
-    @Transient private Boolean yBenFlagL1; // Lag(1) of whether person receives benefits
-    @Transient private Boolean yBenFlag; // Does person receive benefits
-    @Column(name="yBenUCFlag") private Boolean yBenUCFlag; // Person receives UC
-    @Transient private Boolean yBenUCFlagL1;
-    @Column(name="yBenNonUCFlag") private Boolean yBenNonUCFlag;  // Person receives a benefit which is not UC
-    @Transient private Boolean yBenNonUCFlagL1;
+    @Transient private Boolean yBenReceivedFlagL1; // Lag(1) of whether person receives benefits
+    @Transient private Boolean yBenReceivedFlag; // Does person receive benefits
+    @Column(name="yBenUCReceivedFlag") private Boolean yBenUCReceivedFlag; // Person receives UC
+    @Transient private Boolean yBenUCReceivedFlagL1;
+    @Column(name="yBenNonUCReceivedFlag") private Boolean yBenNonUCReceivedFlag;  // Person receives a benefit which is not UC
+    @Transient private Boolean yBenNonUCReceivedFlagL1;
     @Column(name="lifetimeIncome") private Double lifetimeIncome;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labHrsWorkEnumWeek;			//Number of hours of labour supplied each week
@@ -291,7 +291,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         wgt = mother.getWgt();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         healthSelfRated = Dhe.VeryGood;
         healthWbScore0to36 = 9.;			//Set to median for under 18's as a placeholder
-        healthPsyDstrssFlag = 0.;
+        healthPsyDstrss = 0.;
         eduHighestC3 = Education.Low;
         demEthnC6 = mother.getDot01();
         labC4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
@@ -307,9 +307,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         lifetimeIncome = 0.;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         demBornInSimFlag = true;
-        yBenFlag = false;
-        yBenNonUCFlag = false;
-        yBenUCFlag = false;
+        yBenReceivedFlag = false;
+        yBenNonUCReceivedFlag = false;
+        yBenUCReceivedFlag = false;
         yFinDstrssFlag = mother.getYFinDstrssFlag();
         updateVariables(false);
     }
@@ -480,8 +480,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             healthWbScore0to36L1 = originalPerson.healthWbScore0to36;
         }
 
-        healthPsyDstrssFlag = Objects.requireNonNullElse(originalPerson.healthPsyDstrssFlag, 0.);
-        healthPsyDstrssFlagL1 = Objects.requireNonNullElse(originalPerson.healthPsyDstrssFlagL1, healthPsyDstrssFlag);
+        healthPsyDstrss = Objects.requireNonNullElse(originalPerson.healthPsyDstrss, 0.);
+        healthPsyDstrssL1 = Objects.requireNonNullElse(originalPerson.healthPsyDstrssL1, healthPsyDstrss);
 
         demLifeSatScore1to7 = originalPerson.demLifeSatScore1to7;
         healthMentalMcs = originalPerson.healthMentalMcs;
@@ -536,12 +536,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         xEquivYear = originalPerson.xEquivYear;
         sIndexYearMap = new LinkedHashMap<Integer, Double>();
         demEthnC6 = originalPerson.demEthnC6;
-        yBenFlag = originalPerson.yBenFlag;
-        yBenFlagL1 = originalPerson.yBenFlagL1;
-        yBenNonUCFlag = originalPerson.yBenNonUCFlag;
-        yBenNonUCFlagL1 = originalPerson.yBenNonUCFlagL1;
-        yBenUCFlag = originalPerson.yBenUCFlag;
-        yBenUCFlagL1 = originalPerson.yBenUCFlagL1;
+        yBenReceivedFlag = originalPerson.yBenReceivedFlag;
+        yBenReceivedFlagL1 = originalPerson.yBenReceivedFlagL1;
+        yBenNonUCReceivedFlag = originalPerson.yBenNonUCReceivedFlag;
+        yBenNonUCReceivedFlagL1 = originalPerson.yBenNonUCReceivedFlagL1;
+        yBenUCReceivedFlag = originalPerson.yBenUCReceivedFlag;
+        yBenUCReceivedFlagL1 = originalPerson.yBenUCReceivedFlagL1;
         yFinDstrssFlag = originalPerson.yFinDstrssFlag;
 
         if (originalPerson.labWageFullTimeHrly > Parameters.MIN_HOURLY_WAGE_RATE) {
@@ -633,10 +633,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (labHrsWorkEnumWeek ==null)
             labHrsWorkEnumWeek = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue()); // TODO: this can be simplified to obtain value from already initialised hours worked weekly variable? The entire database query on setup is redundant? See initialisation of the lag below.
-        yBenFlagL1 = yBenFlag;
+        yBenReceivedFlagL1 = yBenReceivedFlag;
         labHrsWorkEnumWeekL1 = Labour.convertHoursToLabour(labHrsWorkWeekL1);
-        yBenNonUCFlagL1 = yBenNonUCFlag;
-        yBenUCFlagL1 = yBenUCFlag;
+        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag;
+        yBenUCReceivedFlagL1 = yBenUCReceivedFlag;
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
             updateAgeGroup();
@@ -1118,18 +1118,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     tmp_step2_score = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class); // Obtain score from Step 2 of case-based psychological distress model
                 } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
             }
-            tmp_outcome = constrainDhmGhqEstimate(tmp_step1_score + tmp_step2_score);
-            setDhmGhq(tmp_outcome);
+            tmp_outcome = constrainhealthPsyDstrssEstimate(tmp_step1_score + tmp_step2_score);
+            sethealthPsyDstrss(tmp_outcome);
         }
     }
 
-    protected Double constrainDhmGhqEstimate(Double dhm_ghq) {
-        if (dhm_ghq < 0.) {
-            dhm_ghq = 0.;
-        } else if (dhm_ghq > 12.) {
-            dhm_ghq = 12.;
+    protected Double constrainhealthPsyDstrssEstimate(Double healthPsyDstrssFlag) {
+        if (healthPsyDstrssFlag < 0.) {
+            healthPsyDstrssFlag = 0.;
+        } else if (healthPsyDstrssFlag > 12.) {
+            healthPsyDstrssFlag = 12.;
         }
-        return dhm_ghq;
+        return healthPsyDstrssFlag;
     }
 
     /*
@@ -1925,7 +1925,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demStatusHhL1 = getHouseholdStatus();
         healthSelfRatedL1 = healthSelfRated; //Update lag(1) of health
         healthWbScore0to36L1 = healthWbScore0to36; //Update lag(1) of mental health
-        healthPsyDstrssFlagL1 = healthPsyDstrssFlag;
+        healthPsyDstrssL1 = healthPsyDstrss;
         demLifeSatScore1to7L1 = demLifeSatScore1to7;
         healthMentalMcsL1 = healthMentalMcs;
         healthPhysicalPcsL1 = healthPhysicalPcs;
@@ -1943,9 +1943,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         eduHighestC3L1 = eduHighestC3; //Update lag(1) of education level
         yNonBenPersGrossMonthL1 = getyNonBenPersGrossMonth(); //Update lag(1) of gross personal non-benefit income
         labHrsWorkEnumWeekL1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
-        yBenFlagL1 = yBenFlag; // Lag(1) of flag indicating if individual receives benefits
-        yBenNonUCFlagL1 = yBenNonUCFlag; // Lag(1) of flag indicating if individual receives non-UC benefits
-        yBenUCFlagL1 = yBenUCFlag; // Lag(1) of flag indicating if individual receives UC
+        yBenReceivedFlagL1 = yBenReceivedFlag; // Lag(1) of flag indicating if individual receives benefits
+        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag; // Lag(1) of flag indicating if individual receives non-UC benefits
+        yBenUCReceivedFlagL1 = yBenUCReceivedFlag; // Lag(1) of flag indicating if individual receives UC
         labWageFullTimeHrlyL1 = labWageFullTimeHrly; // Lag(1) of potential hourly earnings
 
         if (initialUpdate) {
@@ -2197,7 +2197,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (isToBePartnered())? 1 : 0;
 
         case isPsychologicallyDistressed:
-            return (healthPsyDstrssFlag >= 4)? 1 : 0;
+            return (healthPsyDstrss >= 4)? 1 : 0;
 
         case isNeedSocialCare:
             return (Indicator.True.equals(careNeedFlag)) ? 1 : 0;
@@ -3124,7 +3124,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else return 0.;
             }
             case Dhmghq_L1 -> {
-                return getDhmGhq_lag1();
+                return gethealthPsyDstrss_lag1();
             }
             case Dhesp_L1 -> {
                 return (healthPartnerSelfRatedL1 != null) ? (double) healthPartnerSelfRatedL1.getValue() : 0.0;
@@ -4597,12 +4597,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.healthWbScore0to36L1 = healthWbScore0to36;
     }
 
-    public Double getDhmGhq() {
-        return healthPsyDstrssFlag;
+    public Double gethealthPsyDstrss() {
+        return healthPsyDstrss;
     }
 
-    public void setDhmGhq(Double dhm_ghq) {
-        this.healthPsyDstrssFlag = dhm_ghq;
+    public void sethealthPsyDstrss(Double healthPsyDstrssFlag) {
+        this.healthPsyDstrss = healthPsyDstrssFlag;
     }
 
     public Ethnicity getDot01() {
@@ -4997,51 +4997,51 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean isReceivesBenefitsFlag() {
-        return yBenFlag;
+        return yBenReceivedFlag;
     }
 
-    public void setReceivesBenefitsFlag(boolean yBenFlag) {
-        this.yBenFlag = yBenFlag;
+    public void setReceivesBenefitsFlag(boolean yBenReceivedFlag) {
+        this.yBenReceivedFlag = yBenReceivedFlag;
     }
 
     public boolean isReceivesBenefitsFlag_L1() {
-        return (yBenFlagL1 !=null) ? yBenFlagL1 : false;
+        return (yBenReceivedFlagL1 !=null) ? yBenReceivedFlagL1 : false;
     }
 
-    public void setReceivesBenefitsFlag_L1(boolean yBenFlagL1) {
-        this.yBenFlagL1 = yBenFlagL1;
+    public void setReceivesBenefitsFlag_L1(boolean yBenReceivedFlagL1) {
+        this.yBenReceivedFlagL1 = yBenReceivedFlagL1;
     }
 
     public boolean isReceivesBenefitsFlagUC() {
-        return yBenUCFlag;
+        return yBenUCReceivedFlag;
     }
 
-    public void setReceivesBenefitsFlagUC(boolean yBenUCFlag) {
-        this.yBenUCFlag = yBenUCFlag;
+    public void setReceivesBenefitsFlagUC(boolean yBenUCReceivedFlag) {
+        this.yBenUCReceivedFlag = yBenUCReceivedFlag;
     }
 
     public boolean isReceivesBenefitsFlagUC_L1() {
-        return (null != yBenUCFlagL1) ? yBenUCFlagL1 : false;
+        return (null != yBenUCReceivedFlagL1) ? yBenUCReceivedFlagL1 : false;
     }
 
-    public void setReceivesBenefitsFlagUC_L1(boolean yBenUCFlagL1) {
-        this.yBenUCFlagL1 = yBenUCFlagL1;
+    public void setReceivesBenefitsFlagUC_L1(boolean yBenUCReceivedFlagL1) {
+        this.yBenUCReceivedFlagL1 = yBenUCReceivedFlagL1;
     }
 
     public boolean isReceivesBenefitsFlagNonUC() {
-        return yBenNonUCFlag;
+        return yBenNonUCReceivedFlag;
     }
 
-    public void setReceivesBenefitsFlagNonUC(boolean yBenNonUCFlag) {
-        this.yBenNonUCFlag = yBenNonUCFlag;
+    public void setReceivesBenefitsFlagNonUC(boolean yBenNonUCReceivedFlag) {
+        this.yBenNonUCReceivedFlag = yBenNonUCReceivedFlag;
     }
 
     public boolean isReceivesBenefitsFlagNonUC_L1() {
-        return (null != yBenNonUCFlagL1) ? yBenNonUCFlagL1 : false;
+        return (null != yBenNonUCReceivedFlagL1) ? yBenNonUCReceivedFlagL1 : false;
     }
 
-    public void setReceivesBenefitsFlagNonUC_L1(boolean yBenNonUCFlagL1) {
-        this.yBenNonUCFlagL1 = yBenNonUCFlagL1;
+    public void setReceivesBenefitsFlagNonUC_L1(boolean yBenNonUCReceivedFlagL1) {
+        this.yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlagL1;
     }
 
 
@@ -5548,10 +5548,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public long getSeed() {return (statSeed !=null) ? statSeed : 0L;}
 
-    private Double getDhmGhq_lag1() {
-        if (healthPsyDstrssFlagL1 == null)
+    private Double gethealthPsyDstrss_lag1() {
+        if (healthPsyDstrssL1 == null)
             throw new RuntimeException("attempt to access dhmGhq_lag1 before it has been initialised");
-        return healthPsyDstrssFlagL1;
+        return healthPsyDstrssL1;
     }
 
     public Double getYnbcpdf_dv() {
