@@ -1236,6 +1236,15 @@ public class Parameters {
             coeffCovarianceHM1Case = RegressionUtils.bootstrap(coeffCovarianceHM1Case);
             coeffCovarianceHM2CaseMales = RegressionUtils.bootstrap(coeffCovarianceHM2CaseMales);
             coeffCovarianceHM2CaseFemales = RegressionUtils.bootstrap(coeffCovarianceHM2CaseFemales);
+            coeffCovarianceDHE_MCS1 = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS1);
+            coeffCovarianceDHE_MCS2Males = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS2Males);
+            coeffCovarianceDHE_MCS2Females = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS2Females);
+            coeffCovarianceDHE_PCS1 = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS1);
+            coeffCovarianceDHE_PCS2Males = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS2Males);
+            coeffCovarianceDHE_PCS2Females = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS2Females);
+            coeffCovarianceDLS1 = RegressionUtils.bootstrap(coeffCovarianceDLS1);
+            coeffCovarianceDLS2Males = RegressionUtils.bootstrap(coeffCovarianceDLS2Males);
+            coeffCovarianceDLS2Females = RegressionUtils.bootstrap(coeffCovarianceDLS2Females);
 
             //Social care
             coeffCovarianceSocialCareS1a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1a);
