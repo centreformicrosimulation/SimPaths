@@ -1204,10 +1204,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void lifeSatisfaction1() {
 
         if (dag >= 16) {
-                double dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
-                double rmse = Parameters.getRMSEForRegression("DLS1");
-                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
-                dls = dlsPrediction + rmse*gauss;
+            double dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
+            double rmse = Parameters.getRMSEForRegression("DLS1");
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
+            dls = dlsPrediction + rmse*gauss;
         }
 
     }
@@ -1819,7 +1819,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             setFullTimeHourlyEarningsPotential(upratedFullTimeHourlyEarnings);
         }
-        }
+    }
     }
     public void setYpncp(double val) {
         ypncp = val;
