@@ -3257,6 +3257,26 @@ public class Parameters {
         }
     }
 
+    public static MultiKeyCoefficientMap safeReadExcel(String excelFileName, String sheetName, int keyColumns) {
+
+        MultiKeyCoefficientMap map = ExcelAssistant.loadCoefficientMap(excelFileName, sheetName, keyColumns);
+
+        validateRegressors(map, sheetName);
+
+        return map;
+
+    }
+
+    public static MultiKeyCoefficientMap safeReadExcel(String excelFileName, String sheetName, int keyColumns, int valueColumns) {
+
+        MultiKeyCoefficientMap map = ExcelAssistant.loadCoefficientMap(excelFileName, sheetName, keyColumns, valueColumns);
+
+        validateRegressors(map, sheetName);
+
+        return map;
+
+    }
+
     public static String getInputDirectory() {
         return INPUT_DIRECTORY;
     }
