@@ -10,6 +10,7 @@ import microsim.statistics.regression.*;
 import org.apache.commons.io.FileUtils;
 import simpaths.data.startingpop.DataParser;
 import simpaths.model.AnnuityRates;
+import simpaths.model.BenefitUnit;
 import simpaths.model.Person;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
@@ -3233,7 +3234,7 @@ public class Parameters {
         EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
     }
 
-    public static void validateRegressors(MultiKeyCoefficientMap map, String mapName) {
+    public static void validatePersonRegressors(MultiKeyCoefficientMap map, String excelFileName, String sheetName) {
         if (map == null) return;
 
         // Get the values read from the REGRESSOR column by ExcelAssistant (excludes 'Constant')
@@ -3248,10 +3249,15 @@ public class Parameters {
                 try {
                     Person.DoublesVariables.valueOf(keyName);
                 } catch (IllegalArgumentException e) {
-                    // This fires if the string isn't in the Enum
-                    throw new RuntimeException("Validation failed for " + mapName +
-                            ": Regressor '" + keyName + "' not found in Person.DoublesVariables. " +
-                            "Check for typos in Excel or missing Enums in Person.java.");
+                    try {
+                        BenefitUnit.Regressors.valueOf(keyName);
+                    } catch (IllegalArgumentException e2) {
+
+                        // This fires if the string isn't in the Enum
+                        throw new RuntimeException("Validation failed for " + excelFileName + " in " + sheetName +
+                                ": Regressor '" + keyName + "' not found in Person.DoublesVariables. " +
+                                "Check for typos in Excel or missing Enums in Person.java.");
+                    }
                 }
             }
         }
@@ -3261,7 +3267,7 @@ public class Parameters {
 
         MultiKeyCoefficientMap map = ExcelAssistant.loadCoefficientMap(excelFileName, sheetName, keyColumns);
 
-        validateRegressors(map, sheetName);
+        validatePersonRegressors(map, excelFileName,  sheetName);
 
         return map;
 
@@ -3271,7 +3277,7 @@ public class Parameters {
 
         MultiKeyCoefficientMap map = ExcelAssistant.loadCoefficientMap(excelFileName, sheetName, keyColumns, valueColumns);
 
-        validateRegressors(map, sheetName);
+        validatePersonRegressors(map, excelFileName, sheetName);
 
         return map;
 
