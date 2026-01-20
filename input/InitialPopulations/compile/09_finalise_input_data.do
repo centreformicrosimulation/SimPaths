@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          9 Dec 2025 DP 
+* LAST UPDATE:          20 Jan 2026 JV 
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -132,87 +132,9 @@ cap gen dwtfq = round(dwt * multiplier)
 replace dwt = dwtfq 
 bys stm: sum dwt*
 
-save "$dir_data\UKHLS_pooled_ipop.dta", replace /*panel dataset with missing values removed*/
-
-***************************************************************************************
-* slice the pooled dataset into intitial populations
-***************************************************************************************
-forvalues yy = $firstSimYear/$lastSimYear {
-* load pooled data with missing values removed  
-	use "$dir_data\ukhls_pooled_ipop.dta", clear
-	rename *, l
-	
-	* limit year
-	global year = `yy'
-	keep if stm == $year 
-
-	*check for duplicates 
-	duplicates report idhh idperson
-	cap drop duplicate 
-	duplicates tag idhh idperson , generate(duplicate)
-	assert duplicate ==0 
-
-	duplicates report idperson
-	cap drop duplicate 
-	duplicates tag idperson , generate(duplicate)
-	assert duplicate ==0 
-
-	*check for same sex couples 
-	assert ssscp!=1 
-	assert dgn!=dgnsp if dgn>=0 & dgnsp>=0
-
-	* check for orphans
-	cap drop adult child adult_count* //drop old vars 
-	gen adult = dag>=$age_become_responsible 
-	gen child = 1 - adult
-	bys idhh: egen adult_count = sum(adult)
-	bys idbenefitunit: egen adult_count2 = sum(adult)
-	drop if adult_count==0| adult_count2==0 
-	assert adult_count>0
-	assert adult_count2>0
-	 
-	*check weight is not zero and non-missing 
-	drop if (dwt==0 | dwt>=.)
-	assert dwt>0 & dwt<. 
-	//sum of weights
-	cap gen one =1
-	sum one [w=dwt]
-	
-	* limit employment history to integer years
-	replace liwwh = round(liwwh)
-	
-	*evaluate disposable income at the benefit unit level 
-	gsort idhh idbenefitunit idperson
-	by idhh idbenefitunit: egen disp_inc = sum(ydisp)
-
-	*limit saved variables
-	keep idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
-	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
-	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
-	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
-	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
-	financial_distress liwwh
-	
-	order idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
-	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
-	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
-	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
-	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
-	financial_distress liwwh
-	
-	recode idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
-	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
-	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt potential_earnings_hourly l1_potential_earnings_hourly total_wealth ///
-	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
-	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
-	financial_distress liwwh (missing=-9)
-	
 	
 /*Rename variables following the new Codebook */
-	* --- Identifiers ---
+* --- Identifiers ---
 rename idhh idHh
 rename idbenefitunit idBu
 rename idperson idPers
@@ -224,73 +146,47 @@ rename swv statCollectionWave
 * --- Demographics ---
 rename dgn demMaleFlag
 rename dag demAge
-//rename dcpst demPartnerStatus
 rename dnc02 demNChild0to2
 rename dnc demNChild
 rename ded eduSpellFlag
 rename deh_c3 eduHighestC3
 rename sedex eduExitSampleFlag
-//rename jbstat labStatus
-//rename les_c3 labStatusC3
 rename dlltsd01 healthDsblLongtermFlag
 rename dhe healthSelfRated
 rename ydses_c5 yHhQuintilesMonthC5
-//rename dhhtp_c4 demCompHhC4
-//rename ssscp demPartnerSameSexFlag
-//rename dcpen demEnterPartnerFlag
 rename dcpyy demPartnerNYear
-//rename dcpex demExitPartnerFlag
 rename dcpagdf demAgePartnerDiff
 rename ynbcpdf_dv yPersAndPartnerGrossDiffMonth
 rename der eduReturnFlag
-//rename sedag demAgeEduRangeFlag
-//rename sprfm demFertFlag
-//rename dchpd demNChild0
-//rename dagsp demAgePartner
-//rename dehsp_c3 eduHighestPartnerC3
-//rename dhesp healthPartnerSelfRated
-//rename lessp_c3 labStatusPartnerC3
 rename dehm_c3 eduHighestMotherC3
 rename dehf_c3 eduHighestFatherC3
 rename stm statInterviewYear
-//rename lesdf_c4 labStatusPartnerAndOwnC4
 rename dhm healthWbScore0to36
 rename scghq2_dv demWbScore0to12
 rename dhh_owned wealthPrptyFlag
 rename lhw labHrsWorkWeek
 rename l1_lhw labHrsWorkWeekL1
 rename drgn1 demRgn
-//rename dct demCountry
 rename les_c4 labC4
 rename dhm_ghq healthPsyDstrssFlag
-//rename lessp_c4 labStatusPartnerC4
 rename adultchildflag demAdultChildFlag
-//rename multiplier demPopSurveyShare
 rename dwt wgtHhCross
 
 * --- Income, labour, wealth ---
 rename potential_earnings_hourly labWageHrly
 rename l1_potential_earnings_hourly labWageHrlyL1
-//rename liquid_wealth wealthLiq
-//rename tot_pen wealthPensValue
-//rename nvmhome wealthPrptyValue
-
-rename disp_inc yDispMonth //disposable income at the benefit unit level                 
 rename total_wealth wealthTotValue   //total wealth net of liabilities of benefit unit including housing, business and
 rename mortgage_debt wealthMortgageDebtValue  //total mortgage debt owed on main home of benefit unit
 rename housing_wealth wealthPrptyValue //value of main home gross of mortgage debt of benefit unit
 rename total_pensions wealthPensValue //value of all private (personal and occupational) pensions of benefit unit
-
 rename econ_benefits yBenReceivedFlag
 rename econ_benefits_nonuc yBenNonUCReceivedFlag
 rename econ_benefits_uc yBenUCReceivedFlag
-
 rename ypncp yCapitalPersMonth
 rename ypnoab yPensPersGrossMonth
 rename yplgrs_dv yEmpPersGrossMonth
 rename ypnbihs_dv yNonBenPersGrossMonth
 rename yptciihs_dv yMiscPersGrossMonth
-
 rename unemp labUnempFlag
 rename liwwh labEmpNyear
 
@@ -302,9 +198,7 @@ rename daughter_socare_hrs careHrsFromDaughter
 rename son_socare_hrs careHrsFromSon
 rename other_socare_hrs careHrsFromOther
 rename formal_socare_cost careCareFormal
-//rename aidhrs careHrsProvidedWeek
-rename carehoursprovidedweekly careHrsProvidedWeek
-rename carewho careWho
+rename careHoursProvidedWeekly careHrsProvidedWeek
 
 * --- Health & wellbeing ---
 rename dhe_mcs healthMentalMcs
@@ -315,7 +209,87 @@ rename dls demLifeSatScore1to7
 rename dot demEthnC4
 rename dot01 demEthnC6
 rename financial_distress yFinDstrssFlag	
-		
+
+
+save "$dir_data\UKHLS_pooled_ipop.dta", replace /*panel dataset with missing values removed*/
+
+***************************************************************************************
+* slice the pooled dataset into intitial populations
+***************************************************************************************
+forvalues yy = $firstSimYear/$lastSimYear {
+* load pooled data with missing values removed  
+	use "$dir_data\ukhls_pooled_ipop.dta", clear
+	
+	* limit year
+	global year = `yy'
+	keep if statInterviewYear == $year 
+
+	*check for duplicates 
+	duplicates report idHh idPers
+	cap drop duplicate 
+	duplicates tag idHh idPers, generate(duplicate)
+	assert duplicate == 0 
+
+	duplicates report idPers
+	cap drop duplicate 
+	duplicates tag idPers, generate(duplicate)
+	assert duplicate ==0 
+
+	*check for same sex couples 
+	assert ssscp!=1 
+	assert demMaleFlag!=dgnsp if demMaleFlag>=0 & dgnsp>=0
+
+	* check for orphans
+	cap drop adult child adult_count* //drop old vars 
+	gen adult = demAge>=$age_become_responsible 
+	gen child = 1 - adult
+	bys idHh: egen adult_count = sum(adult)
+	bys idBu: egen adult_count2 = sum(adult)
+	drop if adult_count==0| adult_count2==0 
+	assert adult_count>0
+	assert adult_count2>0
+	 
+	*check weight is not zero and non-missing 
+	drop if (wgtHhCross==0 | wgtHhCross>=.)
+	assert wgtHhCross>0 & wgtHhCross<. 
+	//sum of weights
+	cap gen one =1
+	sum one [w=wgtHhCross]
+	
+	* limit employment history to integer years
+	replace labEmpNyear = round(labEmpNyear)
+	
+	*evaluate disposable income at the benefit unit level 
+	gsort idHh idBu idPers
+	by idHh idBu: egen yDispMonth = sum(ydisp)
+
+	*limit saved variables
+	keep idHh idBu idPers idPartner idMother idFather statCollectionWave demMaleFlag demAge demNChild0to2 demNChild eduSpellFlag /// 
+	eduHighestC3 eduExitSampleFlag healthDsblLongtermFlag healthSelfRated yHhQuintilesMonthC5 yEmpPersGrossMonth yNonBenPersGrossMonth ///
+	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
+	statInterviewYear healthWbScore0to36 demWbScore0to12 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrssFlag ///
+	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
+	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
+	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
+	healthMentalPartnerMcs healthPhysicalPartnerPcs demLifeSatScore1to7 demEthnC4 demEthnC6 labUnempFlag yFinDstrssFlag labEmpNyear
+	
+	order idHh idBu idPers idPartner idMother idFather statCollectionWave demMaleFlag demAge demNChild0to2 demNChild eduSpellFlag /// 
+	eduHighestC3 eduExitSampleFlag healthDsblLongtermFlag healthSelfRated yHhQuintilesMonthC5 yEmpPersGrossMonth yNonBenPersGrossMonth ///
+	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
+	statInterviewYear healthWbScore0to36 demWbScore0to12 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrssFlag ///
+	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
+	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
+	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
+	healthMentalPartnerMcs healthPhysicalPartnerPcs demLifeSatScore1to7 demEthnC4 demEthnC6 labUnempFlag yFinDstrssFlag labEmpNyear
+	
+	recode idHh idBu idPers idPartner idMother idFather statCollectionWave demMaleFlag demAge demNChild0to2 demNChild eduSpellFlag /// 
+	eduHighestC3 eduExitSampleFlag healthDsblLongtermFlag healthSelfRated yHhQuintilesMonthC5 yEmpPersGrossMonth yNonBenPersGrossMonth ///
+	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
+	statInterviewYear healthWbScore0to36 demWbScore0to12 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrssFlag ///
+	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
+	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
+	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
+	healthMentalPartnerMcs healthPhysicalPartnerPcs demLifeSatScore1to7 demEthnC4 demEthnC6 labUnempFlag yFinDstrssFlag labEmpNyear (missing=-9)
 	
 	gsort idHh idBu idPers
 	save "$dir_data/population_initial_UK_$year.dta", replace
