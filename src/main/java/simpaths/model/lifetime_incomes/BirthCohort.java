@@ -20,7 +20,7 @@ public class BirthCohort {
 
     @Column(name="birth_year") private Integer birthYear;
     @Column(name="end_age") private Integer endAge;
-    @Enumerated(EnumType.STRING) private Gender gender;
+    @Enumerated(EnumType.STRING) private Gender demSex;
 
     @Transient List<Individual> sortedIndividuals = null;
 
@@ -29,9 +29,9 @@ public class BirthCohort {
      * CONSTRUCTOR
      */
     public BirthCohort() {}
-    public BirthCohort(Integer birthYear, Gender gender, Integer endAge) {
+    public BirthCohort(Integer birthYear, Gender demSex, Integer endAge) {
         this.birthYear = birthYear;
-        this.gender = gender;
+        this.demSex = demSex;
         this.endAge = endAge;
     }
 
@@ -47,7 +47,7 @@ public class BirthCohort {
         return birthYear;
     }
     public Gender getGender() {
-        return gender;
+        return demSex;
     }
     public int getEndAge() {return endAge;}
     public void addIndividual(Individual individual) {

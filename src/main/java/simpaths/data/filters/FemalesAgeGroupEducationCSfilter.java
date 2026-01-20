@@ -24,8 +24,8 @@ public class FemalesAgeGroupEducationCSfilter implements ICollectionFilter{
 //		if(person.getActivity_status().equals(Les_c4.Student)) {		//Need to check they are not still students, otherwise education level is not defined
 //			return false;
 //		}
-		else return ( person.getDgn().equals(Gender.Female) && 
-				(person.getDag() >= ageFrom) && (person.getDag() <= ageTo) && 
+		else return ( person.getDemMaleFlag().equals(Gender.Female) && 
+				(person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) && 
 				( person.getDeh_c3().equals(edu) )
 				);
 	}

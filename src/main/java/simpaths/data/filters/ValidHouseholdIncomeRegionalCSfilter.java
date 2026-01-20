@@ -6,18 +6,18 @@ import simpaths.model.enums.Region;
 
 public class ValidHouseholdIncomeRegionalCSfilter implements ICollectionFilter{
 	
-	private Region region;
+	private Region demRgn;
 	
-	public ValidHouseholdIncomeRegionalCSfilter(Region region) {
+	public ValidHouseholdIncomeRegionalCSfilter(Region demRgn) {
 		super();
-		this.region = region;
+		this.demRgn = demRgn;
 		
 	}
 	
 	public boolean isFiltered(Object object) {
 		BenefitUnit house = (BenefitUnit) object;
 //		return (house.getRegion().equals(region) && house.getAtRiskOfPoverty() != null);
-		return (house.getRegion().equals(region) 
+		return (house.getRegion().equals(demRgn)
 				&& house.getEquivalisedDisposableIncomeYearly() >= 0.);		//Removes cases where gross earnings are not valid (i.e. are null, or negative)
 	}
 	

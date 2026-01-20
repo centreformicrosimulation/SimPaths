@@ -101,7 +101,7 @@ public class DataParser {
 								+ "CREATE TABLE " + personTable + " AS (SELECT " + stringAppender(inputPersonColumnNamesSet) + " FROM " + inputFileName + ");"
 
 								//Add panel entity key
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN idperson RENAME TO id;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN idPers RENAME TO id;"
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN id BIGINT;"
 								+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 								+ "ALTER TABLE " + personTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
@@ -109,121 +109,121 @@ public class DataParser {
 
 								//Health
 								+ "ALTER TABLE " + personTable + " ADD health VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET health = 'Poor' WHERE dhe = 1;"
-								+ "UPDATE " + personTable + " SET health = 'Fair' WHERE dhe = 2;"
-								+ "UPDATE " + personTable + " SET health = 'Good' WHERE dhe = 3;"
-								+ "UPDATE " + personTable + " SET health = 'VeryGood' WHERE dhe = 4;"
-								+ "UPDATE " + personTable + " SET health = 'Excellent' WHERE dhe = 5;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN dhe;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN health RENAME TO dhe;"
+								+ "UPDATE " + personTable + " SET health = 'Poor' WHERE healthSelfRated = 1;"
+								+ "UPDATE " + personTable + " SET health = 'Fair' WHERE healthSelfRated = 2;"
+								+ "UPDATE " + personTable + " SET health = 'Good' WHERE healthSelfRated = 3;"
+								+ "UPDATE " + personTable + " SET health = 'VeryGood' WHERE healthSelfRated = 4;"
+								+ "UPDATE " + personTable + " SET health = 'Excellent' WHERE healthSelfRated = 5;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN healthSelfRated;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN health RENAME TO healthSelfRated;"
 
 								//Education
 								+ "ALTER TABLE " + personTable + " ADD education VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education = 'Low' WHERE deh_c3 = 3;"
-								+ "UPDATE " + personTable + " SET education = 'Medium' WHERE deh_c3 = 2;"
-								+ "UPDATE " + personTable + " SET education = 'High' WHERE deh_c3 = 1;"
+								+ "UPDATE " + personTable + " SET education = 'Low' WHERE eduHighestC3 = 3;"
+								+ "UPDATE " + personTable + " SET education = 'Medium' WHERE eduHighestC3 = 2;"
+								+ "UPDATE " + personTable + " SET education = 'High' WHERE eduHighestC3 = 1;"
 								//Note: Have to consider missing values as children don't have a level of education before they leave school
-								+ "UPDATE " + personTable + " SET education = 'Low' WHERE deh_c3 = -9;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN deh_c3;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education RENAME TO deh_c3;"
+								+ "UPDATE " + personTable + " SET education = 'Low' WHERE eduHighestC3 = -9;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestC3;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education RENAME TO eduHighestC3;"
 
 								//Education mother
 								+ "ALTER TABLE " + personTable + " ADD education_mother VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education_mother = 'Low' WHERE dehm_c3 = 3;"
-								+ "UPDATE " + personTable + " SET education_mother = 'Medium' WHERE dehm_c3 = 2;"
-								+ "UPDATE " + personTable + " SET education_mother = 'High' WHERE dehm_c3 = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN dehm_c3;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_mother RENAME TO dehm_c3;"
+								+ "UPDATE " + personTable + " SET education_mother = 'Low' WHERE eduHighestMotherC3 = 3;"
+								+ "UPDATE " + personTable + " SET education_mother = 'Medium' WHERE eduHighestMotherC3 = 2;"
+								+ "UPDATE " + personTable + " SET education_mother = 'High' WHERE eduHighestMotherC3 = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestMotherC3;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_mother RENAME TO eduHighestMotherC3;"
 
 								//Education father
 								+ "ALTER TABLE " + personTable + " ADD education_father VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education_father = 'Low' WHERE dehf_c3 = 3;"
-								+ "UPDATE " + personTable + " SET education_father = 'Medium' WHERE dehf_c3 = 2;"
-								+ "UPDATE " + personTable + " SET education_father = 'High' WHERE dehf_c3 = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN dehf_c3;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_father RENAME TO dehf_c3;"
+								+ "UPDATE " + personTable + " SET education_father = 'Low' WHERE eduHighestFatherC3 = 3;"
+								+ "UPDATE " + personTable + " SET education_father = 'Medium' WHERE eduHighestFatherC3 = 2;"
+								+ "UPDATE " + personTable + " SET education_father = 'High' WHERE eduHighestFatherC3 = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestFatherC3;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_father RENAME TO eduHighestFatherC3;"
 
 								//In education dummy (to be used with Indicator enum when defined in Person class)
 								+ "ALTER TABLE " + personTable + " ADD education_in VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education_in = 'False' WHERE ded = 0;"
-								+ "UPDATE " + personTable + " SET education_in = 'True' WHERE ded = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN ded;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_in RENAME TO ded;"
+								+ "UPDATE " + personTable + " SET education_in = 'False' WHERE eduSpellFlag = 0;"
+								+ "UPDATE " + personTable + " SET education_in = 'True' WHERE eduSpellFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduSpellFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_in RENAME TO eduSpellFlag;"
 
 								//Return to education dummy (to be used with Indicator enum when defined in Person class)
 								+ "ALTER TABLE " + personTable + " ADD education_return VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education_return = 'False' WHERE der = 0;"
-								+ "UPDATE " + personTable + " SET education_return = 'True' WHERE der = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN der;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_return RENAME TO der;"
+								+ "UPDATE " + personTable + " SET education_return = 'False' WHERE eduReturnFlag = 0;"
+								+ "UPDATE " + personTable + " SET education_return = 'True' WHERE eduReturnFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduReturnFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_return RENAME TO eduReturnFlag;"
 
 								//Gender
-								+ "ALTER TABLE " + personTable + " ADD gender VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET gender = 'Female' WHERE dgn = 0;"
-								+ "UPDATE " + personTable + " SET gender = 'Male' WHERE dgn = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN dgn;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN gender RENAME TO dgn;"
+								+ "ALTER TABLE " + personTable + " ADD demSex VARCHAR_IGNORECASE;"
+								+ "UPDATE " + personTable + " SET demSex = 'Female' WHERE demMaleFlag = 0;"
+								+ "UPDATE " + personTable + " SET demSex = 'Male' WHERE demMaleFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN demMaleFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN demSex RENAME TO demMaleFlag;"
 
 								//Weights
-								+"ALTER TABLE " + personTable + " ALTER COLUMN dwt RENAME TO person_weight;"
+								+"ALTER TABLE " + personTable + " ALTER COLUMN wgtHhCross RENAME TO wgt;"
 
 								//Labour Market Economic Status
 								+ "ALTER TABLE " + personTable + " ADD activity_status VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET les_c4 = 3 WHERE les_c4 = 1 AND CAST(potential_earnings_hourly AS FLOAT)<0.01;"
-								+ "UPDATE " + personTable + " SET activity_status = 'EmployedOrSelfEmployed' WHERE les_c4 = 1;"
-								+ "UPDATE " + personTable + " SET activity_status = 'Student' WHERE les_c4 = 2;"
-								+ "UPDATE " + personTable + " SET activity_status = 'NotEmployed' WHERE les_c4 = 3;"
-								+ "UPDATE " + personTable + " SET activity_status = 'Retired' WHERE les_c4 = 4;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN les_c4;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status RENAME TO les_c4;"
+								+ "UPDATE " + personTable + " SET labC4 = 3 WHERE labC4 = 1 AND CAST(labWageHrly AS FLOAT)<0.01;"
+								+ "UPDATE " + personTable + " SET activity_status = 'EmployedOrSelfEmployed' WHERE labC4 = 1;"
+								+ "UPDATE " + personTable + " SET activity_status = 'Student' WHERE labC4 = 2;"
+								+ "UPDATE " + personTable + " SET activity_status = 'NotEmployed' WHERE labC4 = 3;"
+								+ "UPDATE " + personTable + " SET activity_status = 'Retired' WHERE labC4 = 4;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN labC4;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN activity_status RENAME TO labC4;"
 
 								//DEMOGRAPHIC: Long-term sick or disabled (to be used with Indicator enum when defined in Person class)
 								+ "ALTER TABLE " + personTable + " ADD sick_longterm VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET sick_longterm = 'False' WHERE dlltsd01 = 0;"
-								+ "UPDATE " + personTable + " SET sick_longterm = 'True' WHERE dlltsd01 = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN dlltsd01;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN sick_longterm RENAME TO dlltsd;" // There are two versions of this variable in the Initial Population files. We use the dlltsd01, but we rename it dlltsd fo simplicity
+								+ "UPDATE " + personTable + " SET sick_longterm = 'False' WHERE healthDsblLongtermFlag = 0;"
+								+ "UPDATE " + personTable + " SET sick_longterm = 'True' WHERE healthDsblLongtermFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN healthDsblLongtermFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN sick_longterm RENAME TO healthDsblLongtermFlag;" // There are two versions of this variable in the Initial Population files. We use the healthDsblLongtermFlag, but we rename it healthDsblLongtermFlag fo simplicity
 
 
 
 								//DEMOGRAPHIC: Need social care (to be used with Indicator enum when defined in Person class)
 								+ "ALTER TABLE " + personTable + " ADD need_care VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET need_care = 'False' WHERE need_socare = 0;"
-								+ "UPDATE " + personTable + " SET need_care = 'True' WHERE need_socare = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN need_socare;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN need_care RENAME TO need_socare;"
+								+ "UPDATE " + personTable + " SET need_care = 'False' WHERE careNeedFlag = 0;"
+								+ "UPDATE " + personTable + " SET need_care = 'True' WHERE careNeedFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN careNeedFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN need_care RENAME TO careNeedFlag;"
 
 								//DEMOGRAPHIC: Ethnicity
 								+ "ALTER TABLE " + personTable + " ADD ethnicity VARCHAR_IGNORECASE;"
-                                + "UPDATE " + personTable + " SET ethnicity = 'White' WHERE dot01 = 1;"
-                                + "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE dot01 = 2;"
-                                + "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE dot01 = 3;"
-                                + "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE dot01 = 4;"
-                                + "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE dot01 = 5;"
-                                + "UPDATE " + personTable + " SET ethnicity = 'Missing' WHERE dot01 = 6;"
-                                + "ALTER TABLE " + personTable + " DROP COLUMN dot01;"
-                                + "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO dot01;"
+                                + "UPDATE " + personTable + " SET ethnicity = 'White' WHERE demEthnC6 = 1;"
+                                + "UPDATE " + personTable + " SET ethnicity = 'Mixed' WHERE demEthnC6 = 2;"
+                                + "UPDATE " + personTable + " SET ethnicity = 'Asian' WHERE demEthnC6 = 3;"
+                                + "UPDATE " + personTable + " SET ethnicity = 'Black' WHERE demEthnC6 = 4;"
+                                + "UPDATE " + personTable + " SET ethnicity = 'Other' WHERE demEthnC6 = 5;"
+                                + "UPDATE " + personTable + " SET ethnicity = 'Missing' WHERE demEthnC6 = 6;"
+                                + "ALTER TABLE " + personTable + " DROP COLUMN demEthnC6;"
+                                + "ALTER TABLE " + personTable + " ALTER COLUMN ethnicity RENAME TO demEthnC6;"
 
 								//SYSTEM: Year left education (to be used with Indicator enum when defined in Person class)
 								+ "ALTER TABLE " + personTable + " ADD education_left VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education_left = 'False' WHERE sedex = 0;"
-								+ "UPDATE " + personTable + " SET education_left = 'True' WHERE sedex = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN sedex;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_left RENAME TO sedex;" //Getting data conversion error trying to directly change values of sedex
+								+ "UPDATE " + personTable + " SET education_left = 'False' WHERE eduExitSampleFlag = 0;"
+								+ "UPDATE " + personTable + " SET education_left = 'True' WHERE eduExitSampleFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduExitSampleFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_left RENAME TO eduExitSampleFlag;" //Getting data conversion error trying to directly change values of eduExitSampleFlag
 
 								//Adult child flag:
 								+ "ALTER TABLE " + personTable + " ADD adult_child VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET adult_child = 'False' WHERE adultchildflag = 0;"
-								+ "UPDATE " + personTable + " SET adult_child = 'True' WHERE adultchildflag = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN adultchildflag;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN adult_child RENAME TO adultchildflag;"
+								+ "UPDATE " + personTable + " SET adult_child = 'False' WHERE demAdultChildFlag = 0;"
+								+ "UPDATE " + personTable + " SET adult_child = 'True' WHERE demAdultChildFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN demAdultChildFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN adult_child RENAME TO demAdultChildFlag;"
 
 								//Financial distress
 								+ "ALTER TABLE " + personTable + " ADD financial_distress_add VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET financial_distress_add = 'False' WHERE financial_distress = 0;"
-								+ "UPDATE " + personTable + " SET financial_distress_add = 'True' WHERE financial_distress = 1;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN financial_distress;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN financial_distress_add RENAME TO financial_distress;"
+								+ "UPDATE " + personTable + " SET financial_distress_add = 'False' WHERE yFinDstrssFlag = 0;"
+								+ "UPDATE " + personTable + " SET financial_distress_add = 'True' WHERE yFinDstrssFlag = 1;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN yFinDstrssFlag;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN financial_distress_add RENAME TO yFinDstrssFlag;"
 
 								//Social care
 								+ "ALTER TABLE " + personTable + " ADD socare_provided_to VARCHAR_IGNORECASE;"
@@ -232,35 +232,35 @@ public class DataParser {
 								+ "UPDATE " + personTable + " SET socare_provided_to = 'PartnerAndOther' WHERE careWho = 2;"
 								+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyOther' WHERE careWho = 3;"
 								+ "ALTER TABLE " + personTable + " DROP COLUMN careWho;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN carehoursprovidedweekly RENAME TO socare_provided_hrs;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN careHrsProvidedWeek RENAME TO socare_provided_hrs;"
 
 								//SYSTEM : Year
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN stm RENAME TO system_year;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN statInterviewYear RENAME TO system_year;"
 
 								//SYSTEM : Data collection wave
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN swv RENAME TO system_wave;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN statCollectionWave RENAME TO system_wave;"
 
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN lhw RENAME TO " + Parameters.HOURS_WORKED_WEEKLY + ";"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN labHrsWorkWeek RENAME TO " + Parameters.HOURS_WORKED_WEEKLY + ";"
 								+ "ALTER TABLE " + personTable + " ADD work_sector VARCHAR_IGNORECASE DEFAULT 'Private_Employee';"		//Here we assume by default that people are employed - this is because the MultiKeyMaps holding households have work_sector as a key, and cannot handle null values for work_sector. TODO: Need to check that this assumption is OK.
-								+ "UPDATE " + personTable + " SET idmother = null WHERE idmother = -9;"
-								+ "UPDATE " + personTable + " SET idfather = null WHERE idfather = -9;"
+								+ "UPDATE " + personTable + " SET idMother = null WHERE idMother = -9;"
+								+ "UPDATE " + personTable + " SET idFather = null WHERE idFather = -9;"
 
                                 // Convert mental health and wellbeing scores to decimal (and 0/1 integer for GHQ caseness)
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCS DECIMAL(4, 2);"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_MCSSP DECIMAL(4, 2);"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCS DECIMAL(4, 2);"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHE_PCSSP DECIMAL(4, 2);"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DLS INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DHM_GHQ INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN SCGHQ2_DV INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHMENTALMCS DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHMENTALPARTNERMCS DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPHYSICALPCS DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPHYSICALPARTNERPCS DECIMAL(4, 2);"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMLIFESATSCORE1TO7 INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHWBSCORE0TO36 INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPSYDSTRSSFLAG INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMWBSCORE0TO12 INT;"
 
-                                //Rename idbenefitunit to BU_ID
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN idbenefitunit RENAME TO buid;"
+                                //Rename idBu to BU_ID
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN idBu RENAME TO buid;"
 								+ "ALTER TABLE " + personTable + " ADD COLUMN butime INT DEFAULT " + startyear + ";"
 								+ "ALTER TABLE " + personTable + " ADD COLUMN burun INT DEFAULT 0;"
 								+ "ALTER TABLE " + personTable + " ADD COLUMN prid INT DEFAULT 0;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN idhh RENAME TO idhousehold;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN idHh RENAME TO idhousehold;"
 
                                 + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_bukey ON " + personTable + " (buid, butime, burun, prid);"
                                 + "CREATE INDEX IF NOT EXISTS idx_" + personTable + "_idhousehold ON " + personTable + " (idhousehold);"
@@ -283,7 +283,7 @@ public class DataParser {
 				// CREATE BENEFITUNIT TABLE
 				stat.execute(
 						"CREATE TABLE " + benefitUnitTable + " AS (SELECT " + stringAppender(inputBenefitUnitColumnNamesSet) + " FROM " + inputFileName + ");"
-								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idhh RENAME TO hhid;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idHh RENAME TO hhid;"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhtime INT DEFAULT " + startyear + ";"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN hhrun INT DEFAULT 0;"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN prid INT DEFAULT 0;"
@@ -294,41 +294,41 @@ public class DataParser {
 				Parameters.setCountryRegions(country);
 				for(Region region: Parameters.getCountryRegions()) {
 					stat.execute(
-							"UPDATE " + benefitUnitTable + " SET region = '" + region + "' WHERE drgn1 = " + region.getValue() + ";"
+							"UPDATE " + benefitUnitTable + " SET region = '" + region + "' WHERE demRgn = " + region.getValue() + ";"
 					);
 				}
 
 				stat.execute(
-						"ALTER TABLE " + benefitUnitTable + " DROP COLUMN drgn1;"
+						"ALTER TABLE " + benefitUnitTable + " DROP COLUMN demRgn;"
 
 								//INCOME: BenefitUnit income - quintiles
 								+ "ALTER TABLE " + benefitUnitTable + " ADD household_income_qtiles VARCHAR_IGNORECASE;"
-								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q1' WHERE ydses_c5 = 1;"
-								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q2' WHERE ydses_c5 = 2;"
-								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q3' WHERE ydses_c5 = 3;"
-								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q4' WHERE ydses_c5 = 4;"
-								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q5' WHERE ydses_c5 = 5;"
-								+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN ydses_c5;"
-								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN household_income_qtiles RENAME TO ydses_c5;"
+								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q1' WHERE yHhQuintilesMonthC5 = 1;"
+								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q2' WHERE yHhQuintilesMonthC5 = 2;"
+								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q3' WHERE yHhQuintilesMonthC5 = 3;"
+								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q4' WHERE yHhQuintilesMonthC5 = 4;"
+								+ "UPDATE " + benefitUnitTable + " SET household_income_qtiles = 'Q5' WHERE yHhQuintilesMonthC5 = 5;"
+								+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN yHhQuintilesMonthC5;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN household_income_qtiles RENAME TO yHhQuintilesMonthC5;"
 
 								//Disposable income
-								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN disp_inc RENAME TO disposableIncomeMonthly;"
+								// + "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN yDispMonth RENAME TO yDispMonth;"
 
 								//Homeownership
 								+ "ALTER TABLE " + benefitUnitTable + " ADD dhh_owned_add VARCHAR_IGNORECASE;"
-								+ "UPDATE " + benefitUnitTable + " SET dhh_owned_add = 'False' WHERE dhh_owned = 0;"
-								+ "UPDATE " + benefitUnitTable + " SET dhh_owned_add = 'True' WHERE dhh_owned = 1;"
-								+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN dhh_owned;"
-								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN dhh_owned_add RENAME TO dhh_owned;"
+								+ "UPDATE " + benefitUnitTable + " SET dhh_owned_add = 'False' WHERE wealthPrptyFlag = 0;"
+								+ "UPDATE " + benefitUnitTable + " SET dhh_owned_add = 'True' WHERE wealthPrptyFlag = 1;"
+								+ "ALTER TABLE " + benefitUnitTable + " DROP COLUMN wealthPrptyFlag;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN dhh_owned_add RENAME TO wealthPrptyFlag;"
 
 								//WEALTH
-								+ "UPDATE " + benefitUnitTable + " SET total_wealth = 0.0 WHERE total_wealth = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET total_pensions = 0.0 WHERE total_pensions = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET housing_wealth = 0.0 WHERE housing_wealth = -9.0;"
-                                + "UPDATE " + benefitUnitTable + " SET mortgage_debt = 0.0 WHERE mortgage_debt = -9.0;"
+								+ "UPDATE " + benefitUnitTable + " SET wealthTotValue = 0.0 WHERE wealthTotValue = -9.0;"
+								+ "UPDATE " + benefitUnitTable + " SET wealthPensValue = 0.0 WHERE wealthPensValue = -9.0;"
+								+ "UPDATE " + benefitUnitTable + " SET wealthPrptyValue = 0.0 WHERE wealthPrptyValue = -9.0;"
+                                + "UPDATE " + benefitUnitTable + " SET wealthMortgageDebtValue = 0.0 WHERE wealthMortgageDebtValue = -9.0;"
 
 								//Add panel entity key
-								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idbenefitunit RENAME TO id;"
+								+ "ALTER TABLE " + benefitUnitTable + " ALTER COLUMN idBu RENAME TO id;"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
 								+ "ALTER TABLE " + benefitUnitTable + " ADD COLUMN working_id INT DEFAULT 0;"
@@ -357,7 +357,7 @@ public class DataParser {
 				// CREATE HOUSEHOLD TABLE
 				stat.execute(
 						"CREATE TABLE " + householdTable + " AS (SELECT " + stringAppender(inputHouseholdColumnNameSet) + " FROM " + inputFileName + ");"
-								+ "ALTER TABLE " + householdTable + " ALTER COLUMN idhh RENAME TO id;"
+								+ "ALTER TABLE " + householdTable + " ALTER COLUMN idHh RENAME TO id;"
 								+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_time INT DEFAULT " + startyear + ";"
 								+ "ALTER TABLE " + householdTable + " ADD COLUMN simulation_run INT DEFAULT 0;"
 								+ "ALTER TABLE " + householdTable + " ADD COLUMN working_id INT DEFAULT 0;"

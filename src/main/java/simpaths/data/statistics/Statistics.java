@@ -13,39 +13,39 @@ public class Statistics {
 	private PanelEntityKey key = new PanelEntityKey(1L);
 
 	@Column(name = "Gini_coefficient_individual_market_income_nationally")
-	private double giniMarketIncomeNational;
+	private double statYMktNatGini;
 
 	@Column(name = "Gini_coefficient_equivalised_household_disposable_income_nationally")
-	private double giniEquivalisedHouseholdDisposableIncomeNational;
+	private double statYHhDispEquivNatGini;
 
 	@Column(name = "Median_equivalised_household_disposable_income")
-	private double medianEquivalisedHouseholdDisposableIncome;
+	private double yHhDispEquivP50;
 	
 	//Percentiles of ydses:
 	@Column(name = "Ydses_p20")
-	private double ydses_p20;
+	private double yHhQuintilesC5P20;
 	
 	@Column(name = "Ydses_p40")
-	private double ydses_p40;
+	private double yHhQuintilesC5P40;
 	
 	@Column(name = "Ydses_p60")
-	private double ydses_p60;
+	private double yHhQuintilesC5P60;
 	
 	@Column(name = "Ydses_p80")
-	private double ydses_p80;
+	private double yHhQuintilesC5P80;
 
 	//Percentiles of gross labour income:
 	@Column(name = "Gross_Labour_Income_p20")
-	private double grossLabourIncome_p20;
+	private double yLabP20;
 
 	@Column(name = "Gross_Labour_Income_p40")
-	private double grossLabourIncome_p40;
+	private double yLabP40;
 
 	@Column(name = "Gross_Labour_Income_p60")
-	private double grossLabourIncome_p60;
+	private double yLabP60;
 
 	@Column(name = "Gross_Labour_Income_p80")
-	private double grossLabourIncome_p80;
+	private double yLabP80;
 
 	//Equivalised disposable income
 	@Column(name = "EDI_p50")
@@ -59,52 +59,52 @@ public class Statistics {
 //	@Column(name = "Risk_of_poverty_threshold")
 //	private double riskOfPovertyThreshold;
 	
-	public void setGiniPersonalGrossEarningsNational(double giniMarketIncomeNational) {
-		this.giniMarketIncomeNational = giniMarketIncomeNational;
+	public void setGiniPersonalGrossEarningsNational(double statYMktNatGini) {
+		this.statYMktNatGini = statYMktNatGini;
 	}
 	
-	public void setGiniEquivalisedHouseholdDisposableIncomeNational(double giniEquivalisedHouseholdDisposableIncomeNational) {
-		this.giniEquivalisedHouseholdDisposableIncomeNational = giniEquivalisedHouseholdDisposableIncomeNational;
+	public void setGiniEquivalisedHouseholdDisposableIncomeNational(double statYHhDispEquivNatGini) {
+		this.statYHhDispEquivNatGini = statYHhDispEquivNatGini;
 	}
 
 	public double getMedianEquivalisedHouseholdDisposableIncome() {
-		return medianEquivalisedHouseholdDisposableIncome;
+		return yHhDispEquivP50;
 	}
 
-	public void setMedianEquivalisedHouseholdDisposableIncome(double medianEquivalisedHouseholdDisposableIncome) {
-		this.medianEquivalisedHouseholdDisposableIncome = medianEquivalisedHouseholdDisposableIncome;
+	public void setMedianEquivalisedHouseholdDisposableIncome(double yHhDispEquivP50) {
+		this.yHhDispEquivP50 = yHhDispEquivP50;
 	}
 	
 	public double getYdses_p20() {
-		return ydses_p20;
+		return yHhQuintilesC5P20;
 	}
 
-	public void setYdses_p20(double ydses_p20) {
-		this.ydses_p20 = ydses_p20;
+	public void setYdses_p20(double yHhQuintilesC5P20) {
+		this.yHhQuintilesC5P20 = yHhQuintilesC5P20;
 	}
 
 	public double getYdses_p40() {
-		return ydses_p40;
+		return yHhQuintilesC5P40;
 	}
 
-	public void setYdses_p40(double ydses_p40) {
-		this.ydses_p40 = ydses_p40;
+	public void setYdses_p40(double yHhQuintilesC5P40) {
+		this.yHhQuintilesC5P40 = yHhQuintilesC5P40;
 	}
 
 	public double getYdses_p60() {
-		return ydses_p60;
+		return yHhQuintilesC5P60;
 	}
 
-	public void setYdses_p60(double ydses_p60) {
-		this.ydses_p60 = ydses_p60;
+	public void setYdses_p60(double yHhQuintilesC5P60) {
+		this.yHhQuintilesC5P60 = yHhQuintilesC5P60;
 	}
 
 	public double getYdses_p80() {
-		return ydses_p80;
+		return yHhQuintilesC5P80;
 	}
 
-	public void setYdses_p80(double ydses_p80) {
-		this.ydses_p80 = ydses_p80;
+	public void setYdses_p80(double yHhQuintilesC5P80) {
+		this.yHhQuintilesC5P80 = yHhQuintilesC5P80;
 	}
 
 	public double getsIndex_p50() {
@@ -116,35 +116,35 @@ public class Statistics {
 	}
 
 	public double getGrossLabourIncome_p20() {
-		return grossLabourIncome_p20;
+		return yLabP20;
 	}
 
-	public void setGrossLabourIncome_p20(double grossLabourIncome_p20) {
-		this.grossLabourIncome_p20 = grossLabourIncome_p20;
+	public void setGrossLabourIncome_p20(double yLabP20) {
+		this.yLabP20 = yLabP20;
 	}
 
 	public double getGrossLabourIncome_p40() {
-		return grossLabourIncome_p40;
+		return yLabP40;
 	}
 
-	public void setGrossLabourIncome_p40(double grossLabourIncome_p40) {
-		this.grossLabourIncome_p40 = grossLabourIncome_p40;
+	public void setGrossLabourIncome_p40(double yLabP40) {
+		this.yLabP40 = yLabP40;
 	}
 
 	public double getGrossLabourIncome_p60() {
-		return grossLabourIncome_p60;
+		return yLabP60;
 	}
 
-	public void setGrossLabourIncome_p60(double grossLabourIncome_p60) {
-		this.grossLabourIncome_p60 = grossLabourIncome_p60;
+	public void setGrossLabourIncome_p60(double yLabP60) {
+		this.yLabP60 = yLabP60;
 	}
 
 	public double getGrossLabourIncome_p80() {
-		return grossLabourIncome_p80;
+		return yLabP80;
 	}
 
-	public void setGrossLabourIncome_p80(double grossLabourIncome_p80) {
-		this.grossLabourIncome_p80 = grossLabourIncome_p80;
+	public void setGrossLabourIncome_p80(double yLabP80) {
+		this.yLabP80 = yLabP80;
 	}
 
 	public double getEdi_p50() {

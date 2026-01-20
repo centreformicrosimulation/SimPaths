@@ -19,105 +19,106 @@ public class Statistics3 {
     private PanelEntityKey key = new PanelEntityKey(1L);
 
     @Column(name= "social_care_adj_factor")
-    private double socialCareAdjustmentFactor;
+    private double careAdj;
 
     @Column(name = "partnership_adj_factor")
-    private double partnershipAdjustmentFactor;
+    private double demPartnerAdj;
 
     @Column(name = "share_cohabiting_sim")
-    private double shareCohabitingSimulated;
+    private double demPartnerSimShare;
 
     @Column(name = "share_cohabiting_tgt")
-    private double shareCohabitingTarget;
+    private double demPartnerTargetShare;
 
     @Column(name = "fertility_adj_factor")
-    private double fertilityAdjustmentFactor;
+    private double demFertAdj;
 
     @Column(name = "fertiilty_rate_sim")
-    private double fertilityRateSimulated;
+    private double demFertRateSim;
 
     @Column(name = "fertiilty_rate_tgt")
-    private double fertilityRateTarget;
+    private double demFertRateTarget;
 
     @Column(name = "utility_adj_factor_smales")
-    private double utilityAdjustmentFactorSmales;
+    private double demUtilAdjSingleM;
 
     @Column(name = "utility_adj_factor_sfemales")
-    private double utilityAdjustmentFactorSfemales;
+    private double demUtilAdjSingleF;
 
     @Column(name = "utility_adj_factor_couples")
-    private double utilityAdjustmentFactorCouples;
+    private double demUtilAdjCouple;
 
     public double getPartnershipAdjustmentFactor() {
-        return partnershipAdjustmentFactor;
+        return demPartnerAdj;
     }
 
-    public void setPartnershipAdjustmentFactor(double partnershipAdjustmentFactor) {
-        this.partnershipAdjustmentFactor = partnershipAdjustmentFactor;
+    public void setPartnershipAdjustmentFactor(double demPartnerAdj) {
+        this.demPartnerAdj = demPartnerAdj;
     }
 
     public double getFertilityAdjustmentFactor() {
-        return fertilityAdjustmentFactor;
+        return demFertAdj;
     }
 
     public void setFertilityAdjustmentFactor(double factor) {
-        this.fertilityAdjustmentFactor = factor;
+        this.demFertAdj = factor;
     }
 
     public double getUtilityAdjustmentFactorSmales() {
-        return utilityAdjustmentFactorSmales;
+        return demUtilAdjSingleM;
     }
 
-    public void setUtilityAdjustmentFactorSmales(double utilityAdjustmentFactorSmales) {
-        this.utilityAdjustmentFactorSmales = utilityAdjustmentFactorSmales;
+    public void setUtilityAdjustmentFactorSmales(double demUtilAdjSingleM) {
+        this.demUtilAdjSingleM = demUtilAdjSingleM;
     }
 
     public double getUtilityAdjustmentFactorSfemales() {
-        return utilityAdjustmentFactorSfemales;
+        return demUtilAdjSingleF;
     }
 
-    public void setUtilityAdjustmentFactorSfemales(double utilityAdjustmentFactorSfemales) {
-        this.utilityAdjustmentFactorSfemales = utilityAdjustmentFactorSfemales;
+    public void setUtilityAdjustmentFactorSfemales(double demUtilAdjSingleF) {
+        this.demUtilAdjSingleF = demUtilAdjSingleF;
     }
 
     public double getUtilityAdjustmentFactorCouples() {
-        return utilityAdjustmentFactorCouples;
+        return demUtilAdjCouple;
     }
 
-    public void setUtilityAdjustmentFactorCouples(double utilityAdjustmentFactorCouples) {
-        this.utilityAdjustmentFactorCouples = utilityAdjustmentFactorCouples;
+    public void setUtilityAdjustmentFactorCouples(double demUtilAdjCouple) {
+        this.demUtilAdjCouple = demUtilAdjCouple;
     }
 
-    public double getSocialCareAdjustmentFactor() { return socialCareAdjustmentFactor; }
+    public double getSocialCareAdjustmentFactor() { return careAdj; }
 
-    public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
+    public void setSocialCareAdjustmentFactor(double factor) {
+        careAdj = factor;}
 
-    public double getShareCohabitingSimulated() {return shareCohabitingSimulated;}
+    public double getShareCohabitingSimulated() {return demPartnerSimShare;}
 
-    public void setShareCohabitingSimulated(double shareCohabitingSimulated) { this.shareCohabitingSimulated = shareCohabitingSimulated; }
+    public void setShareCohabitingSimulated(double demPartnerSimShare) { this.demPartnerSimShare = demPartnerSimShare; }
 
     public double getFertilityRateSimulated() {
-        return fertilityRateSimulated;
+        return demFertRateSim;
     }
 
-    public void setFertilityRateSimulated(double fertilityRateSimulated) {
-        this.fertilityRateSimulated = fertilityRateSimulated;
+    public void setFertilityRateSimulated(double demFertRateSim) {
+        this.demFertRateSim = demFertRateSim;
     }
 
     public double getFertilityRateTarget() {
-        return fertilityRateTarget;
+        return demFertRateTarget;
     }
 
-    public void setFertilityRateTarget(double fertilityRateTarget) {
-        this.fertilityRateTarget = fertilityRateTarget;
+    public void setFertilityRateTarget(double demFertRateTarget) {
+        this.demFertRateTarget = demFertRateTarget;
     }
 
     public double getShareCohabitingTarget() {
-        return shareCohabitingTarget;
+        return demPartnerTargetShare;
     }
 
-    public void setShareCohabitingTarget(double shareCohabitingTarget) {
-        this.shareCohabitingTarget = shareCohabitingTarget;
+    public void setShareCohabitingTarget(double demPartnerTargetShare) {
+        this.demPartnerTargetShare = demPartnerTargetShare;
     }
 
     public void update(SimPathsModel model) {
@@ -127,7 +128,7 @@ public class Statistics3 {
                 Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.PartnershipAlignment);
         setPartnershipAdjustmentFactor(val);
         long numPersonsWhoCanHavePartner = model.getPersons().stream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
+                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .count();
         long numPersonsPartnered = model.getPersons().stream()
                 .filter(person -> (person.getDcpst().equals(Dcpst.Partnered)))
@@ -145,7 +146,7 @@ public class Statistics3 {
                 .filter(person -> filter.evaluate(person))
                 .count();
         long numBirths = model.getPersons().stream()
-                .filter(person -> (person.getDag() < 1))
+                .filter(person -> (person.getDemAge() < 1))
                 .count();
         val = (numFertilePersons > 0) ? (double) numBirths / numFertilePersons : 0.0;
         setFertilityRateSimulated(val);
