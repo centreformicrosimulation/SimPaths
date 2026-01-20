@@ -2720,7 +2720,7 @@ public class Parameters {
                 if (yearHere>0) {
 
                     if (yearHere<1900 || yearHere>2500)
-                        throw new RuntimeException("problem extending demYear series");
+                        throw new RuntimeException("problem extending time series");
                     if (yearMin == null) {
                         yearMin = yearHere;
                         yearMax = yearHere;
@@ -2808,7 +2808,7 @@ public class Parameters {
             for (Object key : socialCarePolicy.keySet()) {
                 if (key.hashCode()>0) {
                     if (key.hashCode()<1900 || key.hashCode()>2500)
-                        throw new RuntimeException("problem extending demYear series for social policy parameters");
+                        throw new RuntimeException("problem extending time series for social policy parameters");
                     if (key.hashCode() < minYear)
                         minYear = key.hashCode();
                     if (key.hashCode() > maxYear)
