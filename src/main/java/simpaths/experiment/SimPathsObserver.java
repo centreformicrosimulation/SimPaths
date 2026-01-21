@@ -435,10 +435,10 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					Weighted_PyramidPlotter populationAgeGenderPlotter = new Weighted_PyramidPlotter();
 					// Please note that the Pyramid plotter requires a Weighted_CrossSection.Double[2]
 					Weighted_CrossSection.Integer[] populationData = new Weighted_CrossSection.Integer[2];
-					Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "demAge", false);
 					maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
 					populationData[0] = maleAgesCS;
-					Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "demAge", false);
 					femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female));
 					populationData[1] = femaleAgesCS;
 
@@ -1018,9 +1018,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
 					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
-					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_mcs", true);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthMentalMcs", true);
 					maleCS.setFilter(maleAgeFilter);
-					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_mcs", true);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthMentalMcs", true);
 					femaleCS.setFilter(femaleAgeFilter);
 
 					TimeSeriesSimulationPlotter healthMCSAgePlotter = new TimeSeriesSimulationPlotter("Mental health by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
@@ -1042,9 +1042,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
 					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
-					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_pcs", true);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthPhysicalPcs", true);
 					maleCS.setFilter(maleAgeFilter);
-					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhe_pcs", true);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthPhysicalPcs", true);
 					femaleCS.setFilter(femaleAgeFilter);
 
 					TimeSeriesSimulationPlotter healthPCSAgePlotter = new TimeSeriesSimulationPlotter("Physical health by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
@@ -1631,10 +1631,10 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			    // Please note that the Pyramid plotter requires a Weighted_CrossSection[2]
 			    // The exact type (int, double etc) must match the variable in Person  
 			    Weighted_CrossSection.Integer[] populationData = new Weighted_CrossSection.Integer[2];
-			    Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "liwwh", false);
+			    Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "labEmpNyear", false);
 			    maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
 			    populationData[0] = maleAgesCS; 
-			    Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "liwwh", false);
+			    Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "labEmpNyear", false);
 			    femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female)); 
 			    populationData[1] = femaleAgesCS; 
 			    

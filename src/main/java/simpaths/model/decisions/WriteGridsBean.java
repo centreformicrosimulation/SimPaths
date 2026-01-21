@@ -12,7 +12,7 @@ public class WriteGridsBean {
      * ATTRIBUTES
      */
     //@CsvBindByName(column = "birthyear")
-    private double liquidWealth;
+    private double wealthLiqValue;
     private double wagePotentialperHour;
     private double pensionIncomePerYear;
     private int birthYear;
@@ -21,16 +21,16 @@ public class WriteGridsBean {
     private int retirement;
     private int health;
     private int disability;
-    private int socialCareReceipt;
-    private int socialCareProvision;
-    private int region;
+    private int careReceivedFlag;
+    private int careProvidedFlag;
+    private int demRgn;
     private int student;
     private int education;
     private int nk0;
     private int nk1;
     private int nk2;
     private int cohabitation;
-    private int gender;
+    private int demSex;
     private double consumptionShare;
     private double employment1;
     private double employment2;
@@ -45,8 +45,8 @@ public class WriteGridsBean {
     /**
      * SETTERS
      */
-    public void setLiquidWealth(double liquidWealth) {
-        this.liquidWealth = liquidWealth;
+    public void setLiquidWealth(double wealthLiqValue) {
+        this.wealthLiqValue = wealthLiqValue;
     }
     public void setWagePotentialperHour(double wagePotentialperHour) {this.wagePotentialperHour = wagePotentialperHour;}
     public void setPensionIncomePerYear(double pensionIncomePerYear) {this.pensionIncomePerYear = pensionIncomePerYear;}
@@ -60,9 +60,9 @@ public class WriteGridsBean {
         this.health = health;
     }
     public void setDisability(int disability) {this.disability = disability;}
-    public void setSocialCareReceipt(int socialCareReceipt) {this.socialCareReceipt = socialCareReceipt;}
-    public void setSocialCareProvision(int socialCareProvision) {this.socialCareProvision = socialCareProvision;}
-    public void setRegion(int region) {this.region = region;}
+    public void setSocialCareReceipt(int careReceivedFlag) {this.careReceivedFlag = careReceivedFlag;}
+    public void setSocialCareProvision(int careProvidedFlag) {this.careProvidedFlag = careProvidedFlag;}
+    public void setRegion(int demRgn) {this.demRgn = demRgn;}
     public void setStudent(int student) {
         this.student = student;
     }
@@ -77,8 +77,8 @@ public class WriteGridsBean {
         this.nk2 = nk2;
     }
     public void setCohabitation(int cohabitation) {this.cohabitation = cohabitation;}
-    public void setGender(int gender) {
-        this.gender = gender;
+    public void setGender(int demSex) {
+        this.demSex = demSex;
     }
     public void setConsumptionShare(double consumptionShare) {
         this.consumptionShare = consumptionShare;
@@ -98,7 +98,7 @@ public class WriteGridsBean {
      * GETTERS
      */
     public double getLiquidWealth() {
-        return liquidWealth;
+        return wealthLiqValue;
     }
     public double getWagePotentialperHour() {
         return wagePotentialperHour;
@@ -118,9 +118,9 @@ public class WriteGridsBean {
         return health;
     }
     public int getDisability() {return disability;}
-    public int getSocialCareReceipt() {return socialCareReceipt;}
-    public int getSocialCareProvision() {return socialCareProvision;}
-    public int getRegion() {return region;}
+    public int getSocialCareReceipt() {return careReceivedFlag;}
+    public int getSocialCareProvision() {return careProvidedFlag;}
+    public int getRegion() {return demRgn;}
     public int getStudent() {
         return student;
     }
@@ -140,7 +140,7 @@ public class WriteGridsBean {
         return cohabitation;
     }
     public int getGender() {
-        return gender;
+        return demSex;
     }
     public double getConsumptionShare() {
         return consumptionShare;
@@ -160,7 +160,7 @@ public class WriteGridsBean {
      * STRING GETTERS
      */
     public String getLiquidWealthString() {
-        return Double.toString(liquidWealth);
+        return Double.toString(wealthLiqValue);
     }
     public String getWagePotentialperHourString() {
         return Double.toString(wagePotentialperHour);
@@ -186,9 +186,9 @@ public class WriteGridsBean {
     public String getDisabilityString() {
         return String.valueOf(disability);
     }
-    public String getSocialCareReceiptString() {return String.valueOf(socialCareReceipt);}
-    public String getSocialCareProvisionString() {return String.valueOf(socialCareProvision);}
-    public String getRegionString() {return String.valueOf(region);}
+    public String getSocialCareReceiptString() {return String.valueOf(careReceivedFlag);}
+    public String getSocialCareProvisionString() {return String.valueOf(careProvidedFlag);}
+    public String getRegionString() {return String.valueOf(demRgn);}
     public String getStudentString() {
         return String.valueOf(student);
     }
@@ -208,7 +208,7 @@ public class WriteGridsBean {
         return String.valueOf(cohabitation);
     }
     public String getGenderString() {
-        return String.valueOf(gender);
+        return String.valueOf(demSex);
     }
     public String getConsumptionShareString() {
         return Double.toString(consumptionShare);

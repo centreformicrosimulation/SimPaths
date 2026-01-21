@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.HashSet;
 
 
 /**
@@ -22,7 +21,7 @@ public class DonorTaxUnit {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "taxUnit")
     private Set<DonorTaxUnitPolicy> policies = new LinkedHashSet<>();
 
-    @Column(name = "WEIGHT") private Double weight;
+    @Column(name = "WEIGHT") private Double dem;
 
 
     /**
@@ -35,8 +34,8 @@ public class DonorTaxUnit {
      */
     public long getId() {return this.id;}
     public void setId(long id) {this.id = id;}
-    public Double getWeight() {return this.weight;}
-    public void setWeight(double weight) { this.weight = weight;}
+    public Double getWeight() {return this.dem;}
+    public void setWeight(double dem) { this.dem = dem;}
     public DonorTaxUnitPolicy getPolicyByFromYear(int fromYear) {
 
         for (DonorTaxUnitPolicy policy : policies) {

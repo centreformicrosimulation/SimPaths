@@ -53,7 +53,7 @@ public class LifetimeIncomeImputation {
                 for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
                     disposableIncomePerAnnum += benefitUnit.getDisposableIncomeMonthly() * 12.0;
                     for (Person pp : benefitUnit.getMembers()) {
-                        if (pp.getDag() > 13) {
+                        if (pp.getDemAge() > 13) {
                             if (firstAdult) {
                                 equivalenceScale += 1.0;
                                 firstAdult = false;
@@ -73,7 +73,7 @@ public class LifetimeIncomeImputation {
                     for (Person person : benefitUnit.getMembers()) {
                         // loop through each person
 
-                        if (person.getDag()==0) {
+                        if (person.getDemAge()==0) {
                             person.setLtIncome(endAge);
                         }
                         else {
@@ -128,8 +128,8 @@ public class LifetimeIncomeImputation {
     }
 
     private List<Individual> getLtIncomeDonors(Person person) {
-        int birthYear = year - Math.min(person.getDag(),endAge);
-        Gender gender = person.getDgn();
+        int birthYear = year - Math.min(person.getDemAge(),endAge);
+        Gender gender = person.getDemMaleFlag();
         BirthCohort targetCohort = null;
         for (BirthCohort cohort : cohorts) {
 

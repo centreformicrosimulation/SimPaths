@@ -22,7 +22,7 @@ public class ValidEducationAgeGroupCSfilter implements ICollectionFilter{
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		return ( (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) && !person.getLes_c4().equals(Les_c4.Student));
+		return ( (person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) && !person.getLes_c4().equals(Les_c4.Student));
 	}
 	
 	public int getAgeFrom() {

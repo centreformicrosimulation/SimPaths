@@ -8,21 +8,21 @@ public class ValidPersonAgeGenderSIndexCSfilter implements ICollectionFilter{
 
 	private int ageFrom;
 	private int ageTo;
-	private Gender gender;
+	private Gender demSex;
 
-	public ValidPersonAgeGenderSIndexCSfilter(int ageFrom, int ageTo, Gender gender) {
+	public ValidPersonAgeGenderSIndexCSfilter(int ageFrom, int ageTo, Gender demSex) {
 		super();
 		this.ageFrom = ageFrom;
 		this.ageTo = ageTo;
-		this.gender = gender;
+		this.demSex = demSex;
 	}
 
 	public boolean isFiltered(Object object) {
 			Person person = (Person) object;
 //			return (person.getAtRiskOfPoverty() != null);
 			return (person.getsIndex() > 0. && person.getsIndex() != Double.NaN && //Removes cases where security index is invalid
-					(person.getDag() >= ageFrom) && (person.getDag() <= ageTo) &&
-					person.getDgn().equals(gender));
+					(person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) &&
+					person.getDemMaleFlag().equals(demSex));
 	}
 	
 }

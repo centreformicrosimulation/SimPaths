@@ -12,9 +12,9 @@ public class FemalesUnder45Filter implements Predicate {
 		
 		Person agent = (Person) object;
 		
-		return ( (agent.getDgn().equals(Gender.Female)) &&
+		return ( (agent.getDemMaleFlag().equals(Gender.Female)) &&
 //				( !agent.getActivity_status().equals(Les_c4.Student) || agent.isToLeaveSchool() ) &&	//Alignment rate for sweden includes many students who are married, so cannot filter out non-students in the alignment algorithm
-				( agent.getDag() < 45 )		//Strict inequality here, to coincide with age band in the GUI chart of Cohabitiing Females
+				( agent.getDemAge() < 45 )		//Strict inequality here, to coincide with age band in the GUI chart of Cohabitiing Females
 				);
 				
 	}
