@@ -986,16 +986,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             LinkedHashSet<MultiKey<Labour>> possibleLabourCombinations = findPossibleLabourCombinations(); // Find possible labour combinations for this benefit unit
             MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
-            //Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
+            // Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).
+            // For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
             if (Occupancy.Couple.equals(occupancy)) {
 
                 for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
 
-                    //Sets values for regression score calculation
+                    // Sets values for regression score calculation
                     male.setLabourSupplyWeekly(labourKey.getKey(0));
                     female.setLabourSupplyWeekly(labourKey.getKey(1));
 
-                    //Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)
+                    // Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)
                     double maleIncome = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
                     double femaleIncome = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
                     double originalIncomePerMonth = maleIncome + femaleIncome;
@@ -1009,7 +1010,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     setReceivedUC(evaluatedTransfers.getReceivedUC());
                     setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
-                    //Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
+                    // Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
                     double regressionScore = 0.;
                     if (male.atRiskOfWork()) { //If male has flexible labour supply
                         if (female.atRiskOfWork()) { //And female has flexible labour supply
@@ -1116,20 +1117,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             double labourInnov = 0;
 
             // Check if:
-            // - single occupant is employed
-            // - or male of couple is employed
-            // - or male is not at risk of work and female is employed
-            // -> then persist employment at prob_{persist_employment}
+            // - single occupant who was employed in preceding period
+            // - or male of couple who was employed in preceding period
+            // - or male is not at risk of work and female who was employed in preceding period
+            // -> then persist employment innovation with probability Parameters.labour_innovation_employment_persistence_probability
             // Otherwise
-            // -> persist unemployment at prob_{persist_unemployment}
-
-            if (occupancy.Single_Male.equals(occupancy) && male.atRiskOfWork() && male.getEmployed() == 1) {
+            // -> persist employment innovation with probability Parameters.labour_innovation_notinemployment_persistence_probability
+            if (occupancy.Single_Male.equals(occupancy) && male.atRiskOfWork() && male.getEmployed_Lag1() == 1) {
                     labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
-            } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed() == 1) {
+            } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed_Lag1() == 1) {
                     labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
             } else if (occupancy.equals(Occupancy.Couple) &&
-                    ((male.atRiskOfWork() && male.getEmployed() == 1) ||
-                            (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed() == 1))) {
+                    ((male.atRiskOfWork() && male.getEmployed_Lag1() == 1) ||
+                            (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed_Lag1() == 1))) {
                 labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
             } else {
                 labourInnov = getLabourInnovation(Parameters.labour_innovation_notinemployment_persistence_probability);
