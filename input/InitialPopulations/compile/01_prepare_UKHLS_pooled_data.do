@@ -117,16 +117,16 @@ foreach w of global UKHLSwaves {
 	local waveno=strpos("abcdefghijklmnopqrstuvwxyz","`w'")
 
 	if (`waveno'==1) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	else if (`waveno'<6) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv `w'_hhdenub_xw /*`w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv `w'_hhdenub_xw /*`w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	else if (`waveno'<14) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
 	} 
 	else if (`waveno'==14) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hhdeng2_xw `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hhdeng2_xw `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	
 	gen swv = `waveno'
