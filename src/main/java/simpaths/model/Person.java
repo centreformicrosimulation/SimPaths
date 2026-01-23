@@ -26,7 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
-import static simpaths.data.Parameters.getUnemploymentRateByGenderEducationAgeYear;
+import static simpaths.data.Parameters.*;
 
 @Entity
 public class Person implements EventListener, IDoubleSource, IIntSource, Weight, Comparable<Person> {
@@ -75,6 +75,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Education eduHighestFatherC3;      //Father's education level
     @Enumerated(EnumType.STRING) private Ethnicity demEthnC6;          //Ethnicity
     @Enumerated(EnumType.STRING) private Indicator eduSpellFlag;          // in continuous education
+    @Enumerated(EnumType.STRING) private Indicator eduSpellFlagL1;          // in continuous education
     @Enumerated(EnumType.STRING) private Indicator eduReturnFlag;          // return to education
     @Enumerated(EnumType.STRING) private Les_c4 labC4;      //Activity (employment) status
     @Enumerated(EnumType.STRING) private Les_c7_covid labC7Covid; //Activity (employment) status used in the Covid-19 models
@@ -288,6 +289,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         benefitUnit = mother.benefitUnit;
         idBu = benefitUnit.getId();
         demAge = 0;
+        eduSpellFlag = Indicator.True ;
+        eduReturnFlag = Indicator.False;
         wgt = mother.getWgt();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         healthSelfRated = Dhe.VeryGood;
         healthWbScore0to36 = 9.;			//Set to median for under 18's as a placeholder
@@ -356,10 +359,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         eduHighestMotherC3 = originalPerson.eduHighestMotherC3;
         eduHighestPartnerC3L1 = originalPerson.eduHighestC3L1;
 
+        // set eduSpellFlag
         if (originalPerson.demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //If under age to leave education, set flag for being in education to true
             eduSpellFlag = Indicator.True;
         } else {
             eduSpellFlag = originalPerson.eduSpellFlag;
+        }
+
+        if (originalPerson.eduSpellFlagL1 != null) { //If original person misses lagged level of education, assign current level of education
+            eduSpellFlagL1 = originalPerson.eduSpellFlagL1;
+        } else {
+            eduSpellFlagL1 = eduSpellFlag;
         }
 
         eduReturnFlag = originalPerson.eduReturnFlag;
@@ -383,7 +393,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         else if (demAge > Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION)
             eduLeftEduFlag = true;
         else
-            eduLeftEduFlag = (!Les_c4.Student.equals(labC4));
+            eduLeftEduFlag = (!Les_c4.Student.equals(labC4) || (Les_c4.Student.equals(labC4) && eduSpellFlag.equals(Indicator.False))) ;
 
         if (originalPerson.labC4L1 != null) { //If original persons misses lagged activity status, assign current activity status
             labC4L1 = originalPerson.labC4L1;
@@ -1507,50 +1517,132 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void inSchool() {
 
+    public boolean inSchool() {
+        double probitAdjustment = (model.isAlignInSchool()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment) : 0.0;
+        return inSchool(probitAdjustment);
+    }
+
+
+    public boolean inSchool(double probitAdjustment) {
+        // Documentation: diagram "SimPathsEU education module - MR2"
+
+        eduLeaveSchoolFlag = false;
+
+        // Innovation for education decisions
         double labourInnov = statInnovations.getDoubleDraw(24);
-        //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
-        if (Les_c4.Retired.equals(labC4) || demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || demAge > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
-            return;
-        } else if (Les_c4.Student.equals(labC4) && !eduLeftEduFlag && demAge >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
-            //If age is between 16 - 29 and individual has always been in education, follow process E1a:
 
-            if (demAge <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+        // Initial case (laggedStudent): In the previous period, was the individual a student?
+        // Yes
+        if (Les_c4.Student.equals(labC4L1)) {
 
-                double prob = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
-                eduLeaveSchoolFlag = (labourInnov >= prob); //If event is true, stay in school.  If event is false, leave school.
-            } else {
-                eduLeaveSchoolFlag = true; //Hasn't left education until 30 - force out
+            // Is the age of the individual above the minimum age to leave education (age >= minQuittingAge)?
+            // Yes
+            if (demAge >= MIN_AGE_TO_LEAVE_EDUCATION) {
+                // Is the age of the individual below the max age to leave education (age < maxQuittingAge)?
+                // Yes
+                if (demAge <= MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+                    // --> process E1a
+                    double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
+                    double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
+
+                    if (labourInnov < prob) {
+                        // Remain a student *OUTCOME B*
+                        setLes_c4(Les_c4.Student);  //not needed, more of a precaution
+                        //setDed(Indicator.True);           //(!) a bug; E1a is applied to everyone with Ded true and false
+                        //setDer(Indicator.False);          //(!) a bug; Der is set to true only when individual re-enters education (i.e. process E1b)
+                        return true; // Must return true as they remain in school
+                    } else {
+                        // Leave education --> Process E2
+                        eduLeaveSchoolFlag = true; // Must set flag to true
+                        return false; // Must return false as they are leaving
+                    }
+                }
+                // No (demAge > MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION)
+                else {
+                    // Leave education --> Process E2
+                    eduLeaveSchoolFlag = true; // Must set flag to true
+                    return false; // Must return false as they are leaving
+                }
             }
-        } else if (demAge <= 45 && (!Les_c4.Student.equals(labC4) || eduLeftEduFlag)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
-            //If age is between 16 - 45 and individual has not continuously been in education, follow process E1b:
-            //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
-            //TODO: If regression outcome of process E1b is true, set activity status to student and der (return to education indicator) to true?
-
-            double prob = Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class);
-            if (labourInnov < prob) {
-                //If event is true, re-enter education.  If event is false, leave school
-
-                setLes_c4(Les_c4.Student);
-                setDer(Indicator.True);
-                setDed(Indicator.True);
-            } else if (Les_c4.Student.equals(labC4)){
-                //If activity status is student but regression to be in education was evaluated to false, remove student status
-
-                setLes_c4(Les_c4.NotEmployed);
-                setDed(Indicator.False);
-                eduLeaveSchoolFlag = true; //Test what happens if people who returned to education leave again
+            // No (demAge < MIN_AGE_TO_LEAVE_EDUCATION)
+            else {
+                return true; // The individual remains a student *OUTCOME A*
             }
-        } else if (demAge > 45 && labC4.equals(Les_c4.Student)) {
-            //People above 45 shouldn't be in education, so if someone re-entered at 45 in previous step, force out
+        }
 
-            setLes_c4(Les_c4.NotEmployed);
-            setDed(Indicator.False);
+        // No (Not a Student in labC4L1)
+        else {
+            // In the previous period, was the individual a retired (laggedRetired)?
+            // Yes
+            if (Les_c4.Retired.equals(labC4L1)) {
+                return false;  // The individual can't be a student *OUTCOME C*
+                // Remain in current status which is retired
+            }
+
+            // No --> Process E1b
+            else {
+                double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
+
+                if (labourInnov < prob) {
+                    // Become a student *OUTCOME E*
+                    setLes_c4(Les_c4.Student);
+                    setDer(Indicator.True);
+                    setDed(Indicator.False); //not needed, more of a precaution as ded should already be false
+                    return true; // Must return true as they become a student
+                } else {
+                    return false;
+                }
+            }
+
         }
     }
 
-    protected void leavingSchool() {
+
+
+
+//        //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
+//        if (Les_c4.Retired.equals(labC4) || demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || demAge > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
+//            return;
+//        } else if (Les_c4.Student.equals(labC4) && !eduLeftEduFlag && demAge >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
+//            //If age is between 16 - 29 and individual has always been in education, follow process E1a:
+//
+//            if (demAge <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+//
+//                double prob = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
+//                eduLeaveSchoolFlag = (labourInnov >= prob); //If event is true, stay in school.  If event is false, leave school.
+//            } else {
+//                eduLeaveSchoolFlag = true; //Hasn't left education until 30 - force out
+//            }
+//        } else if (demAge <= 45 && (!Les_c4.Student.equals(labC4) || eduLeftEduFlag)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
+//            //If age is between 16 - 45 and individual has not continuously been in education, follow process E1b:
+//            //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
+//            //TODO: If regression outcome of process E1b is true, set activity status to student and der (return to education indicator) to true?
+//
+//            double prob = Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class);
+//            if (labourInnov < prob) {
+//                //If event is true, re-enter education.  If event is false, leave school
+//
+//                setLes_c4(Les_c4.Student);
+//                setDer(Indicator.True);
+//                setDed(Indicator.True);
+//            } else if (Les_c4.Student.equals(labC4)){
+//                //If activity status is student but regression to be in education was evaluated to false, remove student status
+//
+//                setLes_c4(Les_c4.NotEmployed);
+//                setDed(Indicator.False);
+//                eduLeaveSchoolFlag = true; //Test what happens if people who returned to education leave again
+//            }
+//        } else if (demAge > 45 && labC4.equals(Les_c4.Student)) {
+//            //People above 45 shouldn't be in education, so if someone re-entered at 45 in previous step, force out
+//
+//            setLes_c4(Les_c4.NotEmployed);
+//            setDed(Indicator.False);
+//        }
+//    }
+
+    public void leavingSchool() {
 
         if (eduLeaveSchoolFlag) {
 
@@ -1814,8 +1906,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // Note that persons are now assigned a Low education level by default at birth (to prevent null pointer exceptions when persons become old enough to marry while still being a student
     // (we now allow students to marry, given they can re-enter school throughout their lives).
     // The module only applies to students who are leaving school (activityStatus == Student and toLeaveSchool == true) - see inSchool()
-    private void setEducationLevel() {
+    public void setEducationLevel() {
 
+        // Process E2
+
+        // --- Step 1: Regression Result ---
+        // The regression determines the highest possible qualification achieved this spell.
         Map<Education,Double> probs = Parameters.getRegEducationE2a().getProbabilities(this, Person.DoublesVariables.class);
         MultiValEvent event = new MultiValEvent(probs, statInnovations.getDoubleDraw(30));
         Education newEducationLevel = (Education) event.eval();
@@ -1824,6 +1920,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         //This is because we no longer prevent people in school to get married, given that people can re-enter education throughout their lives.
         //Note that by not filtering out students, we must assign a low education level by default to persons at birth to prevent a null pointer exception when new born persons become old enough to marry if they have not yet left school because
         //their education level has not yet been assigned.
+
+        // --- Step 2: Update counters based on regression result ---
         if (newEducationLevel.equals(Education.Low)) {
             model.lowEd++;
         } else if (newEducationLevel.equals(Education.Medium)) {
@@ -1833,13 +1931,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             model.nothing++;
         }
+
+        // --- Step 3: process E2 in the diagaram ---
         if(eduHighestC3 != null) {
             if(newEducationLevel.ordinal() > eduHighestC3.ordinal()) {		//Assume Education level cannot decrease after re-entering school.
                 eduHighestC3 = newEducationLevel;
             }
-        } else {
-            eduHighestC3 = newEducationLevel;
-        }
+        } /*else {
+            // retain old level -> deh_c3 remains the same
+        }*/
     }
 
     public double getLiquidWealth() {
@@ -1875,7 +1975,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demGiveBirthFlag = false;
         demBePartnerFlag = false;
         demLeavePartnerFlag = false;
-        eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
+        // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
+
         if (initialUpdate && !Parameters.checkFinite(careHrsFromParentWeek))
             careHrsFromParentWeek = 0.0;
         if (demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE) {
@@ -1941,6 +2042,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         careProvidedFlagL1 = careProvidedFlag;
         labWageOfferLowFlagL1 = getLowWageOffer();
         eduHighestC3L1 = eduHighestC3; //Update lag(1) of education level
+        eduSpellFlagL1 = eduSpellFlag ; //Update lag(1) of education level
         yNonBenPersGrossMonthL1 = getyNonBenPersGrossMonth(); //Update lag(1) of gross personal non-benefit income
         labHrsWorkEnumWeekL1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
         yBenReceivedFlagL1 = yBenReceivedFlag; // Lag(1) of flag indicating if individual receives benefits
@@ -2338,6 +2440,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dcpst_Single_L1, 				//Lag(1) of partnership status is Single
         Dcrisis,
         Ded,
+        Ded_L1,
         Deh_c3_High,
         Deh_c3_Low,
         Deh_c3_Low_Dag,
@@ -3131,6 +3234,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Ded -> {
                 return (Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
+            }
+            case Ded_L1 -> {
+                return (double) eduSpellFlagL1.getValue() ;
             }
             case Deh_c3_High -> {
                 return (Education.High.equals(eduHighestC3)) ? 1.0 : 0.0;
@@ -4207,9 +4313,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return eduSpellFlag;
     }
 
+    public Indicator getDed_lag1() {
+        return eduSpellFlagL1;
+    }
+
     public void setDed(Indicator eduSpellFlag) {
         this.eduSpellFlag = eduSpellFlag;
     }
+
+    public void setDed_lag1(Indicator eduSpellFlagL1) {
+        this.eduSpellFlagL1 = eduSpellFlagL1;
+    }
+
 
     public int getLowEducation() {
         if(eduHighestC3 != null) {
@@ -4628,6 +4743,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setDer(Indicator eduReturnFlag) {
         this.eduReturnFlag = eduReturnFlag;
     }
+
+    public Indicator getDer() {return eduReturnFlag;}
+
+    public Indicator getSedex() {return eduExitSampleFlag;}
 
     public Long getIdOriginalPerson() {
         return idPersOriginal;

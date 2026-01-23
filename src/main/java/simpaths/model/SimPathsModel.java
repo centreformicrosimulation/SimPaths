@@ -2108,60 +2108,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      */
     private void inSchoolAlignment() {
 
-        int numStudents = 0;
-        int num16to29 = 0;
-        ArrayList<Person> personsLeavingSchool = new ArrayList<Person>();
-        for (Person person : persons) {
-            if (person.getDemAge() > 15 && person.getDemAge() < 30) { //Could introduce separate alignment for different age groups, but this is more flexible as it depends on the regression process within the larger alignment target
-                num16to29++;
-                if (person.getLes_c4().equals(Les_c4.Student)) {
-                    numStudents++;
-                }
-                if (person.isToLeaveSchool()) { //Only those who leave school for the first time have toLeaveSchool set to true
-                    personsLeavingSchool.add(person);
-                }
-            }
-        }
+        InSchoolAlignment inSchoolAlignment = new InSchoolAlignment(persons);
+        double inSchoolAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment);
+        RootSearch search = getRootSearch(inSchoolAdjustment, inSchoolAlignment, 1.0E-2, 1.0E-2, 4); // epsOrdinates and epsFunction determine the stopping condition for the search. For inSchoolAlignment error term is the difference between target and observed share of partnered individuals.
 
-        int targetNumberOfPeopleLeavingSchool = numStudents - (int)( (double)num16to29 * ((Number) Parameters.getStudentShareProjections().getValue(country.toString(), year)).doubleValue() );
-
-        System.out.println("Number of students < 30 is " + numStudents + " Persons set to leave school " + personsLeavingSchool.size() + " Number of people below 30 " + num16to29
-                + " Target number of people leaving school " + targetNumberOfPeopleLeavingSchool);
-
-        if (targetNumberOfPeopleLeavingSchool <= 0) {
-            for(Person person : personsLeavingSchool) {
-                person.setToLeaveSchool(false);                    //Best case scenario is to prevent anyone from leaving school in this year as the target share of students is higher than the number of students.  Although we cannot match the target, this is the nearest we can get to it.
-                if(Parameters.systemOut) {
-                    System.out.println("target number of school leavers is not positive.  Force all school leavers to stay at school.");
-                }
-            }
-        } else if (targetNumberOfPeopleLeavingSchool < personsLeavingSchool.size()) {
-            if(Parameters.systemOut) {
-                System.out.println("Schooling alignment: target number of students is " + targetNumberOfPeopleLeavingSchool);
-            }
-            new ResamplingAlignment<Person>().align(
-                    personsLeavingSchool,
-                    null,
-                    new AlignmentOutcomeClosure<Person>() {
-                        @Override
-                        public boolean getOutcome(Person agent) {
-                            return agent.isToLeaveSchool();
-                        }
-
-                        @Override
-                        public void resample(Person agent) {
-                            agent.setToLeaveSchool(false);
-                        }
-                    },
-                    targetNumberOfPeopleLeavingSchool);
-
-            int numPostAlign = 0;
-            for(Person person : persons) {
-                if(person.isToLeaveSchool()) {
-                    numPostAlign++;
-                }
-            }
-            System.out.println("Schooling alignment: aligned number of students is " + numPostAlign);
+        // update and exit
+        if (search.isTargetAltered()) {
+            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.InSchoolAdjustment); // If adjustment is altered from the initial value, update the map
+            System.out.println("InSchool adjustment value was " + search.getTarget()[0]);
         }
     }
 
@@ -3076,6 +3030,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void setAlignInSchool(boolean flag) {
         alignInSchool = flag;
     }
+
+    public boolean isAlignInSchool() { return alignInSchool;    }
 
     public void setYear(int year) {
         this.year = year;
