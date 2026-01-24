@@ -1602,46 +1602,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
 
 
-//        //Min age to leave education set to 16 (from 18 previously) but note that age to leave home is 18.
-//        if (Les_c4.Retired.equals(labC4) || demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION || demAge > Parameters.MAX_AGE_TO_ENTER_EDUCATION) {		//Only apply module for persons who are old enough to consider leaving education, but not retired
-//            return;
-//        } else if (Les_c4.Student.equals(labC4) && !eduLeftEduFlag && demAge >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
-//            //If age is between 16 - 29 and individual has always been in education, follow process E1a:
-//
-//            if (demAge <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
-//
-//                double prob = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
-//                eduLeaveSchoolFlag = (labourInnov >= prob); //If event is true, stay in school.  If event is false, leave school.
-//            } else {
-//                eduLeaveSchoolFlag = true; //Hasn't left education until 30 - force out
-//            }
-//        } else if (demAge <= 45 && (!Les_c4.Student.equals(labC4) || eduLeftEduFlag)) { //leftEducation is initialised to false and updated to true when individual leaves education for the first time (and never reset).
-//            //If age is between 16 - 45 and individual has not continuously been in education, follow process E1b:
-//            //Either individual is currently a student and has left education at some point in the past (so returned) or individual is not a student so has not been in continuous education:
-//            //TODO: If regression outcome of process E1b is true, set activity status to student and der (return to education indicator) to true?
-//
-//            double prob = Parameters.getRegEducationE1b().getProbability(this, Person.DoublesVariables.class);
-//            if (labourInnov < prob) {
-//                //If event is true, re-enter education.  If event is false, leave school
-//
-//                setLes_c4(Les_c4.Student);
-//                setDer(Indicator.True);
-//                setDed(Indicator.True);
-//            } else if (Les_c4.Student.equals(labC4)){
-//                //If activity status is student but regression to be in education was evaluated to false, remove student status
-//
-//                setLes_c4(Les_c4.NotEmployed);
-//                setDed(Indicator.False);
-//                eduLeaveSchoolFlag = true; //Test what happens if people who returned to education leave again
-//            }
-//        } else if (demAge > 45 && labC4.equals(Les_c4.Student)) {
-//            //People above 45 shouldn't be in education, so if someone re-entered at 45 in previous step, force out
-//
-//            setLes_c4(Les_c4.NotEmployed);
-//            setDed(Indicator.False);
-//        }
-//    }
-
     public void leavingSchool() {
 
         if (eduLeaveSchoolFlag) {
@@ -1652,6 +1612,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             setDer(Indicator.False);
             setEduLeftEduFlag(true); //This is not reset and indicates if individual has ever left school - used with health process
             setLes_c4(Les_c4.NotEmployed); //Set activity status to NotEmployed when leaving school to remove Student status
+
+            this.eduLeaveSchoolFlag = false; // Reset the flag once the leaving process is complete
         }
     }
 
@@ -1971,11 +1933,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void updateVariables(boolean initialUpdate) {
 
         //Reset flags to default values
-        eduLeaveSchoolFlag = false;
+
         demGiveBirthFlag = false;
         demBePartnerFlag = false;
         demLeavePartnerFlag = false;
+        eduLeaveSchoolFlag = false;
+        setSedex(Indicator.False); //This variable is False by default
+                                    // is set to true only when person leaves school in this specific year
         // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
+        // no need to update eduSpellFlag as its value is persisted from the previous year
 
         if (initialUpdate && !Parameters.checkFinite(careHrsFromParentWeek))
             careHrsFromParentWeek = 0.0;
