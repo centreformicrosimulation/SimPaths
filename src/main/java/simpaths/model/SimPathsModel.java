@@ -29,10 +29,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.util.Pair;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import simpaths.data.IEvaluation;
-import simpaths.data.MahalanobisDistance;
-import simpaths.data.Parameters;
-import simpaths.data.RootSearch;
+import simpaths.data.*;
 import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import simpaths.model.decisions.DecisionParams;
@@ -51,6 +48,8 @@ import simpaths.model.taxes.database.TaxDonorDataParser;
 
 import java.io.*;
 import java.sql.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.random.RandomGenerator;
 
@@ -316,6 +315,19 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "whether to include geographic region in state space for IO behavioural solutions")
     private boolean responsesToRegion = false;
 
+    // Controls for macro shocks
+    @GUIparameter(description = "macro shock: population")
+    private MacroScenarioPopulation macroShockPopulation = MacroScenarioPopulation.Baseline;
+
+    @GUIparameter(description = "macro shock: productivity")
+    private MacroScenarioProductivity macroShockProductivity = MacroScenarioProductivity.Baseline;
+
+    @GUIparameter(description = "macro shock: green policy")
+    private MacroScenarioGreenPolicy macroShockGreenPolicy = MacroScenarioGreenPolicy.No;
+
+    @GUIparameter(description = "macro shocks: on")
+    private boolean macroShocksOn = false;
+
     RandomGenerator cohabitInnov;
     Random initialiseInnov1;
     Random initialiseInnov2;
@@ -376,7 +388,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts, lifetimeIncomeImpute);
+                flagSuppressSocialCareCosts, lifetimeIncomeImpute, macroShockPopulation, macroShockProductivity, macroShockGreenPolicy, macroShocksOn);
         if (lifetimeIncomeGenerate) {
             ManagerProjectLifetimeIncomes.run(log, lifetimeIncomeStartBirthYear,
                     lifetimeIncomeEndBirthYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
@@ -616,6 +628,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
         addCollectionEventToAllYears(persons, Person.Processes.UpdateOutputVariables); // Update idPartner, dhhtp_c4
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateOutputVariables); // Update dhhtp_c4
         addEventToAllYears(Processes.EndYear);
 
         // UPDATE YEAR
@@ -1913,34 +1926,159 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
-    public void activityAlignmentSingleMales() {
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentSingleMales);
-        ActivityAlignment activityAlignmentSingleMales = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityMales(), new String[]{"MaleLeisure"}, Occupancy.Single_Male, utilityAdjustment);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleMales, 1.0E-2, 1.0E-2, 0.5); // epsOrdinates and epsFunction determine the stopping condition for the search.
+
+    public void activityAlignmentMacroShock() {
+        Map<OccupancyExtended, MultiKeyCoefficientMap> coefficientMaps = new HashMap<>();
+        coefficientMaps.put(OccupancyExtended.Single_Male, Parameters.getCoeffLabourSupplyUtilityMales());
+        coefficientMaps.put(OccupancyExtended.Single_Female, Parameters.getCoeffLabourSupplyUtilityFemales());
+        coefficientMaps.put(OccupancyExtended.Couple, Parameters.getCoeffLabourSupplyUtilityCouples());
+        coefficientMaps.put(OccupancyExtended.Male_AC, Parameters.getCoeffLabourSupplyUtilityACMales());
+        coefficientMaps.put(OccupancyExtended.Female_AC, Parameters.getCoeffLabourSupplyUtilityACFemales());
+        coefficientMaps.put(OccupancyExtended.Male_With_Dependent, Parameters.getCoeffLabourSupplyUtilityMalesWithDependent());
+        coefficientMaps.put(OccupancyExtended.Female_With_Dependent, Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent());
+
+        Map<OccupancyExtended, List<String>> regressorsToModify = new HashMap<>();
+        regressorsToModify.put(OccupancyExtended.Single_Male, List.of("Hrs_40plus_Male"));
+        regressorsToModify.put(OccupancyExtended.Single_Female, List.of("Hrs_40plus_Female"));
+        regressorsToModify.put(OccupancyExtended.Couple, List.of("Hrs_40plus_Male", "Hrs_40plus_Female"));
+        regressorsToModify.put(OccupancyExtended.Male_AC, List.of("Hrs_40plus_Male"));
+        regressorsToModify.put(OccupancyExtended.Female_AC, List.of("Hrs_40plus_Female"));
+        regressorsToModify.put(OccupancyExtended.Male_With_Dependent, List.of("Hrs_40plus_Male"));
+        regressorsToModify.put(OccupancyExtended.Female_With_Dependent, List.of("Hrs_40plus_Female"));
+
+        double initialUtilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustment);
+
+        ActivityAlignmentMacroShock activityAlignment = new ActivityAlignmentMacroShock(
+                persons, benefitUnits, coefficientMaps, regressorsToModify, initialUtilityAdjustment
+        );
+
+        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 5.0E-1, 5.0E-3, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
+
         if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentSingleMales); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for single males was " + search.getTarget()[0]);
+            double newAdjustment = search.getTarget()[0];
+            Parameters.putTimeSeriesValue(getYear(), newAdjustment, TimeSeriesVariable.UtilityAdjustment);
+            System.out.println("Utility adjustment for all types was " + newAdjustment);
         }
+    }
+
+
+    /*
+    Private helper method used to set up alignment for different occupancy types
+     */
+    private void activityAlignment(
+            TimeSeriesVariable adjustmentMap, // map storing adjustment values used in the alignment process
+            MultiKeyCoefficientMap coefficientMap, // map storing original labour supply utility regression coefficients
+            String[] regressionCoefficientName, // name of regression coefficient to adjust
+            OccupancyExtended occupancy, // benefit unit occupancy extended to allow all types used in labour supply module
+            String occupancyLabel // displays the type of benefit unit to which adjustment is applied
+    ) {
+        //double utilityAdjustment = Parameters.getValuePreferPrev(getYear(), adjustmentMap);
+        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentMap);
+        System.out.println("Utility adjustment for " + occupancyLabel + " has started");
+
+        // start timer
+        Instant beforeRS2 = Instant.now();
+
+
+        ActivityAlignmentV2 activityAlignment = new ActivityAlignmentV2(benefitUnits, coefficientMap, regressionCoefficientName, occupancy);
+        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, 5.0E-3, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
+        // epsFunction tolerance is set to 0.5% seem to be sufficient
+
+        System.out.println("=== Root Search Summary ===");
+        System.out.println("Root found at: " + search.getTarget()[0]);
+        System.out.println("Target altered: " + search.isTargetAltered());
+        System.out.println("Iterations: " + search.getIterationCount());
+
+        for (RootSearch2.IterationInfo it : search.getIterationHistory()) {
+            System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",
+                    it.getIteration(), it.getX(), it.getFx(), it.getStep(),
+                    it.isFuncTolMet(), it.isOrdTolMet());
+        }
+
+        // stop timer
+        Instant afterRS2 = Instant.now();
+
+        // display time to complete
+        Duration durationTotalRS2 = Duration.between(beforeRS2, afterRS2);
+        System.out.println("Utility adjustment for " + occupancyLabel + " completed in " +
+                String.format("%.3f", (double)durationTotalRS2.toSeconds()/60.0) + " minutes");
+
+
+        if (search.isTargetAltered()) {
+            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], adjustmentMap);
+            System.out.println("Utility adjustment for " + occupancyLabel + " was " + search.getTarget()[0]);
+        }
+    }
+
+
+    public void activityAlignmentSingleMales() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentSingleMales,
+                Parameters.getCoeffLabourSupplyUtilityMales(),
+                new String[]{"AlignmentFixedCostMen"},
+                OccupancyExtended.Single_Male,
+                "single males"
+        );
+    }
+
+    public void activityAlignmentSingleACMales() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentACMales,
+                Parameters.getCoeffLabourSupplyUtilityACMales(),
+                new String[]{"AlignmentFixedCostMen"},
+                OccupancyExtended.Male_AC,
+                "single AC males"
+        );
+    }
+
+    public void activityAlignmentSingleACFemales() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentACFemales,
+                Parameters.getCoeffLabourSupplyUtilityACFemales(),
+                new String[]{"AlignmentFixedCostWomen"},
+                OccupancyExtended.Female_AC,
+                "single AC females"
+        );
     }
 
     public void activityAlignmentSingleFemales() {
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentSingleFemales);
-        ActivityAlignment activityAlignmentSingleFemales = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityFemales(), new String[]{"FemaleLeisure"}, Occupancy.Single_Female, utilityAdjustment);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentSingleFemales, 1.0E-2, 1.0E-2, 2); // epsOrdinates and epsFunction determine the stopping condition for the search.
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentSingleFemales); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for single females was " + search.getTarget()[0]);
-        }
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentSingleFemales,
+                Parameters.getCoeffLabourSupplyUtilityFemales(),
+                new String[]{"AlignmentFixedCostWomen"},
+                OccupancyExtended.Single_Female,
+                "single females"
+        );
     }
 
     public void activityAlignmentCouples() {
-        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustmentCouples);
-        ActivityAlignment activityAlignmentCouples = new ActivityAlignment(persons, benefitUnits, Parameters.getCoeffLabourSupplyUtilityCouples(), new String[]{"MaleLeisure","FemaleLeisure"}, Occupancy.Couple, utilityAdjustment);
-        RootSearch search = getRootSearch(utilityAdjustment, activityAlignmentCouples, 1.0E-2, 1.0E-2, 2); // epsOrdinates and epsFunction determine the stopping condition for the search.
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.UtilityAdjustmentCouples); // If adjustment is altered from the initial value, update the map
-            System.out.println("Utility adjustment for couples was " + search.getTarget()[0]);
-        }
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentCouples,
+                Parameters.getCoeffLabourSupplyUtilityCouples(),
+                new String[]{"AlignmentFixedCostMen","AlignmentFixedCostWomen"},
+                OccupancyExtended.Couple,
+                "couples"
+        );
+    }
+
+    public void activityAlignmentMaleWithDependents() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentMaleWithDep,
+                Parameters.getCoeffLabourSupplyUtilityMalesWithDependent(),
+                new String[]{"AlignmentFixedCostMen"},
+                OccupancyExtended.Male_With_Dependent,
+                "males with dependents"
+        );
+    }
+
+    public void activityAlignmentFemaleWithDependents() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentFemaleWithDep,
+                Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent(),
+                new String[]{"AlignmentFixedCostWomen"},
+                OccupancyExtended.Female_With_Dependent,
+                "females with dependents"
+        );
     }
 
     private void partnershipAlignment() {
@@ -1979,6 +2117,23 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double[] lowerBound = new double[] {minVal};
         double[] upperBound = new double[] {maxVal};
         RootSearch search = new RootSearch(lowerBound, upperBound, startVal, alignmentClass, epsOrdinates, epsFunction);
+        search.evaluate();
+        return search;
+    }
+
+    @NotNull
+    private static RootSearch2 getRootSearch2(double initialAdjustment, IEvaluation alignmentClass, double epsOrdinates, double epsFunction, double modifier) {
+        double minVal = initialAdjustment - modifier;
+        double maxVal = initialAdjustment + modifier;
+        return getRootSearch2(initialAdjustment, minVal, maxVal, alignmentClass, epsOrdinates, epsFunction);
+    }
+
+    @NotNull
+    private static RootSearch2 getRootSearch2(double initialAdjustment, double minVal, double maxVal, IEvaluation alignmentClass, double epsOrdinates, double epsFunction) {
+        double[] startVal = new double[] {initialAdjustment}; // Starting values for the adjustment
+        double[] lowerBound = new double[] {minVal};
+        double[] upperBound = new double[] {maxVal};
+        RootSearch2 search = new RootSearch2(lowerBound, upperBound, startVal, alignmentClass, epsOrdinates, epsFunction);
         search.evaluate();
         return search;
     }
@@ -3152,6 +3307,38 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setResponsesToRegion(boolean responsesToRegion) {
         this.responsesToRegion = responsesToRegion;
+    }
+
+    public MacroScenarioPopulation getMacroShockPopulation() {
+        return macroShockPopulation;
+    }
+
+    public void setMacroShockPopulation(MacroScenarioPopulation macroShockPopulation) {
+        this.macroShockPopulation = macroShockPopulation;
+    }
+
+    public MacroScenarioProductivity getMacroShockProductivity() {
+        return macroShockProductivity;
+    }
+
+    public void setMacroShockProductivity(MacroScenarioProductivity macroShockProductivity) {
+        this.macroShockProductivity = macroShockProductivity;
+    }
+
+    public MacroScenarioGreenPolicy getMacroShockGreenPolicy() {
+        return macroShockGreenPolicy;
+    }
+
+    public void setMacroShockGreenPolicy(MacroScenarioGreenPolicy macroShockGreenPolicy) {
+        this.macroShockGreenPolicy = macroShockGreenPolicy;
+    }
+
+    public boolean isMacroShocksOn() {
+        return macroShocksOn;
+    }
+
+    public void setMacroShocksOn(boolean macroShocksOn) {
+        this.macroShocksOn = macroShocksOn;
     }
 
     public boolean getFlagDefaultToTimeSeriesAverages() { return flagDefaultToTimeSeriesAverages; }

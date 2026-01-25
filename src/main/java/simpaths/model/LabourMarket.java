@@ -11,6 +11,8 @@ import simpaths.data.Parameters;
 //import experiment.SimPathsObserver;
 //import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
+
+import static simpaths.data.Parameters.EMPLOYMENT_ALIGNMENT_END_YEAR;
 //import microsim.statistics.IDoubleSource;
 //import microsim.statistics.ILongSource;
 
@@ -209,13 +211,12 @@ public class LabourMarket {
             }
 
             // When all the monthly transitions in a year have been predicted, choose one monthly value to represent the whole year for each individual and set labour force status, work hours, gross and disposable income.
-        //	benefitUnitsCovid19Update.parallelStream().forEach(benefitUnit -> benefitUnit.chooseRandomMonthlyOutcomeCovid19());
+            //	benefitUnitsCovid19Update.parallelStream().forEach(benefitUnit -> benefitUnit.chooseRandomMonthlyOutcomeCovid19());
             for (BenefitUnit benefitUnit : benefitUnitsCovid19Update) {
                 benefitUnit.chooseRandomMonthlyOutcomeCovid19();
             }
 
-        } else {
-            // Otherwise, use the default model of labour supply
+        } else {// Otherwise, use the default model of labour supply
 
             EUROMODpolicyNameForThisYear = Parameters.getEUROMODpolicyForThisYear(year);    //Update EUROMOD policy to apply to this year
 
@@ -234,16 +235,30 @@ public class LabourMarket {
                 }
             }
 
-            if (model.isAlignEmployment() & model.getYear() <= 2019) {
+            // Employment alignment phase (pre-alignment setup + subgroup-specific calibration)
+            if (model.isAlignEmployment() && model.getYear() <= EMPLOYMENT_ALIGNMENT_END_YEAR && !model.isMacroShocksOn()) {
+
+                // Precompute labour choices, utility scores (without fixed costs), and atRisk flags
+                benefitUnits.parallelStream().forEach(BenefitUnit::computeAtRiskOfWorkFlags);
+                benefitUnits.parallelStream().forEach(BenefitUnit::updateLabourChoices);
+                benefitUnits.parallelStream().forEach(BenefitUnit::updateUtilityRegressionScoresWithoutFC);
+
+
+                // Run alignment separately by b.u. subgroup
                 model.activityAlignmentSingleMales();
+                model.activityAlignmentSingleACMales();
                 model.activityAlignmentSingleFemales();
+                model.activityAlignmentSingleACFemales();
                 model.activityAlignmentCouples();
+                model.activityAlignmentMaleWithDependents();
+                model.activityAlignmentFemaleWithDependents();
+            }
+
+            if (model.isMacroShocksOn()) {
+                model.activityAlignmentMacroShock();
             }
 
             //Update Labour Supply
-//            for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
-//                benefitUnit.updateLabourSupplyAndIncome();
-//            }
             benefitUnitsAllRegions.parallelStream()
                     .forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
@@ -283,9 +298,8 @@ public class LabourMarket {
             }
 
             // Update activity status of persons residing within the benefit unit
-            benefitUnits.stream()
+            benefitUnits.parallelStream()
                     .forEach(BenefitUnit::updateActivityOfPersonsWithinBenefitUnit);
-
         }
     }
 
