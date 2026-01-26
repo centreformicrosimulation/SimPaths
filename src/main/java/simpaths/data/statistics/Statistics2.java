@@ -19,577 +19,577 @@ public class Statistics2 {
 
     //population shares in cohabiting relationships
     @Column(name = "pr_married_18_29")
-    private double prMarried18to29;
+    private double demMarried18to29Share;
 
     @Column(name = "pr_married_30_54")
-    private double prMarried30to54;
+    private double demMarried30to54Share;
 
     @Column(name = "pr_married_55_74")
-    private double prMarried55to74;
+    private double demMarried55to74Share;
 
     //average dependent children
     @Column(name = "avkids_18_29")
-    private double avkids18to29;
+    private double demNChild18to29Avg;
 
     @Column(name = "avkids_30_54")
-    private double avkids30to54;
+    private double demNChild30to54Avg;
 
     @Column(name = "avkids_55_74")
-    private double avkids55to74;
+    private double demNChild55to74Avg;
 
     //average health
     @Column(name = "health_18_29")
-    private double health18to29;
+    private double healthScore18to29Avg;
 
     @Column(name = "health_30_54")
-    private double health30to54;
+    private double healthScore30to54Avg;
 
     @Column(name = "health_55_74")
-    private double health55to74;
+    private double healthScore55to74Avg;
 
     //population shares disabled
     @Column(name = "pr_disabled_18_29")
-    private double prDisabled18to29;
+    private double demDsbl18to29Share;
 
     @Column(name = "pr_disabled_30_54")
-    private double prDisabled30to54;
+    private double demDsbl30to54Share;
 
     @Column(name = "pr_disabled_55_74")
-    private double prDisabled55to74;
+    private double demDsbl55to74Share;
 
     //average labour status by age and gender
     @Column(name = "work_fulltime_18_29")
-    private double aworkFulltime18to29;
+    private double labWorkFullTime18to29Share;
 
     @Column(name = "work_fulltime_30_54")
-    private double aworkFulltime30to54;
+    private double labWorkFullTime30to54Share;
 
     @Column(name = "work_fulltime_55_74")
-    private double aworkFulltime55to74;
+    private double labWorkFullTime55to74Share;
 
     @Column(name = "work_parttime_18_29")
-    private double aworkParttime18to29;
+    private double labWorkPartTime18to29Share;
 
     @Column(name = "work_parttime_30_54")
-    private double aworkParttime30to54;
+    private double labWorkPartTime30to54Share;
 
     @Column(name = "work_parttime_55_74")
-    private double aworkParttime55to74;
+    private double labWorkPartTime55to74Share;
 
     @Column(name = "work_none_18_29")
-    private double aaworkNone18to29;
+    private double labNoWork18to29Share;
 
     @Column(name = "work_none_30_54")
-    private double aaworkNone30to54;
+    private double labNoWork30to54Share;
 
     @Column(name = "work_none_55_74")
-    private double aaworkNone55to74;
+    private double labNoWork55to74Share;
 
     @Column(name = "work_none_18_74")
-    private double aaworkNone18to74;
+    private double labNoWork18to54Share;
 
     //employment income
     @Column(name = "labourIncome_18_29")
-    private double labourIncome18to29;
+    private double statYLab18to29Avg;
 
     @Column(name = "labourIncome_30_54")
-    private double labourIncome30to54;
+    private double statYLab30to54Avg;
 
     @Column(name = "labourIncome_55_74")
-    private double labourIncome55to74;
+    private double statYLab55to74Avg;
 
     //investment income
     @Column(name = "investmentIncome_18_29")
-    private double investmentIncome18to29;
+    private double statYInvest18to29Avg;
 
     @Column(name = "investmentIncome_30_54")
-    private double investmentIncome30to54;
+    private double statYInvest30to54Avg;
 
     @Column(name = "investmentIncome_55_74")
-    private double investmentIncome55to74;
+    private double statYInvest55to74Avg;
 
     //pension income
     @Column(name = "pensionIncome_18_29")
-    private double pensionIncome18to29;
+    private double statYPens18to29Avg;
 
     @Column(name = "pensionIncome_30_54")
-    private double pensionIncome30to54;
+    private double statYPens30to54Avg;
 
     @Column(name = "pensionIncome_55_74")
-    private double pensionIncome55to74;
+    private double statYPens55to74Avg;
 
     //disposable income
     @Column(name = "disposableIncome_18_29")
-    private double aadisposableIncome18to29;
+    private double statYDisp18to29Avg;
 
     @Column(name = "disposableIncome_30_54")
-    private double aadisposableIncome30to54;
+    private double statYDisp30to54Avg;
 
     @Column(name = "disposableIncome_55_74")
-    private double aadisposableIncome55to74;
+    private double statYDisp55to74Avg;
 
     //investment losses
     @Column(name = "investmentLosses_18_29")
-    private double investmentLosses18to29;
+    private double statInvestLoss18to29Avg;
 
     @Column(name = "investmentLosses_30_54")
-    private double investmentLosses30to54;
+    private double statInvestLoss30to54Avg;
 
     @Column(name = "investmentLosses_55_74")
-    private double investmentLosses55to74;
+    private double statInvestLoss55to74Avg;
 
     //disposable income gross of investment losses
     @Column(name = "dispInc_grossLosses_18_29")
-    private double dispIncomeGrossOfLosses18to29;
+    private double statYDispGrossOfLosses18to29Avg;
 
     @Column(name = "dispInc_grossLosses_30_54")
-    private double dispIncomeGrossOfLosses30to54;
+    private double statYDispGrossOfLosses30to54Avg;
 
     @Column(name = "dispInc_grossLosses_55_74")
-    private double dispIncomeGrossOfLosses55to74;
+    private double statYDispGrossOfLosses55to75Avg;
 
     //expenditure
     @Column(name = "expenditure_18_29")
-    private double aaexpenditure18to29;
+    private double x18to29Avg;
 
     @Column(name = "expenditure_30_54")
-    private double aaexpenditure30to54;
+    private double x30to54Avg;
 
     @Column(name = "expenditure_55_74")
-    private double aaexpenditure55to74;
+    private double x55to74Avg;
 
     @Column(name = "expenditure_18_54")
-    private double aaexpenditure18to54;
+    private double x18to54Avg;
 
     //consumption to leisure ratios
     @Column(name = "cons_to_leis_ratio")
-    private double aaconsToLeisRatio;
+    private double xToLeisureRatio;
 
     //wealth
     @Column(name = "wealth_18_29")
-    private double wealth18to29;
+    private double wealth18to29Avg;
 
     @Column(name = "wealth_30_54")
-    private double wealth30to54;
+    private double wealth30to54Avg;
 
     @Column(name = "wealth_55_74")
-    private double wealth55to74;
+    private double wealth55to74Avg;
 
     @Column(name= "population_18_29")
-    private double population18to29;
+    private double demPop18to29N;
 
     @Column(name= "population_30_54")
-    private double population30to54;
+    private double demPop30to54N;
 
     @Column(name= "population_55_74")
-    private double population55to74;
+    private double demPop55to74N;
 
     public double getAaconsToLeisRatio() {
-        return aaconsToLeisRatio;
+        return xToLeisureRatio;
     }
 
     public void setAaconsToLeisRatio(double consToLeis) {
-        this.aaconsToLeisRatio = consToLeis;
+        this.xToLeisureRatio = consToLeis;
     }
 
     public double getPopulation18to29() {
-        return population18to29;
+        return demPop18to29N;
     }
 
-    public void setPopulation18to29(double population18to29) {
-        this.population18to29 = population18to29;
+    public void setPopulation18to29(double demPop18to29N) {
+        this.demPop18to29N = demPop18to29N;
     }
 
     public double getPopulation55to74() {
-        return population55to74;
+        return demPop55to74N;
     }
 
-    public void setPopulation30to54(double population30to54) {
-        this.population30to54 = population30to54;
+    public void setPopulation30to54(double demPop30to54N) {
+        this.demPop30to54N = demPop30to54N;
     }
 
     public double getPopulation30to54() {
-        return population30to54;
+        return demPop30to54N;
     }
 
-    public void setPopulation55to74(double population55to74) {
-        this.population55to74 = population55to74;
+    public void setPopulation55to74(double demPop55to74N) {
+        this.demPop55to74N = demPop55to74N;
     }
 
     public double getPrMarried18to29() {
-        return prMarried18to29;
+        return demMarried18to29Share;
     }
 
-    public void setPrMarried18to29(double prMarried18to29) {
-        this.prMarried18to29 = prMarried18to29;
+    public void setPrMarried18to29(double demMarried18to29Share) {
+        this.demMarried18to29Share = demMarried18to29Share;
     }
 
     public double getPrMarried30to54() {
-        return prMarried30to54;
+        return demMarried30to54Share;
     }
 
-    public void setPrMarried30to54(double prMarried30to54) {
-        this.prMarried30to54 = prMarried30to54;
+    public void setPrMarried30to54(double demMarried30to54Share) {
+        this.demMarried30to54Share = demMarried30to54Share;
     }
 
     public double getPrMarried55to74() {
-        return prMarried55to74;
+        return demMarried55to74Share;
     }
 
-    public void setPrMarried55to74(double prMarried55to74) {
-        this.prMarried55to74 = prMarried55to74;
+    public void setPrMarried55to74(double demMarried55to74Share) {
+        this.demMarried55to74Share = demMarried55to74Share;
     }
 
     public double getAvkids18to29() {
-        return avkids18to29;
+        return demNChild18to29Avg;
     }
 
-    public void setAvkids18to29(double avkids18to29) {
-        this.avkids18to29 = avkids18to29;
+    public void setAvkids18to29(double demNChild18to29Avg) {
+        this.demNChild18to29Avg = demNChild18to29Avg;
     }
 
     public double getAvkids30to54() {
-        return avkids30to54;
+        return demNChild30to54Avg;
     }
 
-    public void setAvkids30to54(double avkids30to54) {
-        this.avkids30to54 = avkids30to54;
+    public void setAvkids30to54(double demNChild30to54Avg) {
+        this.demNChild30to54Avg = demNChild30to54Avg;
     }
 
     public double getAvkids55to74() {
-        return avkids55to74;
+        return demNChild55to74Avg;
     }
 
-    public void setAvkids55to74(double avkids55to74) {
-        this.avkids55to74 = avkids55to74;
+    public void setAvkids55to74(double demNChild55to74Avg) {
+        this.demNChild55to74Avg = demNChild55to74Avg;
     }
 
     public double getHealth18to29() {
-        return health18to29;
+        return healthScore18to29Avg;
     }
 
-    public void setHealth18to29(double health18to29) {
-        this.health18to29 = health18to29;
+    public void setHealth18to29(double healthScore18to29Avg) {
+        this.healthScore18to29Avg = healthScore18to29Avg;
     }
 
     public double getHealth30to54() {
-        return health30to54;
+        return healthScore30to54Avg;
     }
 
-    public void setHealth30to54(double health30to54) {
-        this.health30to54 = health30to54;
+    public void setHealth30to54(double healthScore30to54Avg) {
+        this.healthScore30to54Avg = healthScore30to54Avg;
     }
 
     public double getHealth55to74() {
-        return health55to74;
+        return healthScore55to74Avg;
     }
 
-    public void setHealth55to74(double health55to74) {
-        this.health55to74 = health55to74;
+    public void setHealth55to74(double healthScore55to74Avg) {
+        this.healthScore55to74Avg = healthScore55to74Avg;
     }
 
     public double getPrDisabled18to29() {
-        return prDisabled18to29;
+        return demDsbl18to29Share;
     }
 
-    public void setPrDisabled18to29(double prDisabled18to29) {
-        this.prDisabled18to29 = prDisabled18to29;
+    public void setPrDisabled18to29(double demDsbl18to29Share) {
+        this.demDsbl18to29Share = demDsbl18to29Share;
     }
 
     public double getPrDisabled30to54() {
-        return prDisabled30to54;
+        return demDsbl30to54Share;
     }
 
-    public void setPrDisabled30to54(double prDisabled30to54) {
-        this.prDisabled30to54 = prDisabled30to54;
+    public void setPrDisabled30to54(double demDsbl30to54Share) {
+        this.demDsbl30to54Share = demDsbl30to54Share;
     }
 
     public double getPrDisabled55to74() {
-        return prDisabled55to74;
+        return demDsbl55to74Share;
     }
 
-    public void setPrDisabled55to74(double prDisabled55to74) {
-        this.prDisabled55to74 = prDisabled55to74;
+    public void setPrDisabled55to74(double demDsbl55to74Share) {
+        this.demDsbl55to74Share = demDsbl55to74Share;
     }
 
     public double getLabourIncome18to29() {
-        return labourIncome18to29;
+        return statYLab18to29Avg;
     }
 
-    public void setLabourIncome18to29(double labourIncome18to29) {
-        this.labourIncome18to29 = labourIncome18to29;
+    public void setLabourIncome18to29(double statYLab18to29Avg) {
+        this.statYLab18to29Avg = statYLab18to29Avg;
     }
 
     public double getLabourIncome30to54() {
-        return labourIncome30to54;
+        return statYLab30to54Avg;
     }
 
-    public void setLabourIncome30to54(double labourIncome30to54) {
-        this.labourIncome30to54 = labourIncome30to54;
+    public void setLabourIncome30to54(double statYLab30to54Avg) {
+        this.statYLab30to54Avg = statYLab30to54Avg;
     }
 
     public double getLabourIncome55to74() {
-        return labourIncome55to74;
+        return statYLab55to74Avg;
     }
 
-    public void setLabourIncome55to74(double labourIncome55to74) {
-        this.labourIncome55to74 = labourIncome55to74;
+    public void setLabourIncome55to74(double statYLab55to74Avg) {
+        this.statYLab55to74Avg = statYLab55to74Avg;
     }
 
     public double getInvestmentIncome18to29() {
-        return investmentIncome18to29;
+        return statYInvest18to29Avg;
     }
 
-    public void setInvestmentIncome18to29(double investmentIncome18to29) {
-        this.investmentIncome18to29 = investmentIncome18to29;
+    public void setInvestmentIncome18to29(double statYInvest18to29Avg) {
+        this.statYInvest18to29Avg = statYInvest18to29Avg;
     }
 
     public double getInvestmentIncome30to54() {
-        return investmentIncome30to54;
+        return statYInvest30to54Avg;
     }
 
-    public void setInvestmentIncome30to54(double investmentIncome30to54) {
-        this.investmentIncome30to54 = investmentIncome30to54;
+    public void setInvestmentIncome30to54(double statYInvest30to54Avg) {
+        this.statYInvest30to54Avg = statYInvest30to54Avg;
     }
 
     public double getInvestmentIncome55to74() {
-        return investmentIncome55to74;
+        return statYInvest55to74Avg;
     }
 
-    public void setInvestmentIncome55to74(double investmentIncome55to74) {
-        this.investmentIncome55to74 = investmentIncome55to74;
+    public void setInvestmentIncome55to74(double statYInvest55to74Avg) {
+        this.statYInvest55to74Avg = statYInvest55to74Avg;
     }
 
     public double getPensionIncome18to29() {
-        return pensionIncome18to29;
+        return statYPens18to29Avg;
     }
 
-    public void setPensionIncome18to29(double pensionIncome18to29) {
-        this.pensionIncome18to29 = pensionIncome18to29;
+    public void setPensionIncome18to29(double statYPens18to29Avg) {
+        this.statYPens18to29Avg = statYPens18to29Avg;
     }
 
     public double getPensionIncome30to54() {
-        return pensionIncome30to54;
+        return statYPens30to54Avg;
     }
 
-    public void setPensionIncome30to54(double pensionIncome30to54) {
-        this.pensionIncome30to54 = pensionIncome30to54;
+    public void setPensionIncome30to54(double statYPens30to54Avg) {
+        this.statYPens30to54Avg = statYPens30to54Avg;
     }
 
     public double getPensionIncome55to74() {
-        return pensionIncome55to74;
+        return statYPens55to74Avg;
     }
 
-    public void setPensionIncome55to74(double pensionIncome55to74) {
-        this.pensionIncome55to74 = pensionIncome55to74;
+    public void setPensionIncome55to74(double statYPens55to74Avg) {
+        this.statYPens55to74Avg = statYPens55to74Avg;
     }
 
     public double getAadisposableIncome18to29() {
-        return aadisposableIncome18to29;
+        return statYDisp18to29Avg;
     }
 
-    public void setAadisposableIncome18to29(double aadisposableIncome18to29) {
-        this.aadisposableIncome18to29 = aadisposableIncome18to29;
+    public void setAadisposableIncome18to29(double statYDisp18to29Avg) {
+        this.statYDisp18to29Avg = statYDisp18to29Avg;
     }
 
     public double getAadisposableIncome30to54() {
-        return aadisposableIncome30to54;
+        return statYDisp30to54Avg;
     }
 
-    public void setAadisposableIncome30to54(double aadisposableIncome30to54) {
-        this.aadisposableIncome30to54 = aadisposableIncome30to54;
+    public void setAadisposableIncome30to54(double statYDisp30to54Avg) {
+        this.statYDisp30to54Avg = statYDisp30to54Avg;
     }
 
     public double getAadisposableIncome55to74() {
-        return aadisposableIncome55to74;
+        return statYDisp55to74Avg;
     }
 
-    public void setAadisposableIncome55to74(double aadisposableIncome55to74) {
-        this.aadisposableIncome55to74 = aadisposableIncome55to74;
+    public void setAadisposableIncome55to74(double statYDisp55to74Avg) {
+        this.statYDisp55to74Avg = statYDisp55to74Avg;
     }
 
     public double getInvestmentLosses18to29() {
-        return investmentLosses18to29;
+        return statInvestLoss18to29Avg;
     }
 
-    public void setInvestmentLosses18to29(double investmentLosses18to29) {
-        this.investmentLosses18to29 = investmentLosses18to29;
+    public void setInvestmentLosses18to29(double statInvestLoss18to29Avg) {
+        this.statInvestLoss18to29Avg = statInvestLoss18to29Avg;
     }
 
     public double getInvestmentLosses30to54() {
-        return investmentLosses30to54;
+        return statInvestLoss30to54Avg;
     }
 
-    public void setInvestmentLosses30to54(double investmentLosses30to54) {
-        this.investmentLosses30to54 = investmentLosses30to54;
+    public void setInvestmentLosses30to54(double statInvestLoss30to54Avg) {
+        this.statInvestLoss30to54Avg = statInvestLoss30to54Avg;
     }
 
     public double getInvestmentLosses55to74() {
-        return investmentLosses55to74;
+        return statInvestLoss55to74Avg;
     }
 
-    public void setInvestmentLosses55to74(double investmentLosses55to74) {
-        this.investmentLosses55to74 = investmentLosses55to74;
+    public void setInvestmentLosses55to74(double statInvestLoss55to74Avg) {
+        this.statInvestLoss55to74Avg = statInvestLoss55to74Avg;
     }
 
     public double getDispIncomeGrossOfLosses18to29() {
-        return dispIncomeGrossOfLosses18to29;
+        return statYDispGrossOfLosses18to29Avg;
     }
 
-    public void setDispIncomeGrossOfLosses18to29(double dispIncomeGrossOfLosses18to29) {
-        this.dispIncomeGrossOfLosses18to29 = dispIncomeGrossOfLosses18to29;
+    public void setDispIncomeGrossOfLosses18to29(double statYDispGrossOfLosses18to29Avg) {
+        this.statYDispGrossOfLosses18to29Avg = statYDispGrossOfLosses18to29Avg;
     }
 
     public double getDispIncomeGrossOfLosses30to54() {
-        return dispIncomeGrossOfLosses30to54;
+        return statYDispGrossOfLosses30to54Avg;
     }
 
-    public void setDispIncomeGrossOfLosses30to54(double dispIncomeGrossOfLosses30to54) {
-        this.dispIncomeGrossOfLosses30to54 = dispIncomeGrossOfLosses30to54;
+    public void setDispIncomeGrossOfLosses30to54(double statYDispGrossOfLosses30to54Avg) {
+        this.statYDispGrossOfLosses30to54Avg = statYDispGrossOfLosses30to54Avg;
     }
 
     public double getDispIncomeGrossOfLosses55to74() {
-        return dispIncomeGrossOfLosses55to74;
+        return statYDispGrossOfLosses55to75Avg;
     }
 
-    public void setDispIncomeGrossOfLosses55to74(double dispIncomeGrossOfLosses55to74) {
-        this.dispIncomeGrossOfLosses55to74 = dispIncomeGrossOfLosses55to74;
+    public void setDispIncomeGrossOfLosses55to74(double statYDispGrossOfLosses55to75Avg) {
+        this.statYDispGrossOfLosses55to75Avg = statYDispGrossOfLosses55to75Avg;
     }
 
     public double getAaexpenditure18to29() {
-        return aaexpenditure18to29;
+        return x18to29Avg;
     }
 
-    public void setAaexpenditure18to29(double aaexpenditure18to29) {
-        this.aaexpenditure18to29 = aaexpenditure18to29;
+    public void setAaexpenditure18to29(double x18to29Avg) {
+        this.x18to29Avg = x18to29Avg;
     }
 
     public double getAaexpenditure30to54() {
-        return aaexpenditure30to54;
+        return x30to54Avg;
     }
 
-    public void setAaexpenditure30to54(double aaexpenditure30to54) {
-        this.aaexpenditure30to54 = aaexpenditure30to54;
+    public void setAaexpenditure30to54(double x30to54Avg) {
+        this.x30to54Avg = x30to54Avg;
     }
 
     public double getAaexpenditure55to74() {
-        return aaexpenditure55to74;
+        return x55to74Avg;
     }
 
-    public void setAaexpenditure55to74(double aaexpenditure55to74) {
-        this.aaexpenditure55to74 = aaexpenditure55to74;
+    public void setAaexpenditure55to74(double x55to74Avg) {
+        this.x55to74Avg = x55to74Avg;
     }
 
     public double getAaworkNone18to74() {
-        return aaworkNone18to74;
+        return labNoWork18to54Share;
     }
 
-    public void setAaworkNone18to74(double aaworkNone18to74) {
-        this.aaworkNone18to74 = aaworkNone18to74;
+    public void setAaworkNone18to74(double labNoWork18to54Share) {
+        this.labNoWork18to54Share = labNoWork18to54Share;
     }
 
     public double getAaexpenditure18to54() {
-        return aaexpenditure18to54;
+        return x18to54Avg;
     }
 
-    public void setAaexpenditure18to54(double aaexpenditure18to54) {
-        this.aaexpenditure18to54 = aaexpenditure18to54;
+    public void setAaexpenditure18to54(double x18to54Avg) {
+        this.x18to54Avg = x18to54Avg;
     }
 
     public double getWealth18to29() {
-        return wealth18to29;
+        return wealth18to29Avg;
     }
 
-    public void setWealth18to29(double wealth18to29) {
-        this.wealth18to29 = wealth18to29;
+    public void setWealth18to29(double wealth18to29Avg) {
+        this.wealth18to29Avg = wealth18to29Avg;
     }
 
     public double getWealth30to54() {
-        return wealth30to54;
+        return wealth30to54Avg;
     }
 
-    public void setWealth30to54(double wealth30to54) {
-        this.wealth30to54 = wealth30to54;
+    public void setWealth30to54(double wealth30to54Avg) {
+        this.wealth30to54Avg = wealth30to54Avg;
     }
 
     public double getWealth55to74() {
-        return wealth55to74;
+        return wealth55to74Avg;
     }
 
-    public void setWealth55to74(double wealth55to74) {
-        this.wealth55to74 = wealth55to74;
+    public void setWealth55to74(double wealth55to74Avg) {
+        this.wealth55to74Avg = wealth55to74Avg;
     }
 
     public double getAworkFulltime18to29() {
-        return aworkFulltime18to29;
+        return labWorkFullTime18to29Share;
     }
 
-    public void setAworkFulltime18to29(double aworkFulltime18to29) {
-        this.aworkFulltime18to29 = aworkFulltime18to29;
+    public void setAworkFulltime18to29(double labWorkFullTime18to29Share) {
+        this.labWorkFullTime18to29Share = labWorkFullTime18to29Share;
     }
 
     public double getAworkFulltime30to54() {
-        return aworkFulltime30to54;
+        return labWorkFullTime30to54Share;
     }
 
-    public void setAworkFulltime30to54(double aworkFulltime30to54) {
-        this.aworkFulltime30to54 = aworkFulltime30to54;
+    public void setAworkFulltime30to54(double labWorkFullTime30to54Share) {
+        this.labWorkFullTime30to54Share = labWorkFullTime30to54Share;
     }
 
     public double getAworkFulltime55to74() {
-        return aworkFulltime55to74;
+        return labWorkFullTime55to74Share;
     }
 
-    public void setAworkFulltime55to74(double aworkFulltime55to74) {
-        this.aworkFulltime55to74 = aworkFulltime55to74;
+    public void setAworkFulltime55to74(double labWorkFullTime55to74Share) {
+        this.labWorkFullTime55to74Share = labWorkFullTime55to74Share;
     }
 
     public double getAworkParttime18to29() {
-        return aworkParttime18to29;
+        return labWorkPartTime18to29Share;
     }
 
-    public void setAworkParttime18to29(double aworkParttime18to29) {
-        this.aworkParttime18to29 = aworkParttime18to29;
+    public void setAworkParttime18to29(double labWorkPartTime18to29Share) {
+        this.labWorkPartTime18to29Share = labWorkPartTime18to29Share;
     }
 
     public double getAworkParttime30to54() {
-        return aworkParttime30to54;
+        return labWorkPartTime30to54Share;
     }
 
-    public void setAworkParttime30to54(double aworkParttime30to54) {
-        this.aworkParttime30to54 = aworkParttime30to54;
+    public void setAworkParttime30to54(double labWorkPartTime30to54Share) {
+        this.labWorkPartTime30to54Share = labWorkPartTime30to54Share;
     }
 
     public double getAworkParttime55to74() {
-        return aworkParttime55to74;
+        return labWorkPartTime55to74Share;
     }
 
-    public void setAworkParttime55to74(double aworkParttime55to74) {
-        this.aworkParttime55to74 = aworkParttime55to74;
+    public void setAworkParttime55to74(double labWorkPartTime55to74Share) {
+        this.labWorkPartTime55to74Share = labWorkPartTime55to74Share;
     }
 
     public double getAaworkNone18to29() {
-        return aaworkNone18to29;
+        return labNoWork18to29Share;
     }
 
-    public void setAaworkNone18to29(double aaworkNone18to29) {
-        this.aaworkNone18to29 = aaworkNone18to29;
+    public void setAaworkNone18to29(double labNoWork18to29Share) {
+        this.labNoWork18to29Share = labNoWork18to29Share;
     }
 
     public double getAaworkNone30to54() {
-        return aaworkNone30to54;
+        return labNoWork30to54Share;
     }
 
-    public void setAaworkNone30to54(double aaworkNone30to54) {
-        this.aaworkNone30to54 = aaworkNone30to54;
+    public void setAaworkNone30to54(double labNoWork30to54Share) {
+        this.labNoWork30to54Share = labNoWork30to54Share;
     }
 
     public double getAaworkNone55to74() {
-        return aaworkNone55to74;
+        return labNoWork55to74Share;
     }
 
-    public void setAaworkNone55to74(double aaworkNone55to74) {
-        this.aaworkNone55to74 = aaworkNone55to74;
+    public void setAaworkNone55to74(double labNoWork55to74Share) {
+        this.labNoWork55to74Share = labNoWork55to74Share;
     }
 
     public void update(SimPathsModel model) {
@@ -617,11 +617,11 @@ public class Statistics2 {
             // loop over entire population
 
             int ii = -1;
-            if (person.getDag()>=18 && person.getDag()<=29) {
+            if (person.getDemAge()>=18 && person.getDemAge()<=29) {
                 ii = 0;
-            } else if (person.getDag()>=30 && person.getDag()<=54) {
+            } else if (person.getDemAge()>=30 && person.getDemAge()<=54) {
                 ii = 1;
-            } else if (person.getDag()>=55 && person.getDag()<=74) {
+            } else if (person.getDemAge()>=55 && person.getDemAge()<=74) {
                 ii = 2;
             }
             if (ii>=0) {
@@ -658,11 +658,11 @@ public class Statistics2 {
                 if (expenditurePerMonth > 0.0) {
                     expenditurePerMonth /= es;
                     expen[ii] += Math.log(expenditurePerMonth);
-                    if (person.getDag()>=18 && person.getDag()<=54) {
+                    if (person.getDemAge()>=18 && person.getDemAge()<=54) {
                         expen[3] += Math.log(expenditurePerMonth);
                     }
                 }
-                if (person.getDag()>=55 && person.getDag()<=60) {
+                if (person.getDemAge()>=55 && person.getDemAge()<=60) {
 
                     if (Education.High.equals(person.getDeh_c3())) {
                         numberG += 1.0;

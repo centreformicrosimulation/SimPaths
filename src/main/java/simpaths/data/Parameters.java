@@ -79,7 +79,7 @@ public class Parameters {
         "xcc",                  //childcare costs
         "ils_earns",			//EUROMOD output variable:- total labour earnings (employment + self-employment income + potentially other labour earnings like temporary employment, depending on country classification)
         "ils_origy",			//EUROMOD output variable:- all gross income from labour, private pensions, investment income, property income, private transfers etc.
-		"ils_dispy",			//Disposable income : from EUROMOD output data after tax / benefit transfers (monthly time-scale)
+		"ils_dispy",			//Disposable income : from EUROMOD output data after tax / benefit transfers (monthly demYear-scale)
 		"ils_benmt",			//EUROMOD output variable: income list: monetary benefits
 		"ils_bennt",			//EUROMOD output variable: income list: non-monetary benefits
         "bsauc_s",               //EUROMOD output variable: simulated UC receipt
@@ -92,85 +92,85 @@ public class Parameters {
     };
 
     public static final String[] HOUSEHOLD_VARIABLES_INITIAL = new String[] {
-		"idhh",				//id of household (can contain multiple benefit units)
+		"idHh",				//id of household (can contain multiple benefit units)
     };
 
     public static final String[] BENEFIT_UNIT_VARIABLES_INITIAL = new String[] {
-		"idhh",				//id of household (can contain multiple benefit units)
-		"idbenefitunit",	//id of a benefit unit
-		"drgn1", 			//region (NUTS1)
-        "disp_inc",         //disposable income
-		"ydses_c5",			//household income quantile
-		"dhh_owned",		//flag indicating if benefit unit owns a house
-		"total_wealth",	    //benefit unit total net wealth (includes pensions assets and housing)
-        "total_pensions",   //benefit unit total private (personal and occupational) pensions
-        "housing_wealth",   //benefit unit value of main home (gross of mortgage debt)
-        "mortgage_debt",    //benefit unit value of mortgage debt
+		"idHh",				//id of household (can contain multiple benefit units)
+		"idBu",	//id of a benefit unit
+		"demRgn", 			//demRgn (NUTS1)
+        "yDispMonth",         //disposable income
+		"yHhQuintilesMonthC5",			//household income quantile
+		"wealthPrptyFlag",		//flag indicating if benefit unit owns a house
+		"wealthTotValue",	    //benefit unit total net wealth (includes pensions assets and housing)
+        "wealthPensValue",   //benefit unit total private (personal and occupational) pensions
+        "wealthPrptyValue",   //benefit unit value of main home (gross of mortgage debt)
+        "wealthMortgageDebtValue",    //benefit unit value of mortgage debt
     };
 
     public static final String[] PERSON_VARIABLES_INITIAL = new String[] {
-		"idhh",					//id of household (can contain multiple benefit units)
-		"idbenefitunit",		//id of a benefit unit
-		"idperson", 			//id of person
-		"dwt", 					//household weight
-		"idfather", 			//id of father
-		"idmother", 			//id of mother
-		"dag", 					//age
-		"deh_c3", 				//highest education level
-		"dehm_c3",				//highest education level of mother
-		"dehf_c3",				//highest education level of father
-		"ded",					//in education dummy
-		"der",					//return to education dummy
-		"dot",					//ethnicity
-        "dot01",				//ethnicity 6 categories
-		"dhe",					//health status
-        "dhe_mcs",              //mental health - SF12 score MCS
-        "dhe_pcs",              //physical health - SF12 score PCS
-        "dhe_mcssp",            //mental health - SF12 score MCS (partner)
-        "dhe_pcssp",            //physical health - SF12 score PCS (partner)
-        "dhm",					//mental health status
-		"scghq2_dv",			//mental health status case based
-		"dhm_ghq",				//mental health status case based dummy (1 = psychologically distressed)
-        "dls",                  //life satisfaction
-        "financial_distress",	//financial distress
-		"dcpyy",				//years in partnership
-		"dcpagdf",				//partners age difference
-		"dnc02",				//number children aged 0-2
-		"dnc",					//number children
-		"ypnbihs_dv",			//gross personal non-benefit income
-		"yptciihs_dv",			//gross personal non-employment non-benefit income
-		"ypncp",  				//gross personal capital income
-		"ypnoab",				//gross personal pension (public / occupational) income
-		"yplgrs_dv",			//gross personal employment income
-		"ynbcpdf_dv",			//difference partner income
-		"dlltsd01",				//long-term sick or disabled (we use this -and not dlltsd- in the DataParser)
-		"sedex",				//year left education
-		"stm",					//system variable - year
-		"swv",					//system variable - wave
-		"dgn", 					//gender
-		"les_c4", 				//labour employment status
-		"lhw", 					//hours worked per week
-        "l1_lhw",               //hours worked per week in the previous year
-		"adultchildflag",		//flag indicating adult child living at home in the data
-		"potential_earnings_hourly", //initial value of hourly earnings from the data
-		"l1_potential_earnings_hourly", //lag(1) of initial value of hourly earnings from the data
-        "need_socare",          //indicator that the individual needs social care
-        "formal_socare_hrs",    //number of hours of formal care received
-        "formal_socare_cost",   //cost of formal care received
-        "partner_socare_hrs",   //number of hours of informal care received from partner
-        "daughter_socare_hrs",  //number of hours of informal care received from daughter
-        "son_socare_hrs",       //number of hours of informal care received from son
-        "other_socare_hrs",     //number of hours of informal care received from other
-        "carehoursprovidedweekly", // number of informal care hour provided per week
+		"idHh",					//id of household (can contain multiple benefit units)
+		"idBu",		//id of a benefit unit
+		"idPers", 			//id of person
+		"wgtHhCross", 					//household dem
+		"idFather", 			//id of father
+		"idMother", 			//id of mother
+		"demAge", 					//age
+		"eduHighestC3", 				//highest education level
+		"eduHighestMotherC3",				//highest education level of mother
+		"eduHighestFatherC3",				//highest education level of father
+		"eduSpellFlag",					//in education dummy
+		"eduReturnFlag",					//return to education dummy
+		"demEthnC4",					//ethnicity
+        "demEthnC6",				//ethnicity 6 categories
+		"healthSelfRated",					//health status
+        "healthMentalMcs",              //mental health - SF12 score MCS
+        "healthPhysicalPcs",              //physical health - SF12 score PCS
+        "healthMentalPartnerMcs",            //mental health - SF12 score MCS (partner)
+        "healthPhysicalPartnerPcs",            //physical health - SF12 score PCS (partner)
+        "healthWbScore0to36",					//mental health status
+		"demWbScore0to12",			//mental health status case based
+		"healthPsyDstrssFlag",				//mental health status case based dummy (1 = psychologically distressed)
+        "demLifeSatScore1to7",                  //life satisfaction
+        "yFinDstrssFlag",	//financial distress
+		"demPartnerNYear",				//years in partnership
+		"demAgePartnerDiff",				//partners age difference
+		"demNChild0to2",				//number children aged 0-2
+		"demNChild",					//number children
+		"yNonBenPersGrossMonth",			//gross personal non-benefit income
+		"yMiscPersGrossMonth",			//gross personal non-employment non-benefit income
+		"yCapitalPersMonth",  				//gross personal capital income
+		"yPensPersGrossMonth",				//gross personal pension (public / occupational) income
+		"yEmpPersGrossMonth",			//gross personal employment income
+		"yPersAndPartnerGrossDiffMonth",			//difference partner income
+		"healthDsblLongtermFlag",				//long-term sick or disabled (we use this -and not healthDsblLongtermFlag- in the DataParser)
+		"eduExitSampleFlag",				//year left education
+		"statInterviewYear",					//system variable - year
+		"statCollectionWave",					//system variable - wave
+		"demMaleFlag", 					//demSex
+		"labC4", 				//labour employment status
+		"labHrsWorkWeek", 					//hours worked per week
+        "labHrsWorkWeekL1",               //hours worked per week in the previous year
+		"demAdultChildFlag",		//flag indicating adult child living at home in the data
+		"labWageHrly", //initial value of hourly earnings from the data
+		"labWageHrlyL1", //lag(1) of initial value of hourly earnings from the data
+        "careNeedFlag",          //indicator that the individual needs social care
+        "careHrsFormal",    //number of hours of formal care received
+        "careCareFormal",   //cost of formal care received
+        "careHrsFromPartner",   //number of hours of informal care received from partner
+        "careHrsFromDaughter",  //number of hours of informal care received from daughter
+        "careHrsFromSon",       //number of hours of informal care received from son
+        "careHrsFromOther",     //number of hours of informal care received from other
+        "careHrsProvidedWeek", // number of informal care hour provided per week
         "careWho",              //indicator for whom informal care is provided
-        "econ_benefits",        //indicator of benefit receipt
-        "econ_benefits_uc",     //indicator of UC receipt
-        "econ_benefits_nonuc",  //indicator of other benefit receipt
-        "liwwh",                //Total years in employment since Jan 2007
+        "yBenReceivedFlag",        //indicator of benefit receipt
+        "yBenUCReceivedFlag",     //indicator of UC receipt
+        "yBenNonUCReceivedFlag",  //indicator of other benefit receipt
+        // "labWorkHist",                //Total years in employment since Jan 2007
 		//"yem", 					//employment income
 		//"yse", 					//self-employment income
 
-		//From EUROMOD output data before tax / benefit transfers, so not affected by EUROMOD policy scenario (monthly time-scale).  We just use them calculated from EUROMOD output because EUROMOD has the correct way of aggregating each country's different component definitions
+		//From EUROMOD output data before tax / benefit transfers, so not affected by EUROMOD policy scenario (monthly demYear-scale).  We just use them calculated from EUROMOD output because EUROMOD has the correct way of aggregating each country's different component definitions
 		//"ils_earns", 			//EUROMOD output variable:- total labour earnings (employment + self-employment income + potentially other labour earnings like temporary employment, depending on country classification)
 		//"ils_origy"			//EUROMOD output variable:- all gross income from labour, private pensions, investment income, property income, private transfers etc.
     };
@@ -234,7 +234,7 @@ public class Parameters {
     public static final TreeSet<Double> EarningsDiscrepancyConstraint = new TreeSet<>(Arrays.asList(0.01, 0.02, 0.03, 0.04, 0.05));	//Proportional difference
 
     //Initial matching differential bounds - the initial bounds that a match must satisfy, before being relaxed
-    public static final double UNMATCHED_TOLERANCE_THRESHOLD = 0.1;		//Smallest proportion of a gender left unmatched (we take the minimum of the male proportion and female proportions).  If there are more than this, we will relax the constraints (e.g. the bounds on age difference and potential earnings difference) until this target has been reached
+    public static final double UNMATCHED_TOLERANCE_THRESHOLD = 0.1;		//Smallest proportion of a demSex left unmatched (we take the minimum of the male proportion and female proportions).  If there are more than this, we will relax the constraints (e.g. the bounds on age difference and potential earnings difference) until this target has been reached
     public static final int MAXIMUM_ATTEMPTS_MATCHING = 10;
     public static final double RELAXATION_FACTOR = 1.5;
 
@@ -255,7 +255,7 @@ public class Parameters {
     public static final boolean USE_CONTINUOUS_LABOUR_SUPPLY_HOURS = true; // If true, a random number of hours of weekly labour supply within each bracket will be generated. Otherwise, each discrete choice of labour supply corresponds to a fixed number of hours of labour supply, which is the same for all persons
     public static int maxAge;										// maximum age possible in simulation
     public static final int AGE_TO_BECOME_RESPONSIBLE = 18;			// Age become reference person of own benefit unit
-    public static final int MIN_AGE_TO_LEAVE_EDUCATION = 16;		// Minimum age for a person to leave (full-time) education
+    public static final int MIN_AGE_TO_LEAVE_EDUCATION = 16;		// Minimum age for a person to leave (full-demYear) education
     public static final int MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION = 29;
     public static final int MAX_AGE_TO_ENTER_EDUCATION = 45;
     public static final int MIN_AGE_COHABITATION = AGE_TO_BECOME_RESPONSIBLE;  	// Min age a person can marry
@@ -268,7 +268,7 @@ public class Parameters {
     public static final double SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT = 0.25;
     public static final double ANNUITY_RATE_OF_RETURN = 0.015;
     public static AnnuityRates annuityRates;
-    public static final int MIN_HOURS_FULL_TIME_EMPLOYED = 25;	// used to distinguish full-time from part-time employment (needs to be consistent with Labour enum)
+    public static final int MIN_HOURS_FULL_TIME_EMPLOYED = 25;	// used to distinguish full-demYear from part-demYear employment (needs to be consistent with Labour enum)
     public static final double MIN_HOURLY_WAGE_RATE = 1.5;
     public static final double MAX_HOURLY_WAGE_RATE = 150.0;
     public static final double MAX_HOURS_WEEKLY_FORMAL_CARE = 150.0;
@@ -279,7 +279,7 @@ public class Parameters {
     public static final double PERCENTAGE_OF_MEDIAN_EM_DONOR = 0.2; // Used by BenefitUnit => convertGrossToDisposable() to decide whether gross-to-net ratio should be applied or disposable income from the donor used directly
     public static final double PSYCHOLOGICAL_DISTRESS_GHQ12_CASES_CUTOFF = 4; // Define cut-off on the GHQ12 Likert scale above which individuals are classified as psychologically distressed
 
-    //Initial value for the savings rate and multiplier for capital income:
+    //Initial value for the savings rate and demPopSurveyShare for capital income:
     public static double SAVINGS_RATE; //This is set in the country-specific part of this file
 
     //public static int MAX_AGE_IN_EDUCATION;// = MAX_AGE;//30;			// Max age a person can stay in education	//Cannot set here, as MAX_AGE is not known yet.  Now set to MAX_AGE in buildObjects in Model class.
@@ -636,7 +636,7 @@ public class Parameters {
     //Share of students by age
     private static MultiKeyCoefficientMap validationStudentsByAge;
 
-    //Share of students by region
+    //Share of students by demRgn
     private static MultiKeyCoefficientMap validationStudentsByRegion;
 
     //Education level of over 17 year olds
@@ -645,10 +645,10 @@ public class Parameters {
     //Education level by age group
     private static MultiKeyCoefficientMap validationEducationLevelByAge;
 
-    //Education level by region
+    //Education level by demRgn
     private static MultiKeyCoefficientMap validationEducationLevelByRegion;
 
-    //Share of couple by region
+    //Share of couple by demRgn
     private static MultiKeyCoefficientMap validationPartneredShareByRegion;
 
     //Share of disabled by age
@@ -659,10 +659,10 @@ public class Parameters {
     //Health by age
     private static MultiKeyCoefficientMap validationHealthByAge;
 
-    //Mental health by age and gender
+    //Mental health by age and demSex
     private static MultiKeyCoefficientMap validationMentalHealthByAge;
 
-    //Psychological distress cases by age and gender
+    //Psychological distress cases by age and demSex
     private static MultiKeyCoefficientMap validationPsychDistressByAge, validationPsychDistressByAgeLow, validationPsychDistressByAgeMed, validationPsychDistressByAgeHigh;
 
 
@@ -672,16 +672,16 @@ public class Parameters {
     // Life Satisfaction
     private static MultiKeyCoefficientMap validationLifeSatisfactionByAge;
 
-    //Employment by gender
+    //Employment by demSex
     private static MultiKeyCoefficientMap validationEmploymentByGender;
 
-    //Employment by gender and age
+    //Employment by demSex and age
     private static MultiKeyCoefficientMap validationEmploymentByAgeAndGender;
 
     //Employment by maternity
     private static MultiKeyCoefficientMap validationEmploymentByMaternity;
 
-    //Employment by gender and region
+    //Employment by demSex and demRgn
     private static MultiKeyCoefficientMap validationEmploymentByGenderAndRegion;
 
     private static MultiKeyCoefficientMap validationLabourSupplyByEducation;
@@ -692,13 +692,13 @@ public class Parameters {
     //Homeownership status for benefit units
     private static MultiKeyCoefficientMap validationHomeownershipBenefitUnits;
 
-    //Gross earnings yearly by education and gender (for employed persons)
+    //Gross earnings yearly by education and demSex (for employed persons)
     private static MultiKeyCoefficientMap validationGrossEarningsByGenderAndEducation;
 
-    //Hourly wages by education and gender (for employed persons)
+    //Hourly wages by education and demSex (for employed persons)
     private static MultiKeyCoefficientMap validationLhwByGenderAndEducation;
 
-    //Hours worked weekly by education and gender (for employed persons)
+    //Hours worked weekly by education and demSex (for employed persons)
     private static MultiKeyCoefficientMap hourlyWageByGenderAndEducation;
 
     /////////////////////////////////////////////////////////////////// REGRESSION OBJECTS //////////////////////////////////////////
@@ -936,7 +936,7 @@ public class Parameters {
 //					femaleMinAgeSick = age;
                 }
             } else {
-                // gender in multikey must be male
+                // demSex in multikey must be male
                 if (age > maleMaxAgeSick) {
                     maleMaxAgeSick = age;
 //				} else if(age < maleMinAgeSick) {
@@ -1501,10 +1501,10 @@ public class Parameters {
         //Education level by age group
         validationEducationLevelByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_educationLevelByAge", 1);
 
-        //Education level by region
+        //Education level by demRgn
         validationEducationLevelByRegion = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_educationLevelByRegion", 1);
 
-        //Partnered BU share by region
+        //Partnered BU share by demRgn
         validationPartneredShareByRegion = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_partneredBUShareByRegion", 1);
 
         //Disabled by age
@@ -1515,7 +1515,7 @@ public class Parameters {
         //Health by age
         validationHealthByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_healthByAgeGroup", 1);
 
-        //Mental health by age and gender
+        //Mental health by age and demSex
         validationMentalHealthByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_mentalHealthByAgeGroup", 1);
 
 
@@ -1523,22 +1523,22 @@ public class Parameters {
         validationHealthPCSByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_healthPCSByAgeGroup", 1);
         validationLifeSatisfactionByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lifeSatisfactionByAgeGroup", 1);
 
-        //Psychological distress by age and gender
+        //Psychological distress by age and demSex
         validationPsychDistressByAge = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroup", 1);
         validationPsychDistressByAgeLow = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupLowED", 1);
         validationPsychDistressByAgeMed = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupMedED", 1);
         validationPsychDistressByAgeHigh = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_psychDistressByAgeGroupHiEd", 1);
 
-        //Employment by gender
+        //Employment by demSex
         validationEmploymentByGender = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_employmentByGender", 1);
 
-        //Employment by age and gender
+        //Employment by age and demSex
         validationEmploymentByAgeAndGender = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_employmentByGenderAndAge", 1);
 
         //Employment by maternity
         validationEmploymentByMaternity = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_employmentByMaternity", 1);
 
-        //Employment by gender and region
+        //Employment by demSex and demRgn
         validationEmploymentByGenderAndRegion = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_employmentByGenderAndRegion", 1);
 
         //Labour supply by education
@@ -1550,13 +1550,13 @@ public class Parameters {
         //Homeownership status
         validationHomeownershipBenefitUnits = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_homeownership", 1);
 
-        //Gross earnings yearly by education and gender (for employed persons)
+        //Gross earnings yearly by education and demSex (for employed persons)
         validationGrossEarningsByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_grossEarningsByGenderAndEdu", 1);
 
-        //Hourly wages by education and gender (for employed persons)
+        //Hourly wages by education and demSex (for employed persons)
         validationLhwByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_lhwByGenderAndEdu", 1);
 
-        //Hours worked weekly by education and gender (for employed persons)
+        //Hours worked weekly by education and demSex (for employed persons)
         hourlyWageByGenderAndEducation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "validation_statistics.xlsx", countryString + "_hourlywageByGenderAndEdu", 1);
     }
 
@@ -1596,17 +1596,17 @@ public class Parameters {
             retirementAge.put(Gender.Female, ((Number)fixedRetireAge.getValue(year, Gender.Female.toString())).intValue());
 
             probSick.clear();
-            for(Gender gender: Gender.values()) {
+            for(Gender demSex: Gender.values()) {
                 int minAge = Parameters.MIN_AGE_TO_LEAVE_EDUCATION;
-                probSick.put(gender, minAge, rawProbSick.getValue(gender.toString(), minAge));
+                probSick.put(demSex, minAge, rawProbSick.getValue(demSex.toString(), minAge));
             }
 
             for(Object o: rawProbSick.keySet()) {
                 MultiKey mk = (MultiKey)o;
-                String gender = (String) mk.getKey(0);
+                String demSex = (String) mk.getKey(0);
                 int rawAge = (int) mk.getKey(1);
                 int adjustedAge;
-                if(gender.equals(Gender.Male.toString())) {
+                if(demSex.equals(Gender.Male.toString())) {
                     adjustedAge = (int)(rawAge * retirementAge.get(Gender.Male)/(double)maleMaxAgeSick);
                     probSick.put(Gender.Male, adjustedAge, rawProbSick.get(mk));
                 }
@@ -1619,12 +1619,12 @@ public class Parameters {
 
             //Fill in any gaps in age, due to shift in ages, filling with linear interpolation (arithmetic
             //average of neighbouring ages)
-            for(Gender gender: Gender.values()) {
-                for(int i = Parameters.MIN_AGE_TO_LEAVE_EDUCATION; i < retirementAge.get(gender); i++) {
-                    if(!probSick.containsKey(gender, i)) {
-                        double youngerVal = ((Number)probSick.get(gender, i-1)).doubleValue();
-                        double olderVal = ((Number)probSick.get(gender, i+1)).doubleValue();
-                        probSick.put(gender, i, 0.5*(youngerVal + olderVal));	//Insert arithmetic average between ages
+            for(Gender demSex: Gender.values()) {
+                for(int i = Parameters.MIN_AGE_TO_LEAVE_EDUCATION; i < retirementAge.get(demSex); i++) {
+                    if(!probSick.containsKey(demSex, i)) {
+                        double youngerVal = ((Number)probSick.get(demSex, i-1)).doubleValue();
+                        double olderVal = ((Number)probSick.get(demSex, i+1)).doubleValue();
+                        probSick.put(demSex, i, 0.5*(youngerVal + olderVal));	//Insert arithmetic average between ages
                     }
                 }
             }
@@ -1634,8 +1634,8 @@ public class Parameters {
 
     public static void updateUnemploymentRate(int year) {
 //		unemploymentRatesByRegion.clear();
-        for(Region region: countryRegions) {
-            unemploymentRatesByRegion.put(region, ((Number)unemploymentRates.getValue(region.toString(), year)).doubleValue());
+        for(Region demRgn: countryRegions) {
+            unemploymentRatesByRegion.put(demRgn, ((Number)unemploymentRates.getValue(demRgn.toString(), year)).doubleValue());
         }
     }
 */
@@ -1662,16 +1662,16 @@ public class Parameters {
         for (int year = startYear; year <= endYear; year++) {
 
             double projectedNumFertileWomenAll = 0.0, numNewBornAll = 0.0;
-            for (Region region : countryRegions) {
+            for (Region demRgn : countryRegions) {
 
                 double projectedNumFertileWomenByRegion = 0.0;
                 for (int age = MIN_AGE_MATERNITY; age <= MAX_AGE_MATERNITY; age++) {
-                    projectedNumFertileWomenByRegion += getPopulationProjections(Gender.Female, region, age, year);
+                    projectedNumFertileWomenByRegion += getPopulationProjections(Gender.Female, demRgn, age, year);
                 }
 
                 double numNewBornByRegion = 0.;
-                for (Gender gender: Gender.values()) {
-                    numNewBornByRegion += getPopulationProjections(gender, region, 0, year);		//Number of people aged 0 in projected years
+                for (Gender demSex: Gender.values()) {
+                    numNewBornByRegion += getPopulationProjections(demSex, demRgn, 0, year);		//Number of people aged 0 in projected years
                 }
 
                 if (projectedNumFertileWomenByRegion <= 0.) {
@@ -1680,7 +1680,7 @@ public class Parameters {
                 else {
                     projectedNumFertileWomenAll += projectedNumFertileWomenByRegion;
                     numNewBornAll += numNewBornByRegion;
-                    fertilityRateByRegionYear.put(region, year, numNewBornByRegion / projectedNumFertileWomenByRegion);
+                    fertilityRateByRegionYear.put(demRgn, year, numNewBornByRegion / projectedNumFertileWomenByRegion);
                 }
             }
             fertilityRateByYear.put(year, numNewBornAll / projectedNumFertileWomenAll);
@@ -1692,16 +1692,16 @@ public class Parameters {
 
         populationGrowthRatiosByRegionYear = MultiKeyMap.multiKeyMap(new LinkedMap<>());
         for(int year = startYear+1; year <= endYear; year++) {		//Year is the latter year, i.e. growth ratio for year t is Pop(t)/Pop(t-1)
-            for(Region region : countryRegions) {
+            for(Region demRgn : countryRegions) {
                 double numberOfPeopleInRegionThisYear = 0.;
                 double numberOfPeopleInRegionPreviousYear = 0.;
-                for(Gender gender: Gender.values()) {
+                for(Gender demSex: Gender.values()) {
                     for(int age = 0; age <= maxAge; age++) {
-                        numberOfPeopleInRegionThisYear += getPopulationProjections(gender, region, age, year);
-                        numberOfPeopleInRegionPreviousYear += getPopulationProjections(gender, region, age, year-1);
+                        numberOfPeopleInRegionThisYear += getPopulationProjections(demSex, demRgn, age, year);
+                        numberOfPeopleInRegionPreviousYear += getPopulationProjections(demSex, demRgn, age, year-1);
                     }
                 }
-                populationGrowthRatiosByRegionYear.put(region, year, numberOfPeopleInRegionThisYear / numberOfPeopleInRegionPreviousYear);
+                populationGrowthRatiosByRegionYear.put(demRgn, year, numberOfPeopleInRegionThisYear / numberOfPeopleInRegionPreviousYear);
             }
         }
     }
@@ -1789,9 +1789,9 @@ public class Parameters {
 
     public static void setCountryRegions(Country country) {
         countryRegions = new LinkedHashSet<Region>();
-        for(Region region : Region.values()) {			//TODO: restrict this to only regions in the simulated country
-            if(region.toString().startsWith(country.toString())) {			//Only assess the relevant regions for the country
-                countryRegions.add(region);				//Create a set of only relevant regions that we can use below TODO: This should be done in the Parameters class, once and for all!
+        for(Region demRgn : Region.values()) {			//TODO: restrict this to only regions in the simulated country
+            if(demRgn.toString().startsWith(country.toString())) {			//Only assess the relevant regions for the country
+                countryRegions.add(demRgn);				//Create a set of only relevant regions that we can use below TODO: This should be done in the Parameters class, once and for all!
             }
         }
     }
@@ -1939,15 +1939,15 @@ public class Parameters {
         return fertilityRateByRegionYear;
     }
 
-    public static double getFertilityRateByRegionYear(Region region, int year) {
+    public static double getFertilityRateByRegionYear(Region demRgn, int year) {
         int yearHere = Math.max(fertilityProjectionsMinYear, Math.min(fertilityProjectionsMaxYear, year));
         //We calculate the rate per woman, but the standard to report (and what is used in the estimates) is per 1000 hence multiplication
-        return 1000*((Number)fertilityRateByRegionYear.get(region, yearHere)).doubleValue();
+        return 1000*((Number)fertilityRateByRegionYear.get(demRgn, yearHere)).doubleValue();
     }
 
-    public static double getUnemploymentRateByGenderEducationAgeYear(Gender gender, Education education, int age, int year) {
+    public static double getUnemploymentRateByGenderEducationAgeYear(Gender demSex, Education education, int age, int year) {
         double val;
-        if (gender.equals(Gender.Male)) {
+        if (demSex.equals(Gender.Male)) {
             if (education.equals(Education.High)) {
                 int yearHere = Math.max(unemploymentRatesMaleGraduatesMinYear, Math.min(unemploymentRatesMaleGraduatesMaxYear, year));
                 int ageHere = Math.min(unemploymentRatesMaleGraduatesMaxAge, age);
@@ -2070,8 +2070,8 @@ public class Parameters {
     }
     */
     /*
-    public static double getUnemploymentRatesForRegion(Region region) {
-        return unemploymentRatesByRegion.get(region);
+    public static double getUnemploymentRatesForRegion(Region demRgn) {
+        return unemploymentRatesByRegion.get(demRgn);
     }
     */
 
@@ -2090,14 +2090,14 @@ public class Parameters {
     public static MultiKeyCoefficientMap getCoefficientMapRMSE() { return coefficientMapRMSE; }
 
 
-    public static double getMortalityProbability(Gender gender, int age, int year) {
+    public static double getMortalityProbability(Gender demSex, int age, int year) {
 
         double mortalityProbability;
         int yearEval = Math.min(mortalityProbabilityMaxYear, Math.max(mortalityProbabilityMinYear, year));
         int ageEval = Math.min(mortalityProbabilityMaxAge, age);
-        Number prob = ((Number) mortalityProbabilityByGenderAgeYear.getValue(gender.toString(), ageEval, yearEval));
+        Number prob = ((Number) mortalityProbabilityByGenderAgeYear.getValue(demSex.toString(), ageEval, yearEval));
         if (prob==null) {
-            throw new IllegalAccessError("ERROR - problem evaluating mortality probability for year: " + yearEval + ", age: " + ageEval + " and gender " + gender.toString());
+            throw new IllegalAccessError("ERROR - problem evaluating mortality probability for year: " + yearEval + ", age: " + ageEval + " and demSex " + demSex.toString());
         }
         mortalityProbability = prob.doubleValue() / 100000.0;
 
@@ -2112,29 +2112,29 @@ public class Parameters {
         return equivalisedIncomeCDF2.getValue(rnd);
     }
 
-    public static Double getEquivalisedIncome(Gender gender, int age, int year) {
+    public static Double getEquivalisedIncome(Gender demSex, int age, int year) {
 
         Double val = null;
         if (year<=equivalisedIncomeMaxYear && year>=equivalisedIncomeMinYear && age<=equivalisedIncomeMaxAge) {
             // obtain value from observed matrix
 
-            Number nn = ((Number) equivalisedIncomeByGenderAgeYear.getValue(gender.toString(), age, year));
+            Number nn = ((Number) equivalisedIncomeByGenderAgeYear.getValue(demSex.toString(), age, year));
             if (nn==null) {
-                throw new IllegalAccessError("ERROR - problem evaluating mean equivalised income for year: " + year + ", age: " + age + " and gender " + gender.toString());
+                throw new IllegalAccessError("ERROR - problem evaluating mean equivalised income for year: " + year + ", age: " + age + " and demSex " + demSex.toString());
             }
             val = nn.doubleValue();
         }
         return val;
     }
 
-    public static double getPopulationProjections(Gender gender, Region region, int age, int year) {
+    public static double getPopulationProjections(Gender demSex, Region demRgn, int age, int year) {
 
         double populationProjection;
         int yearEval = Math.min(populationProjectionsMaxYear, Math.max(populationProjectionsMinYear, year));
         int ageEval = Math.min(populationProjectionsMaxAge, age);
-        Number val = ((Number)populationProjections.getValue(gender.toString(), region.toString(), ageEval, yearEval));
+        Number val = ((Number)populationProjections.getValue(demSex.toString(), demRgn.toString(), ageEval, yearEval));
         if (val==null)
-            throw new IllegalAccessError("ERROR - problem evaluating population projection for year: " + yearEval + ", age: " + ageEval + ", region: " + region.toString() + " and gender: " + gender.toString());
+            throw new IllegalAccessError("ERROR - problem evaluating population projection for year: " + yearEval + ", age: " + ageEval + ", demRgn: " + demRgn.toString() + " and demSex: " + demSex.toString());
         populationProjection = val.doubleValue();
 
         return populationProjection;
@@ -2150,8 +2150,8 @@ public class Parameters {
         return ((Number) fertilityProjectionsByYear.getValue("Value", yearHere)).doubleValue();
     }
 
-    public synchronized static double[] getWageAndAgeDifferentialMultivariateNormalDistribution(long seed) {
-        wageAndAgeDifferentialMultivariateNormalDistribution.reseedRandomGenerator(seed);
+    public synchronized static double[] getWageAndAgeDifferentialMultivariateNormalDistribution(long statSeed) {
+        wageAndAgeDifferentialMultivariateNormalDistribution.reseedRandomGenerator(statSeed);
         return wageAndAgeDifferentialMultivariateNormalDistribution.sample();
     }
 
@@ -2360,15 +2360,15 @@ public class Parameters {
 
     public static void loadTimeSeriesFactorMaps(Country country) {
 
-        // load time varying rates
+        // load demYear varying rates
         priceMapRealSavingReturns = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_saving_returns", 1, 1);
         priceMapRealDebtCostLow = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_debt_cost_low", 1, 1);
         priceMapRealDebtCostHigh = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_debt_cost_hi", 1, 1);
 
-        // load time varying wage rates
+        // load demYear varying wage rates
         wageRateFormalSocialCare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_carer_hourly_wage", 1, 1);
 
-        // load time varying indices
+        // load demYear varying indices
         upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
         upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
         upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
@@ -2617,7 +2617,7 @@ public class Parameters {
             double val = ((Number)valObj).doubleValue();
             double growthFactor = 0.0;
             if (year > mapYear) {
-                // extend series forward through time
+                // extend series forward through demYear
 
                 if (Math.abs(val)>1.0E-9) {
                     // assume constant exponential growth rate
@@ -2631,7 +2631,7 @@ public class Parameters {
                     putTimeSeriesValue(yy, stringKey1, stringKey2, val, mapToExtend);
                 }
             } else {
-                // extend series backward through time
+                // extend series backward through demYear
 
                 if (Math.abs(val)>1.0E-9) {
                     // assume constant exponential growth rate
@@ -2680,7 +2680,7 @@ public class Parameters {
                 return averageDebtCostHigh;
             }
         }
-        throw new RuntimeException("failed to find requested time varying rate");
+        throw new RuntimeException("failed to find requested demYear varying rate");
     }
 
     private static void setTimeSeriesRateParameter(TimeVaryingRate rateType, double val) {
@@ -2699,7 +2699,7 @@ public class Parameters {
                 return;
             }
         }
-        throw new RuntimeException("failed to find requested time varying rate");
+        throw new RuntimeException("failed to find requested demYear varying rate");
     }
 
     public static double getTimeSeriesRate(int year, TimeVaryingRate rateType) {
@@ -2739,7 +2739,7 @@ public class Parameters {
                 }
             }
             if (year > yearMax) {
-                // extend series forward through time
+                // extend series forward through demYear
 
                 double outOfSampleRate = ((Number) mapToExtend.getValue(yearMax)).doubleValue();
                 for (int yy = yearMax + 1; yy <= year; yy++) {
@@ -2748,7 +2748,7 @@ public class Parameters {
                 val = outOfSampleRate;
             }
             if (year < yearMin) {
-                // extend series backward through time
+                // extend series backward through demYear
 
                 double outOfSampleRate = ((Number) mapToExtend.getValue(yearMin)).doubleValue();
                 for (int yy = yearMin - 1; yy >= year; yy--) {
@@ -2825,7 +2825,7 @@ public class Parameters {
                 }
             }
             if (year < minYear) {
-                // extend backward through time
+                // extend backward through demYear
 
                 Object[] values0 = (Object[]) socialCarePolicy.getValue(minYear+1);
                 Object[] values1 = (Object[]) socialCarePolicy.getValue(minYear);
@@ -2842,7 +2842,7 @@ public class Parameters {
                 }
             }
             else {
-                // extend forward through time
+                // extend forward through demYear
 
                 Object[] values0 = (Object[]) socialCarePolicy.getValue(maxYear-1);
                 Object[] values1 = (Object[]) socialCarePolicy.getValue(maxYear);

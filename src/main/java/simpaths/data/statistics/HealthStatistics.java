@@ -22,204 +22,205 @@ public class HealthStatistics {
     private PanelEntityKey key = new PanelEntityKey(1L);
 
     @Column(name = "gender")
-    private String gender;
+    private String demSex;
 
     // mental health numeric
     @Column(name = "dhm_mean")
-    private double dhm_mean;
+    private double healthWbScore0to36Avg;
 
     @Column(name = "dhm_median")
-    private double dhm_median;
+    private double healthWbScore0to36P50;
 
     @Column(name = "dhm_p_10")
-    private double dhm_p_10;
+    private double healthWbScore0to36P10;
 
     @Column(name = "dhm_p_90")
-    private double dhm_p_90;
+    private double healthWbScore0to36P90;
 
     @Column(name = "dhm_p_25")
-    private double dhm_p_25;
+    private double healthWbScore0to36P25;
 
     @Column(name = "dhm_p_75")
-    private double dhm_p_75;
+    private double healthWbScore0to36P75;
 
     // MCS score numeric
     @Column(name = "dhe_mcs_mean")
-    private double dhe_mcs_mean;
+    private double healthMentalMcsAvg;
 
     @Column(name = "dhe_mcs_median")
-    private double dhe_mcs_median;
+    private double healthMentalMcsP50;
 
     @Column(name = "dhe_mcs_p_10")
-    private double dhe_mcs_p_10;
+    private double healthMentalMcsP10;
 
     @Column(name = "dhe_mcs_p_90")
-    private double dhe_mcs_p_90;
+    private double healthMentalMcsP90;
 
     @Column(name = "dhe_mcs_p_25")
-    private double dhe_mcs_p_25;
+    private double healthMentalMcsP25;
 
     @Column(name = "dhe_mcs_p_75")
-    private double dhe_mcs_p_75;
+    private double healthMentalMcsP75;
 
     // PCS score numeric
     @Column(name = "dhe_pcs_mean")
-    private double dhe_pcs_mean;
+    private double healthPhysicalPcsAvg;
 
     @Column(name = "dhe_pcs_median")
-    private double dhe_pcs_median;
+    private double healthPhysicalPcsP50;
 
     @Column(name = "dhe_pcs_p_10")
-    private double dhe_pcs_p_10;
+    private double healthPhysicalPcsP10;
 
     @Column(name = "dhe_pcs_p_90")
-    private double dhe_pcs_p_90;
+    private double healthPhysicalPcsP90;
 
     @Column(name = "dhe_pcs_p_25")
-    private double dhe_pcs_p_25;
+    private double healthPhysicalPcsP25;
 
     @Column(name = "dhe_pcs_p_75")
-    private double dhe_pcs_p_75;
+    private double healthPhysicalPcsP75;
 
     // Life Satisfaction numeric
     @Column(name = "dls_mean")
-    private double dls_mean;
+    private double demLifeSatScore1to7Avg;
 
     @Column(name = "dls_median")
-    private double dls_median;
+    private double demLifeSatScore1to7P50;
 
     @Column(name = "dls_p_10")
-    private double dls_p_10;
+    private double demLifeSatScore1to7P10;
 
     @Column(name = "dls_p_90")
-    private double dls_p_90;
+    private double demLifeSatScore1to7P90;
 
     @Column(name = "dls_p_25")
-    private double dls_p_25;
+    private double demLifeSatScore1to7P25;
 
     @Column(name = "dls_p_75")
-    private double dls_p_75;
+    private double demLifeSatScore1to7P75;
 
     @Column(name = "qualys")
-    private double qalys;
+    private double healthLifeYearQualAdj;
 
     @Column(name = "wellbys")
-    private double wellbys;
+    private double healthLifeYearWbAdj;
 
     //N
     @Column(name = "N")
-    private int N;
+    private int healthNObsSubGroup;
 
-    public void setGender(String gender) {
-        this.gender = gender;
+
+    public void setGender(String demSex) {
+        this.demSex = demSex;
     }
 
-    public void setDhm_mean(double dhm_mean) {
-        this.dhm_mean = dhm_mean;
+    public void setDhm_mean(double healthWbScore0to36Avg) {
+        this.healthWbScore0to36Avg = healthWbScore0to36Avg;
     }
 
-    public void setDhm_median(double dhm_median) {
-        this.dhm_median = dhm_median;
+    public void setDhm_median(double healthWbScore0to36P50) {
+        this.healthWbScore0to36P50 = healthWbScore0to36P50;
     }
 
-    public void setDhm_p_10(double dhm_p_10) {
-        this.dhm_p_10 = dhm_p_10;
+    public void setDhm_p_10(double healthWbScore0to36P10) {
+        this.healthWbScore0to36P10 = healthWbScore0to36P10;
     }
 
-    public void setDhm_p_90(double dhm_p_90) {
-        this.dhm_p_90 = dhm_p_90;
+    public void setDhm_p_90(double healthWbScore0to36P90) {
+        this.healthWbScore0to36P90 = healthWbScore0to36P90;
     }
 
-    public void setDhm_p_25(double dhm_p_25) {
-        this.dhm_p_25 = dhm_p_25;
+    public void setDhm_p_25(double healthWbScore0to36P25) {
+        this.healthWbScore0to36P25 = healthWbScore0to36P25;
     }
 
-    public void setDhm_p_75(double dhm_p_75) {
-        this.dhm_p_75 = dhm_p_75;
+    public void setDhm_p_75(double healthWbScore0to36P75) {
+        this.healthWbScore0to36P75 = healthWbScore0to36P75;
     }
 
-    public void setDhe_mcs_mean(double dhe_mcs_mean) {
-        this.dhe_mcs_mean = dhe_mcs_mean;
+    public void setDhe_mcs_mean(double healthMentalMcsAvg) {
+        this.healthMentalMcsAvg = healthMentalMcsAvg;
     }
 
-    public void setDhe_mcs_median(double dhe_mcs_median) {
-        this.dhe_mcs_median = dhe_mcs_median;
+    public void setDhe_mcs_median(double healthMentalMcsP50) {
+        this.healthMentalMcsP50 = healthMentalMcsP50;
     }
 
-    public void setDhe_mcs_p_10(double dhe_mcs_p_10) {
-        this.dhe_mcs_p_10 = dhe_mcs_p_10;
+    public void setDhe_mcs_p_10(double healthMentalMcsP10) {
+        this.healthMentalMcsP10 = healthMentalMcsP10;
     }
 
-    public void setDhe_mcs_p_90(double dhe_mcs_p_90) {
-        this.dhe_mcs_p_90 = dhe_mcs_p_90;
+    public void setDhe_mcs_p_90(double healthMentalMcsP90) {
+        this.healthMentalMcsP90 = healthMentalMcsP90;
     }
 
-    public void setDhe_mcs_p_25(double dhe_mcs_p_25) {
-        this.dhe_mcs_p_25 = dhe_mcs_p_25;
+    public void setDhe_mcs_p_25(double healthMentalMcsP25) {
+        this.healthMentalMcsP25 = healthMentalMcsP25;
     }
 
-    public void setDhe_mcs_p_75(double dhe_mcs_p_75) {
-        this.dhe_mcs_p_75 = dhe_mcs_p_75;
+    public void setDhe_mcs_p_75(double healthMentalMcsP75) {
+        this.healthMentalMcsP75 = healthMentalMcsP75;
     }
 
-    public void setDhe_pcs_mean(double dhe_pcs_mean) {
-        this.dhe_pcs_mean = dhe_pcs_mean;
+    public void setDhe_pcs_mean(double healthPhysicalPcsAvg) {
+        this.healthPhysicalPcsAvg = healthPhysicalPcsAvg;
     }
 
-    public void setDhe_pcs_median(double dhe_pcs_median) {
-        this.dhe_pcs_median = dhe_pcs_median;
+    public void setDhe_pcs_median(double healthPhysicalPcsP50) {
+        this.healthPhysicalPcsP50 = healthPhysicalPcsP50;
     }
 
-    public void setDhe_pcs_p_10(double dhe_pcs_p_10) {
-        this.dhe_pcs_p_10 = dhe_pcs_p_10;
+    public void setDhe_pcs_p_10(double healthPhysicalPcsP10) {
+        this.healthPhysicalPcsP10 = healthPhysicalPcsP10;
     }
 
-    public void setDhe_pcs_p_90(double dhe_pcs_p_90) {
-        this.dhe_pcs_p_90 = dhe_pcs_p_90;
+    public void setDhe_pcs_p_90(double healthPhysicalPcsP90) {
+        this.healthPhysicalPcsP90 = healthPhysicalPcsP90;
     }
 
-    public void setDhe_pcs_p_25(double dhe_pcs_p_25) {
-        this.dhe_pcs_p_25 = dhe_pcs_p_25;
+    public void setDhe_pcs_p_25(double healthPhysicalPcsP25) {
+        this.healthPhysicalPcsP25 = healthPhysicalPcsP25;
     }
 
-    public void setDhe_pcs_p_75(double dhe_pcs_p_75) {
-        this.dhe_pcs_p_75 = dhe_pcs_p_75;
+    public void setDhe_pcs_p_75(double healthPhysicalPcsP75) {
+        this.healthPhysicalPcsP75 = healthPhysicalPcsP75;
     }
 
-    public void setDls_mean(double dls_mean) {
-        this.dls_mean = dls_mean;
+    public void setDls_mean(double demLifeSatScore1to7Avg) {
+        this.demLifeSatScore1to7Avg = demLifeSatScore1to7Avg;
     }
 
-    public void setDls_median(double dls_median) {
-        this.dls_median = dls_median;
+    public void setDls_median(double demLifeSatScore1to7P50) {
+        this.demLifeSatScore1to7P50 = demLifeSatScore1to7P50;
     }
 
-    public void setDls_p_10(double dls_p_10) {
-        this.dls_p_10 = dls_p_10;
+    public void setDls_p_10(double demLifeSatScore1to7P10) {
+        this.demLifeSatScore1to7P10 = demLifeSatScore1to7P10;
     }
 
-    public void setDls_p_90(double dls_p_90) {
-        this.dls_p_90 = dls_p_90;
+    public void setDls_p_90(double demLifeSatScore1to7P90) {
+        this.demLifeSatScore1to7P90 = demLifeSatScore1to7P90;
     }
 
-    public void setDls_p_25(double dls_p_25) {
-        this.dls_p_25 = dls_p_25;
+    public void setDls_p_25(double demLifeSatScore1to7P25) {
+        this.demLifeSatScore1to7P25 = demLifeSatScore1to7P25;
     }
 
-    public void setDls_p_75(double dls_p_75) {
-        this.dls_p_75 = dls_p_75;
+    public void setDls_p_75(double demLifeSatScore1to7P75) {
+        this.demLifeSatScore1to7P75 = demLifeSatScore1to7P75;
     }
 
     public void setN(int n) {
-        N = n;
+        healthNObsSubGroup = n;
     }
 
-    public void setQalys(double qalys) {
-        this.qalys = qalys;
+    public void setQalys(double healthLifeYearQualAdj) {
+        this.healthLifeYearQualAdj = healthLifeYearQualAdj;
     }
 
-    public void setWellbys(double wellbys) {
-        this.wellbys = wellbys;
+    public void setWellbys(double healthLifeYearWbAdj) {
+        this.healthLifeYearWbAdj = healthLifeYearWbAdj;
     }
 
     public void update(SimPathsModel model, String gender_s) {

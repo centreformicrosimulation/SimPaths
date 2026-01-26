@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import microsim.data.db.PanelEntityKey;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import simpaths.data.Parameters;
 import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import microsim.engine.SimulationEngine;
@@ -44,7 +43,7 @@ public class Household implements EventListener, IDoubleSource {
     })
     private Processed processed;
 
-    private Long idOriginalHH;
+    private Long idHhOriginal;
 
 
     /*
@@ -64,13 +63,13 @@ public class Household implements EventListener, IDoubleSource {
                 model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
                 collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
                 key  = new PanelEntityKey(originalHousehold.getId());
-                this.idOriginalHH = originalHousehold.getIdOriginalHH();
+                this.idHhOriginal = originalHousehold.getIdOriginalHH();
             }
             default -> {
                 model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
                 collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
                 key  = new PanelEntityKey(householdIdCounter++);
-                idOriginalHH = originalHousehold.key.getId();
+                idHhOriginal = originalHousehold.key.getId();
             }
         }
     }
@@ -84,13 +83,13 @@ public class Household implements EventListener, IDoubleSource {
     /*
     METHODS
      */
-    public Long getIdOriginalHH() {return idOriginalHH;}
+    public Long getIdOriginalHH() {return idHhOriginal;}
 
     public void resetWeights(double newWeight) {
 
         for (BenefitUnit benefitUnit : benefitUnits) {
             for( Person person : benefitUnit.getMembers()) {
-                person.setWeight(newWeight);
+                person.setWgt(newWeight);
             }
         }
     }
@@ -127,7 +126,7 @@ public class Household implements EventListener, IDoubleSource {
     public void setWeight(double weight) {
         for (BenefitUnit benefitUnit : benefitUnits) {
             for ( Person person : benefitUnit.getMembers()) {
-                person.setWeight(weight);
+                person.setWgt(weight);
             }
         }
     }
@@ -152,7 +151,7 @@ public class Household implements EventListener, IDoubleSource {
         for (BenefitUnit benefitUnit : benefitUnits) {
             income += benefitUnit.getDisposableIncomeMonthly() * 12.0;
             for (Person person : benefitUnit.getMembers()) {
-                if (person.getDag() > 13) {
+                if (person.getDemAge() > 13) {
                     if (firstAdult) {
                         eqscale += 1.0;
                         firstAdult = false;

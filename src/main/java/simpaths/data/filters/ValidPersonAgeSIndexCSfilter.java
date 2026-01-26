@@ -18,7 +18,7 @@ public class ValidPersonAgeSIndexCSfilter implements ICollectionFilter{
 			Person person = (Person) object;
 //			return (person.getAtRiskOfPoverty() != null);
 			return (person.getsIndex() > 0. && person.getsIndex() != Double.NaN && //Removes cases where security index is invalid
-					(person.getDag() >= ageFrom) && (person.getDag() <= ageTo));
+					(person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo));
 	}
 	
 }

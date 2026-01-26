@@ -111,6 +111,8 @@ do "${dir_do}/reg_health_mental.do"
 
 do "${dir_do}/reg_health_wellbeing.do"
 
+do "${dir_do}/reg_financial_distress.do"
+
 *******************************************************************************
 * INTERNAL VALIDATION FILES
 ******************************************************************************

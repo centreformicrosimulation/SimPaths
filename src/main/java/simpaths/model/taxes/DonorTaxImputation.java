@@ -42,7 +42,7 @@ public class DonorTaxImputation {
     private double grossIncomePerWeek;
     private double targetNormalisedOriginalIncome;
 
-    private Integer receivedUC;
+    private Integer yBenUCFlag;
     private Integer receivedLegacyBenefit;
 
 
@@ -82,10 +82,10 @@ public class DonorTaxImputation {
     public double getTargetNormalisedOriginalIncome() { return targetNormalisedOriginalIncome; }
 
     public Integer getReceivedUC() {
-        return receivedUC;
+        return yBenUCFlag;
     }
-    public void setReceivedUC(Integer receivedUC) {
-        this.receivedUC = receivedUC;
+    public void setReceivedUC(Integer yBenUCFlag) {
+        this.yBenUCFlag = yBenUCFlag;
     }
     public Integer getReceivedLegacyBenefit() {
         return receivedLegacyBenefit;

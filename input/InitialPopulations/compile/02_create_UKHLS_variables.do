@@ -1883,7 +1883,7 @@ keep ivfio idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dcpagdf dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq dimlwt disclwt ///
 	dimxwt dhhwt jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 month scghq2_dv ydisp ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv ynbcpdf_dv ypncp ypnoab swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der adultchildflag ///
-        econ_benefits econ_benefits_nonuc econ_benefits_uc econ_benefits_lb ///
+        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
 	fihhmnnet1_dv ieqmoecd_dv ///
 	sedcsmpl sedrsmpl scedsmpl dhh_owned dukfr dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag  Int_Date dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp financial_distress
 
@@ -1895,7 +1895,7 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
 	ded deh_c3 der dehsp_c3 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhm dhm_ghq ///
 	jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
 	ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw pno ppno hgbioad1 hgbioad2 der dhh_owned ///
-        econ_benefits econ_benefits_nonuc econ_benefits_uc econ_benefits_lb ///
+        econ_benefits econ_benefits_nonuc econ_benefits_uc ///
 	fihhmnnet1_dv ieqmoecd_dv ///
 	scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ypnoab_lvl *_flag dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp {
 		qui recode `var' (-9/-1=-9) (.=-9) 

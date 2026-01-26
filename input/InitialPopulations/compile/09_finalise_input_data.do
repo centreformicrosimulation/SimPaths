@@ -41,7 +41,7 @@ use "$dir_data\ukhls_pooled_all_obs_09.dta", clear
 ***************************************************************************************
 
 // If any person in the household has missing values, drop the whole household:
-drop if dropHH == 1 /*(62,523  out of 529,229 deleted)*/
+drop if dropHH == 1 
 
 drop dropObs dropHH 
 	
@@ -59,9 +59,9 @@ gen child = dag<$age_become_responsible
 gen adult = 1 - child 
 bys stm idhh: egen adult_count = sum(adult)
 bys stm idbenefitunit: egen adult_count2 = sum(adult)
-drop if adult_count==0 //(1,435 observations deleted)
-drop if adult_count2==0 //(721 observations deleted)
-drop if ((dag>0 & dag<$age_become_responsible) & (idfather == -9 & idmother == -9)) //(0 observations deleted)
+drop if adult_count==0 
+drop if adult_count2==0 
+drop if ((dag>0 & dag<$age_become_responsible) & (idfather == -9 & idmother == -9)) 
 assert adult_count>0 
 assert adult_count2>0 
  
@@ -72,11 +72,11 @@ assert  (idfather>0 | idmother>0) if (dag>0 & dag<$age_become_responsible )
 bys stm idbenefitunit : egen na = sum(adult)
 gen chk = (na==1 & dcpst==1 & adult==1) 
 bys stm idbenefitunit : egen chk2 = max(chk)
-fre chk2 // 30 obs    
+fre chk2 
 //two adults in benunit but not partnered 
 gen chk3 = (na==2 & dcpst!=1 & adult==1) 
 bys stm idbenefitunit : egen chk4 = max(chk3)
-fre chk4 //0 obs 
+fre chk4 
 drop if chk2==1 
 drop if chk4==1  
 drop na chk chk2 chk3 chk4
@@ -294,15 +294,16 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	gsort idHh idBu idPers
 	save "$dir_data/population_initial_UK_$year.dta", replace
 	
-	recode dgn total_wealth total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs ///
-	other_socare_hrs formal_socare_cost aidhrs carewho (-9=0)
+	recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrptyValue wealthPensValue ///
+	careNeedFlag careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek careWho (-9=0)
+
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 }
 
 cap log close
 
 
-***************************************************************************************
+/***************************************************************************************
 * finalise
 ***************************************************************************************
 #delimit ;

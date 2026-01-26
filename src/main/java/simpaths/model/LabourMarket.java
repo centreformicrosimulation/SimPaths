@@ -262,7 +262,7 @@ public class LabourMarket {
                     if (person.atRiskOfWork()) {
 
                         Education ed = person.getDeh_c3();
-                        double newVal = person.getFullTimeHourlyEarningsPotential();
+                        double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);
                         countByEdu.put(ed, oldCount + 1);
@@ -274,7 +274,7 @@ public class LabourMarket {
                     if (person.atRiskOfWork()) {
 
                         Education ed = person.getDeh_c3();
-                        double newVal = person.getFullTimeHourlyEarningsPotential();
+                        double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);
                         countByEdu.put(ed, oldCount + 1);
@@ -298,19 +298,19 @@ public class LabourMarket {
 
     public void updateGrossLabourIncomeBaseline_Xt5(LinkedHashSet<Person> personsInBenefitUnit) {
         for (Person person : personsInBenefitUnit) {
-            if (person != null && person.getCovidModuleGrossLabourIncomeBaseline_Xt5() == null) {
+            if (person != null && person.getCovidYLabGrossXt5() == null) {
                 double covidModuleGrossLabourIncomeBaseline = person.getCovidModuleGrossLabourIncome_Baseline();
                 Statistics stats = ((SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName())).getStats();
                 if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p20()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q1);
+                    person.setCovidYLabGrossXt5(Quintiles.Q1);
                 } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p40()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q2);
+                    person.setCovidYLabGrossXt5(Quintiles.Q2);
                 } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p60()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q3);
+                    person.setCovidYLabGrossXt5(Quintiles.Q3);
                 } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p80()) {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q4);
+                    person.setCovidYLabGrossXt5(Quintiles.Q4);
                 } else {
-                    person.setCovidModuleGrossLabourIncomeBaseline_Xt5(Quintiles.Q5);
+                    person.setCovidYLabGrossXt5(Quintiles.Q5);
                 }
             }
         }

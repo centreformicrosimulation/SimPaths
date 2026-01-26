@@ -17,7 +17,7 @@ public class KeyFunction {
      */
     private int simYear = -999, priceYear = -999, age, numberMembersOver17, numberChildrenUnder5, numberChildren5To9, numberChildren10To17;
     private int dlltsdMan = -1, dlltsdWoman = -1, careProvision = -1;
-    private double hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek;
+    private double hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, originalIncomePerWeek, secondIncomePerWeek, xChildCareWeek;
 
     // define key function here - switchable
     private IKeyFunction keyFunction;
@@ -77,11 +77,11 @@ public class KeyFunction {
     }
     public KeyFunction(int simYear, int priceYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9, int numberChildren10To17,
                        double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int dlltsdMan, int dlltsdWoman, int careProvision, double originalIncomePerWeek,
-                       double secondIncomePerWeek, double childcareCostPerWeek) {
+                       double secondIncomePerWeek, double xChildCareWeek) {
 
         this(simYear, priceYear, age, numberMembersOver17, numberChildrenUnder5, numberChildren5To9, numberChildren10To17,
                 hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, dlltsdMan, dlltsdWoman, careProvision, originalIncomePerWeek);
-        this.childcareCostPerWeek = childcareCostPerWeek;
+        this.xChildCareWeek = xChildCareWeek;
         this.secondIncomePerWeek = Math.max(0.0, Math.min(secondIncomePerWeek, originalIncomePerWeek - secondIncomePerWeek));
     }
 
@@ -185,8 +185,8 @@ public class KeyFunction {
         this.secondIncomePerWeek = secondIncomePerWeek;
     }
 
-    public void setChildcareCostPerWeek(double childcareCostPerWeek) {
-        this.childcareCostPerWeek = childcareCostPerWeek;
+    public void setChildcareCostPerWeek(double xChildCareWeek) {
+        this.xChildCareWeek = xChildCareWeek;
     }
 
     /**
@@ -203,7 +203,7 @@ public class KeyFunction {
         }
         //return keyFunction.evaluateKeys(simYear, priceYear, age, numberMembersOver17, numberChildrenUnder5, numberChildren5To17, hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, dlltsdMan, dlltsdWoman, originalIncomePerWeek);
         return keyFunction.evaluateKeys(simYear, priceYear, age, numberMembersOver17, numberChildrenUnder5, numberChildren5To9, numberChildren10To17,
-                hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, dlltsdMan, dlltsdWoman, careProvision, originalIncomePerWeek, secondIncomePerWeek, childcareCostPerWeek);
+                hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman, dlltsdMan, dlltsdWoman, careProvision, originalIncomePerWeek, secondIncomePerWeek, xChildCareWeek);
     }
 
     public boolean[] isLowIncome(Integer[] keys) {
@@ -220,5 +220,5 @@ public class KeyFunction {
 
     public double getOriginalIncomePerWeek() { return originalIncomePerWeek; }
     public double getSecondIncomePerWeek() { return secondIncomePerWeek; }
-    public double getChildcareCostPerWeek() { return childcareCostPerWeek; }
+    public double getChildcareCostPerWeek() { return xChildCareWeek; }
 }

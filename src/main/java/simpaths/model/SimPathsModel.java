@@ -987,8 +987,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             for (Person person: benefitUnit.getMembers()) {
                 if (!person.getBenefitUnit().equals(benefitUnit))
                     throw new RuntimeException("inconsistent linkages between benefit units and members");
-                if (person.getDag()>=Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-                    if (Gender.Male.equals(person.getDgn()))
+                if (person.getDemAge()>=Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+                    if (Gender.Male.equals(person.getDemMaleFlag()))
                         male++;
                     else
                         female++;
@@ -1057,11 +1057,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         for (Person person : persons) {
             if (SampleExit.NotYet.equals(person.getSampleExit())) {
 
-                Gender gender = person.getDgn();
+                Gender gender = person.getDemMaleFlag();
                 Region region = person.getRegion();
-                int age = Math.min(person.getDag(), maxAlignAge);
+                int age = Math.min(person.getDemAge(), maxAlignAge);
                 double weight = ((Number)weightsByGenderRegionAndAge.get(gender, region, age)).doubleValue();
-                person.setWeight(weight);
+                person.setWgt(weight);
             }
         }
     }
@@ -1126,8 +1126,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             if (SampleExit.NotYet.equals(person.getSampleExit())) {
 
-                int age = Math.min(person.getDag(), maxAlignAge);
-                List<Person> listHere = personsByAlignmentGroup.get(person.getDgn(), person.getRegion(), age);
+                int age = Math.min(person.getDemAge(), maxAlignAge);
+                List<Person> listHere = personsByAlignmentGroup.get(person.getDemMaleFlag(), person.getRegion(), age);
                 if (listHere==null)
                     throw new RuntimeException("failed to identify requested person alignment list");
                 listHere.add(person);
@@ -1175,7 +1175,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                             flagAccept = false;
                         } else {
                             for (Person member : person.getBenefitUnit().getMembers()) {
-                                if ( member.getDag() <= person.getDag() && member != person ) flagAccept = false;
+                                if ( member.getDemAge() <= person.getDemAge() && member != person ) flagAccept = false;
                             }
                         }
                         if (flagAccept) migrantsByAlignmentGroup.get(gender, region, age).add(person);
@@ -1249,8 +1249,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                 if (SampleExit.NotYet.equals(person.getSampleExit())) {
 
-                    int ageHere = Math.min(person.getDag(), maxAlignAge);
-                    Gender genderHere = person.getDgn();
+                    int ageHere = Math.min(person.getDemAge(), maxAlignAge);
+                    Gender genderHere = person.getDemMaleFlag();
 
                     personsByAlignmentGroup.get(genderHere, fromRegion, ageHere).remove(person);
                     personsByAlignmentGroup.get(genderHere, toRegion, ageHere).add(person);
@@ -1318,8 +1318,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
                             if (SampleExit.NotYet.equals(person.getSampleExit())) {
 
-                                int ageHere = Math.min(person.getDag(), maxAlignAge);
-                                Gender genderHere = person.getDgn();
+                                int ageHere = Math.min(person.getDemAge(), maxAlignAge);
+                                Gender genderHere = person.getDemMaleFlag();
                                 personsByAlignmentGroup.get(genderHere, region, ageHere).remove(person);
                                 if (ageHere == age && person!=emigrant) {
                                     migrantPoolByAlignmentGroup.get(genderHere, region, age).remove(person);
@@ -1382,8 +1382,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     // update counters and references
                     for (Person person : immigrantBU.getMembers()) {
 
-                        int ageHere = Math.min(person.getDag(), maxAlignAge);
-                        Gender genderHere = person.getDgn();
+                        int ageHere = Math.min(person.getDemAge(), maxAlignAge);
+                        Gender genderHere = person.getDemMaleFlag();
                         personsByAlignmentGroup.get(genderHere, region, ageHere).add(person);
                     }
                     simulatedNumber ++;
@@ -1515,8 +1515,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         for (Person p : persons) {
             if (p.isToBePartnered() == true) {
-                if (p.getDgn().equals(Gender.Male)) malesToBePartnered++;
-                else if (p.getDgn().equals(Gender.Female)) femalesToBePartnered++;
+                if (p.getDemMaleFlag().equals(Gender.Male)) malesToBePartnered++;
+                else if (p.getDemMaleFlag().equals(Gender.Female)) femalesToBePartnered++;
             }
         }
 
@@ -1551,7 +1551,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         String tmpKeyString = gender + " " + region + " " + education + " " + ageGroup; //MultiKey defined above, but for most methods we use a composite String key instead as MultiKeyMap has a limit of keys
                         for (Person person : tmpPersonsSet) {
 
-                            if (person.getDeh_c3().equals(education) && person.getAgeGroup() == ageGroup) tmpPersonsSet2.add(person); //If education level matches add person to the set
+                            if (person.getDeh_c3().equals(education) && person.getDemAgeGroup() == ageGroup) tmpPersonsSet2.add(person); //If education level matches add person to the set
                         }
 
                         personsToMatch2.put(tmpKeyString, tmpPersonsSet2); //Add a key and set of people to set of persons to match. Each key corresponds to a set of people of certain Gender, Region, and Education who want to match
@@ -1789,12 +1789,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                 public void match(Person p1, Person p2) {
 
                                     //If two people have the same gender or different region, simply don't match and do nothing?
-                                    if (p1.getDgn().equals(p2.getDgn()) || !p1.getRegion().equals(p2.getRegion())) {
+                                    if (p1.getDemMaleFlag().equals(p2.getDemMaleFlag()) || !p1.getRegion().equals(p2.getRegion())) {
                                         // throw new RuntimeException("Error - both parties to match have the same gender!");
                                     } else {
 
-                                        p1.setDcpyy(0); //Set years in partnership to 0
-                                        p2.setDcpyy(0);
+                                        p1.setDemPartnerNYear(0); //Set years in partnership to 0
+                                        p2.setDemPartnerNYear(0);
 
                                         // update benefit unit and household
                                         p1.setupNewBenefitUnit(p2, true);
@@ -1802,8 +1802,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         p2.setToBePartnered(false);
                                         personsToMatch2.get(key).remove(p1); //Remove matched persons and keep everyone else in the matching queue
                                         personsToMatch2.get(keyOther).remove(p2);
-                                        personsToMatch.get(p1.getDgn()).get(p1.getRegion()).remove(p1);
-                                        personsToMatch.get(p2.getDgn()).get(p2.getRegion()).remove(p2);
+                                        personsToMatch.get(p1.getDemMaleFlag()).get(p1.getRegion()).remove(p1);
+                                        personsToMatch.get(p2.getDemMaleFlag()).get(p2.getRegion()).remove(p2);
                                         partnershipsCreated++;
                                     }
                                 }
@@ -1816,8 +1816,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             unmatchedSet.addAll(personsToMatch2.get(key));
             for (Person unmatchedPerson : unmatchedSet) {
 
-                if (unmatchedPerson.getDgn().equals(Gender.Male)) malesUnmatched++;
-                else if (unmatchedPerson.getDgn().equals(Gender.Female)) femalesUnmatched++;
+                if (unmatchedPerson.getDemMaleFlag().equals(Gender.Male)) malesUnmatched++;
+                else if (unmatchedPerson.getDemMaleFlag().equals(Gender.Female)) femalesUnmatched++;
             }
 
             /*
@@ -1890,9 +1890,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             for (Pair<Person,Person> match : matchesHere) {
                 Person male = match.getFirst();
                 Person female = match.getSecond();
-                personsToMatch.get(male.getDgn()).get(male.getRegion()).remove(male);
+                personsToMatch.get(male.getDemMaleFlag()).get(male.getRegion()).remove(male);
                 for (Region region : Parameters.getCountryRegions()) {
-                    personsToMatch.get(female.getDgn()).get(region).remove(female);
+                    personsToMatch.get(female.getDemMaleFlag()).get(region).remove(female);
                 }
             }
             matches.addAll(matchesHere);
@@ -1997,7 +1997,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         int numPersonsToBePartnered = 0;
         ArrayList<Person> personsWhoCanBePartnered = new ArrayList<>();
         for (Person person : persons) {
-            if (person.getDag() >= Parameters.MIN_AGE_COHABITATION && person.getPartner() == null) {
+            if (person.getDemAge() >= Parameters.MIN_AGE_COHABITATION && person.getPartner() == null) {
                 numPersonsWhoCanBePartnered++;
                 personsWhoCanBePartnered.add(person);
                 if (person.isToBePartnered()) {
@@ -2021,7 +2021,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         @Override
                         public void resample(Person agent) {
                             agent.setToBePartnered(true);
-                            personsToMatch.get(agent.getDgn()).get(agent.getBenefitUnit().getRegion()).add(agent);
+                            personsToMatch.get(agent.getDemMaleFlag()).get(agent.getBenefitUnit().getRegion()).add(agent);
                         }
                     },
                     targetNumberToBePartnered);
@@ -2055,8 +2055,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         //Iterate over persons and add them to the nested map above
         for (Person person : persons) {
-            if (person.getDag() >= 18 && person.getDag() <= 64) {
-                personsByGenderAndRegion.get(person.getDgn()).get(person.getRegion()).add(person);
+            if (person.getDemAge() >= 18 && person.getDemAge() <= 64) {
+                personsByGenderAndRegion.get(person.getDemMaleFlag()).get(person.getRegion()).add(person);
             }
         }
 
@@ -2113,7 +2113,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         int num16to29 = 0;
         ArrayList<Person> personsLeavingSchool = new ArrayList<Person>();
         for (Person person : persons) {
-            if (person.getDag() > 15 && person.getDag() < 30) { //Could introduce separate alignment for different age groups, but this is more flexible as it depends on the regression process within the larger alignment target
+            if (person.getDemAge() > 15 && person.getDemAge() < 30) { //Could introduce separate alignment for different age groups, but this is more flexible as it depends on the regression process within the larger alignment target
                 num16to29++;
                 if (person.getLes_c4().equals(Les_c4.Student)) {
                     numStudents++;
@@ -2183,7 +2183,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         for(Person person : persons) {
             if(person.isToLeaveSchool()) {
-                personsLeavingEducation.get(person.getDgn()).add(person);
+                personsLeavingEducation.get(person.getDemMaleFlag()).add(person);
             }
         }
 
@@ -2192,7 +2192,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             //Check pre-aligned population for education level statistics
             int numPersonsOfThisGenderWithLowEduPreAlignment = 0, numPersonsOfThisGenderWithHighEduPreAlignment = 0, numPersonsOfThisGender = 0;
             for(Person person : persons) {
-                if( person.getDgn().equals(gender) && person.getDag() >= 16 && person.getDag() <= 45) {        //Alignment projections are based only on persons younger than 66 years old
+                if( person.getDemMaleFlag().equals(gender) && person.getDemAge() >= 16 && person.getDemAge() <= 45) {        //Alignment projections are based only on persons younger than 66 years old
                     if (person.isToLeaveSchool()) { //Align only people leaving school?
                         if(person.getDeh_c3() != null) {
                             if (person.getDeh_c3().equals(Education.Low)) {
@@ -2221,7 +2221,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             Collections.shuffle(personsLeavingEducation.get(gender), educationInnov);        //To remove any source of bias in borderline cases because the first subset of school leavers of same age are assigned a higher education level.  (I.e. if education level is deemed to be associated with age, so that higher ages are assigned higher education levels, then if the boundary between high and medium education levels is e.g. at the people aged 27, the first few people aged 27 will be assigned a high education level and the rest will have medium (or low) education levels.  To avoid any sort of regularity in the iteration order of school leavers, we shuffle here.
             Collections.sort(personsLeavingEducation.get(gender),
                     (Comparator<Person>) (arg0, arg1) -> {
-                        return arg1.getDag() - arg0.getDag();    //Sort school leavers by descending order in age
+                        return arg1.getDemAge() - arg0.getDemAge();    //Sort school leavers by descending order in age
                     });
 
             //Perform alignment
@@ -2256,7 +2256,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 //Check result of alignment
                 int countHighEdPeople = 0, countMediumEdPeople = 0;
                 for(Person person : persons) {
-                    if( person.getDgn().equals(gender) && (person.getDag() <= 65) ) {        //Alignment projections are based only on persons younger than 66 years old
+                    if( person.getDemMaleFlag().equals(gender) && (person.getDemAge() <= 65) ) {        //Alignment projections are based only on persons younger than 66 years old
                         if (person.isToLeaveSchool()) {
                             if(person.getDeh_c3() != null) {
                                 if(person.getDeh_c3().equals(Education.High)) {
@@ -2531,7 +2531,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
                         for (Person person : benefitUnit.getMembers()) {
                             person.setAdditionalFieldsInInitialPopulation();
-                            if (person.getDag()<Parameters.AGE_TO_BECOME_RESPONSIBLE)
+                            if (person.getDemAge()<Parameters.AGE_TO_BECOME_RESPONSIBLE)
                                 hasChild = true;
                         }
                         benefitUnit.initializeFields();
@@ -2978,13 +2978,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             int femaleAge = 0;
             if (house.getMale() != null) {
                 if(house.getFemale() != null) {
-                    maleAge = house.getMale().getDag();
-                    femaleAge = house.getFemale().getDag();
+                    maleAge = house.getMale().getDemAge();
+                    femaleAge = house.getFemale().getDemAge();
                 } else {
-                    maleAge = house.getMale().getDag();
+                    maleAge = house.getMale().getDemAge();
                 }
             } else {
-                femaleAge = house.getFemale().getDag();
+                femaleAge = house.getFemale().getDemAge();
             }
 
 
