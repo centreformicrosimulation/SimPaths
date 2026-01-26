@@ -385,12 +385,12 @@ public class PersonTest {
             public void calculatesLowScoreCorrectly() {
 
 
-                testPerson.setDhe_mcs(1.);
-                testPerson.setDhe_pcs(1.);
+                testPerson.setHealthMentalMcs(1.);
+                testPerson.setHealthPhysicalPcs(1.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
-                assertEquals(-0.594, testPerson.getHe_eq5d());
+                assertEquals(-0.594, testPerson.getDemLifeSatEQ5D());
 
             }
 
@@ -399,12 +399,12 @@ public class PersonTest {
             public void calculatesHighScoreCorrectly()  {
 
 
-                testPerson.setDhe_mcs(100.);
-                testPerson.setDhe_pcs(100.);
+                testPerson.setHealthMentalMcs(100.);
+                testPerson.setHealthPhysicalPcs(100.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
-                assertEquals(1, testPerson.getHe_eq5d());
+                assertEquals(1, testPerson.getDemLifeSatEQ5D());
 
             }
 
@@ -430,12 +430,12 @@ public class PersonTest {
             @DisplayName("Calculates low score correctly using Franks coefficients")
             public void calculatesLowScoreCorrectly() {
 
-                testPerson.setDhe_mcs(1.);
-                testPerson.setDhe_pcs(1.);
+                testPerson.setHealthMentalMcs(1.);
+                testPerson.setHealthPhysicalPcs(1.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
-                assertEquals(-0.594, testPerson.getHe_eq5d());
+                assertEquals(-0.594, testPerson.getDemLifeSatEQ5D());
 
             }
 
@@ -443,13 +443,13 @@ public class PersonTest {
             @DisplayName("Calculates high score correctly using Franks coefficients")
             public void calculatesHighScoreCorrectly(){
 
-                testPerson.setDhe_mcs(100.);
-                testPerson.setDhe_pcs(100.);
+                testPerson.setHealthMentalMcs(100.);
+                testPerson.setHealthPhysicalPcs(100.);
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
                 // The maximum possible value given by the Franks coefficients
-                assertEquals(0.9035601, testPerson.getHe_eq5d());
+                assertEquals(0.9035601, testPerson.getDemLifeSatEQ5D());
 
             }
 
