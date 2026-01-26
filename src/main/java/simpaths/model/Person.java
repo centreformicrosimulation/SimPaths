@@ -141,9 +141,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Double healthPhysicalPcsL1;  //physical well-being: SF12 physical component summary score lag 1
     private Double healthMentalPartnerMcs; //mental well-being: SF12 mental component summary score (partner)
     private Double healthPhysicalPartnerPcs; //physical well-being: SF12 physical component summary score (partner)
-    private Integer demLifeSatScore1to7;      //life satisfaction - score 1-7
-    @Transient private Double demLifeSatScore1to7Pred;
-    @Transient private Integer demLifeSatScore1to7L1;      //life satisfaction - score 1-7 lag 1
+    private Double demLifeSatScore0to10;      //life satisfaction - score 0-10
+    @Transient private Double demLifeSatScore0to10L1;      //life satisfaction - score 0-10 lag 1
     @Column(name="demLifeSatEQ5D") private Double demLifeSatEQ5D;
     @Column(name="yFinDstrssFlag") private Boolean yFinDstrssFlag;
     @Transient private Boolean yBenReceivedFlagL1; // Lag(1) of whether person receives benefits
@@ -294,7 +293,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         healthPsyDstrss = 0.;
         healthMentalMcs = 48.;
         healthPhysicalPcs = 56.;
-        demLifeSatScore1to10 = 6.;
+        demLifeSatScore0to10 = 6.;
         eduHighestC3 = Education.Low;
         demEthnC6 = mother.getDot01();
         labC4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
@@ -486,16 +485,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         healthPsyDstrss = Objects.requireNonNullElse(originalPerson.healthPsyDstrss, 0.);
         healthPsyDstrssL1 = Objects.requireNonNullElse(originalPerson.healthPsyDstrssL1, healthPsyDstrss);
 
-        demLifeSatScore1to7 = originalPerson.demLifeSatScore1to7;
+        demLifeSatScore0to10 = originalPerson.demLifeSatScore0to10;
         healthMentalMcs = originalPerson.healthMentalMcs;
         healthPhysicalPcs = originalPerson.healthPhysicalPcs;
         healthMentalPartnerMcs = originalPerson.healthMentalPartnerMcs;
         healthPhysicalPartnerPcs = originalPerson.healthPhysicalPartnerPcs;
 
-        if (originalPerson.demLifeSatScore1to7L1 != null) {
-            demLifeSatScore1to7L1 = originalPerson.demLifeSatScore1to7L1;
+        if (originalPerson.demLifeSatScore0to10L1 != null) {
+            demLifeSatScore0to10L1 = originalPerson.demLifeSatScore0to10L1;
         } else {
-            demLifeSatScore1to7L1 = originalPerson.demLifeSatScore1to7;
+            demLifeSatScore0to10L1 = originalPerson.demLifeSatScore0to10;
         }
 
         if (originalPerson.healthWbScore0to36L1 != null) {
@@ -1063,7 +1062,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq2_dv/">scghq2_dv</a>
      */
     protected void healthMentalHM1Case() {
-        if (dag >= 16) {
+        if (demAge >= 16) {
             Map<DhmGhq,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthHM1Case);
             MultiValEvent event = new MultiValEvent(probs, innovations.getDoubleDraw(36));
             healthPsyDstrss = Double.valueOf(event.eval().getValue());
@@ -1083,11 +1082,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthMentalHM2Case() {
         double dhmGhqPrediction;
-        if (dag >= 25 && dag <= 64) {
-            if (Gender.Male.equals(getDgn())) {
+        if (demAge >= 25 && demAge <= 64) {
+            if (Gender.Male.equals(getGender())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class);
                 healthPsyDstrss = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss);
-            } else if (Gender.Female.equals(getDgn())) {
+            } else if (Gender.Female.equals(getGender())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class);
                 healthPsyDstrss = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss);
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
@@ -1108,10 +1107,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthMCS1() {
 
-        if (dag >= 16) {
+        if (demAge >= 16) {
             double mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("DHE_MCS1");
-            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(33));
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(33));
             healthMentalMcs = mcsPrediction + rmse * gauss;
         }
     }
@@ -1130,11 +1129,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthMCS2() {
 
         double mcsPrediction;
-        if (dag >= 25 && dag <= 64) {
-            if (Gender.Male.equals(getDgn())) {
+        if (demAge >= 25 && demAge <= 64) {
+            if (Gender.Male.equals(getGender())) {
                 mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
                 healthMentalMcs = constrainSF12Estimate(mcsPrediction + healthMentalMcs);
-            } else if (Gender.Female.equals(getDgn())) {
+            } else if (Gender.Female.equals(getGender())) {
                 mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
                 healthMentalMcs = constrainSF12Estimate(mcsPrediction + healthMentalMcs);
             }
@@ -1155,10 +1154,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthPCS1() {
 
-        if (dag >= 16) {
+        if (demAge >= 16) {
             double pcsPrediction = Parameters.getRegHealthPCS1().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("DHE_PCS1");
-            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(34));
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(34));
             healthPhysicalPcs = pcsPrediction + rmse * gauss;
         }
     }
@@ -1177,11 +1176,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthPCS2() {
 
         double pcsPrediction;
-        if (dag >= 25 && dag <= 64) {
-            if (Gender.Male.equals(getDgn())) {
+        if (demAge >= 25 && demAge <= 64) {
+            if (Gender.Male.equals(getGender())) {
                 pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
                 healthPhysicalPcs = constrainSF12Estimate(pcsPrediction + healthPhysicalPcs);
-            } else if (Gender.Female.equals(getDgn())) {
+            } else if (Gender.Female.equals(getGender())) {
                 pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
                 healthPhysicalPcs = constrainSF12Estimate(pcsPrediction + healthPhysicalPcs);
             }
@@ -1194,20 +1193,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     /**
      * Health and wellbeing - Life satisfaction score 0-10 step 1
      *
-     * <p>Calculates the 'baseline' yearly update to the Life Satisfaction score ({@code demLifeSatScore1to10}) based on demographic variables.
+     * <p>Calculates the 'baseline' yearly update to the Life Satisfaction score ({@code demLifeSatScore0to10}) based on demographic variables.
      * Runs <b>before</b> {@link #lifeSatisfaction2()}.</p>
      *
      * @filter Age 16+
-     * @updates {@code Person.demLifeSatScore1to10}
+     * @updates {@code Person.demLifeSatScore0to10}
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
      */
     protected void lifeSatisfaction1() {
 
-        if (dag >= 16) {
+        if (demAge >= 16) {
             double dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("DLS1");
-            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(35));
-            demLifeSatScore1to10 = dlsPrediction + rmse*gauss;
+            double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(35));
+            demLifeSatScore0to10 = dlsPrediction + rmse*gauss;
         }
 
     }
@@ -1215,28 +1214,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     /**
      * Health and wellbeing - Life satisfaction score 0-10 step 2
      *
-     * <p>Updates Life Satisfaction score ({@code demLifeSatScore1to10}) from the causal effects of economic transitions.
+     * <p>Updates Life Satisfaction score ({@code demLifeSatScore0to10}) from the causal effects of economic transitions.
      * Applies separate estimates for Male and Female Persons.
      * Runs <b>after</b> {@link #lifeSatisfaction1()}</p>
      *
      * @filter Age 25-64
-     * @updates {@code Person.demLifeSatScore1to10}
+     * @updates {@code Person.demLifeSatScore0to10}
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/sclfsato/">sclfsato</a>
      */
     protected void lifeSatisfaction2() {
 
-        if (dag >= 25 && dag <= 64) {
+        if (demAge >= 25 && demAge <= 64) {
 
             double dlsPrediction;
-            if (Gender.Male.equals(getDgn())) {
+            if (Gender.Male.equals(getGender())) {
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
-                demLifeSatScore1to10 = constrainLifeSatisfactionEstimate(dlsPrediction + demLifeSatScore1to10);
-            } else if (Gender.Female.equals(getDgn())) {
+                demLifeSatScore0to10 = constrainLifeSatisfactionEstimate(dlsPrediction + demLifeSatScore0to10);
+            } else if (Gender.Female.equals(getGender())) {
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
-                demLifeSatScore1to10 = constrainLifeSatisfactionEstimate(dlsPrediction + demLifeSatScore1to10);
+                demLifeSatScore0to10 = constrainLifeSatisfactionEstimate(dlsPrediction + demLifeSatScore0to10);
             }
-        } else if (demLifeSatScore1to10 != null) {
-            demLifeSatScore1to10 = constrainLifeSatisfactionEstimate(demLifeSatScore1to10);
+        } else if (demLifeSatScore0to10 != null) {
+            demLifeSatScore0to10 = constrainLifeSatisfactionEstimate(demLifeSatScore0to10);
         }
     }
 
@@ -1256,7 +1255,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthEQ5D() {
 
         double eq5dPrediction;
-        if (dag >= 16) {
+        if (demAge >= 16) {
 
             eq5dPrediction = Parameters.getRegEQ5D().getScore(this, Person.DoublesVariables.class);
             if (eq5dPrediction > 1) {
@@ -1323,7 +1322,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * Constrains life satisfaction score to valid range, 0-10
      *
      * @param dls_estimate predicted life satisfaction score
-     * @return {@code Person.demLifeSatScore1to10} score constrained to 0-10
+     * @return {@code Person.demLifeSatScore0to10} score constrained to 0-10
      */
     protected Double constrainLifeSatisfactionEstimate(double dls_estimate) {
         if (!Parameters.checkFinite(dls_estimate)) {
@@ -2098,7 +2097,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         healthSelfRatedL1 = healthSelfRated; //Update lag(1) of health
         healthWbScore0to36L1 = healthWbScore0to36; //Update lag(1) of mental health
         healthPsyDstrssL1 = healthPsyDstrss;
-        demLifeSatScore1to7L1 = demLifeSatScore1to7;
+        demLifeSatScore0to10L1 = demLifeSatScore0to10;
         healthMentalMcsL1 = healthMentalMcs;
         healthPhysicalPcsL1 = healthPhysicalPcs;
         demPrptyFlagL1 = getBenefitUnit().isHousingOwned();
@@ -3290,11 +3289,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 );
             }
             case Dls -> {
-                return demLifeSatScore1to10;
+                return demLifeSatScore0to10;
             }
             case Dls_L1 -> {
-                if (demLifeSatScore1to10L1 != null && demLifeSatScore1to10L1 >= 0.) {
-                    return demLifeSatScore1to10L1;
+                if (demLifeSatScore0to10L1 != null && demLifeSatScore0to10L1 >= 0.) {
+                    return demLifeSatScore0to10L1;
                 } else return 0.;
             }
             case Dhmghq_L1 -> {
@@ -4676,12 +4675,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
         return val;
     }
-    public Double getDemLifeSatScore1to10() {
+    public Double getDemLifeSatScore0to10() {
         Double val;
-        if (demLifeSatScore1to10 == null) {
+        if (demLifeSatScore0to10 == null) {
             val = -1.;
         } else {
-            val = demLifeSatScore1to10;
+            val = demLifeSatScore0to10;
         }
         return val;
     }
@@ -5272,7 +5271,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getSocialCareProvisionState() {
 //        double val = getSocialCareProvision().getValue();
-//        if (dag>DecisionParams.MAX_AGE_COHABITATION && val > 0.1 && val < 2.1)
+//        if (demAge>DecisionParams.MAX_AGE_COHABITATION && val > 0.1 && val < 2.1)
 //            val = 3.0;
         return (double)getSocialCareProvision().getValue();
     }

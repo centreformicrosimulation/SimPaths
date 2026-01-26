@@ -250,7 +250,7 @@ public class DataParser {
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHMENTALPARTNERMCS DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPHYSICALPCS DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPHYSICALPARTNERPCS DECIMAL(4, 2);"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMLIFESATSCORE1TO7 INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMLIFESATSCORE0to10 DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHWBSCORE0TO36 INT;"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPSYDSTRSSFLAG INT;"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMWBSCORE0TO12 INT;"
