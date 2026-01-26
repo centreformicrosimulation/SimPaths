@@ -131,7 +131,7 @@ public class Parameters {
         "healthWbScore0to36",					//mental health status
 		"demWbScore0to12",			//mental health status case based
 		"healthPsyDstrssFlag",				//mental health status case based dummy (1 = psychologically distressed)
-        "demLifeSatScore1to7",                  //life satisfaction
+        "demLifeSatScore0to10",                  //life satisfaction
         "yFinDstrssFlag",	//financial distress
 		"demPartnerNYear",				//years in partnership
 		"demAgePartnerDiff",				//partners age difference
@@ -3173,7 +3173,11 @@ public class Parameters {
             Parameters.setTrainingFlag(true);
 
         // populate new database for starting data
-        DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+        try {
+            DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error populating initial database from CSV files: " + e.getMessage());
+        }
 
         // populate new database for tax donors
         String taxDonorInputFilename = "tax_donor_population_" + country;

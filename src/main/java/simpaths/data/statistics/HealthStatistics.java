@@ -83,22 +83,22 @@ public class HealthStatistics {
 
     // Life Satisfaction numeric
     @Column(name = "dls_mean")
-    private double demLifeSatScore1to7Avg;
+    private double demLifeSatScore0to10Avg;
 
     @Column(name = "dls_median")
-    private double demLifeSatScore1to7P50;
+    private double demLifeSatScore0to10P50;
 
     @Column(name = "dls_p_10")
-    private double demLifeSatScore1to7P10;
+    private double demLifeSatScore0to10P10;
 
     @Column(name = "dls_p_90")
-    private double demLifeSatScore1to7P90;
+    private double demLifeSatScore0to10P90;
 
     @Column(name = "dls_p_25")
-    private double demLifeSatScore1to7P25;
+    private double demLifeSatScore0to10P25;
 
     @Column(name = "dls_p_75")
-    private double demLifeSatScore1to7P75;
+    private double demLifeSatScore0to10P75;
 
     @Column(name = "qualys")
     private double healthLifeYearQualAdj;
@@ -187,28 +187,28 @@ public class HealthStatistics {
         this.healthPhysicalPcsP75 = healthPhysicalPcsP75;
     }
 
-    public void setDls_mean(double demLifeSatScore1to7Avg) {
-        this.demLifeSatScore1to7Avg = demLifeSatScore1to7Avg;
+    public void setDls_mean(double demLifeSatScore0to10Avg) {
+        this.demLifeSatScore0to10Avg = demLifeSatScore0to10Avg;
     }
 
-    public void setDls_median(double demLifeSatScore1to7P50) {
-        this.demLifeSatScore1to7P50 = demLifeSatScore1to7P50;
+    public void setDls_median(double demLifeSatScore0to10P50) {
+        this.demLifeSatScore0to10P50 = demLifeSatScore0to10P50;
     }
 
-    public void setDls_p_10(double demLifeSatScore1to7P10) {
-        this.demLifeSatScore1to7P10 = demLifeSatScore1to7P10;
+    public void setDls_p_10(double demLifeSatScore0to10P10) {
+        this.demLifeSatScore0to10P10 = demLifeSatScore0to10P10;
     }
 
-    public void setDls_p_90(double demLifeSatScore1to7P90) {
-        this.demLifeSatScore1to7P90 = demLifeSatScore1to7P90;
+    public void setDls_p_90(double demLifeSatScore0to10P90) {
+        this.demLifeSatScore0to10P90 = demLifeSatScore0to10P90;
     }
 
-    public void setDls_p_25(double demLifeSatScore1to7P25) {
-        this.demLifeSatScore1to7P25 = demLifeSatScore1to7P25;
+    public void setDls_p_25(double demLifeSatScore0to10P25) {
+        this.demLifeSatScore0to10P25 = demLifeSatScore0to10P25;
     }
 
-    public void setDls_p_75(double demLifeSatScore1to7P75) {
-        this.demLifeSatScore1to7P75 = demLifeSatScore1to7P75;
+    public void setDls_p_75(double demLifeSatScore0to10P75) {
+        this.demLifeSatScore0to10P75 = demLifeSatScore0to10P75;
     }
 
     public void setN(int n) {

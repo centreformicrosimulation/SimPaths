@@ -571,7 +571,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // initialise random draws
         this.statSeed = statSeed;
-        statInnovations = new Innovations(33, 1, 1, statSeed);
+        statInnovations = new Innovations(37, 1, 1, statSeed);
 
         //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
         double[] sampleDifferentials = setMarriageTargets();
@@ -1064,7 +1064,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthMentalHM1Case() {
         if (demAge >= 16) {
             Map<DhmGhq,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthHM1Case);
-            MultiValEvent event = new MultiValEvent(probs, innovations.getDoubleDraw(36));
+            MultiValEvent event = new MultiValEvent(probs, statInnovations.getDoubleDraw(36));
             healthPsyDstrss = Double.valueOf(event.eval().getValue());
         }
     }
@@ -1083,10 +1083,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthMentalHM2Case() {
         double dhmGhqPrediction;
         if (demAge >= 25 && demAge <= 64) {
-            if (Gender.Male.equals(getGender())) {
+            if (Gender.Male.equals(getDemMaleFlag())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class);
                 healthPsyDstrss = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss);
-            } else if (Gender.Female.equals(getGender())) {
+            } else if (Gender.Female.equals(getDemMaleFlag())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class);
                 healthPsyDstrss = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss);
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
@@ -1130,10 +1130,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         double mcsPrediction;
         if (demAge >= 25 && demAge <= 64) {
-            if (Gender.Male.equals(getGender())) {
+            if (Gender.Male.equals(getDemMaleFlag())) {
                 mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
                 healthMentalMcs = constrainSF12Estimate(mcsPrediction + healthMentalMcs);
-            } else if (Gender.Female.equals(getGender())) {
+            } else if (Gender.Female.equals(getDemMaleFlag())) {
                 mcsPrediction = Parameters.getRegHealthMCS2Females().getScore(this, Person.DoublesVariables.class);
                 healthMentalMcs = constrainSF12Estimate(mcsPrediction + healthMentalMcs);
             }
@@ -1177,10 +1177,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         double pcsPrediction;
         if (demAge >= 25 && demAge <= 64) {
-            if (Gender.Male.equals(getGender())) {
+            if (Gender.Male.equals(getDemMaleFlag())) {
                 pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
                 healthPhysicalPcs = constrainSF12Estimate(pcsPrediction + healthPhysicalPcs);
-            } else if (Gender.Female.equals(getGender())) {
+            } else if (Gender.Female.equals(getDemMaleFlag())) {
                 pcsPrediction = Parameters.getRegHealthPCS2Females().getScore(this, Person.DoublesVariables.class);
                 healthPhysicalPcs = constrainSF12Estimate(pcsPrediction + healthPhysicalPcs);
             }
@@ -1227,10 +1227,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (demAge >= 25 && demAge <= 64) {
 
             double dlsPrediction;
-            if (Gender.Male.equals(getGender())) {
+            if (Gender.Male.equals(getDemMaleFlag())) {
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Males().getScore(this, Person.DoublesVariables.class);
                 demLifeSatScore0to10 = constrainLifeSatisfactionEstimate(dlsPrediction + demLifeSatScore0to10);
-            } else if (Gender.Female.equals(getGender())) {
+            } else if (Gender.Female.equals(getDemMaleFlag())) {
                 dlsPrediction = Parameters.getRegLifeSatisfaction2Females().getScore(this, Person.DoublesVariables.class);
                 demLifeSatScore0to10 = constrainLifeSatisfactionEstimate(dlsPrediction + demLifeSatScore0to10);
             }

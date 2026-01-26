@@ -363,7 +363,7 @@ public class PersonTest {
         void setup() {
 
             testPerson = new Person(true);
-            testPerson.setDag(30);
+            testPerson.setDemAge(30);
         }
 
         @Nested
