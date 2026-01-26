@@ -121,7 +121,11 @@ public class SimPathsMultiRun extends MultiRun {
 
 		if (flagDatabaseSetup) {
 
-			Parameters.databaseSetup(country, executeWithGui, startYear);
+			try {
+				Parameters.databaseSetup(country, executeWithGui, startYear);
+			} catch (RuntimeException e) {
+				throw e;
+			}
 		} else {
 			// standard simulation
 
