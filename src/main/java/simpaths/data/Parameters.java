@@ -1140,7 +1140,7 @@ public class Parameters {
         coeffCovarianceHM2CaseMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health_mental.xlsx", countryString + "_HM2_Males_C", 1);
         coeffCovarianceHM2CaseFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health_mental.xlsx", countryString + "_HM2_Females_C", 1);
 
-        validateRegressors(coeffCovarianceHM2CaseMales, "HM2_Males_C");
+        validateRegressors(coeffCovarianceHM2CaseMales, "reg_health_mental.xlsx", "HM2_Males_C");
 
         //Health
         coeffCovarianceDHE_MCS1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", countryString + "_DHE_MCS1", 1);
@@ -3234,7 +3234,7 @@ public class Parameters {
         EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
     }
 
-    public static void validatePersonRegressors(MultiKeyCoefficientMap map, String excelFileName, String sheetName) {
+    public static void validateRegressors(MultiKeyCoefficientMap map, String excelFileName, String sheetName) {
         if (map == null) return;
 
         // Get the values read from the REGRESSOR column by ExcelAssistant (excludes 'Constant')
@@ -3267,7 +3267,7 @@ public class Parameters {
 
         MultiKeyCoefficientMap map = ExcelAssistant.loadCoefficientMap(excelFileName, sheetName, keyColumns);
 
-        validatePersonRegressors(map, excelFileName,  sheetName);
+        validateRegressors(map, excelFileName,  sheetName);
 
         return map;
 
@@ -3277,7 +3277,7 @@ public class Parameters {
 
         MultiKeyCoefficientMap map = ExcelAssistant.loadCoefficientMap(excelFileName, sheetName, keyColumns, valueColumns);
 
-        validatePersonRegressors(map, excelFileName, sheetName);
+        validateRegressors(map, excelFileName, sheetName);
 
         return map;
 
