@@ -149,17 +149,9 @@ summ inc_increase inc_decrease econ_incchange
 
 * Task 5
 * Poverty transitions
-// ssc install egenmore
-* Ensure all swvs have household weight
-//gen weight_house = hhdenub_xw
-//replace weight_house=hhdenus_xw if swv==1
-//replace weight_house=hhdenui_xw if swv>=6 & swv<=13
-//replace weight_house=hhdeng2_xw if swv==14
-//
-//label var weight_house "Weight: household cross-sectional"
 
 * Generate median income for sample
-bysort swv: egen samp_medianinc=wpctile(econ_realequivinc), p(50) // weights(weight_house)
+bysort swv: egen samp_medianinc=wpctile(econ_realequivinc), p(50) weights(dhhwt)
 label var samp_medianinc "Median household income for sample in swv"
 * ONS uses net income, before or after housing costs. Net income used here.
 gen samp_poverty =samp_medianinc*0.60
