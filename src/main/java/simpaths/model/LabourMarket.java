@@ -216,7 +216,8 @@ public class LabourMarket {
                 benefitUnit.chooseRandomMonthlyOutcomeCovid19();
             }
 
-        } else {// Otherwise, use the default model of labour supply
+        } else {
+            // Otherwise, use the default model of labour supply
 
             EUROMODpolicyNameForThisYear = Parameters.getEUROMODpolicyForThisYear(year);    //Update EUROMOD policy to apply to this year
 
@@ -236,7 +237,7 @@ public class LabourMarket {
             }
 
             // Employment alignment phase (pre-alignment setup + subgroup-specific calibration)
-            if (model.isAlignEmployment() && model.getYear() <= EMPLOYMENT_ALIGNMENT_END_YEAR && !model.isMacroShocksOn()) {
+            if (model.isAlignEmployment() && model.getYear() <= EMPLOYMENT_ALIGNMENT_END_YEAR ) {
 
                 // Precompute labour choices, utility scores (without fixed costs), and atRisk flags
                 benefitUnits.parallelStream().forEach(BenefitUnit::computeAtRiskOfWorkFlags);
@@ -252,10 +253,6 @@ public class LabourMarket {
                 model.activityAlignmentCouples();
                 model.activityAlignmentMaleWithDependents();
                 model.activityAlignmentFemaleWithDependents();
-            }
-
-            if (model.isMacroShocksOn()) {
-                model.activityAlignmentMacroShock();
             }
 
             //Update Labour Supply

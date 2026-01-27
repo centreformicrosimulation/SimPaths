@@ -915,15 +915,13 @@ public class Parameters {
      *
      * METHOD TO LOAD PARAMETERS FOR GIVEN COUNTRY
      * @param country
-     * @param macroShockPopulation
      */
     public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations,
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
                                       boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
                                       Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
                                       double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
-                                      boolean flagSuppressSocialCareCosts1, boolean lifetimeIncomeImpute1, MacroScenarioPopulation macroShockPopulation,
-                                      MacroScenarioProductivity macroShockProductivity, MacroScenarioGreenPolicy macroShockGreenPolicy, boolean macroShocksOn) {
+                                      boolean flagSuppressSocialCareCosts1, boolean lifetimeIncomeImpute1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -964,143 +962,7 @@ public class Parameters {
         lifetimeIncomeImpute = lifetimeIncomeImpute1;
         fixedRetireAge = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1);
 
-        /*
-        Code below introduces macro shocks in terms of population, productivity, and employment
-         */
-        //Load country specific data on columns number in excel estimate and alignment files
-
-        // Macro population switch
-        if (macroShocksOn) {
-            switch (macroShockPopulation) {
-                case High:
-                    populationProjections = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "population_high", 3);
-
-                    // Productivity sub-switch
-                    switch (macroShockProductivity) {
-                        case Baseline:
-                            // Green policy sub-switch
-                            switch (macroShockGreenPolicy) {
-                                case Yes:
-                                    upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "gdp_highpop_baseprod_green", 1);
-                                    upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "wage_highpop_baseprod_green", 1);
-                                    rebaseIndexMap(TimeSeriesVariable.GDP);
-                                    rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                                    employedShareSingleMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_highpop_baseprod_green", 1);
-                                    employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_highpop_baseprod_green", 1);
-                                    employedShareCouples = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_highpop_baseprod_green", 1);
-                                    employedShare = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_highpop_baseprod_green", 1);
-                                    break;
-                                case No:
-                                default:
-                                    throw new IllegalArgumentException("Unsupported combination: High population + "
-                                            + macroShockProductivity + " + " + macroShockGreenPolicy);
-                            }
-                            break;
-                        case High:
-                        case Low:
-                            throw new IllegalArgumentException("Unsupported combination: High population + "
-                                    + macroShockProductivity);
-                        default:
-                            throw new IllegalStateException("Unexpected productivity value: " + macroShockProductivity);
-                    }
-                    break;
-
-                case Low:
-                    populationProjections = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "population_low", 3);
-
-                    switch (macroShockProductivity) {
-                        case Baseline:
-                            switch (macroShockGreenPolicy) {
-                                case Yes:
-                                    upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "gdp_lowpop_baseprod_green", 1);
-                                    upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "wage_lowpop_baseprod_green", 1);
-                                    rebaseIndexMap(TimeSeriesVariable.GDP);
-                                    rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                                    employedShareSingleMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_lowpop_baseprod_green", 1);
-                                    employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_lowpop_baseprod_green", 1);
-                                    employedShareCouples = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_lowpop_baseprod_green", 1);
-                                    employedShare = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_lowpop_baseprod_green", 1);
-                                    break;
-                                case No:
-                                default:
-                                    throw new IllegalArgumentException("Unsupported combination: Low population + "
-                                            + macroShockProductivity + " + " + macroShockGreenPolicy);
-                            }
-                            break;
-                        case High:
-                        case Low:
-                            throw new IllegalArgumentException("Unsupported combination: Low population + "
-                                    + macroShockProductivity);
-                        default:
-                            throw new IllegalStateException("Unexpected productivity value: " + macroShockProductivity);
-                    }
-                    break;
-
-                case Baseline:
-                default:
-                    populationProjections = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "align_popProjections.xlsx"), "Population_projections", 3);
-
-                    switch (macroShockProductivity) {
-                        case Baseline:
-                            switch (macroShockGreenPolicy) {
-                                case Yes:
-                                    upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "gdp_basepop_baseprod_green", 1);
-                                    upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "wage_basepop_baseprod_green", 1);
-                                    rebaseIndexMap(TimeSeriesVariable.GDP);
-                                    rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                                    employedShareSingleMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    employedShareCouples = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    employedShare = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    break;
-                                case No:
-                                default:
-                                    upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "gdp_basepop_baseprod", 1);
-                                    upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "wage_basepop_baseprod", 1);
-                                    rebaseIndexMap(TimeSeriesVariable.GDP);
-                                    rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                                    employedShareSingleMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod", 1);
-                                    employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod", 1);
-                                    employedShareCouples = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod", 1);
-                                    employedShare = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    break;
-                            }
-                            break;
-                        case High:
-                            switch (macroShockGreenPolicy) {
-                                case Yes:
-                                    upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "gdp_basepop_highprod_green", 1);
-                                    upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "wage_basepop_highprod_green", 1);
-                                    rebaseIndexMap(TimeSeriesVariable.GDP);
-                                    rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                                    employedShareSingleMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_highprod_green", 1);
-                                    employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_highprod_green", 1);
-                                    employedShareCouples = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_highprod_green", 1);
-                                    employedShare = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    break;
-                                case No:
-                                default:
-                                    upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "gdp_basepop_highprod", 1);
-                                    upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "wage_basepop_highprod", 1);
-                                    rebaseIndexMap(TimeSeriesVariable.GDP);
-                                    rebaseIndexMap(TimeSeriesVariable.WageGrowth);
-                                    employedShareSingleMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_highprod", 1);
-                                    employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_highprod", 1);
-                                    employedShareCouples = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_highprod", 1);
-                                    employedShare = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "scenario_macro_shocks.xlsx"), "emp_basepop_baseprod_green", 1);
-                                    break;
-                            }
-                            break;
-                        case Low:
-                            throw new IllegalArgumentException("Unsupported combination: Baseline population + Low productivity");
-                        default:
-                            throw new IllegalStateException("Unexpected productivity value: " + macroShockProductivity);
-                    }
-                    break;
-            }
-        } else {
-            populationProjections = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "align_popProjections.xlsx"), "Population_projections", 3);
-        }
+        populationProjections = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "align_popProjections.xlsx"), "Population_projections", 3);
 
 
         setMapBounds(MapBounds.Population, countryString);

@@ -315,19 +315,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "whether to include geographic region in state space for IO behavioural solutions")
     private boolean responsesToRegion = false;
 
-    // Controls for macro shocks
-    @GUIparameter(description = "macro shock: population")
-    private MacroScenarioPopulation macroShockPopulation = MacroScenarioPopulation.Baseline;
-
-    @GUIparameter(description = "macro shock: productivity")
-    private MacroScenarioProductivity macroShockProductivity = MacroScenarioProductivity.Baseline;
-
-    @GUIparameter(description = "macro shock: green policy")
-    private MacroScenarioGreenPolicy macroShockGreenPolicy = MacroScenarioGreenPolicy.No;
-
-    @GUIparameter(description = "macro shocks: on")
-    private boolean macroShocksOn = false;
-
     RandomGenerator cohabitInnov;
     Random initialiseInnov1;
     Random initialiseInnov2;
@@ -388,7 +375,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
                 projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
                 timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts, lifetimeIncomeImpute, macroShockPopulation, macroShockProductivity, macroShockGreenPolicy, macroShocksOn);
+                flagSuppressSocialCareCosts, lifetimeIncomeImpute);
         if (lifetimeIncomeGenerate) {
             ManagerProjectLifetimeIncomes.run(log, lifetimeIncomeStartBirthYear,
                     lifetimeIncomeEndBirthYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
@@ -1927,41 +1914,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
 
-    public void activityAlignmentMacroShock() {
-        Map<OccupancyExtended, MultiKeyCoefficientMap> coefficientMaps = new HashMap<>();
-        coefficientMaps.put(OccupancyExtended.Single_Male, Parameters.getCoeffLabourSupplyUtilityMales());
-        coefficientMaps.put(OccupancyExtended.Single_Female, Parameters.getCoeffLabourSupplyUtilityFemales());
-        coefficientMaps.put(OccupancyExtended.Couple, Parameters.getCoeffLabourSupplyUtilityCouples());
-        coefficientMaps.put(OccupancyExtended.Male_AC, Parameters.getCoeffLabourSupplyUtilityACMales());
-        coefficientMaps.put(OccupancyExtended.Female_AC, Parameters.getCoeffLabourSupplyUtilityACFemales());
-        coefficientMaps.put(OccupancyExtended.Male_With_Dependent, Parameters.getCoeffLabourSupplyUtilityMalesWithDependent());
-        coefficientMaps.put(OccupancyExtended.Female_With_Dependent, Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent());
-
-        Map<OccupancyExtended, List<String>> regressorsToModify = new HashMap<>();
-        regressorsToModify.put(OccupancyExtended.Single_Male, List.of("Hrs_40plus_Male"));
-        regressorsToModify.put(OccupancyExtended.Single_Female, List.of("Hrs_40plus_Female"));
-        regressorsToModify.put(OccupancyExtended.Couple, List.of("Hrs_40plus_Male", "Hrs_40plus_Female"));
-        regressorsToModify.put(OccupancyExtended.Male_AC, List.of("Hrs_40plus_Male"));
-        regressorsToModify.put(OccupancyExtended.Female_AC, List.of("Hrs_40plus_Female"));
-        regressorsToModify.put(OccupancyExtended.Male_With_Dependent, List.of("Hrs_40plus_Male"));
-        regressorsToModify.put(OccupancyExtended.Female_With_Dependent, List.of("Hrs_40plus_Female"));
-
-        double initialUtilityAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.UtilityAdjustment);
-
-        ActivityAlignmentMacroShock activityAlignment = new ActivityAlignmentMacroShock(
-                persons, benefitUnits, coefficientMaps, regressorsToModify, initialUtilityAdjustment
-        );
-
-        RootSearch search = getRootSearch(initialUtilityAdjustment, activityAlignment, 5.0E-1, 5.0E-3, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
-
-        if (search.isTargetAltered()) {
-            double newAdjustment = search.getTarget()[0];
-            Parameters.putTimeSeriesValue(getYear(), newAdjustment, TimeSeriesVariable.UtilityAdjustment);
-            System.out.println("Utility adjustment for all types was " + newAdjustment);
-        }
-    }
-
-
     /*
     Private helper method used to set up alignment for different occupancy types
      */
@@ -3307,38 +3259,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setResponsesToRegion(boolean responsesToRegion) {
         this.responsesToRegion = responsesToRegion;
-    }
-
-    public MacroScenarioPopulation getMacroShockPopulation() {
-        return macroShockPopulation;
-    }
-
-    public void setMacroShockPopulation(MacroScenarioPopulation macroShockPopulation) {
-        this.macroShockPopulation = macroShockPopulation;
-    }
-
-    public MacroScenarioProductivity getMacroShockProductivity() {
-        return macroShockProductivity;
-    }
-
-    public void setMacroShockProductivity(MacroScenarioProductivity macroShockProductivity) {
-        this.macroShockProductivity = macroShockProductivity;
-    }
-
-    public MacroScenarioGreenPolicy getMacroShockGreenPolicy() {
-        return macroShockGreenPolicy;
-    }
-
-    public void setMacroShockGreenPolicy(MacroScenarioGreenPolicy macroShockGreenPolicy) {
-        this.macroShockGreenPolicy = macroShockGreenPolicy;
-    }
-
-    public boolean isMacroShocksOn() {
-        return macroShocksOn;
-    }
-
-    public void setMacroShocksOn(boolean macroShocksOn) {
-        this.macroShocksOn = macroShocksOn;
     }
 
     public boolean getFlagDefaultToTimeSeriesAverages() { return flagDefaultToTimeSeriesAverages; }

@@ -1497,6 +1497,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         Occupancy occupancy = getOccupancy();
         Person male = getMale();
         Person female = getFemale();
+
         if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
             // intertemporal optimisations enabled
 
