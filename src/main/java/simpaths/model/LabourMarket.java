@@ -251,8 +251,6 @@ public class LabourMarket {
                 model.activityAlignmentSingleFemales();
 //                model.activityAlignmentSingleACFemales();
                 model.activityAlignmentCouples();
-//                model.activityAlignmentMaleWithDependents();
-//                model.activityAlignmentFemaleWithDependents();
             }
 
             //Update Labour Supply

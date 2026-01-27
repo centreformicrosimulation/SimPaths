@@ -95,10 +95,6 @@ public class ActivityAlignmentV2 implements IEvaluation {
         return switch (flag) {
             case Couple ->
                     Parameters.getTargetShare(year, TargetShares.EmploymentCouples);
-//            case Male_With_Dependent ->
-//                    Parameters.getTargetShare(year, TargetShares.EmploymentMaleWithDependent);
-//            case Female_With_Dependent ->
-//                    Parameters.getTargetShare(year, TargetShares.EmploymentFemaleWithDependent);
             case Male_AC ->
                     Parameters.getTargetShare(year, TargetShares.EmploymentMaleAdultChildren);
             case Female_AC ->
@@ -222,14 +218,6 @@ public class ActivityAlignmentV2 implements IEvaluation {
             case Couple:
                 return occ == Occupancy.Couple
                         && maleAtRisk && femaleAtRisk;
-
-//            case Male_With_Dependent:
-//                return occ == Occupancy.Couple
-//                        && maleAtRisk && !femaleAtRisk;
-//
-//            case Female_With_Dependent:
-//                return occ == Occupancy.Couple
-//                        && femaleAtRisk && !maleAtRisk;
 
             case Single_Male:
                 return occ == Occupancy.Single_Male

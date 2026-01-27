@@ -8,10 +8,6 @@ public enum TargetShares {
     EmploymentSingleMales,
     EmploymentSingleFemales,
     EmploymentCouples,
-//    EmploymentMaleWithDependent,
-//    EmploymentFemaleWithDependent,
     EmploymentMaleAdultChildren,
-    EmploymentFemaleAdultChildren,
-//    Employment
-    ;
+    EmploymentFemaleAdultChildren ;
 }

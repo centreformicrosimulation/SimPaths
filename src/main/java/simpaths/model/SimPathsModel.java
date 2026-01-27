@@ -1973,25 +1973,25 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         );
     }
 
-    public void activityAlignmentSingleACMales() {
-        activityAlignment(
-                TimeSeriesVariable.UtilityAdjustmentACMales,
-                Parameters.getCoeffLabourSupplyUtilityACMales(),
-                new String[]{"AlignmentFixedCostMen"},
-                OccupancyExtended.Male_AC,
-                "single AC males"
-        );
-    }
-
-    public void activityAlignmentSingleACFemales() {
-        activityAlignment(
-                TimeSeriesVariable.UtilityAdjustmentACFemales,
-                Parameters.getCoeffLabourSupplyUtilityACFemales(),
-                new String[]{"AlignmentFixedCostWomen"},
-                OccupancyExtended.Female_AC,
-                "single AC females"
-        );
-    }
+//    public void activityAlignmentSingleACMales() {
+//        activityAlignment(
+//                TimeSeriesVariable.UtilityAdjustmentACMales,
+//                Parameters.getCoeffLabourSupplyUtilityACMales(),
+//                new String[]{"AlignmentFixedCostMen"},
+//                OccupancyExtended.Male_AC,
+//                "single AC males"
+//        );
+//    }
+//
+//    public void activityAlignmentSingleACFemales() {
+//        activityAlignment(
+//                TimeSeriesVariable.UtilityAdjustmentACFemales,
+//                Parameters.getCoeffLabourSupplyUtilityACFemales(),
+//                new String[]{"AlignmentFixedCostWomen"},
+//                OccupancyExtended.Female_AC,
+//                "single AC females"
+//        );
+//    }
 
     public void activityAlignmentSingleFemales() {
         activityAlignment(
@@ -2012,26 +2012,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 "couples"
         );
     }
-
-//    public void activityAlignmentMaleWithDependents() {
-//        activityAlignment(
-//                TimeSeriesVariable.UtilityAdjustmentMaleWithDep,
-//                Parameters.getCoeffLabourSupplyUtilityMalesWithDependent(),
-//                new String[]{"AlignmentFixedCostMen"},
-//                OccupancyExtended.Male_With_Dependent,
-//                "males with dependents"
-//        );
-//    }
-//
-//    public void activityAlignmentFemaleWithDependents() {
-//        activityAlignment(
-//                TimeSeriesVariable.UtilityAdjustmentFemaleWithDep,
-//                Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent(),
-//                new String[]{"AlignmentFixedCostWomen"},
-//                OccupancyExtended.Female_With_Dependent,
-//                "females with dependents"
-//        );
-//    }
 
     private void partnershipAlignment() {
 
