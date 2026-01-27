@@ -39,14 +39,13 @@ import static microsim.statistics.regression.RegressionUtils.appendCoefficientMa
  */
 public class Parameters {
 
-    private static String getCountryInputDir(Country country) {
-        return INPUT_DIRECTORY + country + File.separator;
-    }
-
-    private static String resolveCountryFile(Country country, String fileName) {
-        return getCountryInputDir(country) + fileName;
-    }
-
+//    private static String getCountryInputDir(Country country) {
+//        return INPUT_DIRECTORY + country + File.separator;
+//    }
+//
+//    private static String resolveCountryFile(Country country, String fileName) {
+//        return getCountryInputDir(country) + fileName;
+//    }
 
     public static final boolean TESTING_FLAG = false;
 
@@ -396,12 +395,11 @@ public class Parameters {
     private static MultiKeyCoefficientMap upratingIndexMapRealGDP, mapRealGDPperCapita, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
             partnershipTimeAdjustment, fertilityTimeAdjustment,
             utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentCouples,
-            utilityTimeAdjustment, utilityTimeAdjustmentACMales, utilityTimeAdjustmentACFemales, utilityTimeAdjustmentMaleWithDep,
-            utilityTimeAdjustmentFemaleWithDep,
+//            utilityTimeAdjustment, utilityTimeAdjustmentACMales, utilityTimeAdjustmentACFemales,
             upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
             wageRateFormalSocialCare, socialCarePolicy, partneredShare,
-            employedShareSingleMales, employedShareSingleFemales, employedShareCouples,
-            employedShare, employedShareACMales, employedShareACFemales, employedShareMaleWithDep, employedShareFemaleWithDep;
+            employedShareSingleMales, employedShareSingleFemales, employedShareCouples;
+//            employedShare, employedShareACMales, employedShareACFemales, employedShareMaleWithDep, employedShareFemaleWithDep;
 
     public static Map<Integer, Double> partnershipAlignAdjustment, fertilityAlignAdjustment;
     public static MultiKeyMap upratingFactorsMap = new MultiKeyMap<>();
@@ -588,8 +586,8 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemales;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilitySingleWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
-    private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMalesWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
-    private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemalesWithDependent;
+//    private static MultiKeyCoefficientMap coeffLabourSupplyUtilityMalesWithDependent; //For use with couples where only male is flexible in labour supply (so has a dependent)
+//    private static MultiKeyCoefficientMap coeffLabourSupplyUtilityFemalesWithDependent;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACMales; //Adult children, male
 
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACFemales; //Adult children, female
@@ -838,8 +836,8 @@ public class Parameters {
     private static LinearRegression regLabourSupplyUtilityFemales;
 
     private static LinearRegression regLabourSupplyUtilitySingleWithDependent;
-    private static LinearRegression regLabourSupplyUtilityMalesWithDependent;
-    private static LinearRegression regLabourSupplyUtilityFemalesWithDependent;
+//    private static LinearRegression regLabourSupplyUtilityMalesWithDependent;
+//    private static LinearRegression regLabourSupplyUtilityFemalesWithDependent;
 
     private static LinearRegression regLabourSupplyUtilityACMales;
     private static LinearRegression regLabourSupplyUtilityACFemales;
@@ -909,8 +907,6 @@ public class Parameters {
             }
         }
     }
-
-
     /**
      *
      * METHOD TO LOAD PARAMETERS FOR GIVEN COUNTRY
@@ -962,9 +958,8 @@ public class Parameters {
         lifetimeIncomeImpute = lifetimeIncomeImpute1;
         fixedRetireAge = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1);
 
-        populationProjections = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "align_popProjections.xlsx"), "Population_projections", 3);
-
-
+        // alignment parameters
+        populationProjections = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "align_popProjections.xlsx", countryString, 3);
         setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels
@@ -1041,12 +1036,13 @@ public class Parameters {
         addFixedCostRegressors(coeffLabourSupplyUtilityFemales,List.of("AlignmentFixedCostWomen"));
 
         coeffLabourSupplyUtilitySingleWithDependent = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleDep", 1);
+        addFixedCostRegressors(coeffLabourSupplyUtilitySingleWithDependent,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
 
-        coeffLabourSupplyUtilityMalesWithDependent = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_labourSupplyUtility.xlsx"),"SingleDep_Males", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityMalesWithDependent,List.of("AlignmentFixedCostMen"));
-
-        coeffLabourSupplyUtilityFemalesWithDependent = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_labourSupplyUtility.xlsx"),"SingleDep_Females", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityFemalesWithDependent,List.of("AlignmentFixedCostWomen"));
+//        coeffLabourSupplyUtilityMalesWithDependent = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_labourSupplyUtility.xlsx"),"SingleDep_Males", 1);
+//        addFixedCostRegressors(coeffLabourSupplyUtilityMalesWithDependent,List.of("AlignmentFixedCostMen"));
+//
+//        coeffLabourSupplyUtilityFemalesWithDependent = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_labourSupplyUtility.xlsx"),"SingleDep_Females", 1);
+//        addFixedCostRegressors(coeffLabourSupplyUtilityFemalesWithDependent,List.of("AlignmentFixedCostWomen"));
 
         coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1);
         addFixedCostRegressors(coeffLabourSupplyUtilityACMales,List.of("AlignmentFixedCostMen"));
@@ -1058,10 +1054,10 @@ public class Parameters {
         addFixedCostRegressors(coeffLabourSupplyUtilityCouples,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_employmentSelection.xlsx"), "EmploymentSelection_MaleE", 1);
-        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_employmentSelection.xlsx"), "EmploymentSelection_MaleNE", 1);
-        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_employmentSelection.xlsx"), "EmploymentSelection_FemaleE", 1);
-        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "reg_employmentSelection.xlsx"), "EmploymentSelection_FemaleNE", 1);
+        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleE", 1);
+        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleNE", 1);
+        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleE", 1);
+        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleNE", 1);
 
         // Load coefficients for Covid-19 labour supply models
         // Coefficients for process assigning simulated people to self-employment
@@ -1252,14 +1248,12 @@ public class Parameters {
             coeffCovarianceEmploymentSelectionFemalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesNE);
 
             //Labour supply utility
-            /*
             coeffLabourSupplyUtilityMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityMales);
             coeffLabourSupplyUtilityFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityFemales);
-            //coeffLabourSupplyUtilitySingleWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilitySingleWithDependent);
+            coeffLabourSupplyUtilitySingleWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilitySingleWithDependent);
             coeffLabourSupplyUtilityACMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACMales);
             coeffLabourSupplyUtilityACFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACFemales);
             coeffLabourSupplyUtilityCouples = RegressionUtils.bootstrap(coeffLabourSupplyUtilityCouples);
-             */
 
             //Education
             coeffCovarianceEducationE1a = RegressionUtils.bootstrap(coeffCovarianceEducationE1a);
@@ -1478,8 +1472,8 @@ public class Parameters {
         regLabourSupplyUtilityMales = new LinearRegression(coeffLabourSupplyUtilityMales);
         regLabourSupplyUtilityFemales = new LinearRegression(coeffLabourSupplyUtilityFemales);
         regLabourSupplyUtilitySingleWithDependent = new LinearRegression(coeffLabourSupplyUtilitySingleWithDependent);
-        regLabourSupplyUtilityMalesWithDependent = new LinearRegression(coeffLabourSupplyUtilityMalesWithDependent);
-        regLabourSupplyUtilityFemalesWithDependent = new LinearRegression(coeffLabourSupplyUtilityFemalesWithDependent);
+//        regLabourSupplyUtilityMalesWithDependent = new LinearRegression(coeffLabourSupplyUtilityMalesWithDependent);
+//        regLabourSupplyUtilityFemalesWithDependent = new LinearRegression(coeffLabourSupplyUtilityFemalesWithDependent);
         regLabourSupplyUtilityACMales = new LinearRegression(coeffLabourSupplyUtilityACMales);
         regLabourSupplyUtilityACFemales = new LinearRegression(coeffLabourSupplyUtilityACFemales);
         regLabourSupplyUtilityCouples = new LinearRegression(coeffLabourSupplyUtilityCouples);
@@ -2043,13 +2037,13 @@ public class Parameters {
         return regLabourSupplyUtilityMales;
     }
 
-    public static LinearRegression getRegLabourSupplyUtilityFemalesWithDependent() {
-        return regLabourSupplyUtilityFemalesWithDependent;
-    }
-
-    public static LinearRegression getRegLabourSupplyUtilityMalesWithDependent() {
-        return regLabourSupplyUtilityMalesWithDependent;
-    }
+//    public static LinearRegression getRegLabourSupplyUtilityFemalesWithDependent() {
+//        return regLabourSupplyUtilityFemalesWithDependent;
+//    }
+//
+//    public static LinearRegression getRegLabourSupplyUtilityMalesWithDependent() {
+//        return regLabourSupplyUtilityMalesWithDependent;
+//    }
 
     public static LinearRegression getRegLabourSupplyUtilitySingleWithDependent() {
         return regLabourSupplyUtilitySingleWithDependent;
@@ -2417,13 +2411,13 @@ public class Parameters {
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
         fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_fertility_adjustment", 1, 1);
         utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_utility_adj_smales", 1, 1);
-        utilityTimeAdjustmentACMales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_acmales", 1);
-        utilityTimeAdjustmentACFemales = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_acfemales", 1);
+//        utilityTimeAdjustmentACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_utility_adj_acmales", 1);
+//        utilityTimeAdjustmentACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_utility_adj_acfemales", 1);
         utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_utility_adj_sfemales", 1, 1);
         utilityTimeAdjustmentCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_utility_adj_couples", 1, 1);
-        utilityTimeAdjustmentMaleWithDep = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_malewdep", 1);
-        utilityTimeAdjustmentFemaleWithDep = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_femalewdep", 1);
-        utilityTimeAdjustment = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_all", 1);
+//        utilityTimeAdjustmentMaleWithDep = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_malewdep", 1);
+//        utilityTimeAdjustmentFemaleWithDep = ExcelAssistant.loadCoefficientMap(resolveCountryFile(country, "time_series_factor.xlsx"), "utility_adj_femalewdep", 1);
+//        utilityTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_utility_adj_all", 1);
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
         rebaseIndexMap(TimeSeriesVariable.GDP);
@@ -2513,9 +2507,9 @@ public class Parameters {
             case FertilityAdjustment -> {
                 map = fertilityTimeAdjustment;
             }
-            case UtilityAdjustment -> {
-                map = utilityTimeAdjustment;
-            }
+//            case UtilityAdjustment -> {
+//                map = utilityTimeAdjustment;
+//            }
             case UtilityAdjustmentSingleMales -> {
                 map = utilityTimeAdjustmentSingleMales;
             }
@@ -2525,14 +2519,14 @@ public class Parameters {
             case UtilityAdjustmentCouples -> {
                 map = utilityTimeAdjustmentCouples;
             }
-            case UtilityAdjustmentACMales ->
-                    map = utilityTimeAdjustmentACMales;
-            case UtilityAdjustmentACFemales ->
-                    map = utilityTimeAdjustmentACFemales;
-            case UtilityAdjustmentMaleWithDep ->
-                    map = utilityTimeAdjustmentMaleWithDep;
-            case UtilityAdjustmentFemaleWithDep ->
-                    map = utilityTimeAdjustmentFemaleWithDep;
+//            case UtilityAdjustmentACMales ->
+//                    map = utilityTimeAdjustmentACMales;
+//            case UtilityAdjustmentACFemales ->
+//                    map = utilityTimeAdjustmentACFemales;
+//            case UtilityAdjustmentMaleWithDep ->
+//                    map = utilityTimeAdjustmentMaleWithDep;
+//            case UtilityAdjustmentFemaleWithDep ->
+//                    map = utilityTimeAdjustmentFemaleWithDep;
             case HighEducationRate -> {
                 map = projectionsHighEdu;
             }
@@ -2565,17 +2559,17 @@ public class Parameters {
             case EmploymentCouples -> {
                 map = employedShareCouples;
             }
-            case EmploymentMaleAdultChildren ->
-                    map = employedShareACMales;
-            case EmploymentFemaleAdultChildren ->
-                    map = employedShareACFemales;
-            case EmploymentMaleWithDependent ->
-                    map = employedShareMaleWithDep;
-            case EmploymentFemaleWithDependent ->
-                    map = employedShareFemaleWithDep;
-            case Employment -> {
-                map = employedShare;
-            }
+//            case EmploymentMaleAdultChildren ->
+//                    map = employedShareACMales;
+//            case EmploymentFemaleAdultChildren ->
+//                    map = employedShareACFemales;
+//            case EmploymentMaleWithDependent ->
+//                    map = employedShareMaleWithDep;
+//            case EmploymentFemaleWithDependent ->
+//                    map = employedShareFemaleWithDep;
+//            case Employment -> {
+//                map = employedShare;
+//            }
         }
 
         return map;
@@ -3118,13 +3112,13 @@ public class Parameters {
         return coeffLabourSupplyUtilityMales;
     }
 
-    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityMalesWithDependent() {
-        return coeffLabourSupplyUtilityMalesWithDependent;
-    }
-
-    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityFemalesWithDependent() {
-        return coeffLabourSupplyUtilityFemalesWithDependent;
-    }
+//    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityMalesWithDependent() {
+//        return coeffLabourSupplyUtilityMalesWithDependent;
+//    }
+//
+//    public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityFemalesWithDependent() {
+//        return coeffLabourSupplyUtilityFemalesWithDependent;
+//    }
 
     public static MultiKeyCoefficientMap getCoeffLabourSupplyUtilityACMales() {
         return coeffLabourSupplyUtilityACMales;

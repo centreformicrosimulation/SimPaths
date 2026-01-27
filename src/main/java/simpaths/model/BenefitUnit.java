@@ -1118,8 +1118,8 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                 } else {
                     // Male only at risk → subtract male fixed cost
-                    double utilityScore = Parameters.getRegLabourSupplyUtilityMalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
-                    var reg = Parameters.getRegLabourSupplyUtilityMalesWithDependent();
+                    double utilityScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleWithDependent();
 
                     double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
                     double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
@@ -1129,8 +1129,8 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 }
             } else if (femaleAtRiskOfWork) {
                 // Female only at risk → subtract female fixed cost
-                double utilityScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
-                var reg = Parameters.getRegLabourSupplyUtilityFemalesWithDependent();
+                double utilityScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilitySingleWithDependent();
 
                 double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
                 double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
@@ -1362,7 +1362,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                         utilityScore += betaMen * xMen + betaWomen * xWomen;
 
                     } else {
-                        var reg = Parameters.getRegLabourSupplyUtilityMalesWithDependent();
+                        var reg = Parameters.getRegLabourSupplyUtilitySingleWithDependent();
                         double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
                         double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
 
@@ -1370,7 +1370,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                     }
                 } else if (femaleAtRiskOfWork) {
 
-                    var reg = Parameters.getRegLabourSupplyUtilityFemalesWithDependent();
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleWithDependent();
 
                     double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
                     double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
@@ -1968,6 +1968,8 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
     public enum Regressors {
 
+        AlignmentFixedCostWomen,
+        AlignmentFixedCostMen,
         Constant,
         couple_emp_2ft,
         couple_emp_2ne,
@@ -2447,6 +2449,15 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
                         getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,2).ordinal() * 1.e-2;
             }
+
+            case AlignmentFixedCostMen -> {
+                return (getMale() != null && (!getMale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
+            case AlignmentFixedCostWomen -> {
+                return (getFemale() != null && (!getFemale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
             case MaleLeisure -> {                            //24*7 - labour supply weekly for male
                 return Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly();
             }

@@ -179,7 +179,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
 
-    private boolean alignEmployment = false; //Set to true to align employment share
+    private boolean alignEmployment = true; //Set to true to align employment share
 
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
@@ -2013,25 +2013,25 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         );
     }
 
-    public void activityAlignmentMaleWithDependents() {
-        activityAlignment(
-                TimeSeriesVariable.UtilityAdjustmentMaleWithDep,
-                Parameters.getCoeffLabourSupplyUtilityMalesWithDependent(),
-                new String[]{"AlignmentFixedCostMen"},
-                OccupancyExtended.Male_With_Dependent,
-                "males with dependents"
-        );
-    }
-
-    public void activityAlignmentFemaleWithDependents() {
-        activityAlignment(
-                TimeSeriesVariable.UtilityAdjustmentFemaleWithDep,
-                Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent(),
-                new String[]{"AlignmentFixedCostWomen"},
-                OccupancyExtended.Female_With_Dependent,
-                "females with dependents"
-        );
-    }
+//    public void activityAlignmentMaleWithDependents() {
+//        activityAlignment(
+//                TimeSeriesVariable.UtilityAdjustmentMaleWithDep,
+//                Parameters.getCoeffLabourSupplyUtilityMalesWithDependent(),
+//                new String[]{"AlignmentFixedCostMen"},
+//                OccupancyExtended.Male_With_Dependent,
+//                "males with dependents"
+//        );
+//    }
+//
+//    public void activityAlignmentFemaleWithDependents() {
+//        activityAlignment(
+//                TimeSeriesVariable.UtilityAdjustmentFemaleWithDep,
+//                Parameters.getCoeffLabourSupplyUtilityFemalesWithDependent(),
+//                new String[]{"AlignmentFixedCostWomen"},
+//                OccupancyExtended.Female_With_Dependent,
+//                "females with dependents"
+//        );
+//    }
 
     private void partnershipAlignment() {
 
