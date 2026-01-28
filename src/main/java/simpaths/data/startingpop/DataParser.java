@@ -252,8 +252,7 @@ public class DataParser {
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPHYSICALPARTNERPCS DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMLIFESATSCORE0to10 DECIMAL(4, 2);"
                                 + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHWBSCORE0TO36 INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPSYDSTRSSFLAG INT;"
-                                + "ALTER TABLE  " + personTable + " ALTER COLUMN DEMWBSCORE0TO12 INT;"
+                                + "ALTER TABLE  " + personTable + " ALTER COLUMN HEALTHPSYDSTRSS0to12 INT;"
 
                                 //Rename idBu to BU_ID
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN idBu RENAME TO buid;"

@@ -129,8 +129,7 @@ public class Parameters {
         "healthMentalPartnerMcs",            //mental health - SF12 score MCS (partner)
         "healthPhysicalPartnerPcs",            //physical health - SF12 score PCS (partner)
         "healthWbScore0to36",					//mental health status
-		"demWbScore0to12",			//mental health status case based
-		"healthPsyDstrssFlag",				//mental health status case based dummy (1 = psychologically distressed)
+		"healthPsyDstrss0to12",				//mental health status case based dummy (1 = psychologically distressed)
         "demLifeSatScore0to10",                  //life satisfaction
         "yFinDstrssFlag",	//financial distress
 		"demPartnerNYear",				//years in partnership

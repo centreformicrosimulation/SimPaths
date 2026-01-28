@@ -161,16 +161,15 @@ rename der eduReturnFlag
 rename dehm_c3 eduHighestMotherC3
 rename dehf_c3 eduHighestFatherC3
 rename stm statInterviewYear
-rename dhm healthWbScore0to36
-rename scghq2_dv demWbScore0to12
 rename dhh_owned wealthPrptyFlag
 rename lhw labHrsWorkWeek
 rename l1_lhw labHrsWorkWeekL1
 rename drgn1 demRgn
 rename les_c4 labC4
-rename dhm_ghq healthPsyDstrssFlag
 rename adultchildflag demAdultChildFlag
 rename dwt wgtHhCross
+rename dot demEthnC4
+rename dot01 demEthnC6
 
 * --- Income, labour, wealth ---
 rename potential_earnings_hourly labWageHrly
@@ -201,13 +200,13 @@ rename formal_socare_cost careCareFormal
 rename careHoursProvidedWeekly careHrsProvidedWeek
 
 * --- Health & wellbeing ---
+rename dhm healthWbScore0to36
+rename dhm_ghq healthPsyDstrss0to12
 rename dhe_mcs healthMentalMcs
 rename dhe_pcs healthPhysicalPcs
 rename dhe_mcssp healthMentalPartnerMcs
 rename dhe_pcssp healthPhysicalPartnerPcs
 rename dls demLifeSatScore0to10
-rename dot demEthnC4
-rename dot01 demEthnC6
 rename financial_distress yFinDstrssFlag	
 
 
@@ -267,7 +266,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	keep idHh idBu idPers idPartner idMother idFather statCollectionWave demMaleFlag demAge demNChild0to2 demNChild eduSpellFlag /// 
 	eduHighestC3 eduExitSampleFlag healthDsblLongtermFlag healthSelfRated yHhQuintilesMonthC5 yEmpPersGrossMonth yNonBenPersGrossMonth ///
 	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
-	statInterviewYear healthWbScore0to36 demWbScore0to12 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrssFlag ///
+	statInterviewYear healthWbScore0to36 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrss0to12 ///
 	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
 	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
@@ -276,7 +275,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	order idHh idBu idPers idPartner idMother idFather statCollectionWave demMaleFlag demAge demNChild0to2 demNChild eduSpellFlag /// 
 	eduHighestC3 eduExitSampleFlag healthDsblLongtermFlag healthSelfRated yHhQuintilesMonthC5 yEmpPersGrossMonth yNonBenPersGrossMonth ///
 	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
-	statInterviewYear healthWbScore0to36 demWbScore0to12 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrssFlag ///
+	statInterviewYear healthWbScore0to36 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrss0to12 ///
 	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
 	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
@@ -285,7 +284,7 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	recode idHh idBu idPers idPartner idMother idFather statCollectionWave demMaleFlag demAge demNChild0to2 demNChild eduSpellFlag /// 
 	eduHighestC3 eduExitSampleFlag healthDsblLongtermFlag healthSelfRated yHhQuintilesMonthC5 yEmpPersGrossMonth yNonBenPersGrossMonth ///
 	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
-	statInterviewYear healthWbScore0to36 demWbScore0to12 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrssFlag ///
+	statInterviewYear healthWbScore0to36 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrss0to12 ///
 	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
 	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
