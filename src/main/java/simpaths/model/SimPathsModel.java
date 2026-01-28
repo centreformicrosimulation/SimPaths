@@ -597,7 +597,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // modify the outcome of Step 1 depending on individual's exposures + caseness
         yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM2); //Step 2 of mental health.
         // update case-based measure
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1HM2Cases);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM1Case);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMentalHM2Case);
 
         // HEALTH and LIFE SATISFACTION 2
         yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthMCS1); //Step 1 of mental health

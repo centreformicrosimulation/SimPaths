@@ -205,7 +205,7 @@ rename dhe_mcs healthMentalMcs
 rename dhe_pcs healthPhysicalPcs
 rename dhe_mcssp healthMentalPartnerMcs
 rename dhe_pcssp healthPhysicalPartnerPcs
-rename dls demLifeSatScore1to7
+rename dls demLifeSatScore0to10
 rename dot demEthnC4
 rename dot01 demEthnC6
 rename financial_distress yFinDstrssFlag	

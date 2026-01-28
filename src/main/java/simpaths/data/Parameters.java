@@ -131,7 +131,7 @@ public class Parameters {
         "healthWbScore0to36",					//mental health status
 		"demWbScore0to12",			//mental health status case based
 		"healthPsyDstrssFlag",				//mental health status case based dummy (1 = psychologically distressed)
-        "demLifeSatScore1to7",                  //life satisfaction
+        "demLifeSatScore0to10",                  //life satisfaction
         "yFinDstrssFlag",	//financial distress
 		"demPartnerNYear",				//years in partnership
 		"demAgePartnerDiff",				//partners age difference
@@ -742,7 +742,7 @@ public class Parameters {
     private static LinearRegression regHealthHM2LevelMales;
     private static LinearRegression regHealthHM2LevelFemales;
 
-    private static LinearRegression regHealthHM1Case;
+    private static OrderedRegression regHealthHM1Case;
     private static LinearRegression regHealthHM2CaseMales;
     private static LinearRegression regHealthHM2CaseFemales;
 
@@ -1236,6 +1236,15 @@ public class Parameters {
             coeffCovarianceHM1Case = RegressionUtils.bootstrap(coeffCovarianceHM1Case);
             coeffCovarianceHM2CaseMales = RegressionUtils.bootstrap(coeffCovarianceHM2CaseMales);
             coeffCovarianceHM2CaseFemales = RegressionUtils.bootstrap(coeffCovarianceHM2CaseFemales);
+            coeffCovarianceDHE_MCS1 = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS1);
+            coeffCovarianceDHE_MCS2Males = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS2Males);
+            coeffCovarianceDHE_MCS2Females = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS2Females);
+            coeffCovarianceDHE_PCS1 = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS1);
+            coeffCovarianceDHE_PCS2Males = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS2Males);
+            coeffCovarianceDHE_PCS2Females = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS2Females);
+            coeffCovarianceDLS1 = RegressionUtils.bootstrap(coeffCovarianceDLS1);
+            coeffCovarianceDLS2Males = RegressionUtils.bootstrap(coeffCovarianceDLS2Males);
+            coeffCovarianceDLS2Females = RegressionUtils.bootstrap(coeffCovarianceDLS2Females);
 
             //Social care
             coeffCovarianceSocialCareS1a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1a);
@@ -1357,7 +1366,7 @@ public class Parameters {
         regHealthHM2LevelMales = new LinearRegression(coeffCovarianceHM2LevelMales);
         regHealthHM2LevelFemales = new LinearRegression(coeffCovarianceHM2LevelFemales);
 
-        regHealthHM1Case = new LinearRegression(coeffCovarianceHM1Case);
+        regHealthHM1Case = new OrderedRegression(RegressionType.OrderedLogit,DhmGhq.class,coeffCovarianceHM1Case);
         regHealthHM2CaseMales = new LinearRegression(coeffCovarianceHM2CaseMales);
         regHealthHM2CaseFemales = new LinearRegression(coeffCovarianceHM2CaseFemales);
 
@@ -1874,7 +1883,7 @@ public class Parameters {
     public static LinearRegression getRegHealthHM1Level() { return regHealthHM1Level; }
     public static LinearRegression getRegHealthHM2LevelMales() { return regHealthHM2LevelMales; }
     public static LinearRegression getRegHealthHM2LevelFemales() { return regHealthHM2LevelFemales; }
-    public static LinearRegression getRegHealthHM1Case() {return regHealthHM1Case;}
+    public static OrderedRegression getRegHealthHM1Case() {return regHealthHM1Case;}
     public static LinearRegression getRegHealthHM2CaseMales() {return regHealthHM2CaseMales;}
     public static LinearRegression getRegHealthHM2CaseFemales() {return regHealthHM2CaseFemales;}
 
@@ -3164,7 +3173,11 @@ public class Parameters {
             Parameters.setTrainingFlag(true);
 
         // populate new database for starting data
-        DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+        try {
+            DataParser.databaseFromCSV(country, executeWithGui); // Initial database tables
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Error populating initial database from CSV files: " + e.getMessage());
+        }
 
         // populate new database for tax donors
         String taxDonorInputFilename = "tax_donor_population_" + country;

@@ -361,7 +361,9 @@ public class PersonTest {
 
         @BeforeEach
         void setup() {
+
             testPerson = new Person(true);
+            testPerson.setDemAge(30);
         }
 
         @Nested
@@ -388,7 +390,7 @@ public class PersonTest {
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
-                assertEquals(-0.594, testPerson.getHe_eq5d());
+                assertEquals(-0.594, testPerson.getDemLifeSatEQ5D());
 
             }
 
@@ -402,7 +404,7 @@ public class PersonTest {
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
-                assertEquals(1, testPerson.getHe_eq5d());
+                assertEquals(1, testPerson.getDemLifeSatEQ5D());
 
             }
 
@@ -433,7 +435,7 @@ public class PersonTest {
 
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
-                assertEquals(-0.594, testPerson.getHe_eq5d());
+                assertEquals(-0.594, testPerson.getDemLifeSatEQ5D());
 
             }
 
@@ -447,7 +449,7 @@ public class PersonTest {
                 testPerson.onEvent(Person.Processes.HealthEQ5D);
 
                 // The maximum possible value given by the Franks coefficients
-                assertEquals(0.9035601, testPerson.getHe_eq5d());
+                assertEquals(0.9035601, testPerson.getDemLifeSatEQ5D());
 
             }
 
