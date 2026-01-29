@@ -130,8 +130,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean demAlignPartnerProcess;
     @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Column(name="wgt") private Double wgt;
-    @Column(name="healthPsyDstrss") private Double healthPsyDstrss; //Psychological distress GHQ-12 0-12 caseness score
-    @Transient private Double healthPsyDstrssL1;
+    @Column(name="healthPsyDstrss0to12") private Double healthPsyDstrss0to12; //Psychological distress GHQ-12 0-12 caseness score
+    @Transient private Double healthPsyDstrss0to12L1;
     @Transient private Dhe healthSelfRatedL1;
     @Enumerated(EnumType.STRING) private Dhe healthSelfRated;
     private Double healthWbScore0to36; //Psychological distress GHQ-12 Likert scale
@@ -293,7 +293,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         wgt = mother.getWgt();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
         healthSelfRated = Dhe.VeryGood;
         healthWbScore0to36 = 10.;			//Set to median for under 18's as a placeholder
-        healthPsyDstrss = 0.;
+        healthPsyDstrss0to12 = 0.;
         healthMentalMcs = 48.;
         healthPhysicalPcs = 56.;
         demLifeSatScore0to10 = 6.;
@@ -492,8 +492,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             healthWbScore0to36L1 = originalPerson.healthWbScore0to36;
         }
 
-        healthPsyDstrss = Objects.requireNonNullElse(originalPerson.healthPsyDstrss, 0.);
-        healthPsyDstrssL1 = Objects.requireNonNullElse(originalPerson.healthPsyDstrssL1, healthPsyDstrss);
+        healthPsyDstrss0to12 = Objects.requireNonNullElse(originalPerson.healthPsyDstrss0to12, 0.);
+        healthPsyDstrss0to12L1 = Objects.requireNonNullElse(originalPerson.healthPsyDstrss0to12L1, healthPsyDstrss0to12);
 
         demLifeSatScore0to10 = originalPerson.demLifeSatScore0to10;
         healthMentalMcs = originalPerson.healthMentalMcs;
@@ -1064,30 +1064,30 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     /**
      * Health and wellbeing - GHQ-12 subjective wellbeing, Caseness scale 0-12 step 1
      *
-     * <p>Calculates the 'baseline' yearly update to the GHQ-12 Caseness (cases) score ({@code healthPsyDstrss}) based on demographic variables.
+     * <p>Calculates the 'baseline' yearly update to the GHQ-12 Caseness (cases) score ({@code healthPsyDstrss0to12}) based on demographic variables.
      * Runs <b>before</b> {@link #healthMentalHM2Case()}.</p>
      *
      * @filter Age 16+
-     * @updates {@code Person.healthPsyDstrss}
+     * @updates {@code Person.healthPsyDstrss0to12}
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq2_dv/">scghq2_dv</a>
      */
     protected void healthMentalHM1Case() {
         if (demAge >= 16) {
             Map<DhmGhq,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthHM1Case);
             MultiValEvent event = new MultiValEvent(probs, statInnovations.getDoubleDraw(36));
-            healthPsyDstrss = Double.valueOf(event.eval().getValue());
+            healthPsyDstrss0to12 = Double.valueOf(event.eval().getValue());
         }
     }
 
     /**
      * Health and wellbeing - GHQ-12 subjective wellbeing, Caseness scale 0-12 step 2
      *
-     * <p>Updates GHQ-12 Caseness (cases) score ({@code healthPsyDstrss}) from the causal effects of economic transitions.
+     * <p>Updates GHQ-12 Caseness (cases) score ({@code healthPsyDstrss0to12}) from the causal effects of economic transitions.
      * Applies separate estimates for Male and Female Persons.
      * Runs <b>after</b> {@link #healthMentalHM1Case()}</p>
      *
      * @filter Age 25-64
-     * @updates {@code Person.healthPsyDstrss}
+     * @updates {@code Person.healthPsyDstrss0to12}
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq2_dv/">scghq2_dv</a>
      */
     protected void healthMentalHM2Case() {
@@ -1095,13 +1095,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (demAge >= 25 && demAge <= 64) {
             if (Gender.Male.equals(getDemMaleFlag())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class);
-                healthPsyDstrss = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss);
+                healthPsyDstrss0to12 = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss0to12);
             } else if (Gender.Female.equals(getDemMaleFlag())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseFemales().getScore(this, Person.DoublesVariables.class);
-                healthPsyDstrss = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss);
+                healthPsyDstrss0to12 = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss0to12);
             } else System.out.println("healthMentalHM2 method in Person class: Person has no gender!");
-        } else if (healthPsyDstrss != null) {
-            healthPsyDstrss = constrainhealthPsyDstrssEstimate(healthPsyDstrss);
+        } else if (healthPsyDstrss0to12 != null) {
+            healthPsyDstrss0to12 = constrainhealthPsyDstrssEstimate(healthPsyDstrss0to12);
         }
     }
 
@@ -1300,16 +1300,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     /**
      * Constrains GHQ12 Caseness estimates to valid range, 0-12
      *
-     * @param healthPsyDstrssFlag predicted GHQ12 Caseness score
-     * @return {@code Person.healthPsyDstrss} Caseness score constrained to 0-12
+     * @param healthPsyDstrss0to12 predicted GHQ12 Caseness score
+     * @return {@code Person.healthPsyDstrss0to12} Caseness score constrained to 0-12
      */
-    protected Double constrainhealthPsyDstrssEstimate(Double healthPsyDstrssFlag) {
-        if (healthPsyDstrssFlag < 0.) {
-            healthPsyDstrssFlag = 0.;
-        } else if (healthPsyDstrssFlag > 12.) {
-            healthPsyDstrssFlag = 12.;
+    protected Double constrainhealthPsyDstrssEstimate(Double healthPsyDstrss0to12) {
+        if (healthPsyDstrss0to12 < 0.) {
+            healthPsyDstrss0to12 = 0.;
+        } else if (healthPsyDstrss0to12 > 12.) {
+            healthPsyDstrss0to12 = 12.;
         }
-        return healthPsyDstrssFlag;
+        return healthPsyDstrss0to12;
     }
 
 
@@ -2197,7 +2197,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demStatusHhL1 = getHouseholdStatus();
         healthSelfRatedL1 = healthSelfRated; //Update lag(1) of health
         healthWbScore0to36L1 = healthWbScore0to36; //Update lag(1) of mental health
-        healthPsyDstrssL1 = healthPsyDstrss;
+        healthPsyDstrss0to12L1 = healthPsyDstrss0to12;
         demLifeSatScore0to10L1 = demLifeSatScore0to10;
         healthMentalMcsL1 = healthMentalMcs;
         healthPhysicalPcsL1 = healthPhysicalPcs;
@@ -2470,7 +2470,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (isToBePartnered())? 1 : 0;
 
         case isPsychologicallyDistressed:
-            return (healthPsyDstrss >= 4)? 1 : 0;
+            return (healthPsyDstrss0to12 >= 4)? 1 : 0;
 
         case isNeedSocialCare:
             return (Indicator.True.equals(careNeedFlag)) ? 1 : 0;
@@ -4891,12 +4891,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.healthWbScore0to36L1 = dhm;
     }
 
-    public Double getHealthPsyDstrss() {
-        return healthPsyDstrss;
+    public Double getHealthPsyDstrss0to12() {
+        return healthPsyDstrss0to12;
     }
 
-    public void setHealthPsyDstrss(Double dhm_ghq) {
-        this.healthPsyDstrss = dhm_ghq;
+    public void setHealthPsyDstrss0to12(Double dhm_ghq) {
+        this.healthPsyDstrss0to12 = dhm_ghq;
     }
 
     public Ethnicity getDot01() {
@@ -5847,9 +5847,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public long getSeed() {return (statSeed !=null) ? statSeed : 0L;}
 
     private Double gethealthPsyDstrss_lag1() {
-        if (healthPsyDstrssL1 == null)
+        if (healthPsyDstrss0to12L1 == null)
             throw new RuntimeException("attempt to access dhmGhq_lag1 before it has been initialised");
-        return healthPsyDstrssL1;
+        return healthPsyDstrss0to12L1;
     }
 
     public Double getYnbcpdf_dv() {

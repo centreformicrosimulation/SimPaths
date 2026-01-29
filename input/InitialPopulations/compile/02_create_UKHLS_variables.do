@@ -381,38 +381,6 @@ gen dhm_ghq_flag = missing(dhm_ghq)
 replace dhm_ghq = round(dhm_ghq_prediction) if missing(dhm_ghq) 
 bys dhm_ghq_flag : sum dhm_ghq
 
-/* Alternative method of GHQ caseness - binary cutoff at scghq2_dv <4
-/**************************Subjective wellbeing (GHQ): Caseness ******************************
-0: not psychologically distressed, scghq2_dv < 4 
-1: psychologically distressed, scghq2_dv >= 4
-This measure converts valid answers to 12 questions of the General Health Questionnaire (GHQ) to a single scale by recoding 1 and 2 values 
-on individual variables to 0, and 3 and 4 values to 1, and then summing, giving a scale running from 0 (the least distressed) to 12 
-(the most distressed). A binary indicator is then created, equal to 1 for values >= 4.*/
-// fre scghq2_dv
-recode scghq2_dv (-9/-1 . = .)
-gen scghq2_dv_miss_flag = (scghq2_dv == .)
-
-*imputation for all 
-preserve
-drop if dgn < 0 | dag<0 | dhe<0 
-eststo predict_scghq2: reg scghq2_dv c.dag i.dgn i.swv i.dhe if scghq2_dv>=0, vce(robust)
-restore
-
-estimates restore predict_scghq2
-predict scghq2_prediction
-fre scghq2_prediction
-
-cap gen scghq2_dv_flag=missing(scghq2_dv) 
-replace scghq2_dv = round(scghq2_prediction) if missing(scghq2_dv) 
-bys scghq2_dv_flag: fre scghq2_dv
-recode scghq2_dv(-1=0) 
-
-*create a dummy var 
-cap gen dhm_ghq	= . 
-replace dhm_ghq = 0 if scghq2_dv>=0 & scghq2_dv<4
-replace dhm_ghq = 1 if scghq2_dv>=4 
-lab var dhm_ghq "DEMOGRAPHIC: Subjective wellbeing (GHQ): Caseness"
-//fre dhm_ghq
 
 
 /****************************Self-rated health health - mental and physical component summary scores SF12 ***************************/
