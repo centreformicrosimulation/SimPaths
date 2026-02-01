@@ -6,8 +6,9 @@ public enum OccupancyExtended {
 	Couple,
 	Single_Male,
 	Single_Female,
-//	Male_With_Dependent,
-//	Female_With_Dependent,
+    Single_DepMales,
+    Single_DepFemales,
+
 	Male_AC,
 	Female_AC;
 }
