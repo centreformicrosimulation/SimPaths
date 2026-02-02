@@ -2376,7 +2376,8 @@ public class Parameters {
         rebaseIndexMap(TimeSeriesVariable.Inflation);
         rebaseIndexMap(TimeSeriesVariable.WageGrowth);
 
-        studentShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "students", 1,1);
+        //studentShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "students", 1,1);
+        studentShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "inSchool_targets.xlsx", "students", 1,1);
 
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "social care", 1, 8);
