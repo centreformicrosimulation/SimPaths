@@ -246,11 +246,15 @@ public class LabourMarket {
 
 
                 // Run alignment separately by b.u. subgroup
-                model.activityAlignmentSingleMales();
-//                model.activityAlignmentSingleACMales();
-                model.activityAlignmentSingleFemales();
-//                model.activityAlignmentSingleACFemales();
+
                 model.activityAlignmentCouples();
+                model.activityAlignmentSingleMales();
+                model.activityAlignmentSingleFemales();
+                model.activityAlignmentSingleACFemales();
+                model.activityAlignmentSingleACMales();
+
+                model.activityAlignmentSingleDepFemale();
+                model.activityAlignmentSingleDepMale();
             }
 
             //Update Labour Supply

@@ -1973,25 +1973,25 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         );
     }
 
-//    public void activityAlignmentSingleACMales() {
-//        activityAlignment(
-//                TimeSeriesVariable.UtilityAdjustmentACMales,
-//                Parameters.getCoeffLabourSupplyUtilityACMales(),
-//                new String[]{"AlignmentFixedCostMen"},
-//                OccupancyExtended.Male_AC,
-//                "single AC males"
-//        );
-//    }
-//
-//    public void activityAlignmentSingleACFemales() {
-//        activityAlignment(
-//                TimeSeriesVariable.UtilityAdjustmentACFemales,
-//                Parameters.getCoeffLabourSupplyUtilityACFemales(),
-//                new String[]{"AlignmentFixedCostWomen"},
-//                OccupancyExtended.Female_AC,
-//                "single AC females"
-//        );
-//    }
+    public void activityAlignmentSingleACMales() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentACMales,
+                Parameters.getCoeffLabourSupplyUtilityACMales(),
+                new String[]{"AlignmentFixedCostMen"},
+                OccupancyExtended.Male_AC,
+                "single AC males"
+        );
+    }
+
+    public void activityAlignmentSingleACFemales() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentACFemales,
+                Parameters.getCoeffLabourSupplyUtilityACFemales(),
+                new String[]{"AlignmentFixedCostWomen"},
+                OccupancyExtended.Female_AC,
+                "single AC females"
+        );
+    }
 
     public void activityAlignmentSingleFemales() {
         activityAlignment(
@@ -2002,6 +2002,29 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 "single females"
         );
     }
+
+    // single dep male-side
+    public void activityAlignmentSingleDepMale() {
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentSingleDepMen,
+                Parameters.getCoeffLabourSupplyUtilitySingleDep(),
+                new String[]{"AlignmentFixedCostMen"},
+                OccupancyExtended.Single_DepMales,
+                "single dependent (male only)"
+        );
+    }
+
+    // single dep female-side
+    public void activityAlignmentSingleDepFemale(){
+        activityAlignment(
+                TimeSeriesVariable.UtilityAdjustmentSingleDepWomen,
+                Parameters.getCoeffLabourSupplyUtilitySingleDep(),
+                new String[]{"AlignmentFixedCostWomen"},
+                OccupancyExtended.Single_DepFemales,
+                "single dependent (female only)"
+        );
+    }
+
 
     public void activityAlignmentCouples() {
         activityAlignment(
