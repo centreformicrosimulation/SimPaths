@@ -83,7 +83,7 @@ public class PersonTest {
 
             // Static mock setup first
             parametersMock = Mockito.mockStatic(Parameters.class);
-            parametersMock.when(Parameters::getRegPartnershipU1a)
+            parametersMock.when(Parameters::getRegPartnershipU1)
                     .thenReturn(mockBinomialRegression);
 
             // Static mock setup for ManagerRegressions
@@ -193,7 +193,7 @@ public class PersonTest {
             testBenefitUnit.setRegion(Region.UKD);
 
 
-            parametersMock.when(() -> Parameters.getRegPartnershipU1a()).thenReturn(mockBinomialRegression);
+            parametersMock.when(() -> Parameters.getRegPartnershipU1()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(PROBABILITY_TO_PARTNER);
             Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
 
@@ -220,7 +220,7 @@ public class PersonTest {
             testBenefitUnit.setRegion(Region.UKD);
 
 
-            parametersMock.when(() -> Parameters.getRegPartnershipU1a()).thenReturn(mockBinomialRegression);
+            parametersMock.when(() -> Parameters.getRegPartnershipU1()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
             Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
 
@@ -244,7 +244,7 @@ public class PersonTest {
             testBenefitUnit.setRegion(Region.UKD);
 
 
-            parametersMock.when(() -> Parameters.getRegPartnershipU1b()).thenReturn(mockBinomialRegression);
+            parametersMock.when(() -> Parameters.getRegPartnershipU1()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(PROBABILITY_TO_PARTNER);
             Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
 
@@ -269,7 +269,7 @@ public class PersonTest {
             testBenefitUnit.setRegion(Region.UKD);
 
 
-            parametersMock.when(() -> Parameters.getRegPartnershipU1b()).thenReturn(mockBinomialRegression);
+            parametersMock.when(() -> Parameters.getRegPartnershipU1()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
             Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
 
@@ -301,7 +301,7 @@ public class PersonTest {
             assertTrue(testPerson.isPartnered(), "Person should start partnered.");
             assertTrue(testPartner.isPartnered(), "Partner should start partnered.");
 
-            parametersMock.when(() -> Parameters.getRegPartnershipU2b()).thenReturn(mockBinomialRegression);
+            parametersMock.when(() -> Parameters.getRegPartnershipU2()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
             Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
 
@@ -335,7 +335,7 @@ public class PersonTest {
             assertEquals(true, testPerson.isPartnered(), "Person should start partnered.");
             assertEquals(true, testPartner.isPartnered(), "Partner should start partnered.");
 
-            parametersMock.when(() -> Parameters.getRegPartnershipU2b()).thenReturn(mockBinomialRegression);
+            parametersMock.when(() -> Parameters.getRegPartnershipU2()).thenReturn(mockBinomialRegression);
             Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(PROBABILITY_TO_PARTNER);
             Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
 

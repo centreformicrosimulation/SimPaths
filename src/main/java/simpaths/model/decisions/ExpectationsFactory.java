@@ -147,7 +147,7 @@ public class ExpectationsFactory {
             int numberExpectedInitial = numberExpected;
             boolean flagEval = false;
             LocalExpectations lexpect = new LocalExpectations();
-            lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2a);
+            lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2);
             for (int ii = 0; ii < numberExpectedInitial; ii++) {
 
                 if (anyVaries()) {
@@ -155,7 +155,7 @@ public class ExpectationsFactory {
                 }
                 if (flagEval) {
                     lexpect = new LocalExpectations();
-                    lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2a);
+                    lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2);
                 }
 
                 if (anticipated[ii].getStudent() == 1) {
@@ -197,10 +197,11 @@ public class ExpectationsFactory {
                             // birth possible
 
                             if (anticipated[ii].getStudent()==1) {
-                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1a);
-                            } else {
-                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
+                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1);
                             }
+                            // else {
+                            //     expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
+                            // }
                         } else {
                             // birth not possible
 

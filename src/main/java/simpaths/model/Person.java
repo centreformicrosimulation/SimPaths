@@ -857,28 +857,31 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         demGiveBirthFlag = false;
         FertileFilter filter = new FertileFilter();
+
         if (filter.evaluate(this)) {
 
             double prob;
+
             if (model.getCountry().equals(Country.UK)) {
 
-                if (getDemAge() <= 29 && getLes_c4().equals(Les_c4.Student) && !isLeftEducation()) {
                     //If age below or equal to 29 and in continuous education follow process F1a
-                    double score = Parameters.getRegFertilityF1a().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegFertilityF1a().getProbability(score + probitAdjustment);
-                } else {
-                    //Otherwise if not in continuous education, follow process F1b
-                    double score = Parameters.getRegFertilityF1b().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegFertilityF1b().getProbability(score + probitAdjustment);
-                }
-            } else if (model.getCountry().equals(Country.IT)) {
+                    double score = Parameters.getRegFertilityF1().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegFertilityF1().getProbability(score + probitAdjustment);
 
-                prob = Parameters.getRegFertilityF1().getProbability(this, Person.DoublesVariables.class);
-            } else
+                // else {
+                //     //Otherwise if not in continuous education, follow process F1b
+                //     double score = Parameters.getRegFertilityF1b().getScore(this, Person.DoublesVariables.class);
+                //     prob = Parameters.getRegFertilityF1b().getProbability(score + probitAdjustment);
+                // }
+                // } else if (model.getCountry().equals(Country.IT)) {
+                //     prob = Parameters.getRegFertilityF1().getProbability(this, Person.DoublesVariables.class);
+            } else {
                 throw new RuntimeException("Country not recognised when evaluating fertility status");
+            }
 
-            if (statInnovations.getDoubleDraw(29)<prob)
+            if (statInnovations.getDoubleDraw(29)<prob) {
                 demGiveBirthFlag = true;
+            }
         }
     }
 
@@ -1356,24 +1359,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if((demAge >= 16 && demAge <= 29) && Les_c4.Student.equals(labC4) && eduLeftEduFlag == false) {
             //If age is between 16 - 29 and individual has always been in education, follow process H1a:
 
-            Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1a);
+            Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             healthSelfRated = (Dhe) event.eval();
             if (event.isProblemWithProbs())
                 model.addCounterErrorH1a();
         } else if (demAge >= 16) {
 
-            Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1b);
-            MultiValEvent event = new MultiValEvent(probs, healthInnov1);
-            healthSelfRated = (Dhe) event.eval();
-            if (event.isProblemWithProbs())
-                model.addCounterErrorH1b();
+            // Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1b);
+            // MultiValEvent event = new MultiValEvent(probs, healthInnov1);
+            // healthSelfRated = (Dhe) event.eval();
+            // if (event.isProblemWithProbs())
+            //     model.addCounterErrorH1b();
 
             //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
             boolean becomeLTSickDisabled = false;
             if (!Parameters.enableIntertemporalOptimisations || DecisionParams.flagDisability) {
 
-                double prob = Parameters.getRegHealthH2b().getProbability(this, Person.DoublesVariables.class);
+                double prob = Parameters.getRegHealthH2().getProbability(this, Person.DoublesVariables.class);
                 becomeLTSickDisabled = (healthInnov2 < prob);
             }
             if (becomeLTSickDisabled) {
@@ -1631,12 +1634,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                     if (demAge <= 29 && labC4 == Les_c4.Student && !eduLeftEduFlag) {
 
-                        double score = Parameters.getRegPartnershipU1a().getScore(this, Person.DoublesVariables.class);
-                        prob = Parameters.getRegPartnershipU1a().getProbability(score + probitAdjustment);
+                        double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                        prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
                     } else {
 
-                        double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
-                        prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
+                        double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                        prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
                     }
                     demBePartnerFlag = (cohabitInnov < prob);
                     if (demBePartnerFlag)
@@ -1644,8 +1647,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else if (demMaleFlag == Gender.Female && (demAge > 29 || !Les_c4.Student.equals(labC4) || eduLeftEduFlag)) {
                     // partnership dissolution
 
-                    double score = Parameters.getRegPartnershipU2b().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegPartnershipU2b().getProbability(score - probitAdjustment);
+                    double score = Parameters.getRegPartnershipU2().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegPartnershipU2().getProbability(score - probitAdjustment);
                     if (cohabitInnov < prob) {
                         demLeavePartnerFlag = true;
                     }
@@ -1960,6 +1963,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (Parameters.enableIntertemporalOptimisations)
             throw new RuntimeException("request to update non-labour income in person object when wealth is explicit");
 
+        // Initialize to 0 here.
+        // This prevents the bug where you overwrite the calculation later.
+        yCapitalPersMonth = 0.0;
+        yPensPersGrossMonth = 0.0;
+
         // ypncp: inverse hyperbolic sine of capital income per month
         // ypnoab: inverse hyperbolic sine of pension income per month
         // yptciihs_dv: inverse hyperbolic sine of capital and pension income per month
@@ -1967,64 +1975,78 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (demAge >= Parameters.MIN_AGE_TO_HAVE_INCOME) {
 
             double capitalInnov = statInnovations.getDoubleDraw(18);
-            if (demAge <= 29 && Les_c4.Student.equals(labC4) && !eduLeftEduFlag) {
-                // full-time students
+            // 1. SELECTION STEP (Process 1a - Binomial)
+            // Use I1a purely to determine the Probability of having income
+            double probCap = Parameters.getRegIncomeI1a().getProbability(this, Person.DoublesVariables.class);
 
-                double prob = Parameters.getRegIncomeI3a_selection().getProbability(this, Person.DoublesVariables.class);
-                boolean hasCapitalIncome = (capitalInnov < prob);
-                if (hasCapitalIncome) {
+            boolean hasCapitalIncome = (capitalInnov < probCap);
 
-                    double score = Parameters.getRegIncomeI3a().getScore(this, Person.DoublesVariables.class);
-                    double rmse = Parameters.getRMSEForRegression("I3a");
-                    double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome, RegressionScoreType.Asinh);
-                    yCapitalPersMonth = Parameters.asinh(capinclevel); //Capital income amount
-                }
-                else yCapitalPersMonth = 0.; //If no capital income, set amount to 0
-            } else if (eduLeftEduFlag || !Les_c4.Student.equals(labC4)) {
+            if (hasCapitalIncome) {
+                // 2. AMOUNT STEP (Process 1b - Linear)
+                // Use I1b to calculate the Score (magnitude)
+                double score = Parameters.getRegIncomeI1b().getScore(this, Person.DoublesVariables.class);
 
-                double prob = Parameters.getRegIncomeI3b_selection().getProbability(this, Person.DoublesVariables.class);
-                boolean hasCapitalIncome = (capitalInnov < prob);
-                if (hasCapitalIncome) {
+                // Ensure you fetch the RMSE for the linear process (I1b)
+                double rmse = Parameters.getRMSEForRegression("I1b");
 
-                    double score = Parameters.getRegIncomeI3b().getScore(this, Person.DoublesVariables.class);
-                    double rmse = Parameters.getRMSEForRegression("I3b");
-                    double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome, RegressionScoreType.Asinh);
-                    yCapitalPersMonth = Parameters.asinh(capinclevel); //Capital income amount
-                }
-                else yCapitalPersMonth = 0.; //If no capital income, set amount to 0
+                // Calculate level and assign
+                double capinclevel = setIncomeBySource(score, rmse, IncomeSource.CapitalIncome, RegressionScoreType.Asinh);
+                yCapitalPersMonth = Parameters.asinh(capinclevel);
+
             }
-            if (Les_c4.Retired.equals(labC4)) {
-                // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
-                /*
-                    Private pension income when individual was retired in the previous period is modelled using process I4b.
 
-                    Private pension income when individual moves from non-retirement to retirement is modelled using:
-                    i) process I5a_selection, to determine who receives private pension income
-                    ii) process I5a_amount, for those who are determined to receive private pension income by process I5a_selection. I5a_amount is modelled in levels using linear regression.
-                */
+            // Retirement decision is modelled in the retirement process. Here only the amount of pension income for retired individuals is modelled.
+            /*
+                Private pension income when individual was retired in the previous period is modelled using process I2b.
+                Private pension income when individual moves from non-retirement to retirement is modelled using:
+                i) process I3a, to determine who receives private pension income
+                ii) process I3b, to determine the amount
+            */
 
-                double score, rmse, pensionIncLevel = 0.;
+            // GLOBAL CONDITION: Process definitions require age 50+
+            if (demAge >= 50) {
+
+                // --- BRANCH 1: CONTINUING PENSIONERS (Process I2b) ---
+                // Condition: Aged 50+ AND were Retired last year.
+                // Uses OLS (I2b) for amount.
                 if (Les_c4.Retired.equals(labC4L1)) {
-                    // If person was retired in the previous period (and the simulation is not in its initial year), use process I4b
 
-                    score = Parameters.getRegIncomeI4b().getScore(this, Person.DoublesVariables.class);
-                    rmse = Parameters.getRMSEForRegression("I4b");
-                    pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
-                } else {
-                    // For individuals in the first year of retirement, use processes I5a_selection and I5a
+                    double score = Parameters.getRegIncomeI2b().getScore(this, Person.DoublesVariables.class);
+                    double rmse = Parameters.getRMSEForRegression("I2b");
 
-                    double prob = Parameters.getRegIncomeI5a_selection().getProbability(this, Person.DoublesVariables.class);
-                    boolean hasPrivatePensionIncome = (statInnovations.getDoubleDraw(19) < prob);
+                    // "ihs" in instructions -> Use Asinh
+                    double pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
+
+                    // Follows your model's pattern of storing the asinh of the level
+                    yPensPersGrossMonth = Parameters.asinh(pensionIncLevel);
+
+                }
+                // --- BRANCH 2: NEW / OTHER PENSIONERS (Process I3a & I3b) ---
+                // Condition: Aged 50+ AND Not Retired last year AND Not a Student.
+                else if (!Les_c4.Student.equals(labC4)) {
+
+                    // 1. SELECTION (Process I3a - Logit)
+                    double probPens = Parameters.getRegIncomeI3a().getProbability(this, Person.DoublesVariables.class);
+
+                    // Using the same random draw index (19) as your previous pension logic
+                    boolean hasPrivatePensionIncome = (statInnovations.getDoubleDraw(19) < probPens);
+
                     if (hasPrivatePensionIncome) {
 
-                        score = Parameters.getRegIncomeI5a().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("I5a");
-                        pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Level);
+                        // 2. AMOUNT (Process I3b - OLS)
+                        double score = Parameters.getRegIncomeI3b().getScore(this, Person.DoublesVariables.class);
+                        double rmse = Parameters.getRMSEForRegression("I3b");
+
+                        // "ihs" in instructions -> Use Asinh
+                        // (Note: Your old code used 'Level' here, but I3b is explicitly 'ihs')
+                        double pensionIncLevel = setIncomeBySource(score, rmse, IncomeSource.PrivatePension, RegressionScoreType.Asinh);
+
+                        yPensPersGrossMonth = Parameters.asinh(pensionIncLevel);
                     }
                 }
-                yPensPersGrossMonth = Parameters.asinh(pensionIncLevel);
             }
-        }
+                yPensPersGrossMonth = 0.;
+            }
 
         double capital_income_multiplier = model.getSavingRate()/Parameters.SAVINGS_RATE;
         double yptciihs_dv_tmp_level = capital_income_multiplier*(Math.sinh(yCapitalPersMonth) + Math.sinh(yPensPersGrossMonth)); //Multiplied by the capital income multiplier, defined as chosen savings rate divided by the long-term average (specified in Parameters class)
@@ -2083,7 +2105,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // --- Step 1: Regression Result ---
         // The regression determines the highest possible qualification achieved this spell.
-        Map<Education,Double> probs = Parameters.getRegEducationE2a().getProbabilities(this, Person.DoublesVariables.class);
+        Map<Education,Double> probs = Parameters.getRegEducationE2().getProbabilities(this, Person.DoublesVariables.class);
         MultiValEvent event = new MultiValEvent(probs, statInnovations.getDoubleDraw(30));
         Education newEducationLevel = (Education) event.eval();
 
@@ -5796,16 +5818,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public RegressionName getRegressionName(Axis axis) {
         switch (axis) {
             case Student -> {return RegressionName.EducationE1a;}
-            case Education -> {return RegressionName.EducationE2a;}
-            case Health -> {return RegressionName.HealthH1b;}
-            case Disability -> {return RegressionName.HealthH2b;}
+            case Education -> {return RegressionName.EducationE2;}
+            case Health -> {return RegressionName.HealthH1;}
+            case Disability -> {return RegressionName.HealthH2;}
             case Cohabitation -> {
                 if (Dcpst.Partnered.equals(demPartnerStatusL1))
-                    return RegressionName.PartnershipU2b;
+                    return RegressionName.PartnershipU2;
                 else if (getStudent()==0)
-                    return RegressionName.PartnershipU1b;
+                    return RegressionName.PartnershipU1;
                 else
-                    return RegressionName.PartnershipU1a;
+                    return RegressionName.PartnershipU1;
             }
             case SocialCareProvision -> {
                 if (Dcpst.Partnered.equals(getDcpst()))

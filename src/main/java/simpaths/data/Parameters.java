@@ -463,9 +463,8 @@ public class Parameters {
     /////////////////////////////////////////////////////////////////// REGRESSION COEFFICIENTS //////////////////////////////////////////
 
     //Health
-    private static MultiKeyCoefficientMap coeffCovarianceHealthH1a;
-    private static MultiKeyCoefficientMap coeffCovarianceHealthH1b;
-    private static MultiKeyCoefficientMap coeffCovarianceHealthH2b; //Prob. long-term sick or disabled
+    private static MultiKeyCoefficientMap coeffCovarianceHealthH1;
+    private static MultiKeyCoefficientMap coeffCovarianceHealthH2; //Prob. long-term sick or disabled
 
     //Social care
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1a; // prob of needing social care under 65
@@ -523,37 +522,34 @@ public class Parameters {
     //Education
     private static MultiKeyCoefficientMap coeffCovarianceEducationE1a;
     private static MultiKeyCoefficientMap coeffCovarianceEducationE1b;
-    private static MultiKeyCoefficientMap coeffCovarianceEducationE2a;
+    private static MultiKeyCoefficientMap coeffCovarianceEducationE2;
 
     //Partnership
-    private static MultiKeyCoefficientMap coeffCovariancePartnershipU1a; //Probit enter partnership if in continuous education
-    private static MultiKeyCoefficientMap coeffCovariancePartnershipU1b; //Probit enter partnership if not in continuous education
-    private static MultiKeyCoefficientMap coeffCovariancePartnershipU2b; //Probit exit partnership (females)
+    private static MultiKeyCoefficientMap coeffCovariancePartnershipU1; //Probit enter partnership if in continuous education
+    // private static MultiKeyCoefficientMap coeffCovariancePartnershipU1b; //Probit enter partnership if not in continuous education
+    private static MultiKeyCoefficientMap coeffCovariancePartnershipU2; //Probit exit partnership (females)
 
     //Partnership for Italy
     private static MultiKeyCoefficientMap coeffCovariancePartnershipITU1; //Probit enter partnership for Italy
     private static MultiKeyCoefficientMap coeffCovariancePartnershipITU2; //Probit exit partnership for Italy
 
     //Fertility
-    private static MultiKeyCoefficientMap coeffCovarianceFertilityF1a; //Probit fertility if in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceFertilityF1b; //Probit fertility if not in continuous education
-
-    //Fertility for Italy
-    private static MultiKeyCoefficientMap coeffCovarianceFertilityF1; //Probit fertility for Italy
+    private static MultiKeyCoefficientMap coeffCovarianceFertilityF1; //Probit fertility if in continuous education
 
     //Income
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI1a; //Linear regression non-employment non-benefit income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI1b; //Linear regression non-employment non-benefit income if not in continuous education
+    private static MultiKeyCoefficientMap coeffCovarianceIncomeI2b;
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a; //Capital income if in continuous education
     private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b; //Capital income if not in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI3c; //Pension income for those aged over 50 who are not in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4a;
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI4b; //Pension income for those already retired
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI5a; //Pension income for those moving from employment to retirement
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI6a_selection, coeffCovarianceIncomeI6b_amount; // Selection equation for receiving pension income for those in retirement (I6a) and amount in levels (I6b), in the initial simulated year
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a_selection; //Probability of receiving capital income if in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b_selection; //Probability of receiving capital income if not in continuous education
-    private static MultiKeyCoefficientMap coeffCovarianceIncomeI5a_selection; //Selection equation for receiving pension income for those moving from employment to retirement
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI3c; //Pension income for those aged over 50 who are not in continuous education
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI4a;
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI4b; //Pension income for those already retired
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI5a; //Pension income for those moving from employment to retirement
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI6a_selection, coeffCovarianceIncomeI6b_amount; // Selection equation for receiving pension income for those in retirement (I6a) and amount in levels (I6b), in the initial simulated year
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI3a_selection; //Probability of receiving capital income if in continuous education
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI3b_selection; //Probability of receiving capital income if not in continuous education
+    // private static MultiKeyCoefficientMap coeffCovarianceIncomeI5a_selection; //Selection equation for receiving pension income for those moving from employment to retirement
 
     //Homeownership
     private static MultiKeyCoefficientMap coeffCovarianceHomeownership; //Probit regression assigning homeownership status
@@ -619,7 +615,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffC19LS_S3;
 
     //Leaving parental home
-    private static  MultiKeyCoefficientMap coeffCovarianceLeaveHomeP1a;
+    private static  MultiKeyCoefficientMap coeffCovarianceLeaveHomeP1;
 
     //Retirement
     private static MultiKeyCoefficientMap coeffCovarianceRetirementR1a;
@@ -703,9 +699,9 @@ public class Parameters {
     /////////////////////////////////////////////////////////////////// REGRESSION OBJECTS //////////////////////////////////////////
 
     //Health
-    private static GeneralisedOrderedRegression regHealthH1a;
+    private static GeneralisedOrderedRegression regHealthH1;
     private static GeneralisedOrderedRegression regHealthH1b;
-    private static BinomialRegression regHealthH2b;
+    private static BinomialRegression regHealthH2;
 
     //Social care
     private static BinomialRegression regReceiveCareS1a;
@@ -763,35 +759,34 @@ public class Parameters {
     //Education
     private static BinomialRegression regEducationE1a;
     private static BinomialRegression regEducationE1b;
-    private static GeneralisedOrderedRegression regEducationE2a;
+    private static GeneralisedOrderedRegression regEducationE2;
 
     //Partnership
-    private static BinomialRegression regPartnershipU1a;
+    private static BinomialRegression regPartnershipU1;
     private static BinomialRegression regPartnershipU1b;
-    private static BinomialRegression regPartnershipU2b;
+    private static BinomialRegression regPartnershipU2;
 
     private static BinomialRegression regPartnershipITU1;
     private static BinomialRegression regPartnershipITU2;
 
     //Fertility
-    private static BinomialRegression regFertilityF1a;
-    private static BinomialRegression regFertilityF1b;
     private static BinomialRegression regFertilityF1;
 
     //Income
-    private static LinearRegression regIncomeI1a;
+    private static BinomialRegression regIncomeI1a;
     private static LinearRegression regIncomeI1b;
-    private static LinearRegression regIncomeI3a;
+    private static LinearRegression regIncomeI2b;
+    private static BinomialRegression regIncomeI3a;
     private static LinearRegression regIncomeI3b;
-    private static LinearRegression regIncomeI3c;
-    private static LinearRegression regIncomeI4a;
-    private static LinearRegression regIncomeI4b;
-    private static LinearRegression regIncomeI5a;
-    private static LinearRegression regIncomeI6b_amount;
-    private static BinomialRegression regIncomeI3a_selection;
-    private static BinomialRegression regIncomeI3b_selection;
-    private static BinomialRegression regIncomeI5a_selection;
-    private static BinomialRegression regIncomeI6a_selection;
+    // private static LinearRegression regIncomeI3c;
+    // private static LinearRegression regIncomeI4a;
+    // private static LinearRegression regIncomeI4b;
+    // private static LinearRegression regIncomeI5a;
+    // private static LinearRegression regIncomeI6b_amount;
+    // private static BinomialRegression regIncomeI3a_selection;
+    // private static BinomialRegression regIncomeI3b_selection;
+    // private static BinomialRegression regIncomeI5a_selection;
+    // private static BinomialRegression regIncomeI6a_selection;
 
     //Homeownership
     private static BinomialRegression regHomeownershipHO1a;
@@ -1005,16 +1000,16 @@ public class Parameters {
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleE", 1);
-        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleNE", 1);
-        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleE", 1);
-        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleNE", 1);
+        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", countryString + "_W1mb-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", countryString + "_W1ma-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", countryString + "_W1fb-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", countryString + "_W1fa-sel", 1);
 
         // Wages
-        coeffCovarianceWagesMalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_Wages_MalesE", 1);
-        coeffCovarianceWagesMalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_Wages_MalesNE", 1);
-        coeffCovarianceWagesFemalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_Wages_FemalesE", 1);
-        coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_Wages_FemalesNE", 1);
+        coeffCovarianceWagesMalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_W1mb", 1);
+        coeffCovarianceWagesMalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_W1ma", 1);
+        coeffCovarianceWagesFemalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_W1fb", 1);
+        coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", countryString + "_W1fa", 1);
 
         //Labour Supply coefficients from Zhechun's estimates on the EM input data
         coeffLabourSupplyUtilityMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Males", 1);
@@ -1096,9 +1091,8 @@ public class Parameters {
         coeffC19LS_S3 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", countryString + "_C19LS_S3", 1);
 
         //Health
-        coeffCovarianceHealthH1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", countryString + "_H1a", 1);
-        coeffCovarianceHealthH1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", countryString + "_H1b", 1);
-        coeffCovarianceHealthH2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", countryString + "_H2b", 1);
+        coeffCovarianceHealthH1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", countryString + "_H1", 1);
+        coeffCovarianceHealthH2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", countryString + "_H2", 1);
 
         //Social care
         coeffCovarianceSocialCareS1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", countryString + "_S1a", 1);
@@ -1158,32 +1152,28 @@ public class Parameters {
         //Education
         coeffCovarianceEducationE1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", countryString + "_E1a", 1);
         coeffCovarianceEducationE1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", countryString + "_E1b", 1);
-        coeffCovarianceEducationE2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", countryString + "_E2a", 1);
+        coeffCovarianceEducationE2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", countryString + "_E2", 1);
 
         //Partnership
-        coeffCovariancePartnershipU1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", countryString + "_U1a", 1);
-        coeffCovariancePartnershipU1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", countryString + "_U1b", 1);
-        coeffCovariancePartnershipU2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", countryString + "_U2b", 1);
+        coeffCovariancePartnershipU1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", countryString + "_U1", 1);
+        coeffCovariancePartnershipU2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", countryString + "_U2", 1);
         meanCovarianceParametricMatching = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_parametricMatching.xlsx", "Parameters", 1);
 
         //Fertility
-        coeffCovarianceFertilityF1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_fertility.xlsx", countryString + "_F1a", 1);
-        coeffCovarianceFertilityF1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_fertility.xlsx", countryString + "_F1b", 1);
+        coeffCovarianceFertilityF1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_fertility.xlsx", countryString + "_F1", 1);
 
         //Income
-        coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I3a_amount", 1);
-        coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I3b_amount", 1);
-        coeffCovarianceIncomeI4b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I4b_amount", 1);
-        coeffCovarianceIncomeI5a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I5a_amount", 1);
-        coeffCovarianceIncomeI3a_selection = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I3a_selection", 1);
-        coeffCovarianceIncomeI3b_selection = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I3b_selection", 1);
-        coeffCovarianceIncomeI5a_selection = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I5a_selection", 1);
+        coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I1a", 1);
+        coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I1b", 1);
+        coeffCovarianceIncomeI2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I2b", 1);
+        coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I3a", 1);
+        coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", countryString + "_I3b", 1);
 
         //Leaving parental home
-        coeffCovarianceLeaveHomeP1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_leaveParentalHome.xlsx", countryString + "_P1a", 1);
+        coeffCovarianceLeaveHomeP1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_leave_parental_home.xlsx", countryString + "_P1", 1);
 
         //Homeownership
-        coeffCovarianceHomeownership = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_home_ownership.xlsx", countryString + "_HO1a", 1);
+        coeffCovarianceHomeownership = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_home_ownership.xlsx", countryString + "_HO1", 1);
 
         //Retirement
         coeffCovarianceRetirementR1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_retirement.xlsx", countryString + "_R1a", 1);
@@ -1223,12 +1213,11 @@ public class Parameters {
             //Education
             coeffCovarianceEducationE1a = RegressionUtils.bootstrap(coeffCovarianceEducationE1a);
             coeffCovarianceEducationE1b = RegressionUtils.bootstrap(coeffCovarianceEducationE1b);
-            coeffCovarianceEducationE2a = RegressionUtils.bootstrap(coeffCovarianceEducationE2a);
+            coeffCovarianceEducationE2 = RegressionUtils.bootstrap(coeffCovarianceEducationE2);
 
             //Health
-            coeffCovarianceHealthH1a = RegressionUtils.bootstrap(coeffCovarianceHealthH1a); //Note that this overrides the original coefficient map with bootstrapped values
-            coeffCovarianceHealthH1b = RegressionUtils.bootstrap(coeffCovarianceHealthH1b);
-            coeffCovarianceHealthH2b = RegressionUtils.bootstrap(coeffCovarianceHealthH2b);
+            coeffCovarianceHealthH1 = RegressionUtils.bootstrap(coeffCovarianceHealthH1); //Note that this overrides the original coefficient map with bootstrapped values
+            coeffCovarianceHealthH2 = RegressionUtils.bootstrap(coeffCovarianceHealthH2);
             coeffCovarianceHM1Level = RegressionUtils.bootstrap(coeffCovarianceHM1Level);
             coeffCovarianceHM2LevelMales = RegressionUtils.bootstrap(coeffCovarianceHM2LevelMales);
             coeffCovarianceHM2LevelFemales = RegressionUtils.bootstrap(coeffCovarianceHM2LevelFemales);
@@ -1278,22 +1267,23 @@ public class Parameters {
             coeffCovarianceUnemploymentU1d = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1d);
 
             //Non-labour income
-            // coeffCovarianceIncomeI1a = RegressionUtils.bootstrap(coeffCovarianceIncomeI1a); // Commented out as not used any more since income is split.
-            // coeffCovarianceIncomeI1b = RegressionUtils.bootstrap(coeffCovarianceIncomeI1b); // Commented out as not used any more since income is split.
+            coeffCovarianceIncomeI1a = RegressionUtils.bootstrap(coeffCovarianceIncomeI1a); // Commented out as not used any more since income is split.
+            coeffCovarianceIncomeI1b = RegressionUtils.bootstrap(coeffCovarianceIncomeI1b); // Commented out as not used any more since income is split.
+            coeffCovarianceIncomeI2b = RegressionUtils.bootstrap(coeffCovarianceIncomeI2b);
             coeffCovarianceIncomeI3a = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a);
             coeffCovarianceIncomeI3b = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b);
             //coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
             //coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
-            coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
-            coeffCovarianceIncomeI5a = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a);
+            // coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
+            // coeffCovarianceIncomeI5a = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a);
             //coeffCovarianceIncomeI6a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI6a_selection);
             //coeffCovarianceIncomeI6b_amount = RegressionUtils.bootstrap(coeffCovarianceIncomeI6b_amount);
-            coeffCovarianceIncomeI3a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a_selection);
-            coeffCovarianceIncomeI3b_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b_selection);
-            coeffCovarianceIncomeI5a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a_selection);
+            // coeffCovarianceIncomeI3a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a_selection);
+            // coeffCovarianceIncomeI3b_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b_selection);
+            // coeffCovarianceIncomeI5a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a_selection);
 
             //Leave parental home
-            coeffCovarianceLeaveHomeP1a = RegressionUtils.bootstrap(coeffCovarianceLeaveHomeP1a);
+            coeffCovarianceLeaveHomeP1 = RegressionUtils.bootstrap(coeffCovarianceLeaveHomeP1);
 
             //Homeownership
             coeffCovarianceHomeownership = RegressionUtils.bootstrap(coeffCovarianceHomeownership);
@@ -1308,11 +1298,10 @@ public class Parameters {
 
             //Specification of some processes depends on the country:
             if (country.equals(Country.UK)) {
-                coeffCovariancePartnershipU1a = RegressionUtils.bootstrap(coeffCovariancePartnershipU1a);
-                coeffCovariancePartnershipU1b = RegressionUtils.bootstrap(coeffCovariancePartnershipU1b);
-                coeffCovariancePartnershipU2b = RegressionUtils.bootstrap(coeffCovariancePartnershipU2b);
-                coeffCovarianceFertilityF1a = RegressionUtils.bootstrap(coeffCovarianceFertilityF1a);
-                coeffCovarianceFertilityF1b = RegressionUtils.bootstrap(coeffCovarianceFertilityF1b);
+                coeffCovariancePartnershipU1 = RegressionUtils.bootstrap(coeffCovariancePartnershipU1);
+                // coeffCovariancePartnershipU1b = RegressionUtils.bootstrap(coeffCovariancePartnershipU1b);
+                coeffCovariancePartnershipU2 = RegressionUtils.bootstrap(coeffCovariancePartnershipU2);
+                coeffCovarianceFertilityF1 = RegressionUtils.bootstrap(coeffCovarianceFertilityF1);
             } else if (country.equals(Country.IT)) {
                 coeffCovariancePartnershipITU1 = RegressionUtils.bootstrap(coeffCovariancePartnershipITU1);
                 coeffCovariancePartnershipITU2 = RegressionUtils.bootstrap(coeffCovariancePartnershipITU2);
@@ -1321,9 +1310,8 @@ public class Parameters {
         }
 
         //Health
-        regHealthH1a = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1a);
-        regHealthH1b = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1b);
-        regHealthH2b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceHealthH2b);
+        regHealthH1 = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1);
+        regHealthH2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceHealthH2);
 
         //Social care
         regReceiveCareS1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS1a);
@@ -1380,18 +1368,19 @@ public class Parameters {
         regLifeSatisfaction2Males = new LinearRegression(coeffCovarianceDLS2Males);
         regLifeSatisfaction2Females = new LinearRegression(coeffCovarianceDLS2Females);
 
+        // Education
         regEducationE1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1a);
         regEducationE1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1b);
-        regEducationE2a = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Education.class, coeffCovarianceEducationE2a);
+        regEducationE2 = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Education.class, coeffCovarianceEducationE2);
 
         //Partnership
         if (country.equals(Country.UK)) {
-            MultiKeyCoefficientMap coeffPartnershipU1aAppended = appendCoefficientMaps(coeffCovariancePartnershipU1a, partnershipTimeAdjustment, "Year");
-            MultiKeyCoefficientMap coeffPartnershipU1bAppended = appendCoefficientMaps(coeffCovariancePartnershipU1b, partnershipTimeAdjustment, "Year");
-            MultiKeyCoefficientMap coeffPartnershipU2bAppended = appendCoefficientMaps(coeffCovariancePartnershipU2b, partnershipTimeAdjustment, "Year", true);
-            regPartnershipU1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1aAppended);
-            regPartnershipU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1bAppended);
-            regPartnershipU2b = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffPartnershipU2bAppended);
+            MultiKeyCoefficientMap coeffPartnershipU1Appended = appendCoefficientMaps(coeffCovariancePartnershipU1, partnershipTimeAdjustment, "Year");
+            // MultiKeyCoefficientMap coeffPartnershipU1bAppended = appendCoefficientMaps(coeffCovariancePartnershipU1b, partnershipTimeAdjustment, "Year");
+            MultiKeyCoefficientMap coeffPartnershipU2Appended = appendCoefficientMaps(coeffCovariancePartnershipU2, partnershipTimeAdjustment, "Year", true);
+            regPartnershipU1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1Appended);
+            // regPartnershipU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1bAppended);
+            regPartnershipU2 = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffPartnershipU2Appended);
         } else if (country.equals(Country.IT)) {
             regPartnershipITU1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipITU1);
             regPartnershipITU2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipITU2);
@@ -1399,27 +1388,26 @@ public class Parameters {
 
         //Fertility
         if (country.equals(Country.UK)) {
-            MultiKeyCoefficientMap coeffFertilityF1aAppended = appendCoefficientMaps(coeffCovarianceFertilityF1a, fertilityTimeAdjustment, "Year");
-            MultiKeyCoefficientMap coeffFertilityF1bAppended = appendCoefficientMaps(coeffCovarianceFertilityF1b, fertilityTimeAdjustment, "Year");
-            regFertilityF1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1aAppended);
-            regFertilityF1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1bAppended);
+            MultiKeyCoefficientMap coeffFertilityF1aAppended = appendCoefficientMaps(coeffCovarianceFertilityF1, fertilityTimeAdjustment, "Year");
+            regFertilityF1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1aAppended);
         } else if (country.equals(Country.IT)) {
             regFertilityF1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceFertilityF1);
         }
 
         //Income
-        //regIncomeI1a = new LinearRegression(coeffCovarianceIncomeI1a);
-        //regIncomeI1b = new LinearRegression(coeffCovarianceIncomeI1b);
-        regIncomeI3a = new LinearRegression(coeffCovarianceIncomeI3a);
+        regIncomeI1a = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI1a);
+        regIncomeI1b = new LinearRegression(coeffCovarianceIncomeI1b);
+        regIncomeI2b = new LinearRegression(coeffCovarianceIncomeI2b);
+        regIncomeI3a = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI3a);
         regIncomeI3b = new LinearRegression(coeffCovarianceIncomeI3b);
         //regIncomeI3c = new LinearRegression(coeffCovarianceIncomeI3c);
         //regIncomeI4a = new LinearRegression(coeffCovarianceIncomeI4a);
-        regIncomeI4b = new LinearRegression(coeffCovarianceIncomeI4b);
-        regIncomeI5a = new LinearRegression(coeffCovarianceIncomeI5a);
+        // regIncomeI4b = new LinearRegression(coeffCovarianceIncomeI4b);
+        // regIncomeI5a = new LinearRegression(coeffCovarianceIncomeI5a);
         //regIncomeI6b_amount = new LinearRegression(coeffCovarianceIncomeI6b_amount);
-        regIncomeI3a_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI3a_selection);
-        regIncomeI3b_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI3b_selection);
-        regIncomeI5a_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI5a_selection);
+        // regIncomeI3a_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI3a_selection);
+        // regIncomeI3b_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI3b_selection);
+        // regIncomeI5a_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI5a_selection);
         //regIncomeI6a_selection = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI6a_selection);
 
         //Homeownership
@@ -1467,7 +1455,7 @@ public class Parameters {
         regC19LS_S3 = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffC19LS_S3);
 
         //Leaving parental home
-        regLeaveHomeP1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceLeaveHomeP1a);
+        regLeaveHomeP1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceLeaveHomeP1);
 
         //Retirement
         regRetirementR1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceRetirementR1a);
@@ -1844,9 +1832,9 @@ public class Parameters {
         Parameters.employmentsFurloughedFlex = employmentsFurloughedFlex;
     }
 
-    public static GeneralisedOrderedRegression getRegHealthH1a() { return regHealthH1a; }
-    public static GeneralisedOrderedRegression getRegHealthH1b() { return regHealthH1b; }
-    public static BinomialRegression getRegHealthH2b() { return regHealthH2b; }
+    public static GeneralisedOrderedRegression getRegHealthH1() { return regHealthH1; }
+    // public static GeneralisedOrderedRegression getRegHealthH1b() { return regHealthH1b; }
+    public static BinomialRegression getRegHealthH2() { return regHealthH2; }
 
     public static BinomialRegression getRegReceiveCareS1a() { return regReceiveCareS1a; }
     public static LinearRegression getRegCareHoursS1b() { return regCareHoursS1b; }
@@ -1900,33 +1888,32 @@ public class Parameters {
 
     public static BinomialRegression getRegEducationE1a() {return regEducationE1a;}
     public static BinomialRegression getRegEducationE1b() {return regEducationE1b;}
-    public static GeneralisedOrderedRegression getRegEducationE2a() {return regEducationE2a;}
+    public static GeneralisedOrderedRegression getRegEducationE2() {return regEducationE2;}
 
     public static LinearRegression getRegEQ5D() { return regHealthEQ5D; };
 
-    public static BinomialRegression getRegPartnershipU1a() {return regPartnershipU1a;}
-    public static BinomialRegression getRegPartnershipU1b() {return regPartnershipU1b;}
-    public static BinomialRegression getRegPartnershipU2b() {return regPartnershipU2b;}
+    public static BinomialRegression getRegPartnershipU1() {return regPartnershipU1;}
+    // public static BinomialRegression getRegPartnershipU1b() {return regPartnershipU1b;}
+    public static BinomialRegression getRegPartnershipU2() {return regPartnershipU2;}
     public static BinomialRegression getRegPartnershipITU1() {return regPartnershipITU1;}
     public static BinomialRegression getRegPartnershipITU2() {return regPartnershipITU2;}
 
-    public static BinomialRegression getRegFertilityF1a() {return regFertilityF1a;}
-    public static BinomialRegression getRegFertilityF1b() {return regFertilityF1b;}
     public static BinomialRegression getRegFertilityF1() {return regFertilityF1;}
 
-    public static LinearRegression getRegIncomeI1a() {return regIncomeI1a;}
+    public static BinomialRegression getRegIncomeI1a() {return regIncomeI1a;}
     public static LinearRegression getRegIncomeI1b() {return regIncomeI1b;}
-    public static LinearRegression getRegIncomeI3a() { return regIncomeI3a; }
+    public static LinearRegression getRegIncomeI2b() { return regIncomeI2b; }
+    public static BinomialRegression getRegIncomeI3a() { return regIncomeI3a; }
     public static LinearRegression getRegIncomeI3b() { return regIncomeI3b; }
-    public static LinearRegression getRegIncomeI3c() { return regIncomeI3c; }
-    public static LinearRegression getRegIncomeI4a() { return regIncomeI4a; }
-    public static LinearRegression getRegIncomeI4b() {return regIncomeI4b;}
-    public static LinearRegression getRegIncomeI5a() {return regIncomeI5a;}
-    public static LinearRegression getRegIncomeI6b_amount() { return regIncomeI6b_amount; }
-    public static BinomialRegression getRegIncomeI3a_selection() { return regIncomeI3a_selection; }
-    public static BinomialRegression getRegIncomeI3b_selection() { return regIncomeI3b_selection; }
-    public static BinomialRegression getRegIncomeI5a_selection() { return regIncomeI5a_selection; }
-    public static BinomialRegression getRegIncomeI6a_selection() { return regIncomeI6a_selection; }
+    // public static LinearRegression getRegIncomeI3c() { return regIncomeI3c; }
+    // public static LinearRegression getRegIncomeI4a() { return regIncomeI4a; }
+    // public static LinearRegression getRegIncomeI4b() {return regIncomeI4b;}
+    // public static LinearRegression getRegIncomeI5a() {return regIncomeI5a;}
+    // public static LinearRegression getRegIncomeI6b_amount() { return regIncomeI6b_amount; }
+    // public static BinomialRegression getRegIncomeI3a_selection() { return regIncomeI3a_selection; }
+    // public static BinomialRegression getRegIncomeI3b_selection() { return regIncomeI3b_selection; }
+    // public static BinomialRegression getRegIncomeI5a_selection() { return regIncomeI5a_selection; }
+    // public static BinomialRegression getRegIncomeI6a_selection() { return regIncomeI6a_selection; }
 
     public static BinomialRegression getRegHomeownershipHO1a() {return regHomeownershipHO1a;}
 
@@ -2078,9 +2065,8 @@ public class Parameters {
         return marriageTypesFrequency;
     }
 
-    public static MultiKeyCoefficientMap getCoeffCovarianceHealthH1a() { return coeffCovarianceHealthH1a; }
+    public static MultiKeyCoefficientMap getCoeffCovarianceHealthH1() { return coeffCovarianceHealthH1; }
 
-    public static MultiKeyCoefficientMap getCoeffCovarianceHealthH1b() { return coeffCovarianceHealthH1b; }
 
     public static MultiKeyCoefficientMap getCoeffCovarianceWagesMalesE() { return coeffCovarianceWagesMalesE; }
     public static MultiKeyCoefficientMap getCoeffCovarianceWagesMalesNE() { return coeffCovarianceWagesMalesNE; }
