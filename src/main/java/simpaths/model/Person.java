@@ -65,6 +65,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // person level variables
     private int demAge; //Age
+    @Column(name = "demAgeSq") private Integer demAgeSq; //Age squared
     private Dcpst demPartnerStatus;
     @Enumerated(EnumType.STRING) private Indicator demAdultChildFlag;
     @Transient private boolean demIoFlag;         // true if a dummy person instantiated for IO decision solution
@@ -288,6 +289,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         benefitUnit = mother.benefitUnit;
         idBu = benefitUnit.getId();
         demAge = 0;
+        demAgeSq = demAge * demAge;
         eduSpellFlag = Indicator.True ;
         eduReturnFlag = Indicator.False;
         wgt = mother.getWgt();			//Newborn has same weight as mother (the number of newborns will then be aligned in fertility alignment)
@@ -347,6 +349,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             this.lifetimeIncome = originalPerson.getLifetimeIncome();
 
         demAge = originalPerson.demAge;
+        demAgeSq = demAge * demAge;
         demAgeGroup = originalPerson.demAgeGroup;
         demMaleFlag = originalPerson.demMaleFlag;
         eduHighestC3 = originalPerson.eduHighestC3;
@@ -935,6 +938,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // iterate age and update for maturity
         demAge++;
+        demAgeSq = demAge * demAge;
         if (demAge == Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             setupNewBenefitUnit(true);
             considerLeavingHome();
@@ -1868,9 +1872,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (Les_c4.EmployedOrSelfEmployed.equals(labC4L1)) {
             if (labWageRegressRandomCompoponentEmp == null || !model.fixRegressionStochasticComponent) {
                 if (Gender.Male.equals(demMaleFlag)) {
-                    rmse = Parameters.getRMSEForRegression("Wages_MalesE");
+                    rmse = Parameters.getRMSEForRegression("W1mb");
                 } else {
-                    rmse = Parameters.getRMSEForRegression("Wages_FemalesE");
+                    rmse = Parameters.getRMSEForRegression("W1fb");
                 }
                 double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(wagesInnov);
                 labWageRegressRandomCompoponentEmp = rmse * gauss;
@@ -1878,9 +1882,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             if (labWageRegressRandomCompoponentNotEmp == null || !model.fixRegressionStochasticComponent) {
                 if (Gender.Male.equals(demMaleFlag)) {
-                    rmse = Parameters.getRMSEForRegression("Wages_MalesNE");
+                    rmse = Parameters.getRMSEForRegression("W1ma");
                 } else {
-                    rmse = Parameters.getRMSEForRegression("Wages_FemalesNE");
+                    rmse = Parameters.getRMSEForRegression("W1fa");
                 }
                 double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(wagesInnov);
                 labWageRegressRandomCompoponentNotEmp = rmse * gauss;
@@ -2636,6 +2640,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dcrisis,
         Ded,
         Ded_L1,
+        Ded_Dgn,
+        Ded_Dag,
+        Ded_Dag_sq,
+        Ded_Dhe_pcs_L1,
+        Ded_Dhe_mcs_L1,
+        Ded_Ypncp_L1,
+        Ded_Yplgrs_dv_L1,
+        Ded_Yplgrs_dv_L2,
+        Ded_Ypncp_L2,
+        Ded_Ydses_c5_Q2_L1,
+        Ded_Ydses_c5_Q3_L1,
+        Ded_Ydses_c5_Q4_L1,
+        Ded_Ydses_c5_Q5_L1,
+        Ded_Dnc_L1_,
+        Ded_Dnc02_L1,
+        Ded_Dcpst_Single,
         Deh_c3_High,
         Deh_c3_Low,
         Deh_c3_Low_Dag,
@@ -2643,6 +2663,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Deh_c3_Medium,
         Deh_c3_Medium_Dag,
         Deh_c3_Medium_L1, 				//Education level lag(1) equals medium
+        Deh_c4_Low,
+        Deh_c4_Low_L1,
+        Deh_c4_Medium,
+        Deh_c4_Medium_L1,
+        Deh_c4_High,
+        Deh_c4_High_L1,
+        Deh_c4_Na_L1,
         Dehf_c3_High,					//Father's education == High indicator
         Dehf_c3_Low,					//Father's education == Low indicator
         Dehf_c3_Medium,					//Father's education == Medium indicator
@@ -2791,11 +2818,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Les_c4_Student_L1,
         Les_c4_NotEmployed_L1,
         Les_c4_Retired_L1,
+        Les_c4_Student_Dgn_L1,
+        Les_c4_NotEmployed_Dgn_L1,
+        Les_c4_Retired_Dgn_L1,
         Les_c7_Covid_Furlough_L1,
         Lesdf_c4_BothNotEmployed_L1,
         Lesdf_c4_EmployedSpouseNotEmployed_L1, 					//Own and partner's activity status lag(1)
+        Lesdf_c4_EmpSpouseNotEmp_L1,
         Lesdf_c4_NotEmployedSpouseEmployed_L1,
+        Lesdf_c4_NotEmpSpouseEmp_L1,
         Lessp_c3_NotEmployed_L1,
+        Lessp_c3_NotEmployed,
         Lessp_c3_Sick_L1,
         Lessp_c3_Student_L1,			//Partner variables
         Lesnr_c2_NotEmployed_L1,
@@ -2821,7 +2854,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         PovertyToNonPoverty,
         Pt,
         Reached_Retirement_Age,						//Indicator whether individual is at or above retirement age
-        Reached_Retirement_Age_Les_c3_NotEmployed_L1, //Interaction term for being at or above retirement age and not employed in the previous year
+        Reached_Retirement_Age_Les, //Interaction term for being at or above retirement age and not employed in the previous year
         Reached_Retirement_Age_Sp,					//Indicator whether spouse is at or above retirement age
         RealGDPGrowth,
         RealIncomeChange, //Note: the above return a 0 or 1 value, but income variables will return the change in income or 0
@@ -3430,23 +3463,77 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Ded -> {
                 return (Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
             }
+            case Ded_Dgn -> {
+                return (Indicator.True.equals(eduSpellFlag) && Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
+            }
+            case Ded_Dag -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? (double) demAge : 0.0;
+            }
+            case Ded_Dag_sq -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? (double) getDemAgeSq() : 0.0;
+            }
+            case Ded_Dhe_pcs_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Dhe_pcs_L1) : 0.0;
+            }
+            case Ded_Dhe_mcs_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Dhe_mcs_L1) : 0.0;
+            }
+            case Ded_Ypncp_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Ypncp_L1) : 0.0;
+            }
+            case Ded_Yplgrs_dv_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Yplgrs_dv_L1) : 0.0;
+            }
+            case Ded_Yplgrs_dv_L2 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Yplgrs_dv_L2) : 0.0;
+            }
+            case Ded_Ypncp_L2 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Ypncp_L2) : 0.0;
+            }
+            case Ded_Ydses_c5_Q2_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Ydses_c5_Q2_L1) : 0.0;
+            }
+            case Ded_Ydses_c5_Q3_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Ydses_c5_Q3_L1) : 0.0;
+            }
+            case Ded_Ydses_c5_Q4_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Ydses_c5_Q4_L1) : 0.0;
+            }
+            case Ded_Ydses_c5_Q5_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Ydses_c5_Q5_L1) : 0.0;
+            }
+            case Ded_Dnc_L1_ -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Dnc_L1) : 0.0;
+            }
+            case Ded_Dnc02_L1 -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Dnc02_L1) : 0.0;
+            }
+            case Ded_Dcpst_Single -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(DoublesVariables.Dcpst_Single) : 0.0;
+            }
             case Ded_L1 -> {
                 return (double) eduSpellFlagL1.getValue() ;
             }
-            case Deh_c3_High -> {
+            case Deh_c3_High, Deh_c4_High -> {
                 return (Education.High.equals(eduHighestC3)) ? 1.0 : 0.0;
             }
-            case Deh_c3_Medium -> {
+            case Deh_c4_High_L1 -> {
+                return (Education.High.equals(eduHighestC3L1)) ? 1.0 : 0.0;
+            }
+            case Deh_c3_Medium, Deh_c4_Medium -> {
                 return (Education.Medium.equals(eduHighestC3)) ? 1.0 : 0.0;
             }
-            case Deh_c3_Medium_L1 -> {
+            case Deh_c3_Medium_L1, Deh_c4_Medium_L1 -> {
                 return (Education.Medium.equals(eduHighestC3L1)) ? 1.0 : 0.0;
             }
-            case Deh_c3_Low -> {
+            case Deh_c3_Low, Deh_c4_Low -> {
                 return (Education.Low.equals(eduHighestC3)) ? 1.0 : 0.0;
             }
-            case Deh_c3_Low_L1 -> {
+            case Deh_c3_Low_L1, Deh_c4_Low_L1 -> {
                 return (Education.Low.equals(eduHighestC3L1)) ? 1.0 : 0.0;
+            }
+            case Deh_c4_Na_L1 -> {
+                return (Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
             }
             case Dehm_c3_High -> {
                 return (Education.High.equals(eduHighestMotherC3)) ? 1.0 : 0.0;
@@ -3636,16 +3723,32 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Les_c4_Student_L1 -> {
                 return (Les_c4.Student.equals(labC4L1)) ? 1. : 0. ;
             }
+            case Les_c4_Student_Dgn_L1 -> {
+                return (Les_c4.Student.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1. : 0. ;
+            }
             case Les_c4_NotEmployed_L1 -> {
                 return (Les_c4.NotEmployed.equals(labC4L1)) ? 1. : 0. ;
             }
+            case Les_c4_NotEmployed_Dgn_L1 -> {
+                return (Les_c4.NotEmployed.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1. : 0. ;
+            }
             case Les_c4_Retired_L1 -> {
                 return (Les_c4.Retired.equals(labC4L1)) ? 1. : 0. ;
+            }
+            case Les_c4_Retired_Dgn_L1 -> {
+                return (Les_c4.Retired.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1. : 0. ;
             }
             case Lessp_c3_Student_L1 -> {
                 Person partner = getPartner();
                 if (partner != null && partner.labC4L1 != null)
                     return partner.labC4L1.equals(Les_c4.Student) ? 1. : 0.;
+                else
+                    return 0.;
+            }
+            case Lessp_c3_NotEmployed -> {
+                Person partner = getPartner();
+                if (partner != null && partner.labC4 != null)
+                    return (partner.labC4.equals(Les_c4.NotEmployed) || partner.labC4.equals(Les_c4.Retired)) ? 1. : 0.;
                 else
                     return 0.;
             }
@@ -3686,10 +3789,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Retired -> {
                 return Les_c4.Retired.equals(labC4) ? 1. : 0.;
             }
-            case Lesdf_c4_EmployedSpouseNotEmployed_L1 -> {                    //Own and partner's activity status lag(1)
+            case Lesdf_c4_EmployedSpouseNotEmployed_L1, Lesdf_c4_EmpSpouseNotEmp_L1 -> {                    //Own and partner's activity status lag(1)
                 return (Lesdf_c4.EmployedSpouseNotEmployed.equals(labStatusPartnerAndOwnC4L1)) ? 1. : 0.;
             }
-            case Lesdf_c4_NotEmployedSpouseEmployed_L1 -> {
+            case Lesdf_c4_NotEmployedSpouseEmployed_L1, Lesdf_c4_NotEmpSpouseEmp_L1 -> {
                 return (Lesdf_c4.NotEmployedSpouseEmployed.equals(labStatusPartnerAndOwnC4L1)) ? 1. : 0.;
             }
             case Lesdf_c4_BothNotEmployed_L1 -> {
@@ -4063,7 +4166,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return 0.;
                 }
             }
-            case Reached_Retirement_Age_Les_c3_NotEmployed_L1 -> { //Reached retirement age and was not employed in the previous year
+            case Reached_Retirement_Age_Les -> { //Reached retirement age and was not employed in the previous year
                 int retirementAge;
                 if (demMaleFlag.equals(Gender.Female)) {
                     retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
@@ -4396,9 +4499,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * class in any way.
      * 
      */
-     public PanelEntityKey getKey() {
+    public PanelEntityKey getKey() {
        return new PanelEntityKey(key.getId());
      }
+
+    @PrePersist
+    @PreUpdate
+    private void syncDemAgeSq() {
+        demAgeSq = demAge * demAge;
+    }
 
      public int getPersonCount() {
         return 1;
@@ -4408,8 +4517,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return demAge;
     }
 
+    public int getDemAgeSq() {
+        demAgeSq = demAge * demAge;
+        return demAgeSq;
+    }
+
     public void setDemAge(Integer demAge) {
         this.demAge = demAge;
+        demAgeSq = demAge * demAge;
     }
 
     public Gender getDemMaleFlag() {
