@@ -1933,7 +1933,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 
         ActivityAlignmentV2 activityAlignment = new ActivityAlignmentV2(benefitUnits, coefficientMap, regressionCoefficientName, occupancy);
-        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, 5.0E-3, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
+        // Use subgroup-specific bounds to reduce boundary-only solutions while keeping a single bounded search interval.
+        double alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT;
+        if (occupancy == OccupancyExtended.Couple) {
+            alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 12.0;
+        } else if (occupancy == OccupancyExtended.Single_DepMales) {
+            alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 20.0;
+        } else if (occupancy == OccupancyExtended.Single_DepFemales) {
+            alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 20.0;
+        }
+        // Diagnostics probe only the actual bounded interval.
+        activityAlignment.printDiagnostics(utilityAdjustment, alignmentBound);
+        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, 5.0E-3, alignmentBound);
         // epsFunction tolerance is set to 0.5% seem to be sufficient
 
         System.out.println("=== Root Search Summary ===");
@@ -2008,7 +2019,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         activityAlignment(
                 TimeSeriesVariable.UtilityAdjustmentSingleDepMen,
                 Parameters.getCoeffLabourSupplyUtilitySingleDep(),
-                new String[]{"AlignmentFixedCostMen"},
+                new String[]{"AlignmentSingleDepMen"},
                 OccupancyExtended.Single_DepMales,
                 "single dependent (male only)"
         );
@@ -2019,7 +2030,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         activityAlignment(
                 TimeSeriesVariable.UtilityAdjustmentSingleDepWomen,
                 Parameters.getCoeffLabourSupplyUtilitySingleDep(),
-                new String[]{"AlignmentFixedCostWomen"},
+                new String[]{"AlignmentSingleDepWomen"},
                 OccupancyExtended.Single_DepFemales,
                 "single dependent (female only)"
         );

@@ -885,10 +885,11 @@ public class Parameters {
     public static double disposableIncomeFromLabourInnov;
 
 
-    // the method adds missing fixed-cost regressors with zero values to enable employment alignment
+    // Add missing alignment regressors with zero values so alignment can adjust them at runtime.
     private static void addFixedCostRegressors(MultiKeyCoefficientMap map, List<String> regressors) {
         for (String reg : regressors) {
-            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen"))
+            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen")
+                    || reg.equals("AlignmentSingleDepMen") || reg.equals("AlignmentSingleDepWomen"))
                     && map.getValue(reg) == null) {
                 // Infer the format from an existing coefficient
                 Object sample = map.getValue("IncomeDiv100");
@@ -1029,7 +1030,12 @@ public class Parameters {
         addFixedCostRegressors(coeffLabourSupplyUtilityFemales,List.of("AlignmentFixedCostWomen"));
 
         coeffLabourSupplyUtilitySingleDep = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleDep", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
+        addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of(
+                "AlignmentFixedCostMen",
+                "AlignmentFixedCostWomen",
+                "AlignmentSingleDepMen",
+                "AlignmentSingleDepWomen"
+        ));
 
         coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1);
         addFixedCostRegressors(coeffLabourSupplyUtilityACMales,List.of("AlignmentFixedCostMen"));
@@ -2028,6 +2034,23 @@ public class Parameters {
 
     public static LinearRegression getRegLabourSupplyUtilityACFemales() {
         return regLabourSupplyUtilityACFemales;
+    }
+
+    /**
+     * Rebuild regressions after coefficient-map edits so alignment adjustments take effect.
+     * What: recreate the subgroup-specific labour-supply regression object from the current coefficient map.
+     * Why: alignment edits update the coefficient maps, but existing regression instances hold stale coefficients.
+     * How: pick the subgroup and replace the cached regression with a new LinearRegression built from its map.
+     */
+    public static void refreshLabourSupplyUtilityRegression(OccupancyExtended subgroupFlag) {
+        switch (subgroupFlag) {
+            case Couple -> regLabourSupplyUtilityCouples = new LinearRegression(coeffLabourSupplyUtilityCouples);
+            case Single_DepMales, Single_DepFemales -> regLabourSupplyUtilitySingleDep = new LinearRegression(coeffLabourSupplyUtilitySingleDep);
+            case Single_Male -> regLabourSupplyUtilityMales = new LinearRegression(coeffLabourSupplyUtilityMales);
+            case Single_Female -> regLabourSupplyUtilityFemales = new LinearRegression(coeffLabourSupplyUtilityFemales);
+            case Male_AC -> regLabourSupplyUtilityACMales = new LinearRegression(coeffLabourSupplyUtilityACMales);
+            case Female_AC -> regLabourSupplyUtilityACFemales = new LinearRegression(coeffLabourSupplyUtilityACFemales);
+        }
     }
 
     public static LinearRegression getRegEmploymentSelectionMale() {

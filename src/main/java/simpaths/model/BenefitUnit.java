@@ -1126,7 +1126,11 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                     double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
                     double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
 
-                    utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen);
+                    // Alignment-only regressor for the single-dep male subgroup.
+                    double betaSingleDepMen = reg.getCoefficient("AlignmentSingleDepMen");
+                    double xSingleDepMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepMen"));
+
+                    utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen) - (betaSingleDepMen * xSingleDepMen);
                     return utilityScore;
                 }
             } else if (femaleAtRiskOfWork) {
@@ -1138,7 +1142,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
                 double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
                 double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
-                utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen);
+                // Alignment-only regressor for the single-dep female subgroup.
+                double betaSingleDepWomen = reg.getCoefficient("AlignmentSingleDepWomen");
+                double xSingleDepWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepWomen"));
+                utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen) - (betaSingleDepWomen * xSingleDepWomen);
                 return utilityScore;
 
             } else if (!model.isAlignEmployment()) {
@@ -1366,11 +1373,15 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                         utilityScore += betaMen * xMen + betaWomen * xWomen;
 
                     } else {
-                        var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
-                        double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
-                        double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
 
-                        utilityScore += betaMen * xMen;
+                    // Alignment-only regressor for the single-dep male subgroup.
+                    double betaSingleDepMen = reg.getCoefficient("AlignmentSingleDepMen");
+                    double xSingleDepMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepMen"));
+
+                    utilityScore += betaMen * xMen + betaSingleDepMen * xSingleDepMen;
                     }
                 } else if (femaleAtRiskOfWork) {
 
@@ -1378,7 +1389,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                     double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
                     double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
-                    utilityScore += betaWomen * xWomen;
+                    // Alignment-only regressor for the single-dep female subgroup.
+                    double betaSingleDepWomen = reg.getCoefficient("AlignmentSingleDepWomen");
+                    double xSingleDepWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepWomen"));
+                    utilityScore += betaWomen * xWomen + betaSingleDepWomen * xSingleDepWomen;
 
                 }
 
@@ -1985,6 +1999,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
         AlignmentFixedCostWomen,
         AlignmentFixedCostMen,
+        // Alignment-only regressors for single-dependent subgroups.
+        AlignmentSingleDepMen,
+        AlignmentSingleDepWomen,
         Constant,
         couple_emp_2ft,
         couple_emp_2ne,
@@ -2471,6 +2488,27 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
             case AlignmentFixedCostWomen -> {
                 return (getFemale() != null && (!getFemale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
+            case AlignmentSingleDepMen -> {
+                if (getOccupancy() != Occupancy.Couple) return 0.0;
+                Person male = getMale();
+                Person female = getFemale();
+                boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+                boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+                boolean maleEmployed = (male != null) && (!male.getLabourSupplyWeekly().equals(Labour.ZERO));
+                // Varies with male employment so alignment can shift employment probabilities.
+                return (maleAtRisk && !femaleAtRisk && maleEmployed) ? 1.0 : 0.0;
+            }
+            case AlignmentSingleDepWomen -> {
+                if (getOccupancy() != Occupancy.Couple) return 0.0;
+                Person male = getMale();
+                Person female = getFemale();
+                boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+                boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+                boolean femaleEmployed = (female != null) && (!female.getLabourSupplyWeekly().equals(Labour.ZERO));
+                // Varies with female employment so alignment can shift employment probabilities.
+                return (!maleAtRisk && femaleAtRisk && femaleEmployed) ? 1.0 : 0.0;
             }
 
             case MaleLeisure -> {                            //24*7 - labour supply weekly for male

@@ -2,11 +2,13 @@ package simpaths.model;
 
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
+import microsim.statistics.regression.LinearRegression;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Occupancy;
 import simpaths.model.enums.OccupancyExtended;
 import simpaths.model.enums.TargetShares;
+import simpaths.model.enums.Les_c4;
 
 import java.util.*;
 
@@ -24,6 +26,9 @@ public class ActivityAlignmentV2 implements IEvaluation {
     private final Set<BenefitUnit> benefitUnits;
     private final OccupancyExtended subgroupFlag;
     private final SimPathsModel model;
+    private boolean diagnosticsPrinted = false;
+    private double lastSimulatedShare = Double.NaN;
+    private double lastAdjustment = Double.NaN;
 
     /**
      * Constructor accepting an OccupancyExtended flag to specify subgroup.
@@ -71,11 +76,12 @@ public class ActivityAlignmentV2 implements IEvaluation {
     }
 
     /**
-     * Ensures that AlignmentFixedCostMen and AlignmentFixedCostWomen exist in the coefficient map if required.
+     * Ensures that alignment regressors exist in the coefficient map if required.
      */
     private void addFixedCostRegressorsIfNeeded(MultiKeyCoefficientMap map, List<String> regressors) {
         for (String reg : regressors) {
-            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen"))
+            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen")
+                    || reg.equals("AlignmentSingleDepMen") || reg.equals("AlignmentSingleDepWomen"))
                     && map.getValue(reg) == null) {
                 // Infer the format from an existing coefficient
                 Object sample = map.getValue("IncomeDiv100");
@@ -119,7 +125,9 @@ public class ActivityAlignmentV2 implements IEvaluation {
     public double evaluate(double[] args) {
         double adjustment = args[0];
         adjustCoefficients(adjustment);
-        return targetAggregateShareOfEmployed - computeSimulatedShareUsingFraction();
+        lastAdjustment = adjustment;
+        lastSimulatedShare = computeSimulatedShareUsingFraction();
+        return targetAggregateShareOfEmployed - lastSimulatedShare;
     }
 
     /**
@@ -133,6 +141,8 @@ public class ActivityAlignmentV2 implements IEvaluation {
                     : orig.baseValue + adjustment;
             coefficientMap.replaceValue(reg, newVal);
         }
+        // Rebuild the regression so it reflects the updated coefficient map during alignment.
+        Parameters.refreshLabourSupplyUtilityRegression(subgroupFlag);
 
         // Update all benefit units in parallel for efficiency
         // Update only benefit units in the selected(!) subgroup
@@ -174,8 +184,52 @@ public class ActivityAlignmentV2 implements IEvaluation {
     /**
      * Computes the simulated employment share for benefit units in the specified subgroup using employment fraction of each BU
      */
-
     private double computeSimulatedShareUsingFraction() {
+        /*
+         * For Single_Dep subgroups, the target refers to the at-risk partner's employment rate.
+         * Using BU-level fracEmployed() (maleEmployed+femaleEmployed)/(maleCount+femaleCount) would cap the share at ~0.5 because the non-at-risk partner is typically not employed.
+         * So we compute partner-specific shares instead:
+         *  - Single_DepMales: maleEmployed / (maleCount + femaleCount)
+         *  - Single_DepFemales: femaleEmployed / (maleCount + femaleCount)
+         */
+        // Single-dep male alignment targets the male employment rate (not the couple-averaged rate).
+        if (subgroupFlag == OccupancyExtended.Single_DepMales) {
+            // Single-dep male alignment targets the male employment rate (not the couple-averaged rate).
+            long[] counts = benefitUnits.parallelStream()
+                    .filter(this::matchesSubgroup)
+                    .collect(
+                            () -> new long[2], // [0] = count of units, [1] = count employed (male)
+                            (a, bu) -> {
+                                a[0]++;
+                                Person male = bu.getMale();
+                                if (male != null && Les_c4.EmployedOrSelfEmployed.equals(male.getLes_c4())) {
+                                    a[1]++;
+                                }
+                            },
+                            (a, b) -> { a[0] += b[0]; a[1] += b[1]; }
+                    );
+            return counts[0] > 0 ? (double) counts[1] / counts[0] : 0.0;
+        }
+
+        // Single-dep female alignment targets the female employment rate (not the couple-averaged rate).
+        if (subgroupFlag == OccupancyExtended.Single_DepFemales) {
+            // Single-dep female alignment targets the female employment rate (not the couple-averaged rate).
+            long[] counts = benefitUnits.parallelStream()
+                    .filter(this::matchesSubgroup)
+                    .collect(
+                            () -> new long[2], // [0] = count of units, [1] = count employed (female)
+                            (a, bu) -> {
+                                a[0]++;
+                                Person female = bu.getFemale();
+                                if (female != null && Les_c4.EmployedOrSelfEmployed.equals(female.getLes_c4())) {
+                                    a[1]++;
+                                }
+                            },
+                            (a, b) -> { a[0] += b[0]; a[1] += b[1]; }
+                    );
+            return counts[0] > 0 ? (double) counts[1] / counts[0] : 0.0;
+        }
+
         double[] totals = benefitUnits.parallelStream()
                 .filter(this::matchesSubgroup)
                 .collect(
@@ -191,6 +245,70 @@ public class ActivityAlignmentV2 implements IEvaluation {
                 );
 
         return totals[0] > 0 ? totals[1] / totals[0] : 0.0;
+    }
+
+    private int countSubgroup() {
+        return (int) benefitUnits.stream()
+                .filter(this::matchesSubgroup)
+                .count();
+    }
+
+    private LinearRegression getAlignmentRegression() {
+        return switch (subgroupFlag) {
+            case Couple -> Parameters.getRegLabourSupplyUtilityCouples();
+            case Single_DepMales, Single_DepFemales -> Parameters.getRegLabourSupplyUtilitySingleDep();
+            case Single_Male -> Parameters.getRegLabourSupplyUtilityMales();
+            case Single_Female -> Parameters.getRegLabourSupplyUtilityFemales();
+            case Male_AC -> Parameters.getRegLabourSupplyUtilityACMales();
+            case Female_AC -> Parameters.getRegLabourSupplyUtilityACFemales();
+        };
+    }
+
+    public void printDiagnostics(double baseAdjustment, double bound) {
+        if (diagnosticsPrinted) return;
+
+        int subgroupCount = countSubgroup();
+        System.out.println("=== Employment alignment diagnostics ===");
+        System.out.println("Subgroup flag: " + subgroupFlag
+                + ", subgroupCount=" + subgroupCount
+                + ", totalBenefitUnits=" + benefitUnits.size());
+        System.out.println("Target share: " + targetAggregateShareOfEmployed);
+
+
+        // Probe the actual bounded search interval only.
+        double[] testAdjustments = new double[] {
+                baseAdjustment,
+                baseAdjustment - bound,
+                baseAdjustment + bound
+        };
+
+        double minSimulated = Double.POSITIVE_INFINITY;
+        double maxSimulated = Double.NEGATIVE_INFINITY;
+        for (double adj : testAdjustments) {
+            double fx = evaluate(new double[] {adj});
+            if (!Double.isNaN(lastSimulatedShare)) {
+                minSimulated = Math.min(minSimulated, lastSimulatedShare);
+                maxSimulated = Math.max(maxSimulated, lastSimulatedShare);
+            }
+            System.out.println("Diag adj=" + adj
+                    + " | simulated=" + lastSimulatedShare
+                    + " | f(x)=" + fx);
+        }
+        if (minSimulated != Double.POSITIVE_INFINITY) {
+            if (targetAggregateShareOfEmployed < minSimulated || targetAggregateShareOfEmployed > maxSimulated) {
+                System.out.println("Target out of tested range: target=" + targetAggregateShareOfEmployed
+                        + ", simulatedMin=" + minSimulated
+                        + ", simulatedMax=" + maxSimulated);
+            } else {
+                System.out.println("Target within tested range: target=" + targetAggregateShareOfEmployed
+                        + ", simulatedMin=" + minSimulated
+                        + ", simulatedMax=" + maxSimulated);
+            }
+        }
+
+        // restore to base adjustment so alignment starts from intended value
+        evaluate(new double[] {baseAdjustment});
+        diagnosticsPrinted = true;
     }
 
     /**
