@@ -3,7 +3,7 @@
 * SECTION:        ALIGNMENT PROCEDURES
 *
 * AUTHORS:        Liang Shi (LS)
-* LAST UPDATE:    04/02/2026
+* LAST UPDATE:    05/02/2026
 * COUNTRY:        UK
 *
 * DATA:           Initial populations
@@ -75,8 +75,8 @@ foreach y of numlist $min_year/$max_year {
 	replace occcupancy = "Single_female" if (has_resp_female==1 & has_resp_male==0)
 	
 	* Individual "at risk of employment" (working-age, not retired, not student, not permanently disabled)
-	gen byte maleAtRisk   = ( (demmaleflag == 1) & !(labc4 == 2 | labc4 == 4 | healthdsbllongtermflag == 1 | demage < 16 | demage > 75) )
-	gen byte femaleAtRisk = ( (demmaleflag == 0) & !(labc4 == 2 | labc4 == 4 | healthdsbllongtermflag == 1 | demage < 16 | demage > 75) )
+	gen byte maleAtRisk   = ( (demmaleflag == 1) & !(labc4 == 2 | labc4 == 4 | healthdsbllongtermflag == 1 | demage < 16 | demage > 75 | careneedflag == 1) )
+	gen byte femaleAtRisk = ( (demmaleflag == 0) & !(labc4 == 2 | labc4 == 4 | healthdsbllongtermflag == 1 | demage < 16 | demage > 75 | careneedflag == 1) )
 	
 	* BU-level indicators of whether there is at least one male/female at risk
 	bys idbu: egen byte bu_maleAtRisk   = max(maleAtRisk)
@@ -105,11 +105,13 @@ foreach y of numlist $min_year/$max_year {
 	gen byte student = (labc4 == 4)
 	gen byte retired = (labc4 == 2)
 	gen byte disabled = (healthdsbllongtermflag == 1)
+	gen byte careneeded = (careneedflag == 1)
 
 	gen byte at_risk_employed = employed & at_risk
 	gen byte student_employed = employed & student
 	gen byte retired_employed = employed & retired
 	gen byte disabled_employed = employed & disabled
+	gen byte careneeded_employed = employed & careneeded
 	gen byte n_person = 1
 
 	* Aggregate to subgroup counts
@@ -123,7 +125,9 @@ foreach y of numlist $min_year/$max_year {
       n_retired=retired ///
       n_retired_employed=retired_employed ///
       n_disabled=disabled ///
-      n_disabled_employed=disabled_employed, by(group_code)
+      n_disabled_employed=disabled_employed ///
+	  n_careneeded = careneeded ///
+	  n_careneeded_employed = careneeded_employed, by(group_code)
 	gen year = `y'
 
 	append using "${dir_working_data}/person_risk_emp_${country}_allsubgroups_initpopdata.dta"

@@ -2,9 +2,9 @@
 * PROJECT:        SimPaths
 * SECTION:        ALIGNMENT PROCEDURES
 *
-* AUTHORS:        Liang Shi (LS)
-* LAST UPDATE:    05/02/2026 (MV)
-* COUNTRY:        UK
+* AUTHORS:        Mariia Vartuzova (MV)
+* LAST UPDATE:    03/12/2025 (MV)
+* COUNTRY:        Poland 
 *
 * DATA:           Initial populations			
 *
@@ -17,10 +17,9 @@
 *                  - Aggregates to employment shares by group and year
 *                  - Exports the results to Excel (one sheet per group)
 *
-* SET-UP:         1. Update the working directory path (global dir_w), create 
-*                    working_data directory.
-*                 2. Update the data source directory. Copy the directory of
-*                    relevant input data into variable dir_input_data
+* SET-UP:         1. Update the working directory path (global dir_w)
+*                 2. Copy the relevant input data into the /input_data folder
+*                    under the country-specific subdirectory
 *
 *******************************************************************************/
 
