@@ -1,9 +1,9 @@
 ********************************************************************************
-* PROJECT:  		ESPON
+* PROJECT:  		SimPaths UK
 * SECTION:			Retirement  
-* OBJECT: 			Final Regresion Models 
+* OBJECT: 			Probit Regresion Models 
 * AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		1 July 2025 DP
+* LAST UPDATE:		20 Jan 2026 DP 
 * COUNTRY: 			UK  
 *
 * NOTES: 			
@@ -16,33 +16,20 @@ set type double
 //set maxvar 120000
 set maxvar 30000
 
-
 *******************************************************************
 cap log close 
 log using "${dir_log}/reg_retirement.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-
-do "$dir_do/variable_update"
-
-	
-* sample selection 
-drop if dag < 16
-
-
-xtset idperson swv
-
-
 * Set Excel file 
 
 * Info sheet
 
-putexcel set "$dir_results/reg_retirement", sheet("Info") replace
+putexcel set "$dir_results/reg_retirement_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of retirement"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 1 July 2025 DP"
+putexcel A3 = "Last edit: 26 jan 2026 DP"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -54,445 +41,497 @@ putexcel A6 = "R1b"
 putexcel B6 = "Probit regression estimates of the probability of retiring, cohabiting individuals aged 50+ not yet retired"
 
 putexcel A10 = "Notes:", bold
-putexcel B10 = "replaced dlltsd with dlltsd01; added dhe_pcs and dhe_mcs, ethnicity-4 cat(dot) and Covid dummies (y2020 y2021)"
+//putexcel B10 = ""
 
-putexcel set "$dir_results/reg_retirement", sheet("Gof") modify
+putexcel set "$dir_results/reg_retirement_UK", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
 
-****************************
-* R1a: Retirement - Single *
-****************************
+/********************************* PREPARE DATA *******************************/
 
-* Process R1a: Probability retire if single 
-* Sample: Non-partnered individuals aged 50+ who are not yet retired.
-* DV: Enter retirement dummy (have to not be retired last year)
+* Load data 
+use ${estimation_sample}, clear
 
-fre drtren if ((dcpst==2 | dcpst==3) & dag>=50)
+* Set data 
+xtset idperson swv
+sort idperson swv 
 
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-    li.ydses_c5 li.dlltsd ib8.drgn1 stm y2020 y2021 i.dot ///
- if ((dcpst==2 | dcpst==3) & dag>=50) [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_R1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(R1a, dimlwt) side dec(4) 
+* Remove children 
+drop if dag < 16
 
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-    li.ydses_c5 li.dlltsd ib8.drgn1 stm y2020 y2021 i.dot ///
- if ((dcpst==2 | dcpst==3) & dag>=50) [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_R1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(R1a, disclwt) side dec(4)
+* Adjust variables 
+do "${dir_do}/variable_update.do"
 
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-    li.ydses_c5 li.dlltsd ib8.drgn1 stm y2020 y2021 i.dot ///
- if ((dcpst==2 | dcpst==3) & dag>=50) [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_R1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(R1a, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_R1a.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-    li.ydses_c5 li.dlltsd01 l.dhe_pcs l.dhe_mcs ///
-	ib8.drgn1 stm y2020 y2021 i.dot ///
- if ((dcpst==2 | dcpst==3) & dag>=50) [pweight=dimxwt], vce(robust)
+ 
+/********************************** ESTIMATION ********************************/
 
-   * raw results 
+/****************** R1a: PROBABILITY OF RETIREMENT, SINLGE ********************/
+display "${r1a_if_condition}"
+
+probit drtren i.Dgn Dag Dag_sq ///
+    i.Deh_c3_Medium i.Deh_c3_Low ///
+	l.Dhe_pcs l.Dhe_mcs  ///
+	i.Reached_Retirement_Age ///
+	li.Les_c3_NotEmployed ///
+	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
+	$regions Year_transformed Y2020 Y2021 $ethnicity ///
+	if ${r1a_if_condition} [pw=dwt], vce(robust)
+	
+
+* Save raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/retirement/retirement", sheet("Process R1a") replace
+
+putexcel set "$dir_raw_results/retirement/retirement", ///
+	sheet("Process R1a") replace
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/retirement/R1a.doc", replace ///
-title("Process R1a: Probit regression estimates for retiring - single individuals aged 50+ not yet retired") ///
- ctitle(retiring) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
-gen in_sample = e(sample)	
 
+outreg2 stats(coef se pval) using ///
+	"$dir_raw_results/retirement/R1a.doc", replace ///
+title("Process R1a: Probability of Retirement, Single") ///
+	ctitle(Retire) label side dec(2) noparen ///
+	addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) ///
+	addnote(`"Note: Regression if condition = (${r1a_if_condition})"')		
+	
+* Save sample inclusion indicator and predicted probabilities				
+gen in_sample = e(sample)	
 predict p
 
+* Save sample for estimte validation 
 save "$dir_validation_data/R1a_sample", replace
 
+* Store model summary statistics
 scalar r2_p = e(r2_p) 
-scalar N = e(N)	
+scalar N_sample = e(N)	
 scalar chi2 = e(chi2)
 scalar ll = e(ll)	
 	
-	
-* Rresults	
-* Note: Zeros values are eliminated 
-	
+* Store results in Excel 
+
+* Store estimates
 matrix b = e(b)	
 matrix V = e(V)
 
+mata:
+	// Call matrices into mata 
+    V = st_matrix("V")
+    b = st_matrix("b")
 
-* Store variance-covariance matrix 
-
-preserve
-
-putexcel set "$dir_raw_results/retirement/var_cov", sheet("var_cov") ///
-	replace
-putexcel A1 = matrix(V)
-
-import excel "$dir_raw_results/retirement/var_cov", sheet("var_cov") clear
-
-describe
-local no_vars = `r(k)'	
+    // Find which coefficients are nonzero
+    keep = (b :!= 0)
 	
-forvalues i = 1/2 {
-	egen row_sum = rowtotal(*)
-	drop if row_sum == 0 
-	drop row_sum
-	xpose, clear	
-}	
+	// Eliminate zeros
+	b_trimmed = select(b, keep)
+    V_trimmed = select(V, keep)
+    V_trimmed = select(V_trimmed', keep)'
+
+	// Inspection
+	b_trimmed 
+	V_trimmed 
 	
-mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_retirement", sheet("UK_R1a") modify
-putexcel C2 = matrix(var)
-		
-restore	
+    // Return to Stata
+    st_matrix("b_trimmed", b_trimmed')
+    st_matrix("V_trimmed", V_trimmed)
+	st_matrix("nonzero_b_flag", keep)
+end	
 
+* Eigenvalue tests for var-cov invertablility in SimPaths
+matrix symeigen X lambda = V_trimmed
 
-* Store estimated coefficients 
+scalar max_eig = lambda[1,1]
 
-// Initialize a counter for non-zero coefficients
-local non_zero_count = 0
-//local names : colnames b
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
 
-// Loop through each element in `b` to count non-zero coefficients
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        local non_zero_count = `non_zero_count' + 1
-    }
+* Outcome of max eigenvalue test 
+if max_eig < 1.0e-12 {
+	
+    display as error "CRITICAL ERROR: Maximum eigenvalue is too small (`max_eig')."
+    display as error "The Variance-Covariance matrix is likely singular."
+    exit 999
+
 }
 
-// Create a new row vector to hold only non-zero coefficients
-matrix nonzero_b = J(1, `non_zero_count', .)
+display "Stability Check Passed: Max Eigenvalue is " max_eig
 
-// Populate nonzero_b with non-zero coefficients from b
-local index = 1
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        matrix nonzero_b[1, `index'] = b[1, `i']
-        local index = `index' + 1
-    }
+* Outcome of eigenvalue ratio test 
+if min_ratio < 1.0e-12 {
+	
+    display as error "Matrix is ill-conditioned. Min/Max ratio: " min_ratio
+    exit 506
+
 }
 
-putexcel set "$dir_results/reg_retirement", sheet("UK_R1a") modify
-putexcel A1 = matrix(nonzero_b'), names nformat(number_d2)  
- 
- 
-* Labelling 
- 
+display "Stability Check Passed. Min/Max ratio: " min_ratio
+
+* Export into Excel 
+putexcel set "$dir_results/reg_retirement_UK", sheet("R1a") modify
+putexcel B2 = matrix(b_trimmed)
+putexcel C2 = matrix(V_trimmed)
+
+* Labels 
+preserve 
+putexcel set "$dir_results/reg_retirement_UK", sheet("R1a") modify
+
 putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dgn"
-putexcel A3 = "Dag"
-putexcel A4 = "Dag_sq"
-putexcel A5 = "Deh_c3_Medium"
-putexcel A6 = "Deh_c3_Low"
-putexcel A7 = "Reached_Retirement_Age"
-putexcel A8 = "Lesnr_c2_NotEmployed_L1"
-putexcel A9 = "Ydses_c5_Q2_L1"
-putexcel A10 = "Ydses_c5_Q3_L1"
-putexcel A11 = "Ydses_c5_Q4_L1"
-putexcel A12 = "Ydses_c5_Q5_L1"
-putexcel A13 = "Dlltsd01_L1"
-putexcel A14 = "Dhe_pcs_L1"
-putexcel A15 = "Dhe_mcs_L1"
-putexcel A16 = "UKC"
-putexcel A17 = "UKD"
-putexcel A18 = "UKE"
-putexcel A19 = "UKF"
-putexcel A20 = "UKG"
-putexcel A21 = "UKH"
-putexcel A22 = "UKJ"
-putexcel A23 = "UKK"
-putexcel A24 = "UKL"
-putexcel A25 = "UKM"
-putexcel A26 = "UKN"
-putexcel A27 = "Year_transformed"
-putexcel A28 = "Y2020"
-putexcel A29 = "Y2021"
-putexcel A30 = "Ethn_Asian"
-putexcel A31 = "Ethn_Black"
-putexcel A32 = "Ethn_Other"
-putexcel A33 = "Constant"
-
 putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dgn"
-putexcel D1 = "Dag"
-putexcel E1 = "Dag_sq"
-putexcel F1 = "Deh_c3_Medium"
-putexcel G1 = "Deh_c3_Low"
-putexcel H1 = "Reached_Retirement_Age"
-putexcel I1 = "Lesnr_c2_NotEmployed_L1"
-putexcel J1 = "Ydses_c5_Q2_L1"
-putexcel K1 = "Ydses_c5_Q3_L1"
-putexcel L1 = "Ydses_c5_Q4_L1"
-putexcel M1 = "Ydses_c5_Q5_L1"
-putexcel N1 = "Dlltsd01_L1"
-putexcel O1 = "Dhe_pcs_L1"
-putexcel P1 = "Dhe_mcs_L1"
-putexcel Q1 = "UKC"
-putexcel R1 = "UKD"
-putexcel S1 = "UKE"
-putexcel T1 = "UKF"
-putexcel U1 = "UKG"
-putexcel V1 = "UKH"
-putexcel W1 = "UKJ"
-putexcel X1 = "UKK"
-putexcel Y1 = "UKL"
-putexcel Z1 = "UKM"
-putexcel AA1 = "UKN"
-putexcel AB1 = "Year_transformed"
-putexcel AC1 = "Y2020"
-putexcel AD1 = "Y2021"
-putexcel AE1 = "Ethn_Asian"
-putexcel AF1 = "Ethn_Black"
-putexcel AG1 = "Ethn_Other"
-putexcel AH1 = "Constant"
+
+* Use Mata to extract nice labels from colstripe of e(b)
+
+local dir_results "$dir_results"
+cap erase "$dir_results/temp_labels.txt"
+
+mata:
+    // --------------------------------------------------
+    // Import objects from Stata
+    // --------------------------------------------------
+    nonzero_b_flag = st_matrix("nonzero_b_flag")
+    stripe         = st_matrixcolstripe("e(b)")
+
+    // Ensure column vector
+    nonzero_b_flag = nonzero_b_flag'
+    
+    // --------------------------------------------------
+    // Extract variable names
+    // --------------------------------------------------
+    varnames = stripe[.,2]
+
+    // Keep non-baseline coefficients
+    varnames_no_bl = select(varnames, nonzero_b_flag :== 1)
+
+    // --------------------------------------------------
+    // Clean labels
+    // --------------------------------------------------
+    labels_no_bl = usubinstr(varnames_no_bl, "1.", "", 1)
+    labels_no_bl = regexr(labels_no_bl, "^_cons", "Constant")
+
+    // Handle lags: L.var -> var_L1
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^L\.") :* ///
+        (regexr(labels_no_bl, "^L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^L\.") :* labels_no_bl)
+
+    // Handle 1L.var
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^1L\.") :* ///
+        (regexr(labels_no_bl, "^1L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^1L\.") :* labels_no_bl)
+
+    // --------------------------------------------------
+    // Add header
+    // --------------------------------------------------
+    labels_out = "v1" \ labels_no_bl
+
+    // --------------------------------------------------
+    // Write to temp file
+    // --------------------------------------------------
+    outfile = st_local("dir_results") + "/temp_labels.txt"
+    fh = fopen(outfile, "w")
+    for (i=1; i<=rows(labels_out); i++) {
+        fput(fh, labels_out[i])
+    }
+    fclose(fh)
+end
 
 
-* Goodness of fit
+    * Import cleaned labels into Stata
+    import delimited "$dir_results/temp_labels.txt", clear varnames(1) ///
+		encoding(utf8)
+	gen n = _n
+    
+    * Export labels to Excel
+    putexcel set "$dir_results/reg_retirement_UK", sheet("R1a") modify 	
+	
+	* Vertical labels
+    summarize n, meanonly
+	local N = r(max)+1
+	forvalue i = 2/`N' {
+	
+		local j = `i' - 1
+		putexcel A`i' = v1[`j'] 
+	
+	}	
+	
+	* Horizontal labels 
+	summarize n, meanonly
+	local N = r(max) + 1  // Adjusted since we're working across columns
 
-putexcel set "$dir_results/reg_retirement", sheet("Gof") modify
+	forvalues j = 1/`N' {
+	
+		local n = `j'+2 // Shift by 2 to start from column C
+		local col ""
+		
+		while `n' > 0 {
+			local rem = mod(`n' - 1, 26)
+			local col = char(65 + `rem') + "`col'"
+			local n = floor((`n' - 1)/26)
+		}
+
+		putexcel `col'1 = v1[`j']
+	}
+	
+    * Clean up
+    cap erase "$dir_results/temp_labels.txt"
+
+restore 
+
+* Export model fit statistics
+putexcel set "$dir_results/reg_retirement_UK", sheet("Gof") modify
 
 putexcel A3 = "R1a - Retirement single", bold		
 
 putexcel A5 = "Pseudo R-squared" 
 putexcel B5 = r2_p 
 putexcel A6 = "N"
-putexcel B6 = N 
+putexcel B6 = N_sample 
 putexcel E5 = "Chi^2"		
 putexcel F5 = chi2
 putexcel E6 = "Log likelihood"		
 putexcel F6 = ll		
 
+		
+* Clean up 		
 drop in_sample p
-scalar drop r2_p N chi2 ll	
+scalar drop _all
+matrix drop _all
 
 
-
-
-******************************
-* R1b: Retirement, partnered *
-******************************
-
-* Process R1b: Probability retire 
-* Sample: Partnered heterosexual individuals aged 50+ who are not yet retired
-* DV: Enter retirement dummy (have to not be retired last year)
-count if (ssscp!=1 & dcpst==1 & dag>=50) & lessp_c3==2 //115 obs partnered with students 
-drop if (ssscp!=1 & dcpst==1 & dag>=50) & lessp_c3==2 //drop partnered with students 
-
-fre drtren if (ssscp!=1 & dcpst==1 & dag>=50)
-
-/*//////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-     i.dagpns#li.lesnr_c2 li.ydses_c5 li.dlltsd i.dagpns_sp ///
-     li.lessp_c3 li.dlltsd_sp ib8.drgn1 stm  y2020 y2021 i.dot if ///
-	 (ssscp!=1 & dcpst==1 & dag>=50)  [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_R1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(R1b, dimlwt) side dec(4) 
-
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-     i.dagpns#li.lesnr_c2 li.ydses_c5 li.dlltsd i.dagpns_sp ///
-     li.lessp_c3 li.dlltsd_sp ib8.drgn1 stm  y2020 y2021 i.dot if ///
-	 (ssscp!=1 & dcpst==1 & dag>=50)  [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_R1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(R1b, disclwt) side dec(4)
-
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-     i.dagpns#li.lesnr_c2 li.ydses_c5 li.dlltsd i.dagpns_sp ///
-     li.lessp_c3 li.dlltsd_sp ib8.drgn1 stm  y2020 y2021 i.dot if ///
-	 (ssscp!=1 & dcpst==1 & dag>=50)  [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_R1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(R1b, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_R1b.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-
-probit drtren i.dgn dag dagsq ib1.deh_c3 i.dagpns li.lesnr_c2 ///
-     i.dagpns#li.lesnr_c2 li.ydses_c5 li.dlltsd01 l.dhe_pcs l.dhe_mcs i.dagpns_sp ///
-     li.lessp_c3 li.dlltsd01_sp ib8.drgn1 stm y2020 y2021 i.dot if ///
-	 (ssscp!=1 & dcpst==1 & dag>=50) [pweight=dimxwt], vce(robust)
-
-   * raw results 
+	 
+/***************** R1b: PROBABILITY OF RETIREMENT, PARTNERED ******************/
+display "${r1b_if_condition}"
+	
+probit drtren i.Dgn Dag Dag_sq ///
+    i.Deh_c3_Medium i.Deh_c3_Low ///
+	l.Dhe_pcs l.Dhe_mcs  ///
+	i.Reached_Retirement_Age i.Reached_Retirement_Age_Les ///
+	li.Les_c3_NotEmployed i.Lessp_c3_NotEmployed ///
+	i.Reached_Retirement_Age_Sp ///
+	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
+	$regions Year_transformed Y2020 Y2021 $ethnicity ///
+	if ${r1b_if_condition} [pweight = dwt], vce(robust)	
+	
+	
+* Save raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/retirement/retirement", sheet("Process R1b") modify
+
+putexcel set "$dir_raw_results/retirement/retirement", ///
+	sheet("Process R1b") modify
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/retirement/R1b.doc", replace ///
-title("Process R1b: Probit regression estimates for retiring - cohabiting individuals aged 50+ not yet retired") ///
- ctitle(retiring) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
+
+outreg2 stats(coef se pval) using ///
+	"$dir_raw_results/retirement/R1b.doc", replace ///
+title("Process R1b: Probability of Retirement, Partnered") ///
+	ctitle(Retire) label side dec(2) noparen ///
+	addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) ///
+	addnote(`"Note: Regression if condition = (${r1b_if_condition})"')		
 	
-
+* Save sample inclusion indicator and predicted probabilities	
 gen in_sample = e(sample)	
-
 predict p
 
+graph bar (mean) drtren p if in_sample, over(dag, label(labsize(vsmall)))  ///
+	legend(label(1 "observed") label(2 "predicted"))
+
+graph drop _all 	
+	
+* Save sample for estiamte validation 
 save "$dir_validation_data/R1b_sample", replace
 
+* Store model summary statistics
 scalar r2_p = e(r2_p) 
-scalar N = e(N)	
+scalar N_sample = e(N)	
 scalar chi2 = e(chi2)
 scalar ll = e(ll)	
 	
-
-* Results 
-* Note: Zeros values are eliminated 
 	
+* Store results in Excel 
+
+* Store estimates
 matrix b = e(b)	
 matrix V = e(V)
 
+mata:
+	// Call matrices into mata 
+    V = st_matrix("V")
+    b = st_matrix("b")
 
-* Store variance-covariance matrix 
-
-preserve
-
-putexcel set "$dir_raw_results/retirement/var_cov", sheet("var_cov") replace
-putexcel A1 = matrix(V)
-
-import excel "$dir_raw_results/retirement/var_cov", sheet("var_cov") clear
-
-describe
-local no_vars = `r(k)'	
+    // Find which coefficients are nonzero
+    keep = (b :!= 0)
 	
-forvalues i = 1/2 {
-	egen row_sum = rowtotal(*)
-	drop if row_sum == 0 
-	drop row_sum
-	xpose, clear	
-}	
+	// Eliminate zeros
+	b_trimmed = select(b, keep)
+    V_trimmed = select(V, keep)
+    V_trimmed = select(V_trimmed', keep)'
+
+	// Inspection
+	b_trimmed 
+	V_trimmed 
 	
-mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_retirement", sheet("UK_R1b") modify
-putexcel C2 = matrix(var)
-		
-restore	
+    // Return to Stata
+    st_matrix("b_trimmed", b_trimmed')
+    st_matrix("V_trimmed", V_trimmed)
+	st_matrix("nonzero_b_flag", keep)
+end	
 
+* Eigenvalue tests for var-cov invertablility in SimPaths
+matrix symeigen X lambda = V_trimmed
 
-* Store estimated coefficients 
+scalar max_eig = lambda[1,1]
 
-// Initialize a counter for non-zero coefficients
-local non_zero_count = 0
-//local names : colnames b
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
 
-// Loop through each element in `b` to count non-zero coefficients
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        local non_zero_count = `non_zero_count' + 1
-    }
+* Outcome of max eigenvalue test 
+if max_eig < 1.0e-12 {
+	
+    display as error "CRITICAL ERROR: Maximum eigenvalue is too small (`max_eig')."
+    display as error "The Variance-Covariance matrix is likely singular."
+    exit 999
+
 }
 
-// Create a new row vector to hold only non-zero coefficients
-matrix nonzero_b = J(1, `non_zero_count', .)
+display "Stability Check Passed: Max Eigenvalue is " max_eig
 
-// Populate nonzero_b with non-zero coefficients from b
-local index = 1
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        matrix nonzero_b[1, `index'] = b[1, `i']
-        local index = `index' + 1
-    }
+* Outcome of eigenvalue ratio test 
+if min_ratio < 1.0e-12 {
+	
+    display as error "Matrix is ill-conditioned. Min/Max ratio: " min_ratio
+    exit 506
+
 }
 
-putexcel set "$dir_results/reg_retirement", sheet("UK_R1b") modify
-putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
-	
+display "Stability Check Passed. Min/Max ratio: " min_ratio
 
-* Labelling
+* Export into Excel 
+putexcel set "$dir_results/reg_retirement_UK", sheet("R1b") modify
+putexcel B2 = matrix(b_trimmed)
+putexcel C2 = matrix(V_trimmed)
 
+* Labels 
+preserve 
+putexcel set "$dir_results/reg_retirement_UK", sheet("R1b") modify
 putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dgn"
-putexcel A3 = "Dag"
-putexcel A4 = "Dag_sq"
-putexcel A5 = "Deh_c3_Medium"
-putexcel A6 = "Deh_c3_Low"
-putexcel A7 = "Reached_Retirement_Age"
-putexcel A8 = "Lesnr_c2_NotEmployed_L1"
-putexcel A9 = "Reached_Retirement_Age_Lesnr_c2_NotEmployed_L1"
-putexcel A10 = "Ydses_c5_Q2_L1"
-putexcel A11 = "Ydses_c5_Q3_L1"
-putexcel A12 = "Ydses_c5_Q4_L1"
-putexcel A13 = "Ydses_c5_Q5_L1"
-putexcel A14 = "Dlltsd01_L1"
-putexcel A15 = "Dhe_pcs_L1"
-putexcel A16 = "Dhe_mcs_L1"
-putexcel A17 = "Reached_Retirement_Age_Sp"
-putexcel A18 = "Lessp_c3_NotEmployed_L1"
-putexcel A19 = "Dlltsd01_sp_L1"
-putexcel A20 = "UKC"
-putexcel A21 = "UKD"
-putexcel A22 = "UKE"
-putexcel A23 = "UKF"
-putexcel A24 = "UKG"
-putexcel A25 = "UKH"
-putexcel A26 = "UKJ"
-putexcel A27 = "UKK"
-putexcel A28 = "UKL"
-putexcel A29 = "UKM"
-putexcel A30 = "UKN"
-putexcel A31 = "Year_transformed"
-putexcel A32 = "Y2020"
-putexcel A33 = "Y2021"
-putexcel A34 = "Ethn_Asian"
-putexcel A35 = "Ethn_Black"
-putexcel A36 = "Ethn_Other"
-putexcel A37 = "Constant"
-
 putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dgn"
-putexcel D1 = "Dag"
-putexcel E1 = "Dag_sq"
-putexcel F1 = "Deh_c3_Medium"
-putexcel G1 = "Deh_c3_Low"
-putexcel H1 = "Reached_Retirement_Age"
-putexcel I1 = "Lesnr_c2_NotEmployed_L1"
-putexcel J1 = "Reached_Retirement_Age_Les_c3_NotEmployed_L1"
-putexcel K1 = "Ydses_c5_Q2_L1"
-putexcel L1 = "Ydses_c5_Q3_L1"
-putexcel M1 = "Ydses_c5_Q4_L1"
-putexcel N1 = "Ydses_c5_Q5_L1"
-putexcel O1 = "Dlltsd01_L1"
-putexcel P1 = "Dhe_pcs_L1"
-putexcel Q1 = "Dhe_mcs_L1"
-putexcel R1 = "Reached_Retirement_Age_Sp"
-putexcel S1 = "Lessp_c3_NotEmployed_L1"
-putexcel T1 = "Dlltsd01_sp_L1"
-putexcel U1 = "UKC"
-putexcel V1 = "UKD"
-putexcel W1 = "UKE"
-putexcel X1 = "UKF"
-putexcel Y1 = "UKG"
-putexcel Z1 = "UKH"
-putexcel AA1 = "UKJ"
-putexcel AB1 = "UKK"
-putexcel AC1 = "UKL"
-putexcel AD1 = "UKM"
-putexcel AE1 = "UKN"
-putexcel AF1 = "Year_transformed"
-putexcel AG1 = "Y2020"
-putexcel AH1 = "Y2021"
-putexcel AI1 = "Ethn_Asian"
-putexcel AJ1 = "Ethn_Black"
-putexcel AK1 = "Ethn_Other"
-putexcel AL1 = "Constant"
+
+* Use Mata to extract nice labels from colstripe of e(b)
+
+local dir_results "$dir_results"
+cap erase "$dir_results/temp_labels.txt"
+
+mata:
+    // --------------------------------------------------
+    // Import objects from Stata
+    // --------------------------------------------------
+    nonzero_b_flag = st_matrix("nonzero_b_flag")
+    stripe         = st_matrixcolstripe("e(b)")
+
+    // Ensure column vector
+    nonzero_b_flag = nonzero_b_flag'
+    
+    // --------------------------------------------------
+    // Extract variable names
+    // --------------------------------------------------
+    varnames = stripe[.,2]
+
+    // Keep non-baseline coefficients
+    varnames_no_bl = select(varnames, nonzero_b_flag :== 1)
+
+    // --------------------------------------------------
+    // Clean labels
+    // --------------------------------------------------
+    labels_no_bl = usubinstr(varnames_no_bl, "1.", "", 1)
+    labels_no_bl = regexr(labels_no_bl, "^_cons", "Constant")
+
+    // Handle lags: L.var -> var_L1
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^L\.") :* ///
+        (regexr(labels_no_bl, "^L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^L\.") :* labels_no_bl)
+
+    // Handle 1L.var
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^1L\.") :* ///
+        (regexr(labels_no_bl, "^1L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^1L\.") :* labels_no_bl)
+
+    // --------------------------------------------------
+    // Add header
+    // --------------------------------------------------
+    labels_out = "v1" \ labels_no_bl
+
+    // --------------------------------------------------
+    // Write to temp file
+    // --------------------------------------------------
+    outfile = st_local("dir_results") + "/temp_labels.txt"
+    fh = fopen(outfile, "w")
+    for (i=1; i<=rows(labels_out); i++) {
+        fput(fh, labels_out[i])
+    }
+    fclose(fh)
+end
 
 
-* Goodness of fit
+    * Import cleaned labels into Stata
+    import delimited "$dir_results/temp_labels.txt", clear varnames(1) ///
+		encoding(utf8)
+	gen n = _n
+    
+    * Export labels to Excel
+    putexcel set "$dir_results/reg_retirement_UK", sheet("R1b") modify 	
+	
+	* Vertical labels
+    summarize n, meanonly
+	local N = r(max)+1
+	forvalue i = 2/`N' {
+	
+		local j = `i' - 1
+		putexcel A`i' = v1[`j'] 
+	
+	}	
+	
+	* Horizontal labels 
+	summarize n, meanonly
+	local N = r(max) + 1  // Adjusted since we're working across columns
 
-putexcel set "$dir_results/reg_retirement", sheet("Gof") modify
+	forvalues j = 1/`N' {
+	
+		local n = `j'+2 // Shift by 2 to start from column C
+		local col ""
+		
+		while `n' > 0 {
+			local rem = mod(`n' - 1, 26)
+			local col = char(65 + `rem') + "`col'"
+			local n = floor((`n' - 1)/26)
+		}
+
+		putexcel `col'1 = v1[`j']
+	}
+	
+    * Clean up
+    cap erase "$dir_results/temp_labels.txt"
+
+restore 
+
+* Export model fit statistics
+putexcel set "$dir_results/reg_retirement_UK", sheet("Gof") modify
 
 putexcel A9 = "R1b - Retirement partnered", bold		
 
 putexcel A11 = "Pseudo R-squared" 
 putexcel B11 = r2_p 
 putexcel A12 = "N"
-putexcel B12 = N 
+putexcel B12 = N_sample
 putexcel E11 = "Chi^2"		
 putexcel F11 = chi2
 putexcel E12 = "Log likelihood"		
 putexcel F12 = ll		
 
+* Clean up 		
 drop in_sample p
-scalar drop r2_p N chi2 ll	
-
-capture log close 
-
+scalar drop _all
+matrix drop _all
+graph drop _all 	
+	
+capture log close 	 
+	 

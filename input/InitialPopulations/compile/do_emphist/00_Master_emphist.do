@@ -26,9 +26,9 @@
 *                       A sample scripts by Liam Wright are available but outdated: 
 *                       https://www.understandingsociety.ac.uk/documentation/mainstage/syntax/user-deposited-syntax/working-life-histories/
 ***********************************************************************************************************
-* UKHLS VERSION:        UKDA-6931 Special License version 2009-2023
+* UKHLS VERSION:        UKHLS EUL version - UKDA-6614-stata [to wave o]
 * AUTHORS:              Nick Buck, Ricky Kanabar, Patryk Bronka, Daria Popova 
-* LAST REVISION:        30 Oct 2025 DP 
+* LAST REVISION:        15 Jan 2026 DP 
 ***********************************************************************************************************
 
 ************************************************************************

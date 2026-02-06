@@ -1,434 +1,124 @@
+/*********************************************************************
+ MASTER VARIABLE CONSTRUCTION AND TRANSFORMATIONS DO-FILE
+*********************************************************************/
 
-xtset idperson swv
-
-* --------------------------------------------
-* 1. Handle Missing Values and Basic Setup
-* --------------------------------------------
-
-// Recode -9 as missing for all variables
-foreach var of varlist _all {
-    replace `var' = . if `var' == -9
+*==================================================
+* Ensure missing is coded as missing
+*==================================================
+foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc dgn dgnsp dag dagsq dhe dhesp dcpst ///
+    ded deh_c3 deh_c4 der dehsp_c3 dehsp_c4 dehm_c3 dehf_c3 dehmf_c3 dcpen dcpyy dcpex ///
+    dlltsd dlltsd01 dlrtrd drtren dlftphm dhhtp_c4 dhhtp_c8 dhm dhm_ghq ///
+    jbhrs jshrs j2hrs jbstat les_c3 les_c4 lessp_c3 lessp_c4 lesdf_c4 ydses_c5 scghq2_dv ///
+    ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw ///
+    pno ppno hgbioad1 hgbioad2 der obs_earnings_hourly l1_obs_earnings_hourly ///
+    dhh_owned econ_benefits econ_benefits_nonuc econ_benefits_uc ///
+    scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ///
+    ypnoab flag* dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp new_rel {
+        qui recode `var' (-9/-1=.)
 }
 
-// Sort data by individual and wave
-sort idperson swv
+*==================================================
+* Student flag
+*==================================================
+cap drop Dst
+gen Dst = .
+replace Dst = 0 if les_c3 != 2
+replace Dst = 1 if les_c3 == 2
+replace Dst = . if les_c3 == .
 
-// Recode year to two-digit format
+*==================================================
+* Age transformations
+*==================================================
+
+gen Dag    = dag
+gen Dag_sq = dagsq
+
+gen Dag_c    = dag - 23
+gen Dag_c_sq = Dag_c^2
+
+gen Dag_post25 = (dag > 25) * (dag - 25)
+
+gen Dag_post21    = (dag > 21) * (dag - 21)
+gen Dag_post18_sq = (dag > 18) * (dag - 18)^2
+gen Dag_post21_sq = (dag > 21) * (dag - 21)^2
+gen Dag_post25_sq = (dag > 25) * (dag - 25)^2
+gen Dag_post26_sq = (dag > 26) * (dag - 26)^2
+
+mkspline rcs = dag, cubic knots(18 21 23 26)
+
+*==================================================
+* Time transformations
+*==================================================
+
 replace stm = stm - 2000
 
-// cap generate COVID year dummies
-cap cap gen y2020 = (stm == 20)
-cap cap gen y2021 = (stm == 21)
-
-
-* --------------------------------------------
-* 2. Correct Inconsistencies
-* --------------------------------------------
-
-// Fix inconsistent student coding
-replace ded = 0 if idperson == idperson[_n-1] & ded == 1 & ded[_n-1] == 0
-
-
-* --------------------------------------------
-* 3. Construct New Variables
-* --------------------------------------------
-
-// Partnership status in the first year
-cap cap gen new_rel = 0 if dcpst == 1
-replace new_rel = 1 if dcpen == 1
-label var new_rel "Partnerhip in first year"
-
-// Household type: 8 categories
-cap cap gen dhhtp_c8 = . 
-label var dhhtp_c8 "Household Type: 8 Category"
-replace dhhtp_c8 = 1 if dhhtp_c4 == 1 & lessp_c3 == 1
-replace dhhtp_c8 = 2 if dhhtp_c4 == 1 & lessp_c3 == 2
-replace dhhtp_c8 = 3 if dhhtp_c4 == 1 & lessp_c3 == 3	
-replace dhhtp_c8 = 4 if dhhtp_c4 == 2 & lessp_c3 == 1
-replace dhhtp_c8 = 5 if dhhtp_c4 == 2 & lessp_c3 == 2
-replace dhhtp_c8 = 6 if dhhtp_c4 == 2 & lessp_c3 == 3	
-replace dhhtp_c8 = 7 if dhhtp_c4 == 3
-replace dhhtp_c8 = 8 if dhhtp_c4 == 4
-cap label define dhhtp_c8 1 "Couple with no children, spouse employed" ///
-2 "Couple with no children, spouse student" ///
-3 "Couple with no children, spouse not employed" ///
-4 "Couple with children, spouse employed" ///
-5 "Couple with children, spouse student" ///
-6 "Couple with children, spouse not employed" ///
-7 "Single with no children" ///
-8 "Single with children"
-label values dhhtp_c8 dhhtp_c8	
-
-tab dhhtp_c8, gen(Dhhtp_c8_)
-
-// Squared income variable
-cap cap gen ypnbihs_dv_sq = ypnbihs_dv^2
-label variable ypnbihs_dv_sq "Personal Non-benefit Gross Income Squared"
-
-// Dummy for receiving capital income
-cap cap gen receives_ypncp = (ypncp > 0 & !missing(ypncp))
-
-// Transform capital income from IHS to level + log
-cap drop ypncp_lvl
-cap gen ypncp_lvl = sinh(ypncp)
-cap gen ln_ypncp = ln(ypncp_lvl)
-
-// Dummy and transformation for private pension income
-cap drop ypnoab_lvl
-cap gen ypnoab_lvl = sinh(ypnoab)
-cap cap gen ln_ypnoab = ln(ypnoab_lvl)
-cap cap gen receives_ypnoab = (ypnoab_lvl > 0 & !missing(ypnoab_lvl))
-
-// Dummy for state pension age
-cap cap gen state_pension_age = (dag >= 68)
-
-
-* Household net income
-* Describe income variables
-* summ fihhmnnet1_dv ieqmoecd_dv
-* Negative net income is possible. Missing marked as -9.
-* Negative income may make percent changes difficult to calculate. Sorted by
-* winsorisation.
-
-
-* Convert to real values
-gen econ_realnetinc=fihhmnnet1_dv/CPI
-label var econ_realnetinc "Real net household income"
-
-*Winsorise income variable
-winsor econ_realnetinc , gen(inc_wins) p(0.001)
-summ inc_wins, detail
-label var inc_wins "Income: winsorised (net)"
-
-
-* Generate equivalised household income
-gen econ_realequivinc=inc_wins/ieqmoecd_dv
-label var econ_realequivinc "Real equivalised household income"
-
-* Generate inverse hyperbolic sine transformation
-gen econ_realequivinct=asinh(econ_realequivinc)
-label var econ_realequivinct "Transformed real equivalised household income"
-* See Bellemare (2019) for coefficient interpretation
-
-
-* Task 4
-* Generate income change exposure
-sort idperson swv
-gen econ_incchange=econ_realequivinc - L.econ_realequivinc
-label var econ_incchange "Income change level"
-
-
-gen exp_incchange=.
-replace exp_incchange=1 if (econ_realequivinc < L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
-replace exp_incchange=0 if (econ_realequivinc == L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
-replace exp_incchange=0 if (econ_realequivinc > L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
-
-label define incchangecat 1 "Decreased income" 0 "Increased or stable income"
-label values exp_incchange incchangecat
-* Very few obs. with stable income, perhaps define within a percentage change
-
-tab exp_incchange, miss
-
-gen log_income=ln(econ_realequivinc)
-label var log_income "Log of real equivalised household net income"
-
-* Income increase
-gen inc_increase=D.log_income
-label var inc_increase "Change rate of income increase"
-* Set to zero for those without an increase in income
-replace inc_increase=0 if exp_incchange==1 | ((econ_realequivinc == L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.)
-
-* Income decrease
-gen inc_decrease=D.log_income
-label var inc_increase "Change rate of income decrease"
-* Set to zero for those without a decrease in income
-replace inc_decrease=0 if exp_incchange==0
-summ inc_increase inc_decrease econ_incchange
-
-* note: individuals moving from an increase to decrease (or vice versa) will have to effects applied.
-
-* Task 5
-* Poverty transitions
-
-* Generate median income for sample
-bysort swv: egen samp_medianinc=wpctile(econ_realequivinc), p(50) weights(dhhwt)
-label var samp_medianinc "Median household income for sample in swv"
-* ONS uses net income, before or after housing costs. Net income used here.
-gen samp_poverty =samp_medianinc*0.60
-label var samp_poverty "Poverty threshold"
-
-tabstat samp_poverty, by(swv)
-summ samp_poverty, detail
-
-* Generate poverty marker
-gen econ_poverty =(samp_poverty>=econ_realequivinc)
-label var econ_poverty "Below poverty threshold (before housing costs)"
-replace econ_poverty=. if econ_realequivinc==. | samp_poverty==.
-label define yesno 0 "No" 1 "Yes"
-label values econ_poverty yesno
-tab econ_poverty swv, col
-* Before housing costs used in LABSim
-
-* Generate poverty exposure variable
-sort idperson swv
-gen exp_poverty= .
-replace exp_poverty=0 if econ_poverty==0 & L.econ_poverty==0
-replace exp_poverty=1 if econ_poverty==1 & L.econ_poverty==0
-replace exp_poverty=2 if econ_poverty==0 & L.econ_poverty==1
-replace exp_poverty=3 if econ_poverty==1 & L.econ_poverty==1
-label define poverty_trans 0 "No Poverty" 1 "Entering poverty" 2 "Exiting poverty" 3 "Continuous poverty"
-label values exp_poverty poverty_trans
-label var exp_poverty "Poverty transition"
-tab exp_poverty swv, m column
-
-
-* Generate poverty gap marker
-* define the poverty gap (Gi) as the poverty line (samp_poverty) less 
-* actual income (econ_realequivinc) for individuals below the poverty line
-* the gap is considered to be zero for everyone else
-* Source: https://www.ilo.org/wcmsp5/groups/public/---americas/---ro-lima/---sro-port_of_spain/documents/presentation/wcms_304851.pdf
-gen exp_povgap=.
-replace exp_povgap=(samp_poverty-econ_realequivinc)/samp_poverty if econ_poverty==1
-replace exp_povgap=0 if econ_poverty==0
-label var exp_povgap "Poverty gap"
-
-* Task 2 
-* Generate employment volatility exposure
-* Only interested in 
-* employment (1) to employment (1)
-* employment (1) to not employed (3)
-* not employed (3) to employed (1)
-* not employed (3) to not employed (3)
-sort idperson swv
-gen  exp_emp=.
-* Starting state: employed or self-employed
-replace exp_emp=11 if L.les_c4==1 & les_c4==1
-replace exp_emp=13 if L.les_c4==1 & les_c4==3
-
-* Starting state: not employed
-replace exp_emp=31 if L.les_c4==3 & les_c4==1
-replace exp_emp=33 if L.les_c4==3 & les_c4==3
-label define exp_emp 11 "Continuous employment" 13 "Exiting employment" 31 "Entering employment" 33 "Continuously non-employed"
-label value exp_emp exp_emp
-tab exp_emp swv, col miss
-
-
-* Generate working hours categories
-gen lhw_zero=(lhw<=5)
-gen lhw_ten=(lhw>=6 & lhw<=15)
-gen lhw_twenty=(lhw>=16 & lhw<=25)
-gen lhw_thirty=(lhw>=26 & lhw<=35)
-gen lhw_forty=(lhw>=36 & lhw!=.)
-
-gen lhw_c5=.
-replace lhw_c5=0 if lhw_zero==1
-replace lhw_c5=10 if lhw_ten==1
-replace lhw_c5=20 if lhw_twenty==1
-replace lhw_c5=30 if lhw_thirty==1
-replace lhw_c5=40 if lhw_forty==1
-/**********************Partner's hours of work category*************/
-preserve
-keep swv idperson idhh lhw_c5
-rename lhw_c5 lhwsp_c5
-rename idperson idpartner
-save temp_lhwsp.dta, replace
-restore
-merge m:1 swv idpartner idhh using temp_lhwsp.dta
-keep if _merge == 1 | _merge == 3
-drop _merge
-
-tab lhwsp_c5 dcpst, miss 
-
-gen lhwsp_c6=lhwsp_c5
-replace lhwsp_c6=999 if lhwsp_c6==. & dcpst>1 & dcpst!=.
-label define lhwsp 0 "zero" 10 "Ten" 20 "Twenty" 30 "Thirty" 40 "Forty" 999 "No partner"
-label value lhwsp_c6 lhwsp
-tab lhwsp_c6 dcpst, miss
-la var lhwsp_c6 "LABOUR MARKET: Partner's hours worked per week category"
-
-
-* --------------------------------------------------
-* 4. Lag Variables + Handle Missing Lags at Age 16
-* --------------------------------------------------
-
-// Create basic lags
-sort idperson swv
-cap gen l_ydses_c5 = ydses_c5[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dhe = dhe[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_les_c3 = les_c3[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_lesnr_c2 = lesnr_c2[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dhhtp_c4 = dhhtp_c4[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dhe_pcs = dhe_pcs[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dhe_mcs = dhe_mcs[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dlltsd = dlltsd[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dlltsd01 = dlltsd01[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dnc = dnc[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dnc02 = dnc02[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dcpst = dcpst[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dhhtp_c8 = dhhtp_c8[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_dhh_owned = dhh_owned[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-cap gen l_yptciihs_dv = yptciihs_dv[_n-1] if idperson == idperson[_n-1] & swv == swv[_n-1] + 1 
-
-
-// Fill in missing lags using current values at age 16
-gsort +idperson -stm
-bys idperson: carryforward dhe if dag <= 16, replace 
-bys idperson: carryforward dhe_pcs if dag <= 16, replace 
-bys idperson: carryforward dhe_mcs if dag <= 16, replace 
-
-sort idperson swv
-cap drop dhe_L1
-bys idperson: gen dhe_L1 = l.dhe
-replace dhe_L1 = dhe if missing(dhe_L1)
-
-cap drop dhe_pcs_L1
-bys idperson: gen dhe_pcs_L1 = l.dhe_pcs
-replace dhe_pcs_L1 = dhe_pcs if missing(dhe_pcs_L1)
-
-cap drop dhe_mcs_L1
-bys idperson: gen dhe_mcs_L1 = l.dhe_mcs
-replace dhe_mcs_L1 = dhe if missing(dhe_mcs_L1)
-
-cap drop yplgrs_dv_L1
-bys idperson: gen yplgrs_dv_L1 = l.yplgrs_dv
-replace yplgrs_dv_L1 = yplgrs_dv if missing(yplgrs_dv_L1)
-
-cap drop yplgrs_dv_L2
-bys idperson: gen yplgrs_dv_L2 = l2.yplgrs_dv
-replace yplgrs_dv_L2 = yplgrs_dv if missing(yplgrs_dv_L2)
-
-cap drop ypncp_L1
-bys idperson: gen ypncp_L1 = l.ypncp
-replace ypncp_L1 = ypncp if missing(ypncp_L1)
-
-cap drop ypncp_L2
-bys idperson: gen ypncp_L2 = l2.ypncp
-replace ypncp_L2 = ypncp if missing(ypncp_L2)
-
-cap drop ypnoab_L1
-bys idperson: gen ypnoab_L1 = l.ypnoab
-replace ypnoab_L1 = ypnoab if missing(ypnoab_L1)
-
-cap drop ypnoab_L2
-bys idperson: gen ypnoab_L2 = l2.ypnoab
-replace ypnoab_L2 = ypnoab if missing(ypnoab_L2)
-
-cap drop dhhtp_c4_L1
-bys idperson: gen dhhtp_c4_L1 = l.dhhtp_c4
-replace dhhtp_c4_L1 = dhhtp_c4 if missing(dhhtp_c4_L1)
-
-cap drop les_c3_L1
-bys idperson: gen les_c3_L1 = l.les_c3
-replace les_c3_L1 = les_c3 if missing(les_c3_L1)
-
-
-* --------------------------------------------------
-* 4. Labelling 
-* --------------------------------------------------
-
-* Label definitions
-cap label define jbf 1 "Employed" 2 "Student" 3 "Not Employed"
-cap label define jbg 1 "Employed" 2 "Student" 3 "Not employed" 4 "Retired"
-cap label define edd 1 "Degree" 2 "Other Higher/A-level/GCSE" 3 "Other/No Qualification"
-cap label define hht 1 "Couples with No Children" 2 "Couples with Children" 3 "Single with No Children" 4 "Single with Children"
-cap label define gdr 1 "Male" 0 "Female"
-cap label define rgna 1 "North East" 2 "North West" 4 "Yorkshire and the Humber" 5 "East Midlands" 6 "West Midlands" 7 "East of England" 8 "London" 9 "South East" 10 "South West" 11 "Wales" 12 "Scotland" 13 "Northern Ireland"
-cap label define yn 1 "Yes" 0 "No"
-cap label define dces 1 "Both Employed" 2 "Employed, Spouse Not Employed" 3 "Not Employed, Spouse Employed" 4 "Both Not Employed"
-cap label define ethn 1 "White" 2 "Asian or Asian British" 3 "Black, Black British, Caribbean, or African" 4 "Other or missing ethnic group"
-cap label define dhe 1 "Poor" 2 "Fair" 3 "Good" 4 "VeryGood" 5 "Excellent", modify 
-
-* Variable labels
-label variable dgn "cap gender"
-label variable dag "Age"
-label variable dagsq "Age Squared"
-label variable drgn1 "Region"
-label variable stm "Year"
-label variable les_c3 "Employment Status: 3 Category"
-label variable les_c4 "Employment Status: 4 Category"
-label variable dhe "Self-rated Health"
-label variable dcpen "Entered a new Partnership"
-label variable dcpex "Partnership dissolution"
-label variable deh_c3 "Educational Attainment: 3 Category"
-label variable ydses_c5 "Annual Household Income Quintile"
-label variable dlltsd "Long-term Sick or Disabled"
-label variable dhhtp_c4 "Household Type: 4 Category"
-label variable dhhtp_c8 "Household Type: 8 Category"
-label variable dnc "Number of Children in Household"
-label variable dnc02 "Number of Children aged 0-2 in Household"
-label variable dot "Ethnicity"
-label variable dehmf_c3 "Highest Parental Educational Attainment: 3 Category"
-label variable dhe_mcs "Subjective Self-rated health - Mental (SF12 MCS)"
-label variable dhe_pcs "Subjective Self-rated health - Physical (SF12 PCS)"
-label variable dagpns "Reached state retirement age"
-label variable dagpns_sp "Reached state retirement age - partner"
-label variable dukfr "UK Fertility Rate"
-label variable lesdf_c4 "Differential Employment Status"
-label variable ypnbihs_dv "Personal Non-benefit Gross Income"
-label variable ynbcpdf_dv "Differential Personal Non-Benefit Gross Income"
-
-* Attach value labels to variables
-label values dgn gdr
-label values drgn1 rgna
-label values les_c3 lessp_c3 jbf 
-label values les_c4 jbg 
-label values deh_c3 dehsp_c3 edd 
-label values dcpen dcpex yn
-label values lesdf_c4 dces
-label values dhhtp_c4 hht 
-label values dhhtp_c8 dhhtp_c8
-label values dot ethn 
-label values dhe dhe
-label value ded yn
-label value dlltsd yn
-label value dlltsd01 yn
-
-* Alter names and create dummies for automatic labelling 
-*(required for gologit) 
-
-cap gen Dgn = dgn 
-cap gen Dag = dag  
-cap gen Dag_sq = dagsq 
-
-
-capture drop UK*
-capture drop Deh_c3_*
-capture drop Dehmf_c3_*
-capture drop Les_c4_*
-capture drop L_Les_c3_*
-capture drop Ydses_c5_Q*
-capture drop L_Ydses_c5_Q*
-capture drop Dhe_*
-capture drop L_Dhe_c5_*
-capture drop Dhhtp_c4_*
-capture drop L_Dhhtp_c4_*
-capture drop dot_*
-cap drop Ethn_White Ethn_Asian Ethn_Black Ethn_Other
-cap drop Les_c3_Employed_L1 Les_c3_Student_L1 Les_c3_NotEmployed_L1
-
-tab drgn1, gen(UK) 
-rename UK1 UKC //North East
-rename UK2 UKD //North West
-rename UK3 UKE //Yorkshire and the Humber
-rename UK4 UKF //East Midlands
-rename UK5 UKG //West Midlands
-rename UK6 UKH //East of England
-rename UK7 UKI //London
-rename UK8 UKJ //South East
-rename UK9 UKK //South West
-rename UK10 UKL //Wales
-rename UK11 UKM //Scotland
-rename UK12 UKN //Northern Ireland
-
-tab deh_c3, gen(Deh_c3_)
-rename Deh_c3_1 Deh_c3_High
-rename Deh_c3_2 Deh_c3_Medium
-rename Deh_c3_3 Deh_c3_Low
-
-tab dehmf_c3, gen(Dehmf_c3_)
-rename Dehmf_c3_1 Dehmf_c3_High
-rename Dehmf_c3_2 Dehmf_c3_Medium
-rename Dehmf_c3_3 Dehmf_c3_Low
+foreach y of numlist 11/25 {
+    gen y20`y' = (stm == `y')
+}
+
+foreach y of numlist 2011/2025 {
+    gen Y`y' = y`y'
+}
+
+gen year_post2020 = (stm > 20) * (stm - 20)
+gen Y2223 = inlist(stm, 22, 23)
+gen Year_transformed = stm
+
+*==================================================
+* Income variables
+*==================================================
+
+gen receives_ypncp = ypncp > 0 & !missing(ypncp) //capital income
+
+gen receives_ypnoab = ypnoab > 0 & !missing(ypnoab) //private pension income 
+
+recode ynbcpdf_dv (-999 = .)
+
+tab ydses_c5 , gen(Ydses_c5_Q)
+
+*==================================================
+* Education recoding
+*==================================================
+cap drop deh_c3_recoded
+recode deh_c3 (1 = 3) (3 = 1), gen(deh_c3_recoded)
+
+cap lab define deh_c3_recoded   1 "Low" 2 "Medium" 3 "High"
+label values deh_c3_recoded deh_c3_recoded
+
+
+*==================================================
+* Region dummies
+*==================================================
+
+gen Dgn = dgn
+tab drgn1, gen(UK)
+
+rename UK1  UKC
+rename UK2  UKD
+rename UK3  UKE
+rename UK4  UKF
+rename UK5  UKG
+rename UK6  UKH
+rename UK7  UKI
+rename UK8  UKJ
+rename UK9  UKK
+rename UK10 UKL
+rename UK11 UKM
+rename UK12 UKN
+
+*==================================================
+* Employment dummies
+*==================================================
+
+tab les_c3, gen(Les_c3_)
+rename Les_c3_1 Les_c3_Employed
+rename Les_c3_2 Les_c3_Student
+rename Les_c3_3 Les_c3_NotEmployed
+
+tab lessp_c3, gen(Lessp_c3_)
+rename Lessp_c3_1 Lessp_c3_Employed
+rename Lessp_c3_2 Lessp_c3_Student
+rename Lessp_c3_3 Lessp_c3_NotEmployed
 
 tab les_c4, gen(Les_c4_)
 rename Les_c4_1 Les_c4_Employed
@@ -436,19 +126,42 @@ rename Les_c4_2 Les_c4_Student
 rename Les_c4_3 Les_c4_NotEmployed
 rename Les_c4_4 Les_c4_Retired
 
-tab l_les_c3, gen(L_Les_c3_)
-rename L_Les_c3_1 Les_c3_Employed_L1
-rename L_Les_c3_2 Les_c3_Student_L1
-rename L_Les_c3_3 Les_c3_NotEmployed_L1
+tab lesdf_c4, gen(Lesdf_c4_)
+rename Lesdf_c4_1 Lesdf_c4_BothEmployed
+rename Lesdf_c4_2 Lesdf_c4_EmpSpouseNotEmp
+rename Lesdf_c4_3 Lesdf_c4_NotEmpSpouseEmp
+rename Lesdf_c4_4 Lesdf_c4_BothNotEmployed
 
-tab ydses_c5, gen(Ydses_c5_Q)
+*==================================================
+* Education dummies
+*==================================================
 
-tab l_ydses_c5, gen(L_Ydses_c5_Q)
-rename L_Ydses_c5_Q1 Ydses_c5_Q1_L1
-rename L_Ydses_c5_Q2 Ydses_c5_Q2_L1
-rename L_Ydses_c5_Q3 Ydses_c5_Q3_L1
-rename L_Ydses_c5_Q4 Ydses_c5_Q4_L1
-rename L_Ydses_c5_Q5 Ydses_c5_Q5_L1
+tab deh_c3, gen(Deh_c3_)
+rename Deh_c3_1 Deh_c3_High
+rename Deh_c3_2 Deh_c3_Medium
+rename Deh_c3_3 Deh_c3_Low
+
+tab deh_c4, gen(Deh_c4_)
+rename Deh_c4_1 Deh_c4_Na
+rename Deh_c4_2 Deh_c4_High
+rename Deh_c4_3 Deh_c4_Medium
+rename Deh_c4_4 Deh_c4_Low
+
+tab dehmf_c3, gen(Dehmf_c3_)
+rename Dehmf_c3_1 Dehmf_c3_High
+rename Dehmf_c3_2 Dehmf_c3_Medium
+rename Dehmf_c3_3 Dehmf_c3_Low
+
+tab dehsp_c3, gen(Dehsp_c3_)
+rename Dehsp_c3_1 Dehsp_c3_High
+rename Dehsp_c3_2 Dehsp_c3_Medium
+rename Dehsp_c3_3 Dehsp_c3_Low
+
+*==================================================
+* Health dummies
+*==================================================
+cap lab define dhe 1 "Poor" 2 "Fair" 3 "Good" 4 "VeryGood" 5 "Excellent" , modify 
+lab values dhe dhe 
 
 tab dhe, gen(Dhe_)
 rename Dhe_1 Dhe_Poor
@@ -457,24 +170,28 @@ rename Dhe_3 Dhe_Good
 rename Dhe_4 Dhe_VeryGood
 rename Dhe_5 Dhe_Excellent
 
-tab l_dhe, gen(L_Dhe_c5_)
+tab dhesp, gen(Dhesp_)
+rename Dhesp_1 Dhesp_Poor
+rename Dhesp_2 Dhesp_Fair
+rename Dhesp_3 Dhesp_Good
+rename Dhesp_4 Dhesp_VeryGood
+rename Dhesp_5 Dhesp_Excellent
 
-tab dhhtp_c4, gen(Dhhtp_c4_)
-rename Dhhtp_c4_1 Dhhtp_c4_CoupleNoChildren
-rename Dhhtp_c4_2 Dhhtp_c4_CoupleChildren
-rename Dhhtp_c4_3 Dhhtp_c4_SingleNoChildren
-rename Dhhtp_c4_4 Dhhtp_c4_SingleChildren
+gen Dhe_pcs   = dhe_pcs
+gen Dhe_mcs   = dhe_mcs
+gen Dhe_pcssp = dhe_pcssp
+gen Dhe_mcssp = dhe_mcssp
 
-tab l_dhhtp_c4, gen(L_Dhhtp_c4_)
-rename L_Dhhtp_c4_1 Dhhtp_c4_CoupleNoChildren_L1
-rename L_Dhhtp_c4_2 Dhhtp_c4_CoupleChildren_L1
-rename L_Dhhtp_c4_3 Dhhtp_c4_SingleNoChildren_L1
-rename L_Dhhtp_c4_4 Dhhtp_c4_SingleChildren_L1
+*==================================================
+* Long-term sick or disabled
+*==================================================
 
-tab l_dhhtp_c8, gen(L_Dhhtp_c8_)
-forvalues i=1/8 {
-rename L_Dhhtp_c8_`i' Dhhtp_c8_`i'_L1
-}
+gen Dlltsd   = dlltsd
+gen Dlltsd01 = dlltsd01
+
+*==================================================
+* Ethnicity
+*==================================================
 
 tab dot, gen(dot_)
 rename dot_1 Ethn_White
@@ -482,52 +199,130 @@ rename dot_2 Ethn_Asian
 rename dot_3 Ethn_Black
 rename dot_4 Ethn_Other
 
+*==================================================
+* Household type and relationship dynamics
+*==================================================
+
+tab dhhtp_c4, gen(Dhhtp_c4_)
+rename Dhhtp_c4_1 Dhhtp_c4_CoupleNoChildren
+rename Dhhtp_c4_2 Dhhtp_c4_CoupleChildren
+rename Dhhtp_c4_3 Dhhtp_c4_SingleNoChildren
+rename Dhhtp_c4_4 Dhhtp_c4_SingleChildren
+
+tab dhhtp_c8, gen(Dhhtp_c8_)
+
+gen New_rel = new_rel
+
 tab dcpst, gen(Dcpst_)
 rename Dcpst_1 Dcpst_Partnered
 rename Dcpst_2 Dcpst_Single
 
-tab l_dcpst, gen(L_Dcpst_)
-rename L_Dcpst_1 Dcpst_Partnered_L1
-rename L_Dcpst_2 Dcpst_Single_L1
+
+*==================================================
+* Explicit lags
+*==================================================
+cap drop l_* L_*
+
+xtset idperson swv
+
+foreach v in ydses_c5 dhe dhe_pcs dhe_mcs les_c3 les_c4 dhhtp_c4 dlltsd01 {
+    gen l_`v' = L.`v'
+}
+
+gen L_Ydses_c5 = l_ydses_c5
+gen L_Dhe      = l_dhe
+gen L_Dhe_pcs  = l_dhe_pcs
+gen L_Dhe_mcs  = l_dhe_mcs
+gen L_Dlltsd01 = l_dlltsd01
+
+tab l_les_c4, gen(L_Les_c4_)
+rename L_Les_c4_1 L_Les_c4_Employed
+rename L_Les_c4_2 L_Les_c4_Student
+rename L_Les_c4_3 L_Les_c4_NotEmployed
+rename L_Les_c4_4 L_Les_c4_Retired
+
+tab l_ydses_c5, gen(L_Ydses_c5_Q)
+
+tab l_dhhtp_c4, gen(L_Dhhtp_c4_)
+rename L_Dhhtp_c4_1 L_Dhhtp_c4_CoupleNoChildren
+rename L_Dhhtp_c4_2 L_Dhhtp_c4_CoupleChildren
+rename L_Dhhtp_c4_3 L_Dhhtp_c4_SingleNoChildren
+rename L_Dhhtp_c4_4 L_Dhhtp_c4_SingleChildren
 
 
-cap gen Year_transformed = stm  
-
-cap gen Y2020 = y2020
-cap gen Y2021 = y2021
-
-cap gen Dhe = dhe 
-cap gen Dhe_pcs = dhe_pcs
-cap gen Dhe_mcs = dhe_mcs
-
-cap gen Ydses_c5 = ydses_c5 
-
-cap gen Ydses_c5_L1 = l_ydses_c5
-
-cap gen Dhe_L1 = l_dhe
-cap gen Dhe_pcs_L1 = l_dhe_pcs
-cap gen Dhe_mcs_L1 = l_dhe_mcs
-
-cap gen Dlltsd = dlltsd
-cap gen Dlltsd01 = dlltsd01
-
-cap gen Dlltsd_L1 = l_dlltsd
-cap gen Dlltsd01_L1 = l_dlltsd01
-
-cap gen FertilityRate = dukfr
-
-cap gen Dnc = dnc 
-
-cap gen Dnc02 = dnc02
-
-rename l_dnc Dnc_L1 
-
-rename l_dnc02 Dnc02_L1 
-
-gen Ypnbihs_dv = ypnbihs_dv
-
-gen Yptciihs_dv = yptciihs_dv
-gen Yptciihs_dv_L1 = l_yptciihs_dv
-
+*==================================================
+* Copy variables for nice labels 
+*==================================================
+gen Dnc       = dnc
+gen Dnc02     = dnc02
+gen Ded       = ded
+gen Dhe       = dhe
+gen Ydses_c5  = ydses_c5
+gen Dcpyy     = dcpyy
+gen Dcpagdf   = dcpagdf
+gen FertilityRate = dukfr
 gen Dhh_owned = dhh_owned
-gen Dhh_owned_L1 = l_dhh_owned
+
+gen Elig_pen    = dagpns
+gen Elig_pen_L1 = l.dagpns
+
+gen Reached_Retirement_Age    = dagpns
+gen Reached_Retirement_Age_Sp = dagpns_sp
+
+gen Dlltsdsp   = dlltsd_sp
+gen Dlltsd01sp = dlltsd01_sp
+
+gen Ypncp = ypncp
+gen Ypnoab =  ypnoab
+gen Yplgrs_dv = yplgrs_dv
+gen Ypnbihs_dv = ypnbihs_dv
+gen Ypnbihs_dv_sq = ypnbihs_dv^2
+gen Ynbcpdf_dv   = ynbcpdf_dv
+gen Yptciihs_dv  = yptciihs_dv
+
+
+
+*==================================================
+* Interactions
+*==================================================
+cap drop Les_c4_*_Dgn Ded_* Reached_Retirement_Age_Les
+
+gen Les_c4_Student_Dgn     = Dgn * Les_c4_Student
+gen Les_c4_NotEmployed_Dgn = Dgn * Les_c4_NotEmployed
+gen Les_c4_Retired_Dgn     = Dgn * Les_c4_Retired
+
+gen Ded_Dag    = Ded * Dag
+gen Ded_Dag_sq = Ded * Dag_sq
+gen Ded_Dgn    = Ded * Dgn
+
+gen Ded_Dnc_L1_  = Ded * l.Dnc
+gen Ded_Dnc02_L1 = Ded * l.Dnc02
+
+forvalues i = 1/5 {
+    gen Ded_Ydses_c5_Q`i'_L1 = Ded * l.Ydses_c5_Q`i'
+}
+
+gen Ded_Dehsp_c3_Medium_L1 = l.Dehsp_c3_Medium * Ded
+gen Ded_Dehsp_c3_Low_L1    = l.Dehsp_c3_Low * Ded
+
+gen Ded_Dhesp_Good_L1 = l.Dhesp_Good * Ded
+gen Ded_Dhesp_Fair_L1 = l.Dhesp_Fair * Ded
+
+gen Ded_Dhe_Fair_L1      = l.Dhe_Fair * Ded
+gen Ded_Dhe_Good_L1      = l.Dhe_Good * Ded
+gen Ded_Dhe_VeryGood_L1  = l.Dhe_VeryGood * Ded
+gen Ded_Dhe_Excellent_L1 = l.Dhe_Excellent * Ded
+
+gen Ded_Dhe_pcs = Ded * Dhe_pcs
+gen Ded_Dhe_mcs = Ded * Dhe_mcs
+
+gen Ded_Dhe             = Dhe * Ded
+gen Ded_Dcpst_Single    = Dcpst_Single * Ded
+gen Ded_Dcpst_Single_L1 = l.Dcpst_Single * Ded
+
+gen Reached_Retirement_Age_Les = Reached_Retirement_Age * l.Les_c3_NotEmployed
+
+gen Ded_Ypncp= Ded * Ypncp
+gen Ded_Yplgrs_dv = Ded *Yplgrs_dv
+
+

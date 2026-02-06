@@ -1,20 +1,19 @@
-/********************************************************************************
-*
-*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE PROVISION TO INCLUDE IN INITIAL POPULATION
-*
-*	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 18 July 2025 DP 
-*
-********************************************************************************/
+***************************************************************************************
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data  
+* DO-FILE NAME:         04_social_care_provided.do
+* DESCRIPTION:          EXTRACT UKHLS DATA FOR SOCIAL CARE PROVISION TO INCLUDE IN INITIAL POPULATION
+***************************************************************************************
+* COUNTRY:              UK
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
+* AUTHORS: 				Justin van de Ven, Daria Popova 
+* LAST UPDATE:          15 Jan 2026 DP
+* NOTE:					Called from 00_master.do - see master file for further details
+***************************************************************************************
 
 ***************************************************************************************
 cap log close 
 log using "${dir_log}/04_social_care_provided.log", replace
 ***************************************************************************************
-/********************************************************************************
-	local data directories - commented out when using master program
-********************************************************************************/
-
 
 /**********************************************************************
 *	start analysis
@@ -175,6 +174,8 @@ local files_to_drop
 	ukhls_scprov_k.dta
 	ukhls_scprov_l.dta
 	ukhls_scprov_m.dta
+	ukhls_scprov_n.dta
+	ukhls_scprov_o.dta
 	ukhls_scprov_pooled0.dta
 	ukhls_scprov_pooled1.dta
 	;

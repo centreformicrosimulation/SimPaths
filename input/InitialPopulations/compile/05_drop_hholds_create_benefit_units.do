@@ -78,8 +78,8 @@ drop _merge
 
 *Keep children under age to become responsible with parents unless their partner lives in the hh: 
 *(children above age to become responsible will create independent households)
-replace apartnum = apartnumm if missing(apartnum) & dag < $age_become_responsible & ppno == 0 //ppno == 0 ensures there is no partner living with them
-replace apartnum = apartnumf if missing(apartnum) & dag < $age_become_responsible & ppno == 0
+replace apartnum = apartnumm if missing(apartnum) & dag < $age_becomes_responsible & ppno == 0 //ppno == 0 ensures there is no partner living with them
+replace apartnum = apartnumf if missing(apartnum) & dag < $age_becomes_responsible & ppno == 0
 drop apartnumm apartnumf
 
 
@@ -94,7 +94,7 @@ replace idhh = newid if apartnum > 1 & !missing(apartnum)
 *If a single has a child ==> it should go with them. 
 *If aged above the age to become responsible, and pno > 1 (so more than 2 person in the HH) & ppno == 0 (partner not in the HH) should move out
 cap drop newid
-egen newid = group(swv idhh pno) if dag >= $age_become_responsible & pno > 1 & ppno == 0
+egen newid = group(swv idhh pno) if dag >= $age_becomes_responsible & pno > 1 & ppno == 0
 tostring(newid), replace
 replace newid = "888888"+newid if newid != "."
 destring(newid), replace
@@ -103,10 +103,10 @@ drop newid
 
 
 *Still some households with 3 adults? 
-bys swv idhh: egen adult_count = count(idperson) if dag > $age_become_responsible
+bys swv idhh: egen adult_count = count(idperson) if dag > $age_becomes_responsible
 fre adult_count
 /*
-egen newid = group(idhh pno) if adult_count > 2 & ppno == 0 & dag > $age_become_responsible
+egen newid = group(idhh pno) if adult_count > 2 & ppno == 0 & dag > $age_becomes_responsible
 tostring(newid), replace
 replace newid = "777777"+newid if newid != "."
 destring(newid), replace
@@ -116,7 +116,7 @@ drop newid adult_count
 
 
 *Check for orphans: 
-gen orphan_dummy = 1 if dag < $age_become_responsible & idmother <0 & idfather <0
+gen orphan_dummy = 1 if dag < $age_becomes_responsible & idmother <0 & idfather <0
 bys swv idhh: egen orphan_hh = max(orphan_dummy)
 tab orphan_dummy 
 
@@ -124,18 +124,18 @@ tab orphan_dummy
 bys swv idhh: gen long idmother2 = idperson if dgn == 0 & dag > 18 //Keep at 18 and not age to become responsible as minimum age to give birth is 18?
 gsort +swv +idhh -dag
 by swv idhh: carryforward idmother2, replace
-replace idmother = idmother2 if dag < $age_become_responsible & idmother<0 & idfather<0 & !missing(idmother2)
+replace idmother = idmother2 if dag < $age_becomes_responsible & idmother<0 & idfather<0 & !missing(idmother2)
 
 bys swv idhh: gen long idfather2 = idperson if dgn == 1 & dag > 18 
 gsort +swv +idhh -dag
 by swv idhh: carryforward idfather2, replace
-replace idfather = idfather2 if dag < $age_become_responsible & idmother<0 & idfather<0 & !missing(idfather2)
+replace idfather = idfather2 if dag < $age_becomes_responsible & idmother<0 & idfather<0 & !missing(idfather2)
 
 /**************************Drop remaining orphans *********************************************/
-count if dag < $age_become_responsible & idmother<0 & idfather<0
+count if dag < $age_becomes_responsible & idmother<0 & idfather<0
 /*143 cases in total*/
-bys swv: count if dag < $age_become_responsible & idmother<0 & idfather<0
-drop if dag < $age_become_responsible & idmother<0 & idfather<0
+bys swv: count if dag < $age_becomes_responsible & idmother<0 & idfather<0
+drop if dag < $age_becomes_responsible & idmother<0 & idfather<0
 /**********************************************************************************************/
 
 
@@ -157,7 +157,7 @@ gen same_sex_couple = 1 if dgn == dgn_partner & !missing(dgn) & !missing(dgn_par
 *Check same-sex couples for children: father/mother should stay with children 
 *Double-check as might not work properly 
 bys swv idhh: egen samesex_hh = max(same_sex_couple) 
-tab samesex_hh if dag < $age_become_responsible //HH where same-sex couple is with someone < 18, N=19 
+tab samesex_hh if dag < $age_becomes_responsible //HH where same-sex couple is with someone < 18, N=19 
 
 
 gen long parent_id_temp = idmother if samesex_hh == 1 & dag < 18
@@ -172,9 +172,9 @@ replace idmother = . if idmother < 0
 replace idfather = . if idfather < 0  
 
 *Break-up same-sex couples into separate households:
-gen long idmother3 = idmother if dag < $age_become_responsible
+gen long idmother3 = idmother if dag < $age_becomes_responsible
 replace idmother3 = idperson if missing(idmother3) & dgn == 0 
-gen long idfather3 = idfather if dag < $age_become_responsible
+gen long idfather3 = idfather if dag < $age_becomes_responsible
 replace idfather3 = idperson if missing(idfather3) & dgn == 1
 
 sort swv idhh pno 
@@ -207,7 +207,7 @@ drop if samesex_hh == 1
 
 * Clean up
 *Set idpartner = 0 if single HH:
-bys swv idhh: egen count = count(idperson) if dag >= $age_become_responsible | (dag < $age_become_responsible & ppno != 0)
+bys swv idhh: egen count = count(idperson) if dag >= $age_becomes_responsible | (dag < $age_becomes_responsible & ppno != 0)
 fre count
 replace idpartner = 0 if count == 1
 
@@ -224,8 +224,8 @@ home id == idhh for everyone (the one we modified), but for households with adul
 */
 gen double idhome = idhh
 format idhome %15.0g
-replace idhome = idhhmother if adultChildFlag == 1 & !missing(idhhmother)
-replace idhome = idhhfather if adultChildFlag == 1 & missing(idhhmother) & !missing(idhhfather)
+replace idhome = idhhmother if adultchildflag == 1 & !missing(idhhmother)
+replace idhome = idhhfather if adultchildflag == 1 & missing(idhhmother) & !missing(idhhfather)
 */
 
 /**************************************************************************************************************************/
@@ -239,7 +239,7 @@ foreach vv in dgnsp dagsp dehsp_c3 dhesp lessp_c3 lessp_c4 {
 }
 
 * adult defined as 18 or over, or if married
-cap gen adult = (dag>=$age_become_responsible) 
+cap gen adult = (dag>=$age_becomes_responsible) 
 replace adult = 1 if (adult==0 & dcpst==1)
 cap gen child = 1 - adult
 
@@ -361,17 +361,17 @@ replace dropObs = 1 if dagsp == -9 & idpartner != -9
 
 
 *Health status - remove household if missing for adults - 0 cases due to imputation  
-count if (dhe == -9 ) & dag > $age_become_responsible 
-count if (dhe == -9 ) & dag>0 & dag<= $age_become_responsible 
+count if (dhe == -9 ) & dag > $age_becomes_responsible 
+count if (dhe == -9 ) & dag>0 & dag<= $age_becomes_responsible 
 /*no missing cases due to imputations */
-replace dropObs = 1 if (dhe == -9) & dag > $age_become_responsible
+replace dropObs = 1 if (dhe == -9) & dag > $age_becomes_responsible
 
 *Mental health status (1 obs):
-count if dhm == -9 & dag > $age_become_responsible
-count if dhm_ghq == -9 & dag > $age_become_responsible
+count if dhm == -9 & dag > $age_becomes_responsible
+count if dhm_ghq == -9 & dag > $age_becomes_responsible
 /*no missing cases due to imputations */
-replace dropObs = 1 if dhm == -9 & dag > $age_become_responsible
-replace dropObs = 1 if dhm_ghq == -9 & dag > $age_become_responsible 
+replace dropObs = 1 if dhm == -9 & dag > $age_becomes_responsible
+replace dropObs = 1 if dhm_ghq == -9 & dag > $age_becomes_responsible 
 
 *Health status of spouse - remove household if missing but individual has a spouse (46 obs)
 count if dhesp == -9 & idpartner != -9 
@@ -379,8 +379,8 @@ count if dhesp == -9 & idpartner != -9
 replace dropObs = 1 if (dhesp == -9) & idpartner != -9
 
 *Education - remove household if missing education level for adults who are not in education (1,918 cases):
-count if deh_c3 == -9 & dag >= $age_become_responsible & ded == 0
-replace dropObs = 1 if deh_c3 == -9 & dag >= $age_become_responsible & ded == 0
+count if deh_c3 == -9 & dag >= $age_becomes_responsible & ded == 0
+replace dropObs = 1 if deh_c3 == -9 & dag >= $age_becomes_responsible & ded == 0
 
 *Education of spouse - remove household if missing but individual has a spouse (14,720 obs)
 count if dehsp_c3 == -9 & idpartner != -9
@@ -395,12 +395,12 @@ count if dcpst == -9
 replace dropObs = 1 if dcpst == -9 
 
 *Activity status (392 cases):
-count if les_c3 == -9 & dag >= $age_become_responsible
-replace dropObs = 1 if les_c3 == -9 & dag >= $age_become_responsible
+count if les_c3 == -9 & dag >= $age_becomes_responsible
+replace dropObs = 1 if les_c3 == -9 & dag >= $age_becomes_responsible
 
 *Activity status with retirement as a separate category (392 cases)
-count if les_c4 == -9 & dag >= $age_become_responsible
-replace dropObs = 1 if les_c4 == -9 & dag >= $age_become_responsible
+count if les_c4 == -9 & dag >= $age_becomes_responsible
+replace dropObs = 1 if les_c4 == -9 & dag >= $age_becomes_responsible
 
 *Partner's activity status (30,481 cases) 
 count if lessp_c3 == -9 & idpartner != -9
@@ -415,15 +415,15 @@ count if dhhtp_c4 == -9
 replace dropObs = 1 if dhhtp_c4 == -9
 
 *Income (14 cases):
-count if ypnbihs_dv == -9 & dag >= $age_become_responsible //530 obs 
-count if yplgrs_dv == -9 & dag >= $age_become_responsible //704 obs 
+count if ypnbihs_dv == -9 & dag >= $age_becomes_responsible //530 obs 
+count if yplgrs_dv == -9 & dag >= $age_becomes_responsible //704 obs 
 count if ydses_c5 == -9 //286 obs 
-count if ypncp == -9 & dag >= $age_become_responsible //0 obs 
+count if ypncp == -9 & dag >= $age_becomes_responsible //0 obs 
 
-replace dropObs = 1 if ypnbihs_dv == -9 & dag >= $age_become_responsible
-replace dropObs = 1 if yplgrs_dv == -9 & dag >= $age_become_responsible
+replace dropObs = 1 if ypnbihs_dv == -9 & dag >= $age_becomes_responsible
+replace dropObs = 1 if yplgrs_dv == -9 & dag >= $age_becomes_responsible
 replace dropObs = 1 if ydses_c5 == -9
-replace dropObs = 1 if ypncp == -9 & dag >= $age_become_responsible
+replace dropObs = 1 if ypncp == -9 & dag >= $age_becomes_responsible
 	
 *Indicator for households with missing values 
 cap drop dropHH

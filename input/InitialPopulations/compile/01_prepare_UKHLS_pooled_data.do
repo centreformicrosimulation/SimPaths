@@ -1,12 +1,12 @@
 ***************************************************************************************
-* PROJECT:              ESPON: construct initial populations for SimPaths using UKHLS data 
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data  
 * DO-FILE NAME:         01_prepare_UKHLS_pooled_data.do
 * DESCRIPTION:          Compiles pooled data from UKHLS for analysis
 ***************************************************************************************
 * COUNTRY:              UK
-* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          18 July 2025 DP
+* LAST UPDATE:          15 Jan 2026 DP
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -96,12 +96,21 @@ foreach w of global UKHLSwaves {
 		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
 		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
 		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
-		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw `w'_indpxui_xw*/ `w'_indpxg2_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_sf12mcs_dv `w'_sf12pcs_dv ///
+		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw `w'_indpxui_xw*/ `w'_indpxg2_xw `w'_inding2_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_sf12mcs_dv `w'_sf12pcs_dv ///
 		using `w'_indresp.dta, clear
 		gen m_j2hrs=-9 /*m_j2hrs not available in wave 14*/
 	} 
 	
-		
+	else if (`waveno'==15) {
+		use pidp `w'_hidp `w'_pno `w'_buno_dv `w'_jbhrs `w'_jbot `w'_jshrs `w'_scghq1_dv `w'_scghq2_dv `w'_fimngrs_dv `w'_fimnnet_dv `w'_fimnlabnet_dv ///
+		`w'_fimnmisc_dv `w'_fimnprben_dv `w'_fimninvnet_dv `w'_fimnsben_dv `w'_fimnlabgrs_dv `w'_fimnpen_dv `w'_jbstat `w'_hiqual_dv `w'_jbhrs ///
+		/*`w'_j2hrs*/ `w'_jshrs `w'_scsf1 `w'_scghq1_dv `w'_scghq2_dv `w'_jbsic07_cc `w'_bendis* `w'_scghq1_dv `w'_scghq2_dv ///
+		`w'_indinus_lw `w'_indscus_lw /*`w'_indpxub_xw `w'_indpxui_xw `w'_indpxg2_xw*/ `w'_inding2_xw `w'_relup `w'_currpart* `w'_lmcbm* `w'_lmcby4* `w'_sf12mcs_dv `w'_sf12pcs_dv ///
+		using `w'_indresp.dta, clear
+		gen m_j2hrs=-9 /*m_j2hrs not available in wave 14*/
+	} 
+	
+	
 	gen swv = `waveno'
 	rename `w'_* *
 	if (`waveno'>1) {
@@ -110,6 +119,7 @@ foreach w of global UKHLSwaves {
 	save "$dir_data\add_vars_ukhls_indresp.dta", replace
 }
 
+
 *add variables from the Responding households dataset
 foreach w of global UKHLSwaves {
 
@@ -117,16 +127,16 @@ foreach w of global UKHLSwaves {
 	local waveno=strpos("abcdefghijklmnopqrstuvwxyz","`w'")
 
 	if (`waveno'==1) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	else if (`waveno'<6) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv `w'_hhdenub_xw /*`w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv `w'_hhdenub_xw /*`w'_hhdenui_xw*/ `w'_hsownd using `w'_hhresp.dta, clear
 	}
-	else if (`waveno'<14) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
+	else if (`waveno'<=14) {
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw*/ `w'_hhdenui_xw `w'_hsownd using `w'_hhresp.dta, clear
 	} 
-	else if (`waveno'==14) {
-		use `w'_hidp `w'_fihhmnnet1_dv `w'_ieqmoecd_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hhdeng2_xw `w'_hsownd using `w'_hhresp.dta, clear
+	else if (`waveno'>=15) {
+		use `w'_hidp `w'_fihhmnnet1_dv `w'_fihhmngrs1_dv `w'_fihhmnsben_dv `w'_nch02_dv /*`w'_hhdenub_xw `w'_hhdenui_xw*/ `w'_hhdeng2_xw `w'_hsownd using `w'_hhresp.dta, clear
 	}
 	
 	gen swv = `waveno'

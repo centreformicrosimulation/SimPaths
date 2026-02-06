@@ -1,14 +1,21 @@
-/**********************************************************************
-*
-*	MANAGES IMPUTATION OF WEALTH DATA FROM WAS TO UKHLS FOR SIMPATHS INPUT DATA
-*		Imputes data for year defined by $yearWealth
-*		May be called multiple times from 00_master.do
-*
-*	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 01/11/2023 (JV)
+**********************************************************************************************************
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data 
+* DO-FILE NAME:         08_wealth_to_ukhls.do
+* DESCRIPTION:          MANAGES IMPUTATION OF WEALTH DATA FROM WAS TO UKHLS FOR SIMPATHS INPUT DATA 
+**********************************************************************************************************
+* COUNTRY:              UK
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
+*                       WAS EUL version - UKDA-7215-stata [to wave 7]
+* AUTHORS: 				Justin van de Ven, Daria Popova
+* LAST UPDATE:          15 Jan 2026 DP 
+* NOTE:					Called from 00_master.do - see master file for further details
 *
 *********************************************************************/
 
+********************************************************************************
+cap log close 
+log using "${dir_log}/08_wealth_to_ukhls.log", replace
+********************************************************************************
 
 /**********************************************************************
 *	start analysis
@@ -424,6 +431,7 @@ label var smp "matching sample - number of matched candidates to choose from"
 label var mtc "benefit unit id (bu) of matched observation"
 save "population_initial_fs_UK_$yearWealth", replace
 
+cap log close 
 
 /**************************************************************************************
 * clean-up and exit
@@ -442,6 +450,3 @@ foreach file of local files_to_drop {
 }
 
 */
-/**************************************************************************************
-*	fin
-**************************************************************************************/

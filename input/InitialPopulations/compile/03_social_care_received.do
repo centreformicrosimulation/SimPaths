@@ -1,19 +1,20 @@
-/********************************************************************************
-*
-*	FILE TO EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN INITIAL POPULATION
-*
-*	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 18 July 2025 DP 
-*
-*******************************************************************************/
+***************************************************************************************
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data  
+* DO-FILE NAME:         03_social_care_received.do
+* DESCRIPTION:          EXTRACT UKHLS DATA FOR SOCIAL CARE RECEIPT TO INCLUDE IN INITIAL POPULATION
+***************************************************************************************
+* COUNTRY:              UK
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
+* AUTHORS: 				Justin van de Ven, Daria Popova 
+* LAST UPDATE:          15 Jan 2026 DP
+* NOTE:					Called from 00_master.do - see master file for further details
+***************************************************************************************
+
 
 **************************************************************************************
 cap log close 
 log using "${dir_log}/03_social-care_received.log", replace
 ***************************************************************************************
-/********************************************************************************
-	local data directories - commented out when using master program
-*******************************************************************************/
 
 * define seed to ensure replicatability of results
 global seedBase = 3141592
@@ -33,8 +34,12 @@ matrix careHourlyWageRates = (9.04 \ ///	2010
 9.61 \ ///	2019
 9.97 \ ///	2020
 9.92 \ ///	2021
-10.01276101) ///2022
-
+10.01 \ ///  2022
+10.01 \ ///  2023
+10.01 \ ///  2024
+10.01) ///  2025
+ 
+/*TO UPDATE FOR RECENT YEARS */
 
 /**********************************************************************
 *	start analysis
@@ -242,6 +247,7 @@ qui {
 		replace `var' = -9 if (missing(`var'))
 	}
 
+/*TO UPDATE FOR RECENT YEARS */
 
 	cap gen formal_socare_cost = -9
 	//replace formal_socare_cost = $careHourlyWageRates[`year' - $careWageRate_minyear + 1] * formal_socare_hrs if (formal_socare_hrs>0)
@@ -258,8 +264,10 @@ qui {
 	replace formal_socare_cost = 9.97 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2020		  
 	replace formal_socare_cost = 9.92 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2021
 	replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2022
-
-
+    replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2023
+    replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2024
+    replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2025
+    
 	sort idperson swv 
 
 	save "ukhls_pooled_all_obs_03.dta", replace 

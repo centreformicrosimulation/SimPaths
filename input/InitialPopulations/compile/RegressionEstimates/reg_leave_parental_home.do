@@ -1,14 +1,14 @@
 ********************************************************************************
-* PROJECT:  		SimPaths UK 
-* SECTION:			Home ownership 
-* OBJECT: 			Final Regresion Models - Weighted
+* PROJECT:  		SimPaths UK
+* SECTION:			Leaving Parental Home
+* OBJECT: 			Final Probit Regression Model 
 * AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		20 Jan 2026 DP  
-* COUNTRY: 			UK
-*
-* NOTES: 			Re-estimated process at benefit unit level to be consistent with SimPaths 
-*                  
-********************************************************************************
+* LAST UPDATE:		19 Jan 2026 DP  
+* COUNTRY: 			UK  
+* 
+* NOTES: 			
+**********************************************************************************
+
 clear all
 set more off
 set mem 200m
@@ -16,38 +16,38 @@ set type double
 //set maxvar 120000
 set maxvar 30000
 
+
 *******************************************************************
 cap log close 
-log using "${dir_log}/reg_home_ownership.log", replace
+log using "${dir_log}/reg_leave_parental_home.log", replace
 *******************************************************************
 
 * Set Excel file 
 
 * Info sheet
 
-putexcel set "$dir_results/reg_home_ownership_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("Info") replace
 putexcel A1 = "Description:"
-putexcel B1 = "Model parameters governing projection of home ownership"
+putexcel B1 = "Model parameters governing leaving parental home"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 20 Jan 2026 DP"
+putexcel A3 = "Last edit: 19 Jan 2026 DP"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
-putexcel A5 = "HO1"
-putexcel B5 = "Probit regression estimates of the probability of being a home owner, aged 18+"
+putexcel A5 = "P1a"
+putexcel B5 = "Probit regression estimates for leaving the parental home, transitioning out of adult child status"
 
 putexcel A10 = "Notes:", bold
 putexcel B10 = "Estimation sample: UK_ipop.dta with grossing up weight dwt" 
 putexcel B11 = "Conditions for processes are defined as globals in master.do"
-putexcel B12 = "Re-estimated process at benefit unit level to be consistent with SimPaths"
 
-putexcel set "$dir_results/reg_home_ownership_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
 
 /********************************* PREPARE DATA *******************************/
 
-* Load data 
+* Load data
 use ${estimation_sample}, clear
 
 * Set data 
@@ -60,86 +60,42 @@ drop if dag < 16
 * Adjust variables 
 do "${dir_do}/variable_update.do"
 
-*--------------------------------------------------
-* Create sample at benefti unit head 
-*--------------------------------------------------
 
-* Keep adults (18+)
-keep if dag >= 18
-
-* Count unique benefit-unit–wave combinations BEFORE head selection
-egen tag_bu_wave = tag(idbenefitunit swv)
-count if tag_bu_wave
-local n_bu_before = r(N)
-display "Number of benefit unit–wave combinations BEFORE selecting head: `n_bu_before'"
-
-* Sort benefit unit members within each wave:
-* 1. Highest non-benefit income (ypnbihs_dv)
-* 2. Highest age (dag)
-* 3. Lowest idperson (idperson)
-gsort idbenefitunit swv -ypnbihs_dv -dag idperson 
-
-* Tag the first person (the "head") per benefit unit and wave
-bysort idbenefitunit swv: gen benunit_head = (_n == 1)
-
-* Keep only benefit unit heads
-keep if benunit_head == 1
-
-* Count unique benefit-unit–wave combinations AFTER head selection
-drop tag_bu_wave
-egen tag_bu_wave = tag(idbenefitunit swv)
-count if tag_bu_wave
-local n_bu_after = r(N)
-display "Number of benefit unit–wave combinations AFTER selecting head: `n_bu_after'"
-
-* Ensure benefit unit–wave counts match before and after head selection
-assert `n_bu_before' == `n_bu_after'
-
-* Verify only one head per benefit unit per wave
-by idbenefitunit swv, sort: gen n=_N
-assert n==1
-
-sort idperson swv 
 /********************************** ESTIMATION ********************************/
 
-/********************** HO1: PROBABILITY OF OWNING HOME ***********************/
-display "${ho1_if_condition}" 
-
-probit dhh_owned i.Dgn Dag Dag_sq ///
-    il.Dhhtp_c8_2 il.Dhhtp_c8_3 il.Dhhtp_c8_4 il.Dhhtp_c8_5 il.Dhhtp_c8_6 il.Dhhtp_c8_7 il.Dhhtp_c8_8 ///
-	il.Les_c4_Student il.Les_c4_NotEmployed il.Les_c4_Retired  ///
-	i.Deh_c3_Medium i.Deh_c3_Low ///
-	L_Dhe_mcs L_Dhe_pcs ///
+/**************** P1: PROBABILITY OF LEAVING THE PARENTAL HOME ****************/
+display "${p1_if_condition}"
+	
+probit dlftphm i.Dgn Dag Dag_sq i.Deh_c3_Medium i.Deh_c3_Low ///
+	li.Les_c3_Student li.Les_c3_NotEmployed ///
 	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
-	l.Yptciihs_dv ///
-	l.Dhh_owned ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///
-	if ${ho1_if_condition} [pw=dwt], vce(cluster idperson)
+	if ${p1_if_condition} [pw=dwt], vce(robust)
 
 	* Save raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
 
-putexcel set "$dir_raw_results/home_ownership/home_ownership", ///
-	sheet("Process HO1") replace
+putexcel set "$dir_raw_results/leave_parental_home/leave_parental_home", ///
+	sheet("Process P1") replace
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
 
 outreg2 stats(coef se pval) using ///
-	"$dir_raw_results/home_ownership/HO1.doc", replace ///
-title("Process H01: Probability Own Home") ///
-	ctitle(Own home) label side dec(2) noparen ///
+	"$dir_raw_results/leave_parental_home/P1.doc", replace ///
+title("Process P1: Probability Leave the Parental Home") ///
+	ctitle(Leave home) label side dec(2) noparen ///
 	addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) ///
-	addnote(`"Note: Regression if condition = (${ho1_if_condition}). Only estimated on benefit unit heads."')		
+	addnote(`"Note: Regression if condition = (${p1_if_condition})"')	
 	
-* Save sample inclusion indicator and predicted probabilities				
+* Save sample inclusion indicator and predicted probabilities	
 gen in_sample = e(sample)	
 predict p
 
-* Save sample for stimate validation
-save "$dir_validation_data/HO1_sample", replace
-
-* Store model summary statistics
+* Save sample for estiamte validation
+save "$dir_validation_data/P1_sample", replace
+	
+* Store model summary statistics	
 scalar r2_p = e(r2_p) 
 scalar N_sample = e(N)	
 scalar chi2 = e(chi2)
@@ -148,10 +104,11 @@ scalar ll = e(ll)
 
 * Store results in Excel 
 
-* Store estimates
+* Store estimates in matrices
 matrix b = e(b)	
 matrix V = e(V)
 
+* Eliminate rows and columns containing zeros (baseline cats) 
 mata:
 	// Call matrices into mata 
     V = st_matrix("V")
@@ -174,6 +131,7 @@ mata:
     st_matrix("V_trimmed", V_trimmed)
 	st_matrix("nonzero_b_flag", keep)
 end	
+
 
 * Eigenvalue tests for var-cov invertablility in SimPaths
 matrix symeigen X lambda = V_trimmed
@@ -203,15 +161,16 @@ if min_ratio < 1.0e-12 {
 
 display "Stability Check Passed. Min/Max ratio: " min_ratio
 
+
 * Export into Excel 
-putexcel set "$dir_results/reg_home_ownership_UK", sheet("HO1") modify 
+putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("P1") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
 preserve 
-putexcel set "$dir_results/reg_home_ownership_UK", sheet("HO1") modify 
+putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("P1") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -230,7 +189,7 @@ mata:
 
     // Ensure column vector
     nonzero_b_flag = nonzero_b_flag'
-    
+
     // --------------------------------------------------
     // Extract variable names
     // --------------------------------------------------
@@ -280,7 +239,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_home_ownership_UK", sheet("HO1") modify 	
+    putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("P1") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -315,22 +274,25 @@ end
 
 restore 
 
+	
 * Export model fit statistics
-putexcel set "$dir_results/reg_home_ownership_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("Gof") modify
 
-putexcel A3 = "HO1 - Home ownership", bold		
+putexcel A3 = "P1 - Leaving the parental home ", bold		
 
 putexcel A5 = "Pseudo R-squared" 
 putexcel B5 = r2_p 
 putexcel A6 = "N"
-putexcel B6 = N_sample 
+putexcel B6 = N_sample
 putexcel E5 = "Chi^2"		
 putexcel F5 = chi2
 putexcel E6 = "Log likelihood"		
 putexcel F6 = ll		
 
+* Clean up 
 drop in_sample p
-scalar drop r2_p N_sample chi2 ll	
+scalar drop _all
+matrix drop _all
+	
 
-capture log close 	
-
+capture log close 

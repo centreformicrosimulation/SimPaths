@@ -1,13 +1,17 @@
-/**************************************************************/
-*														
-*	FILE TO COMPILE WAS DATA FOR IMPUTING WEALTH INTO UKHLS DATA
+***************************************************************************************
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data 
+* DO-FILE NAME:         07_was_wealth_data.do
+* DESCRIPTION:          COMPILE WAS DATA FOR IMPUTING WEALTH INTO UKHLS DATA 
+***************************************************************************************
+* COUNTRY:              UK
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
+*                       WAS EUL version - UKDA-7215-stata [to wave 7]
+* AUTHORS: 				Justin van de Ven, Daria Popova
+* LAST UPDATE:          15 Jan 2026 DP 
+* NOTE:					Called from 00_master.do - see master file for further details
 *
-*	DATA: 		WAS EUL version - UKDA-7215-stata [to wave 7]
-*	AUTH: 		Justin van de Ven (JV), Daria Popova (DP)
-*	LAST EDIT: 	11/04/2024 (JV)
-*
-*	NOTE: 		file currently compiles data to merge from 2016
-*				this could be extended to at least 2011
+*	File currently compiles data to merge from 2016
+*	This could be extended to at least 2011 and up to round 8 
 *
 *	Approach involves identifying total net wealth (wealth), 
 *	total private pension wealth (personal and occupational), gross 
@@ -30,6 +34,10 @@
 		WAVE 7: 2018 (6855), 2019  (8756), 2020 (1923)
 */
 
+********************************************************************************
+cap log close 
+log using "${dir_log}/07_was_wealth_data.log", replace
+********************************************************************************
 
 /**************************************************************/
 *	
@@ -575,6 +583,7 @@ sum wealth [fweight=dwt] if (bu_rp), detail
 
 */
 
+cap log close
 
 /**************************************************************************************
 * clean-up and exit
@@ -592,14 +601,4 @@ local files_to_drop
 foreach file of local files_to_drop { 
 	erase "$dir_data/`file'"
 }
-
-
-
-/**************************************************************/
-*
-*	END 
-*
-/**************************************************************/
-
-
 

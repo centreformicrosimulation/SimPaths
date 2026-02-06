@@ -1,16 +1,15 @@
 ********************************************************************************
-* PROJECT:  		ESPON 
+* PROJECT:  		SimPaths UK 
 * SECTION:			Unions
 * OBJECT: 			Final Probit Models
 * AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		26 Aug 2025 DP  
+* LAST UPDATE:		4 Feb 2026 DP  
 * COUNTRY: 			UK  
 * 
 *NOTES: 			
-*                    
-* 					Reduced number of covariates in union formation process 
-*                   for those in initial education spell to obtain estimaes. 	
+* 					Combined former a and b processes.                 	
 ********************************************************************************
+
 clear all
 set more off
 set mem 200m
@@ -18,658 +17,531 @@ set type double
 //set maxvar 120000
 set maxvar 30000
 
-
 *******************************************************************
 cap log close 
 log using "${dir_log}/reg_partnership.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-
-do "$dir_do/variable_update"
-
-
-
-*sample selection 
-drop if dag < 16
-
-
-xtset idperson swv
-
 * Set Excel file 
 
 * Info sheet
 
-putexcel set "$dir_results/reg_partnership", sheet("Info") replace
+putexcel set "$dir_results/reg_partnership_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters for relationship status projection"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 1 July 2025 DP"
+putexcel A3 = "Last edit: 4 Feb 2026 DP"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
-putexcel A5 = "U1a"
-putexcel B5 = "Probit regression estimates  probability of entering  a partnership - single respondents aged 18+ in initial education spell"
-putexcel A6 = "U1b"
-putexcel B6 = "Probit regression estimates of probability of entering a partnership - single respondents aged 18+ not in initial education spell"
-putexcel A7 = "U2b"
-putexcel B7 = "Probit regression estimates of probability of exiting a partnership - cohabiting women aged 18+ not in initial education spell"
+putexcel A5 = "U1"
+putexcel B5 = "Probit regression estimates  probability of entering  a partnership - single respondents aged 18+"
+putexcel A6 = "U2"
+putexcel B6 = "Probit regression estimates of probability of exiting a partnership - cohabiting women aged 18+"
 
 putexcel A10 = "Notes:", bold
-putexcel B10 = "All processes: replaced dhe with dhe_pcs and dhe_mcs, added ethnicity-4 cat (dot) and Covid dummies (y2020 y2021)"
-putexcel B11 = "U1a: Just 73 obs with positive outcome! Cannot include region and covid dummies as covariates. Cannot obtain estimates of the 5th quintile of hh income"
-putexcel B12 = "U2b contains a new variable New_rel_L1"
+putexcel B10 = "Estimation sample: UK_ipop.dta with grossing up weight dwt" 
+putexcel B11 = "Conditions for processes are defined as globals in master.do"
+putexcel B12 = "Combined former processes U1a and U1b"
 
-putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
+putexcel set "$dir_results/reg_partnership_UK", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
-****************************************************
-* U1a: Partnership formation, in initial edu spell *
-****************************************************
-* Probability of entering a partnership. 
-* Sample: All single respondents aged 18 +, in continuous education.
-* DV: Enter partnership dummy 
-* Note: Requirement of being single in the previous year is embedded in the 
-* 			dependent variable  
-* 		Only 73 observation of relationships forming when still in initial 
-* 			education spell and aged 18+.
- 
-fre dcpen if (dag >= 18 & ded == 1 & ssscp != 1) 
 
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag>=18 & ded==1 & ssscp!=1) [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(U1a, dimlwt) side dec(4) 
 
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag>=18 & ded==1 & ssscp!=1) [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U1a, disclwt) side dec(4)
+/********************************* PREPARE DATA *******************************/
 
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag>=18 & ded==1 & ssscp!=1) [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U1a, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_U1a.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
+* Load data 
+use ${estimation_sample}, clear
 
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag>=18 & ded==1 & ssscp!=1) [pweight=dimxwt], vce(robust)
- 
-* raw results 
+* Set data 
+xtset idperson swv
+sort idperson swv 
+
+* Remove children 
+drop if dag < 16
+
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+
+
+/********************************** ESTIMATION ********************************/
+
+/******************** U1: PROBABILITY FORMING PARTNERSHIP *********************/
+display "${u1_if_condition}"	
+
+probit dcpen i.Ded Dgn Dag Dag_sq lc.Dnc lc.Dnc02 ///
+    li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
+	/*Ded_Dag Ded_Dag_sq*/ Ded_Dgn Ded_Dnc_L1 Ded_Dnc02_L1 ///
+	Ded_Ydses_c5_Q2_L1 Ded_Ydses_c5_Q3_L1 Ded_Ydses_c5_Q4_L1 Ded_Ydses_c5_Q5_L1  ///
+	i.Deh_c4_Na i.Deh_c4_High i.Deh_c4_Medium i.Deh_c4_Low  ///
+	li.Les_c4_Student li.Les_c4_NotEmployed li.Les_c4_Retired /// 
+	li.Les_c4_Student_Dgn li.Les_c4_NotEmployed_Dgn ///
+	li.Les_c4_Retired_Dgn ///
+	Dhe_pcs Dhe_mcs ///
+	$regions Year_transformed Y2020 Y2021 $ethnicity ///
+	if ${u1_if_condition} [pw=dwt], vce(robust)
+
+
+* Save raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/partnership/partnership", sheet("U1a") replace
+
+putexcel set "$dir_raw_results/partnership/partnership", ///
+	sheet("Process U1") replace
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/partnership/U1a.doc", replace ///
-title("Process U1a: Probit regression estimates for entering a partnership - single respondents aged 18+ in continuous education") ///
- ctitle(enter partnership) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
- 
-gen in_sample = e(sample)	
 
+outreg2 stats(coef se pval) using ///
+	"$dir_raw_results/partnership/U1.doc", replace ///
+title("Process U1: Probability Form partnership") ///
+	ctitle(Form partnership) label side dec(2) noparen ///
+	addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) ///
+	addnote(`"Note: Regression if condition = (${u1_if_condition})"')		
+	
+* Save sample inclusion indicator and predicted probabilities	
+gen in_sample = e(sample)	
 predict p
 
-save "$dir_validation_data/U1a_sample", replace
+* Save sample for later use (internal validation)
+save "$dir_validation_data/U1_sample", replace
 
+* Store model summary statistics	
 scalar r2_p = e(r2_p) 
-scalar N = e(N)	
+scalar N_sample = e(N)	
 scalar chi2 = e(chi2)
 scalar ll = e(ll)	
+	
+* Store results in Excel 
 
-		
-* Results		
-* Note: Zeros values are eliminated 
-
+* Store estimates in matrices
 matrix b = e(b)	
 matrix V = e(V)
 
+* Eliminate rows and columns containing zeros (baseline cats) 
+mata:
+	// Call matrices into mata 
+    V = st_matrix("V")
+    b = st_matrix("b")
 
-* Store variance-covariance matrix 
-
-preserve
-
-putexcel set "$dir_raw_results/partnership/var_cov", sheet("var_cov") replace
-putexcel A1 = matrix(V)
-
-import excel "$dir_raw_results/partnership/var_cov", sheet("var_cov") clear
-
-describe
-local no_vars = `r(k)'	
+    // Find which coefficients are nonzero
+    keep = (b :!= 0)
 	
-forvalues i = 1/2 {
-	egen row_sum = rowtotal(*)
-	drop if row_sum == 0 
-	drop row_sum
-	xpose, clear	
-}	
+	// Eliminate zeros
+	b_trimmed = select(b, keep)
+    V_trimmed = select(V, keep)
+    V_trimmed = select(V_trimmed', keep)'
+
+	// Inspection
+	b_trimmed 
+	V_trimmed 
 	
-mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_partnership", sheet("UK_U1a") modify
-putexcel C2 = matrix(var)
-		
-restore	
+    // Return to Stata
+    st_matrix("b_trimmed", b_trimmed')
+    st_matrix("V_trimmed", V_trimmed)
+	st_matrix("nonzero_b_flag", keep)
+end	
 
 
-* Store estimated coefficients 
+* Eigenvalue tests for var-cov invertablility in SimPaths
+matrix symeigen X lambda = V_trimmed
 
-// Initialize a counter for non-zero coefficients
-local non_zero_count = 0
-//local names : colnames b
+scalar max_eig = lambda[1,1]
 
-// Loop through each element in `b` to count non-zero coefficients
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        local non_zero_count = `non_zero_count' + 1
-    }
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
+
+* Outcome of max eigenvalue test 
+if max_eig < 1.0e-12 {
+	
+    display as error "CRITICAL ERROR: Maximum eigenvalue is too small (`max_eig')."
+    display as error "The Variance-Covariance matrix is likely singular."
+    exit 999
+
 }
 
-// Create a new row vector to hold only non-zero coefficients
-matrix nonzero_b = J(1, `non_zero_count', .)
+display "Stability Check Passed: Max Eigenvalue is " max_eig
 
-// Populate nonzero_b with non-zero coefficients from b
-local index = 1
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        matrix nonzero_b[1, `index'] = b[1, `i']
-        local index = `index' + 1
-    }
+* Outcome of eigenvalue ratio test 
+if min_ratio < 1.0e-12 {
+    display as error "Matrix is ill-conditioned. Min/Max ratio: " min_ratio
+    exit 506
+
 }
 
-putexcel set "$dir_results/reg_partnership", sheet("UK_U1a") modify
-putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
-	
+display "Stability Check Passed. Min/Max ratio: " min_ratio
 
-* Labelling
+
+* Export into Excel 
+putexcel set "$dir_results/reg_partnership_UK", sheet("U1") modify
+putexcel B2 = matrix(b_trimmed)
+putexcel C2 = matrix(V_trimmed)
+
+
+* Labels 
+preserve 
+putexcel set "$dir_results/reg_partnership_UK", sheet("U1") modify
 
 putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dgn"
-putexcel A3 = "Dag"
-putexcel A4 = "Dag_sq"
-putexcel A5 = "Ydses_c5_Q2_L1"
-putexcel A6 = "Ydses_c5_Q3_L1"
-putexcel A7 = "Ydses_c5_Q4_L1"
-putexcel A8 = "Dnc_L1"
-putexcel A9 = "Dnc02_L1"
-putexcel A10 = "Dhe_pcs"
-putexcel A11 = "Dhe_mcs"
-putexcel A12 = "Year_transformed"
-putexcel A13 = "Ethn_Asian"
-putexcel A14 = "Ethn_Black"
-putexcel A15 = "Ethn_Other"
-putexcel A16 = "Constant"
-
 putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dgn"
-putexcel D1 = "Dag"
-putexcel E1 = "Dag_sq"
-putexcel F1 = "Ydses_c5_Q2_L1"
-putexcel G1 = "Ydses_c5_Q3_L1"
-putexcel H1 = "Ydses_c5_Q4_L1"
-putexcel I1 = "Dnc_L1"
-putexcel J1 = "Dnc02_L1"
-putexcel K1 = "Dhe_pcs"
-putexcel L1 = "Dhe_mcs"
-putexcel M1 = "Year_transformed"
-putexcel N1 = "Ethn_Asian"
-putexcel O1 = "Ethn_Black"
-putexcel P1 = "Ethn_Other"
-putexcel Q1 = "Constant"
- 
-* Goodness of fit
 
-putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
+* Use Mata to extract nice labels from colstripe of e(b)
 
-putexcel A3 = "U1a - Partnership formation, in initial education spell", ///
-	bold		
+local dir_results "$dir_results"
+cap erase "$dir_results/temp_labels.txt"
+
+mata:
+    // --------------------------------------------------
+    // Import objects from Stata
+    // --------------------------------------------------
+    nonzero_b_flag = st_matrix("nonzero_b_flag")
+    stripe         = st_matrixcolstripe("e(b)")
+
+    // Ensure column vector
+    nonzero_b_flag = nonzero_b_flag'
+    
+    // --------------------------------------------------
+    // Extract variable names
+    // --------------------------------------------------
+    varnames = stripe[.,2]
+
+    // Keep non-baseline coefficients
+    varnames_no_bl = select(varnames, nonzero_b_flag :== 1)
+
+    // --------------------------------------------------
+    // Clean labels
+    // --------------------------------------------------
+    labels_no_bl = usubinstr(varnames_no_bl, "1.", "", 1)
+    labels_no_bl = regexr(labels_no_bl, "^_cons", "Constant")
+
+    // Handle lags: L.var -> var_L1
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^L\.") :* ///
+        (regexr(labels_no_bl, "^L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^L\.") :* labels_no_bl)
+
+    // Handle 1L.var
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^1L\.") :* ///
+        (regexr(labels_no_bl, "^1L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^1L\.") :* labels_no_bl)
+
+    // --------------------------------------------------
+    // Add header
+    // --------------------------------------------------
+    labels_out = "v1" \ labels_no_bl
+
+    // --------------------------------------------------
+    // Write to temp file
+    // --------------------------------------------------
+    outfile = st_local("dir_results") + "/temp_labels.txt"
+    fh = fopen(outfile, "w")
+    for (i=1; i<=rows(labels_out); i++) {
+        fput(fh, labels_out[i])
+    }
+    fclose(fh)
+end
+
+
+    * Import cleaned labels into Stata
+    import delimited "$dir_results/temp_labels.txt", clear varnames(1) ///
+		encoding(utf8)
+	gen n = _n
+    
+    * Export labels to Excel
+    putexcel set "$dir_results/reg_partnership_UK", sheet("U1") modify 	
+	
+	* Vertical labels
+    summarize n, meanonly
+	local N = r(max)+1
+	forvalue i = 2/`N' {
+	
+		local j = `i' - 1
+		putexcel A`i' = v1[`j'] 
+	
+	}	
+	
+	* Horizontal labels 
+	summarize n, meanonly
+	local N = r(max) + 1  // Adjusted since we're working across columns
+
+	forvalues j = 1/`N' {
+	
+		local n = `j'+2 // Shift by 2 to start from column C
+		local col ""
+		
+		while `n' > 0 {
+			local rem = mod(`n' - 1, 26)
+			local col = char(65 + `rem') + "`col'"
+			local n = floor((`n' - 1)/26)
+		}
+
+		putexcel `col'1 = v1[`j']
+	}
+	
+    * Clean up
+    cap erase "$dir_results/temp_labels.txt"
+
+restore 
+
+	
+* Export model fit statistics
+putexcel set "$dir_results/reg_partnership_UK", sheet("Gof") modify
+
+putexcel A3 = "U1- Partnership formation", bold		
 
 putexcel A5 = "Pseudo R-squared" 
 putexcel B5 = r2_p 
 putexcel A6 = "N"
-putexcel B6 = N 
+putexcel B6 = N_sample
 putexcel E5 = "Chi^2"		
 putexcel F5 = chi2
 putexcel E6 = "Log likelihood"		
 putexcel F6 = ll		
 
+* Clean up 
 drop in_sample p
-scalar drop r2_p N chi2 ll	
+scalar drop _all
+matrix drop _all
 
 
-********************************************************
-* U1b: Partnership formation, not in initial edu spell *
-********************************************************
-* Process U1b: Probability of entering a partnership. 
-* Sample: All respondents aged 18+, left initial education spell and not in a 
-* 			same sex relationship 
-* DV: Enter partnership dummy (requires not having been in a relationship last 
-* 		year)	
-* Note: Requirement of being single in the previous year is embedded in the 
-* 			dependent variable  
-* 		Income captured by hh quintiles. 
+/******************* U2: PROBABILITY TERMINATE PARTNERSHIP ********************/
+display "${u2_if_condition}"	
+	
 
-fre dcpen if (dag >= 18 & ded == 0 & ssscp != 1)
+* Estimation 
+probit dcpex i.Ded Dag Dag_sq /*Ded_Dag Ded_Dag_sq*/ ///
+    li.Deh_c4_Na li.Deh_c4_Low  li.Deh_c4_Medium li.Deh_c4_High ///
+	li.Dehsp_c3_Medium li.Dehsp_c3_Low ///
+	li.Dhe_Fair li.Dhe_Good li.Dhe_VeryGood li.Dhe_Excellent  ///
+	l.Dhe_pcs l.Dhe_mcs ///
+	l.Dhe_pcssp l.Dhe_mcssp ///
+	l.Dcpyy l.New_rel l.Dcpagdf l.Dnc l.Dnc02 ///
+	li.Lesdf_c4_EmpSpouseNotEmp li.Lesdf_c4_NotEmpSpouseEmp li.Lesdf_c4_BothNotEmployed ///
+	l.Ypnbihs_dv l.Ynbcpdf_dv ///
+	$regions Year_transformed Y2020 Y2021 $ethnicity ///
+	if ${u2_if_condition} [pw=dwt], vce(robust)
 
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag >= 18 & ded == 0 & ssscp != 1) [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(U1b, dimlwt) side dec(4) 
 
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag >= 18 & ded == 0 & ssscp != 1) [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U1b, disclwt) side dec(4)
-
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs /*ib8.drgn1*/ stm /*y2020 y2021*/ i.dot ///
-if (dag >= 18 & ded == 0 & ssscp != 1) [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U1b, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_U1b.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-
-probit dcpen i.dgn dag dagsq li.ydses_c5 l.dnc l.dnc02 /*dhe*/ dhe_pcs dhe_mcs ib8.drgn1 stm y2020 y2021 i.dot ///
-if (dag >= 18 & ded == 0 & ssscp != 1) [pweight=dimxwt], vce(robust)
-
-* raw results 
+* Save raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/partnership/partnership", sheet("Process U1b") replace
+
+putexcel set "$dir_raw_results/partnership/partnership", sheet("Process U2") ///
+	modify
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/partnership/U1b.doc", replace ///
-title("Process U1b: Probit regression estimates for entering a partnership - single respondents aged 18+ not in continuous education") ///
- ctitle(enter partnership) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
- 
-gen in_sample = e(sample)	
 
+outreg2 stats(coef se pval) using ///
+	"$dir_raw_results/partnership/U2.doc", replace ///
+title("Process U2: Probability Terminating Partnership") ///
+	ctitle(End partnership) label side dec(2) noparen ///
+	addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) ///
+	addnote(`"Note: Regression if condition = (${u2_if_condition})"')		
+	
+* Save sample inclusion indicator and predicted probabilities		
+gen in_sample = e(sample)	
 predict p
 
-save "$dir_validation_data/U1b_sample", replace
+* Save sample for later use (internal validation)
+save "$dir_validation_data/U2_sample", replace
 
+* Store model summary statistics
 scalar r2_p = e(r2_p) 
-scalar N = e(N)	
-scalar chi2 = e(chi2)
-scalar ll = e(ll)	
-	
-	
-* Results 	
-* Note: Zeros values are eliminated 
-	
-matrix b = e(b)	
-matrix V = e(V)
-
-
-*  Store variance-covariance matrix 
-
-preserve
-
-putexcel set "$dir_raw_results/partnership/var_cov", sheet("var_cov") replace
-putexcel A1 = matrix(V)
-
-import excel "$dir_raw_results/partnership/var_cov", sheet("var_cov") clear
-
-describe
-local no_vars = `r(k)'	
-	
-forvalues i = 1/2 {
-	egen row_sum = rowtotal(*)
-	drop if row_sum == 0 
-	drop row_sum
-	xpose, clear	
-}	
-	
-mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_partnership", sheet("UK_U1b") modify
-putexcel C2 = matrix(var)
-		
-restore	
-
-
-* Store estimated coefficients 
-
-// Initialize a counter for non-zero coefficients
-local non_zero_count = 0
-//local names : colnames b
-
-// Loop through each element in `b` to count non-zero coefficients
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        local non_zero_count = `non_zero_count' + 1
-    }
-}
-
-// Create a new row vector to hold only non-zero coefficients
-matrix nonzero_b = J(1, `non_zero_count', .)
-
-// Populate nonzero_b with non-zero coefficients from b
-local index = 1
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        matrix nonzero_b[1, `index'] = b[1, `i']
-        local index = `index' + 1
-    }
-}
-
-putexcel set "$dir_results/reg_partnership", sheet("UK_U1b") modify
-putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
-		
-* Labelling
-
-putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dgn"
-putexcel A3 = "Dag"
-putexcel A4 = "Dag_sq"
-putexcel A5 = "Ydses_c5_Q2_L1"
-putexcel A6 = "Ydses_c5_Q3_L1"
-putexcel A7 = "Ydses_c5_Q4_L1"
-putexcel A8 = "Ydses_c5_Q5_L1"
-putexcel A9 = "Dnc_L1"
-putexcel A10 = "Dnc02_L1"
-putexcel A11 = "Dhe_pcs"
-putexcel A12 = "Dhe_mcs"
-putexcel A13 = "UKC"
-putexcel A14 = "UKD"
-putexcel A15 = "UKE"
-putexcel A16 = "UKF"
-putexcel A17 = "UKG"
-putexcel A18 = "UKH"
-putexcel A19 = "UKJ"
-putexcel A20 = "UKK"
-putexcel A21 = "UKL"
-putexcel A22 = "UKM"
-putexcel A23 = "UKN"
-putexcel A24 = "Year_transformed"
-putexcel A25 = "Y2020"
-putexcel A26 = "Y2021"
-putexcel A27 = "Ethn_Asian"
-putexcel A28 = "Ethn_Black"
-putexcel A29 = "Ethn_Other"
-putexcel A30 = "Constant"
-
-putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dgn"
-putexcel D1 = "Dag"
-putexcel E1 = "Dag_sq"
-putexcel F1 = "Ydses_c5_Q2_L1"
-putexcel G1 = "Ydses_c5_Q3_L1"
-putexcel H1 = "Ydses_c5_Q4_L1"
-putexcel I1 = "Ydses_c5_Q5_L1"
-putexcel J1 = "Dnc_L1"
-putexcel K1 = "Dnc02_L1"
-putexcel L1 = "Dhe_pcs"
-putexcel M1 = "Dhe_mcs"
-putexcel N1 = "UKC"
-putexcel O1 = "UKD"
-putexcel P1 = "UKE"
-putexcel Q1 = "UKF"
-putexcel R1 = "UKG"
-putexcel S1 = "UKH"
-putexcel T1 = "UKJ"
-putexcel U1 = "UKK"
-putexcel V1 = "UKL"
-putexcel W1 = "UKM"
-putexcel X1 = "UKN"
-putexcel Y1 = "Year_transformed"
-putexcel Z1 = "Y2020"
-putexcel AA1 = "Y2021"
-putexcel AB1 = "Ethn_Asian"
-putexcel AC1 = "Ethn_Black"
-putexcel AD1 = "Ethn_Other"
-putexcel AE1 = "Constant"
-
-
-* Goodness of fit 
-
-putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
-
-putexcel A9 = "U1b - Partnership formation, left initial education spell", ///
-	bold		
-
-putexcel A11 = "Pseudo R-squared" 
-putexcel B11 = r2_p 
-putexcel A12 = "N"
-putexcel B12 = N 
-putexcel E11 = "Chi^2"		
-putexcel F11 = chi2
-putexcel E12 = "Log likelihood"		
-putexcel F12 = ll		
-
-drop in_sample p
-scalar drop r2_p N chi2 ll	
-
-
-**********************************************************
-* U2b: Partnership termination, not in initial edu spell *
-**********************************************************
-
-* Process U2b: Probability of partnership break-up.
-* Sample: 	Female member of a heterosexual couple in t-1 aged 18+ and not in 
-* 			continuous education
-* DV: Exit partnership dummy
-* Note:	Requirement to be in a relationship last year is embedded in the DV.
-* 		The ded condition refers to the female partner only. 
-* 		If take away the ded condition doesn't make any difference because there
-* 		are not splits by those in their initial education spell. 
-		
-fre dcpex if (dgn == 0 & dag >= 18 & ded == 0 & ssscp != 1) 
-
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit dcpex dag dagsq lib1.deh_c3 lib1.dehsp_c3 /*li.dhe li.dhesp*/ l.dhe_pcs l.dhe_mcs l.dhe_pcssp l.dhe_mcssp l.dcpyy l.new_rel l.dcpagdf l.dnc l.dnc02  lib1.lesdf_c4 ///
-     l.ypnbihs_dv l.ynbcpdf_dv ib8.drgn1 stm y2020 y2021 i.dot ///
-	 if (dgn==0 & dag>=18 & ded==0 & ssscp!=1) [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U2b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(U2b, dimlwt) side dec(4) 
-
-probit dcpex dag dagsq lib1.deh_c3 lib1.dehsp_c3 /*li.dhe li.dhesp*/ l.dhe_pcs l.dhe_mcs l.dhe_pcssp l.dhe_mcssp l.dcpyy l.new_rel l.dcpagdf l.dnc l.dnc02  lib1.lesdf_c4 ///
-     l.ypnbihs_dv l.ynbcpdf_dv ib8.drgn1 stm y2020 y2021 i.dot ///
-	 if (dgn==0 & dag>=18 & ded==0 & ssscp!=1) [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U2b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U2b, disclwt) side dec(4)
-
-probit dcpex dag dagsq lib1.deh_c3 lib1.dehsp_c3 /*li.dhe li.dhesp*/ l.dhe_pcs l.dhe_mcs l.dhe_pcssp l.dhe_mcssp l.dcpyy l.new_rel l.dcpagdf l.dnc l.dnc02  lib1.lesdf_c4 ///
-     l.ypnbihs_dv l.ynbcpdf_dv ib8.drgn1 stm y2020 y2021 i.dot ///
-	 if (dgn==0 & dag>=18 & ded==0 & ssscp!=1) [pweight=dhhwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U2b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U2b, dhhwt) side dec(4) 
-probit dcpex dag dagsq lib1.deh_c3 lib1.dehsp_c3 /*li.dhe li.dhesp*/ l.dhe_pcs l.dhe_mcs l.dhe_pcssp l.dhe_mcssp l.dcpyy l.new_rel l.dcpagdf l.dnc l.dnc02  lib1.lesdf_c4 ///
-     l.ypnbihs_dv l.ynbcpdf_dv ib8.drgn1 stm y2020 y2021 i.dot ///
-	 if (dgn==0 & dag>=18 & ded==0 & ssscp!=1) [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_U2b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(U2b, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_U2b.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-probit dcpex dag dagsq lib1.deh_c3 lib1.dehsp_c3 /*li.dhe li.dhesp*/ l.dhe_pcs l.dhe_mcs l.dhe_pcssp l.dhe_mcssp l.dcpyy l.new_rel l.dcpagdf l.dnc l.dnc02  lib1.lesdf_c4 ///
-     l.ypnbihs_dv l.ynbcpdf_dv ib8.drgn1 stm y2020 y2021 i.dot ///
-	 if (dgn==0 & dag>=18 & ded==0 & ssscp!=1) [pweight=dimxwt], vce(robust)
-
-	* raw results 
-matrix results = r(table)
-matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/partnership/partnership", sheet("Process U2b") modify
-putexcel A3 = matrix(results), names nformat(number_d2) 
-putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/partnership/U2b.doc", replace ///
-title("Process U2b: Probit regression estimates for exiting a partnership - cohabiting women aged 18+ not in continuous education") ///
- ctitle(enter partnership) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
-	
-	
-gen in_sample = e(sample)	
-
-predict p
-
-save "$dir_validation_data/U2b_sample", replace
-
-scalar r2_p = e(r2_p) 
-scalar N = e(N)	 
+scalar N_sample = e(N)	 
 scalar chi2 = e(chi2)
 scalar ll = e(ll)
 
+* Store results in Excel 
 
-* Results 	
-* Note: Zeros values are eliminated 
-	
+* Store estimates in matrices
 matrix b = e(b)	
 matrix V = e(V)
 
-matrix list  V
+* Eliminate rows and columns containing zeros (baseline cats) 
+mata:
+	// Call matrices into mata 
+    V = st_matrix("V")
+    b = st_matrix("b")
 
-*  Store variance-covariance matrix 
-
-preserve
-
-putexcel set "$dir_raw_results/partnership/var_cov", sheet("var_cov") replace
-putexcel A1 = matrix(V)
-
-import excel "$dir_raw_results/partnership/var_cov", sheet("var_cov") clear
-
-describe
-local no_vars = `r(k)'	
+    // Find which coefficients are nonzero
+    keep = (b :!= 0)
 	
-forvalues i = 1/2 {
-	egen row_sum = rowtotal(*)
-	drop if row_sum == 0 
-	drop row_sum
-	xpose, clear	
-}	
+	// Eliminate zeros
+	b_trimmed = select(b, keep)
+    V_trimmed = select(V, keep)
+    V_trimmed = select(V_trimmed', keep)'
+
+	// Inspection
+	b_trimmed 
+	V_trimmed 
 	
-mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_partnership", sheet("UK_U2b") modify
-putexcel C2 = matrix(var)
-		
-restore	
+    // Return to Stata
+    st_matrix("b_trimmed", b_trimmed')
+    st_matrix("V_trimmed", V_trimmed)
+	st_matrix("nonzero_b_flag", keep)
+end	
 
+* Eigenvalue tests for var-cov invertablility in SimPaths
+matrix symeigen X lambda = V_trimmed
 
-* Store estimated coefficients 
+scalar max_eig = lambda[1,1]
 
-// Initialize a counter for non-zero coefficients
-local non_zero_count = 0
-//local names : colnames b
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
 
-// Loop through each element in `b` to count non-zero coefficients
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        local non_zero_count = `non_zero_count' + 1
-    }
+* Outcome of max eigenvalue test 
+if max_eig < 1.0e-12 {
+	
+    display as error "CRITICAL ERROR: Maximum eigenvalue is too small (`max_eig')."
+    display as error "The Variance-Covariance matrix is likely singular."
+    exit 999
+
 }
 
-// Create a new row vector to hold only non-zero coefficients
-matrix nonzero_b = J(1, `non_zero_count', .)
+display "Stability Check Passed: Max Eigenvalue is " max_eig
 
-// Populate nonzero_b with non-zero coefficients from b
-local index = 1
-forvalues i = 1/`no_vars' {
-    if (b[1, `i'] != 0) {
-        matrix nonzero_b[1, `index'] = b[1, `i']
-        local index = `index' + 1
-    }
+* Outcome of eigenvalue ratio test 
+if min_ratio < 1.0e-12 {
+    display as error "Matrix is ill-conditioned. Min/Max ratio: " min_ratio
+    exit 506
+
 }
 
-putexcel set "$dir_results/reg_partnership", sheet("UK_U2b") modify
-putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
-	
-	
-* Labelling 
+display "Stability Check Passed. Min/Max ratio: " min_ratio
+
+
+* Export into Excel 
+putexcel set "$dir_results/reg_partnership_UK", sheet("U2") modify
+putexcel B2 = matrix(b_trimmed)
+putexcel C2 = matrix(V_trimmed)
+
+
+* Labels 
+preserve 
+putexcel set "$dir_results/reg_partnership_UK", sheet("U2") modify
 
 putexcel A1 = "REGRESSOR"
-putexcel A2 = "Dag"
-putexcel A3 = "Dag_sq"
-putexcel A4 = "Deh_c3_Medium_L1"
-putexcel A5 = "Deh_c3_Low_L1"
-putexcel A6 = "Dehsp_c3_Medium_L1"
-putexcel A7 = "Dehsp_c3_Low_L1"
-putexcel A8 = "Dhe_pcs_L1"
-putexcel A9 = "Dhe_mcs_L1"
-putexcel A10 = "Dhe_pcssp_L1"
-putexcel A11 = "Dhe_mcssp_L1"
-putexcel A12 = "Dcpyy_L1"
-putexcel A13 = "New_rel_L1"
-putexcel A14 = "Dcpagdf_L1"
-putexcel A15 = "Dnc_L1"
-putexcel A16 = "Dnc02_L1"
-putexcel A17 = "Lesdf_c4_EmployedSpouseNotEmployed_L1"
-putexcel A18 = "Lesdf_c4_NotEmployedSpouseEmployed_L1"
-putexcel A19 = "Lesdf_c4_BothNotEmployed_L1"
-putexcel A20 = "Ypnbihs_dv_L1"
-putexcel A21 = "Ynbcpdf_dv_L1"
-putexcel A22 = "UKC"
-putexcel A23 = "UKD"
-putexcel A24 = "UKE"
-putexcel A25 = "UKF"
-putexcel A26 = "UKG"
-putexcel A27 = "UKH"
-putexcel A28 = "UKJ"
-putexcel A29 = "UKK"
-putexcel A30 = "UKL"
-putexcel A31 = "UKM"
-putexcel A32 = "UKN"
-putexcel A33 = "Year_transformed"
-putexcel A34 = "Y2020"
-putexcel A35 = "Y2021"
-putexcel A36 = "Ethn_Asian"
-putexcel A37 = "Ethn_Black"
-putexcel A38 = "Ethn_Other"
-putexcel A39 = "Constant"
-
-
 putexcel B1 = "COEFFICIENT"
-putexcel C1 = "Dag"
-putexcel D1 = "Dag_sq"
-putexcel E1 = "Deh_c3_Medium_L1"
-putexcel F1 = "Deh_c3_Low_L1"
-putexcel G1 = "Dehsp_c3_Medium_L1"
-putexcel H1 = "Dehsp_c3_Low_L1"
-putexcel I1 = "Dhe_pcs_L1"
-putexcel J1 = "Dhe_mcs_L1"
-putexcel K1 = "Dhe_pcssp_L1"
-putexcel L1 = "Dhe_mcssp_L1"
-putexcel M1 = "Dcpyy_L1"
-putexcel N1 = "New_rel_L1"
-putexcel O1 = "Dcpagdf_L1"
-putexcel P1 = "Dnc_L1"
-putexcel Q1 = "Dnc02_L1"
-putexcel R1 = "Lesdf_c4_EmployedSpouseNotEmployed_L1"
-putexcel S1 = "Lesdf_c4_NotEmployedSpouseEmployed_L1"
-putexcel T1 = "Lesdf_c4_BothNotEmployed_L1"
-putexcel U1 = "Ypnbihs_dv_L1"
-putexcel V1 = "Ynbcpdf_dv_L1"
-putexcel W1 = "UKC"
-putexcel X1 = "UKD"
-putexcel Y1 = "UKE"
-putexcel Z1 = "UKF"
-putexcel AA1 = "UKG"
-putexcel AB1 = "UKH"
-putexcel AC1 = "UKJ"
-putexcel AD1 = "UKK"
-putexcel AE1 = "UKL"
-putexcel AF1 = "UKM"
-putexcel AG1 = "UKN"
-putexcel AH1 = "Year_transformed"
-putexcel AI1 = "Y2020"
-putexcel AJ1 = "Y2021"
-putexcel AK1 = "Ethn_Asian"
-putexcel AL1 = "Ethn_Black"
-putexcel AM1 = "Ethn_Other"
-putexcel AN1 = "Constant"
 
-* Goodness of fit
+* Use Mata to extract nice labels from colstripe of e(b)
 
-putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
+local dir_results "$dir_results"
+cap erase "$dir_results/temp_labels.txt"
 
-putexcel A15 = ///
-	"U2b - Partnership termination, left initial education spell", bold		
+mata:
+    // --------------------------------------------------
+    // Import objects from Stata
+    // --------------------------------------------------
+    nonzero_b_flag = st_matrix("nonzero_b_flag")
+    stripe         = st_matrixcolstripe("e(b)")
 
-putexcel A17 = "Pseudo R-squared" 
-putexcel B17 = r2_p 
-putexcel A18 = "N"
-putexcel B18 = N 
-putexcel E17 = "Chi^2"		
-putexcel F17 = chi2
-putexcel E18 = "Log likelihood"		
-putexcel F18 = ll		
+    // Ensure column vector
+    nonzero_b_flag = nonzero_b_flag'
+    
+    // --------------------------------------------------
+    // Extract variable names
+    // --------------------------------------------------
+    varnames = stripe[.,2]
 
+    // Keep non-baseline coefficients
+    varnames_no_bl = select(varnames, nonzero_b_flag :== 1)
+
+    // --------------------------------------------------
+    // Clean labels
+    // --------------------------------------------------
+    labels_no_bl = usubinstr(varnames_no_bl, "1.", "", 1)
+    labels_no_bl = regexr(labels_no_bl, "^_cons", "Constant")
+
+    // Handle lags: L.var -> var_L1
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^L\.") :* ///
+        (regexr(labels_no_bl, "^L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^L\.") :* labels_no_bl)
+
+    // Handle 1L.var
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^1L\.") :* ///
+        (regexr(labels_no_bl, "^1L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^1L\.") :* labels_no_bl)
+
+    // --------------------------------------------------
+    // Add header
+    // --------------------------------------------------
+    labels_out = "v1" \ labels_no_bl
+
+    // --------------------------------------------------
+    // Write to temp file
+    // --------------------------------------------------
+    outfile = st_local("dir_results") + "/temp_labels.txt"
+    fh = fopen(outfile, "w")
+    for (i=1; i<=rows(labels_out); i++) {
+        fput(fh, labels_out[i])
+    }
+    fclose(fh)
+end
+
+
+    * Import cleaned labels into Stata
+    import delimited "$dir_results/temp_labels.txt", clear varnames(1) ///
+		encoding(utf8)
+	gen n = _n
+    
+    * Export labels to Excel
+    putexcel set "$dir_results/reg_partnership_UK", sheet("U2") modify 	
+	
+	* Vertical labels
+    summarize n, meanonly
+	local N = r(max)+1
+	forvalue i = 2/`N' {
+	
+		local j = `i' - 1
+		putexcel A`i' = v1[`j'] 
+	
+	}	
+	
+	* Horizontal labels 
+	summarize n, meanonly
+	local N = r(max) + 1  // Adjusted since we're working across columns
+
+	forvalues j = 1/`N' {
+	
+		local n = `j'+2 // Shift by 2 to start from column C
+		local col ""
+		
+		while `n' > 0 {
+			local rem = mod(`n' - 1, 26)
+			local col = char(65 + `rem') + "`col'"
+			local n = floor((`n' - 1)/26)
+		}
+
+		putexcel `col'1 = v1[`j']
+	}
+	
+    * Clean up
+    cap erase "$dir_results/temp_labels.txt"
+
+restore 
+
+
+* Export model fit statistics
+putexcel set "$dir_results/reg_partnership_UK", sheet("Gof") modify
+
+putexcel A8 = "U2 - Partnership termination", bold		
+
+putexcel A10 = "Pseudo R-squared" 
+putexcel B10 = r2_p 
+putexcel A11 = "N"
+putexcel B11 = N_sample 
+putexcel E10 = "Chi^2"		
+putexcel F10 = chi2
+putexcel E11 = "Log likelihood"		
+putexcel F11 = ll	
+	
+	
+* Clean up 		
 drop in_sample p
-scalar drop r2_p N chi2 ll	
+scalar drop _all
+matrix drop _all
 	
-	
+
 capture log close 
+

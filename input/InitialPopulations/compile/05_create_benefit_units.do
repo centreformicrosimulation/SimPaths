@@ -1,12 +1,12 @@
 ***************************************************************************************
-* PROJECT:              ESPON: construct initial populations for SimPaths using UKHLS data 
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data 
 * DO-FILE NAME:         05_create_benefit_units.do
 * DESCRIPTION:          Screens data, identifies benefit units and households that are to be dropped 
 ***************************************************************************************
 * COUNTRY:              UK
-* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave n]
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          18 July 2025 DP 
+* LAST UPDATE:          15 Jan 2026 DP 
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -23,7 +23,7 @@ keep if ivfio == 1 | ivfio == 2 | ivfio == 21 | ivfio == 24
 fre ivfio
 
 /******************************Split households********************************/
-*DP: This procedure is revised following the approach taken for the EU-SILC based models  
+  
 /**********************Rules and assumptions***********************************
 1. Each HH can contain: Responsible Male, and/or Responsible Female, Children, Other members.
 In the simulation everyone starts as "Other member" and is assigned one of the roles in the HH.
@@ -53,7 +53,7 @@ replace ssscp = 0 if idpartner==-9
 //fre ssscp
 
 * adult is defined as 18 or over, or if married  
-cap gen adult = (dag>=$age_become_responsible) 
+cap gen adult = (dag>=${age_becomes_responsible}) 
 replace adult = 1 if (adult==0 & dcpst==1)
 cap gen child = 1 - adult
 
@@ -124,7 +124,7 @@ cap drop num_adults
 bys swv idhh: egen num_adults = total(adult)
 fre num_adults 
 
-fre idhh if num_adults ==0 //1838 obs 
+//fre idhh if num_adults ==0 //1838 obs 
 
 
 ************************
@@ -192,14 +192,14 @@ replace idbenefitunit = idbenefitunit[_n-`i'] if idfather>0 & missing(idbenefitu
 } 
 
 //check if all kids are assigned 
-count if child==1 & idbenefitunit==. //5,099 kids are still not asigned 
+count if child==1 & idbenefitunit==. 
 
 //////////////////////
 //deal with orphans //
 //////////////////////
 *bys swv idhh: replace idbenefitunit = idbenefitunit[1] if missing(idbenefitunit) & orphan ==1  //assign orphans to the first benunit ==> we rejected this  
 cap gen orphan = (idfather<0 & idmother<0 & child==1)
-fre orphan if idbenefitunit==. //2,168 are orphans   
+fre orphan if idbenefitunit==. 
 
 cap drop n_orphan
 bys stm idhh: egen n_orphan = sum(orphan)  //count N of orphans per household ==> can be up to 7!
@@ -291,12 +291,12 @@ replace idfather=idbenefitunit if idmother==idbupartner & orphan==1
 replace idfather=idbupartner if idmother==idbenefitunit & orphan==1 
 
 //check if all kilds are assigned 
-count if child==1 & idbenefitunit==. //3,091 obs 
+count if child==1 & idbenefitunit==. 
 
 //check data after orphans are assigned   
 count if idbenefitunit == . 
 fre adult child orphan dag if  idbenefitunit == . //benunits are missing only for kids out of which 164 are orphans ==> these are hholds without adults , teenage parents, etc
-fre idperson if orphan==1 & missing(idbenefitunit)   
+//fre idperson if orphan==1 & missing(idbenefitunit)   
 
 //assign orphaned kids living in hhlds w/t adults to the same beunit having the oldest one as head  
 bys swv idhh: replace idbenefitunit=idperson[1] if orphan==1 & missing(idbenefitunit)  
@@ -307,9 +307,9 @@ bys swv idhh: replace adult=1 if idperson==idperson[1] & orphan==1 & num_adults=
 */
 
 //check if everyone is assigned to benunits at this point  
-count if idbenefitunit == .  //2,931 obs 
-count if child==1 & idbenefitunit==. //2,931 obs  
-count if adult==1 & idbenefitunit==. //0 obs
+count if idbenefitunit == .  
+count if child==1 & idbenefitunit==. 
+count if adult==1 & idbenefitunit==. 
 
  
 //check that everyone in benuint has the same benunit partner id assigned   
@@ -366,7 +366,7 @@ and keep only the second one . the alternative is to change the stm for the firs
 
 sort duplicate stm idperson Int_Date 
 cap drop keep 
-by duplicate stm idperson: gen todrop = (_n>1) //16869 obs will be dropped 	
+by duplicate stm idperson: gen todrop = (_n>1) 
 
 *drop duplicate observations 
 drop if todrop==1 
@@ -381,7 +381,7 @@ duplicates report stm idhh idperson
 cap gen dropObs = . //Generate variable indicating whether household should be dropped
 
 *Identify remaining orphans   
-gen orphan_check = 1 if (idfather<0 & idmother<0) & (dag>0 & dag<$age_become_responsible ) //57 obs 
+gen orphan_check = 1 if (idfather<0 & idmother<0) & (dag>0 & dag<${age_becomes_responsible} ) //57 obs 
 fre dag if orphan_check == 1 
 fre n_child if orphan_check == 1
 replace dropObs = 1 if orphan_check ==1 //these are kids who have partners or their own kids 
@@ -396,7 +396,7 @@ replace dropObs = 1 if orphan_check ==1 //these are kids who have partners or th
 bys stm idbenefitunit : egen na = sum(adult)
 gen chk = (na==1 & dcpst==1 & adult==1) 
 bys stm idbenefitunit : egen chk2 = max(chk)
-fre chk2 // 58,098 obs => this is due to some partners not having full interviews   
+fre chk2 // => this is due to some partners not having full interviews   
 replace dropObs = 1 if chk2 == 1
 //two adults in benunit but not partnered 
 gen chk3 = (na==2 & dcpst!=1 & adult==1) 
@@ -406,95 +406,91 @@ replace dropObs = 1 if chk4 == 1
 drop na chk chk2 chk3 chk4 
 
 
-*Missing region (353  obs)
+*Missing region 
 count if drgn1 == -9 
 replace dropObs = 1 if drgn1 == -9
 
-*Missing age (197 obs):
+*Missing age 
 count if dag == -9
 replace dropObs = 1 if dag == -9
 
-*Missing age of partner (but has a partner, 71 cases):
+*Missing age of partner (but has a partner)
 count if dagsp == -9 & idpartner != -9
 replace dropObs = 1 if dagsp == -9 & idpartner != -9
 
-*Health status - remove household if missing for adults - 0 cases due to imputation  
-count if (dhe == -9 ) & dag > $age_become_responsible 
-count if (dhe == -9 ) & dag>0 & dag<= $age_become_responsible 
-/*no missing cases due to imputations */
-replace dropObs = 1 if (dhe == -9) & dag > $age_become_responsible
+*Health status - remove household if missing for adults ==> no missing values due to imputations
+count if (dhe_pcs == -9 & dhe_mcs == -9) & dag > ${age_becomes_responsible} 
+count if (dhe_pcs == -9 & dhe_mcs == -9) & dag>0 & dag<= ${age_becomes_responsible} 
+replace dropObs = 1 if (dhe_pcs == -9 & dhe_mcs == -9) & dag > ${age_becomes_responsible}
 
-*Mental health status - 0 cases due to imputation
-count if dhm == -9 & dag > $age_become_responsible
-count if dhm_ghq == -9 & dag > $age_become_responsible
-/*no missing cases due to imputations */
-replace dropObs = 1 if dhm == -9 & dag > $age_become_responsible
-replace dropObs = 1 if dhm_ghq == -9 & dag > $age_become_responsible 
+*Mental health status - 0 cases due to imputation ==> no missing values due to imputations
+count if dhm == -9 & dag > ${age_becomes_responsible}
+count if dhm_ghq == -9 & dag > ${age_becomes_responsible}
+replace dropObs = 1 if dhm == -9 & dag > ${age_becomes_responsible}
+replace dropObs = 1 if dhm_ghq == -9 & dag > ${age_becomes_responsible} 
 
-*Health status of spouse - remove household if missing but individual has a spouse (4 obs)
+*Health status of spouse - remove household if missing but individual has a spouse ==> no missing values due to imputations
 count if dhesp == -9 & idpartner != -9 
-/*no missing cases due to imputations */
 replace dropObs = 1 if (dhesp == -9) & idpartner != -9
 
-*Education - remove household if missing education level for adults who are not in education ( 2,684 cases):
-count if deh_c3 == -9 & dag >= $age_become_responsible & ded == 0
-replace dropObs = 1 if deh_c3 == -9 & dag >= $age_become_responsible & ded == 0
+*Education - remove household if missing education level for adults who are not in education ==> no missing values due to imputations
+count if deh_c3 == -9 & dag >= ${age_becomes_responsible} & ded == 0
+replace dropObs = 1 if deh_c3 == -9 & dag >= ${age_becomes_responsible} & ded == 0
 
-*Education of spouse - remove household if missing but individual has a spouse (16,792 obs)
+*Education of spouse - remove household if missing but individual has a spouse ==> no missing values due to imputations
 count if dehsp_c3 == -9 & idpartner != -9
 replace dropObs = 1 if dehsp_c3 == -9 & idpartner != -9
 
-*Parental education - 0 obs removed due to imputation
+*Parental education ==> no missing values due to imputations
 count if  dehmf_c3 == -9 
 replace dropObs = 1 if dehmf_c3 == -9 
 
-*Partnership status (692 obs):
+*Partnership status 
 count if dcpst == -9 
 replace dropObs = 1 if dcpst == -9 
 
-*Activity status (504 cases):
-count if les_c3 == -9 & dag >= $age_become_responsible
-replace dropObs = 1 if les_c3 == -9 & dag >= $age_become_responsible
+*Activity status 
+count if les_c3 == -9 & dag >= ${age_becomes_responsible}
+replace dropObs = 1 if les_c3 == -9 & dag >= ${age_becomes_responsible}
 
-*Activity status with retirement as a separate category (504 cases)
-count if les_c4 == -9 & dag >= $age_become_responsible
-replace dropObs = 1 if les_c4 == -9 & dag >= $age_become_responsible
+*Activity status with retirement as a separate category 
+count if les_c4 == -9 & dag >= ${age_becomes_responsible}
+replace dropObs = 1 if les_c4 == -9 & dag >= ${age_becomes_responsible}
 
-*Partner's activity status (33,358 cases) 
+*Partner's activity status 
 count if lessp_c3 == -9 & idpartner != -9
 replace dropObs = 1 if lessp_c3 == -9 & idpartner != -9
 
-*Own and spousal activity status (33,530 cases) 
+*Own and spousal activity status 
 count if lesdf_c4 == -9 & idpartner != -9
 replace dropObs = 1 if lesdf_c4 == -9 & idpartner != -9
 
-*Household composition (692 cases):
+*Household composition 
 count if dhhtp_c4 == -9
 replace dropObs = 1 if dhhtp_c4 == -9
 
-*Income (14 cases):
-count if ypnbihs_dv == -9 & dag >= $age_become_responsible //5 obs 
-count if yplgrs_dv == -9 & dag >= $age_become_responsible //79 obs 
-count if ydses_c5 == -9 //469 obs 
-count if ypncp == -9 & dag >= $age_become_responsible //0 obs 
+*Income 
+count if ypnbihs_dv == -9 & dag >= ${age_becomes_responsible} 
+count if yplgrs_dv == -9 & dag >= ${age_becomes_responsible}  
+count if ydses_c5 == -9 
+count if ypncp == -9 & dag >= ${age_becomes_responsible} 
 
-replace dropObs = 1 if ypnbihs_dv == -9 & dag >= $age_become_responsible
-replace dropObs = 1 if yplgrs_dv == -9 & dag >= $age_become_responsible
+replace dropObs = 1 if ypnbihs_dv == -9 & dag >= ${age_becomes_responsible}
+replace dropObs = 1 if yplgrs_dv == -9 & dag >= ${age_becomes_responsible}
 replace dropObs = 1 if ydses_c5 == -9
-replace dropObs = 1 if ypncp == -9 & dag >= $age_become_responsible
+replace dropObs = 1 if ypncp == -9 & dag >= ${age_becomes_responsible}
 	
 *Indicator for households with missing values 
 cap drop dropHH
 bys stm idhh: egen dropHH = max(dropObs)
 tab dropHH, mis 
 /*	tab dropHH,	mis 
-
 	dropHH	Freq.	Percent	Cum.
 				
-	1	74,706	11.20	11.20
-	.	592,608	88.80	100.00
+	1	73,821	10.50	10.50
+	.	629,012	89.50	100.00
 				
-	Total	667,314	100.00
+	Total	702,833	100.00
 */
 drop if stm<0 
 
