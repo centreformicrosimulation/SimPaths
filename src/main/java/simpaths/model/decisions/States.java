@@ -415,7 +415,7 @@ public class States {
         return getCohabitationIndex() == 1;
     }
     Dcpst getDcpst() {
-        return (getCohabitation()) ? Dcpst.Partnered : Dcpst.SingleNeverMarried;
+        return (getCohabitation()) ? Dcpst.Partnered : Dcpst.Single;
     }
 
     /**

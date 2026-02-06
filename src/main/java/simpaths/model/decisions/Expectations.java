@@ -204,9 +204,9 @@ public class Expectations {
             personProxyNextPeriod.setDcpstLocal(currentStates.getDcpst());
         } else {
             if (currentStates.getDcpst().equals(Dcpst.Partnered))
-                personProxyNextPeriod.setDcpstLocal(Dcpst.PreviouslyPartnered);
+                personProxyNextPeriod.setDcpstLocal(Dcpst.Single);
             else
-                personProxyNextPeriod.setDcpstLocal(Dcpst.SingleNeverMarried);
+                personProxyNextPeriod.setDcpstLocal(Dcpst.Single);
         }
         personProxyNextPeriod.setDcpst_lag1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);

@@ -71,6 +71,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private boolean demIoFlag;         // true if a dummy person instantiated for IO decision solution
     @Enumerated(EnumType.STRING) private Gender demMaleFlag;             // gender
     @Enumerated(EnumType.STRING) private Education eduHighestC3;       //Education level
+    @Column(name = "eduHighestC4") private String eduHighestC4;       //Education level incl. education spell category
     @Transient private Education eduHighestC3L1;  //Lag(1) of education level
     @Enumerated(EnumType.STRING) private Education eduHighestMotherC3;      //Mother's education level
     @Enumerated(EnumType.STRING) private Education eduHighestFatherC3;      //Father's education level
@@ -2049,8 +2050,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     }
                 }
             }
-                yPensPersGrossMonth = 0.;
-            }
+        }
 
         double capital_income_multiplier = model.getSavingRate()/Parameters.SAVINGS_RATE;
         double yptciihs_dv_tmp_level = capital_income_multiplier*(Math.sinh(yCapitalPersMonth) + Math.sinh(yPensPersGrossMonth)); //Multiplied by the capital income multiplier, defined as chosen savings rate divided by the long-term average (specified in Parameters class)
@@ -2214,6 +2214,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private void updateOutputVariables() {
         idPartner = getPartnerID();
         demPartnerStatus = getDcpst();
+        eduHighestC4 = calculateEduHighestC4();
     }
 
     private void updateLaggedVariables(boolean initialUpdate) {
@@ -2632,10 +2633,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
         Dcpyy_L1, 						//Lag(1) number of years in partnership
         Dcpst_Partnered,				//Partnered
-        Dcpst_PreviouslyPartnered,		//Previously partnered
-        Dcpst_PreviouslyPartnered_L1,   //Lag(1) of partnership status is previously partnered
+        Dcpst_PreviouslyPartnered,		//Single (previously partnered category merged)
+        Dcpst_PreviouslyPartnered_L1,   //Lag(1) of partnership status is single (merged)
         New_rel_L1,
-        Dcpst_Single,					//Single never married
+        Dcpst_Single,					//Single
         Dcpst_Single_L1, 				//Lag(1) of partnership status is Single
         Dcrisis,
         Ded,
@@ -3235,22 +3236,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (demAgePartnerDiffL1 != null) ? (double) demAgePartnerDiffL1 : 0.0;
             }
             case Dcpst_Single -> {
-                return (Dcpst.SingleNeverMarried.equals(getDcpst())) ? 1.0 : 0.0;
+                return (Dcpst.Single.equals(getDcpst())) ? 1.0 : 0.0;
             }
             case Dcpst_Partnered -> {
                 return (Dcpst.Partnered.equals(getDcpst())) ? 1.0 : 0.0;
             }
             case Dcpst_PreviouslyPartnered -> {
-                return (Dcpst.PreviouslyPartnered.equals(getDcpst())) ? 1.0 : 0.0;
+                return (Dcpst.Single.equals(getDcpst())) ? 1.0 : 0.0;
             }
             case Dcpst_Single_L1 -> {
                 if (demPartnerStatusL1 != null) {
-                    return demPartnerStatusL1.equals(Dcpst.SingleNeverMarried) ? 1. : 0.;
+                    return demPartnerStatusL1.equals(Dcpst.Single) ? 1. : 0.;
                 } else return 0.;
             }
             case Dcpst_PreviouslyPartnered_L1 -> {
                 if (demPartnerStatusL1 != null) {
-                    return demPartnerStatusL1.equals(Dcpst.PreviouslyPartnered) ? 1. : 0.;
+                    return demPartnerStatusL1.equals(Dcpst.Single) ? 1. : 0.;
                 } else return 0.;
             }
             case New_rel_L1 -> {
@@ -4507,6 +4508,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @PreUpdate
     private void syncDemAgeSq() {
         demAgeSq = demAge * demAge;
+        eduHighestC4 = calculateEduHighestC4();
+    }
+
+    private String calculateEduHighestC4() {
+        if (Indicator.True.equals(eduSpellFlag)) {
+            return "InEducation";
+        }
+        if (eduHighestC3 == null) {
+            return null;
+        }
+        return eduHighestC3.name();
     }
 
      public int getPersonCount() {
@@ -4599,6 +4611,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public Education getDeh_c3() {
         return eduHighestC3;
+    }
+
+    public String getEduHighestC4() {
+        return eduHighestC4;
     }
 
     public void setDeh_c3(Education eduHighestC3) {
@@ -5096,9 +5112,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
         if (getPartner()!=null)
             return Dcpst.Partnered;
-        if (Dcpst.Partnered.equals(demPartnerStatusL1))
-            return Dcpst.PreviouslyPartnered;
-        return Dcpst.SingleNeverMarried;
+        return Dcpst.Single;
     }
 
     public void setDcpstLocal(Dcpst demPartnerStatus) {
