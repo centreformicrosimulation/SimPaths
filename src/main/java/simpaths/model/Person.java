@@ -154,7 +154,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean yBenUCReceivedFlagL1;
     @Column(name="yBenNonUCReceivedFlag") private Boolean yBenNonUCReceivedFlag;  // Person receives a benefit which is not UC
     @Transient private Boolean yBenNonUCReceivedFlagL1;
-    @Column(name="lifetimeIncome") private Double lifetimeIncome;                  // mean annual equivalised household disposable income by age
+    @Column(name="yLifeTime") private Double yLifeTime;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labHrsWorkEnumWeek;			//Number of hours of labour supplied each week
     @Transient private Labour labHrsWorkEnumWeekL1; // Lag(1) (previous year's value) of weekly labour supply
@@ -171,9 +171,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Series.Double yDispEquivYear;
     private Double xEquivYear;
     @Transient private Series.Double xEquivYearL1;
-    private Double sIndex;
-    private Double sIndexNormalised;
-    @Transient private LinkedHashMap<Integer, Double> sIndexYearMap;
     private Integer demPartnerNYear; //Number of years in partnership
     @Transient private Integer demPartnerNYearL1; //Lag(1) of number of years in partnership
     private Double yNonBenPersGrossMonth; // asinh of personal non-benefit income per month
@@ -312,8 +309,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yDispEquivYear = new Series.Double(this, DoublesVariables.EquivalisedIncomeYearly);
         xEquivYearL1 = new Series.Double(this, DoublesVariables.EquivalisedConsumptionYearly);
         xEquivYear = 0.;
-        lifetimeIncome = 0.;
-        sIndexYearMap = new LinkedHashMap<Integer, Double>();
+        yLifeTime = 0.;
         demBornInSimFlag = true;
         yBenReceivedFlag = false;
         yBenNonUCReceivedFlag = false;
@@ -347,7 +343,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             this.ltIncomeDonor = originalPerson.ltIncomeDonor;
         }
         if (Parameters.lifetimeIncomeImpute)
-            this.lifetimeIncome = originalPerson.getLifetimeIncome();
+            this.yLifeTime = originalPerson.getYLifeTime();
 
         demAge = originalPerson.demAge;
         demAgeSq = demAge * demAge;
@@ -550,7 +546,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yDispEquivYear = new Series.Double(this, DoublesVariables.EquivalisedIncomeYearly);
         xEquivYearL1 = new Series.Double(this, DoublesVariables.EquivalisedConsumptionYearly);
         xEquivYear = originalPerson.xEquivYear;
-        sIndexYearMap = new LinkedHashMap<Integer, Double>();
         demEthnC6 = originalPerson.demEthnC6;
         yBenReceivedFlag = originalPerson.yBenReceivedFlag;
         yBenReceivedFlagL1 = originalPerson.yBenReceivedFlagL1;
@@ -2865,8 +2860,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         ResStanDev,
         Retired,
         Sfr, 										//Scenario : fertility rate This retrieves the fertility rate by region and year to use in fertility regression
-        sIndex,
-        sIndexNormalised,
         Single,
         Single_kids,
         StatePensionAge,
@@ -4184,13 +4177,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     return xEquivYear;
                 } else return -9999.99;
             }
-            case sIndex -> {
-                return getsIndex();
-            }
-            case sIndexNormalised -> {
-                return getsIndexNormalised();
-            }
-
             //New enums for the mental health Step 1 and 2:
             case EmployedToUnemployed -> {
                 return (labC4L1.equals(Les_c4.EmployedOrSelfEmployed) && labC4.equals(Les_c4.NotEmployed) && healthDsblLongtermFlag.equals(Indicator.False)) ? 1. : 0.;
@@ -5364,47 +5350,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.xEquivYearL1 = xEquivYearL1;
     }
 
-    /*
-    public Double getsIndex() {
-        if (sIndexYearMap.get(model.getYear()-model.getsIndexTimeWindow()) != null) {
-            return sIndexYearMap.get(model.getYear() - model.getsIndexTimeWindow());
-        } else {
-            return Double.NaN;
-        }
-    }
-
-    public void setsIndex(Double sIndex) {
-        sIndexYearMap.put(model.getYear(), sIndex);
-    }
-
-     */
-
-    public Double getsIndex() {
-        if (sIndex != null && sIndex > 0. && !sIndex.isInfinite() && (model.getYear() >= model.getStartYear()+model.getsIndexTimeWindow())) {
-            return sIndex;
-        }
-        else return Double.NaN;
-    }
-
-    public void setsIndex(Double sIndex) {
-        this.sIndex = sIndex;
-    }
-
-    public Double getsIndexNormalised() {
-        if (sIndexNormalised != null && sIndexNormalised > 0. && !sIndexNormalised.isInfinite() && (model.getYear() >= model.getStartYear()+model.getsIndexTimeWindow())) {
-            return sIndexNormalised;
-        }
-        else return Double.NaN;
-    }
-
-    public void setsIndexNormalised(Double sIndexNormalised) {
-        this.sIndexNormalised = sIndexNormalised;
-    }
-
-    public Map<Integer, Double> getsIndexYearMap() {
-        return sIndexYearMap;
-    }
-
     public Integer getLabHrsWorkNewL1() {
         return labHrsWorkNewL1;
     }
@@ -6065,7 +6010,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public void setLtIncome(int maxAge) {
-        lifetimeIncome = 0.0;
+        yLifeTime = 0.0;
         if (demAge > 0) {
 
             int birthYear = ltIncomeDonor.getBirthYear();
@@ -6074,30 +6019,30 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 AnnualIncome annualIncome = ltIncomeDonor.getAnnualIncome(birthYear+aa);
                 if (annualIncome == null)
                     throw new RuntimeException("Annual income for year " + (birthYear+aa) + " not found for donor " + ltIncomeDonor.getId());
-                lifetimeIncome += annualIncome.getValue();
+                yLifeTime += annualIncome.getValue();
             }
-            lifetimeIncome /= (double)(ageLimit+1);
+            yLifeTime /= (double)(ageLimit+1);
         }
     }
 
-    public double getLifetimeIncome() {
-        if (Parameters.checkFinite(lifetimeIncome))
-            return lifetimeIncome;
+    public double getYLifeTime() {
+        if (Parameters.checkFinite(yLifeTime))
+            return yLifeTime;
         else
-            throw new RuntimeException("lifetimeIncome is not finite");
+            throw new RuntimeException("yLifeTime is not finite");
     }
 
     public void updateLtIncome() {
         double newVal = getBenefitUnit().getHousehold().getEquivalisedDisposableIncomeYearly();
         if (demAge == 0) {
-            lifetimeIncome = newVal;
+            yLifeTime = newVal;
         } else {
 
-            if (!Parameters.checkFinite(lifetimeIncome))
-                throw new RuntimeException("lifetimeIncome is not defined");
-            double curVal = lifetimeIncome;
+            if (!Parameters.checkFinite(yLifeTime))
+                throw new RuntimeException("yLifeTime is not defined");
+            double curVal = yLifeTime;
             double years = demAge + 1;
-            lifetimeIncome = (curVal * (years - 1) + newVal) / years;
+            yLifeTime = (curVal * (years - 1) + newVal) / years;
         }
     }
 
