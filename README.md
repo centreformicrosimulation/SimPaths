@@ -2,10 +2,18 @@
 
 by Matteo Richiardi, Patryk Bronka, Justin van de Ven
 
-## Introduction
+## What is SimPaths and how to use it?
 
-SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. The framework builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries – versions currently exist for the UK and Italy. Careful attention is paid to model validation, and sensitivity of projections to key assumptions. The modular nature of the SimPaths framework is designed to facilitate analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates and alternative approaches for projecting labour/leisure and consumption/savings decisions. Projections for a workhorse model parameterised to the UK context are reported in [Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis* (No. CEMPA6/23), Centre for Microsimulation and Policy Analysis at the Institute for Social and Economic Research*](https://www.microsimulation.ac.uk/publications/publication-557738/), which closely reflect observed data throughout a 10-year validation window.
+SimPaths is an open-source framework for modelling individual and household life course events across multiple domains. The framework projects life histories over time, developing detailed representations of career paths, family and intergenerational relationships, health, and financial circumstances. As a family of models, SimPaths offers a dynamic simulation of how life events evolve and interact within populations.
 
+SimPaths models currently exist for the UK, Greece, Hungary, Italy, and Poland. This page refers to the UK model; the other European models are available at the corresponding [SimPathsEU](https://github.com/centreformicrosimulation/SimPathsEU) page. 
+
+The entire SimPaths documentation is available on its [WikiPage](https://github.com/centreformicrosimulation/SimPaths/wiki), which includes: a detailed description of its building blocks; instructions on how to set up and run the model; information about contributing to the model's development.
+
+<!-- Projections for a workhorse model parameterised to the UK context are reported in [Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis* (No. CEMPA6/23), Centre for Microsimulation and Policy Analysis at the Institute for Social and Economic Research*](https://www.microsimulation.ac.uk/publications/publication-557738/), which closely reflect observed data throughout a 10-year validation window. -->
+
+
+<!--
 ## Getting Started
 
 To contribute to this project, you need to fork the repository and set up your development environment.
@@ -109,3 +117,4 @@ In our open-source project, we follow a clear and consistent branch naming conve
     - `docs/documentation-topic`: Prefix documentation branches with `docs` for updating or creating documentation. For example, `docs/update-readme`.
 
 These branch naming conventions are designed to make it easy for our contributors to understand the purpose of each branch and maintain consistency within our repository. Please adhere to these conventions when creating branches for your contributions.
+-->
