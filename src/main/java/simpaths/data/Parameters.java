@@ -71,9 +71,18 @@ public class Parameters {
 		"lcs", 					//labour civil servant dummy indicator
         "lcr01",                //carer status for benefits (0 no 1 yes)
 		"lhw", 					//hours worked per week
-		"ddi",					//disability status
         "yem", 					//employment income - used to construct work sector *NOT VALID FOR POLICY ANALYSIS*
         "yse", 					//self-employment income - used to construct work sector *NOT VALID FOR POLICY ANALYSIS*
+        "bdioa",                //Attendance Allowance
+        "bdisc",                //Disability Living Allowance
+        "bdimb",                //Disability Living Allowance (mobility)
+        "bdiscwa",              //Personal Independence Payment living allowance
+        "bdimbwa",              //Personal Independence Payment mobility
+        "bdict01",              //Incapacity Benefit
+        "bdict02",              //Contributory Employment and Support Allowance
+        "bsadi_s",              //income-related Employment and Support Allowance
+        "bdiwi",                //Industrial injuries pension
+        "bdisv",                //Severe Disablement Allowance
     };
 
     public static final String[] DONOR_POLICY_VARIABLES = new String[] {
