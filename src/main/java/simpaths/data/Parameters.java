@@ -2036,23 +2036,6 @@ public class Parameters {
         return regLabourSupplyUtilityACFemales;
     }
 
-    /**
-     * Rebuild regressions after coefficient-map edits so alignment adjustments take effect.
-     * What: recreate the subgroup-specific labour-supply regression object from the current coefficient map.
-     * Why: alignment edits update the coefficient maps, but existing regression instances hold stale coefficients.
-     * How: pick the subgroup and replace the cached regression with a new LinearRegression built from its map.
-     */
-    public static void refreshLabourSupplyUtilityRegression(OccupancyExtended subgroupFlag) {
-        switch (subgroupFlag) {
-            case Couple -> regLabourSupplyUtilityCouples = new LinearRegression(coeffLabourSupplyUtilityCouples);
-            case Single_DepMales, Single_DepFemales -> regLabourSupplyUtilitySingleDep = new LinearRegression(coeffLabourSupplyUtilitySingleDep);
-            case Single_Male -> regLabourSupplyUtilityMales = new LinearRegression(coeffLabourSupplyUtilityMales);
-            case Single_Female -> regLabourSupplyUtilityFemales = new LinearRegression(coeffLabourSupplyUtilityFemales);
-            case Male_AC -> regLabourSupplyUtilityACMales = new LinearRegression(coeffLabourSupplyUtilityACMales);
-            case Female_AC -> regLabourSupplyUtilityACFemales = new LinearRegression(coeffLabourSupplyUtilityACFemales);
-        }
-    }
-
     public static LinearRegression getRegEmploymentSelectionMale() {
         return regEmploymentSelectionMale;
     }

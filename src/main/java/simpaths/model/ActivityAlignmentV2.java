@@ -141,9 +141,6 @@ public class ActivityAlignmentV2 implements IEvaluation {
                     : orig.baseValue + adjustment;
             coefficientMap.replaceValue(reg, newVal);
         }
-        // Rebuild the regression so it reflects the updated coefficient map during alignment.
-        Parameters.refreshLabourSupplyUtilityRegression(subgroupFlag);
-
         // Update all benefit units in parallel for efficiency
         // Update only benefit units in the selected(!) subgroup
         benefitUnits.parallelStream()
