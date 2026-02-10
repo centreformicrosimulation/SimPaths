@@ -248,7 +248,7 @@ public class Parameters {
     public static double labour_innovation_employment_persistence_probability = 0.9;
     public static double labour_innovation_notinemployment_persistence_probability = 0.1;
 
-    public static final int HOURS_IN_WEEK = 24 * 7; //This is used to calculate leisure in labour supply
+    public static final int HOURS_IN_WEEK = 18 * 7; //This is used to calculate leisure in labour supply (18 = 24 - 6 hours of sleep)
     //Is it possible for people to start going to the labour module (e.g. age 17) while they are living with parents (until age 18)?
     //Cannot see how its possible if it is the household that decides how much labour to supply.  If someone finishes school at 17, they need to leave home before they can enter the labour market.  So set age for finishing school and leaving home to 18.
     public static final int MAX_LABOUR_HOURS_IN_WEEK = 48;

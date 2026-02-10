@@ -1851,232 +1851,232 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,2).ordinal() * 1.e-2;
             }
             case MaleLeisure -> {                            //24*7 - labour supply weekly for male
-                return Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly();
+                return getMaleLeisureHoursWeekly();
             }
             case MaleLeisureSq -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                return (getMaleLeisureHoursWeekly()) * (getMaleLeisureHoursWeekly());
             }
             case MaleLeisure_IncomeDiv100 -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                return (getMaleLeisureHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
             }
             case MaleLeisure_MaleAgeDiv100 -> {                //Male Leisure interacted with age of male
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getMale().getDemAge() * 1.e-2;
+                return (getMaleLeisureHoursWeekly()) * getMale().getDemAge() * 1.e-2;
             }
             case MaleLeisure_MaleAgeSqDiv10000 -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getMale().getDemAge() * getMale().getDemAge() * 1.e-4;
+                return (getMaleLeisureHoursWeekly()) * getMale().getDemAge() * getMale().getDemAge() * 1.e-4;
             }
             case MaleLeisure_NChildren017, MaleLeisure_dnc -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * (double)getNumberChildren(0,17);
+                return (getMaleLeisureHoursWeekly()) * (double)getNumberChildren(0,17);
             }
             case MaleLeisure_DChildren2Under -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
             }
             case MaleLeisure_MaleDeh_c3_Low -> {
                 if(getMale().getDeh_c3().equals(Education.Low)) {
-                    return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                    return (getMaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case MaleLeisure_MaleDeh_c3_Medium -> {
                 if(getMale().getDeh_c3().equals(Education.Medium)) {
-                    return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                    return (getMaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case MaleLeisure_UKC -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKC)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKD -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKD)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKE -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKE)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKF -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKF)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKG -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKG)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKH -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKH)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKJ -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKJ)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKK -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKK)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKL -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKL)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKM -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKM)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKN -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKN)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_MaleAge50Above -> {
                 if (getMale().getDemAge() >= 50) {
-                    return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                    return (getMaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case MaleLeisure_FemaleLeisure -> {            //Male leisure interacted with female leisure
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                return (getMaleLeisureHoursWeekly()) * (getFemaleLeisureHoursWeekly());
             }
             case FemaleLeisure -> {                            //24*7 - labour supply weekly for Female
-                return Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly();
+                return getFemaleLeisureHoursWeekly();
             }
             case FemaleLeisureSq -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                return (getFemaleLeisureHoursWeekly()) * (getFemaleLeisureHoursWeekly());
             }
             case FemaleLeisure_IncomeDiv100 -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                return (getFemaleLeisureHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
             }
             case FemaleLeisure_FemaleAgeDiv100 -> {                //Female Leisure interacted with age of Female
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getFemale().getDemAge() * 1.e-2;
+                return (getFemaleLeisureHoursWeekly()) * getFemale().getDemAge() * 1.e-2;
             }
             case FemaleLeisure_FemaleAgeSqDiv10000 -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getFemale().getDemAge() * getFemale().getDemAge() * 1.e-4;
+                return (getFemaleLeisureHoursWeekly()) * getFemale().getDemAge() * getFemale().getDemAge() * 1.e-4;
             }
             case FemaleLeisure_NChildren017, FemaleLeisure_dnc -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * (double)getNumberChildren(0,17);
+                return (getFemaleLeisureHoursWeekly()) * (double)getNumberChildren(0,17);
             }
             case FemaleLeisure_DChildren2Under -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
             }
             case FemaleLeisure_FemaleDeh_c3_Low -> {
                 if(getFemale().getDeh_c3().equals(Education.Low)) {
-                    return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                    return (getFemaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case FemaleLeisure_FemaleDeh_c3_Medium -> {
                 if(getFemale().getDeh_c3().equals(Education.Medium)) {
-                    return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                    return (getFemaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case FemaleLeisure_UKC -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKC)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKD -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKD)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKE -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKE)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKF -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKF)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKG -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKG)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKH -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKH)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKJ -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKJ)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKK -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKK)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKL -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKL)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKM -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKM)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKN -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKN)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_FemaleAge50Above -> {
                 if (getFemale().getDemAge() >= 50) {
-                    return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                    return (getFemaleLeisureHoursWeekly());
                 } else return 0.;
                 //Note: In the previous version of the model, Fixed Cost was returning -1 to match the regression coefficients
             }
@@ -2148,17 +2148,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 //Note: couples in which one person is not at risk of work have utility set according to the process for singles
             }
             case MaleLeisure_DChildren1317 -> { //Male leisure interacted with dummy for presence of children aged 13-17
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
             }
             case MaleLeisure_DChildren712 -> {  //Male leisure interacted with dummy for presence of children aged 7 - 12
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
             }
             case MaleLeisure_DChildren36 -> {   //Male leisure interacted with dummy for presence of children aged 3 - 6
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
             }
             case MaleLeisure_DChildren017 -> {  //Male leisure interacted with dummy for presence of children aged 0 - 17
                 if(getNumberChildren(0,17) > 0) { //Instead of creating a new variable, use number of children aged 0 - 17
-                    return Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly();
+                    return getMaleLeisureHoursWeekly();
                 } else return 0.;
                 //The following two regressors refer to a partner in single LS model - this is for those with an inactive partner, but not everyone will have a partner so check for nulls
             }
@@ -2178,17 +2178,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             }
             case FemaleLeisure_DChildren1317 -> { //Male leisure interacted with dummy for presence of children aged 13-17
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
             }
             case FemaleLeisure_DChildren712 -> {  //Male leisure interacted with dummy for presence of children aged 7 - 12
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
             }
             case FemaleLeisure_DChildren36 -> {   //Male leisure interacted with dummy for presence of children aged 3 - 6
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
             }
             case FemaleLeisure_DChildren017 -> {  //Male leisure interacted with dummy for presence of children aged 0 - 17
                 if(getNumberChildren(0,17) > 0) { //Instead of creating a new variable, use number of children aged 0 - 17
-                    return Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly();
+                    return getFemaleLeisureHoursWeekly();
                 } else return 0.;
             }
             case FixedCostFemale_Dlltsdsp -> {    //Fixed cost interacted with dummy for partner being long-term sick or disabled
@@ -2925,10 +2925,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
             }
             case MaleLeisure_dnc02 -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
             }
             case FemaleLeisure_dnc02 -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
 
             }
             case Homeownership_D -> {
@@ -3097,6 +3097,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 throw new IllegalArgumentException("Unsupported regressor " + variableID.name() + " in BenefitUnit");
             }
         }
+    }
+
+    private double getMaleLeisureHoursWeekly() {
+        return getMale().getLeisureHoursPerWeek();
+    }
+
+    private double getFemaleLeisureHoursWeekly() {
+        return getFemale().getLeisureHoursPerWeek();
     }
 
 
