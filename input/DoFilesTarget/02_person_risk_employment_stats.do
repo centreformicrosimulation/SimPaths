@@ -74,9 +74,9 @@ foreach y of numlist $min_year/$max_year {
 	replace occcupancy = "Single_male"   if (has_resp_male==1 & has_resp_female==0)
 	replace occcupancy = "Single_female" if (has_resp_female==1 & has_resp_male==0)
 	
-	* Individual "at risk of employment" (working-age, not retired, not student, not permanently disabled)
-	gen byte maleAtRisk   = ( (demmaleflag == 1) & !(labc4 == 2 | labc4 == 4 | healthdsbllongtermflag == 1 | demage < 16 | demage > 75 | careneedflag == 1) )
-	gen byte femaleAtRisk = ( (demmaleflag == 0) & !(labc4 == 2 | labc4 == 4 | healthdsbllongtermflag == 1 | demage < 16 | demage > 75 | careneedflag == 1) )
+	* Individual "at risk of employment" (working-age, not retired, not student, do not need care)
+	gen byte maleAtRisk   = ( (demmaleflag == 1) & !(labc4 == 2 | labc4 == 4 | demage < 16 | demage > 75 | careneedflag == 1) )
+	gen byte femaleAtRisk = ( (demmaleflag == 0) & !(labc4 == 2 | labc4 == 4 | demage < 16 | demage > 75 | careneedflag == 1) )
 	
 	* BU-level indicators of whether there is at least one male/female at risk
 	bys idbu: egen byte bu_maleAtRisk   = max(maleAtRisk)
