@@ -205,7 +205,7 @@ public class GridScale {
             }
 
             // social care receipt
-            if (Parameters.flagSocialCare && ageHh >= DecisionParams.minAgeReceiveFormalCare) {
+            if (Parameters.flagSocialCare && ageHh >= DecisionParams.minAgeReceiveSocialCare) {
                 axes[aa][dimIndex][0] = 4; // none needed, no formal, informal and formal, only formal (see Enum SocialCareReceiptState)
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 3;
@@ -498,7 +498,7 @@ public class GridScale {
         }
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare) {
             if (axisID==Axis.SocialCareReceipt) return dimIndex;
             dimIndex++;
         } else {

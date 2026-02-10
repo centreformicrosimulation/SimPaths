@@ -103,7 +103,7 @@ public class States {
             populate(Axis.Disability, (double)refPerson.getDisability());
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptState().getValue());
 
         // social care provision
@@ -628,7 +628,7 @@ public class States {
      * @return integer (0 none needed, 1 no formal (needed but not received or only informal), 2 formal and informal, 3 only formal
      */
     int getSocialCareReceipt() {
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare) {
             return (int) labStatesContObject[scale.getIndex(Axis.SocialCareReceipt, ageYears)];
         } else {
             return 0;
@@ -892,7 +892,7 @@ public class States {
      */
     SocialCareReceiptState getSocialCareReceiptStateCode() {
         SocialCareReceiptState code;
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             code = SocialCareReceiptState.getCode(getVal(Axis.SocialCareReceipt));
         else
             code = SocialCareReceiptState.NoneNeeded;
@@ -904,7 +904,7 @@ public class States {
      */
     SocialCareReceipt getSocialCareReceiptCode() {
         SocialCareReceipt code;
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             code = SocialCareReceipt.getCode(getVal(Axis.SocialCareReceipt));
         else
             code = SocialCareReceipt.None;
@@ -1036,7 +1036,7 @@ public class States {
         }
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare) {
             stateIndex = scale.getIndex(Axis.SocialCareReceipt, ageYears);
             printOutOfBounds(stateIndex);
             msg = "social care receipt: " + String.format(fmtIndicator, labStatesContObject[stateIndex]);

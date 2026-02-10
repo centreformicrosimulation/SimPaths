@@ -271,7 +271,7 @@ public class Parameters {
     public static final int MIN_AGE_TO_HAVE_INCOME = 16; //Minimum age to have non-employment non-benefit income
     public static final int MIN_AGE_TO_RETIRE = 50; //Minimum age to consider retirement
     public static final int DEFAULT_AGE_TO_RETIRE = 67; //if pension included, but retirement decision not
-    public static final int MIN_AGE_FORMAL_SOCARE = 65; //Minimum age to receive formal social care
+    public static final int MIN_AGE_SOCIAL_CARE = 65; //Minimum age to receive formal social care
     public static final int MIN_AGE_FLEXIBLE_LABOUR_SUPPLY = 16; //Used when filtering people who can be "flexible in labour supply"
     public static final int MAX_AGE_FLEXIBLE_LABOUR_SUPPLY = 75;
     public static final double SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT = 0.25;
@@ -477,8 +477,6 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHealthH2; //Prob. long-term sick or disabled
 
     //Social care
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1a; // prob of needing social care under 65
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1b;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2a; // prob of needing social care 65+
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2b;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2c;
@@ -714,8 +712,6 @@ public class Parameters {
     private static BinomialRegression regHealthH2;
 
     //Social care
-    private static BinomialRegression regReceiveCareS1a;
-    private static LinearRegression regCareHoursS1b;
     private static BinomialRegression regNeedCareS2a;
     private static BinomialRegression regReceiveCareS2b;
     private static MultinomialRegression regSocialCareMarketS2c;
@@ -1105,8 +1101,6 @@ public class Parameters {
         coeffCovarianceHealthH2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", "H2", 1);
 
         //Social care
-        coeffCovarianceSocialCareS1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S1a", 1);
-        coeffCovarianceSocialCareS1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S1b", 1);
         coeffCovarianceSocialCareS2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2a", 1);
         coeffCovarianceSocialCareS2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2b", 1);
         coeffCovarianceSocialCareS2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2c", 1);
@@ -1232,8 +1226,6 @@ public class Parameters {
                     {"coeffCovarianceDLS1", coeffCovarianceDLS1},
                     {"coeffCovarianceDLS2Males", coeffCovarianceDLS2Males},
                     {"coeffCovarianceDLS2Females", coeffCovarianceDLS2Females},
-                    {"coeffCovarianceSocialCareS1a", coeffCovarianceSocialCareS1a},
-                    {"coeffCovarianceSocialCareS1b", coeffCovarianceSocialCareS1b},
                     {"coeffCovarianceSocialCareS2a", coeffCovarianceSocialCareS2a},
                     {"coeffCovarianceSocialCareS2b", coeffCovarianceSocialCareS2b},
                     {"coeffCovarianceSocialCareS2c", coeffCovarianceSocialCareS2c},
@@ -1326,8 +1318,6 @@ public class Parameters {
             coeffCovarianceDLS2Females = RegressionUtils.bootstrap(coeffCovarianceDLS2Females);
 
             //Social care
-            coeffCovarianceSocialCareS1a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1a);
-            coeffCovarianceSocialCareS1b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1b);
             coeffCovarianceSocialCareS2a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2a);
             coeffCovarianceSocialCareS2b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2b);
             coeffCovarianceSocialCareS2c = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2c);
@@ -1405,8 +1395,6 @@ public class Parameters {
         regHealthH2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceHealthH2);
 
         //Social care
-        regReceiveCareS1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS1a);
-        regCareHoursS1b = new LinearRegression(coeffCovarianceSocialCareS1b);
         regNeedCareS2a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2a);
         regReceiveCareS2b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2b);
         regSocialCareMarketS2c = new MultinomialRegression<>(RegressionType.MultinomialLogit, SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2c);
@@ -1927,8 +1915,6 @@ public class Parameters {
     // public static GeneralisedOrderedRegression getRegHealthH1b() { return regHealthH1b; }
     public static BinomialRegression getRegHealthH2() { return regHealthH2; }
 
-    public static BinomialRegression getRegReceiveCareS1a() { return regReceiveCareS1a; }
-    public static LinearRegression getRegCareHoursS1b() { return regCareHoursS1b; }
     public static BinomialRegression getRegNeedCareS2a() { return regNeedCareS2a; }
     public static BinomialRegression getRegReceiveCareS2b() { return regReceiveCareS2b; }
     public static MultinomialRegression getRegSocialCareMarketS2c() { return regSocialCareMarketS2c; }

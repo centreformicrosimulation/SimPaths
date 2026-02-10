@@ -148,12 +148,6 @@ public class ManagerRegressions {
             case HealthH2 -> {
                 return Parameters.getRegHealthH2();
             }
-            case SocialCareS1a -> {
-                return Parameters.getRegReceiveCareS1a();
-            }
-            case SocialCareS2a -> {
-                return Parameters.getRegNeedCareS2a();
-            }
             case SocialCareS2b -> {
                 return Parameters.getRegReceiveCareS2b();
             }

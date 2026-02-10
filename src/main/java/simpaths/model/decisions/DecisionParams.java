@@ -110,7 +110,7 @@ public class DecisionParams {
     public static final Indicator DEFAULT_DISABILITY = Indicator.False;     // assumed for formulating expectations in absence of explicit value
 
     // FORMAL SOCIAL CARE STATE
-    public static int minAgeReceiveFormalCare;
+    public static int minAgeReceiveSocialCare;
 
     // MAXIMUM AGE FOR COHABITATION
     public static final int MAX_AGE_COHABITATION = 115;
@@ -190,7 +190,7 @@ public class DecisionParams {
             minAgeToRetire = Parameters.DEFAULT_AGE_TO_RETIRE;
         else
             minAgeToRetire = Parameters.MIN_AGE_TO_RETIRE;
-        minAgeReceiveFormalCare = Parameters.MIN_AGE_FORMAL_SOCARE;
+        minAgeReceiveSocialCare = Parameters.MIN_AGE_SOCIAL_CARE;
 
         Parameters.annuityRates = new AnnuityRates();
         maxPensionPYear = getMaxWealthByAge(Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
@@ -255,8 +255,8 @@ public class DecisionParams {
 
     public static int maxAgeForDisability() {
         int val = DecisionParams.maxAgeFlexibleLabourSupply;
-        if (Parameters.flagSocialCare && val >= DecisionParams.minAgeReceiveFormalCare)
-            val = DecisionParams.minAgeReceiveFormalCare - 1;
+        if (Parameters.flagSocialCare && val >= DecisionParams.minAgeReceiveSocialCare)
+            val = DecisionParams.minAgeReceiveSocialCare - 1;
         return val;
     }
 }

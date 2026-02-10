@@ -1389,7 +1389,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void evaluateSocialCareReceipt() {
 
-        if (demAge < Parameters.MIN_AGE_FORMAL_SOCARE || getYear()>getStartYear()) {
+        if (demAge < Parameters.MIN_AGE_SOCIAL_CARE || getYear()>getStartYear()) {
 
             careNeedFlag = Indicator.False;
             careHrsFormalWeek = 0.0;
@@ -1409,47 +1409,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (!Parameters.checkFinite(careHrsFromParentWeek))
             careHrsFromParentWeek = 0.0;
 
-        if ((demAge < Parameters.MIN_AGE_FORMAL_SOCARE) && Indicator.True.equals(healthDsblLongtermFlag)) {
-            // under 65 years old with disability
-
-            careNeedFlag = Indicator.True;
-            double probRecCare;
-            if (Indicator.False.equals(healthDsblLongtermFlagL1) || getYear()==getStartYear()) {
-                // need to identify receipt of social care
-
-                probRecCare = Parameters.getRegReceiveCareS1a().getProbability(this, Person.DoublesVariables.class);
-            } else {
-                // persist preceding receipt
-
-                if (getTotalHoursSocialCare_L1()>0.5) {
-                    probRecCare = 1.1;
-                } else {
-                    probRecCare = -0.1;
-                }
-            }
-
-            if (statInnovations.getDoubleDraw(5) < probRecCare) {
-                // receive social care
-
-                double score = Parameters.getRegCareHoursS1b().getScore(this,Person.DoublesVariables.class);
-                double rmse = Parameters.getRMSEForRegression("S1b");
-                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(6));
-                double careHours = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * gauss));
-                Person partner = getPartner();
-                if (partner!=null && partner.getDemAge() < 75) {
-                    careFromPartnerFlag = true;
-                    careHrsFromPartnerWeek = careHours;
-                } else if (demAge < 50) {
-                    careFromOtherFlag = true;
-                    careHrsFromParentWeek = careHours;
-                } else {
-                    careFromOtherFlag = true;
-                    careHrsFromOtherWeek = careHours;
-                }
-            }
-        }
-
-        if (demAge >= Parameters.MIN_AGE_FORMAL_SOCARE && getYear()>getStartYear()) {
+        if (demAge >= Parameters.MIN_AGE_SOCIAL_CARE && getYear()>getStartYear()) {
             // need care only projected for 65 and over due to limitations of data used for parameterisation
 
             double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(this, Person.DoublesVariables.class);
