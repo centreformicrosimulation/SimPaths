@@ -7,12 +7,15 @@ randomSeed: 606
 startYear: 2019
 endYear: 2026
 popSize: 50000
+# countryString: "United Kingdom"
+# integrationTest: false
 
 # Arguments passed to the SimPathsModel
 model_args:
 #    maxAge: 130
 #    fixTimeTrend: true
 #    timeTrendStopsIn: 2017
+#    timeTrendStopsInMonetaryProcesses: 2017
 #    fixRandomSeed: true
 #    sIndexTimeWindow: 5
 #    sIndexAlpha: 2
@@ -22,14 +25,24 @@ model_args:
 #    useWeights: false
 #    useSBAMMatching:
 #    projectMortality: true
+#    alignPopulation: true
 #    alignFertility: true
+#    alignEducation: false
+#    alignInSchool: false
+#    alignCohabitation: false
 #    labourMarketCovid19On: false
 #    projectFormalChildcare: true
 #    donorPoolAveraging: true
 #    alignEmployment: false
 #    projectSocialCare: false
+#    addRegressionStochasticComponent: true
+#    fixRegressionStochasticComponent: false
+#    flagSuppressChildcareCosts: false
+#    flagSuppressSocialCareCosts: false
 #    enableIntertemporalOptimisations: true
+#    flagDefaultToTimeSeriesAverages: true
 #    responsesToLowWageOffer: true
+#    responsesToPension: false
 #    saveImperfectTaxDBMatches: false
 #    useSavedBehaviour: false
 #    readGrid: "laptop serial"
@@ -42,10 +55,12 @@ model_args:
 #    responsesToDisability: false
 #    minAgeForPoorHealth: 50
 #    responsesToRegion: false
+#    ignoreTargetsAtPopulationLoad: false
 
 # Arguments that alter processing of the SimPathsMultiRun object
 innovation_args:
 #    randomSeedInnov: false
+#    flagDatabaseSetup: false
 #    intertemporalElasticityInnov: false
 #    labourSupplyElasticityInnov: true
 
@@ -55,9 +70,11 @@ collector_args:
 #    exportToCSV: true
 #    persistStatistics: true
 #    persistStatistics2: true
+#    persistStatistics3: true
 #    persistPersons: false
 #    persistBenefitUnits: false
 #    persistHouseholds: false
+#    persistEmploymentStatistics: false
 #    dataDumpStartTime: 0L
 #    dataDumpTimePeriod: 1.0
 
@@ -65,6 +82,7 @@ parameter_args:
 #  input_directory: input
 #  input_directory_initial_populations: input/InitialPopulations
 #  euromod_output_directory: input/EUROMODoutput
+#  trainingFlag: false
 #  includeYears:
 #    - 2011
 #    - 2012
