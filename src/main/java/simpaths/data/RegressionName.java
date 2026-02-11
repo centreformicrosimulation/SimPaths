@@ -45,6 +45,7 @@ public enum RegressionName {
 
     RMSE(RegressionType.Linear),
 
+    SocialCareS1b (RegressionType.Linear),
     SocialCareS2a(RegressionType.Probit),
     SocialCareS2b(RegressionType.Probit),
     SocialCareS2c(RegressionType.MultinomialLogit),

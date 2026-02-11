@@ -477,6 +477,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHealthH2; //Prob. long-term sick or disabled
 
     //Social care
+    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1b;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2a; // prob of needing social care 65+
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2b;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2c;
@@ -712,6 +713,7 @@ public class Parameters {
     private static BinomialRegression regHealthH2;
 
     //Social care
+    private static LinearRegression regSocialCareS1b;
     private static BinomialRegression regNeedCareS2a;
     private static BinomialRegression regReceiveCareS2b;
     private static MultinomialRegression regSocialCareMarketS2c;
@@ -1101,6 +1103,7 @@ public class Parameters {
         coeffCovarianceHealthH2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", "H2", 1);
 
         //Social care
+        coeffCovarianceSocialCareS1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S1b", 1);
         coeffCovarianceSocialCareS2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2a", 1);
         coeffCovarianceSocialCareS2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2b", 1);
         coeffCovarianceSocialCareS2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2c", 1);
@@ -1226,6 +1229,7 @@ public class Parameters {
                     {"coeffCovarianceDLS1", coeffCovarianceDLS1},
                     {"coeffCovarianceDLS2Males", coeffCovarianceDLS2Males},
                     {"coeffCovarianceDLS2Females", coeffCovarianceDLS2Females},
+                    {"coeffCovarianceSocialCareS1b", coeffCovarianceSocialCareS1b},
                     {"coeffCovarianceSocialCareS2a", coeffCovarianceSocialCareS2a},
                     {"coeffCovarianceSocialCareS2b", coeffCovarianceSocialCareS2b},
                     {"coeffCovarianceSocialCareS2c", coeffCovarianceSocialCareS2c},
@@ -1318,6 +1322,7 @@ public class Parameters {
             coeffCovarianceDLS2Females = RegressionUtils.bootstrap(coeffCovarianceDLS2Females);
 
             //Social care
+            coeffCovarianceSocialCareS1b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1b);
             coeffCovarianceSocialCareS2a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2a);
             coeffCovarianceSocialCareS2b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2b);
             coeffCovarianceSocialCareS2c = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2c);
@@ -1395,6 +1400,7 @@ public class Parameters {
         regHealthH2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceHealthH2);
 
         //Social care
+        regSocialCareS1b = new LinearRegression(coeffCovarianceSocialCareS1b);
         regNeedCareS2a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2a);
         regReceiveCareS2b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2b);
         regSocialCareMarketS2c = new MultinomialRegression<>(RegressionType.MultinomialLogit, SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2c);
@@ -1921,6 +1927,7 @@ public class Parameters {
     public static BinomialRegression getRegReceiveCarePartnerS2d() { return regReceiveCarePartnerS2d; }
     public static MultinomialRegression getRegPartnerSupplementaryCareS2e() { return regPartnerSupplementaryCareS2e; }
     public static MultinomialRegression getRegNotPartnerInformalCareS2f() { return regNotPartnerInformalCareS2f; }
+    public static LinearRegression getRegCareHoursS1b() { return regSocialCareS1b; }
     public static LinearRegression getRegPartnerCareHoursS2g() { return regPartnerCareHoursS2g; }
     public static LinearRegression getRegDaughterCareHoursS2h() { return regDaughterCareHoursS2h; }
     public static LinearRegression getRegSonCareHoursS2i() { return regSonCareHoursS2i; }
