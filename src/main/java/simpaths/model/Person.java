@@ -1356,33 +1356,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         double healthInnov1 = statInnovations.getDoubleDraw(3);
         double healthInnov2 = statInnovations.getDoubleDraw(4);
-        if((demAge >= 16 && demAge <= 29) && Les_c4.Student.equals(labC4) && eduLeftEduFlag == false) {
-            //If age is between 16 - 29 and individual has always been in education, follow process H1a:
-
+        if (demAge >= 16) {
             Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             healthSelfRated = (Dhe) event.eval();
             if (event.isProblemWithProbs())
                 model.addCounterErrorH1a();
-        } else if (demAge >= 16) {
 
-            // Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1b);
-            // MultiValEvent event = new MultiValEvent(probs, healthInnov1);
-            // healthSelfRated = (Dhe) event.eval();
-            // if (event.isProblemWithProbs())
-            //     model.addCounterErrorH1b();
-
-            //If age is over 16 and individual is not in continuous education, also follow process H2b to calculate the probability of long-term sickness / disability:
-            boolean becomeLTSickDisabled = false;
-            if (!Parameters.enableIntertemporalOptimisations || DecisionParams.flagDisability) {
-
-                double prob = Parameters.getRegHealthH2().getProbability(this, Person.DoublesVariables.class);
-                becomeLTSickDisabled = (healthInnov2 < prob);
-            }
-            if (becomeLTSickDisabled) {
-                healthDsblLongtermFlag = Indicator.True;
-            } else {
-                healthDsblLongtermFlag = Indicator.False;
+            if (Indicator.False.equals(getDed())) {
+                boolean becomeLTSickDisabled = false;
+                if (!Parameters.enableIntertemporalOptimisations || DecisionParams.flagDisability) {
+                    double prob = Parameters.getRegHealthH2().getProbability(this, Person.DoublesVariables.class);
+                    becomeLTSickDisabled = (healthInnov2 < prob);
+                }
+                if (becomeLTSickDisabled) {
+                    healthDsblLongtermFlag = Indicator.True;
+                } else {
+                    healthDsblLongtermFlag = Indicator.False;
+                }
             }
         }
     }
@@ -1806,6 +1797,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void initialisePotentialHourlyEarnings() {
 
+        if (demAge < Parameters.MIN_AGE_TO_HAVE_INCOME || demAge > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) {
+            return;
+        }
         double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(15));
         double logPotentialHourlyEarnings, score, rmse;
         if (demMaleFlag.equals(Gender.Male)) {
@@ -1824,6 +1818,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     protected void updateFullTimeHourlyEarnings() {
 
+        if (demAge < Parameters.MIN_AGE_TO_HAVE_INCOME || demAge > Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) {
+            return;
+        }
         double rmse, wagesInnov = statInnovations.getDoubleDraw(16);
         if (Les_c4.EmployedOrSelfEmployed.equals(labC4L1)) {
             if (labWageRegressRandomCompoponentEmp == null || !model.fixRegressionStochasticComponent) {

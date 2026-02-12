@@ -8,7 +8,6 @@ import microsim.data.db.PanelEntityKey;
 import org.hibernate.annotations.Fetch;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
-import simpaths.data.filters.ValidHomeownersCSfilter;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -3177,31 +3176,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     protected void homeownership() {
 
-        ValidHomeownersCSfilter filter = new ValidHomeownersCSfilter();
-        Person male = getMale();
-        Person female = getFemale();
-        if (filter.isFiltered(this)) {
-
-            boolean male_homeowner = false, female_homeowner = false;
-            if (male!=null) {
-
-                double prob = Parameters.getRegHomeownershipHO1a().getProbability(male, Person.DoublesVariables.class);
-                if (statInnovations.getDoubleDraw(6) < prob) {
-                    male_homeowner = true;
-                }
-            }
-            if (female!=null) {
-
-                double prob = Parameters.getRegHomeownershipHO1a().getProbability(female, Person.DoublesVariables.class);
-                if (statInnovations.getDoubleDraw(7) < prob) {
-                    female_homeowner = true;
-                }
-            }
-            if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
-                setWealthPrptyFlag(true);
-            } else {
-                setWealthPrptyFlag(false);
-            }
+        Person refPerson = getRefPersonForDecisions();
+        if (refPerson.getDemAge() >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            double prob = Parameters.getRegHomeownershipHO1a().getProbability(refPerson, Person.DoublesVariables.class);
+            boolean homeowner = (statInnovations.getDoubleDraw(6) < prob);
+            setWealthPrptyFlag(homeowner);
         }
     }
 
