@@ -1582,10 +1582,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
             // No --> Process E1b
             else {
-                // Re-entry to education is only allowed up to the configured age threshold.
-                if (demAge > MAX_AGE_TO_ENTER_EDUCATION) {
-                    return false;
-                }
                 double score = Parameters.getRegEducationE1b().getScore(this, Person.DoublesVariables.class);
                 double prob = Parameters.getRegEducationE1b().getProbability(score + probitAdjustment);
 
