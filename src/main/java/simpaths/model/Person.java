@@ -1595,7 +1595,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     demBePartnerFlag = (cohabitInnov < prob);
                     if (demBePartnerFlag)
                         model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
-                } else if (demMaleFlag == Gender.Female && (demAge > 29 || !Les_c4.Student.equals(labC4) || eduLeftEduFlag)) {
+                } else if (demMaleFlag == Gender.Female && demAge >= Parameters.MIN_AGE_COHABITATION) {
                     // partnership dissolution
 
                     double score = Parameters.getRegPartnershipU2().getScore(this, Person.DoublesVariables.class);
@@ -1966,7 +1966,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // --- BRANCH 1: CONTINUING PENSIONERS (Process I2b) ---
                 // Condition: Aged 50+ AND were Retired last year.
                 // Uses OLS (I2b) for amount.
-                if (Les_c4.Retired.equals(labC4L1)) {
+                if (Les_c4.Retired.equals(labC4L1) && yPensPersGrossMonthL1 != null && yPensPersGrossMonthL1 > 0.0) {
 
                     double score = Parameters.getRegIncomeI2b().getScore(this, Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("I2b");
