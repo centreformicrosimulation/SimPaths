@@ -1958,6 +1958,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         System.out.println("Root found at: " + search.getTarget()[0]);
         System.out.println("Target altered: " + search.isTargetAltered());
         System.out.println("Iterations: " + search.getIterationCount());
+        System.out.println("Bound search diagnostics: " + search.getBoundSearchDiagnosticsSummary());
 
         for (RootSearch2.IterationInfo it : search.getIterationHistory()) {
             System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",

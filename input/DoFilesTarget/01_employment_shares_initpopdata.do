@@ -38,7 +38,7 @@ global min_year 2011
 global max_year 2023
 
 * Directory structure
-global dir_input_data   "D:\CeMPA\SimPaths\input\InitialPopulations"
+global dir_input_data   "D:\CeMPA\SimPaths\input\InitialPopulations"  // Please use up-to-date initial population
 global dir_working_data "$dir_w/${country}/working_data"
 global dir_output       "$dir_w/${country}"
 
@@ -133,10 +133,9 @@ foreach y of numlist $min_year/$max_year {
 	
 	* ---------- END BU-LEVEL FRACTIONAL EMPLOYMENT ------------------------ *
 
-	* Partner-specific employment targets for SingleDep groups
 	gen double bu_target_emp = bu_fracemployed
-    replace bu_target_emp = bu_male_emp if group_code == "SingleDep_Males"
-	replace bu_target_emp = bu_female_emp if group_code == "SingleDep_Females"
+//     replace bu_target_emp = bu_male_emp if group_code == "SingleDep_Males"
+// 	replace bu_target_emp = bu_female_emp if group_code == "SingleDep_Females"
 	
 	* BU-level weight: sum of person-level weights within each BU
 	bys idbu: egen double bu_w = total(wgthhcross)

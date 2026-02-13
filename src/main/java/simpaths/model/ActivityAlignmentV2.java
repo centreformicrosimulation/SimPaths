@@ -8,7 +8,6 @@ import simpaths.data.Parameters;
 import simpaths.model.enums.Occupancy;
 import simpaths.model.enums.OccupancyExtended;
 import simpaths.model.enums.TargetShares;
-import simpaths.model.enums.Les_c4;
 
 import java.util.*;
 
@@ -182,51 +181,6 @@ public class ActivityAlignmentV2 implements IEvaluation {
      * Computes the simulated employment share for benefit units in the specified subgroup using employment fraction of each BU
      */
     private double computeSimulatedShareUsingFraction() {
-        /*
-         * For Single_Dep subgroups, the target refers to the at-risk partner's employment rate.
-         * Using BU-level fracEmployed() (maleEmployed+femaleEmployed)/(maleCount+femaleCount) would cap the share at ~0.5 because the non-at-risk partner is typically not employed.
-         * So we compute partner-specific shares instead:
-         *  - Single_DepMales: maleEmployed / (maleCount + femaleCount)
-         *  - Single_DepFemales: femaleEmployed / (maleCount + femaleCount)
-         */
-        // Single-dep male alignment targets the male employment rate (not the couple-averaged rate).
-        if (subgroupFlag == OccupancyExtended.Single_DepMales) {
-            // Single-dep male alignment targets the male employment rate (not the couple-averaged rate).
-            long[] counts = benefitUnits.parallelStream()
-                    .filter(this::matchesSubgroup)
-                    .collect(
-                            () -> new long[2], // [0] = count of units, [1] = count employed (male)
-                            (a, bu) -> {
-                                a[0]++;
-                                Person male = bu.getMale();
-                                if (male != null && Les_c4.EmployedOrSelfEmployed.equals(male.getLes_c4())) {
-                                    a[1]++;
-                                }
-                            },
-                            (a, b) -> { a[0] += b[0]; a[1] += b[1]; }
-                    );
-            return counts[0] > 0 ? (double) counts[1] / counts[0] : 0.0;
-        }
-
-        // Single-dep female alignment targets the female employment rate (not the couple-averaged rate).
-        if (subgroupFlag == OccupancyExtended.Single_DepFemales) {
-            // Single-dep female alignment targets the female employment rate (not the couple-averaged rate).
-            long[] counts = benefitUnits.parallelStream()
-                    .filter(this::matchesSubgroup)
-                    .collect(
-                            () -> new long[2], // [0] = count of units, [1] = count employed (female)
-                            (a, bu) -> {
-                                a[0]++;
-                                Person female = bu.getFemale();
-                                if (female != null && Les_c4.EmployedOrSelfEmployed.equals(female.getLes_c4())) {
-                                    a[1]++;
-                                }
-                            },
-                            (a, b) -> { a[0] += b[0]; a[1] += b[1]; }
-                    );
-            return counts[0] > 0 ? (double) counts[1] / counts[0] : 0.0;
-        }
-
         double[] totals = benefitUnits.parallelStream()
                 .filter(this::matchesSubgroup)
                 .collect(
