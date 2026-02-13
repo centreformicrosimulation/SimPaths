@@ -392,7 +392,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
         if (demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION)
             eduLeftEduFlag = false;
-        else if (demAge > Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION)
+        else if (demAge > Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION)
             eduLeftEduFlag = true;
         else
             eduLeftEduFlag = (!Les_c4.Student.equals(labC4) || (Les_c4.Student.equals(labC4) && eduSpellFlag.equals(Indicator.False))) ;
@@ -1583,19 +1583,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 if (partner == null) {
                     // partnership formation
 
-                    if (demAge <= 29 && labC4 == Les_c4.Student && !eduLeftEduFlag) {
-
-                        double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
-                        prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
-                    } else {
-
-                        double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
-                        prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
-                    }
+                    double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
                     demBePartnerFlag = (cohabitInnov < prob);
                     if (demBePartnerFlag)
                         model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
-                } else if (demMaleFlag == Gender.Female && demAge >= Parameters.MIN_AGE_COHABITATION) {
+                } else if (demMaleFlag == Gender.Female) {
                     // partnership dissolution
 
                     double score = Parameters.getRegPartnershipU2().getScore(this, Person.DoublesVariables.class);
@@ -1614,7 +1607,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         if (demBePartnerFlag)
                             model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
                     }
-                } else if (partner != null && demMaleFlag == Gender.Female && ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student))) {
+                } else if (demMaleFlag == Gender.Female && ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student))) {
 
                     double prob = Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class);
                     if (cohabitInnov < prob) {
@@ -1666,7 +1659,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (demAge >= MIN_AGE_TO_LEAVE_EDUCATION) {
                 // Is the age of the individual below the max age to leave education (age < maxQuittingAge)?
                 // Yes
-                if (demAge <= MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+                if (demAge <= MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
                     // --> process E1a
                     double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
                     double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
@@ -1683,7 +1676,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                         return false; // Must return false as they are leaving
                     }
                 }
-                // No (demAge > MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION)
+                // No (demAge > MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION)
                 else {
                     // Leave education --> Process E2
                     eduLeaveSchoolFlag = true; // Must set flag to true
@@ -1733,7 +1726,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 //        } else if (Les_c4.Student.equals(labC4) && !eduLeftEduFlag && demAge >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //leftEducation is initialised to false and updated to true when individual leaves education (and never reset).
 //            //If age is between 16 - 29 and individual has always been in education, follow process E1a:
 //
-//            if (demAge <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+//            if (demAge <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
 //
 //                double prob = Parameters.getRegEducationE1a().getProbability(this, Person.DoublesVariables.class);
 //                eduLeaveSchoolFlag = (labourInnov >= prob); //If event is true, stay in school.  If event is false, leave school.

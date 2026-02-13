@@ -235,7 +235,7 @@ public class GridScale {
             }
 
             //student
-            if (ageHh <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
+            if (ageHh <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
                 axes[aa][dimIndex][0] = DecisionParams.PTS_STUDENT;
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = DecisionParams.PTS_STUDENT - 1;
@@ -522,7 +522,7 @@ public class GridScale {
         }
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
             if (axisID==Axis.Student) return dimIndex;
             dimIndex++;
         } else {

@@ -393,7 +393,7 @@ public class Expectations {
             }
 
             // student - don't need to track separately from education (no need for flagStudentVaries)
-            if (DecisionParams.flagEducation && ageYearsNextPeriod<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+            if (DecisionParams.flagEducation && ageYearsNextPeriod<=Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
                 futures.updateStudent();
             }
 

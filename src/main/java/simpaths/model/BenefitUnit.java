@@ -3639,9 +3639,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 ref = male;
             } else if (female.getLes_c4()==Les_c4.Retired) {
                 ref = female;
-            } else if (male.getLes_c4()==Les_c4.Student && male.getDemAge()<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && female.getLes_c4()!=Les_c4.Student) {
+            } else if (male.getLes_c4()==Les_c4.Student && male.getDemAge()<=Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && female.getLes_c4()!=Les_c4.Student) {
                 ref = male;
-            } else if (female.getLes_c4()==Les_c4.Student && female.getDemAge()<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && male.getLes_c4()!=Les_c4.Student) {
+            } else if (female.getLes_c4()==Les_c4.Student && female.getDemAge()<=Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && male.getLes_c4()!=Les_c4.Student) {
                 ref = female;
             } else {
                 if (male.getLabWageFullTimeHrly() >= female.getLabWageFullTimeHrly()) {

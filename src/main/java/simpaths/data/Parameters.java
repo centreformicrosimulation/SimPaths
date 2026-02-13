@@ -265,7 +265,7 @@ public class Parameters {
     public static int maxAge;										// maximum age possible in simulation
     public static final int AGE_TO_BECOME_RESPONSIBLE = 18;			// Age become reference person of own benefit unit
     public static final int MIN_AGE_TO_LEAVE_EDUCATION = 16;		// Minimum age for a person to leave (full-demYear) education
-    public static final int MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION = 29;
+    public static final int MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION = 29;
     public static final int MIN_AGE_COHABITATION = AGE_TO_BECOME_RESPONSIBLE;  	// Min age a person can marry
     public static final int MIN_AGE_TO_HAVE_INCOME = 16; //Minimum age to have non-employment non-benefit income
     public static final int MIN_AGE_TO_RETIRE = 50; //Minimum age to consider retirement
@@ -301,7 +301,7 @@ public class Parameters {
     private static final int MIN_START_YEAR_TRAINING = 2019;
     private static final int MAX_START_YEAR_TRAINING = 2019; //Maximum allowed starting point. Should correspond to the most recent initial population.
     public static final int MIN_AGE_MATERNITY = 18;  			// Min age a person can give birth
-    public static final int MAX_AGE_MATERNITY = 44;  			// Max age a person can give birth
+    public static final int MAX_AGE_MATERNITY = 49;  			// Max age a person can give birth
     public static final boolean FLAG_SINGLE_MOTHERS = true;
     public static boolean flagUnemployment = false;
     public static ArrayList<Integer> includeYears;

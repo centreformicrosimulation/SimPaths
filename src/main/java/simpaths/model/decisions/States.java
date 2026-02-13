@@ -115,7 +115,7 @@ public class States {
             populate(Axis.Region, benefitUnit.getRegionIndex());
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation)
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation)
             populate(Axis.Student, refPerson.getStudent());
 
         // education
@@ -679,7 +679,7 @@ public class States {
      */
     int getStudent() {
         int student = 0;
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
             student = (int) labStatesContObject[scale.getIndex(Axis.Student, ageYears)];
         }
         return student;
@@ -852,7 +852,7 @@ public class States {
         Les_c4 code;
         int student = 0;
         if (DecisionParams.flagEducation) {
-            if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+            if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
                 student = getStudent();
             }
         }
@@ -1060,7 +1060,7 @@ public class States {
         }
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
             stateIndex = scale.getIndex(Axis.Student, ageYears);
             printOutOfBounds(stateIndex);
             msg = "student: " + String.format(fmtIndicator, labStatesContObject[stateIndex]);
