@@ -38,7 +38,7 @@ global min_year 2011
 global max_year 2023
 
 * Directory structure
-global dir_input_data   "D:\CeMPA\SimPaths\input\InitialPopulations"  // Please use up-to-date initial population
+global dir_input_data   "D:\BaiduSyncdisk\Job CeMPA\employment alignment UK\UK\initial population"
 global dir_working_data "$dir_w/${country}/working_data"
 global dir_output       "$dir_w/${country}"
 
@@ -109,30 +109,37 @@ foreach y of numlist $min_year/$max_year {
 	* Restrict to the relevant BU groups
 	keep if inlist(group_code,"Couples","SingleDep_Males","SingleDep_Females","Single_male","Single_female","SingleAC_Males","SingleAC_Females")
 	
-	* Employment of responsible male/female adults
+	* Employment of responsible male/female adults, consistent with Java labour module:
+	* if an adult is not at risk of work, treat them as non-employed in target construction.
 	gen byte male_emp   = employed if (demmaleflag==1 & demage>=18)
 	gen byte female_emp = employed if (demmaleflag==0 & demage>=18)
-	
+	replace male_emp   = 0 if (demmaleflag==1 & demage>=18 & bu_maleAtRisk!=1)
+	replace female_emp = 0 if (demmaleflag==0 & demage>=18 & bu_femaleAtRisk!=1)
+
 	* Collapse to BU: whether the responsible male/female (if present) is employed
 	bys idbu: egen byte bu_male_emp   = max(male_emp)
 	bys idbu: egen byte bu_female_emp = max(female_emp)
-	
+
 	* Replace missing BU employment with 0 (no employed responsible adult of that sex)
 	replace bu_male_emp   = 0 if missing(bu_male_emp)
 	replace bu_female_emp = 0 if missing(bu_female_emp)
-	
+
 	* Number of responsible adults in the BU
 	gen byte bu_nresp = has_resp_male + has_resp_female
-	
+
 	* Fractional BU employment: 0, 0.5, or 1 depending on how many responsible adults work
 	gen double bu_fracemployed = .
 	replace bu_fracemployed = (bu_male_emp + bu_female_emp) / bu_nresp if bu_nresp>0
-	
+
 	* Safety check: if no responsible adult (should not happen), set to 0
-	replace bu_fracemployed = 0 if bu_nresp==0  
+	replace bu_fracemployed = 0 if bu_nresp==0
+
+	* Consistency guard: SingleDep groups cannot exceed 0.5 by construction
+	assert bu_fracemployed <= 0.5 if inlist(group_code,"SingleDep_Males","SingleDep_Females")
 	
 	* ---------- END BU-LEVEL FRACTIONAL EMPLOYMENT ------------------------ *
 
+	* Partner-specific employment targets for SingleDep groups
 	gen double bu_target_emp = bu_fracemployed
 //     replace bu_target_emp = bu_male_emp if group_code == "SingleDep_Males"
 // 	replace bu_target_emp = bu_female_emp if group_code == "SingleDep_Females"
