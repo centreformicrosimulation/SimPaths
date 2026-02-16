@@ -1924,15 +1924,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             OccupancyExtended occupancy, // benefit unit occupancy extended to allow all types used in labour supply module
             String occupancyLabel // displays the type of benefit unit to which adjustment is applied
     ) {
-        // Warm-start root search from the last solved year when available.
-        // This improves stability/speed because employment utility adjustments usually evolve smoothly over time.
-        // For the first simulated year, keep the configured value for that year.
-        double utilityAdjustment;
-        if (getYear() > startYear) {
-            utilityAdjustment = Parameters.getTimeSeriesValue(getYear() - 1, adjustmentMap);
-        } else {
-            utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentMap);
-        }
+        // Start from the configured value for the current year.
+        double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentMap);
         System.out.println("Utility adjustment for " + occupancyLabel + " has started");
 
         // start timer
@@ -1941,29 +1934,23 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         ActivityAlignmentV2 activityAlignment = new ActivityAlignmentV2(benefitUnits, coefficientMap, regressionCoefficientName, occupancy);
         // Use subgroup-specific bounds to reduce boundary-only solutions while keeping a single bounded search interval.
-        double alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT;
-        if (occupancy == OccupancyExtended.Couple) {
-            alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 12.0;
-        } else if (occupancy == OccupancyExtended.Single_DepMales) {
-            alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 20.0;
-        } else if (occupancy == OccupancyExtended.Single_DepFemales) {
-            alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 20.0;
-        }
+        double alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 40 ;
         // Diagnostics probe only the actual bounded interval.
-        activityAlignment.printDiagnostics(utilityAdjustment, alignmentBound);
-        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, 5.0E-3, alignmentBound);
+        final double epsFunction = 5.0E-3;
+        activityAlignment.printDiagnostics(utilityAdjustment, alignmentBound, epsFunction);
+        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, epsFunction, alignmentBound);
         // epsFunction tolerance is set to 0.5% seem to be sufficient
 
         System.out.println("=== Root Search Summary ===");
         System.out.println("Root found at: " + search.getTarget()[0]);
-        System.out.println("Target altered: " + search.isTargetAltered());
         System.out.println("Iterations: " + search.getIterationCount());
         System.out.println("Bound search diagnostics: " + search.getBoundSearchDiagnosticsSummary());
-
-        for (RootSearch2.IterationInfo it : search.getIterationHistory()) {
-            System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",
-                    it.getIteration(), it.getX(), it.getFx(), it.getStep(),
-                    it.isFuncTolMet(), it.isOrdTolMet());
+        if (search.getIterationCount() > 0) {
+            for (RootSearch2.IterationInfo it : search.getIterationHistory()) {
+                System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",
+                        it.getIteration(), it.getX(), it.getFx(), it.getStep(),
+                        it.isFuncTolMet(), it.isOrdTolMet());
+            }
         }
 
         // stop timer

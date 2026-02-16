@@ -17,10 +17,11 @@ public class RootSearch2 {
 
     private int iterationCount = 0;
     private final List<IterationInfo> iterationHistory = new ArrayList<>();
-    private static final double BRACKET_MAX_DISTANCE = 300.0;
-    // Ratios chosen to reproduce [5,20,50,100,300] when W=300.
+    private Double lastEvalX = null;
+    private Double lastEvalFx = null;
+    // Probe distances are fractions of the max reachable distance within current bounds.
     private static final double[] BRACKET_DISTANCE_RATIOS =
-            new double[]{(1.0 / 60.0), (1.0 / 15.0), (1.0 / 6.0), (1.0 / 3.0), 1.0};
+            new double[]{(1.0 / 5.0), (2.0 / 5.0), (3.0 / 5.0), (4.0 / 5.0), 1.0};
     private BoundSearchDiagnostics boundDiagnostics = new BoundSearchDiagnostics();
 
 
@@ -72,13 +73,15 @@ public class RootSearch2 {
         iterationHistory.clear();
         iterationCount = 0;
         targetAltered = false;
+        lastEvalX = null;
+        lastEvalFx = null;
 
         double[] xg, xn=null, xp=null;
         double fg, fn, fp;
 
         xg = copyPoint(target);
         xg[0] = clampToBounds(xg[0]);
-        fg = function.evaluate(xg);
+        fg = evalAt(xg[0]);
         boundDiagnostics = new BoundSearchDiagnostics();
         boundDiagnostics.lowerBound = lowerBounds[0];
         boundDiagnostics.upperBound = upperBounds[0];
@@ -99,7 +102,7 @@ public class RootSearch2 {
             boundDiagnostics.probeStartX = probeStart;
             boundDiagnostics.usedZeroAnchor = (probeStart == 0.0 && xg[0] != 0.0);
             if (probeStart != xg[0]) {
-                probeF = function.evaluate(asPoint(probeStart));
+                probeF = evalAt(probeStart);
                 iterationHistory.add(new IterationInfo(
                         iterationHistory.size(), probeStart, probeF, Double.NaN,
                         Math.abs(probeF) <= epsFunction, false));
@@ -112,16 +115,20 @@ public class RootSearch2 {
             xp = bounds.xp;
             fp = bounds.fp;
             boundDiagnostics.bracketed = bounds.bracketed;
+            if (bounds.bracketed) {
+                boundDiagnostics.bracketLower = xn[0];
+                boundDiagnostics.bracketUpper = xp[0];
+            }
 
             if (bounds.bracketed) {
                 // Keep the model state aligned with the endpoint used by zbrent's initial fb.
-                fp = function.evaluate(copyPoint(xp));
+                fp = evalAt(xp[0]);
                 target = zbrent(xn, xp, fn, fp);
             } else {
                 target = copyPoint(bounds.bestX);
                 final double chosenX = target[0];
                 // Ensure final state corresponds exactly to chosen target.
-                final double fChosen = function.evaluate(copyPoint(target));
+                final double fChosen = evalAt(chosenX);
 
                 iterationHistory.add(new IterationInfo(
                         iterationHistory.size(), chosenX, fChosen, Double.NaN,
@@ -157,7 +164,7 @@ public class RootSearch2 {
             }
             xgg = midPoint(xnn, xpp);
             double currX = xgg[0];
-            fgg = function.evaluate(xgg);
+            fgg = evalAt(currX);
 
             double step = (prevX == null) ? Double.NaN : Math.abs(currX - prevX);
             boolean funcOk = Math.abs(fgg) <= epsFunction;
@@ -262,7 +269,7 @@ public class RootSearch2 {
                 bb += Math.abs(tol1);
             }
             bbv[0] = bb;
-            fb=function.evaluate(bbv);
+            fb = evalAt(bb);
 
             // log this iteration
             double step = (prevX == null) ? Double.NaN : Math.abs(bb - prevX);
@@ -306,7 +313,7 @@ public class RootSearch2 {
         result.bestFx = startFx;
 
         // Bound-consistent probing ladder:
-        // W = min(300, furthest reachable distance from start within [lowerBound, upperBound]).
+        // W = furthest reachable distance from start within [lowerBound, upperBound].
         // Distances = ratio * W, using BRACKET_DISTANCE_RATIOS.
         final double[] bracketDistances = buildBracketDistances(startX);
         if (bracketDistances.length == 0) {
@@ -321,12 +328,12 @@ public class RootSearch2 {
         ProbePoint right = null;
 
         if (leftX != startX) {
-            left = new ProbePoint(leftX, function.evaluate(asPoint(leftX)));
+            left = new ProbePoint(leftX, evalAt(leftX));
             addProbeToHistory(left);
             updateBest(result, left);
         }
         if (rightX != startX) {
-            right = new ProbePoint(rightX, function.evaluate(asPoint(rightX)));
+            right = new ProbePoint(rightX, evalAt(rightX));
             addProbeToHistory(right);
             updateBest(result, right);
         }
@@ -361,7 +368,7 @@ public class RootSearch2 {
             if (candidateX == current.x) {
                 break;
             }
-            ProbePoint candidate = new ProbePoint(candidateX, function.evaluate(asPoint(candidateX)));
+            ProbePoint candidate = new ProbePoint(candidateX, evalAt(candidateX));
             addProbeToHistory(candidate);
             updateBest(result, candidate);
 
@@ -380,7 +387,7 @@ public class RootSearch2 {
                 Math.abs(startX - lowerBounds[0]),
                 Math.abs(upperBounds[0] - startX)
         );
-        final double w = Math.min(BRACKET_MAX_DISTANCE, maxReachWithinBounds);
+        final double w = maxReachWithinBounds;
         if (w <= 0.0) {
             return new double[0];
         }
@@ -449,6 +456,16 @@ public class RootSearch2 {
         return new double[]{x};
     }
 
+    private double evalAt(double x) {
+        if (lastEvalX != null && Double.compare(lastEvalX, x) == 0) {
+            return lastEvalFx;
+        }
+        final double fx = function.evaluate(asPoint(x));
+        lastEvalX = x;
+        lastEvalFx = fx;
+        return fx;
+    }
+
     private double[] copyPoint(double[] x) {
         return java.util.Arrays.copyOf(x, x.length);
     }
@@ -476,6 +493,8 @@ public class RootSearch2 {
     private static final class BoundSearchDiagnostics {
         double lowerBound;
         double upperBound;
+        double bracketLower = Double.NaN;
+        double bracketUpper = Double.NaN;
         double initialX;
         double initialFx;
         double probeStartX;
@@ -501,19 +520,32 @@ public class RootSearch2 {
     public String getBoundSearchDiagnosticsSummary() {
         final String bracketingStatus;
         if (boundDiagnostics.convergedAtInitial) {
-            bracketingStatus = "did not expand bracketing in rootsearch (initial point met tolerance)";
+            bracketingStatus = "initial point met tolerance";
         } else if (boundDiagnostics.bracketingAttempted && boundDiagnostics.bracketed) {
-            bracketingStatus = "expanded bracketing in rootsearch and found sign-change bracket";
+            bracketingStatus = "root bracket found within bounds";
         } else if (boundDiagnostics.bracketingAttempted) {
-            bracketingStatus = "expanded bracketing in rootsearch but no sign-change bracket found";
+            bracketingStatus = "no sign-change bracket found within bounds";
         } else {
             bracketingStatus = "bracketing status unavailable";
         }
 
-        return "Bounds=[" + boundDiagnostics.lowerBound + ", " + boundDiagnostics.upperBound + "]"
+        if (boundDiagnostics.convergedAtInitial) {
+            return "init=(" + boundDiagnostics.initialX + ", f=" + boundDiagnostics.initialFx + ")"
+                    + ", " + bracketingStatus;
+        }
+
+        final String boundsForSummary;
+        if (boundDiagnostics.bracketingAttempted && boundDiagnostics.bracketed) {
+            final double lo = Math.min(boundDiagnostics.bracketLower, boundDiagnostics.bracketUpper);
+            final double hi = Math.max(boundDiagnostics.bracketLower, boundDiagnostics.bracketUpper);
+            boundsForSummary = "Bounds=[" + lo + ", " + hi + "]";
+        } else {
+            boundsForSummary = "Bounds=[" + boundDiagnostics.lowerBound + ", " + boundDiagnostics.upperBound + "]";
+        }
+
+        return boundsForSummary
                 + ", init=(" + boundDiagnostics.initialX + ", f=" + boundDiagnostics.initialFx + ")"
-                + ", " + bracketingStatus
-                + ", finalX=" + boundDiagnostics.finalX;
+                + ", " + bracketingStatus;
     }
 
 }

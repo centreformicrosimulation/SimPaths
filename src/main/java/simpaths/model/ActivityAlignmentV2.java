@@ -204,18 +204,7 @@ public class ActivityAlignmentV2 implements IEvaluation {
                 .count();
     }
 
-    private LinearRegression getAlignmentRegression() {
-        return switch (subgroupFlag) {
-            case Couple -> Parameters.getRegLabourSupplyUtilityCouples();
-            case Single_DepMales, Single_DepFemales -> Parameters.getRegLabourSupplyUtilitySingleDep();
-            case Single_Male -> Parameters.getRegLabourSupplyUtilityMales();
-            case Single_Female -> Parameters.getRegLabourSupplyUtilityFemales();
-            case Male_AC -> Parameters.getRegLabourSupplyUtilityACMales();
-            case Female_AC -> Parameters.getRegLabourSupplyUtilityACFemales();
-        };
-    }
-
-    public void printDiagnostics(double baseAdjustment, double bound) {
+    public void printDiagnostics(double baseAdjustment, double bound, double epsFunction) {
         if (diagnosticsPrinted) return;
 
         int subgroupCount = countSubgroup();
@@ -226,39 +215,14 @@ public class ActivityAlignmentV2 implements IEvaluation {
         System.out.println("Target share: " + targetAggregateShareOfEmployed);
 
 
-        // Probe the actual bounded search interval only.
-        double[] testAdjustments = new double[] {
-                baseAdjustment,
-                baseAdjustment - bound,
-                baseAdjustment + bound
-        };
-
-        double minSimulated = Double.POSITIVE_INFINITY;
-        double maxSimulated = Double.NEGATIVE_INFINITY;
-        for (double adj : testAdjustments) {
-            double fx = evaluate(new double[] {adj});
-            if (!Double.isNaN(lastSimulatedShare)) {
-                minSimulated = Math.min(minSimulated, lastSimulatedShare);
-                maxSimulated = Math.max(maxSimulated, lastSimulatedShare);
-            }
-            System.out.println("Diag adj=" + adj
-                    + " | simulated=" + lastSimulatedShare
-                    + " | f(x)=" + fx);
+        // Evaluate the initial point first; if already within tolerance, skip bound probes.
+        double baseFx = evaluate(new double[] {baseAdjustment});
+        System.out.println("Diag adj=" + baseAdjustment
+                + " | simulated=" + lastSimulatedShare
+                + " | f(x)=" + baseFx);
+        if (Math.abs(baseFx) <= epsFunction) {
+            System.out.println("Initial point meets function tolerance.");
         }
-        if (minSimulated != Double.POSITIVE_INFINITY) {
-            if (targetAggregateShareOfEmployed < minSimulated || targetAggregateShareOfEmployed > maxSimulated) {
-                System.out.println("Target out of tested range: target=" + targetAggregateShareOfEmployed
-                        + ", simulatedMin=" + minSimulated
-                        + ", simulatedMax=" + maxSimulated);
-            } else {
-                System.out.println("Target within tested range: target=" + targetAggregateShareOfEmployed
-                        + ", simulatedMin=" + minSimulated
-                        + ", simulatedMax=" + maxSimulated);
-            }
-        }
-
-        // restore to base adjustment so alignment starts from intended value
-        evaluate(new double[] {baseAdjustment});
         diagnosticsPrinted = true;
     }
 
