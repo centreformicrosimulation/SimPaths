@@ -230,7 +230,6 @@ qui {
 }
 
 
-
 /**************************************************************************************
 *	merge with main data set
 *************************************************************************************/
@@ -242,41 +241,210 @@ qui {
 
 	merge 1:1 idperson swv using ukhls_socare_poolb, keep(1 3) nogen
 
+/*TO UPDATE FOR RECENT YEARS */
 
 	foreach var of varlist need_socare partner_socare_hrs son_socare_hrs daughter_socare_hrs other_socare_hrs formal_socare_hrs {
 		replace `var' = -9 if (missing(`var'))
 	}
 
-/*TO UPDATE FOR RECENT YEARS */
-
-	cap gen formal_socare_cost = -9
-	//replace formal_socare_cost = $careHourlyWageRates[`year' - $careWageRate_minyear + 1] * formal_socare_hrs if (formal_socare_hrs>0)
-	replace formal_socare_cost = 9.04 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2010
-	replace formal_socare_cost = 9.12 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2010
-	replace formal_socare_cost = 8.91 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2011
-	replace formal_socare_cost = 8.71 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2012
-	replace formal_socare_cost = 8.58 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2013
-	replace formal_socare_cost = 8.79 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2014
-	replace formal_socare_cost = 9.13 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2016
-	replace formal_socare_cost = 9.22 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2017
-	replace formal_socare_cost = 9.37 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2018
-	replace formal_socare_cost = 9.61 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2019
-	replace formal_socare_cost = 9.97 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2020		  
-	replace formal_socare_cost = 9.92 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2021
-	replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2022
-    replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2023
-    replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2024
-    replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2025
-    
 	sort idperson swv 
 
-	save "ukhls_pooled_all_obs_03.dta", replace 
+	save "ukhls_pooled_all_obs_care.dta", replace 
 }
-cap log close 
+
+
+/**************************************************************************************
+* extend beyond interpolated sample (defined by firstWave and lastWave)
+*************************************************************************************/
+disp "impute data beyond interpolated sample"
+use "ukhls_pooled_all_obs_care.dta", clear 
+
+// age variables
+gen dage1 = 0
+forval ii = 1/10 {
+	replace dage1 = `ii' if (dag>=65+2*(`ii'-1) & dag<=67+2*(`ii'-1))
+}
+replace dage1 = 11 if (dag>85)
+
+// adjusted life satisfaction
+gen dls_adj = round(dls)
+
+// partner age difference
+gen age_diff = 0
+replace age_diff = 0 if (dcpagdf < -10)
+replace age_diff = 1 if (dcpagdf < -5) * (dcpagdf >= -10)
+replace age_diff = 2 if (dcpagdf < 0) * (dcpagdf >= -5)
+replace age_diff = 3 if (dcpagdf < 5) * (dcpagdf >= 0)
+replace age_diff = 4 if (dcpagdf < 10) * (dcpagdf >= 5)
+replace age_diff = 5 if (dcpagdf >= 10)
+
+// partner
+gen partnered = (dcpst==1)
+
+// replace missing
+replace dlltsd01 = 0 if (dlltsd01<0)			// missing set to zero - not disabled
+replace dlltsd01_sp = 0 if (dlltsd01_sp<0)		// mostly single people - missing set to zero and partner dummy picks up the variation
+replace dehsp_c3 = 0 if (dehsp_c3<0)			// mostly single people - missing set to zero and partner dummy picks up the variation
+replace dhesp = 0 if (dhesp<0)					// mostly single people - missing set to zero and partner dummy picks up the variation
+replace dhm_ghq=0 if (dhm_ghq<0)				// missing set to zero
+replace drgn1=7 if (drgn1<0)					// missing set to london
+replace jbstat = 4 if (jbstat<0)				// missing set to retired
+
+// need social care (basic probit)
+gen need_socare_adj = need_socare
+replace need_socare_adj = 0 if (need_socare<0)
+probit need_socare_adj dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
+predict nsc_tmp if (dag>64 & (swv<$firstWave | swv>$lastWave))
+gen ee = runiform()
+gen need_socare2 = 0
+replace need_socare2 = 1 if (ee<nsc_tmp & dag>64 & (swv<$firstWave | swv>$lastWave))
+rename need_socare need_socare_original
+gen need_socare = need_socare_original
+replace need_socare = need_socare2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+drop ee nsc_tmp
+*tab swv need_socare
+
+// hours informal care (double hurdle model)
+gen informal_hrs = partner_socare_hrs*(partner_socare_hrs > 0) + son_socare_hrs*(son_socare_hrs > 0) + daughter_socare_hrs*(daughter_socare_hrs > 0) + other_socare_hrs*(other_socare_hrs > 0)
+gen rec_informal = (informal_hrs > 0)
+probit rec_informal dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
+predict ip if (dag>64 & (swv<$firstWave | swv>$lastWave))
+gen ee = runiform()
+gen ip2 = 0
+replace ip2 = 1 if (ee<ip & dag>64 & (swv<$firstWave | swv>$lastWave))
+drop ee ip
+*tab swv rec_informal
+*tab swv ip2
+
+// use categorical variable to mitigate sparse distribution
+gen hrs_grp = 0
+replace hrs_grp = 1 if (informal_hrs>0 &   informal_hrs<=5)
+replace hrs_grp = 2 if (informal_hrs>5 &   informal_hrs<=9)
+replace hrs_grp = 3 if (informal_hrs>9 &   informal_hrs<=20)
+replace hrs_grp = 4 if (informal_hrs>20 &  informal_hrs<=34)
+replace hrs_grp = 5 if (informal_hrs>34 &  informal_hrs<=50)
+replace hrs_grp = 6 if (informal_hrs>50 &  informal_hrs<=100)
+replace hrs_grp = 7 if (informal_hrs>100 & informal_hrs<=110)
+replace hrs_grp = 8 if (informal_hrs>110)
+oprobit hrs_grp dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_informal==1)
+forvalues ii = 1/7 {
+	
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1), outcome(#`ii')
+}
+gen ee = runiform()
+gen informal_hrs2 = 0
+replace pp2 = pp2 + pp1
+replace pp3 = pp3 + pp2
+replace pp4 = pp4 + pp3
+replace pp5 = pp5 + pp4
+replace pp6 = pp6 + pp5
+replace pp7 = pp7 + pp6
+replace informal_hrs2 = 2.5 if (ee<=pp1 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 7 if (ee>pp1 & ee<=pp2 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 14.5 if (ee>pp2 & ee<=pp3 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 27.0 if (ee>pp3 & ee<=pp4 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 42.0 if (ee>pp4 & ee<=pp5 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 74.5 if (ee>pp5 & ee<=pp6 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 100  if (ee>pp6 & ee<=pp7 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = 125  if (ee>pp7 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace informal_hrs2 = -9 if (dag<65 & (swv<$firstWave | swv>$lastWave) & ip2==0)
+
+rename informal_hrs informal_hrs_original
+gen informal_socare_hrs = informal_hrs_original
+replace informal_socare_hrs = informal_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+drop ip2 pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee
+*tab hrs_grp if (dag>64 & swv>=$firstWave & swv<=$lastWave)
+*tab informal_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+
+// hours of formal care
+gen rec_formal = (formal_socare_hrs > 0)
+gen rec_informal_intensive = (informal_socare_hrs>10)
+probit rec_formal rec_informal rec_informal_intensive dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
+predict ip if (dag>64 & (swv<$firstWave | swv>$lastWave))
+gen ee = runiform()
+gen ip2 = 0
+replace ip2 = 1 if (ee<ip*1.9 & dag>64 & swv<$firstWave)
+replace ip2 = 1 if (ee<ip & dag>64 & swv>$lastWave)
+drop ee ip
+*tab swv rec_informal
+*tab swv ip2
+
+gen formal_hrs_grp = 0
+replace formal_hrs_grp = 1 if (formal_socare_hrs>0 & formal_socare_hrs<=5)
+replace formal_hrs_grp = 2 if (formal_socare_hrs>5 & formal_socare_hrs<=9)
+replace formal_hrs_grp = 3 if (formal_socare_hrs>9 & formal_socare_hrs<=20)
+replace formal_hrs_grp = 4 if (formal_socare_hrs>20 & formal_socare_hrs<=34)
+replace formal_hrs_grp = 5 if (formal_socare_hrs>34 & formal_socare_hrs<=50)
+replace formal_hrs_grp = 6 if (formal_socare_hrs>50 & formal_socare_hrs<=100)
+replace formal_hrs_grp = 7 if (formal_socare_hrs>100)
+oprobit formal_hrs_grp rec_informal rec_informal_intensive dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_formal==1)
+forvalues ii = 1/7 {
+	
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1), outcome(#`ii')
+}
+gen ee = runiform()
+gen formal_socare_hrs2 = 0
+replace pp2 = pp2 + pp1
+replace pp3 = pp3 + pp2
+replace pp4 = pp4 + pp3
+replace pp5 = pp5 + pp4
+replace pp6 = pp6 + pp5
+replace pp7 = pp7 + pp6
+replace formal_socare_hrs2 = 2.5 if (ee<=pp1 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = 7 if (ee>pp1 & ee<=pp2 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = 14.5 if (ee>pp2 & ee<=pp3 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = 27.0 if (ee>pp3 & ee<=pp4 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = 42.0 if (ee>pp4 & ee<=pp5 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = 74.5 if (ee>pp5 & ee<=pp6 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = 125  if (ee>pp6 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
+replace formal_socare_hrs2 = -9 if (dag<65 & (swv<$firstWave | swv>$lastWave) & ip2==0)
+
+rename formal_socare_hrs formal_socare_hrs_original
+gen formal_socare_hrs = formal_socare_hrs_original
+replace formal_socare_hrs = formal_socare_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+drop ip2 pp1 pp2 pp3 pp4 pp5 pp6 ee
+*tab formal_hrs_grp if (dag>64 & swv>=$firstWave & swv<=$lastWave)
+*tab formal_socare_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+
+
+/**************************************************************************************
+* evaluate formal care costs
+*************************************************************************************/
+cap gen formal_socare_cost = -9
+//replace formal_socare_cost = $careHourlyWageRates[`year' - $careWageRate_minyear + 1] * formal_socare_hrs if (formal_socare_hrs>0)
+replace formal_socare_cost = 9.04 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2010
+replace formal_socare_cost = 9.12 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2010
+replace formal_socare_cost = 8.91 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2011
+replace formal_socare_cost = 8.71 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2012
+replace formal_socare_cost = 8.58 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2013
+replace formal_socare_cost = 8.79 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2014
+replace formal_socare_cost = 9.13 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2016
+replace formal_socare_cost = 9.22 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2017
+replace formal_socare_cost = 9.37 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2018
+replace formal_socare_cost = 9.61 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2019
+replace formal_socare_cost = 9.97 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2020		  
+replace formal_socare_cost = 9.92 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2021
+replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2022
+replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2023
+replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2024
+replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) & stm==2025
+
+
+/**************************************************************************************
+* save results
+*************************************************************************************/
+keep idperson swv need_socare informal_socare_hrs formal_socare_hrs formal_socare_cost
+sort idperson swv
+save temp, replace
+use "ukhls_pooled_all_obs_care.dta", clear
+merge 1:1 idperson swv using temp, keep(1 3) nogen
+save "ukhls_pooled_all_obs_03.dta", replace 
+
 
 /**************************************************************************************
 * clean-up and exit
 *************************************************************************************/
+cap log close 
 #delimit ;
 local files_to_drop 
 	sample_temp.dta
@@ -293,6 +461,7 @@ local files_to_drop
 	ukhls_socareb_k.dta
 	ukhls_socareb_l.dta
 	ukhls_socareb_m.dta
+	temp.dta
 	;
 #delimit cr // cr stands for carriage return
 
