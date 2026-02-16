@@ -12,7 +12,7 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
     ypnbihs_dv yptciihs_dv yplgrs_dv swv sedex ssscp sprfm sedag stm dagsp lhw l1_lhw ///
     pno ppno hgbioad1 hgbioad2 der obs_earnings_hourly l1_obs_earnings_hourly ///
     dhh_owned econ_benefits econ_benefits_nonuc econ_benefits_uc ///
-    scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd_sp dlltsd01_sp ///
+    scghq2_dv_miss_flag dchpd dagpns dagpns_sp CPI lesnr_c2 dlltsd01 dlltsd_sp dlltsd01_sp ///
     ypnoab flag* dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp new_rel {
         qui recode `var' (-9/-1=.)
 }
@@ -63,6 +63,7 @@ foreach y of numlist 2011/2025 {
 gen year_post2020 = (stm > 20) * (stm - 20)
 gen Y2223 = inlist(stm, 22, 23)
 gen Year_transformed = stm
+
 
 *==================================================
 * Income variables
@@ -189,6 +190,7 @@ gen Dhe_mcssp = dhe_mcssp
 gen Dlltsd   = dlltsd
 gen Dlltsd01 = dlltsd01
 
+
 *==================================================
 * Ethnicity
 *==================================================
@@ -225,7 +227,7 @@ cap drop l_* L_*
 
 xtset idperson swv
 
-foreach v in ydses_c5 dhe dhe_pcs dhe_mcs les_c3 les_c4 dhhtp_c4 dlltsd01 {
+foreach v in ydses_c5 dhe dhe_pcs dhe_mcs les_c3 les_c4 dhhtp_c4 dlltsd01 need_socare {
     gen l_`v' = L.`v'
 }
 
@@ -234,6 +236,7 @@ gen L_Dhe      = l_dhe
 gen L_Dhe_pcs  = l_dhe_pcs
 gen L_Dhe_mcs  = l_dhe_mcs
 gen L_Dlltsd01 = l_dlltsd01
+gen L_Need_socare = l_need_socare
 
 tab l_les_c4, gen(L_Les_c4_)
 rename L_Les_c4_1 L_Les_c4_Employed

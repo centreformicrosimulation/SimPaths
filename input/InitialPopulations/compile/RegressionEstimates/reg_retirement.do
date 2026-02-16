@@ -50,7 +50,7 @@ putexcel A1 = "Goodness of fit", bold
 /********************************* PREPARE DATA *******************************/
 
 * Load data 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -73,7 +73,7 @@ probit drtren i.Dgn Dag Dag_sq ///
 	l.Dhe_pcs l.Dhe_mcs  ///
 	i.Reached_Retirement_Age ///
 	li.Les_c3_NotEmployed ///
-	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
+	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 li.Dlltsd01 ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///
 	if ${r1a_if_condition} [pw=dwt], vce(robust)
 	
@@ -306,7 +306,7 @@ probit drtren i.Dgn Dag Dag_sq ///
 	i.Reached_Retirement_Age i.Reached_Retirement_Age_Les ///
 	li.Les_c3_NotEmployed i.Lessp_c3_NotEmployed ///
 	i.Reached_Retirement_Age_Sp ///
-	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
+	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 li.Dlltsd01 ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///
 	if ${r1b_if_condition} [pweight = dwt], vce(robust)	
 	
