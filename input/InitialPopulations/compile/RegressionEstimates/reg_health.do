@@ -57,7 +57,7 @@ putexcel A1 = "Goodness of fit", bold
 /********************************* PREPARE DATA *******************************/
 
 * Load data 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -80,7 +80,7 @@ gologit2 dhe Ded Dgn Dag Dag_sq ///  /*Ded_Dag Ded_Dag_sq Ded_Dgn /// */
 		 Deh_c3_Medium Deh_c3_Low ///
 	     /*L_Les_c4_Student*/ L_Les_c4_NotEmployed L_Les_c4_Retired ///
 		 L_Ydses_c5_Q2 L_Ydses_c5_Q3 L_Ydses_c5_Q4 L_Ydses_c5_Q5 ///
-		 L_Dhhtp_c4_CoupleChildren L_Dhhtp_c4_SingleNoChildren L_Dhhtp_c4_SingleChildren ///
+		 L_Dhhtp_c4_CoupleChildren L_Dhhtp_c4_SingleNoChildren L_Dhhtp_c4_SingleChildren L_Dlltsd01 ///
 		 $regions Year_transformed Y2020 Y2021 $ethnicity if ///
 	     ${h1_if_condition} [pw=dwt], autofit
 	  

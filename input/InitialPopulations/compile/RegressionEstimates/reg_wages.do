@@ -101,7 +101,7 @@ save "$dir_external_data/growth_rates", replace
 /********************************* PREPARE DATA *******************************/
 
 * Load data 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -1360,6 +1360,6 @@ restore
 //	estimation sample above (first observation for an individual)
 replace pred_hourly_wage = exp(lwage_hour) if missing(pred_hourly_wage)
 
-save ${estimation_sample2}, replace
+save "${estimation_sample2}", replace
 
 capture log close 
