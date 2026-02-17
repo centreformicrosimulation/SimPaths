@@ -504,7 +504,6 @@ foreach file in "$dir_was_data\was_round_5_person_eul_oct_2020.dta" ///
 		// Variables below: total value of ISAs, net value of own-business assets, net value of financial and non-financial (non-property) assets, aggregate occupational pension rights, ww, private/personal pension rights (non‑occupational)
 		keep case person_id bu bu_rp year sex grad gradsp dvage17 na nk* single_man ///
 			single_woman couple couple_ref gor2 dhe2 healths p_healths dlltsd dlltsdsp ///
-			// ADDITIONAL VARIABLES: isa_fam bus_assets assets tot_open ww tot_pp oprop /// 
 			idnk04 pct emp empsp tot_pen dvhvalue main_mort wealth inc was dwt
 		if (`ww' > `ww0') {
 			append using "$dir_data\was_wealthdata.dta"
