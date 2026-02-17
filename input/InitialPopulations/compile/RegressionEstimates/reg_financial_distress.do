@@ -41,7 +41,7 @@ do "${dir_do}/variable_update_legacy.do"
 
 logit financial_distress ///
 ib11.exp_emp  i.lhw_c5 D.log_income i.exp_incchange ib0.exp_poverty L.ypncp L.ypnoab ///
-L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd  L.financial_distress ///
+L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01  L.financial_distress ///
 i.dgn L.dag L.dagsq i.deh_c3 i.dot stm ///
 [pweight=dimxwt]  ///
 , vce(cluster idperson)
@@ -168,7 +168,7 @@ putexcel A33 = "Ydses_c5_Q2_L1"             // 2L.ydses_c5
 putexcel A34 = "Ydses_c5_Q3_L1"             // 3L.ydses_c5
 putexcel A35 = "Ydses_c5_Q4_L1"             // 4L.ydses_c5
 putexcel A36 = "Ydses_c5_Q5_L1"             // 5L.ydses_c5
-putexcel A37 = "Dlltsd_L1"                  // L.dlltsd
+putexcel A37 = "Dlltsd01_L1"                  // L.dlltsd01
 putexcel A38 = "FinancialDistress"          // L.financial_distress
 putexcel A39 = "Dgn"                        // 1.dgn
 putexcel A40 = "Dag_L1"                     // L.dag
@@ -217,7 +217,7 @@ putexcel AH1 = "Ydses_c5_Q2_L1"             // 2L.ydses_c5
 putexcel AI1 = "Ydses_c5_Q3_L1"             // 3L.ydses_c5
 putexcel AJ1 = "Ydses_c5_Q4_L1"             // 4L.ydses_c5
 putexcel AK1 = "Ydses_c5_Q5_L1"             // 5L.ydses_c5
-putexcel AL1 = "Dlltsd_L1"                  // L.dlltsd
+putexcel AL1 = "Dlltsd01_L1"                  // L.dlltsd01
 putexcel AM1 = "FinancialDistress"          // L.financial_distress
 putexcel AN1 = "Dgn"                        // 1.dgn
 putexcel AO1 = "Dag_L1"                     // L.dag
