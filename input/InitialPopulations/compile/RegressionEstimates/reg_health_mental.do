@@ -3,7 +3,7 @@
 * SECTION:		Health and wellbeing
 * OBJECT: 		Health status and Disability
 * AUTHORS:		Andy Baxter
-* LAST UPDATE:		04 Dec 2025  
+* LAST UPDATE:	17 Feb 2026
 * COUNTRY: 		UK 
 *
 * NOTES:		
@@ -20,16 +20,20 @@ cap log close
 log using "${dir_log}/reg_health_mental.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-do "$dir_do/variable_update"
+/********************************* PREPARE DATA *******************************/
 
+use ${estimation_sample}, clear
 
+* Set data 
+xtset idperson swv
+sort idperson swv 
 
-* Sample selection 
+* Remove children 
 drop if dag < 16
 
-
-xtset idperson swv
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+do "${dir_do}/variable_update_legacy.do"
 
 
 **********************************************************************
@@ -37,7 +41,7 @@ xtset idperson swv
 **********************************************************************
 
 reg dhm ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhm ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhm ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
 [pweight=dimxwt]  ///
 , vce(cluster idperson)
@@ -148,7 +152,7 @@ putexcel A17 = "Ydses_c5_Q2_L1"
 putexcel A18 = "Ydses_c5_Q3_L1"
 putexcel A19 = "Ydses_c5_Q4_L1"
 putexcel A20 = "Ydses_c5_Q5_L1"
-putexcel A21 = "Dlltsd_L1"
+putexcel A21 = "Dlltsd01_L1"
 putexcel A22 = "Dhm_L1"
 putexcel A23 = "Dag_L1"
 putexcel A24 = "Dag_sq_L1"
@@ -181,7 +185,7 @@ putexcel R1 = "Ydses_c5_Q2_L1"
 putexcel S1 = "Ydses_c5_Q3_L1"
 putexcel T1 = "Ydses_c5_Q4_L1"
 putexcel U1 = "Ydses_c5_Q5_L1"
-putexcel V1 = "Dlltsd_L1"
+putexcel V1 = "Dlltsd01_L1"
 putexcel W1 = "Dhm_L1"
 putexcel X1 = "Dag_L1"
 putexcel Y1 = "Dag_sq_L1"
@@ -211,7 +215,7 @@ scalar drop r2_p N chi2 ll
 reghdfe dhm ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhm ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhm ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==0 ///
 [pweight=dimxwt]  ///
@@ -356,7 +360,7 @@ scalar drop r2_p N chi2 ll
 reghdfe dhm ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhm ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhm ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==1 ///
 [pweight=dimxwt]  ///
@@ -499,7 +503,7 @@ scalar drop r2_p N chi2 ll
 * New ordered logistic regression model, reflecting observed distributions
 
 ologit scghq2_dv ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.scghq2_dv ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.scghq2_dv ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
 if stm!=20 & stm!=21 & dag>=25 & dag<=64 & swv!=12 ///
 [pweight=dimxwt]  ///
@@ -611,7 +615,7 @@ putexcel A17 = "Ydses_c5_Q2_L1"
 putexcel A18 = "Ydses_c5_Q3_L1"
 putexcel A19 = "Ydses_c5_Q4_L1"
 putexcel A20 = "Ydses_c5_Q5_L1"
-putexcel A21 = "Dlltsd_L1"
+putexcel A21 = "Dlltsd01_L1"
 putexcel A22 = "Dhm_L1"
 putexcel A23 = "Dag_L1"
 putexcel A24 = "Dag_sq_L1"
@@ -655,7 +659,7 @@ putexcel R1 = "Ydses_c5_Q2_L1"
 putexcel S1 = "Ydses_c5_Q3_L1"
 putexcel T1 = "Ydses_c5_Q4_L1"
 putexcel U1 = "Ydses_c5_Q5_L1"
-putexcel V1 = "Dlltsd_L1"
+putexcel V1 = "Dlltsd01_L1"
 putexcel W1 = "Dhm_L1"
 putexcel X1 = "Dag_L1"
 putexcel Y1 = "Dag_sq_L1"
@@ -700,7 +704,7 @@ gen scghq2_dv_L1 = L.scghq2_dv
 reghdfe scghq2_dv ///
 ib11.exp_emp i.exp_poverty i.exp_incchange RealIncomeDecrease_D financial_distress ///
 y2020 y2021 ///
-i.dhh_owned i.dcpst dnc dhe_pcs ib8.drgn i.ydses_c5 dlltsd ///
+i.dhh_owned i.dcpst dnc dhe_pcs ib8.drgn i.ydses_c5 dlltsd01 ///
 dag dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==0 ///
 , absorb(idperson) vce(cluster idperson)
@@ -844,7 +848,7 @@ scalar drop r2_p N chi2 ll
 reghdfe scghq2_dv ///
 ib11.exp_emp i.exp_poverty i.exp_incchange RealIncomeDecrease_D financial_distress ///
 y2020 y2021 ///
-i.dhh_owned i.dcpst dnc dhe_pcs ib8.drgn i.ydses_c5 dlltsd ///
+i.dhh_owned i.dcpst dnc dhe_pcs ib8.drgn i.ydses_c5 dlltsd01 ///
 dag dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==1 ///
 , absorb(idperson) vce(cluster idperson)

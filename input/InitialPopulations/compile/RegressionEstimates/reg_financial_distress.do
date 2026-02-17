@@ -3,7 +3,7 @@
 * SECTION:		Health and wellbeing
 * OBJECT: 		Financial distress
 * AUTHORS:		Andy Baxter, Erik Igelström
-* LAST UPDATE:		08 Jan 2026  
+* LAST UPDATE:	17 Feb 2026  
 * COUNTRY:		UK 
 *
 * NOTES:		
@@ -19,17 +19,21 @@ cap log close
 log using "${dir_log}/reg_financial_distress.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-do "$dir_do/variable_update"
 
+/********************************* PREPARE DATA *******************************/
 
+use ${estimation_sample}, clear
 
-* Sample selection 
+* Set data 
+xtset idperson swv
+sort idperson swv 
+
+* Remove children 
 drop if dag < 16
 
-
-xtset idperson swv
-
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+do "${dir_do}/variable_update_legacy.do"
 
 **********************************************************************
 * HM1_L: GHQ12 score 0-36 of all working-age adults - baseline effects *
@@ -37,7 +41,7 @@ xtset idperson swv
 
 logit financial_distress ///
 ib11.exp_emp  i.lhw_c5 D.log_income i.exp_incchange ib0.exp_poverty L.ypncp L.ypnoab ///
-L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd  L.financial_distress ///
+L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01  L.financial_distress ///
 i.dgn L.dag L.dagsq i.deh_c3 i.dot stm ///
 [pweight=dimxwt]  ///
 , vce(cluster idperson)
@@ -164,7 +168,7 @@ putexcel A33 = "Ydses_c5_Q2_L1"             // 2L.ydses_c5
 putexcel A34 = "Ydses_c5_Q3_L1"             // 3L.ydses_c5
 putexcel A35 = "Ydses_c5_Q4_L1"             // 4L.ydses_c5
 putexcel A36 = "Ydses_c5_Q5_L1"             // 5L.ydses_c5
-putexcel A37 = "Dlltsd_L1"                  // L.dlltsd
+putexcel A37 = "Dlltsd01_L1"                  // L.dlltsd01
 putexcel A38 = "FinancialDistress"          // L.financial_distress
 putexcel A39 = "Dgn"                        // 1.dgn
 putexcel A40 = "Dag_L1"                     // L.dag
@@ -213,7 +217,7 @@ putexcel AH1 = "Ydses_c5_Q2_L1"             // 2L.ydses_c5
 putexcel AI1 = "Ydses_c5_Q3_L1"             // 3L.ydses_c5
 putexcel AJ1 = "Ydses_c5_Q4_L1"             // 4L.ydses_c5
 putexcel AK1 = "Ydses_c5_Q5_L1"             // 5L.ydses_c5
-putexcel AL1 = "Dlltsd_L1"                  // L.dlltsd
+putexcel AL1 = "Dlltsd01_L1"                  // L.dlltsd01
 putexcel AM1 = "FinancialDistress"          // L.financial_distress
 putexcel AN1 = "Dgn"                        // 1.dgn
 putexcel AO1 = "Dag_L1"                     // L.dag

@@ -499,8 +499,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.GarbageCollection);
         if (enableIntertemporalOptimisations)
             yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateWealth);
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
-        addCollectionEventToAllYears(persons, Person.Processes.Update);
+        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Update);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Update);
 
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Aging);
 
@@ -510,7 +510,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         //yearlySchedule.addEvent(this, Processes.CheckForEmptyHouseholds);
 
         // Check whether persons have reached retirement Age
-        addCollectionEventToAllYears(persons, Person.Processes.ConsiderRetirement, false);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderRetirement, false);
 
         // EDUCATION MODULE
         // Check In School - check whether still in education, and if leaving school, reset Education Level
@@ -518,7 +518,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // In School alignment
         addEventToAllYears(Processes.InSchoolAlignment);
-        addCollectionEventToAllYears(persons, Person.Processes.LeavingSchool);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.LeavingSchool);
 
         // Align the level of education if required
         addEventToAllYears(Processes.EducationLevelAlignment);
@@ -560,33 +560,32 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         // TIME USE MODULE
         // Social care
         if (projectSocialCare) {
-            addCollectionEventToAllYears(persons, Person.Processes.SocialCareReceipt);
-            addCollectionEventToAllYears(persons, Person.Processes.SocialCareProvision);
-            //yearlySchedule.addEvent(this, Processes.SocialCareMarketClearing);
+            yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareReceipt);
+            yearlySchedule.addCollectionEvent(persons, Person.Processes.SocialCareProvision);
         }
 
         // Unemployment
-        addCollectionEventToAllYears(persons, Person.Processes.Unemployment);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Unemployment);
 
         // update references for optimising behaviour
         // needs to be positioned after all decision states for the current period have been simulated
         if (enableIntertemporalOptimisations)
-            addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateStates, false);
+            yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateStates, false);
 
-        addEventToAllYears(Processes.LabourMarketAndIncomeUpdate);
+        yearlySchedule.addEvent(this, Processes.LabourMarketAndIncomeUpdate);
 
         // Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
+        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
 
         // CONSUMPTION AND SAVINGS MODULE
         if (enableIntertemporalOptimisations)
-            addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.ProjectDiscretionaryConsumption);
-        addCollectionEventToAllYears(persons, Person.Processes.ProjectEquivConsumption);
+            yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.ProjectDiscretionaryConsumption);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.ProjectEquivConsumption);
 
         // equivalised disposable income
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
+        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.CalculateChangeInEDI);
         if (lifetimeIncomeImpute)
-            addCollectionEventToAllYears(persons, Person.Processes.ReviseLifetimeIncome);
+            yearlySchedule.addCollectionEvent(persons, Person.Processes.ReviseLifetimeIncome);
 
         // Update financial distress
         yearlySchedule.addCollectionEvent(persons, Person.Processes.FinancialDistress);
@@ -609,12 +608,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
         // mortality (migration) and population alignment at year's end
-        addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
-        addEventToAllYears(Processes.PopulationAlignment);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderMortality);
+        yearlySchedule.addEvent(this, Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
-        addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
-        addEventToAllYears(Processes.CheckForImperfectTaxDBMatches);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthEQ5D);
+        yearlySchedule.addEvent(this, Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
         addCollectionEventToAllYears(persons, Person.Processes.UpdateOutputVariables); // Update idPartner, dhhtp_c4
         addEventToAllYears(Processes.EndYear);
