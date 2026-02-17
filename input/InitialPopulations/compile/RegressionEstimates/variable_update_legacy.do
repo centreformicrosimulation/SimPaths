@@ -10,11 +10,6 @@
  the patterns established there (naming conventions etc.) used.
 *********************************************************************/
 
-
-gen fihhmnnet1_dv=1000
-gen ieqmoecd_dv=1
-
-
 * Convert to real values
 gen econ_realnetinc=fihhmnnet1_dv/CPI
 label var econ_realnetinc "Real net household income"
