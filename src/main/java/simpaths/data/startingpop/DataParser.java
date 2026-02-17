@@ -227,11 +227,8 @@ public class DataParser {
 
 								//Social care
 								+ "ALTER TABLE " + personTable + " ADD socare_provided_to VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET socare_provided_to = 'None' WHERE careWho = 0;"
-								+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyPartner' WHERE careWho = 1;"
-								+ "UPDATE " + personTable + " SET socare_provided_to = 'PartnerAndOther' WHERE careWho = 2;"
-								+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyOther' WHERE careWho = 3;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN careWho;"
+								+ "UPDATE " + personTable + " SET socare_provided_to = 'None' WHERE careHrsProvidedWeek <= 0 OR careHrsProvidedWeek IS NULL;"
+								+ "UPDATE " + personTable + " SET socare_provided_to = 'OnlyOther' WHERE careHrsProvidedWeek > 0;"
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN careHrsProvidedWeek RENAME TO socare_provided_hrs;"
 
 								//SYSTEM : Year

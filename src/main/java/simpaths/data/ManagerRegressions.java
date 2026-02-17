@@ -73,27 +73,39 @@ public class ManagerRegressions {
             case HealthEQ5D -> {
                 return Parameters.getRegEQ5D();
             }
-            case SocialCareS1b -> {
-                return Parameters.getRegCareHoursS1b();
+            case SocialCareS2d -> {
+                return Parameters.getRegInformalCareHoursS2d();
             }
-            case SocialCareS2g -> {
-                return Parameters.getRegPartnerCareHoursS2g();
+            case SocialCareS2e -> {
+                return Parameters.getRegFormalCareHoursS2e();
             }
-            case SocialCareS2h -> {
-                return Parameters.getRegDaughterCareHoursS2h();
+            case SocialCareS3c -> {
+                return Parameters.getRegCareHoursProvS3c();
             }
-            case SocialCareS2i -> {
-                return Parameters.getRegSonCareHoursS2i();
+            case SocialCareS3d -> {
+                return Parameters.getRegCareHoursProvS3d();
             }
-            case SocialCareS2j -> {
-                return Parameters.getRegOtherCareHoursS2j();
-            }
-            case SocialCareS2k -> {
-                return Parameters.getRegFormalCareHoursS2k();
-            }
-            case SocialCareS3e -> {
-                return Parameters.getRegCareHoursProvS3e();
-            }
+            // case SocialCareS1b -> {
+            //     return Parameters.getRegCareHoursS1b();
+            // }
+            // case SocialCareS2g -> {
+            //     return Parameters.getRegPartnerCareHoursS2g();
+            // }
+            // case SocialCareS2h -> {
+            //     return Parameters.getRegDaughterCareHoursS2h();
+            // }
+            // case SocialCareS2i -> {
+            //     return Parameters.getRegSonCareHoursS2i();
+            // }
+            // case SocialCareS2j -> {
+            //     return Parameters.getRegOtherCareHoursS2j();
+            // }
+            // case SocialCareS2k -> {
+            //     return Parameters.getRegFormalCareHoursS2k();
+            // }
+            // case SocialCareS3e -> {
+            //     return Parameters.getRegCareHoursProvS3e();
+            // }
             case WagesMales -> {
                 return Parameters.getRegWagesMales();
             }
@@ -151,17 +163,14 @@ public class ManagerRegressions {
             case SocialCareS2b -> {
                 return Parameters.getRegReceiveCareS2b();
             }
-            case SocialCareS2d -> {
-                return Parameters.getRegReceiveCarePartnerS2d();
-            }
+            // case SocialCareS2d -> {
+            //     return Parameters.getRegReceiveCarePartnerS2d();
+            // }
             case SocialCareS3a -> {
                 return Parameters.getRegCarePartnerProvCareToOtherS3a();
             }
             case SocialCareS3b -> {
                 return Parameters.getRegNoCarePartnerProvCareToOtherS3b();
-            }
-            case SocialCareS3c -> {
-                return Parameters.getRegNoPartnerProvCareToOtherS3c();
             }
             case UnemploymentU1a -> {
                 return Parameters.getRegUnemploymentMaleGraduateU1a();
@@ -226,15 +235,12 @@ public class ManagerRegressions {
             case SocialCareS2c -> {
                 return Parameters.getRegSocialCareMarketS2c();
             }
-            case SocialCareS2e -> {
-                return Parameters.getRegPartnerSupplementaryCareS2e();
-            }
-            case SocialCareS2f -> {
-                return Parameters.getRegNotPartnerInformalCareS2f();
-            }
-            case SocialCareS3d -> {
-                return Parameters.getRegInformalCareToS3d();
-            }
+            // case SocialCareS2e -> {
+            //     return Parameters.getRegPartnerSupplementaryCareS2e();
+            // }
+            // case SocialCareS2f -> {
+            //     return Parameters.getRegNotPartnerInformalCareS2f();
+            // }
             default -> {
                 throw new RuntimeException("unrecognised regression (1)");
             }

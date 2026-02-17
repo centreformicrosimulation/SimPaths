@@ -27,6 +27,7 @@ import simpaths.model.taxes.database.TaxDonorDataParser;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -165,13 +166,9 @@ public class Parameters {
 		"labWageHrlyL1", //lag(1) of initial value of hourly earnings from the data
         "careNeedFlag",          //indicator that the individual needs social care
         "careHrsFormal",    //number of hours of formal care received
-        "careCareFormal",   //cost of formal care received
-        "careHrsFromPartner",   //number of hours of informal care received from partner
-        "careHrsFromDaughter",  //number of hours of informal care received from daughter
-        "careHrsFromSon",       //number of hours of informal care received from son
-        "careHrsFromOther",     //number of hours of informal care received from other
+        "careFormalX",   //cost of formal care received
+        "careHrsInformal",   //number of hours of informal care received
         "careHrsProvidedWeek", // number of informal care hour provided per week
-        "careWho",              //indicator for whom informal care is provided
         "yBenReceivedFlag",        //indicator of benefit receipt
         "yBenUCReceivedFlag",     //indicator of UC receipt
         "yBenNonUCReceivedFlag",  //indicator of other benefit receipt
@@ -476,23 +473,23 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffCovarianceHealthH2; //Prob. long-term sick or disabled
 
     //Social care
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1b;
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS1b; // retired process
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2a; // prob of needing social care 65+
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2b;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2c;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2d;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2e;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2f;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2g;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2h;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2i;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2j;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2k;
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2f; // retired process
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2g; // retired process
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2h; // retired process
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2i; // retired process
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2j; // retired process
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS2k; // retired process
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3a;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3b;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3c;
     private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3d;
-    private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3e;
+    // private static MultiKeyCoefficientMap coeffCovarianceSocialCareS3e; // retired process
 
     //Unemployment
     private static MultiKeyCoefficientMap coeffCovarianceUnemploymentU1a;
@@ -712,23 +709,23 @@ public class Parameters {
     private static BinomialRegression regHealthH2;
 
     //Social care
-    private static LinearRegression regSocialCareS1b;
+    // private static LinearRegression regSocialCareS1b; // retired process
     private static BinomialRegression regNeedCareS2a;
     private static BinomialRegression regReceiveCareS2b;
     private static MultinomialRegression regSocialCareMarketS2c;
-    private static BinomialRegression regReceiveCarePartnerS2d;
-    private static MultinomialRegression regPartnerSupplementaryCareS2e;
-    private static MultinomialRegression regNotPartnerInformalCareS2f;
-    private static LinearRegression regPartnerCareHoursS2g;
-    private static LinearRegression regDaughterCareHoursS2h;
-    private static LinearRegression regSonCareHoursS2i;
-    private static LinearRegression regOtherCareHoursS2j;
-    private static LinearRegression regFormalCareHoursS2k;
+    private static LinearRegression regInformalCareHoursS2d;
+    private static LinearRegression regFormalCareHoursS2e;
+    // private static MultinomialRegression regNotPartnerInformalCareS2f; // retired process
+    // private static LinearRegression regPartnerCareHoursS2g; // retired process
+    // private static LinearRegression regDaughterCareHoursS2h; // retired process
+    // private static LinearRegression regSonCareHoursS2i; // retired process
+    // private static LinearRegression regOtherCareHoursS2j; // retired process
+    // private static LinearRegression regFormalCareHoursS2k; // retired process
     private static BinomialRegression regCarePartnerProvCareToOtherS3a;
     private static BinomialRegression regNoCarePartnerProvCareToOtherS3b;
-    private static BinomialRegression regNoPartnerProvCareToOtherS3c;
-    private static MultinomialRegression regInformalCareToS3d;
-    private static LinearRegression regCareHoursProvS3e;
+    private static LinearRegression regCareHoursProvS3c;
+    private static LinearRegression regCareHoursProvS3d;
+    // private static LinearRegression regCareHoursProvS3e; // retired process
 
     //Unemployment
     private static BinomialRegression regUnemploymentMaleGraduateU1a;
@@ -1102,23 +1099,23 @@ public class Parameters {
         coeffCovarianceHealthH2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", "H2", 1);
 
         //Social care
-        coeffCovarianceSocialCareS1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S1b", 1);
+        // coeffCovarianceSocialCareS1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S1b", 1); // retired process
         coeffCovarianceSocialCareS2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2a", 1);
         coeffCovarianceSocialCareS2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2b", 1);
         coeffCovarianceSocialCareS2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2c", 1);
         coeffCovarianceSocialCareS2d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2d", 1);
         coeffCovarianceSocialCareS2e = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2e", 1);
-        coeffCovarianceSocialCareS2f = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2f", 1);
-        coeffCovarianceSocialCareS2g = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2g", 1);
-        coeffCovarianceSocialCareS2h = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2h", 1);
-        coeffCovarianceSocialCareS2i = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2i", 1);
-        coeffCovarianceSocialCareS2j = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2j", 1);
-        coeffCovarianceSocialCareS2k = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2k", 1);
+        // coeffCovarianceSocialCareS2f = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2f", 1); // retired process
+        // coeffCovarianceSocialCareS2g = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2g", 1); // retired process
+        // coeffCovarianceSocialCareS2h = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2h", 1); // retired process
+        // coeffCovarianceSocialCareS2i = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2i", 1); // retired process
+        // coeffCovarianceSocialCareS2j = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2j", 1); // retired process
+        // coeffCovarianceSocialCareS2k = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2k", 1); // retired process
         coeffCovarianceSocialCareS3a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3a", 1);
         coeffCovarianceSocialCareS3b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3b", 1);
         coeffCovarianceSocialCareS3c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3c", 1);
         coeffCovarianceSocialCareS3d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3d", 1);
-        coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3e", 1);
+        // coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3e", 1); // retired process
 
         //Unemployment
         coeffCovarianceUnemploymentU1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "U1a", 1);
@@ -1191,6 +1188,7 @@ public class Parameters {
 
         //Bootstrap the coefficients
         if(bootstrapAll) {
+            resetBootstrapTrace();
             if (systemOut) {
                 // Validate coefficient maps for null covariance cells before bootstrapping.
                 validateCoefficientMapsForBootstrap(new Object[][]{
@@ -1228,23 +1226,23 @@ public class Parameters {
                     {"coeffCovarianceDLS1", coeffCovarianceDLS1},
                     {"coeffCovarianceDLS2Males", coeffCovarianceDLS2Males},
                     {"coeffCovarianceDLS2Females", coeffCovarianceDLS2Females},
-                    {"coeffCovarianceSocialCareS1b", coeffCovarianceSocialCareS1b},
+                    // {"coeffCovarianceSocialCareS1b", coeffCovarianceSocialCareS1b}, // retired process
                     {"coeffCovarianceSocialCareS2a", coeffCovarianceSocialCareS2a},
                     {"coeffCovarianceSocialCareS2b", coeffCovarianceSocialCareS2b},
                     {"coeffCovarianceSocialCareS2c", coeffCovarianceSocialCareS2c},
                     {"coeffCovarianceSocialCareS2d", coeffCovarianceSocialCareS2d},
                     {"coeffCovarianceSocialCareS2e", coeffCovarianceSocialCareS2e},
-                    {"coeffCovarianceSocialCareS2f", coeffCovarianceSocialCareS2f},
-                    {"coeffCovarianceSocialCareS2g", coeffCovarianceSocialCareS2g},
-                    {"coeffCovarianceSocialCareS2h", coeffCovarianceSocialCareS2h},
-                    {"coeffCovarianceSocialCareS2i", coeffCovarianceSocialCareS2i},
-                    {"coeffCovarianceSocialCareS2j", coeffCovarianceSocialCareS2j},
-                    {"coeffCovarianceSocialCareS2k", coeffCovarianceSocialCareS2k},
+                    // {"coeffCovarianceSocialCareS2f", coeffCovarianceSocialCareS2f}, // retired process
+                    // {"coeffCovarianceSocialCareS2g", coeffCovarianceSocialCareS2g}, // retired process
+                    // {"coeffCovarianceSocialCareS2h", coeffCovarianceSocialCareS2h}, // retired process
+                    // {"coeffCovarianceSocialCareS2i", coeffCovarianceSocialCareS2i}, // retired process
+                    // {"coeffCovarianceSocialCareS2j", coeffCovarianceSocialCareS2j}, // retired process
+                    // {"coeffCovarianceSocialCareS2k", coeffCovarianceSocialCareS2k}, // retired process
                     {"coeffCovarianceSocialCareS3a", coeffCovarianceSocialCareS3a},
                     {"coeffCovarianceSocialCareS3b", coeffCovarianceSocialCareS3b},
                     {"coeffCovarianceSocialCareS3c", coeffCovarianceSocialCareS3c},
                     {"coeffCovarianceSocialCareS3d", coeffCovarianceSocialCareS3d},
-                    {"coeffCovarianceSocialCareS3e", coeffCovarianceSocialCareS3e},
+                    // {"coeffCovarianceSocialCareS3e", coeffCovarianceSocialCareS3e}, // retired process
                     {"coeffCovarianceEquivalisedIncomeMales", coeffCovarianceEquivalisedIncomeMales},
                     {"coeffCovarianceEquivalisedIncomeFemales", coeffCovarianceEquivalisedIncomeFemales},
                     {"coeffCovarianceEquivalisedIncomeDynamics", coeffCovarianceEquivalisedIncomeDynamics},
@@ -1274,89 +1272,89 @@ public class Parameters {
 
             //Wages
             //coeffCovarianceWagesMales = RegressionUtils.bootstrap(coeffCovarianceWagesMales);
-            coeffCovarianceWagesMalesE = RegressionUtils.bootstrap(coeffCovarianceWagesMalesE);
-            coeffCovarianceWagesMalesNE = RegressionUtils.bootstrap(coeffCovarianceWagesMalesNE);
+            coeffCovarianceWagesMalesE = bootstrapWithTrace("coeffCovarianceWagesMalesE", coeffCovarianceWagesMalesE);
+            coeffCovarianceWagesMalesNE = bootstrapWithTrace("coeffCovarianceWagesMalesNE", coeffCovarianceWagesMalesNE);
             //coeffCovarianceWagesFemales = RegressionUtils.bootstrap(coeffCovarianceWagesFemales);
-            coeffCovarianceWagesFemalesE = RegressionUtils.bootstrap(coeffCovarianceWagesFemalesE);
-            coeffCovarianceWagesFemalesNE = RegressionUtils.bootstrap(coeffCovarianceWagesFemalesNE);
+            coeffCovarianceWagesFemalesE = bootstrapWithTrace("coeffCovarianceWagesFemalesE", coeffCovarianceWagesFemalesE);
+            coeffCovarianceWagesFemalesNE = bootstrapWithTrace("coeffCovarianceWagesFemalesNE", coeffCovarianceWagesFemalesNE);
 
             //Employment selection
             //coeffCovarianceEmploymentSelectionMales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMales);
-            coeffCovarianceEmploymentSelectionMalesE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMalesE);
-            coeffCovarianceEmploymentSelectionMalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionMalesNE);
+            coeffCovarianceEmploymentSelectionMalesE = bootstrapWithTrace("coeffCovarianceEmploymentSelectionMalesE", coeffCovarianceEmploymentSelectionMalesE);
+            coeffCovarianceEmploymentSelectionMalesNE = bootstrapWithTrace("coeffCovarianceEmploymentSelectionMalesNE", coeffCovarianceEmploymentSelectionMalesNE);
             //coeffCovarianceEmploymentSelectionFemales = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemales);
-            coeffCovarianceEmploymentSelectionFemalesE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesE);
-            coeffCovarianceEmploymentSelectionFemalesNE = RegressionUtils.bootstrap(coeffCovarianceEmploymentSelectionFemalesNE);
+            coeffCovarianceEmploymentSelectionFemalesE = bootstrapWithTrace("coeffCovarianceEmploymentSelectionFemalesE", coeffCovarianceEmploymentSelectionFemalesE);
+            coeffCovarianceEmploymentSelectionFemalesNE = bootstrapWithTrace("coeffCovarianceEmploymentSelectionFemalesNE", coeffCovarianceEmploymentSelectionFemalesNE);
 
             //Labour supply utility
-            coeffLabourSupplyUtilityMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityMales);
-            coeffLabourSupplyUtilityFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityFemales);
-            coeffLabourSupplyUtilitySingleWithDependent = RegressionUtils.bootstrap(coeffLabourSupplyUtilitySingleWithDependent);
-            coeffLabourSupplyUtilityACMales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACMales);
-            coeffLabourSupplyUtilityACFemales = RegressionUtils.bootstrap(coeffLabourSupplyUtilityACFemales);
-            coeffLabourSupplyUtilityCouples = RegressionUtils.bootstrap(coeffLabourSupplyUtilityCouples);
+            coeffLabourSupplyUtilityMales = bootstrapWithTrace("coeffLabourSupplyUtilityMales", coeffLabourSupplyUtilityMales);
+            coeffLabourSupplyUtilityFemales = bootstrapWithTrace("coeffLabourSupplyUtilityFemales", coeffLabourSupplyUtilityFemales);
+            coeffLabourSupplyUtilitySingleWithDependent = bootstrapWithTrace("coeffLabourSupplyUtilitySingleWithDependent", coeffLabourSupplyUtilitySingleWithDependent);
+            coeffLabourSupplyUtilityACMales = bootstrapWithTrace("coeffLabourSupplyUtilityACMales", coeffLabourSupplyUtilityACMales);
+            coeffLabourSupplyUtilityACFemales = bootstrapWithTrace("coeffLabourSupplyUtilityACFemales", coeffLabourSupplyUtilityACFemales);
+            coeffLabourSupplyUtilityCouples = bootstrapWithTrace("coeffLabourSupplyUtilityCouples", coeffLabourSupplyUtilityCouples);
 
             //Education
-            coeffCovarianceEducationE1a = RegressionUtils.bootstrap(coeffCovarianceEducationE1a);
-            coeffCovarianceEducationE1b = RegressionUtils.bootstrap(coeffCovarianceEducationE1b);
-            coeffCovarianceEducationE2 = RegressionUtils.bootstrap(coeffCovarianceEducationE2);
+            coeffCovarianceEducationE1a = bootstrapWithTrace("coeffCovarianceEducationE1a", coeffCovarianceEducationE1a);
+            coeffCovarianceEducationE1b = bootstrapWithTrace("coeffCovarianceEducationE1b", coeffCovarianceEducationE1b);
+            coeffCovarianceEducationE2 = bootstrapWithTrace("coeffCovarianceEducationE2", coeffCovarianceEducationE2);
 
             //Health
-            coeffCovarianceHealthH1 = RegressionUtils.bootstrap(coeffCovarianceHealthH1); //Note that this overrides the original coefficient map with bootstrapped values
-            coeffCovarianceHealthH2 = RegressionUtils.bootstrap(coeffCovarianceHealthH2);
-            coeffCovarianceHM1Level = RegressionUtils.bootstrap(coeffCovarianceHM1Level);
-            coeffCovarianceHM2LevelMales = RegressionUtils.bootstrap(coeffCovarianceHM2LevelMales);
-            coeffCovarianceHM2LevelFemales = RegressionUtils.bootstrap(coeffCovarianceHM2LevelFemales);
-            coeffCovarianceHM1Case = RegressionUtils.bootstrap(coeffCovarianceHM1Case);
-            coeffCovarianceHM2CaseMales = RegressionUtils.bootstrap(coeffCovarianceHM2CaseMales);
-            coeffCovarianceHM2CaseFemales = RegressionUtils.bootstrap(coeffCovarianceHM2CaseFemales);
-            coeffCovarianceDHE_MCS1 = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS1);
-            coeffCovarianceDHE_MCS2Males = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS2Males);
-            coeffCovarianceDHE_MCS2Females = RegressionUtils.bootstrap(coeffCovarianceDHE_MCS2Females);
-            coeffCovarianceDHE_PCS1 = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS1);
-            coeffCovarianceDHE_PCS2Males = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS2Males);
-            coeffCovarianceDHE_PCS2Females = RegressionUtils.bootstrap(coeffCovarianceDHE_PCS2Females);
-            coeffCovarianceDLS1 = RegressionUtils.bootstrap(coeffCovarianceDLS1);
-            coeffCovarianceDLS2Males = RegressionUtils.bootstrap(coeffCovarianceDLS2Males);
-            coeffCovarianceDLS2Females = RegressionUtils.bootstrap(coeffCovarianceDLS2Females);
+            coeffCovarianceHealthH1 = bootstrapWithTrace("coeffCovarianceHealthH1", coeffCovarianceHealthH1);//Note that this overrides the original coefficient map with bootstrapped values
+            coeffCovarianceHealthH2 = bootstrapWithTrace("coeffCovarianceHealthH2", coeffCovarianceHealthH2);
+            coeffCovarianceHM1Level = bootstrapWithTrace("coeffCovarianceHM1Level", coeffCovarianceHM1Level);
+            coeffCovarianceHM2LevelMales = bootstrapWithTrace("coeffCovarianceHM2LevelMales", coeffCovarianceHM2LevelMales);
+            coeffCovarianceHM2LevelFemales = bootstrapWithTrace("coeffCovarianceHM2LevelFemales", coeffCovarianceHM2LevelFemales);
+            coeffCovarianceHM1Case = bootstrapWithTrace("coeffCovarianceHM1Case", coeffCovarianceHM1Case);
+            coeffCovarianceHM2CaseMales = bootstrapWithTrace("coeffCovarianceHM2CaseMales", coeffCovarianceHM2CaseMales);
+            coeffCovarianceHM2CaseFemales = bootstrapWithTrace("coeffCovarianceHM2CaseFemales", coeffCovarianceHM2CaseFemales);
+            coeffCovarianceDHE_MCS1 = bootstrapWithTrace("coeffCovarianceDHE_MCS1", coeffCovarianceDHE_MCS1);
+            coeffCovarianceDHE_MCS2Males = bootstrapWithTrace("coeffCovarianceDHE_MCS2Males", coeffCovarianceDHE_MCS2Males);
+            coeffCovarianceDHE_MCS2Females = bootstrapWithTrace("coeffCovarianceDHE_MCS2Females", coeffCovarianceDHE_MCS2Females);
+            coeffCovarianceDHE_PCS1 = bootstrapWithTrace("coeffCovarianceDHE_PCS1", coeffCovarianceDHE_PCS1);
+            coeffCovarianceDHE_PCS2Males = bootstrapWithTrace("coeffCovarianceDHE_PCS2Males", coeffCovarianceDHE_PCS2Males);
+            coeffCovarianceDHE_PCS2Females = bootstrapWithTrace("coeffCovarianceDHE_PCS2Females", coeffCovarianceDHE_PCS2Females);
+            coeffCovarianceDLS1 = bootstrapWithTrace("coeffCovarianceDLS1", coeffCovarianceDLS1);
+            coeffCovarianceDLS2Males = bootstrapWithTrace("coeffCovarianceDLS2Males", coeffCovarianceDLS2Males);
+            coeffCovarianceDLS2Females = bootstrapWithTrace("coeffCovarianceDLS2Females", coeffCovarianceDLS2Females);
 
             //Social care
-            coeffCovarianceSocialCareS1b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1b);
-            coeffCovarianceSocialCareS2a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2a);
-            coeffCovarianceSocialCareS2b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2b);
-            coeffCovarianceSocialCareS2c = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2c);
-            coeffCovarianceSocialCareS2d = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2d);
-            coeffCovarianceSocialCareS2e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2e);
-            coeffCovarianceSocialCareS2f = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2f);
-            coeffCovarianceSocialCareS2g = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2g);
-            coeffCovarianceSocialCareS2h = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2h);
-            coeffCovarianceSocialCareS2i = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2i);
-            coeffCovarianceSocialCareS2j = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2j);
-            coeffCovarianceSocialCareS2k = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2k);
-            coeffCovarianceSocialCareS3a = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3a);
-            coeffCovarianceSocialCareS3b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3b);
-            coeffCovarianceSocialCareS3c = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3c);
-            coeffCovarianceSocialCareS3d = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3d);
-            coeffCovarianceSocialCareS3e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3e);
+            // coeffCovarianceSocialCareS1b = RegressionUtils.bootstrap(coeffCovarianceSocialCareS1b); // retired process
+            coeffCovarianceSocialCareS2a = bootstrapWithTrace("coeffCovarianceSocialCareS2a", coeffCovarianceSocialCareS2a);
+            coeffCovarianceSocialCareS2b = bootstrapWithTrace("coeffCovarianceSocialCareS2b", coeffCovarianceSocialCareS2b);
+            coeffCovarianceSocialCareS2c = bootstrapWithTrace("coeffCovarianceSocialCareS2c", coeffCovarianceSocialCareS2c);
+            coeffCovarianceSocialCareS2d = bootstrapWithTrace("coeffCovarianceSocialCareS2d", coeffCovarianceSocialCareS2d);
+            coeffCovarianceSocialCareS2e = bootstrapWithTrace("coeffCovarianceSocialCareS2e", coeffCovarianceSocialCareS2e);
+            // coeffCovarianceSocialCareS2f = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2f); // retired process
+            // coeffCovarianceSocialCareS2g = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2g); // retired process
+            // coeffCovarianceSocialCareS2h = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2h); // retired process
+            // coeffCovarianceSocialCareS2i = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2i); // retired process
+            // coeffCovarianceSocialCareS2j = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2j); // retired process
+            // coeffCovarianceSocialCareS2k = RegressionUtils.bootstrap(coeffCovarianceSocialCareS2k); // retired process
+            coeffCovarianceSocialCareS3a = bootstrapWithTrace("coeffCovarianceSocialCareS3a", coeffCovarianceSocialCareS3a);
+            coeffCovarianceSocialCareS3b = bootstrapWithTrace("coeffCovarianceSocialCareS3b", coeffCovarianceSocialCareS3b);
+            coeffCovarianceSocialCareS3c = bootstrapWithTrace("coeffCovarianceSocialCareS3c", coeffCovarianceSocialCareS3c);
+            coeffCovarianceSocialCareS3d = bootstrapWithTrace("coeffCovarianceSocialCareS3d", coeffCovarianceSocialCareS3d);
+            // coeffCovarianceSocialCareS3e = RegressionUtils.bootstrap(coeffCovarianceSocialCareS3e); // retired process
 
             //lifetime incomes
-            coeffCovarianceEquivalisedIncomeMales = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeMales);
-            coeffCovarianceEquivalisedIncomeFemales = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeFemales);
-            coeffCovarianceEquivalisedIncomeDynamics = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeDynamics);
-            coeffCovarianceEquivalisedIncomeDynamics2 = RegressionUtils.bootstrap(coeffCovarianceEquivalisedIncomeDynamics2);
+            coeffCovarianceEquivalisedIncomeMales = bootstrapWithTrace("coeffCovarianceEquivalisedIncomeMales", coeffCovarianceEquivalisedIncomeMales);
+            coeffCovarianceEquivalisedIncomeFemales = bootstrapWithTrace("coeffCovarianceEquivalisedIncomeFemales", coeffCovarianceEquivalisedIncomeFemales);
+            coeffCovarianceEquivalisedIncomeDynamics = bootstrapWithTrace("coeffCovarianceEquivalisedIncomeDynamics", coeffCovarianceEquivalisedIncomeDynamics);
+            coeffCovarianceEquivalisedIncomeDynamics2 = bootstrapWithTrace("coeffCovarianceEquivalisedIncomeDynamics2", coeffCovarianceEquivalisedIncomeDynamics2);
 
             //Unemployment
-            coeffCovarianceUnemploymentU1a = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1a);
-            coeffCovarianceUnemploymentU1b = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1b);
-            coeffCovarianceUnemploymentU1c = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1c);
-            coeffCovarianceUnemploymentU1d = RegressionUtils.bootstrap(coeffCovarianceUnemploymentU1d);
+            coeffCovarianceUnemploymentU1a = bootstrapWithTrace("coeffCovarianceUnemploymentU1a", coeffCovarianceUnemploymentU1a);
+            coeffCovarianceUnemploymentU1b = bootstrapWithTrace("coeffCovarianceUnemploymentU1b", coeffCovarianceUnemploymentU1b);
+            coeffCovarianceUnemploymentU1c = bootstrapWithTrace("coeffCovarianceUnemploymentU1c", coeffCovarianceUnemploymentU1c);
+            coeffCovarianceUnemploymentU1d = bootstrapWithTrace("coeffCovarianceUnemploymentU1d", coeffCovarianceUnemploymentU1d);
 
             //Non-labour income
-            coeffCovarianceIncomeI1a = RegressionUtils.bootstrap(coeffCovarianceIncomeI1a); // Commented out as not used any more since income is split.
-            coeffCovarianceIncomeI1b = RegressionUtils.bootstrap(coeffCovarianceIncomeI1b); // Commented out as not used any more since income is split.
-            coeffCovarianceIncomeI2b = RegressionUtils.bootstrap(coeffCovarianceIncomeI2b);
-            coeffCovarianceIncomeI3a = RegressionUtils.bootstrap(coeffCovarianceIncomeI3a);
-            coeffCovarianceIncomeI3b = RegressionUtils.bootstrap(coeffCovarianceIncomeI3b);
+            coeffCovarianceIncomeI1a = bootstrapWithTrace("coeffCovarianceIncomeI1a", coeffCovarianceIncomeI1a);// Commented out as not used any more since income is split.
+            coeffCovarianceIncomeI1b = bootstrapWithTrace("coeffCovarianceIncomeI1b", coeffCovarianceIncomeI1b);// Commented out as not used any more since income is split.
+            coeffCovarianceIncomeI2b = bootstrapWithTrace("coeffCovarianceIncomeI2b", coeffCovarianceIncomeI2b);
+            coeffCovarianceIncomeI3a = bootstrapWithTrace("coeffCovarianceIncomeI3a", coeffCovarianceIncomeI3a);
+            coeffCovarianceIncomeI3b = bootstrapWithTrace("coeffCovarianceIncomeI3b", coeffCovarianceIncomeI3b);
             //coeffCovarianceIncomeI3c = RegressionUtils.bootstrap(coeffCovarianceIncomeI3c);
             //coeffCovarianceIncomeI4a = RegressionUtils.bootstrap(coeffCovarianceIncomeI4a);
             // coeffCovarianceIncomeI4b = RegressionUtils.bootstrap(coeffCovarianceIncomeI4b);
@@ -1368,29 +1366,29 @@ public class Parameters {
             // coeffCovarianceIncomeI5a_selection = RegressionUtils.bootstrap(coeffCovarianceIncomeI5a_selection);
 
             //Leave parental home
-            coeffCovarianceLeaveHomeP1 = RegressionUtils.bootstrap(coeffCovarianceLeaveHomeP1);
+            coeffCovarianceLeaveHomeP1 = bootstrapWithTrace("coeffCovarianceLeaveHomeP1", coeffCovarianceLeaveHomeP1);
 
             //Homeownership
-            coeffCovarianceHomeownership = RegressionUtils.bootstrap(coeffCovarianceHomeownership);
+            coeffCovarianceHomeownership = bootstrapWithTrace("coeffCovarianceHomeownership", coeffCovarianceHomeownership);
 
             //Retirement
-            coeffCovarianceRetirementR1a = RegressionUtils.bootstrap(coeffCovarianceRetirementR1a);
-            coeffCovarianceRetirementR1b = RegressionUtils.bootstrap(coeffCovarianceRetirementR1b);
+            coeffCovarianceRetirementR1a = bootstrapWithTrace("coeffCovarianceRetirementR1a", coeffCovarianceRetirementR1a);
+            coeffCovarianceRetirementR1b = bootstrapWithTrace("coeffCovarianceRetirementR1b", coeffCovarianceRetirementR1b);
 
             //Childcare
-            coeffCovarianceChildcareC1a = RegressionUtils.bootstrap(coeffCovarianceChildcareC1a);
-            coeffCovarianceChildcareC1b = RegressionUtils.bootstrap(coeffCovarianceChildcareC1b);
+            coeffCovarianceChildcareC1a = bootstrapWithTrace("coeffCovarianceChildcareC1a", coeffCovarianceChildcareC1a);
+            coeffCovarianceChildcareC1b = bootstrapWithTrace("coeffCovarianceChildcareC1b", coeffCovarianceChildcareC1b);
 
             //Specification of some processes depends on the country:
             if (country.equals(Country.UK)) {
-                coeffCovariancePartnershipU1 = RegressionUtils.bootstrap(coeffCovariancePartnershipU1);
+                coeffCovariancePartnershipU1 = bootstrapWithTrace("coeffCovariancePartnershipU1", coeffCovariancePartnershipU1);
                 // coeffCovariancePartnershipU1b = RegressionUtils.bootstrap(coeffCovariancePartnershipU1b);
-                coeffCovariancePartnershipU2 = RegressionUtils.bootstrap(coeffCovariancePartnershipU2);
-                coeffCovarianceFertilityF1 = RegressionUtils.bootstrap(coeffCovarianceFertilityF1);
+                coeffCovariancePartnershipU2 = bootstrapWithTrace("coeffCovariancePartnershipU2", coeffCovariancePartnershipU2);
+                coeffCovarianceFertilityF1 = bootstrapWithTrace("coeffCovarianceFertilityF1", coeffCovarianceFertilityF1);
             } else if (country.equals(Country.IT)) {
-                coeffCovariancePartnershipITU1 = RegressionUtils.bootstrap(coeffCovariancePartnershipITU1);
-                coeffCovariancePartnershipITU2 = RegressionUtils.bootstrap(coeffCovariancePartnershipITU2);
-                coeffCovarianceFertilityF1 = RegressionUtils.bootstrap(coeffCovarianceFertilityF1);
+                coeffCovariancePartnershipITU1 = bootstrapWithTrace("coeffCovariancePartnershipITU1", coeffCovariancePartnershipITU1);
+                coeffCovariancePartnershipITU2 = bootstrapWithTrace("coeffCovariancePartnershipITU2", coeffCovariancePartnershipITU2);
+                coeffCovarianceFertilityF1 = bootstrapWithTrace("coeffCovarianceFertilityF1", coeffCovarianceFertilityF1);
             }
         }
 
@@ -1399,23 +1397,23 @@ public class Parameters {
         regHealthH2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceHealthH2);
 
         //Social care
-        regSocialCareS1b = new LinearRegression(coeffCovarianceSocialCareS1b);
+        // regSocialCareS1b = new LinearRegression(coeffCovarianceSocialCareS1b); // retired process
         regNeedCareS2a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2a);
         regReceiveCareS2b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2b);
         regSocialCareMarketS2c = new MultinomialRegression<>(RegressionType.MultinomialLogit, SocialCareReceiptS2c.class, coeffCovarianceSocialCareS2c);
-        regReceiveCarePartnerS2d = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS2d);
-        regPartnerSupplementaryCareS2e = new MultinomialRegression<>(RegressionType.MultinomialLogit, PartnerSupplementaryCarer.class, coeffCovarianceSocialCareS2e);
-        regNotPartnerInformalCareS2f = new MultinomialRegression<>(RegressionType.MultinomialLogit, NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f);
-        regPartnerCareHoursS2g = new LinearRegression(coeffCovarianceSocialCareS2g);
-        regDaughterCareHoursS2h = new LinearRegression(coeffCovarianceSocialCareS2h);
-        regSonCareHoursS2i = new LinearRegression(coeffCovarianceSocialCareS2i);
-        regOtherCareHoursS2j = new LinearRegression(coeffCovarianceSocialCareS2j);
-        regFormalCareHoursS2k = new LinearRegression(coeffCovarianceSocialCareS2k);
+        regInformalCareHoursS2d = new LinearRegression(coeffCovarianceSocialCareS2d);
+        regFormalCareHoursS2e = new LinearRegression(coeffCovarianceSocialCareS2e);
+        // regNotPartnerInformalCareS2f = new MultinomialRegression<>(RegressionType.MultinomialLogit, NotPartnerInformalCarer.class, coeffCovarianceSocialCareS2f); // retired process
+        // regPartnerCareHoursS2g = new LinearRegression(coeffCovarianceSocialCareS2g); // retired process
+        // regDaughterCareHoursS2h = new LinearRegression(coeffCovarianceSocialCareS2h); // retired process
+        // regSonCareHoursS2i = new LinearRegression(coeffCovarianceSocialCareS2i); // retired process
+        // regOtherCareHoursS2j = new LinearRegression(coeffCovarianceSocialCareS2j); // retired process
+        // regFormalCareHoursS2k = new LinearRegression(coeffCovarianceSocialCareS2k); // retired process
         regCarePartnerProvCareToOtherS3a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS3a);
         regNoCarePartnerProvCareToOtherS3b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS3b);
-        regNoPartnerProvCareToOtherS3c = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceSocialCareS3c);
-        regInformalCareToS3d = new MultinomialRegression<>(RegressionType.MultinomialLogit, SocialCareProvision.class, coeffCovarianceSocialCareS3d);
-        regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e);
+        regCareHoursProvS3c = new LinearRegression(coeffCovarianceSocialCareS3c);
+        regCareHoursProvS3d = new LinearRegression(coeffCovarianceSocialCareS3d);
+        // regCareHoursProvS3e = new LinearRegression(coeffCovarianceSocialCareS3e); // retired process
 
         //lifetime incomes
         regEquivalisedIncomeMales = new LinearRegression(coeffCovarianceEquivalisedIncomeMales);
@@ -1722,8 +1720,28 @@ public class Parameters {
     }
 
     public static double getRMSEForRegression(String regressionName) {
-        double valueRMSE = ((Number) coefficientMapRMSE.getValue(regressionName)).doubleValue();
-        return valueRMSE;
+        Object rmseValue = coefficientMapRMSE.getValue(regressionName);
+        if (rmseValue instanceof Number) {
+            return ((Number) rmseValue).doubleValue();
+        }
+
+        // Backward-compatible aliases for simplified social-care equations.
+        if ("S2d".equals(regressionName)) {
+            Object aliasValue = coefficientMapRMSE.getValue("S2g");
+            if (aliasValue instanceof Number) {
+                System.out.println("RMSE warning: using S2g RMSE as fallback for S2d");
+                return ((Number) aliasValue).doubleValue();
+            }
+        } else if ("S2e".equals(regressionName)) {
+            Object aliasValue = coefficientMapRMSE.getValue("S2k");
+            if (aliasValue instanceof Number) {
+                System.out.println("RMSE warning: using S2k RMSE as fallback for S2e");
+                return ((Number) aliasValue).doubleValue();
+            }
+        }
+
+        System.out.println("RMSE warning: missing RMSE for regression " + regressionName + ", defaulting to 0.0");
+        return 0.0;
     }
 
     private static void calculateFertilityRatesFromProjections() {
@@ -1923,20 +1941,20 @@ public class Parameters {
     public static BinomialRegression getRegNeedCareS2a() { return regNeedCareS2a; }
     public static BinomialRegression getRegReceiveCareS2b() { return regReceiveCareS2b; }
     public static MultinomialRegression getRegSocialCareMarketS2c() { return regSocialCareMarketS2c; }
-    public static BinomialRegression getRegReceiveCarePartnerS2d() { return regReceiveCarePartnerS2d; }
-    public static MultinomialRegression getRegPartnerSupplementaryCareS2e() { return regPartnerSupplementaryCareS2e; }
-    public static MultinomialRegression getRegNotPartnerInformalCareS2f() { return regNotPartnerInformalCareS2f; }
-    public static LinearRegression getRegCareHoursS1b() { return regSocialCareS1b; }
-    public static LinearRegression getRegPartnerCareHoursS2g() { return regPartnerCareHoursS2g; }
-    public static LinearRegression getRegDaughterCareHoursS2h() { return regDaughterCareHoursS2h; }
-    public static LinearRegression getRegSonCareHoursS2i() { return regSonCareHoursS2i; }
-    public static LinearRegression getRegOtherCareHoursS2j() { return regOtherCareHoursS2j; }
-    public static LinearRegression getRegFormalCareHoursS2k() { return regFormalCareHoursS2k; }
+    public static LinearRegression getRegInformalCareHoursS2d() { return regInformalCareHoursS2d; }
+    public static LinearRegression getRegFormalCareHoursS2e() { return regFormalCareHoursS2e; }
+    // public static MultinomialRegression getRegNotPartnerInformalCareS2f() { return regNotPartnerInformalCareS2f; } // retired process
+    // public static LinearRegression getRegCareHoursS1b() { return regSocialCareS1b; } // retired process
+    // public static LinearRegression getRegPartnerCareHoursS2g() { return regPartnerCareHoursS2g; } // retired process
+    // public static LinearRegression getRegDaughterCareHoursS2h() { return regDaughterCareHoursS2h; } // retired process
+    // public static LinearRegression getRegSonCareHoursS2i() { return regSonCareHoursS2i; } // retired process
+    // public static LinearRegression getRegOtherCareHoursS2j() { return regOtherCareHoursS2j; } // retired process
+    // public static LinearRegression getRegFormalCareHoursS2k() { return regFormalCareHoursS2k; } // retired process
     public static BinomialRegression getRegCarePartnerProvCareToOtherS3a() { return regCarePartnerProvCareToOtherS3a; }
     public static BinomialRegression getRegNoCarePartnerProvCareToOtherS3b() { return regNoCarePartnerProvCareToOtherS3b; }
-    public static BinomialRegression getRegNoPartnerProvCareToOtherS3c() { return regNoPartnerProvCareToOtherS3c; }
-    public static MultinomialRegression getRegInformalCareToS3d() { return regInformalCareToS3d; }
-    public static LinearRegression getRegCareHoursProvS3e() { return regCareHoursProvS3e; }
+    public static LinearRegression getRegCareHoursProvS3c() { return regCareHoursProvS3c; }
+    public static LinearRegression getRegCareHoursProvS3d() { return regCareHoursProvS3d; }
+    // public static LinearRegression getRegCareHoursProvS3e() { return regCareHoursProvS3e; } // retired process
 
     public static LinearRegression getRegEquivalisedIncomeMales() {return regEquivalisedIncomeMales;}
     public static LinearRegression getRegEquivalisedIncomeFemales() {return regEquivalisedIncomeFemales;}
@@ -3321,6 +3339,37 @@ public class Parameters {
         return !dd.isInfinite() && !dd.isNaN();
     }
 
+    private static MultiKeyCoefficientMap bootstrapWithTrace(String mapName, MultiKeyCoefficientMap map) {
+        try {
+            appendBootstrapTrace("START " + mapName);
+            return RegressionUtils.bootstrap(map);
+        } catch (RuntimeException e) {
+            appendBootstrapTrace("FAIL  " + mapName + " :: " + e.getMessage());
+            System.err.println("Bootstrap failed for map: " + mapName);
+            throw new RuntimeException("Bootstrap failed for map: " + mapName + ". Cause: " + e.getMessage());
+        }
+    }
+
+    private static File bootstrapTraceFile() {
+        return new File(System.getProperty("java.io.tmpdir"), "simpaths_bootstrap_trace.log");
+    }
+
+    private static void resetBootstrapTrace() {
+        try {
+            FileUtils.writeStringToFile(bootstrapTraceFile(), "", StandardCharsets.UTF_8, false);
+        } catch (IOException ignored) {
+            // tracing is best-effort only
+        }
+    }
+
+    private static void appendBootstrapTrace(String line) {
+        try {
+            FileUtils.writeStringToFile(bootstrapTraceFile(), line + System.lineSeparator(), StandardCharsets.UTF_8, true);
+        } catch (IOException ignored) {
+            // tracing is best-effort only
+        }
+    }
+
     private static void validateCoefficientMapsForBootstrap(Object[][] namedMaps) {
         if (namedMaps == null) {
             return;
@@ -3373,7 +3422,15 @@ public class Parameters {
         while (it.hasNext()) {
             it.next();
             MultiKey key = (MultiKey) it.getKey();
-            Object[] rowValues = (Object[]) map.getValue(new Object[]{key});
+            Object rowObj = map.getValue(new Object[]{key});
+            Object[] rowValues;
+            if (rowObj instanceof Object[]) {
+                rowValues = (Object[]) rowObj;
+            } else if (rowObj != null) {
+                rowValues = new Object[]{rowObj};
+            } else {
+                rowValues = null;
+            }
             String regressor = String.valueOf(key.getKey(0));
             if (rowValues == null) {
                 System.out.println("Bootstrap validation: null row for " + name + " regressor=" + regressor);

@@ -1026,7 +1026,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         regressionScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
                     if (!Parameters.checkFinite(regressionScore)) {
-                        throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
+                        regressionScore = -700.0;
                     }
 
                     disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
@@ -1059,7 +1059,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             regressionScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
                         }
                         if (!Parameters.checkFinite(regressionScore)) {
-                            throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
+                            regressionScore = -700.0;
                         }
 
                         disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
@@ -1089,7 +1089,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             regressionScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
                         }
                         if (!Parameters.checkFinite(regressionScore)) {
-                            throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
+                            regressionScore = -700.0;
                         }
                         disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
                         benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
