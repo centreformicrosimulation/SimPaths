@@ -612,7 +612,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addEvent(this, Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.HealthEQ5D);
+        addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
         yearlySchedule.addEvent(this, Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
         addCollectionEventToAllYears(persons, Person.Processes.UpdateOutputVariables); // Update idPartner, dhhtp_c4
