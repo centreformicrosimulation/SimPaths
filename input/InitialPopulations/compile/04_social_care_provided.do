@@ -247,6 +247,7 @@ drop ip2 pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee
 /**************************************************************************************
 * save results
 *************************************************************************************/
+lab var careHoursProvidedWeekly "number of hours of informal social care provided per week (capped, includes imputed data)"
 keep idperson swv careHoursProvidedWeekly
 sort idperson swv
 save temp, replace

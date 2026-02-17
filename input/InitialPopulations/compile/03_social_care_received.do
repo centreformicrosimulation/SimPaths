@@ -433,6 +433,10 @@ replace formal_socare_cost = 10.01 * formal_socare_hrs if (formal_socare_hrs>0) 
 /**************************************************************************************
 * save results
 *************************************************************************************/
+label var need_socare "indicator variable for someone who can only manage at least one ADL with help or not at all (includes imputed data)"
+label var informal_socare_hrs "number of hours per week received informal social care (includes imputed data)"
+label var formal_socare_hrs "number of hours per week received formal social care (includes imputed data)"
+label var formal_socare_cost "cost of received formal social care (imputed from hours received)"
 keep idperson swv need_socare informal_socare_hrs formal_socare_hrs formal_socare_cost
 sort idperson swv
 save temp, replace

@@ -195,26 +195,23 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	keep idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
 	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt obs_earnings_hourly l1_obs_earnings_hourly total_wealth ///
-	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
-	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
-	financial_distress liwwh
+	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs informal_socare_hrs formal_socare_cost ///
+	carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab dhe_mcs dhe_pcs dhe_mcssp ///
+	dhe_pcssp dls dot dot01 unemp financial_distress liwwh
 	
 	order idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
 	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt obs_earnings_hourly l1_obs_earnings_hourly total_wealth ///
-	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
-	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
-	financial_distress liwwh
+	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs informal_socare_hrs formal_socare_cost ///
+	carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab dhe_mcs dhe_pcs dhe_mcssp ///
+	dhe_pcssp dls dot dot01 unemp financial_distress liwwh
 	
 	recode idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
 	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt obs_earnings_hourly l1_obs_earnings_hourly total_wealth ///
-	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs partner_socare_hrs daughter_socare_hrs ///
-	son_socare_hrs other_socare_hrs formal_socare_cost carehoursprovidedweekly econ_benefits econ_benefits_nonuc ///
-	econ_benefits_uc disp_inc ypncp ypnoab aidhrs carewho dhe_mcs dhe_pcs dhe_mcssp dhe_pcssp dls dot dot01 unemp ///
-	financial_distress liwwh (missing=-9)
+	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs informal_socare_hrs formal_socare_cost ///
+	carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab dhe_mcs dhe_pcs dhe_mcssp ///
+	dhe_pcssp dls dot dot01 unemp financial_distress liwwh (missing = -9)
 	
 	
 /*Rename variables following the new Codebook */
@@ -302,14 +299,9 @@ rename liwwh labEmpNyear
 * --- Social care ---
 rename need_socare careNeedFlag
 rename formal_socare_hrs careHrsFormal
-rename partner_socare_hrs careHrsFromPartner
-rename daughter_socare_hrs careHrsFromDaughter
-rename son_socare_hrs careHrsFromSon
-rename other_socare_hrs careHrsFromOther
+rename informal_socare_hrs careHrsInformal
 rename formal_socare_cost careCareFormal
-//rename aidhrs careHrsProvidedWeek
 rename carehoursprovidedweekly careHrsProvidedWeek
-rename carewho careWho
 
 * --- Health & wellbeing ---
 rename dhm healthWbScore0to36
@@ -325,7 +317,7 @@ rename financial_distress yFinDstrssFlag
 save "$dir_data/population_initial_UK_$year.dta", replace /*panel dataset with missing values removed*/
 
 recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrptyValue wealthPensValue ///
-	careNeedFlag careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek careWho (-9=0)
+	careNeedFlag careHrsFormal careHrsInformal careCareFormal careHrsProvidedWeek (-9=0)
 
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 
