@@ -21,7 +21,7 @@ public class RootSearch2 {
     private Double lastEvalFx = null;
     // Probe distances are fractions of the max reachable distance within current bounds.
     private static final double[] BRACKET_DISTANCE_RATIOS =
-            new double[]{(1.0 / 5.0), (2.0 / 5.0), (3.0 / 5.0), (4.0 / 5.0), 1.0};
+            new double[]{(1.0/40.0), (1.0 / 5.0), (2.0 / 5.0), (3.0 / 5.0), (4.0 / 5.0), 1.0};
     private BoundSearchDiagnostics boundDiagnostics = new BoundSearchDiagnostics();
 
 
