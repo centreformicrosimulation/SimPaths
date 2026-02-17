@@ -3,7 +3,7 @@
 * SECTION:		Health and wellbeing
 * OBJECT: 		Health status and Disability
 * AUTHORS:		Andy Baxter
-* LAST UPDATE:		04 Dec 2025  
+* LAST UPDATE:	17 Feb 2026
 * COUNTRY: 		UK 
 *
 * NOTES:		
@@ -20,24 +20,27 @@ cap log close
 log using "${dir_log}/reg_health_wellbeing.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-do "$dir_do/variable_update"
+/********************************* PREPARE DATA *******************************/
 
+use ${estimation_sample}, clear
 
+* Set data 
+xtset idperson swv
+sort idperson swv 
 
-* Sample selection 
+* Remove children 
 drop if dag < 16
 
-
-xtset idperson swv
-gen wave = swv
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+do "${dir_do}/variable_update_legacy.do"
 
 ********************************************************************************
 * DHE_MCS1 - SF12 MCS score 0-100 of all working-age adults - baseline effects *
 ********************************************************************************
 
 reg dhe_mcs ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_mcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_mcs ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
 [pweight=dimxwt]  ///
 , vce(cluster idperson)

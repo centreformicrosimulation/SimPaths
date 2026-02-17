@@ -3,7 +3,7 @@
 * SECTION:		Health and wellbeing
 * OBJECT: 		Financial distress
 * AUTHORS:		Andy Baxter, Erik Igelström
-* LAST UPDATE:		08 Jan 2026  
+* LAST UPDATE:	17 Feb 2026  
 * COUNTRY:		UK 
 *
 * NOTES:		
@@ -19,17 +19,21 @@ cap log close
 log using "${dir_log}/reg_financial_distress.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-do "$dir_do/variable_update"
 
+/********************************* PREPARE DATA *******************************/
 
+use ${estimation_sample}, clear
 
-* Sample selection 
+* Set data 
+xtset idperson swv
+sort idperson swv 
+
+* Remove children 
 drop if dag < 16
 
-
-xtset idperson swv
-
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+do "${dir_do}/variable_update_legacy.do"
 
 **********************************************************************
 * HM1_L: GHQ12 score 0-36 of all working-age adults - baseline effects *
