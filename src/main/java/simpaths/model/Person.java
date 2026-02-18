@@ -4622,7 +4622,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     private String calculateEduHighestC4() {
-        if (Indicator.True.equals(eduSpellFlag)) {
+        if ("InEducation".equals(eduHighestC4)) {
             return "InEducation";
         }
         if (eduHighestC3 == null) {

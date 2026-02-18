@@ -192,21 +192,21 @@ forvalues yy = $firstSimYear/$lastSimYear {
 	by idhh idbenefitunit: egen disp_inc = sum(ydisp)
 
 	*limit saved variables
-	keep idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
+	keep idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 deh_c4 sedex dlltsd01 dhe ydses_c5 ///
 	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt obs_earnings_hourly l1_obs_earnings_hourly total_wealth ///
 	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs informal_socare_hrs formal_socare_cost ///
 	carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab dhe_mcs dhe_pcs dhe_mcssp ///
 	dhe_pcssp dls dot dot01 unemp financial_distress liwwh
 	
-	order idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
+	order idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 deh_c4 sedex dlltsd01 dhe ydses_c5 ///
 	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt obs_earnings_hourly l1_obs_earnings_hourly total_wealth ///
 	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs informal_socare_hrs formal_socare_cost ///
 	carehoursprovidedweekly econ_benefits econ_benefits_nonuc econ_benefits_uc disp_inc ypncp ypnoab dhe_mcs dhe_pcs dhe_mcssp ///
 	dhe_pcssp dls dot dot01 unemp financial_distress liwwh
 	
-	recode idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 sedex dlltsd01 dhe ydses_c5 ///
+	recode idhh idbenefitunit idperson idpartner idmother idfather swv dgn dag dnc02 dnc ded deh_c3 deh_c4 sedex dlltsd01 dhe ydses_c5 ///
 	yplgrs_dv ypnbihs_dv yptciihs_dv dcpyy dcpagdf ynbcpdf_dv der dehm_c3 dehf_c3 stm dhm scghq2_dv dhh_owned lhw ///
 	l1_lhw drgn1 les_c4 dhm_ghq adultchildflag dwt obs_earnings_hourly l1_obs_earnings_hourly total_wealth ///
 	total_pensions housing_wealth mortgage_debt need_socare formal_socare_hrs informal_socare_hrs formal_socare_cost ///
@@ -232,6 +232,7 @@ rename dnc02 demNChild0to2
 rename dnc demNChild
 rename ded eduSpellFlag
 rename deh_c3 eduHighestC3
+rename deh_c4 eduHighestC4
 rename sedex eduExitSampleFlag
 //rename jbstat labStatus
 //rename les_c3 labStatusC3

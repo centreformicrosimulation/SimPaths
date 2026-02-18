@@ -127,6 +127,14 @@ public class DataParser {
 								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestC3;"
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN education RENAME TO eduHighestC3;"
 
+								+ "ALTER TABLE " + personTable + " ADD education4 VARCHAR_IGNORECASE;"
+								+ "UPDATE " + personTable + " SET education4 = 'Low' WHERE eduHighestC4 = 3;"
+								+ "UPDATE " + personTable + " SET education4 = 'Medium' WHERE eduHighestC4 = 2;"
+								+ "UPDATE " + personTable + " SET education4 = 'High' WHERE eduHighestC4 = 1;"
+								+ "UPDATE " + personTable + " SET education4 = 'InEducation' WHERE eduHighestC4 = 0;"
+								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestC4;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education4 RENAME TO eduHighestC4;"
+
 								//Education mother
 								+ "ALTER TABLE " + personTable + " ADD education_mother VARCHAR_IGNORECASE;"
 								+ "UPDATE " + personTable + " SET education_mother = 'Low' WHERE eduHighestMotherC3 = 3;"

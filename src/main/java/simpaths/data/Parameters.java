@@ -136,6 +136,7 @@ public class Parameters {
 		"idMother", 			//id of mother
 		"demAge", 					//age
 		"eduHighestC3", 				//highest education level
+		"eduHighestC4", 				//highest education incl. initial education spell
 		"eduHighestMotherC3",				//highest education level of mother
 		"eduHighestFatherC3",				//highest education level of father
 		"eduSpellFlag",					//in education dummy
