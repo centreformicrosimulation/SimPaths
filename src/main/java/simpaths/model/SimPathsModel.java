@@ -176,7 +176,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignEducation = false; //Set to true to align level of education
 
-    private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
+    private boolean alignInSchool = true; //Set to true to align share of students among 16-29 age group
 
     private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
 
@@ -2109,8 +2109,96 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private void inSchoolAlignment() {
 
         InSchoolAlignment inSchoolAlignment = new InSchoolAlignment(persons);
-        double inSchoolAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment);
-        RootSearch search = getRootSearch(inSchoolAdjustment, inSchoolAlignment, 1.0E-2, 1.0E-2, 4); // epsOrdinates and epsFunction determine the stopping condition for the search. For inSchoolAlignment error term is the difference between target and observed share of partnered individuals.
+        double inSchoolAdjustment;
+        // Warm-start from the previously solved year to stabilise/accelerate yearly root search.
+        if (getYear() > startYear) {
+            inSchoolAdjustment = Parameters.getTimeSeriesValue(getYear() - 1, TimeSeriesVariable.InSchoolAdjustment);
+        } else {
+            inSchoolAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment);
+        }
+        final double epsOrdinates = 1.0E-2;
+        final double epsFunction = 1.0E-2;
+        final double initialBound = 20.0;
+        final double tightSideBound = 5.0;
+        final double maxDirectionalExpansion = 100.0;
+        final int maxAttempts = 6;
+
+        System.out.println("InSchool adjustment has started");
+        double minVal = inSchoolAdjustment - initialBound;
+        double maxVal = inSchoolAdjustment + initialBound;
+        RootSearch search = getRootSearch(inSchoolAdjustment, minVal, maxVal, inSchoolAlignment, epsOrdinates, epsFunction);
+
+        int attempts = 1;
+        while (!search.isBracketed() && attempts < maxAttempts) {
+            Double fL = search.getLowerEvalFx();
+            Double fU = search.getUpperEvalFx();
+            if (fL == null || fU == null) {
+                break;
+            }
+
+            if (fL < 0.0 && fU < 0.0) {
+                // Simulated share remains too high on both bounds; move search strongly to negative side.
+                double currentNegSpan = inSchoolAdjustment - minVal;
+                double nextNegSpan = Math.min(maxDirectionalExpansion, Math.max(initialBound, 2.0 * currentNegSpan));
+                minVal = inSchoolAdjustment - nextNegSpan;
+                maxVal = inSchoolAdjustment + tightSideBound;
+            } else if (fL > 0.0 && fU > 0.0) {
+                // Simulated share remains too low on both bounds; move search strongly to positive side.
+                double currentPosSpan = maxVal - inSchoolAdjustment;
+                double nextPosSpan = Math.min(maxDirectionalExpansion, Math.max(initialBound, 2.0 * currentPosSpan));
+                minVal = inSchoolAdjustment - tightSideBound;
+                maxVal = inSchoolAdjustment + nextPosSpan;
+            } else {
+                break;
+            }
+
+            attempts++;
+            search = getRootSearch(inSchoolAdjustment, minVal, maxVal, inSchoolAlignment, epsOrdinates, epsFunction);
+        }
+
+        RootSearch.IterationInfo first = search.getIterationHistory().isEmpty() ? null : search.getIterationHistory().get(0);
+        double target = inSchoolAlignment.getTargetStudentShare();
+        System.out.println("=== InSchool alignment diagnostics ===");
+        System.out.println("Population size: " + persons.size());
+        System.out.println("Target share: " + target);
+        System.out.println("Search bounds used: [" + minVal + ", " + maxVal + "] after " + attempts + " attempt(s)");
+        if (first != null) {
+            double f0 = first.getFx();
+            System.out.println("Diag adj=" + inSchoolAdjustment
+                    + " | simulated=" + (target - f0)
+                    + " | f(x)=" + f0);
+        }
+        if (search.getLowerEvalFx() != null && search.getUpperEvalFx() != null) {
+            double fL = search.getLowerEvalFx();
+            double fU = search.getUpperEvalFx();
+            double simL = target - fL;
+            double simU = target - fU;
+            System.out.println("Diag adj=" + search.getLowerEvalX() + " | simulated=" + simL + " | f(x)=" + fL);
+            System.out.println("Diag adj=" + search.getUpperEvalX() + " | simulated=" + simU + " | f(x)=" + fU);
+            double minSimulated = Math.min(simL, simU);
+            double maxSimulated = Math.max(simL, simU);
+            if (target < minSimulated || target > maxSimulated) {
+                System.out.println("Target out of tested range: target=" + target
+                        + ", simulatedMin=" + minSimulated
+                        + ", simulatedMax=" + maxSimulated);
+            } else {
+                System.out.println("Target within tested range: target=" + target
+                        + ", simulatedMin=" + minSimulated
+                        + ", simulatedMax=" + maxSimulated);
+            }
+        } else {
+            System.out.println("Bound probes not required (initial point already within tolerance).");
+        }
+
+        System.out.println("=== Root Search Summary ===");
+        System.out.println("Root found at: " + search.getTarget()[0]);
+        System.out.println("Target altered: " + search.isTargetAltered());
+        System.out.println("Iterations: " + search.getIterationCount());
+        for (RootSearch.IterationInfo it : search.getIterationHistory()) {
+            System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",
+                    it.getIteration(), it.getX(), it.getFx(), it.getStep(),
+                    it.isFuncTolMet(), it.isOrdTolMet());
+        }
 
         // update and exit
         if (search.isTargetAltered()) {

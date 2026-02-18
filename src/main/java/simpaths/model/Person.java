@@ -784,11 +784,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case LifeSatisfaction2 -> {
                 lifeSatisfaction2();
             }
-            case HealthMentalHM1Case -> {
-                healthMentalHM1Case();
-            }
-            case HealthMentalHM2Case -> {
-                healthMentalHM2Case();
+            case HealthMentalHM1HM2Cases -> {
+                healthMentalHM1HM2Cases();
             }
             case HealthEQ5D -> {
                 healthEQ5D();
@@ -1766,6 +1763,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             setDer(Indicator.False);
             setEduLeftEduFlag(true); //This is not reset and indicates if individual has ever left school - used with health process
             setLes_c4(Les_c4.NotEmployed); //Set activity status to NotEmployed when leaving school to remove Student status
+
+            this.eduLeaveSchoolFlag = false; // Reset the flag once the leaving process is complete
         }
     }
 
@@ -2109,11 +2108,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void updateVariables(boolean initialUpdate) {
 
         //Reset flags to default values
-        eduLeaveSchoolFlag = false;
+
         demGiveBirthFlag = false;
         demBePartnerFlag = false;
         demLeavePartnerFlag = false;
+        eduLeaveSchoolFlag = false;
+        setSedex(Indicator.False); //This variable is False by default
+                                    // is set to true only when person leaves school in this specific year
         // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
+        // no need to update eduSpellFlag as its value is persisted from the previous year
 
         if (initialUpdate && !Parameters.checkFinite(careHrsInformalWeek))
             careHrsInformalWeek = 0.0;
