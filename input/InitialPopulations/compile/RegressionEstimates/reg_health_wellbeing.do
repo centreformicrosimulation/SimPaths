@@ -202,7 +202,7 @@ putexcel AG1 = "Constant"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A21 = ("DHE_MCS1") B21 = rmse 
+putexcel A22 = ("DHE_MCS1") B22 = rmse 
 		
 
 drop in_sample p
@@ -349,7 +349,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A22 = ("DHE_MCS2_Females") B22 = rmse 
+putexcel A23 = ("DHE_MCS2_Females") B23 = rmse 
 
 		
 drop in_sample p
@@ -495,7 +495,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A23 = ("DHE_MCS2_Males") B23 = rmse 
+putexcel A24 = ("DHE_MCS2_Males") B24 = rmse 
 
 		
 drop in_sample p
@@ -666,7 +666,7 @@ putexcel AG1 = "Constant"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A24 = ("DHE_PCS1") B24 = rmse 
+putexcel A25 = ("DHE_PCS1") B25 = rmse 
 
 		
 drop in_sample p
@@ -813,7 +813,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A25 = ("DHE_PCS2_Females") B25 = rmse 
+putexcel A26 = ("DHE_PCS2_Females") B26 = rmse 
 
 		
 		
@@ -960,7 +960,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A26 = ("DHE_PCS2_Males") B26 = rmse 
+putexcel A27 = ("DHE_PCS2_Males") B27 = rmse 
 
 		
 drop in_sample p
@@ -1131,7 +1131,7 @@ putexcel AG1 = "Constant"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A27 = ("DLS1") B27 = rmse 
+putexcel A28 = ("DLS1") B28 = rmse 
 
 		
 drop in_sample p
@@ -1278,7 +1278,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A28 = ("DLS2_Females") B28 = rmse 
+putexcel A29 = ("DLS2_Females") B29 = rmse 
 
 		
 drop in_sample p
@@ -1424,7 +1424,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A29 = ("DLS2_Males") B29 = rmse 
+putexcel A30 = ("DLS2_Males") B30 = rmse 
 
 		
 drop in_sample p

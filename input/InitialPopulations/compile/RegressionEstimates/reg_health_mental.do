@@ -835,7 +835,7 @@ putexcel M1 = "Covid_2021_D"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A19 = ("HM2_Females_C") B19 = rmse 
+putexcel A20 = ("HM2_Females_C") B20 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
@@ -978,7 +978,7 @@ putexcel M1 = "Covid_2021_D"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A20 = ("HM2_Males_C") B20 = rmse 
+putexcel A21 = ("HM2_Males_C") B21 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
