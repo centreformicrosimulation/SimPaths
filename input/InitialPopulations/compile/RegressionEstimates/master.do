@@ -8,7 +8,7 @@
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
 *
 * AUTHORS: 				Daria Popova, Justin van de Ven
-* LAST UPDATE:          19 Jan 2026 DP  
+* LAST UPDATE:          18 Feb 2026 DP  
 ***************************************************************************************
 
 ***************************************************************************************
@@ -89,12 +89,13 @@ global first_sim_year "2010"
 
 global last_sim_year "2025"
 
+global weight "dwt"
 
 * Globals used for all pricesses   
 
 global regions "UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN" //UKI is London 
 
-global ethnicity "Ethn_Asian Ethn_Black Ethn_Other" //While is reference. Mixed race & undefined  are in Other category 
+global ethnicity "Ethn_Asian Ethn_Black Ethn_Other" //White is reference. Mixed race & undefined  are in Other category 
 
 
 * Define threshold ages
@@ -181,9 +182,11 @@ global wages_m_prev_if_condition "dgn == 1 & dag >= ${age_seek_employment} & dag
 
 
 * CAPITAL INCOME 
+
 global i1a_if_condition "dag >= ${age_becomes_semi_responsible}" 
 
 global i1b_if_condition "dag >= ${age_becomes_semi_responsible} & receives_ypncp == 1" 
+
 
 * PRIVATE PENSION INCOME 
 
@@ -194,10 +197,33 @@ global i3a_if_condition "dag >= ${age_can_retire} & dlrtrd == 1 & l.dlrtrd!=1 & 
 global i3b_if_condition "dag >= ${age_can_retire} & dlrtrd == 1 & l.dlrtrd!=1 & l.les_c4 != 2 & receives_ypnoab==1"
 
 
+* SOCIAL CARE  
+
+global s2a_if_condition "dag > 64 & stm >= 2015 & stm <= 2022"								// Need care
+
+global s2b_if_condition "dag > 64 & stm >= 2016 & stm <= 2021"								// Receive care
+
+global s2c_if_condition "dag > 64 & receive_care & stm >= 2016 & stm <= 2021"				// Care mix received
+
+global s2d_if_condition "dag > 64 & receive_informal_care & stm >= 2016 & stm <= 2021"		// Informal care hours received
+
+global s2e_if_condition "dag > 64 & receive_formal_care & stm >= 2016 & stm <= 2021"		// Formal care hours received
+
+
+global s3a_if_condition "Single & stm >= 2015"												// Provide care, Singles
+
+global s3b_if_condition "Partnered & stm >= 2015"											// Provide care, Partnered
+
+global s3c_if_condition "provide_informal_care & Single & stm >= 2015"						// Informal care hours provided, Singles
+
+global s3d_if_condition "provide_informal_care & Partnered & stm >= 2015"					// Informal care hours provided, Singles
+
+
+
 /*******************************************************************************
 * ESTIMATION FILES
 *******************************************************************************/
-/* */
+/* 
 
 do "${dir_do}/reg_education.do"
 
@@ -216,18 +242,16 @@ do "${dir_do}/reg_retirement.do"
 do "${dir_do}/reg_wages.do"
 
 do "${dir_do}/reg_income.do"
+*/
 
-do "${dir_do}/reg_financial_distress.do"
+do "${dir_do}/reg_socialcare.do"
 
-do "${dir_do}/reg_health_mental.do"
-
-do "${dir_do}/reg_health_wellbeing.do"
 
 
 *******************************************************************************
 * INTERNAL VALIDATION FILES
 ******************************************************************************
-/**/
+/*
 do "$dir_do_validation/int_val_education.do"	
 
 do "$dir_do_validation/int_val_leave_parental_home.do"	
@@ -245,7 +269,7 @@ do "$dir_do_validation/int_val_retirement.do"
 do "$dir_do_validation/int_val_wages.do"	
 
 do "$dir_do_validation/int_val_income.do"	
-
+*/
 
 /**************************************************************************************
 * END OF FILE
