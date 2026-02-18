@@ -202,7 +202,7 @@ putexcel AG1 = "Constant"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A10 = ("HM1_L") B10 = rmse 
+putexcel A15 = ("HM1_L") B15 = rmse 
 
 drop in_sample p
 
@@ -347,7 +347,7 @@ putexcel M1 = "Covid_2021_D"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A11 = ("HM2_Females_L") B11 = rmse 
+putexcel A16 = ("HM2_Females_L") B16 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
@@ -492,7 +492,7 @@ putexcel M1 = "Covid_2021_D"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A12 = ("HM2_Males_L") B12 = rmse 
+putexcel A17 = ("HM2_Males_L") B17 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
@@ -687,7 +687,7 @@ putexcel AR1 = "Cut12"
 		
 * save RMSE - not strictly needed for ologit predictions
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A11 = ("HM1_C") B11 = rmse 
+putexcel A18 = ("HM1_C") B18 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
@@ -835,7 +835,7 @@ putexcel M1 = "Covid_2021_D"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A14 = ("HM2_Females_C") B14 = rmse 
+putexcel A19 = ("HM2_Females_C") B19 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
@@ -978,7 +978,7 @@ putexcel M1 = "Covid_2021_D"
 		
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A15 = ("HM2_Males_C") B15 = rmse 
+putexcel A20 = ("HM2_Males_C") B20 = rmse 
 
 drop in_sample p
 scalar drop r2_p N chi2 ll	
