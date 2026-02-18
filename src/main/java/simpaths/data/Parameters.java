@@ -587,7 +587,6 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACMales; //Adult children, male
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACFemales; //Adult children, female
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityCouples;
-    private static MultiKeyCoefficientMap coeffLabourSupplyUtilitySingleWithDependent;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilitySingleDep;
 
     // coefficients for Covid-19 labour supply models below
@@ -1022,33 +1021,22 @@ public class Parameters {
         //Labour Supply coefficients from Zhechun's estimates on the EM input data
         //Employment alignment adjusts *fixed-cost* -> add the relevant alignment fixed-cost regressors to each subgroup
         coeffLabourSupplyUtilityMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Males", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityMales,List.of("AlignmentFixedCostMen"));
 
         coeffLabourSupplyUtilityFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Females", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityFemales,List.of("AlignmentFixedCostWomen"));
 
         coeffLabourSupplyUtilitySingleDep = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleDep", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of(
-                "AlignmentFixedCostMen",
-                "AlignmentFixedCostWomen",
-                "AlignmentSingleDepMen",
-                "AlignmentSingleDepWomen"
-        ));
 
         coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityACMales,List.of("AlignmentFixedCostMen"));
 
         coeffLabourSupplyUtilityACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Females", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityACFemales,List.of("AlignmentFixedCostWomen"));
 
         coeffLabourSupplyUtilityCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Couples", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilityCouples,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1mb-sel", 1);
-        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1ma-sel", 1);
-        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1fb-sel", 1);
-        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1fa-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1mb-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1ma-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1fb-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1fa-sel", 1);
 
         // Load coefficients for Covid-19 labour supply models
         // Coefficients for process assigning simulated people to self-employment
@@ -1229,7 +1217,7 @@ public class Parameters {
                     {"coeffCovarianceEmploymentSelectionFemalesNE", coeffCovarianceEmploymentSelectionFemalesNE},
                     {"coeffLabourSupplyUtilityMales", coeffLabourSupplyUtilityMales},
                     {"coeffLabourSupplyUtilityFemales", coeffLabourSupplyUtilityFemales},
-                    {"coeffLabourSupplyUtilitySingleWithDependent", coeffLabourSupplyUtilitySingleWithDependent},
+                    {"coeffLabourSupplyUtilitySingleDep", coeffLabourSupplyUtilitySingleDep},
                     {"coeffLabourSupplyUtilityACMales", coeffLabourSupplyUtilityACMales},
                     {"coeffLabourSupplyUtilityACFemales", coeffLabourSupplyUtilityACFemales},
                     {"coeffLabourSupplyUtilityCouples", coeffLabourSupplyUtilityCouples},
@@ -1291,8 +1279,8 @@ public class Parameters {
                     {"coeffCovarianceChildcareC1b", coeffCovarianceChildcareC1b},
                     {"coeffCovariancePartnershipU1", coeffCovariancePartnershipU1},
                     {"coeffCovariancePartnershipU2", coeffCovariancePartnershipU2},
-                    {"coeffCovariancePartnershipITU1", coeffCovariancePartnershipITU1},
-                    {"coeffCovariancePartnershipITU2", coeffCovariancePartnershipITU2},
+                    //{"coeffCovariancePartnershipITU1", coeffCovariancePartnershipITU1},
+                    //{"coeffCovariancePartnershipITU2", coeffCovariancePartnershipITU2},
                     {"coeffCovarianceFertilityF1", coeffCovarianceFertilityF1},
                 });
             }
@@ -1315,11 +1303,23 @@ public class Parameters {
 
             //Labour supply utility
             coeffLabourSupplyUtilityMales = bootstrapWithTrace("coeffLabourSupplyUtilityMales", coeffLabourSupplyUtilityMales);
+            addFixedCostRegressors(coeffLabourSupplyUtilityMales,List.of("AlignmentFixedCostMen"));
             coeffLabourSupplyUtilityFemales = bootstrapWithTrace("coeffLabourSupplyUtilityFemales", coeffLabourSupplyUtilityFemales);
-            coeffLabourSupplyUtilitySingleWithDependent = bootstrapWithTrace("coeffLabourSupplyUtilitySingleWithDependent", coeffLabourSupplyUtilitySingleWithDependent);
+            addFixedCostRegressors(coeffLabourSupplyUtilityFemales,List.of("AlignmentFixedCostWomen"));
+            coeffLabourSupplyUtilitySingleDep = bootstrapWithTrace("coeffLabourSupplyUtilitySingleDep", coeffLabourSupplyUtilitySingleDep);
+            addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of(
+                    "AlignmentFixedCostMen",
+                    "AlignmentFixedCostWomen",
+                    "AlignmentSingleDepMen",
+                    "AlignmentSingleDepWomen"
+            ));
             coeffLabourSupplyUtilityACMales = bootstrapWithTrace("coeffLabourSupplyUtilityACMales", coeffLabourSupplyUtilityACMales);
+            addFixedCostRegressors(coeffLabourSupplyUtilityACMales,List.of("AlignmentFixedCostMen"));
             coeffLabourSupplyUtilityACFemales = bootstrapWithTrace("coeffLabourSupplyUtilityACFemales", coeffLabourSupplyUtilityACFemales);
+            addFixedCostRegressors(coeffLabourSupplyUtilityACFemales,List.of("AlignmentFixedCostWomen"));
             coeffLabourSupplyUtilityCouples = bootstrapWithTrace("coeffLabourSupplyUtilityCouples", coeffLabourSupplyUtilityCouples);
+            addFixedCostRegressors(coeffLabourSupplyUtilityCouples,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
+
 
             //Education
             coeffCovarianceEducationE1a = bootstrapWithTrace("coeffCovarianceEducationE1a", coeffCovarianceEducationE1a);
