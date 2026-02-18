@@ -300,7 +300,7 @@ rename liwwh labEmpNyear
 rename need_socare careNeedFlag
 rename formal_socare_hrs careHrsFormal
 rename informal_socare_hrs careHrsInformal
-rename formal_socare_cost careCareFormal
+rename formal_socare_cost careFormalX
 rename carehoursprovidedweekly careHrsProvidedWeek
 
 * --- Health & wellbeing ---
@@ -317,7 +317,7 @@ rename financial_distress yFinDstrssFlag
 save "$dir_data/population_initial_UK_$year.dta", replace /*panel dataset with missing values removed*/
 
 recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrptyValue wealthPensValue ///
-	careNeedFlag careHrsFormal careHrsInformal careCareFormal careHrsProvidedWeek (-9=0)
+	careNeedFlag careHrsFormal careHrsInformal careFormalX careHrsProvidedWeek (-9=0)
 
 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 
@@ -379,7 +379,7 @@ recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrp
 // 	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
 // 	statInterviewYear healthWbScore0to36 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrss0to12 ///
 // 	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
-// 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
+// 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careFormalX careHrsProvidedWeek yBenReceivedFlag ///
 // 	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
 // 	healthMentalPartnerMcs healthPhysicalPartnerPcs demLifeSatScore1to7 demEthnC4 demEthnC6 labUnempFlag yFinDstrssFlag labEmpNyear
 //	
@@ -388,7 +388,7 @@ recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrp
 // 	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
 // 	statInterviewYear healthWbScore0to36 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrss0to12 ///
 // 	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
-// 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
+// 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careFormalX careHrsProvidedWeek yBenReceivedFlag ///
 // 	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
 // 	healthMentalPartnerMcs healthPhysicalPartnerPcs demLifeSatScore1to7 demEthnC4 demEthnC6 labUnempFlag yFinDstrssFlag labEmpNyear
 //	
@@ -397,7 +397,7 @@ recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrp
 // 	yMiscPersGrossMonth demPartnerNYear demAgePartnerDiff yPersAndPartnerGrossDiffMonth eduReturnFlag eduHighestMotherC3 eduHighestFatherC3 ///
 // 	statInterviewYear healthWbScore0to36 wealthPrptyFlag labHrsWorkWeek labHrsWorkWeekL1 demRgn labC4 healthPsyDstrss0to12 ///
 // 	demAdultChildFlag wgtHhCross labWageHrly labWageHrlyL1 wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag ///
-// 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek yBenReceivedFlag ///
+// 	careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careFormalX careHrsProvidedWeek yBenReceivedFlag ///
 // 	yBenNonUCReceivedFlag yBenUCReceivedFlag yDispMonth yCapitalPersMonth yPensPersGrossMonth aidhrs careWho healthMentalMcs healthPhysicalPcs ///
 // 	healthMentalPartnerMcs healthPhysicalPartnerPcs demLifeSatScore1to7 demEthnC4 demEthnC6 labUnempFlag yFinDstrssFlag labEmpNyear (missing=-9)
 //	
@@ -405,7 +405,7 @@ recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrp
 // 	save "$dir_data/population_initial_UK_$year.dta", replace
 //	
 // 	recode demMaleFlag yDispMonth wealthTotValue  wealthMortgageDebtValue  wealthPrptyValue wealthPensValue ///
-// 	careNeedFlag careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal careHrsProvidedWeek careWho (-9=0)
+// 	careNeedFlag careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careFormalX careHrsProvidedWeek careWho (-9=0)
 //
 // 	export delimited using "$dir_data/population_initial_UK_$year.csv", nolabel replace
 // }
