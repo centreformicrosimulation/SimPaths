@@ -1433,6 +1433,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         FemaleLeisureSq,
         FixedCost_Female,
         FixedCost_Male,
+        FixedCost_Disabled,
+        FixedCost_Disabled_Female,
+        FixedCost_Disabled_Male,
+        FixedCost_RetirementAge,
+        FixedCost_RetirementAge_Female,
+        FixedCost_RetirementAge_Male,
         FixedCostByHighEducation,
         FixedCostFemale,
         FixedCostFemale_DChildren2Under,
@@ -1476,6 +1482,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         HoursMaleSquared,
         Hrs_36plus_Female,
         Hrs_36plus_Male,
+        Hrs_below36_Disabled,
+        Hrs_below36_Disabled_Female,
+        Hrs_below36_Disabled_Male,
+        Hrs_below36_RetirementAge,
+        Hrs_below36_RetirementAge_Female,
+        Hrs_below36_RetirementAge_Male,
         Income,
         IncomeByAge,
         IncomeByAgeSquared,
@@ -1669,6 +1681,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         Liwwh_Male_64,
         Liwwh_Male_65,
         Liwwh_Male_66,
+        Leisure,
+        Leisure_IncomeDiv100,
+        LeisureSq,
         MaleEduH_1,
         MaleEduH_10,
         MaleEduH_2,
@@ -1965,6 +1980,27 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case MaleLeisure_FemaleLeisure -> {            //Male leisure interacted with female leisure
                 return (getMaleLeisureHoursWeekly()) * (getFemaleLeisureHoursWeekly());
             }
+            case Leisure -> {
+                if (getMale() != null && getFemale() == null) {
+                    return getMaleLeisureHoursWeekly();
+                } else if (getFemale() != null && getMale() == null) {
+                    return getFemaleLeisureHoursWeekly();
+                } else return 0.;
+            }
+            case LeisureSq -> {
+                if (getMale() != null && getFemale() == null) {
+                    return getMaleLeisureHoursWeekly() * getMaleLeisureHoursWeekly();
+                } else if (getFemale() != null && getMale() == null) {
+                    return getFemaleLeisureHoursWeekly() * getFemaleLeisureHoursWeekly();
+                } else return 0.;
+            }
+            case Leisure_IncomeDiv100 -> {
+                if (getMale() != null && getFemale() == null) {
+                    return getMaleLeisureHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                } else if (getFemale() != null && getMale() == null) {
+                    return getFemaleLeisureHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                } else return 0.;
+            }
             case FemaleLeisure -> {                            //24*7 - labour supply weekly for Female
                 return getFemaleLeisureHoursWeekly();
             }
@@ -2087,6 +2123,40 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case FixedCost_Female -> {
                 if(getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0) {
                     return 1.;
+                } else return 0.;
+            }
+            case FixedCost_Disabled -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0) ? getMale().getDlltsd().ordinal() : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0) ? getFemale().getDlltsd().ordinal() : 0.;
+                } else return 0.;
+            }
+            case FixedCost_RetirementAge -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0) ? getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0) ? getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else return 0.;
+            }
+            case FixedCost_Disabled_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0) {
+                    return getMale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case FixedCost_Disabled_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0) {
+                    return getFemale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case FixedCost_RetirementAge_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0) {
+                    return getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
+                } else return 0.;
+            }
+            case FixedCost_RetirementAge_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0) {
+                    return getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
                 } else return 0.;
             }
             case FixedCostMale_NorthernRegions -> {
@@ -2229,6 +2299,40 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else{
                     return 0.;
                 }
+            }
+            case Hrs_below36_Disabled -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) ? getMale().getDlltsd().ordinal() : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) ? getFemale().getDlltsd().ordinal() : 0.;
+                } else return 0.;
+            }
+            case Hrs_below36_RetirementAge -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) ? getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) ? getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else return 0.;
+            }
+            case Hrs_below36_Disabled_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) {
+                    return getMale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case Hrs_below36_Disabled_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) {
+                    return getFemale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case Hrs_below36_RetirementAge_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) {
+                    return getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
+                } else return 0.;
+            }
+            case Hrs_below36_RetirementAge_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) {
+                    return getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
+                } else return 0.;
             }
             case HoursMaleByIncome -> {
                 return getMale().getLabourSupplyHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-3;
