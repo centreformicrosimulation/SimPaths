@@ -28,12 +28,15 @@ use ${estimation_sample}, clear
 xtset idperson swv
 sort idperson swv 
 
+* Add household income/poverty/employment transition variables (this needs to
+* happen before children are removed, so the entire household is represented!)
+do "${dir_do}/variable_update_legacy.do"
+
 * Remove children 
 drop if dag < 16
 
 * Adjust variables 
 do "${dir_do}/variable_update.do"
-do "${dir_do}/variable_update_legacy.do"
 
 ********************************************************************************
 * DHE_MCS1 - SF12 MCS score 0-100 of all working-age adults - baseline effects *

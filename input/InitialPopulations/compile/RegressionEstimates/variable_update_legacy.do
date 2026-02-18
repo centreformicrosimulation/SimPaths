@@ -10,32 +10,54 @@
  the patterns established there (naming conventions etc.) used.
 *********************************************************************/
 
-* Convert to real values
-gen econ_realnetinc=fihhmnnet1_dv/CPI
-label var econ_realnetinc "Real net household income"
+*==================================================
+* Modified OECD equivalence scale
+*==================================================
+
+bysort swv idhh: egen temp_NinHH0013 = sum(dag >= 0 & dag <= 13)
+bysort swv idhh: egen temp_NinHH14up = sum(dag >= 14)
+
+* There needs to be at least one adult in every household, so that
+* (temp_NinHH14up - 1) gives us the number of "additional" adults for the
+* purposes of the OECD equivalence scale.
+assert temp_NinHH14up >= 1
+
+* Modified OECD equivalence scale: 1 for the first adult in the household
+* (dag >= 14), 0.5 for each additional adult (dag >= 14), 0.3 for each child
+* (dag <= 13)
+gen moecd_eq = 1 + (temp_NinHH14up - 1) * 0.5 + (temp_NinHH0013) * 0.3
+
+drop temp*
+
+*==================================================
+* Real equivalised household income
+*==================================================
+
+bysort swv idhh: egen temp_HH_ydisp = sum(ydisp)
+gen temp_realnetinc=temp_HH_ydisp/CPI
 
 *Winsorise income variable
-winsor econ_realnetinc , gen(inc_wins) p(0.001)
-summ inc_wins, detail
-label var inc_wins "Income: winsorised (net)"
-
+winsor temp_realnetinc, gen(temp_inc_wins) p(0.001)
+summ temp_inc_wins, detail
 
 * Generate equivalised household income
-gen econ_realequivinc=inc_wins/ieqmoecd_dv
+gen econ_realequivinc=temp_inc_wins/moecd_eq
 label var econ_realequivinc "Real equivalised household income"
+drop temp_*
 
-* Generate inverse hyperbolic sine transformation
-gen econ_realequivinct=asinh(econ_realequivinc)
-label var econ_realequivinct "Transformed real equivalised household income"
-* See Bellemare (2019) for coefficient interpretation
+*==================================================
+* Log income
+*==================================================
 
+gen log_income=ln(econ_realequivinc)
+label var log_income "Log of real equivalised household net income"
 
-* Task 4
-* Generate income change exposure
+*==================================================
+* Income change (binary, increased or decreased)
+*==================================================
+
 sort idperson swv
-gen econ_incchange=econ_realequivinc - L.econ_realequivinc
-label var econ_incchange "Income change level"
-
+gen temp_incchange=econ_realequivinc - L.econ_realequivinc
 
 gen exp_incchange=.
 replace exp_incchange=1 if (econ_realequivinc < L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
@@ -44,74 +66,44 @@ replace exp_incchange=0 if (econ_realequivinc > L.econ_realequivinc) & econ_real
 
 label define incchangecat 1 "Decreased income" 0 "Increased or stable income"
 label values exp_incchange incchangecat
-* Very few obs. with stable income, perhaps define within a percentage change
+drop temp_*
 
-tab exp_incchange, miss
-
-gen log_income=ln(econ_realequivinc)
-label var log_income "Log of real equivalised household net income"
-
-* Income increase
-gen inc_increase=D.log_income
-label var inc_increase "Change rate of income increase"
-* Set to zero for those without an increase in income
-replace inc_increase=0 if exp_incchange==1 | ((econ_realequivinc == L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.)
-
-* Income decrease
-gen inc_decrease=D.log_income
-label var inc_increase "Change rate of income decrease"
-* Set to zero for those without a decrease in income
-replace inc_decrease=0 if exp_incchange==0
-summ inc_increase inc_decrease econ_incchange
-
-* note: individuals moving from an increase to decrease (or vice versa) will have to effects applied.
-
-* Task 5
-* Poverty transitions
+*==================================================
+* Poverty transition
+*==================================================
 
 * Generate median income for sample
-bysort swv: egen samp_medianinc=wpctile(econ_realequivinc), p(50) weights(dhhwt)
-label var samp_medianinc "Median household income for sample in swv"
-* ONS uses net income, before or after housing costs. Net income used here.
-gen samp_poverty =samp_medianinc*0.60
-label var samp_poverty "Poverty threshold"
+bysort swv: egen temp_swvMedianIncome = wpctile(econ_realequivinc), p(50) weights(dhhwt)
+* ONS uses net income, before or after housing costs.
+* Here we use disposable income (ydisp).
+gen temp_swvPovertyThreshold = temp_swvMedianIncome*0.60
+label var temp_swvPovertyThreshold "Poverty threshold"
 
-tabstat samp_poverty, by(swv)
-summ samp_poverty, detail
+tabstat temp_swvPovertyThreshold, by(swv)
+summ temp_swvPovertyThreshold, detail
 
 * Generate poverty marker
-gen econ_poverty =(samp_poverty>=econ_realequivinc)
-label var econ_poverty "Below poverty threshold (before housing costs)"
-replace econ_poverty=. if econ_realequivinc==. | samp_poverty==.
-label define yesno 0 "No" 1 "Yes"
-label values econ_poverty yesno
-tab econ_poverty swv, col
-* Before housing costs used in LABSim
+gen temp_HHinPoverty = (econ_realequivinc <= temp_swvPovertyThreshold)
+replace temp_HHinPoverty=. if missing(econ_realequivinc) | missing(temp_swvPovertyThreshold)
+tab temp_HHinPoverty swv, col
 
-* Generate poverty exposure variable
+* Generate poverty transition variable
 sort idperson swv
 gen exp_poverty= .
-replace exp_poverty=0 if econ_poverty==0 & L.econ_poverty==0
-replace exp_poverty=1 if econ_poverty==1 & L.econ_poverty==0
-replace exp_poverty=2 if econ_poverty==0 & L.econ_poverty==1
-replace exp_poverty=3 if econ_poverty==1 & L.econ_poverty==1
+replace exp_poverty=0 if temp_HHinPoverty==0 & L.temp_HHinPoverty==0
+replace exp_poverty=1 if temp_HHinPoverty==1 & L.temp_HHinPoverty==0
+replace exp_poverty=2 if temp_HHinPoverty==0 & L.temp_HHinPoverty==1
+replace exp_poverty=3 if temp_HHinPoverty==1 & L.temp_HHinPoverty==1
 label define poverty_trans 0 "No Poverty" 1 "Entering poverty" 2 "Exiting poverty" 3 "Continuous poverty"
 label values exp_poverty poverty_trans
 label var exp_poverty "Poverty transition"
 tab exp_poverty swv, m column
+drop temp_*
 
+*==================================================
+* Employment transitions
+*==================================================
 
-* Generate poverty gap marker
-* define the poverty gap (Gi) as the poverty line (samp_poverty) less 
-* actual income (econ_realequivinc) for individuals below the poverty line
-* the gap is considered to be zero for everyone else
-* Source: https://www.ilo.org/wcmsp5/groups/public/---americas/---ro-lima/---sro-port_of_spain/documents/presentation/wcms_304851.pdf
-gen exp_povgap=.
-replace exp_povgap=(samp_poverty-econ_realequivinc)/samp_poverty if econ_poverty==1
-replace exp_povgap=0 if econ_poverty==0
-label var exp_povgap "Poverty gap"
-
-* Task 2 
 * Generate employment volatility exposure
 * Only interested in 
 * employment (1) to employment (1)
@@ -131,17 +123,17 @@ label define exp_emp 11 "Continuous employment" 13 "Exiting employment" 31 "Ente
 label value exp_emp exp_emp
 tab exp_emp swv, col miss
 
-
-* Generate working hours categories
-gen lhw_zero=(lhw<=5)
-gen lhw_ten=(lhw>=6 & lhw<=15)
-gen lhw_twenty=(lhw>=16 & lhw<=25)
-gen lhw_thirty=(lhw>=26 & lhw<=35)
-gen lhw_forty=(lhw>=36 & lhw!=.)
+*==================================================
+* Working hour categories
+*==================================================
 
 gen lhw_c5=.
-replace lhw_c5=0 if lhw_zero==1
-replace lhw_c5=10 if lhw_ten==1
-replace lhw_c5=20 if lhw_twenty==1
-replace lhw_c5=30 if lhw_thirty==1
-replace lhw_c5=40 if lhw_forty==1
+replace lhw_c5=0 if (lhw<=5)
+replace lhw_c5=10 if (lhw>=6 & lhw<=15)
+replace lhw_c5=20 if (lhw>=16 & lhw<=25)
+replace lhw_c5=30 if (lhw>=26 & lhw<=35)
+replace lhw_c5=40 if (lhw>=36 & lhw!=.)
+
+label define lhwsp 0 "Zero" 10 "Ten" 20 "Twenty" 30 "Thirty" 40 "Forty"
+label value lhw_c5 lhwsp
+la var lhw_c5 "Hours worked per week (category)"
