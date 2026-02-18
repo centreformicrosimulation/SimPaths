@@ -784,8 +784,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case LifeSatisfaction2 -> {
                 lifeSatisfaction2();
             }
-            case HealthMentalHM1HM2Cases -> {
-                healthMentalHM1HM2Cases();
+
+            case HealthMentalHM1Case -> {
+                healthMentalHM1Case();
+            }
+            case HealthMentalHM2Case -> {
+                healthMentalHM2Case();
             }
             case HealthEQ5D -> {
                 healthEQ5D();
