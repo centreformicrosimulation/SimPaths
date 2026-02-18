@@ -1045,10 +1045,10 @@ public class Parameters {
         addFixedCostRegressors(coeffLabourSupplyUtilityCouples,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleE", 1);
-        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_MaleNE", 1);
-        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleE", 1);
-        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "_EmploymentSelection_FemaleNE", 1);
+        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1mb-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1ma-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1fb-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employmentSelection.xlsx", countryString + "W1fa-sel", 1);
 
         // Load coefficients for Covid-19 labour supply models
         // Coefficients for process assigning simulated people to self-employment
