@@ -303,10 +303,13 @@ forval kk = 1/`nn' {
 // loop over each reference person in dataset to match to 
 
 	qui {
-		gen chk = 1-treat 		// consider data points in "from" dataset
+	// consider data points in "from" dataset
+	
+		gen chk = 1-treat
 		local rnk = 1
 		foreach vv in tt grad gradsp gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp {
-			replace chk = 0 if (`vv'!=`vv'[`kk'])  // limit data point in from dataset to those with the same discrete characteristics
+		// limit data point in from dataset to those with the same discrete characteristics
+			replace chk = 0 if (`vv'!=`vv'[`kk'])  
 		}
 		sum chk, mean
 	}
@@ -349,7 +352,7 @@ forval kk = 1/`nn' {
 			preserve
 			keep if (chk==1)
 			if (r(mean)*r(N)>1) {
-				* multiple matches - select random observation
+			// multiple matches - select random observation
 				
 				sum dwt
 				gen smp_cdf = 0
@@ -435,7 +438,7 @@ cap log close
 
 /**************************************************************************************
 * clean-up and exit
-*************************************************************************************/
+**************************************************************************************/
 #delimit ;
 local files_to_drop 
 	ukhls_wealthtemp.dta
@@ -448,3 +451,5 @@ local files_to_drop
 foreach file of local files_to_drop { 
 	erase "$dir_data/`file'"
 }
+
+

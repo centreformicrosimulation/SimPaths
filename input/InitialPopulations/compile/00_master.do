@@ -235,7 +235,7 @@ do "${dir_do}/07_was_wealth_data.do"
 forvalues year = $wealthStartYear / $wealthEndYear {
 	global yearWealth = `year'
 	do "${dir_do}/08_wealth_to_ukhls.do"
-} */
+}
 * check data and slice into initial populations
 do "${dir_do}/09_finalise_input_data.do"
 * descriptives for initial populations and full sample
