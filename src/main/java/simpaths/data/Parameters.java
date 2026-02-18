@@ -398,7 +398,7 @@ public class Parameters {
     private static boolean flagDefaultToTimeSeriesAverages;
     private static Double averageSavingReturns, averageDebtCostLow, averageDebtCostHigh;
     private static MultiKeyCoefficientMap upratingIndexMapRealGDP, mapRealGDPperCapita, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
-            partnershipTimeAdjustment, fertilityTimeAdjustment,
+            partnershipTimeAdjustment, studentsTimeAdjustment, fertilityTimeAdjustment,
             utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentACMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentACFemales,
             utilityTimeAdjustmentCouples, utilityTimeAdjustmentSingleDepMen, utilityTimeAdjustmentSingleDepWomen,
             upratingIndexMapRealWageGrowth, priceMapRealSavingReturns, priceMapRealDebtCostLow, priceMapRealDebtCostHigh,
@@ -587,6 +587,7 @@ public class Parameters {
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACMales; //Adult children, male
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityACFemales; //Adult children, female
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilityCouples;
+    private static MultiKeyCoefficientMap coeffLabourSupplyUtilitySingleWithDependent;
     private static MultiKeyCoefficientMap coeffLabourSupplyUtilitySingleDep;
 
     // coefficients for Covid-19 labour supply models below
