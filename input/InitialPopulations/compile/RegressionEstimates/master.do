@@ -217,6 +217,12 @@ do "${dir_do}/reg_wages.do"
 
 do "${dir_do}/reg_income.do"
 
+do "${dir_do}/reg_financial_distress.do"
+
+do "${dir_do}/reg_health_mental.do"
+
+do "${dir_do}/reg_health_wellbeing.do"
+
 
 *******************************************************************************
 * INTERNAL VALIDATION FILES
