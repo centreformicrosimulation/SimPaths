@@ -2028,10 +2028,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (Les_c4.Student.equals(labC4) && !Parameters.enableIntertemporalOptimisations)
             return false;
-        if (Indicator.True.equals(healthDsblLongtermFlag) && !Parameters.flagSuppressSocialCareCosts)
-            return false;
-        if (Indicator.True.equals(careNeedFlag) && !Parameters.flagSuppressSocialCareCosts)
-            return false;
+//        if (Indicator.True.equals(healthDsblLongtermFlag) && !Parameters.flagSuppressSocialCareCosts)
+//            return false;
+//        if (Indicator.True.equals(careNeedFlag) && !Parameters.flagSuppressSocialCareCosts)
+//            return false;
 
         //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.
         //These people will not work for any wage (their activity status will be set to Nonwork in the Labour Market Module

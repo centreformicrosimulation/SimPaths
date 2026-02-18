@@ -90,6 +90,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Enumerated(EnumType.STRING) private Ydses_c5 yHhQuintilesMonthC5;
     @Transient private Ydses_c5 yHhQuintilesC5L1;
     @Transient private Double i_yNonBenHhGrossAsinh;
+    private Dhhtp_c4 dhhtp_c4;
     @Transient private Dhhtp_c4 demCompHhC4L1;
     private String demCreatedByConstructor;
     @Column(name="wealthPrptyFlag") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
@@ -105,6 +106,43 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Education i_eduHighestC3;
     @Transient private Integer i_labHrsWork1Week;
     @Transient private Integer i_labHrsWork2Week;
+
+    // ================= At Risk of Work cache to avoid unnecessary atRiskOfWork() calls =================
+    @Transient private Boolean cachedMaleAtRiskOfWork = null;
+    @Transient private Boolean cachedFemaleAtRiskOfWork = null;
+
+    // ================= Labour-choice cache for fast alignment =================
+    @Transient private Integer labourChoiceCacheYear = null;
+
+    // cached discrete choice set
+    @Transient private LinkedHashSet<MultiKey<Labour>> cachedPossibleLabourCombinations = null;
+
+    // cached tax/income outputs by labour pair
+    @Transient private MultiKeyMap<Labour, LabourEval> cachedEvalByLabourPairs =
+            MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+    // cached utility regression scores by labour pair
+    @Transient private MultiKeyMap<Labour, Double> cachedUtilityScoreByLabourPairs =
+            MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+    // score cache validity markers
+    @Transient private Integer labourScoreCacheYear = null;
+    @Transient private Object labourScoreCacheKey = null;
+
+    // helper – NOT persisted, no annotation needed
+    private static class LabourEval {
+        final double disposableIncomeMonthly;
+        final double benefitsReceivedPerMonth;
+        final double grossIncomeMonthly;
+        final Match taxDbMatch;
+
+        LabourEval(TaxEvaluation ev) {
+            this.disposableIncomeMonthly = ev.getDisposableIncomePerMonth();
+            this.benefitsReceivedPerMonth = ev.getBenefitsReceivedPerMonth();
+            this.grossIncomeMonthly = ev.getGrossIncomePerMonth();
+            this.taxDbMatch = ev.getMatch();
+        }
+    }
 
 
     /*********************************************************************
@@ -281,6 +319,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Processes {
         Update,        //This updates the household fields, such as number of children of a certain age
+        UpdateOutputVariables,
         UpdateWealth,
         CalculateChangeInEDI, //Calculate change in equivalised disposable income
         Homeownership,
@@ -297,6 +336,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case Update -> {
                 updateAttributes();
                 clearStates();
+            }
+            case UpdateOutputVariables -> {
+                updateOutputVariables();
             }
             case UpdateWealth -> {
                 updateWealth();
@@ -360,6 +402,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     protected void updateWealth() {
         wealthTotValue += yDispMonth * 12.0 - xDiscretionaryYear - getNonDiscretionaryConsumptionPerYear();
+    }
+
+    /*
+Contemporaneous values of dhhtp_c4 are required for validation. Update and output here.
+ */
+    private void updateOutputVariables() {
+        dhhtp_c4 = getDhhtp_c4();
     }
 
 
@@ -558,7 +607,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         // update disposable income
         TaxEvaluation evaluatedTransfers;
         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : statInnovations.getDoubleDraw(8);
-        evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDemAge(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvidedFlag, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
+        evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDemAge(), getIntValue(Regressors.NumberMembersOver17),
+                getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017),
+                hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvidedFlag, originalIncomePerMonth, secondIncomePerMonth,
+                childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
 
         return evaluatedTransfers;
     }
@@ -894,12 +946,575 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         } else return workHoursConverted;
     }
 
+
+    /**
+     * atRiskOfWork() depends on dag, les_c4, dlltsd, and inverseMillsRatio
+     * — none of these should change fixed-costs that are adjusted inside the alignment loop.
+     * - caching it is safe and removes a lot of repeated work.
+     */
+    public void computeAtRiskOfWorkFlags() {
+
+        Occupancy occ = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        switch (occ) {
+            case Couple -> {
+                cachedMaleAtRiskOfWork   = (male != null) && male.atRiskOfWork();
+                cachedFemaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+            }
+            case Single_Male -> {
+                cachedMaleAtRiskOfWork   = (male != null) && male.atRiskOfWork();
+                cachedFemaleAtRiskOfWork = false;
+            }
+            case Single_Female -> {
+                cachedMaleAtRiskOfWork   = false;
+                cachedFemaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+            }
+            default -> {
+                cachedMaleAtRiskOfWork = false;
+                cachedFemaleAtRiskOfWork = false;
+            }
+        }
+    }
+
+
+    /**
+     * Precomputes and caches tax/benefit evaluations for all feasible discrete labour options.
+     * Resets labour states, updates non-labour income for consistency, and then (if cache is stale) rebuilds:
+     *  - the feasible labour combinations, and
+     *  - the mapping from labour-pairs to evaluated disposable/gross income, benefits and tax DB match.
+     * The cache is intended for the non-intertemporal discrete-choice branch only;
+     * when IO is enabled - this method exits early.
+     */
+    public void updateLabourChoices() {
+
+        resetLabourStates();
+
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        // This cache is only used for the non-intertemporal discrete-choice branch.
+        if (Parameters.enableIntertemporalOptimisations
+                && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2)) {
+            return;
+        }
+
+        // Must be current since investment/pension enter originalIncomePerMonth in IO branch,
+        // and may matter for regressors; keep consistent with existing method.
+        updateNonLabourIncome();
+
+
+        boolean cacheValid =
+                labourChoiceCacheYear != null
+                        && labourChoiceCacheYear == model.getYear()
+                        && cachedPossibleLabourCombinations != null
+                        && !cachedPossibleLabourCombinations.isEmpty()
+                        && cachedEvalByLabourPairs != null
+                        && !cachedEvalByLabourPairs.isEmpty();
+
+        if (cacheValid) return;
+
+        // rebuild cache
+        labourChoiceCacheYear = model.getYear();
+
+        cachedPossibleLabourCombinations = findPossibleLabourCombinations();
+        cachedEvalByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+        // precompute tax/income for each discrete option
+        if (Occupancy.Couple.equals(occupancy)) {
+
+            for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+
+                double maleIncome = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
+                double femaleIncome = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
+                double originalIncomePerMonth = maleIncome + femaleIncome;
+                double secondIncomePerMonth = Math.min(maleIncome, femaleIncome);
+
+                TaxEvaluation ev = taxWrapper(labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), originalIncomePerMonth, secondIncomePerMonth);
+
+                cachedEvalByLabourPairs.put(labourKey, new LabourEval(ev));
+            }
+
+        } else if (Occupancy.Single_Male.equals(occupancy)) {
+
+            for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+                double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
+                TaxEvaluation ev = taxWrapper(labourKey.getKey(0).getHours(male), 0.0, male.getDisability(), -1, originalIncomePerMonth, 0.0);
+
+                cachedEvalByLabourPairs.put(labourKey, new LabourEval(ev));
+            }
+
+        } else if (Occupancy.Single_Female.equals(occupancy)) {
+
+            for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+                double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
+                TaxEvaluation ev = taxWrapper(0.0, labourKey.getKey(1).getHours(female), -1, female.getDisability(), originalIncomePerMonth, 0.0);
+
+                cachedEvalByLabourPairs.put(labourKey, new LabourEval(ev));
+            }
+        }
+    }
+
+
+    /**
+     * Computes the utility regression score with fixed-cost components removed.
+     * Used during employment alignment to isolate the non–fixed-cost part of utility,
+     * enabling fast recomputation when fixed costs are adjusted.
+     * Called by the utility score precomputation and alignment routines.
+     */
+    private double computeUtilityRegressionScoreWithoutFC(Occupancy occupancy, Person male, Person female) {
+        boolean maleAtRiskOfWork = Boolean.TRUE.equals(cachedMaleAtRiskOfWork);
+        boolean femaleAtRiskOfWork = Boolean.TRUE.equals(cachedFemaleAtRiskOfWork);
+
+        if (cachedMaleAtRiskOfWork == null || cachedFemaleAtRiskOfWork == null) {
+            // fallback: compute once (still avoids inside-loop calls)
+            switch (occupancy) {
+                case Couple -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                case Single_Male -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = false;
+                }
+                case Single_Female -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                default -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = false;
+                }
+            }
+            // optionally store so future calls reuse
+            cachedMaleAtRiskOfWork = maleAtRiskOfWork;
+            cachedFemaleAtRiskOfWork = femaleAtRiskOfWork;
+        }
+
+        if (Occupancy.Couple.equals(occupancy)) {
+            // Both partners at risk of work → subtract both fixed costs
+            if (maleAtRiskOfWork) {
+                if (femaleAtRiskOfWork) {
+                    double utilityScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
+                    var reg = Parameters.getRegLabourSupplyUtilityCouples();
+
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    utilityScore = utilityScore - (betaMen * xMen + betaWomen * xWomen);
+                    return utilityScore;
+
+                } else {
+                    // Male only at risk → subtract male fixed cost
+                    double utilityScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+
+                    // Alignment-only regressor for the single-dep male subgroup.
+                    double betaSingleDepMen = reg.getCoefficient("AlignmentSingleDepMen");
+                    double xSingleDepMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepMen"));
+
+                    utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen) - (betaSingleDepMen * xSingleDepMen);
+                    return utilityScore;
+                }
+            } else if (femaleAtRiskOfWork) {
+                // Female only at risk → subtract female fixed cost
+                double utilityScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+
+                double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+                double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                // Alignment-only regressor for the single-dep female subgroup.
+                double betaSingleDepWomen = reg.getCoefficient("AlignmentSingleDepWomen");
+                double xSingleDepWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepWomen"));
+                utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen) - (betaSingleDepWomen * xSingleDepWomen);
+                return utilityScore;
+
+            } else if (!model.isAlignEmployment()) {
+                // Defensive check: unexpected state outside alignment
+                throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
+            }
+            // No-one at risk during alignment → utility fixed cost is irrelevant
+            return 0.0;
+
+        } else if (Occupancy.Single_Male.equals(occupancy)) {
+
+            if (male.getAdultChildFlag() == 1) {
+                // Male adult child case → subtract male fixed cost
+                double utilityScore = Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilityACMales();
+                Double coefExist = reg.getCoefficient("AlignmentFixedCostMen");
+
+                if (coefExist != null) {
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    utilityScore = utilityScore - (betaMen * xMen);
+                }
+                return utilityScore;
+
+            }
+            // Standard single male case → subtract male fixed cost
+            double utilityScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
+            var reg = Parameters.getRegLabourSupplyUtilityMales();
+
+            double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+            double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+            utilityScore = utilityScore - (betaMen * xMen);
+            return utilityScore;
+
+        } else {
+            // Female adult child → subtract female fixed cost
+            if (female.getAdultChildFlag() == 1) {
+                double utilityScore = Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilityACFemales();
+
+                double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                utilityScore = utilityScore - (betaWomen * xWomen);
+                return utilityScore;
+
+            }
+            // Standrad single female case → subtract female fixed cost
+            double utilityScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
+            var reg = Parameters.getRegLabourSupplyUtilityFemales();
+
+            double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+            double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+            utilityScore = utilityScore - (betaWomen * xWomen);
+            return utilityScore;
+
+        }
+    }
+
+
+    /**
+     * Precomputes and caches utility regression scores excluding fixed costs.
+     * This is done to speed up employment alignment by avoiding repeated utility evaluation.
+     * Called once before the alignment loop and reused across alignment iterations.
+     */
+    public void updateUtilityRegressionScoresWithoutFC() {
+
+        resetLabourStates();
+
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        // Not used in IO branch
+        if (Parameters.enableIntertemporalOptimisations
+                && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2)) {
+            return;
+        }
+
+        // Ensure tax eval cache exists
+        if (cachedPossibleLabourCombinations == null || cachedPossibleLabourCombinations.isEmpty()
+                || cachedEvalByLabourPairs == null || cachedEvalByLabourPairs.isEmpty()) {
+            updateLabourChoices();
+        }
+
+        boolean scoreCacheValid =
+                labourScoreCacheYear != null
+                        && labourScoreCacheYear == model.getYear()
+                        && cachedUtilityScoreByLabourPairs != null
+                        && !cachedUtilityScoreByLabourPairs.isEmpty();
+
+        if (scoreCacheValid) return;
+
+        // rebuild score cache
+        labourScoreCacheYear = model.getYear();
+        cachedUtilityScoreByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+        for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+            // set candidate labour for regressors
+            if (Occupancy.Couple.equals(occupancy)) {
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+            } else if (Occupancy.Single_Male.equals(occupancy)) {
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+            } else { // Single_Female
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+            }
+
+            // inject cached incomes into BU fields for regressors
+            LabourEval le = cachedEvalByLabourPairs.get(labourKey);
+            yDispMonth = le.disposableIncomeMonthly;
+            yBenAmountMonth = le.benefitsReceivedPerMonth;
+            yGrossMonth = le.grossIncomeMonthly;
+
+            double regressionScore = computeUtilityRegressionScoreWithoutFC(occupancy, male, female);
+
+            if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                regressionScore = 0.0;
+            }
+
+            cachedUtilityScoreByLabourPairs.put(labourKey, regressionScore);
+        }
+    }
+
+
+    public void updateFixedCostsAndLabour() {
+
+        resetLabourStates();
+
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        // If IO is on, fast mode isn't applicable; keep original behavior.
+        if (Parameters.enableIntertemporalOptimisations
+                && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2)) {
+            updateLabourSupplyAndIncome();
+            return;
+        }
+
+        // Ensure cache exists (alignment should call updateLabourChoices() once beforehand)
+        if (cachedPossibleLabourCombinations == null || cachedPossibleLabourCombinations.isEmpty()
+                || cachedEvalByLabourPairs == null || cachedEvalByLabourPairs.isEmpty()) {
+            updateLabourChoices();
+        }
+
+        // Ensure regression scores exist (computed separately & cached)
+        if (cachedUtilityScoreByLabourPairs == null || cachedUtilityScoreByLabourPairs.isEmpty()) {
+            updateUtilityRegressionScoresWithoutFC();
+        }
+
+        MultiKey<? extends Labour> labourSupplyChoice = null;
+        MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs =
+                MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+        // ------------------------------------------------------------------
+        // atRiskOfWork flags MUST be precomputed outside this method.
+        // Defensive fallback: if missing, compute once here (still hoisted).
+        // ------------------------------------------------------------------
+        boolean maleAtRiskOfWork = Boolean.TRUE.equals(cachedMaleAtRiskOfWork);
+        boolean femaleAtRiskOfWork = Boolean.TRUE.equals(cachedFemaleAtRiskOfWork);
+
+        if (cachedMaleAtRiskOfWork == null || cachedFemaleAtRiskOfWork == null) {
+            // fallback: compute once (still avoids inside-loop calls)
+            switch (occupancy) {
+                case Couple -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                case Single_Male -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = false;
+                }
+                case Single_Female -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                default -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = false;
+                }
+            }
+            // optionally store so future calls reuse
+            cachedMaleAtRiskOfWork = maleAtRiskOfWork;
+            cachedFemaleAtRiskOfWork = femaleAtRiskOfWork;
+        }
+
+        for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+            // 1) set candidate labour for this key
+            switch (occupancy) {
+                case Couple -> {
+                    male.setLabourSupplyWeekly(labourKey.getKey(0));
+                    female.setLabourSupplyWeekly(labourKey.getKey(1));
+                }
+                case Single_Male -> male.setLabourSupplyWeekly(labourKey.getKey(0));
+                case Single_Female -> female.setLabourSupplyWeekly(labourKey.getKey(1));
+                default -> { /* no-op or throw if impossible */ }
+            }
+
+            // 2) inject cached incomes
+            LabourEval le = cachedEvalByLabourPairs.get(labourKey);
+            yDispMonth = le.disposableIncomeMonthly;
+            yBenAmountMonth = le.benefitsReceivedPerMonth;
+            yGrossMonth = le.grossIncomeMonthly;
+
+            // 3) get cached score
+            Double utilityScore = cachedUtilityScoreByLabourPairs.get(labourKey);
+
+            // 4) add adjusted fixed cost (atRisk flags are now cached/hoisted)
+            if (Occupancy.Couple.equals(occupancy)) {
+
+                if (maleAtRiskOfWork) {
+                    if (femaleAtRiskOfWork) {
+
+                        var reg = Parameters.getRegLabourSupplyUtilityCouples();
+
+                        double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                        double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                        double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                        double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                        utilityScore += betaMen * xMen + betaWomen * xWomen;
+
+                    } else {
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    // Alignment-only regressor for the single-dep male subgroup.
+                    double betaSingleDepMen = reg.getCoefficient("AlignmentSingleDepMen");
+                    double xSingleDepMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepMen"));
+
+                    utilityScore += betaMen * xMen + betaSingleDepMen * xSingleDepMen;
+                    }
+                } else if (femaleAtRiskOfWork) {
+
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    // Alignment-only regressor for the single-dep female subgroup.
+                    double betaSingleDepWomen = reg.getCoefficient("AlignmentSingleDepWomen");
+                    double xSingleDepWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepWomen"));
+                    utilityScore += betaWomen * xWomen + betaSingleDepWomen * xSingleDepWomen;
+
+                }
+
+            } else if (Occupancy.Single_Male.equals(occupancy)) {
+
+                if (male.getAdultChildFlag() == 1) {
+
+                    var reg = Parameters.getRegLabourSupplyUtilityACMales();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    utilityScore += betaMen * xMen;
+                } else {
+                    var reg = Parameters.getRegLabourSupplyUtilityMales();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    utilityScore += betaMen * xMen;
+                }
+
+            } else { // Single_Female
+
+                if (female.getAdultChildFlag() == 1) {
+
+                    var reg = Parameters.getRegLabourSupplyUtilityACFemales();
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    utilityScore += betaWomen * xWomen;
+                } else {
+
+                    var reg = Parameters.getRegLabourSupplyUtilityFemales();
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    utilityScore += betaWomen * xWomen;
+                }
+            }
+
+            if (utilityScore == null) {
+                throw new IllegalStateException(
+                        "Missing cached regression score for labourKey " + labourKey
+                                + " (HHID " + getKey().getId() + ")"
+                );
+            }
+
+            // 5) store obtained utility scores
+            labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, utilityScore);
+        }
+
+        if (labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
+            System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
+            if (male != null) System.out.print("male : " + male.getKey().getId() + ", ");
+            if (female != null) System.out.print("female : " + female.getKey().getId() + ", ");
+            System.out.print("is empty!");
+        }
+
+        // sample labour supply (exactly as your code)
+        double labourInnov = statInnovations.getDoubleDraw(5);
+
+        try {
+            MultiKeyMap<Labour, Double> probs =
+                    convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
+            labourSupplyChoice = ManagerRegressions.multiEvent(probs, labourInnov);
+        } catch (RuntimeException e) {
+            System.out.print("Could not determine labour supply choice for BU with ID: " + getKey().getId());
+        }
+
+        if (model.debugCommentsOn && labourSupplyChoice != null) {
+            log.trace("labour supply choice " + labourSupplyChoice);
+        }
+
+        // realise labour choice
+        if (Occupancy.Couple.equals(occupancy)) {
+            male.setLabourSupplyWeekly(labourSupplyChoice.getKey(0));
+            female.setLabourSupplyWeekly(labourSupplyChoice.getKey(1));
+        } else if (Occupancy.Single_Male.equals(occupancy)) {
+            male.setLabourSupplyWeekly(labourSupplyChoice.getKey(0));
+        } else {
+            female.setLabourSupplyWeekly(labourSupplyChoice.getKey(1));
+        }
+
+        // childcare / social care (kept consistent)
+        if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
+            updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDemAge());
+        }
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
+            updateSocialCareCostPerWeek();
+        }
+
+        // populate final incomes from cache (NO taxWrapper)
+        LabourEval chosenEval = cachedEvalByLabourPairs.get(labourSupplyChoice);
+        yDispMonth = chosenEval.disposableIncomeMonthly;
+        yPensYear = chosenEval.benefitsReceivedPerMonth;
+        yGrossMonth = chosenEval.grossIncomeMonthly;
+        demDbMatchTax = chosenEval.taxDbMatch;
+        idtaxDbDonor = demDbMatchTax.getCandidateID();
+
+        calculateBUIncome();
+    }
+
+
+
+    /**
+     * Main labour-supply + income update for a benefit unit.
+     *
+     * If intertemporal optimisations (IO) are enabled, derives (continuous) hours from the IO grids,
+     * converts to discrete labour states, computes labour + non-labour income, and evaluates taxes/
+     * benefits once via taxWrapper.
+     *
+     * If IO is disabled, enumerates all feasible discrete labour options (single or couple), evaluates
+     * taxes/benefits for each, computes regression utilities, samples a labour choice, applies optional
+     * childcare/social care costs, and stores the chosen disposable/gross income, benefits and tax DB match.
+     *
+     * Always finishes by recalculating BU/occupant income aggregates via calculateBUIncome().
+     */
     protected void updateLabourSupplyAndIncome() {
 
         resetLabourStates();
         Occupancy occupancy = getOccupancy();
         Person male = getMale();
         Person female = getFemale();
+
         if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
             // intertemporal optimisations enabled
 
@@ -1016,14 +1631,25 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                             //Follow utility process for couples
                             regressionScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
                         } else if (!female.atRiskOfWork()) { //Male has flexible labour supply, female doesn't
-                            //Follow utility process for single males for the UK
-                            regressionScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
-                            //In Italy, this should follow a separate set of estimates. One way is to differentiate between countries here; another would be to add a set of estimates for both countries, but for the UK have the same number as for singles
-                            //Introduced a new category of estimates, Males/Females with Dependent to be used when only one of the couple is flexible in labour supply. In Italy, these have a separate set of estimates; in the UK they use the same estimates as "independent" singles
+                            //Male is at risk of work and has dependent female
+                            regressionScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+
+                            var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                            double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                            double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+
+                            regressionScore = regressionScore - (betaWomen * xWomen); //term "(betaWomen * xWomen)" should be zero but this is just a precaution
                         }
                     } else if (female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
-                        //Follow utility process for single female
-                        regressionScore = Parameters.getRegLabourSupplyUtilitySingleWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                        //Female is at risk of work and has dependent male
+                        regressionScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+
+                        var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                        double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                        double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                        regressionScore = regressionScore - (betaMen * xMen); //term "(betaMen * xMen)" should be zero but this is just a precaution
+
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
                     if (!Parameters.checkFinite(regressionScore)) {
                         regressionScore = -700.0;
@@ -1370,6 +1996,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Regressors {
 
+        AlignmentFixedCostWomen,
+        AlignmentFixedCostMen,
+        // Alignment-only regressors for single-dependent subgroups.
+        AlignmentSingleDepMen,
+        AlignmentSingleDepWomen,
         Constant,
         couple_emp_2ft,
         couple_emp_2ne,
@@ -1864,6 +2495,36 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
                         getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,2).ordinal() * 1.e-2;
             }
+
+            case AlignmentFixedCostMen -> {
+                return (getMale() != null && (!getMale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
+            case AlignmentFixedCostWomen -> {
+                return (getFemale() != null && (!getFemale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
+            case AlignmentSingleDepMen -> {
+                if (getOccupancy() != Occupancy.Couple) return 0.0;
+                Person male = getMale();
+                Person female = getFemale();
+                boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+                boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+                boolean maleEmployed = (male != null) && (!male.getLabourSupplyWeekly().equals(Labour.ZERO));
+                // Varies with male employment so alignment can shift employment probabilities.
+                return (maleAtRisk && !femaleAtRisk && maleEmployed) ? 1.0 : 0.0;
+            }
+            case AlignmentSingleDepWomen -> {
+                if (getOccupancy() != Occupancy.Couple) return 0.0;
+                Person male = getMale();
+                Person female = getFemale();
+                boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+                boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+                boolean femaleEmployed = (female != null) && (!female.getLabourSupplyWeekly().equals(Labour.ZERO));
+                // Varies with female employment so alignment can shift employment probabilities.
+                return (!maleAtRisk && femaleAtRisk && femaleEmployed) ? 1.0 : 0.0;
+            }
+
             case MaleLeisure -> {                            //24*7 - labour supply weekly for male
                 return getMaleLeisureHoursWeekly();
             }
@@ -3263,6 +3924,27 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             atRiskOfWork = male.atRiskOfWork();
         }
         return atRiskOfWork;
+    }
+
+    public double fracEmployed() {
+        double  fracEmployed    = 0.0;
+        int     femaleQuantity  = 0;
+        int     maleQuantity    = 0;
+        int     femaleEmployed  = 0;
+        int     maleEmployed    = 0;
+        Person male = getMale();
+        Person female = getFemale();
+        if(female != null) {
+            femaleQuantity = 1;
+            if (Les_c4.EmployedOrSelfEmployed.equals(female.getLes_c4())) {femaleEmployed = 1;};
+        }
+        if( male != null) {
+            maleQuantity = 1;
+            if (Les_c4.EmployedOrSelfEmployed.equals(male.getLes_c4())) {maleEmployed = 1;}
+        }
+
+        fracEmployed = (femaleEmployed + maleEmployed) /  (double) (femaleQuantity + maleQuantity);
+        return fracEmployed;
     }
 
     public boolean isEmployed() {
