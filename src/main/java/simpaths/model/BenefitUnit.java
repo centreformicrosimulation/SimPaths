@@ -369,6 +369,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         if (getNumberChildrenAll()==0)
             xChildCareWeek = 0.0;
+        // Transient lagged values are not loaded from DB; initialize them for year-1 regressors.
+        if (i_demNChild0to2L1 == null) i_demNChild0to2L1 = getIndicatorChildren(0,3);
+        if (dem4to12L1 == null) dem4to12L1 = getIndicatorChildren(4,12);
+        if (numberChildrenAll_lag1 == null) numberChildrenAll_lag1 = getNumberChildrenAll();
+        if (numberChildren02_lag1 == null) numberChildren02_lag1 = getNumberChildren(0,2);
         demCompHhC4L1 = getDhhtp_c4();
 
         // clean-up odd ends
