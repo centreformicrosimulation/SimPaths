@@ -885,10 +885,11 @@ public class Parameters {
     public static double disposableIncomeFromLabourInnov;
 
 
-    // the method adds missing fixed-cost regressors with zero values to enable employment alignment
+    // Add missing alignment regressors with zero values so alignment can adjust them at runtime.
     private static void addFixedCostRegressors(MultiKeyCoefficientMap map, List<String> regressors) {
         for (String reg : regressors) {
-            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen"))
+            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen")
+                    || reg.equals("AlignmentSingleDepMen") || reg.equals("AlignmentSingleDepWomen"))
                     && map.getValue(reg) == null) {
                 // Infer the format from an existing coefficient
                 Object sample = map.getValue("IncomeDiv100");
@@ -1029,7 +1030,12 @@ public class Parameters {
         addFixedCostRegressors(coeffLabourSupplyUtilityFemales,List.of("AlignmentFixedCostWomen"));
 
         coeffLabourSupplyUtilitySingleDep = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleDep", 1);
-        addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
+        addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of(
+                "AlignmentFixedCostMen",
+                "AlignmentFixedCostWomen",
+                "AlignmentSingleDepMen",
+                "AlignmentSingleDepWomen"
+        ));
 
         coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1);
         addFixedCostRegressors(coeffLabourSupplyUtilityACMales,List.of("AlignmentFixedCostMen"));

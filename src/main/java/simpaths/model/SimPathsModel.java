@@ -1924,7 +1924,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             OccupancyExtended occupancy, // benefit unit occupancy extended to allow all types used in labour supply module
             String occupancyLabel // displays the type of benefit unit to which adjustment is applied
     ) {
-        //double utilityAdjustment = Parameters.getValuePreferPrev(getYear(), adjustmentMap);
+        // Start from the configured value for the current year.
         double utilityAdjustment = Parameters.getTimeSeriesValue(getYear(), adjustmentMap);
         System.out.println("Utility adjustment for " + occupancyLabel + " has started");
 
@@ -1933,18 +1933,24 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
 
         ActivityAlignmentV2 activityAlignment = new ActivityAlignmentV2(benefitUnits, coefficientMap, regressionCoefficientName, occupancy);
-        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, 5.0E-3, Parameters.MAX_EMPLOYMENT_ALIGNMENT);
+        // Use subgroup-specific bounds to reduce boundary-only solutions while keeping a single bounded search interval.
+        double alignmentBound = Parameters.MAX_EMPLOYMENT_ALIGNMENT * 40 ;
+        // Diagnostics probe only the actual bounded interval.
+        final double epsFunction = 5.0E-3;
+        activityAlignment.printDiagnostics(utilityAdjustment, alignmentBound, epsFunction);
+        RootSearch2 search = getRootSearch2(utilityAdjustment, activityAlignment, 0.5, epsFunction, alignmentBound);
         // epsFunction tolerance is set to 0.5% seem to be sufficient
 
         System.out.println("=== Root Search Summary ===");
         System.out.println("Root found at: " + search.getTarget()[0]);
-        System.out.println("Target altered: " + search.isTargetAltered());
         System.out.println("Iterations: " + search.getIterationCount());
-
-        for (RootSearch2.IterationInfo it : search.getIterationHistory()) {
-            System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",
-                    it.getIteration(), it.getX(), it.getFx(), it.getStep(),
-                    it.isFuncTolMet(), it.isOrdTolMet());
+        System.out.println("Bound search diagnostics: " + search.getBoundSearchDiagnosticsSummary());
+        if (search.getIterationCount() > 0) {
+            for (RootSearch2.IterationInfo it : search.getIterationHistory()) {
+                System.out.printf("Iter %3d | x=% .6f | f(x)=% .3e | step=% .3e | funcTol=%-5s | ordTol=%-5s%n",
+                        it.getIteration(), it.getX(), it.getFx(), it.getStep(),
+                        it.isFuncTolMet(), it.isOrdTolMet());
+            }
         }
 
         // stop timer
@@ -2008,7 +2014,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         activityAlignment(
                 TimeSeriesVariable.UtilityAdjustmentSingleDepMen,
                 Parameters.getCoeffLabourSupplyUtilitySingleDep(),
-                new String[]{"AlignmentFixedCostMen"},
+                new String[]{"AlignmentSingleDepMen"},
                 OccupancyExtended.Single_DepMales,
                 "single dependent (male only)"
         );
@@ -2019,7 +2025,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         activityAlignment(
                 TimeSeriesVariable.UtilityAdjustmentSingleDepWomen,
                 Parameters.getCoeffLabourSupplyUtilitySingleDep(),
-                new String[]{"AlignmentFixedCostWomen"},
+                new String[]{"AlignmentSingleDepWomen"},
                 OccupancyExtended.Single_DepFemales,
                 "single dependent (female only)"
         );

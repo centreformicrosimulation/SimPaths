@@ -2,6 +2,7 @@ package simpaths.model;
 
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
+import microsim.statistics.regression.LinearRegression;
 import simpaths.data.IEvaluation;
 import simpaths.data.Parameters;
 import simpaths.model.enums.Occupancy;
@@ -24,6 +25,9 @@ public class ActivityAlignmentV2 implements IEvaluation {
     private final Set<BenefitUnit> benefitUnits;
     private final OccupancyExtended subgroupFlag;
     private final SimPathsModel model;
+    private boolean diagnosticsPrinted = false;
+    private double lastSimulatedShare = Double.NaN;
+    private double lastAdjustment = Double.NaN;
 
     /**
      * Constructor accepting an OccupancyExtended flag to specify subgroup.
@@ -71,11 +75,12 @@ public class ActivityAlignmentV2 implements IEvaluation {
     }
 
     /**
-     * Ensures that AlignmentFixedCostMen and AlignmentFixedCostWomen exist in the coefficient map if required.
+     * Ensures that alignment regressors exist in the coefficient map if required.
      */
     private void addFixedCostRegressorsIfNeeded(MultiKeyCoefficientMap map, List<String> regressors) {
         for (String reg : regressors) {
-            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen"))
+            if ((reg.equals("AlignmentFixedCostMen") || reg.equals("AlignmentFixedCostWomen")
+                    || reg.equals("AlignmentSingleDepMen") || reg.equals("AlignmentSingleDepWomen"))
                     && map.getValue(reg) == null) {
                 // Infer the format from an existing coefficient
                 Object sample = map.getValue("IncomeDiv100");
@@ -119,7 +124,9 @@ public class ActivityAlignmentV2 implements IEvaluation {
     public double evaluate(double[] args) {
         double adjustment = args[0];
         adjustCoefficients(adjustment);
-        return targetAggregateShareOfEmployed - computeSimulatedShareUsingFraction();
+        lastAdjustment = adjustment;
+        lastSimulatedShare = computeSimulatedShareUsingFraction();
+        return targetAggregateShareOfEmployed - lastSimulatedShare;
     }
 
     /**
@@ -133,7 +140,6 @@ public class ActivityAlignmentV2 implements IEvaluation {
                     : orig.baseValue + adjustment;
             coefficientMap.replaceValue(reg, newVal);
         }
-
         // Update all benefit units in parallel for efficiency
         // Update only benefit units in the selected(!) subgroup
         benefitUnits.parallelStream()
@@ -174,7 +180,6 @@ public class ActivityAlignmentV2 implements IEvaluation {
     /**
      * Computes the simulated employment share for benefit units in the specified subgroup using employment fraction of each BU
      */
-
     private double computeSimulatedShareUsingFraction() {
         double[] totals = benefitUnits.parallelStream()
                 .filter(this::matchesSubgroup)
@@ -191,6 +196,34 @@ public class ActivityAlignmentV2 implements IEvaluation {
                 );
 
         return totals[0] > 0 ? totals[1] / totals[0] : 0.0;
+    }
+
+    private int countSubgroup() {
+        return (int) benefitUnits.stream()
+                .filter(this::matchesSubgroup)
+                .count();
+    }
+
+    public void printDiagnostics(double baseAdjustment, double bound, double epsFunction) {
+        if (diagnosticsPrinted) return;
+
+        int subgroupCount = countSubgroup();
+        System.out.println("=== Employment alignment diagnostics ===");
+        System.out.println("Subgroup flag: " + subgroupFlag
+                + ", subgroupCount=" + subgroupCount
+                + ", totalBenefitUnits=" + benefitUnits.size());
+        System.out.println("Target share: " + targetAggregateShareOfEmployed);
+
+
+        // Evaluate the initial point first; if already within tolerance, skip bound probes.
+        double baseFx = evaluate(new double[] {baseAdjustment});
+        System.out.println("Diag adj=" + baseAdjustment
+                + " | simulated=" + lastSimulatedShare
+                + " | f(x)=" + baseFx);
+        if (Math.abs(baseFx) <= epsFunction) {
+            System.out.println("Initial point meets function tolerance.");
+        }
+        diagnosticsPrinted = true;
     }
 
     /**

@@ -8,7 +8,6 @@ public enum OccupancyExtended {
 	Single_Female,
     Single_DepMales,
     Single_DepFemales,
-
 	Male_AC,
 	Female_AC;
 }
