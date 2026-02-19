@@ -664,7 +664,7 @@ public class Statistics2 {
                 }
                 if (person.getDemAge()>=55 && person.getDemAge()<=60) {
 
-                    if (Education.High.equals(person.getDeh_c3())) {
+                    if (Education.High.equals(person.getDeh_c4())) {
                         numberG += 1.0;
                         ctlG += expenditurePerMonth / Parameters.WEEKS_PER_MONTH / person.getLeisureHoursPerWeek();
                     } else {

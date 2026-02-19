@@ -275,7 +275,7 @@ public class LabourMarket {
                     Person person = benefitUnit.getMale();
                     if (person.atRiskOfWork()) {
 
-                        Education ed = person.getDeh_c3();
+                        Education ed = person.getDeh_c4();
                         double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);
@@ -287,7 +287,7 @@ public class LabourMarket {
                     Person person = benefitUnit.getFemale();
                     if (person.atRiskOfWork()) {
 
-                        Education ed = person.getDeh_c3();
+                        Education ed = person.getDeh_c4();
                         double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);

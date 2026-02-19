@@ -117,23 +117,15 @@ public class DataParser {
 								+ "ALTER TABLE " + personTable + " DROP COLUMN healthSelfRated;"
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN health RENAME TO healthSelfRated;"
 
-								//Education
-								+ "ALTER TABLE " + personTable + " ADD education VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education = 'Low' WHERE eduHighestC3 = 3;"
-								+ "UPDATE " + personTable + " SET education = 'Medium' WHERE eduHighestC3 = 2;"
-								+ "UPDATE " + personTable + " SET education = 'High' WHERE eduHighestC3 = 1;"
-								//Note: Have to consider missing values as children don't have a level of education before they leave school
-								+ "UPDATE " + personTable + " SET education = 'Low' WHERE eduHighestC3 = -9;"
-								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestC3;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education RENAME TO eduHighestC3;"
+									//Education (4 categories incl. in education)
+									+ "ALTER TABLE " + personTable + " ADD education VARCHAR_IGNORECASE;"
+									+ "UPDATE " + personTable + " SET education = 'Low' WHERE eduHighestC4 = 3;"
+									+ "UPDATE " + personTable + " SET education = 'Medium' WHERE eduHighestC4 = 2;"
+									+ "UPDATE " + personTable + " SET education = 'High' WHERE eduHighestC4 = 1;"
+									+ "UPDATE " + personTable + " SET education = 'InEducation' WHERE eduHighestC4 = 0;"
 
-								+ "ALTER TABLE " + personTable + " ADD education4 VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET education4 = 'Low' WHERE eduHighestC4 = 3;"
-								+ "UPDATE " + personTable + " SET education4 = 'Medium' WHERE eduHighestC4 = 2;"
-								+ "UPDATE " + personTable + " SET education4 = 'High' WHERE eduHighestC4 = 1;"
-								+ "UPDATE " + personTable + " SET education4 = 'InEducation' WHERE eduHighestC4 = 0;"
 								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestC4;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education4 RENAME TO eduHighestC4;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education RENAME TO eduHighestC4;"
 
 								//Education mother
 								+ "ALTER TABLE " + personTable + " ADD education_mother VARCHAR_IGNORECASE;"
@@ -141,7 +133,7 @@ public class DataParser {
 								+ "UPDATE " + personTable + " SET education_mother = 'Medium' WHERE eduHighestMotherC3 = 2;"
 								+ "UPDATE " + personTable + " SET education_mother = 'High' WHERE eduHighestMotherC3 = 1;"
 								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestMotherC3;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_mother RENAME TO eduHighestMotherC3;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_mother RENAME TO eduHighestMotherC4;"
 
 								//Education father
 								+ "ALTER TABLE " + personTable + " ADD education_father VARCHAR_IGNORECASE;"
@@ -149,7 +141,7 @@ public class DataParser {
 								+ "UPDATE " + personTable + " SET education_father = 'Medium' WHERE eduHighestFatherC3 = 2;"
 								+ "UPDATE " + personTable + " SET education_father = 'High' WHERE eduHighestFatherC3 = 1;"
 								+ "ALTER TABLE " + personTable + " DROP COLUMN eduHighestFatherC3;"
-								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_father RENAME TO eduHighestFatherC3;"
+								+ "ALTER TABLE " + personTable + " ALTER COLUMN education_father RENAME TO eduHighestFatherC4;"
 
 								//In education dummy (to be used with Indicator enum when defined in Person class)
 								+ "ALTER TABLE " + personTable + " ADD education_in VARCHAR_IGNORECASE;"
