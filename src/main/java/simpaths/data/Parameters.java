@@ -1312,22 +1312,15 @@ public class Parameters {
 
             //Labour supply utility
             coeffLabourSupplyUtilityMales = bootstrapWithTrace("coeffLabourSupplyUtilityMales", coeffLabourSupplyUtilityMales);
-            addFixedCostRegressors(coeffLabourSupplyUtilityMales,List.of("AlignmentFixedCostMen"));
+
             coeffLabourSupplyUtilityFemales = bootstrapWithTrace("coeffLabourSupplyUtilityFemales", coeffLabourSupplyUtilityFemales);
-            addFixedCostRegressors(coeffLabourSupplyUtilityFemales,List.of("AlignmentFixedCostWomen"));
             coeffLabourSupplyUtilitySingleDep = bootstrapWithTrace("coeffLabourSupplyUtilitySingleDep", coeffLabourSupplyUtilitySingleDep);
-            addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep,List.of(
-                    "AlignmentFixedCostMen",
-                    "AlignmentFixedCostWomen",
-                    "AlignmentSingleDepMen",
-                    "AlignmentSingleDepWomen"
-            ));
+
             coeffLabourSupplyUtilityACMales = bootstrapWithTrace("coeffLabourSupplyUtilityACMales", coeffLabourSupplyUtilityACMales);
-            addFixedCostRegressors(coeffLabourSupplyUtilityACMales,List.of("AlignmentFixedCostMen"));
             coeffLabourSupplyUtilityACFemales = bootstrapWithTrace("coeffLabourSupplyUtilityACFemales", coeffLabourSupplyUtilityACFemales);
-            addFixedCostRegressors(coeffLabourSupplyUtilityACFemales,List.of("AlignmentFixedCostWomen"));
+
             coeffLabourSupplyUtilityCouples = bootstrapWithTrace("coeffLabourSupplyUtilityCouples", coeffLabourSupplyUtilityCouples);
-            addFixedCostRegressors(coeffLabourSupplyUtilityCouples,List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
+
 
 
             //Education
@@ -1426,7 +1419,21 @@ public class Parameters {
                 coeffCovariancePartnershipITU2 = bootstrapWithTrace("coeffCovariancePartnershipITU2", coeffCovariancePartnershipITU2);
                 coeffCovarianceFertilityF1 = bootstrapWithTrace("coeffCovarianceFertilityF1", coeffCovarianceFertilityF1);
             }
+
         }
+
+
+        addFixedCostRegressors(coeffLabourSupplyUtilityMales, List.of("AlignmentFixedCostMen"));
+        addFixedCostRegressors(coeffLabourSupplyUtilityFemales, List.of("AlignmentFixedCostWomen"));
+        addFixedCostRegressors(coeffLabourSupplyUtilitySingleDep, List.of(
+                "AlignmentFixedCostMen",
+                "AlignmentFixedCostWomen",
+                "AlignmentSingleDepMen",
+                "AlignmentSingleDepWomen"
+        ));
+        addFixedCostRegressors(coeffLabourSupplyUtilityACMales, List.of("AlignmentFixedCostMen"));
+        addFixedCostRegressors(coeffLabourSupplyUtilityACFemales, List.of("AlignmentFixedCostWomen"));
+        addFixedCostRegressors(coeffLabourSupplyUtilityCouples, List.of("AlignmentFixedCostMen", "AlignmentFixedCostWomen"));
 
         //Health
         regHealthH1 = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Dhe.class, coeffCovarianceHealthH1);
