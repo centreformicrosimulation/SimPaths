@@ -29,8 +29,8 @@ log using "${dir_log}/reg_partnership.log", replace
 putexcel set "$dir_results/reg_partnership_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters for relationship status projection"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 4 Feb 2026 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -52,7 +52,7 @@ putexcel A1 = "Goodness of fit", bold
 /********************************* PREPARE DATA *******************************/
 
 * Load data 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -78,7 +78,7 @@ probit dcpen i.Ded Dgn Dag Dag_sq lc.Dnc lc.Dnc02 ///
 	li.Les_c4_Student li.Les_c4_NotEmployed li.Les_c4_Retired /// 
 	li.Les_c4_Student_Dgn li.Les_c4_NotEmployed_Dgn ///
 	li.Les_c4_Retired_Dgn ///
-	Dhe_pcs Dhe_mcs ///
+	l.Dhe_pcs l.Dhe_mcs ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///
 	if ${u1_if_condition} [pw=dwt], vce(robust)
 

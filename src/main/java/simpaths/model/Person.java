@@ -2581,6 +2581,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dcpagdf_L1, 					//Lag(1) of age difference between partners
         Dcpyy_L1, 						//Lag(1) number of years in partnership
         Dcpst_Partnered,				//Partnered
+        Dcpst_Partnered_L1,             //Lag(1) of partnership status is partnered
         Dcpst_PreviouslyPartnered,		//Single (previously partnered category merged)
         Dcpst_PreviouslyPartnered_L1,   //Lag(1) of partnership status is single (merged)
         New_rel_L1,
@@ -2613,11 +2614,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Deh_c3_Medium_Dag,
         Deh_c3_Medium_L1, 				//Education level lag(1) equals medium
         Deh_c4_Low,
+        Deh_c4_Low_Dag,
         Deh_c4_Low_L1,
         Deh_c4_Medium,
+        Deh_c4_Medium_Dag,
         Deh_c4_Medium_L1,
         Deh_c4_High,
         Deh_c4_High_L1,
+        Deh_c4_Na,
         Deh_c4_Na_L1,
         Dehf_c3_High,					//Father's education == High indicator
         Dehf_c3_Low,					//Father's education == Low indicator
@@ -2627,7 +2631,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dehm_c3_Medium,					//Mother's education == Medium indicator
         Dehmf_c3_High,
         Dehmf_c3_Medium,
+        Dehmf_c3_Medium_L1,
         Dehmf_c3_Low,
+        Dehmf_c3_Low_L1,
         Dehsp_c3_Low_L1,				//Partner's education == Low at lag(1)
         Dehsp_c3_Medium_L1,				//Partner's education == Medium at lag(1)
         He_eq5d,                          //EQ5D quality of life score
@@ -2674,6 +2680,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         L_Dhhtp_c4_CoupleChildren,
         L_Dhhtp_c4_SingleChildren,
         L_Dhhtp_c4_SingleNoChildren,
+        L_Dehmf_c3_Low_,
+        L_Dehmf_c3_Low,
+        L_Dehmf_c3_Medium_,
+        L_Dehmf_c3_Medium,
         Dhhtp_c8_2_L1,
         Dhhtp_c8_3_L1,
         Dhhtp_c8_4_L1,
@@ -3333,6 +3343,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dcpst_PreviouslyPartnered -> {
                 return (Dcpst.Single.equals(getDcpst())) ? 1.0 : 0.0;
             }
+            case Dcpst_Partnered_L1 -> {
+                if (demPartnerStatusL1 != null) {
+                    return demPartnerStatusL1.equals(Dcpst.Partnered) ? 1. : 0.;
+                } else return 0.;
+            }
             case Dcpst_Single_L1 -> {
                 if (demPartnerStatusL1 != null) {
                     return demPartnerStatusL1.equals(Dcpst.Single) ? 1. : 0.;
@@ -3635,8 +3650,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Deh_c3_Low, Deh_c4_Low, Deh_c3_Low_Mixed, Deh_c3_Low_Formal -> {
                 return (Education.Low.equals(eduHighestC3)) ? 1.0 : 0.0;
             }
+            case Deh_c4_Low_Dag -> {
+                return (Education.Low.equals(eduHighestC3)) ? demAge : 0.0;
+            }
             case Deh_c3_Low_L1, Deh_c4_Low_L1 -> {
                 return (Education.Low.equals(eduHighestC3L1)) ? 1.0 : 0.0;
+            }
+            case Deh_c4_Medium_Dag -> {
+                return (Education.Medium.equals(eduHighestC3)) ? demAge : 0.0;
+            }
+            case Deh_c4_Na -> {
+                return (Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
             }
             case Deh_c4_Na_L1 -> {
                 return (Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
@@ -3665,7 +3689,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dehmf_c3_Medium -> {
                 return (checkHighestParentalEducationEquals(Education.Medium)) ? 1.0 : 0.0;
             }
+            case Dehmf_c3_Medium_L1, L_Dehmf_c3_Medium_, L_Dehmf_c3_Medium -> {
+                return (checkHighestParentalEducationEquals(Education.Medium)) ? 1.0 : 0.0;
+            }
             case Dehmf_c3_Low -> {
+                return (checkHighestParentalEducationEquals(Education.Low)) ? 1.0 : 0.0;
+            }
+            case Dehmf_c3_Low_L1, L_Dehmf_c3_Low_, L_Dehmf_c3_Low -> {
                 return (checkHighestParentalEducationEquals(Education.Low)) ? 1.0 : 0.0;
             }
             case Dehsp_c3_Medium_L1 -> {

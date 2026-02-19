@@ -34,8 +34,8 @@ log using "${dir_log}/reg_income.log", replace
 putexcel set "$dir_results/reg_income_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estiamtes used by processes I1 (capital income), I2 (private pension, retired last year), I3 (private pension income, not retired last year) "
-putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: Jan 21 2026 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -82,7 +82,7 @@ save "$dir_external_data\growth_rates", replace
 /********************************* PREPARE DATA *******************************/
 
 * Load data 
-use ${estimation_sample2}, clear //panel with predicted wages 
+use "${estimation_sample2}", clear //panel with predicted wages 
 
 * Merge in growth rates 
 merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(growth)
@@ -632,7 +632,7 @@ matrix drop _all
 display "${i2b_if_condition}"
 
 reg ypnoab i.Dgn c.Dag ///
-          i.Deh_c3_Medium i.Deh_c3_High /// 
+           i.Deh_c4_High i.Deh_c4_Medium  i.Deh_c4_Na /// 
           li.Dhhtp_c4_CoupleChildren li.Dhhtp_c4_SingleNoChildren li.Dhhtp_c4_SingleChildren ///
           l.Dhe_pcs l.Dhe_mcs ///
 		  lc.Ypnoab l2c.Ypnoab ///
@@ -888,7 +888,7 @@ display "${i3a_if_condition}"
 
 logit receives_ypnoab ///
     i.Dgn i.Reached_Retirement_Age ///
-	i.Deh_c3_Medium i.Deh_c3_High ///
+	 i.Deh_c4_High i.Deh_c4_Medium i.Deh_c4_Na ///
 	li.Les_c4_NotEmployed  ///
 	li.Dhhtp_c4_CoupleChildren li.Dhhtp_c4_SingleNoChildren li.Dhhtp_c4_SingleChildren ///
 	l.Dhe_pcs l.Dhe_mcs ///
@@ -1133,7 +1133,7 @@ matrix drop _all
 display "${i3b_if_condition}"
 
 reg ypnoab i.Dgn c.Dag ///
-          i.Deh_c3_Medium i.Deh_c3_High /// 
+           i.Deh_c4_High i.Deh_c4_Medium i.Deh_c4_Na /// 
           li.Les_c4_NotEmployed ///
           li.Dhhtp_c4_CoupleChildren li.Dhhtp_c4_SingleNoChildren li.Dhhtp_c4_SingleChildren ///
           l.Dhe_pcs l.Dhe_mcs ///

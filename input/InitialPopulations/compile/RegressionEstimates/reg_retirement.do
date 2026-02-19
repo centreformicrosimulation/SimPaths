@@ -2,8 +2,8 @@
 * PROJECT:  		SimPaths UK
 * SECTION:			Retirement  
 * OBJECT: 			Probit Regresion Models 
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		20 Jan 2026 DP 
+* AUTHORS:			Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK 
 * COUNTRY: 			UK  
 *
 * NOTES: 			
@@ -28,7 +28,7 @@ log using "${dir_log}/reg_retirement.log", replace
 putexcel set "$dir_results/reg_retirement_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of retirement"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
 putexcel A3 = "Last edit: 26 jan 2026 DP"
 
 putexcel A4 = "Process:", bold
@@ -69,7 +69,7 @@ do "${dir_do}/variable_update.do"
 display "${r1a_if_condition}"
 
 probit drtren i.Dgn Dag Dag_sq ///
-    i.Deh_c3_Medium i.Deh_c3_Low ///
+     li.Deh_c4_Medium li.Deh_c4_Low li.Deh_c4_Na ///
 	l.Dhe_pcs l.Dhe_mcs  ///
 	i.Reached_Retirement_Age ///
 	li.Les_c3_NotEmployed ///
@@ -301,10 +301,10 @@ matrix drop _all
 display "${r1b_if_condition}"
 	
 probit drtren i.Dgn Dag Dag_sq ///
-    i.Deh_c3_Medium i.Deh_c3_Low ///
+     li.Deh_c4_Medium li.Deh_c4_Low li.Deh_c4_Na ///
 	l.Dhe_pcs l.Dhe_mcs  ///
 	i.Reached_Retirement_Age i.Reached_Retirement_Age_Les ///
-	li.Les_c3_NotEmployed i.Lessp_c3_NotEmployed ///
+	li.Les_c3_NotEmployed li.Lessp_c3_NotEmployed ///
 	i.Reached_Retirement_Age_Sp ///
 	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 li.Dlltsd01 ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///

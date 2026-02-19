@@ -19,6 +19,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.util.Pair;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import simpaths.model.decisions.Grids;
 import simpaths.model.lifetime_incomes.EquivalisedIncomeCDF;
 import simpaths.model.taxes.DonorTaxUnit;
@@ -50,6 +51,13 @@ public class Parameters {
 //    }
 
     public static final boolean TESTING_FLAG = false;
+    private static final double POI_MIN_INFLATE_RATIO = 0.005d;
+
+    static {
+        // Some generated XLSX files contain highly-compressed style XML entries that are safe
+        // but can trip POI's default zip-bomb threshold (0.01).
+        ZipSecureFile.setMinInflateRatio(POI_MIN_INFLATE_RATIO);
+    }
 
     // EUROMOD variables
 

@@ -227,7 +227,7 @@ cap drop l_* L_*
 
 xtset idperson swv
 
-foreach v in ydses_c5 dhe dhe_pcs dhe_mcs les_c3 les_c4 dhhtp_c4 dlltsd01 need_socare {
+foreach v in ydses_c5 dhe dhe_pcs dhe_mcs les_c3 les_c4 dhhtp_c4 dlltsd01 need_socare dehmf_c3 {
     gen l_`v' = L.`v'
 }
 
@@ -237,6 +237,7 @@ gen L_Dhe_pcs  = l_dhe_pcs
 gen L_Dhe_mcs  = l_dhe_mcs
 gen L_Dlltsd01 = l_dlltsd01
 gen L_Need_socare = l_need_socare
+gen L_Dehmf_c3 = l_dehmf_c3
 
 tab l_les_c4, gen(L_Les_c4_)
 rename L_Les_c4_1 L_Les_c4_Employed
@@ -251,6 +252,12 @@ rename L_Dhhtp_c4_1 L_Dhhtp_c4_CoupleNoChildren
 rename L_Dhhtp_c4_2 L_Dhhtp_c4_CoupleChildren
 rename L_Dhhtp_c4_3 L_Dhhtp_c4_SingleNoChildren
 rename L_Dhhtp_c4_4 L_Dhhtp_c4_SingleChildren
+
+tab l_dehmf_c3, gen(L_Dehmf_c3_)
+rename L_Dehmf_c3_1 L_Dehmf_c3_High
+rename L_Dehmf_c3_2 L_Dehmf_c3_Medium
+rename L_Dehmf_c3_3 L_Dehmf_c3_Low
+
 
 
 *==================================================
@@ -282,6 +289,7 @@ gen Ypnbihs_dv = ypnbihs_dv
 gen Ypnbihs_dv_sq = ypnbihs_dv^2
 gen Ynbcpdf_dv   = ynbcpdf_dv
 gen Yptciihs_dv  = yptciihs_dv
+
 
 
 

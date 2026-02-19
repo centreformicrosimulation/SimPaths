@@ -2,8 +2,8 @@
 * PROJECT:  		SimPaths UK 
 * SECTION:			Home ownership 
 * OBJECT: 			Final Regresion Models - Weighted
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		20 Jan 2026 DP  
+* AUTHORS:			Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK  
 * COUNTRY: 			UK
 *
 * NOTES: 			Re-estimated process at benefit unit level to be consistent with SimPaths 
@@ -28,8 +28,8 @@ log using "${dir_log}/reg_home_ownership.log", replace
 putexcel set "$dir_results/reg_home_ownership_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of home ownership"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 20 Jan 2026 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -48,7 +48,7 @@ putexcel A1 = "Goodness of fit", bold
 /********************************* PREPARE DATA *******************************/
 
 * Load data 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -108,8 +108,8 @@ display "${ho1_if_condition}"
 probit dhh_owned i.Dgn Dag Dag_sq ///
     il.Dhhtp_c8_2 il.Dhhtp_c8_3 il.Dhhtp_c8_4 il.Dhhtp_c8_5 il.Dhhtp_c8_6 il.Dhhtp_c8_7 il.Dhhtp_c8_8 ///
 	il.Les_c4_Student il.Les_c4_NotEmployed il.Les_c4_Retired  ///
-	i.Deh_c3_Medium i.Deh_c3_Low ///
-	L_Dhe_mcs L_Dhe_pcs ///
+	i.Deh_c4_Medium i.Deh_c4_Low i.Deh_c4_Na ///
+	l.Dhe_mcs l.Dhe_pcs ///
 	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
 	l.Yptciihs_dv ///
 	l.Dhh_owned ///

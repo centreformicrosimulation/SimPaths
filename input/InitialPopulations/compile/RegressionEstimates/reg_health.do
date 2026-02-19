@@ -2,8 +2,8 @@
 * PROJECT:  		SimPaths UK 
 * SECTION:			Health
 * OBJECT: 			Health status and Disability
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		4 Feb 2026 DP  
+* AUTHORS:			Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK  
 * COUNTRY: 			UK 
 *
 * NOTES:	  Combined former a and b processes.
@@ -28,8 +28,8 @@ log using "${dir_log}/reg_health.log", replace
 putexcel set "$dir_results/reg_health_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection self-reported health status"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 4 Feb 2026 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -77,7 +77,7 @@ display "${h1_if_condition}"
 
 gologit2 dhe Ded Dgn Dag Dag_sq ///  /*Ded_Dag Ded_Dag_sq Ded_Dgn /// */
 	     L_Dhe_pcs L_Dhe_mcs ///
-		 Deh_c3_Medium Deh_c3_Low ///
+		 i.Deh_c4_Medium i.Deh_c4_Low i.Deh_c4_Na ///
 	     /*L_Les_c4_Student*/ L_Les_c4_NotEmployed L_Les_c4_Retired ///
 		 L_Ydses_c5_Q2 L_Ydses_c5_Q3 L_Ydses_c5_Q4 L_Ydses_c5_Q5 ///
 		 L_Dhhtp_c4_CoupleChildren L_Dhhtp_c4_SingleNoChildren L_Dhhtp_c4_SingleChildren L_Dlltsd01 ///
@@ -428,9 +428,8 @@ matrix drop _all
 display "${h2_if_condition}"
 
 probit dlltsd01 i.Dgn Dag Dag_sq ///
-       Deh_c3_Medium Deh_c3_Low ///
-	   L_Ydses_c5_Q2 L_Ydses_c5_Q3 L_Ydses_c5_Q4 L_Ydses_c5_Q5 ///
-	   Dhe_pcs Dhe_mcs ///
+       Deh_c4_Medium Deh_c4_Low Deh_c4_Na ///
+	  L_Ydses_c5_Q2 L_Ydses_c5_Q3 L_Ydses_c5_Q4 L_Ydses_c5_Q5 ///
 	   L_Dhe_pcs L_Dhe_mcs ///
 	   L_Dlltsd01 ///
 	   L_Dhhtp_c4_CoupleChildren L_Dhhtp_c4_SingleNoChildren L_Dhhtp_c4_SingleChildren /// 

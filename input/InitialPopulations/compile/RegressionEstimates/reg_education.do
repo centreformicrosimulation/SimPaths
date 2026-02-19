@@ -1,14 +1,14 @@
-********************************************************************************
+******************************************************************************************
 * PROJECT:  		SimPaths UK
 * SECTION:			Education
 * OBJECT: 			Final Probit & Generalised Logit Models - Weighted
-* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven
-* LAST UPDATE:		4 Feb 2026 DP  
+* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK  
 * COUNTRY: 			UK  
 * 
 * NOTES: 	                   
 *                    
-********************************************************************************		
+*****************************************************************************************		
 
 clear all
 set more off
@@ -28,8 +28,8 @@ log using "${dir_log}/reg_education.log", replace
 putexcel set "$dir_results/reg_education_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of education status"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 4 Feb 2025 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -58,7 +58,7 @@ putexcel A1 = "Goodness of fit", bold
 
 /********************************* PREPARE DATA *******************************/
 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -77,7 +77,7 @@ do "${dir_do}/variable_update.do"
 display "${e1a_if_condition}"	
 
 probit Dst i.Dgn Dag Dag_sq /*Dag_c Dag_c_sq Dag_post18_sq*/  li.Ded  ///
-	i.Dehmf_c3_Medium i.Dehmf_c3_Low ///
+	li.Dehmf_c3_Medium li.Dehmf_c3_Low ///
 	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///
 	if ${e1a_if_condition} ///
@@ -309,9 +309,9 @@ matrix drop _all
 /****************** E1b: PROBABILITY OF RETURNING TO EDUCATION ****************/
 display "${e1b_if_condition}"	
 
-probit der i.Dgn Dag Dag_sq i.Dcpst_Partnered ///
+probit der i.Dgn Dag Dag_sq li.Dcpst_Partnered ///
 li.Deh_c4_High li.Deh_c4_Low ///
-i.Dehmf_c3_Medium i.Dehmf_c3_Low ///
+li.Dehmf_c3_Medium li.Dehmf_c3_Low ///
 li.Les_c3_NotEmployed li.Les_c3_Employed ///
 l.Dnc l.Dnc02 ///
 $regions Year_transformed Y2020 Y2021 $ethnicity ///
@@ -545,7 +545,7 @@ matrix drop _all
 display "${e2_if_condition}"	
 
 gologit2 deh_c3_recoded i.Dgn Dag Dag_sq ///
-         i.Dehmf_c3_Medium i.Dehmf_c3_Low ///
+         i.L_Dehmf_c3_Medium i.L_Dehmf_c3_Low ///
          $regions Year_transformed Y2020 Y2021 $ethnicity ///
          if ${e2_if_condition} [pw=dwt], autofit 
 

@@ -2,8 +2,8 @@
 * PROJECT:  		SimPaths UK
 * SECTION:			Leaving Parental Home
 * OBJECT: 			Final Probit Regression Model 
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		19 Jan 2026 DP  
+* AUTHORS:			Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK  
 * COUNTRY: 			UK  
 * 
 * NOTES: 			
@@ -29,7 +29,7 @@ log using "${dir_log}/reg_leave_parental_home.log", replace
 putexcel set "$dir_results/reg_leave_parental_home_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing leaving parental home"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
 putexcel A3 = "Last edit: 19 Jan 2026 DP"
 
 putexcel A4 = "Process:", bold
@@ -48,7 +48,7 @@ putexcel A1 = "Goodness of fit", bold
 /********************************* PREPARE DATA *******************************/
 
 * Load data
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -66,7 +66,7 @@ do "${dir_do}/variable_update.do"
 /**************** P1: PROBABILITY OF LEAVING THE PARENTAL HOME ****************/
 display "${p1_if_condition}"
 	
-probit dlftphm i.Dgn Dag Dag_sq i.Deh_c3_Medium i.Deh_c3_Low ///
+probit dlftphm i.Dgn Dag Dag_sq li.Deh_c4_Na li.Deh_c4_Medium li.Deh_c4_Low ///
 	li.Les_c3_Student li.Les_c3_NotEmployed ///
 	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
 	$regions Year_transformed Y2020 Y2021 $ethnicity ///

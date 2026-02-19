@@ -1,11 +1,11 @@
-********************************************************************************
+*******************************************************************************************
 * PROJECT:  		SimPaths UK
 * SECTION:			Wage regression 
 * OBJECT: 			Heckman regressions 
-* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven
-* LAST UPDATE:		4 Feb 2026 DP 
-********************************************************************************
-******************************************************************************** 
+* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK 
+******************************************************************************************
+****************************************************************************************** 
 * NOTES: 			Strategy:  
 * 					1) Heckman estimated on the sub-sample of individuals 
 * 						who are not observed working in previous period. 
@@ -40,8 +40,8 @@ log using "${dir_log}/reg_wages.log", replace
 putexcel set "$dir_results/reg_employment_selection_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estimates from the first stage of the Heckman selection model used to estimates wages."
-putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 4 Feb 2026 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A5 = "Process:", bold
 putexcel B5 = "Description:", bold
@@ -63,8 +63,8 @@ putexcel B13 = "Two-step Heckman command is used which does not permit weights"
 putexcel set "$dir_results/reg_wages_UK", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estimates used to calculate potential wages for males and females in the simulation."
-putexcel A2 = "Authors:	Patryk Bronka, Daria Popova" 
-putexcel A3 = "Last edit: 21 Jan 2026 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
@@ -192,8 +192,8 @@ gen pred_hourly_wage = .
 * Sample: Working age (16-75) women who did not receive a wage in t-1
 * DV: Log gross hourly wage 
 
-global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded
-global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
+global wage_eqn "lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded
+global seln_eqn "i.L1les_c3 dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
 
 local filter = "${wages_f_no_prev_if_condition}"
 display "`filter'"
@@ -376,8 +376,8 @@ restore
 putexcel set "$dir_results/reg_wages_UK", ///
 	sheet("W1fa") modify 
 
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1 ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
 
@@ -432,8 +432,8 @@ restore
 * Labelling 
 putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1fa-sel") modify 
 	
-local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Na Deh_c4_Medium Deh_c4_Low Deh_c4_Na_Dag Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag  Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant 
 	
@@ -488,8 +488,8 @@ restore
 * Sample: Working age (16-75) men who did not receive a wage in t-1
 * DV: Log gross hourly wage 
 
-global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded 
-global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded 
+global wage_eqn "lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded 
+global seln_eqn "i.L1les_c3 dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded 
 
 local filter = "${wages_m_no_prev_if_condition}"
 display "`filter'"
@@ -672,8 +672,8 @@ restore
 putexcel set "$dir_results/reg_wages_UK", ///
 	sheet("W1ma") modify 
 
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
 
@@ -729,8 +729,8 @@ restore
 putexcel set "$dir_results/reg_employment_selection_UK", ///
 	sheet("W1ma-sel") modify 
 	
-local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant 
 	
@@ -784,8 +784,8 @@ restore
 * Sample: Working age (16-75) women who received a wage in t-1
 * DV: Log gross hourly wage 
 
-global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag  i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded
-global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
+global wage_eqn "lwage_hour L1.lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag  i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded
+global seln_eqn "dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
 
 local filter = "${wages_f_prev_if_condition}"
 display "`filter'"
@@ -963,8 +963,8 @@ restore
 putexcel set "$dir_results/reg_wages_UK", ///
 	sheet("W1fb") modify 
 
-local var_list L1_log_hourly_wage Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list L1_log_hourly_wage Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant InverseMillsRatio
 
@@ -1016,8 +1016,8 @@ restore
 * Labelling 
 putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1fb-sel") modify 
 	
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Dag Dag_sq Deh_c4_High Deh_c4_Medium Deh_c4_Low Deh_c4_Na Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant 
 	
@@ -1072,8 +1072,8 @@ restore
 * Sample: Working age (16-75) men who received a wage in t-1
 * DV: Log gross hourly wage 
 
-global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded 
-global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag  i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
+global wage_eqn "lwage_hour L1.lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded 
+global seln_eqn "dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag  i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
 
 local filter = "${wages_m_prev_if_condition}"
 display "`filter'"
@@ -1252,8 +1252,8 @@ restore
 putexcel set "$dir_results/reg_wages_UK", ///
 	sheet("W1mb") modify 
 
-local var_list L1_log_hourly_wage Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list L1_log_hourly_wage Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
 
@@ -1305,8 +1305,8 @@ restore
 * Labelling 
 putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1mb-sel") modify 
 	
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs_L1 Dhe_Mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant 
 	
