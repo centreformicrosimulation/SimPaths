@@ -239,3 +239,10 @@ input/EUROMODoutput/baseline/*
 .Rproj.user
 /input/EUROMODoutput/test
 /input/InitialPopulations/test
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IntelliJ
+.idea/
