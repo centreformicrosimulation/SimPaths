@@ -144,8 +144,8 @@ public class Parameters {
 		"idMother", 			//id of mother
 		"demAge", 					//age
 		"eduHighestC4", 				//highest education level (4 categories incl. in education)
-		"eduHighestMotherC4",				//highest education level of mother
-		"eduHighestFatherC4",				//highest education level of father
+		"eduHighestMotherC3",				//highest education level of mother (input C3, recoded to C4)
+		"eduHighestFatherC3",				//highest education level of father (input C3, recoded to C4)
 		"eduSpellFlag",					//in education dummy
 		"eduReturnFlag",					//return to education dummy
 		"demEthnC4",					//ethnicity
