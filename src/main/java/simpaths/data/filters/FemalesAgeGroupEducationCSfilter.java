@@ -20,13 +20,13 @@ public class FemalesAgeGroupEducationCSfilter implements ICollectionFilter{
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		if( person.getDeh_c3() == null ) return false;		//Better just to check on Education being null, rather than assuming anything about the Students.  In future models, it may be possible to go back to education after already working.
+		if( person.getDeh_c4() == null ) return false;		//Better just to check on Education being null, rather than assuming anything about the Students.  In future models, it may be possible to go back to education after already working.
 //		if(person.getActivity_status().equals(Les_c4.Student)) {		//Need to check they are not still students, otherwise education level is not defined
 //			return false;
 //		}
 		else return ( person.getDemMaleFlag().equals(Gender.Female) && 
 				(person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) && 
-				( person.getDeh_c3().equals(edu) )
+				( person.getDeh_c4().equals(edu) )
 				);
 	}
 	

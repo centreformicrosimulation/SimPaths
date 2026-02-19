@@ -19,7 +19,7 @@ public class RegionEducationAtRiskOfWorkCSfilter implements ICollectionFilter{
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getRegion().equals(demRgn) && person.getDeh_c3().equals(education) && person.atRiskOfWork());
+			return (person.getRegion().equals(demRgn) && person.getDeh_c4().equals(education) && person.atRiskOfWork());
 		}
 		else throw new IllegalArgumentException("Object passed to RegionEducationCSfilter must be of type Person!");
 	}			
