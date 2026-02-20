@@ -496,8 +496,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.GarbageCollection);
         if (enableIntertemporalOptimisations)
             yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateWealth);
-        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Update);
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.Update);
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
+        addCollectionEventToAllYears(persons, Person.Processes.Update);
 
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Aging);
 
@@ -605,7 +605,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.LifeSatisfaction2);
 
         // mortality (migration) and population alignment at year's end
-        yearlySchedule.addCollectionEvent(persons, Person.Processes.ConsiderMortality);
+        addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
         yearlySchedule.addEvent(this, Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
