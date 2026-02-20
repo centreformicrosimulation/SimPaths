@@ -3,7 +3,7 @@
 *	FILE TO OBTAIN TRAINING DATA FOR SIMPATHS
 *
 *	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 20/01/2026 (JV)
+*	LAST EDIT: 20/02/2026 (JV)
 *
 *******************************************************************************/
 
@@ -185,7 +185,7 @@ save "$dir_data/temp10", replace
 
 // adjust continuous variables
 foreach vv of varlist yEmpPersGrossMonth yNonBenPersGrossMonth yMiscPersGrossMonth yPersAndPartnerGrossDiffMonth wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue ///
-yDispMonth yCapitalPersMonth yPensPersGrossMonth careHrsFormal careHrsFromPartner careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal aidhrs {
+yDispMonth yCapitalPersMonth yPensPersGrossMonth careHrsFormal careHrsInformal careFormalX {
 	gen tmp = `vv'
 	order tmp, a(`vv')
 	recode tmp (0=.)
@@ -195,8 +195,7 @@ yDispMonth yCapitalPersMonth yPensPersGrossMonth careHrsFormal careHrsFromPartne
 	drop `vv'
 	rename tmp `vv'
 }
-foreach vv of varlist yEmpPersGrossMonth yNonBenPersGrossMonth yMiscPersGrossMonth yCapitalPersMonth yPensPersGrossMonth careHrsFormal careHrsFromPartner careHrsFromDaughter ///
-careHrsFromSon careHrsFromOther careCareFormal aidhrs {
+foreach vv of varlist yEmpPersGrossMonth yNonBenPersGrossMonth yMiscPersGrossMonth yCapitalPersMonth yPensPersGrossMonth careHrsFormal careHrsInformal careFormalX {
 	replace `vv' = 0 if (`vv'<0.0)
 }
 gen tmp = ln(labWageHrly)
@@ -224,8 +223,7 @@ foreach vv of varlist demRgn yHhQuintilesMonthC5 wealthPrptyFlag wgtHhCross weal
 /**************************************************************************************
 *	export training data
 *************************************************************************************/
-recode demMaleFlag wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag careHrsFormal careHrsFromPartner ///
-careHrsFromDaughter careHrsFromSon careHrsFromOther careCareFormal aidhrs careWho (-9=0)
+recode demMaleFlag wealthTotValue wealthPensValue wealthPrptyValue wealthMortgageDebtValue careNeedFlag careHrsFormal careHrsInformal careFormalX (-9=0)
 export delimited using "$dir_data/training_population_initial_UK_$wealthEndYear.csv", nolabel replace
 
 

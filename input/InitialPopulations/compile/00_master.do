@@ -85,6 +85,7 @@ ssc install carryforward
 ssc install outreg2
 ssc install filelist
 ssc install gologit2
+ssc install estout
 */
 
 clear all
