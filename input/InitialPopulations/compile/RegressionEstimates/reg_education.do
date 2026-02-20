@@ -25,7 +25,7 @@ log using "${dir_log}/reg_education.log", replace
 * Set Excel file 
 
 * Info sheet
-putexcel set "$dir_results/reg_education_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_education", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of education status"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
@@ -51,7 +51,7 @@ putexcel B10 = "Estimation sample: UK_ipop.dta with grossing up weight dwt"
 putexcel B11 = "Conditions for processes are defined as globals in master.do"
 //putexcel B12 = "E1a: Compared to the previous version, where age and age squared were used, age is now centered (at age 23) and its effect is allowed to change after age 18." 
 
-putexcel set "$dir_results/reg_education_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_education", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold	
 
 
@@ -63,9 +63,6 @@ use "${estimation_sample}", clear
 * Set data 
 xtset idperson swv
 sort idperson swv 
-
-* Remove children 
-drop if dag < 16
 
 * Adjust variables 
 do "${dir_do}/variable_update.do"
@@ -173,14 +170,14 @@ if min_ratio < 1.0e-12 {
 display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 * Export into Excel 
-putexcel set "$dir_results/reg_education_UK", sheet("E1a") modify
+putexcel set "$dir_results/reg_education", sheet("E1a") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
 preserve
-putexcel set "$dir_results/reg_education_UK", sheet("E1a") modify 	
+putexcel set "$dir_results/reg_education", sheet("E1a") modify 	
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -250,7 +247,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_education_UK", sheet("E1a") modify 	
+    putexcel set "$dir_results/reg_education", sheet("E1a") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -286,7 +283,7 @@ end
 restore 
 	
 * Export model fit statistics
-putexcel set "$dir_results/reg_education_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_education", sheet("Gof") modify
 
 putexcel A3 = "E1a - Leaving education", bold		
 
@@ -407,14 +404,14 @@ if min_ratio < 1.0e-12 {
 display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 * Export into Excel 
-putexcel set "$dir_results/reg_education_UK", sheet("E1b") modify
+putexcel set "$dir_results/reg_education", sheet("E1b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
 preserve 
-putexcel set "$dir_results/reg_education_UK", sheet("E1b") modify 	
+putexcel set "$dir_results/reg_education", sheet("E1b") modify 	
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -484,7 +481,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_education_UK", sheet("E1b") modify 	
+    putexcel set "$dir_results/reg_education", sheet("E1b") modify 	
 		
 	* Vertical labels
     summarize n, meanonly
@@ -521,7 +518,7 @@ end
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_education_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_education", sheet("Gof") modify
 
 putexcel A8 = "E1b - Returning to education", bold		
 
@@ -585,7 +582,7 @@ matrix b = e(b)
 matrix V = e(V)
 
 * Raw output 
-putexcel set "$dir_results/reg_education_UK", sheet("E2_raw") modify
+putexcel set "$dir_results/reg_education", sheet("E2_raw") modify
 putexcel A1 = matrix(b'), names nformat(number_d2) 
 putexcel A1 =  "CATEGORY"
 putexcel B1 =  "REGRESSOR"
@@ -692,7 +689,7 @@ end
 matrix list nonzero_b_structure
 
 * Export into Excel 
-putexcel set "$dir_results/reg_education_UK", sheet("E2") modify
+putexcel set "$dir_results/reg_education", sheet("E2") modify
 putexcel A1 = matrix(nonzero_b_structure'), names //nformat(number_d2) 
 
 
@@ -749,7 +746,7 @@ end
 matrix list nonzero_var_structure
 
 * Export to Excel 
-putexcel set "$dir_results/reg_education_UK", sheet("E2") modify 
+putexcel set "$dir_results/reg_education", sheet("E2") modify 
 putexcel C2 = matrix(nonzero_var_structure)
 
 *=======================================================================
@@ -785,7 +782,7 @@ display "Min/Max ratio: " min_ratio
 * Labels
 preserve
 
-putexcel set "$dir_results/reg_education_UK", sheet("E2") modify
+putexcel set "$dir_results/reg_education", sheet("E2") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -838,7 +835,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_education_UK", sheet("E2") modify
+    putexcel set "$dir_results/reg_education", sheet("E2") modify
 	
 	* Vertical labels
     sum n, meanonly
@@ -873,7 +870,7 @@ restore
 
 * Goodness of fit
 
-putexcel set "$dir_results/reg_education_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_education", sheet("Gof") modify
 
 putexcel A13 = "E2 - Education attainment", bold		
 

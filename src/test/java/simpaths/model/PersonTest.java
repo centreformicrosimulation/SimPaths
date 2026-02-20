@@ -471,7 +471,7 @@ public class PersonTest {
         class EducationTests {
 
             private static final int MIN_AGE_TO_LEAVE_EDUCATION = 16;
-            private static final int MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION = 29;
+            private static final int MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION = 29;
 
             private SimPathsModel mockModel;
             private Innovations mockInnovations;
@@ -530,10 +530,10 @@ public class PersonTest {
             private void setupEducationLevelRegressionMock(double draw) {
                 Mockito.when(mockInnovations.getDoubleDraw(30)).thenReturn(draw);
 
-                Map<Education, Double> mockProbs = new HashMap<>();
-                mockProbs.put(Education.Low, 0.3);
-                mockProbs.put(Education.Medium, 0.3);
-                mockProbs.put(Education.High, 0.4);
+                Map<EducationLevel, Double> mockProbs = new HashMap<>();
+                mockProbs.put(EducationLevel.Low, 0.3);
+                mockProbs.put(EducationLevel.Medium, 0.3);
+                mockProbs.put(EducationLevel.High, 0.4);
 
                 managerRegressionsMock.when(() ->
                                 ManagerRegressions.getProbabilities(Mockito.any(Person.class), Mockito.eq(RegressionName.EducationE2)))
@@ -593,7 +593,7 @@ public class PersonTest {
             @Test
             @DisplayName("E2 Trigger: Lagged Student, at Max Age (Forced Exit)")
             void triggersE2FromMaxAge() {
-                testPerson.setDemAge(MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION + 1);
+                testPerson.setDemAge(MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 1);
                 testPerson.setLes_c4_lag1(Les_c4.Student);
 
                 assertFalse(testPerson.inSchool());
@@ -651,53 +651,53 @@ public class PersonTest {
             @Test
             @DisplayName("OUTCOME F (First Spell): Adopts New Level (Low -> High)")
             void firstSpellAdoptsNewLevel() {
-                testPerson.setDeh_c3(Education.Low);
+                testPerson.setDeh_c4(Education.Low);
                 testPerson.setDer(Indicator.False);
 
                 setupEducationLevelRegressionMock(0.9); // -> High
 
                 testPerson.setEducationLevel();
 
-                assertEquals(Education.High, testPerson.getDeh_c3());
+                assertEquals(Education.High, testPerson.getDeh_c4());
             }
 
             @Test
             @DisplayName("OUTCOME F (Return Spell Improvement): Adopts New, Higher Level")
             void returnSpellAdoptsHigherLevel() {
-                testPerson.setDeh_c3(Education.Low);
+                testPerson.setDeh_c4(Education.Low);
                 testPerson.setDer(Indicator.True);
 
                 setupEducationLevelRegressionMock(0.5); // -> Medium
 
                 testPerson.setEducationLevel();
 
-                assertEquals(Education.Medium, testPerson.getDeh_c3());
+                assertEquals(Education.Medium, testPerson.getDeh_c4());
             }
 
             @Test
             @DisplayName("OUTCOME G (Return Spell Downgrade): Retains Current Level")
             void returnSpellRetainsCurrentLevelOnDowngrade() {
-                testPerson.setDeh_c3(Education.Medium);
+                testPerson.setDeh_c4(Education.Medium);
                 testPerson.setDer(Indicator.True);
 
                 setupEducationLevelRegressionMock(0.2); // -> Low
 
                 testPerson.setEducationLevel();
 
-                assertEquals(Education.Medium, testPerson.getDeh_c3());
+                assertEquals(Education.Medium, testPerson.getDeh_c4());
             }
 
             @Test
             @DisplayName("OUTCOME G (Return Spell Same Level): Retains Current Level")
             void returnSpellRetainsCurrentLevelOnSameLevel() {
-                testPerson.setDeh_c3(Education.Medium);
+                testPerson.setDeh_c4(Education.Medium);
                 testPerson.setDer(Indicator.True);
 
                 setupEducationLevelRegressionMock(0.5); // -> Medium
 
                 testPerson.setEducationLevel();
 
-                assertEquals(Education.Medium, testPerson.getDeh_c3());
+                assertEquals(Education.Medium, testPerson.getDeh_c4());
             }
 
             // ----------------------- leavingSchool() -----------------------
@@ -707,7 +707,7 @@ public class PersonTest {
             void successfulExitExecution() {
                 testPerson.setToLeaveSchool(true);
                 testPerson.setDemAge(20);
-                testPerson.setDeh_c3(Education.Low);
+                testPerson.setDeh_c4(Education.Low);
                 testPerson.setDed(Indicator.True);
                 testPerson.setDer(Indicator.False);
                 testPerson.setLes_c4(Les_c4.Student);
@@ -722,7 +722,7 @@ public class PersonTest {
                 assertEquals(Indicator.False, testPerson.getDer());
                 assertTrue(testPerson.isLeftEducation());
                 assertEquals(Les_c4.NotEmployed, testPerson.getLes_c4());
-                assertEquals(Education.Medium, testPerson.getDeh_c3());
+                assertEquals(Education.Medium, testPerson.getDeh_c4());
                 assertEquals(Indicator.True, testPerson.getSedex());
             }
 
@@ -731,12 +731,12 @@ public class PersonTest {
             void noExecution() {
                 testPerson.setToLeaveSchool(false);
                 testPerson.setLes_c4(Les_c4.EmployedOrSelfEmployed);
-                testPerson.setDeh_c3(Education.High);
+                testPerson.setDeh_c4(Education.High);
 
                 testPerson.leavingSchool();
 
                 assertEquals(Les_c4.EmployedOrSelfEmployed, testPerson.getLes_c4());
-                assertEquals(Education.High, testPerson.getDeh_c3());
+                assertEquals(Education.High, testPerson.getDeh_c4());
                 assertFalse(testPerson.isLeftEducation());
                 Mockito.verify(mockInnovations, Mockito.never()).getDoubleDraw(30);
             }

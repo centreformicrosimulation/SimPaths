@@ -25,7 +25,7 @@ log using "${dir_log}/reg_health.log", replace
 
 * Info sheet
 
-putexcel set "$dir_results/reg_health_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_health", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection self-reported health status"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
@@ -50,7 +50,7 @@ putexcel B15 = "Estimation sample: UK_ipop.dta with grossing up weight dwt"
 putexcel B16 = "Conditions for processes are defined as globals in master.do"
 putexcel B17 = "Combined former processes H1a and H1b"
 
-putexcel set "$dir_work/reg_health", sheet("Gof") modify
+putexcel set "$dir_results/reg_health", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold	
 
 
@@ -62,9 +62,6 @@ use "${estimation_sample}", clear
 * Set data 
 xtset idperson swv
 sort idperson swv 
-
-* Remove children 
-drop if dag < 16
 
 * Adjust variables 
 do "${dir_do}/variable_update.do"
@@ -122,7 +119,7 @@ matrix b = e(b)
 matrix V = e(V)
 
 * Raw output 
-putexcel set "$dir_results/reg_health_UK", sheet("H1_raw") modify
+putexcel set "$dir_results/reg_health", sheet("H1_raw") modify
 putexcel A1 = matrix(b'), names nformat(number_d2) 
 putexcel A1 =  "CATEGORY"
 putexcel B1 =  "REGRESSOR"
@@ -231,7 +228,7 @@ end
 matrix list nonzero_b_structure
 
 * Export into Excel 
-putexcel set "$dir_results/reg_health_UK", sheet("H1") modify
+putexcel set "$dir_results/reg_health", sheet("H1") modify
 putexcel A1 = matrix(nonzero_b_structure'), names nformat(number_d2) 
 
 
@@ -287,7 +284,7 @@ end
 matrix list nonzero_var_structure
 
 * Export to Excel 
-putexcel set "$dir_results/reg_health_UK", sheet("H1") modify
+putexcel set "$dir_results/reg_health", sheet("H1") modify
 putexcel C2 = matrix(nonzero_var_structure)
 	
 *=======================================================================
@@ -322,7 +319,7 @@ display "Min/Max ratio: " min_ratio
 			
 * Labels
 preserve
-putexcel set "$dir_results/reg_health_UK", sheet("H1") modify
+putexcel set "$dir_results/reg_health", sheet("H1") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -374,7 +371,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_health_UK", sheet("H1") modify
+    putexcel set "$dir_results/reg_health", sheet("H1") modify
 	
 	* Vertical labels
     sum n, meanonly
@@ -409,7 +406,7 @@ restore
     
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_health_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_health", sheet("Gof") modify
 
 putexcel A3 = "H1 - Health status", bold		
 
@@ -520,13 +517,13 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_health_UK", sheet("H2") modify
+putexcel set "$dir_results/reg_health", sheet("H2") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
-putexcel set "$dir_results/reg_health_UK", sheet("H2") modify
+putexcel set "$dir_results/reg_health", sheet("H2") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -569,7 +566,7 @@ import delimited "$dir_results/temp_labels.txt", clear varnames(1) encoding(utf8
 gen n = _n
 
 * Export to Excel (vertical layout in column A)
-putexcel set "$dir_results/reg_health_UK", sheet("H2") modify
+putexcel set "$dir_results/reg_health", sheet("H2") modify
 summarize n, meanonly
 local N = r(max) + 1
 forvalue i = 2/`N' {
@@ -595,7 +592,7 @@ erase "$dir_results/temp_labels.txt"
 
 
 * Export model fit statistics	
-putexcel set "$dir_results/reg_health_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_health", sheet("Gof") modify
 
 putexcel A15 = "H2-Long-term sick/disabled or on disability benefits", bold		
 putexcel A17 = "Pseudo R-squared" 

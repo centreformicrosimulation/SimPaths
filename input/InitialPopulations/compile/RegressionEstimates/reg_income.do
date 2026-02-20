@@ -31,7 +31,7 @@ log using "${dir_log}/reg_income.log", replace
 
 * Set Excel file 
 * Info sheet
-putexcel set "$dir_results/reg_income_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_income", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estiamtes used by processes I1 (capital income), I2 (private pension, retired last year), I3 (private pension income, not retired last year) "
 putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
@@ -90,9 +90,6 @@ merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(g
 * Set data 
 xtset idperson swv
 sort idperson swv 
-
-* Remove children 
-drop if dag < 16
 
 * adjust capital income 
 sum ypncp, det
@@ -223,7 +220,7 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_income_UK", sheet("I1a") modify
+putexcel set "$dir_results/reg_income", sheet("I1a") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
@@ -231,7 +228,7 @@ putexcel C2 = matrix(V_trimmed)
 * Labels 
 preserve 
 
-putexcel set "$dir_results/reg_income_UK", sheet("I1a") modify
+putexcel set "$dir_results/reg_income", sheet("I1a") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -305,7 +302,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_income_UK", sheet("I1a") modify 	
+    putexcel set "$dir_results/reg_income", sheet("I1a") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -341,7 +338,7 @@ end
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_income_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
 
 putexcel A3 = ///
 	"I1a - Receiving capital income ", ///
@@ -474,7 +471,7 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_income_UK", sheet("I1b") modify
+putexcel set "$dir_results/reg_income", sheet("I1b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
@@ -482,7 +479,7 @@ putexcel C2 = matrix(V_trimmed)
 * Labels 
 preserve 
 
-putexcel set "$dir_results/reg_income_UK", sheet("I1b") modify
+putexcel set "$dir_results/reg_income", sheet("I1b") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -556,7 +553,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_income_UK", sheet("I1b") modify 	
+    putexcel set "$dir_results/reg_income", sheet("I1b") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -602,12 +599,12 @@ preserve
 keep if receives_ypncp == 1
 sum squared_residuals [w = dwt]
 di "RMSE for Amount of capital income" sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A6 = ("I1b") B6 = (sqrt(r(mean))) 
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_income_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
 
 putexcel A9 = "I1b - Capital income amount", ///
 	bold		
@@ -732,7 +729,7 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_income_UK", sheet("I2b") modify
+putexcel set "$dir_results/reg_income", sheet("I2b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
@@ -740,7 +737,7 @@ putexcel C2 = matrix(V_trimmed)
 * Labels 
 preserve 
 
-putexcel set "$dir_results/reg_income_UK", sheet("I2b") modify
+putexcel set "$dir_results/reg_income", sheet("I2b") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -814,7 +811,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_income_UK", sheet("I2b") modify 	
+    putexcel set "$dir_results/reg_income", sheet("I2b") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -859,12 +856,12 @@ preserve
 keep if receives_ypncp == 1
 sum squared_residuals [w = dwt]
 di "RMSE for Amount of private pension income" sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A7 = ("I2b") B7 = (sqrt(r(mean))) 
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_income_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
 
 putexcel A15 = ///
 	"I2b - Private Pension income amount", ///
@@ -986,7 +983,7 @@ if min_ratio < 1.0e-12 {
 display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 * Export into Excel 
-putexcel set "$dir_results/reg_income_UK", sheet("I3a") modify
+putexcel set "$dir_results/reg_income", sheet("I3a") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
@@ -994,7 +991,7 @@ putexcel C2 = matrix(V_trimmed)
 * Labels 
 preserve 
 
-putexcel set "$dir_results/reg_income_UK", sheet("I3a") modify
+putexcel set "$dir_results/reg_income", sheet("I3a") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -1068,7 +1065,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_income_UK", sheet("I3a") modify 	
+    putexcel set "$dir_results/reg_income", sheet("I3a") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -1104,7 +1101,7 @@ end
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_income_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
 
 putexcel A21 = ///
 	"I3a - Receiving private pension income", ///
@@ -1235,7 +1232,7 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_income_UK", sheet("I3b") modify
+putexcel set "$dir_results/reg_income", sheet("I3b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
@@ -1243,7 +1240,7 @@ putexcel C2 = matrix(V_trimmed)
 * Labels 
 preserve 
 
-putexcel set "$dir_results/reg_income_UK", sheet("I3b") modify
+putexcel set "$dir_results/reg_income", sheet("I3b") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -1317,7 +1314,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_income_UK", sheet("I3b") modify 	
+    putexcel set "$dir_results/reg_income", sheet("I3b") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -1362,12 +1359,12 @@ preserve
 keep if receives_ypncp == 1
 sum squared_residuals [w = dwt]
 di "RMSE for Amount of private pension income" sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A8 = ("I3b") B8 = (sqrt(r(mean))) 
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_income_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_income", sheet("Gof") modify
 
 putexcel A27 = ///
 	"I3b - Private Pension income amount", ///

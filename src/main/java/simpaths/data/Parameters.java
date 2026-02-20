@@ -143,7 +143,6 @@ public class Parameters {
 		"idFather", 			        //id of father
 		"idMother", 			        //id of mother
 		"demAge", 					    //age
-		"eduHighestC3", 				//highest education level
 		"eduHighestC4", 				//highest education incl. initial education spell
 		"eduHighestMotherC3",			//highest education level of mother
 		"eduHighestFatherC3",			//highest education level of father
@@ -1496,7 +1495,7 @@ public class Parameters {
         // Education
         regEducationE1a = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1a);
         regEducationE1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceEducationE1b);
-        regEducationE2 = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, Education.class, coeffCovarianceEducationE2);
+        regEducationE2 = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, EducationLevel.class, coeffCovarianceEducationE2);
 
         //Partnership
         if (country.equals(Country.UK)) {

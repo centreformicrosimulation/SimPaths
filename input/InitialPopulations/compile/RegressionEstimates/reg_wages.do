@@ -37,7 +37,7 @@ log using "${dir_log}/reg_wages.log", replace
 *****************************************************************************************************************************
 * Set Excel file 
 * Info sheet - first stage 
-putexcel set "$dir_results/reg_employment_selection_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_employment_selection", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estimates from the first stage of the Heckman selection model used to estimates wages."
 putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
@@ -60,7 +60,7 @@ putexcel B12 = "Predicted wages used as input into union parameters and income p
 putexcel B13 = "Two-step Heckman command is used which does not permit weights"
 
 * Info sheet - second stage 
-putexcel set "$dir_results/reg_wages_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_wages", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estimates used to calculate potential wages for males and females in the simulation."
 putexcel A2 = "Authors:	Patryk Bronka, Daria Popova, Aleksandra Kolndrekaj" 
@@ -106,9 +106,6 @@ use "${estimation_sample}", clear
 * Set data 
 xtset idperson swv
 sort idperson swv 
-
-* Remove children 
-drop if dag < 16
 
 * Adjust variables 
 do "${dir_do}/variable_update.do"
@@ -366,14 +363,14 @@ drop AG-BL // UPDATE
 
 
 mkmat *, matrix(Females_NLW)
-putexcel set "$dir_results/reg_wages_UK", sheet("W1fa") modify 
+putexcel set "$dir_results/reg_wages", sheet("W1fa") modify 
 putexcel B2 = matrix(Females_NLW)
 
 restore 
 
 
 * Labelling 
-putexcel set "$dir_results/reg_wages_UK", ///
+putexcel set "$dir_results/reg_wages", ///
 	sheet("W1fa") modify 
 
 local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
@@ -423,14 +420,14 @@ drop BM // UPDATE
 
 
 mkmat *, matrix(Females_NLW)
-putexcel set "$dir_results/reg_employment_selection_UK", ///
+putexcel set "$dir_results/reg_employment_selection", ///
 	sheet("W1fa-sel") modify 
 putexcel B2 = matrix(Females_NLW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1fa-sel") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1fa-sel") modify 
 	
 local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Na Deh_c4_Medium Deh_c4_Low Deh_c4_Na_Dag Deh_c4_Medium_Dag ///
 	Deh_c4_Low_Dag  Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
@@ -476,7 +473,7 @@ preserve
 keep if `filter'
 sum squared_residuals 
 di "RMSE for Not employed women:  " sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
 A2=("W1fa") B2=(sqrt(r(mean))) 
 restore 
@@ -662,14 +659,14 @@ drop AG-BL // UPDATE
 
 
 mkmat *, matrix(Males_NLW)
-putexcel set "$dir_results/reg_wages_UK", ///
+putexcel set "$dir_results/reg_wages", ///
 	sheet("W1ma") modify 
 putexcel B2 = matrix(Males_NLW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_wages_UK", ///
+putexcel set "$dir_results/reg_wages", ///
 	sheet("W1ma") modify 
 
 local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
@@ -719,14 +716,14 @@ drop BM // UPDATE
 
 
 mkmat *, matrix(Males_NLW)
-putexcel set "$dir_results/reg_employment_selection_UK", ///
+putexcel set "$dir_results/reg_employment_selection", ///
 	sheet("W1ma-sel") modify 
 putexcel B2 = matrix(Males_NLW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employment_selection_UK", ///
+putexcel set "$dir_results/reg_employment_selection", ///
 	sheet("W1ma-sel") modify 
 	
 local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
@@ -772,7 +769,7 @@ preserve
 keep if `filter'
 sum squared_residuals 
 di "RMSE for Not employed men:  " sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
 A3=("W1ma") B3=(sqrt(r(mean))) 
 restore 
@@ -954,13 +951,13 @@ drop A
 drop AH-BK // UPDATE
 
 mkmat *, matrix(Females_LW)
-putexcel set "$dir_results/reg_wages_UK", sheet("W1fb") modify 
+putexcel set "$dir_results/reg_wages", sheet("W1fb") modify 
 putexcel B2 = matrix(Females_LW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_wages_UK", ///
+putexcel set "$dir_results/reg_wages", ///
 	sheet("W1fb") modify 
 
 local var_list L1_log_hourly_wage Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
@@ -1008,13 +1005,13 @@ drop C-AG // UPDATE
 drop BL // UPDATE
 
 mkmat *, matrix(Females_LW)
-putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1fb-sel") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1fb-sel") modify 
 putexcel B2 = matrix(Females_LW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1fb-sel") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1fb-sel") modify 
 	
 local var_list Dag Dag_sq Deh_c4_High Deh_c4_Medium Deh_c4_Low Deh_c4_Na Deh_c4_Medium_Dag ///
 	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
@@ -1060,7 +1057,7 @@ preserve
 keep if `filter'
 sum squared_residuals 
 di "RMSE for Employed women:  " sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
 A4=("W1fb") B4=(sqrt(r(mean))) 
 restore 
@@ -1243,13 +1240,13 @@ drop AH-BK // UPDATE
 
 
 mkmat *, matrix(Males_LW)
-putexcel set "$dir_results/reg_wages_UK", sheet("W1mb") modify 
+putexcel set "$dir_results/reg_wages", sheet("W1mb") modify 
 putexcel B2 = matrix(Males_LW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_wages_UK", ///
+putexcel set "$dir_results/reg_wages", ///
 	sheet("W1mb") modify 
 
 local var_list L1_log_hourly_wage Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
@@ -1297,13 +1294,13 @@ drop C-AG // UPDATE
 drop BL // UPDATE
 
 mkmat *, matrix(Males_LW)
-putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1mb-sel") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1mb-sel") modify 
 putexcel B2 = matrix(Males_LW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employment_selection_UK", sheet("W1mb-sel") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1mb-sel") modify 
 	
 local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
 	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs_L1 Dhe_Mcs_L1  ///
@@ -1349,7 +1346,7 @@ preserve
 keep if `filter'
 sum squared_residuals 
 di "RMSE for Employed men:  " sqrt(r(mean))
-putexcel set "$dir_results/reg_RMSE_UK.xlsx", sheet("UK") modify
+putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
 A5=("W1mb") B5=(sqrt(r(mean))) 
 restore 

@@ -70,11 +70,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private Indicator demAdultChildFlag;
     @Transient private boolean demIoFlag;         // true if a dummy person instantiated for IO decision solution
     @Enumerated(EnumType.STRING) private Gender demMaleFlag;             // gender
-    @Enumerated(EnumType.STRING) private Education eduHighestC3;       //Education level
-    @Column(name = "eduHighestC4") private String eduHighestC4;       //Education level incl. education spell category
-    @Transient private Education eduHighestC3L1;  //Lag(1) of education level
-    @Enumerated(EnumType.STRING) private Education eduHighestMotherC3;      //Mother's education level
-    @Enumerated(EnumType.STRING) private Education eduHighestFatherC3;      //Father's education level
+    @Enumerated(EnumType.STRING) private Education eduHighestC4;       //Education level (4 categories incl. in education)
+    @Transient private Education eduHighestC4L1;  //Lag(1) of education level
+    @Enumerated(EnumType.STRING) private Education eduHighestMotherC4;      //Mother's education level
+    @Enumerated(EnumType.STRING) private Education eduHighestFatherC4;      //Father's education level
     @Enumerated(EnumType.STRING) private Ethnicity demEthnC6;          //Ethnicity
     @Enumerated(EnumType.STRING) private Indicator eduSpellFlag;          // in continuous education
     @Enumerated(EnumType.STRING) private Indicator eduSpellFlagL1;          // in continuous education
@@ -107,7 +106,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // partner lags
     @Transient private Dcpst demPartnerStatusL1;            // lag partnership status
     @Transient private Dcpst demPartnerStatusL2;            // lag (2) partnership status
-    @Transient private Education eduHighestPartnerC3L1;     //Lag(1) of partner's education
+    @Transient private Education eduHighestPartnerC4L1;     //Lag(1) of partner's education
     @Transient private Dhe healthPartnerSelfRatedL1;
     @Transient private Lesdf_c4 labStatusPartnerAndOwnC4L1;      //Lag(1) of own and partner's activity status
     @Transient private Long idPartnerL1;
@@ -257,13 +256,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demEnterSample = SampleEntry.Birth;
         demMaleFlag = gender;
         idMother = mother.getId();
-        eduHighestMotherC3 = mother.getDeh_c3();
+        eduHighestMotherC4 = mother.getDeh_c4();
         if (mother.getPartner()==null) {
             idFather = null;
-            eduHighestFatherC3 = mother.getDeh_c3();
+            eduHighestFatherC4 = mother.getDeh_c4();
         } else {
             idFather = mother.getPartner().getId();
-            eduHighestFatherC3 = mother.getPartner().getDeh_c3();
+            eduHighestFatherC4 = mother.getPartner().getDeh_c4();
         }
 
         labEmpNyear = 0;
@@ -287,7 +286,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         healthMentalMcs = 48.;
         healthPhysicalPcs = 56.;
         demLifeSatScore0to10 = 6.;
-        eduHighestC3 = Education.Low;
+        eduHighestC4 = Education.InEducation;
         demEthnC6 = mother.getDot01();
         labC4 = Les_c4.Student;				//Set lag activity status as Student, i.e. in education from birth
         eduLeftEduFlag = false;
@@ -339,17 +338,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demAgeSq = demAge * demAge;
         demAgeGroup = originalPerson.demAgeGroup;
         demMaleFlag = originalPerson.demMaleFlag;
-        eduHighestC3 = originalPerson.eduHighestC3;
+        eduHighestC4 = originalPerson.eduHighestC4;
 
-        if (originalPerson.eduHighestC3L1 != null) { //If original person misses lagged level of education, assign current level of education
-            eduHighestC3L1 = originalPerson.eduHighestC3L1;
+        if (originalPerson.eduHighestC4L1 != null) { //If original person misses lagged level of education, assign current level of education
+            eduHighestC4L1 = originalPerson.eduHighestC4L1;
         } else {
-            eduHighestC3L1 = eduHighestC3;
+            eduHighestC4L1 = eduHighestC4;
         }
 
-        eduHighestFatherC3 = originalPerson.eduHighestFatherC3;
-        eduHighestMotherC3 = originalPerson.eduHighestMotherC3;
-        eduHighestPartnerC3L1 = originalPerson.eduHighestC3L1;
+        eduHighestFatherC4 = originalPerson.eduHighestFatherC4;
+        eduHighestMotherC4 = originalPerson.eduHighestMotherC4;
+        eduHighestPartnerC4L1 = originalPerson.eduHighestC4L1;
 
         // set eduSpellFlag
         if (originalPerson.demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION) { //If under age to leave education, set flag for being in education to true
@@ -865,13 +864,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                 double prob;
                 if (demMaleFlag.equals(Gender.Male)) {
-                    if (eduHighestC3.equals(Education.High)) {
+                    if (eduHighestC4.equals(Education.High)) {
                         prob = Parameters.getRegUnemploymentMaleGraduateU1a().getProbability(this, Person.DoublesVariables.class);
                     } else {
                         prob = Parameters.getRegUnemploymentMaleNonGraduateU1b().getProbability(this, Person.DoublesVariables.class);
                     }
                 } else {
-                    if (eduHighestC3.equals(Education.High)) {
+                    if (eduHighestC4.equals(Education.High)) {
                         prob = Parameters.getRegUnemploymentFemaleGraduateU1c().getProbability(this, Person.DoublesVariables.class);
                     } else {
                         prob = Parameters.getRegUnemploymentFemaleNonGraduateU1d().getProbability(this, Person.DoublesVariables.class);
@@ -2053,9 +2052,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // --- Step 1: Regression Result ---
         // The regression determines the highest possible qualification achieved this spell.
-        Map<Education,Double> probs = Parameters.getRegEducationE2().getProbabilities(this, Person.DoublesVariables.class);
+        Map<EducationLevel,Double> probs = Parameters.getRegEducationE2().getProbabilities(this, Person.DoublesVariables.class);
         MultiValEvent event = new MultiValEvent(probs, statInnovations.getDoubleDraw(30));
-        Education newEducationLevel = (Education) event.eval();
+        EducationLevel regressionEducationLevel = (EducationLevel) event.eval();
+        Education newEducationLevel = Education.valueOf(regressionEducationLevel.name());
 
         //Education has been set to Low by default for all new born babies, so it should never be null.
         //This is because we no longer prevent people in school to get married, given that people can re-enter education throughout their lives.
@@ -2069,14 +2069,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             model.medEd++;
         } else if (newEducationLevel.equals(Education.High)) {
             model.highEd++;
+        } else if (newEducationLevel.equals(Education.InEducation)) {
+            model.inEd++;
         } else {
             model.nothing++;
         }
 
         // --- Step 3: process E2 in the diagaram ---
-        if(eduHighestC3 != null) {
-            if(newEducationLevel.ordinal() > eduHighestC3.ordinal()) {		//Assume Education level cannot decrease after re-entering school.
-                eduHighestC3 = newEducationLevel;
+        if (eduHighestC4 != null) {
+            if (newEducationLevel.getRank() > eduHighestC4.getRank()) { // highest qualification cannot decrease
+                eduHighestC4 = newEducationLevel;
             }
         } /*else {
             // retain old level -> deh_c3 remains the same
@@ -2162,7 +2164,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private void updateOutputVariables() {
         idPartner = getPartnerID();
         demPartnerStatus = getDcpst();
-        eduHighestC4 = calculateEduHighestC4();
     }
 
     private void updateLaggedVariables(boolean initialUpdate) {
@@ -2184,7 +2185,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         careHrsProvidedWeekL1 = careHrsProvidedWeek;
         careProvidedFlagL1 = careProvidedFlag;
         labWageOfferLowFlagL1 = getLowWageOffer();
-        eduHighestC3L1 = eduHighestC3; //Update lag(1) of education level
+        eduHighestC4L1 = eduHighestC4; //Update lag(1) of education level
         eduSpellFlagL1 = eduSpellFlag ; //Update lag(1) of education level
         yNonBenPersGrossMonthL1 = getyNonBenPersGrossMonth(); //Update lag(1) of gross personal non-benefit income
         labHrsWorkEnumWeekL1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
@@ -2228,13 +2229,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         // partner variables
         Person partner = getPartner();
         if (partner!=null) {
-            eduHighestPartnerC3L1 = partner.eduHighestC3;
+            eduHighestPartnerC4L1 = partner.eduHighestC4;
             healthPartnerSelfRatedL1 = partner.healthSelfRated;
             demPartnerStatusL1 = Dcpst.Partnered;
             demAgePartnerDiffL1 = demAge - partner.demAge;
             idPartnerL1 = partner.getId();
         } else {
-            eduHighestPartnerC3L1 = null;
+            eduHighestPartnerC4L1 = null;
             healthPartnerSelfRatedL1 = null;
             demAgePartnerDiffL1 = null;
             demPartnerStatusL1 = getDcpst();
@@ -3636,52 +3637,52 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (double) eduSpellFlagL1.getValue() ;
             }
             case Deh_c3_High, Deh_c4_High -> {
-                return (Education.High.equals(eduHighestC3)) ? 1.0 : 0.0;
+                return (Education.High.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
             case Deh_c4_High_L1 -> {
-                return (Education.High.equals(eduHighestC3L1)) ? 1.0 : 0.0;
+                return (Education.High.equals(eduHighestC4L1)) ? 1.0 : 0.0;
             }
             case Deh_c3_Medium, Deh_c4_Medium, Deh_c3_Medium_Mixed, Deh_c3_Medium_Formal -> {
-                return (Education.Medium.equals(eduHighestC3)) ? 1.0 : 0.0;
+                return (Education.Medium.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
             case Deh_c3_Medium_L1, Deh_c4_Medium_L1 -> {
-                return (Education.Medium.equals(eduHighestC3L1)) ? 1.0 : 0.0;
+                return (Education.Medium.equals(eduHighestC4L1)) ? 1.0 : 0.0;
             }
             case Deh_c3_Low, Deh_c4_Low, Deh_c3_Low_Mixed, Deh_c3_Low_Formal -> {
-                return (Education.Low.equals(eduHighestC3)) ? 1.0 : 0.0;
+                return (Education.Low.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
             case Deh_c4_Low_Dag -> {
-                return (Education.Low.equals(eduHighestC3)) ? demAge : 0.0;
+                return (Education.Low.equals(eduHighestC4)) ? demAge : 0.0;
             }
             case Deh_c3_Low_L1, Deh_c4_Low_L1 -> {
-                return (Education.Low.equals(eduHighestC3L1)) ? 1.0 : 0.0;
+                return (Education.Low.equals(eduHighestC4L1)) ? 1.0 : 0.0;
             }
             case Deh_c4_Medium_Dag -> {
-                return (Education.Medium.equals(eduHighestC3)) ? demAge : 0.0;
+                return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
             }
             case Deh_c4_Na -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
+                return (Education.InEducation.equals(eduHighestC4) || Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
             }
             case Deh_c4_Na_L1 -> {
-                return (Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
+                return (Education.InEducation.equals(eduHighestC4L1) || Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
             }
             case Dehm_c3_High -> {
-                return (Education.High.equals(eduHighestMotherC3)) ? 1.0 : 0.0;
+                return (Education.High.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
             }
             case Dehm_c3_Medium -> {
-                return (Education.Medium.equals(eduHighestMotherC3)) ? 1.0 : 0.0;
+                return (Education.Medium.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
             }
             case Dehm_c3_Low -> {
-                return (Education.Low.equals(eduHighestMotherC3)) ? 1.0 : 0.0;
+                return (Education.Low.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
             }
             case Dehf_c3_High -> {
-                return (Education.High.equals(eduHighestFatherC3)) ? 1.0 : 0.0;
+                return (Education.High.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
             }
             case Dehf_c3_Medium -> {
-                return (Education.Medium.equals(eduHighestFatherC3)) ? 1.0 : 0.0;
+                return (Education.Medium.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
             }
             case Dehf_c3_Low -> {
-                return (Education.Low.equals(eduHighestFatherC3)) ? 1.0 : 0.0;
+                return (Education.Low.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
             }
             case Dehmf_c3_High -> {
                 return (checkHighestParentalEducationEquals(Education.High)) ? 1.0 : 0.0;
@@ -3699,10 +3700,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (checkHighestParentalEducationEquals(Education.Low)) ? 1.0 : 0.0;
             }
             case Dehsp_c3_Medium_L1 -> {
-                return (Education.Medium.equals(eduHighestPartnerC3L1)) ? 1. : 0.;
+                return (Education.Medium.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
             }
             case Dehsp_c3_Low_L1 -> {
-                return (Education.Low.equals(eduHighestPartnerC3L1)) ? 1. : 0.;
+                return (Education.Low.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
             }
             case He_eq5d -> {
                 return getDemLifeSatEQ5D();
@@ -3972,7 +3973,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else return 0.;
             }
             case UnemploymentRate -> {
-                return getUnemploymentRateByGenderEducationAgeYear(getDemMaleFlag(), getDeh_c3(), getDemAge(), getYear());
+                return getUnemploymentRateByGenderEducationAgeYear(getDemMaleFlag(), getDeh_c4(), getDemAge(), getYear());
             }
             case Union -> {
                 return HouseholdStatus.Couple.equals(getHouseholdStatus()) ? 1. : 0.;
@@ -4285,10 +4286,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (demStatusHhL1.equals(HouseholdStatus.Couple) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
             }
             case EduMediumIT -> {
-                return (eduHighestC3.equals(Education.Medium) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
+                return (eduHighestC4.equals(Education.Medium) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
             }
             case EduHighIT -> {
-                return (eduHighestC3.equals(Education.High) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
+                return (eduHighestC4.equals(Education.High) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
             }
 
             case Reached_Retirement_Age -> {
@@ -4426,10 +4427,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
             case Deh_c3_Low_Dag -> {
-                return (Education.Low.equals(eduHighestC3)) ? demAge : 0.0;
+                return (Education.Low.equals(eduHighestC4)) ? demAge : 0.0;
             }
             case Deh_c3_Medium_Dag -> {
-                return (Education.Medium.equals(eduHighestC3)) ? demAge : 0.0;
+                return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
             }
             //Italy
             case ITC -> {
@@ -4648,17 +4649,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @PreUpdate
     private void syncDemAgeSq() {
         demAgeSq = demAge * demAge;
-        eduHighestC4 = calculateEduHighestC4();
-    }
-
-    private String calculateEduHighestC4() {
-        if ("InEducation".equals(eduHighestC4)) {
-            return "InEducation";
-        }
-        if (eduHighestC3 == null) {
-            return null;
-        }
-        return eduHighestC3.name();
     }
 
      public int getPersonCount() {
@@ -4702,8 +4692,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public int getEducation() {
 
-        if (eduHighestC3 ==Education.Medium) return 1;
-        else if (eduHighestC3 ==Education.High) return (int)(DecisionParams.PTS_EDUCATION - 1.0);
+        if (eduHighestC4 == Education.Medium) return 1;
+        else if (eduHighestC4 == Education.High) return (int)(DecisionParams.PTS_EDUCATION - 1.0);
         else return 0;
     }
 
@@ -4749,36 +4739,32 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return benefitUnit.getCoupleDummy();
     }
 
-    public Education getDeh_c3() {
-        return eduHighestC3;
-    }
-
-    public String getEduHighestC4() {
+    public Education getDeh_c4() {
         return eduHighestC4;
     }
 
-    public void setDeh_c3(Education eduHighestC3) {
-         this.eduHighestC3 = eduHighestC3;
+    public void setDeh_c4(Education eduHighestC4) {
+         this.eduHighestC4 = eduHighestC4;
      }
 
-    public void setDeh_c3_lag1(Education eduHighestC3L1) {
-         this.eduHighestC3L1 = eduHighestC3L1;
+    public void setDeh_c4_lag1(Education eduHighestC4L1) {
+         this.eduHighestC4L1 = eduHighestC4L1;
      }
 
-    public Education getDehm_c3() {
-        return eduHighestMotherC3;
+    public Education getDehm_c4() {
+        return eduHighestMotherC4;
     }
 
-    public void setDehm_c3(Education eduHighestMotherC3) {
-        this.eduHighestMotherC3 = eduHighestMotherC3;
+    public void setDehm_c4(Education eduHighestMotherC4) {
+        this.eduHighestMotherC4 = eduHighestMotherC4;
     }
 
-    public Education getDehf_c3() {
-        return eduHighestFatherC3;
+    public Education getDehf_c4() {
+        return eduHighestFatherC4;
     }
 
-    public void setDehf_c3(Education eduHighestFatherC3) {
-        this.eduHighestFatherC3 = eduHighestFatherC3;
+    public void setDehf_c4(Education eduHighestFatherC4) {
+        this.eduHighestFatherC4 = eduHighestFatherC4;
     }
 
     public Indicator getDed() {
@@ -4799,8 +4785,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
 
     public int getLowEducation() {
-        if(eduHighestC3 != null) {
-            if (eduHighestC3.equals(Education.Low)) return 1;
+        if(eduHighestC4 != null) {
+            if (eduHighestC4.equals(Education.Low)) return 1;
             else return 0;
         }
         else {
@@ -4809,8 +4795,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public int getMidEducation() {
-        if(eduHighestC3 != null) {
-            if (eduHighestC3.equals(Education.Medium)) return 1;
+        if(eduHighestC4 != null) {
+            if (eduHighestC4.equals(Education.Medium)) return 1;
             else return 0;
         }
         else {
@@ -4819,8 +4805,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public int getHighEducation() {
-        if(eduHighestC3 != null) {
-            if (eduHighestC3.equals(Education.High)) return 1;
+        if(eduHighestC4 != null) {
+            if (eduHighestC4.equals(Education.High)) return 1;
             else return 0;
         }
         else {
@@ -4829,7 +4815,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public void setEducation(Education educationlevel) {
-        this.eduHighestC3 = educationlevel;
+        this.eduHighestC4 = educationlevel;
     }
 
     public int getGoodHealth() {
@@ -5407,8 +5393,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yNonBenPersGrossMonthL1 = val;
     }
 
-    public void setDehsp_c3_lag1(Education eduHighestPartnerC3L1) {
-        this.eduHighestPartnerC3L1 = eduHighestPartnerC3L1;
+    public void setDehsp_c4_lag1(Education eduHighestPartnerC4L1) {
+        this.eduHighestPartnerC4L1 = eduHighestPartnerC4L1;
     }
 
     public void setDhesp_lag1(Dhe healthPartnerSelfRatedL1) {
@@ -5830,7 +5816,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
         } else {
-            log.debug("inverse Mills ratio is not finite, return 0 instead!!!   IMR: " + inverseMillsRatio + ", score: " + score/* + ", num: " + num + ", denom: " + denom*/ + ", age: " + demAge + ", gender: " + demMaleFlag + ", education " + eduHighestC3 + ", activity_status from previous time-step " + labC4);
+            log.debug("inverse Mills ratio is not finite, return 0 instead!!!   IMR: " + inverseMillsRatio + ", score: " + score/* + ", num: " + num + ", denom: " + denom*/ + ", age: " + demAge + ", gender: " + demMaleFlag + ", education " + eduHighestC4 + ", activity_status from previous time-step " + labC4);
             return 0.;
         }
         return inverseMillsRatio;		//XXX: Currently only returning non-zero IMR if it is finite
@@ -6008,15 +5994,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     private boolean checkHighestParentalEducationEquals(Education ee) {
-        if (eduHighestFatherC3 !=null && eduHighestMotherC3 !=null) {
-            if (eduHighestFatherC3.getValue() > eduHighestMotherC3.getValue())
-                return ee.equals(eduHighestFatherC3);
+        if (eduHighestFatherC4 !=null && eduHighestMotherC4 !=null) {
+            if (eduHighestFatherC4.getValue() > eduHighestMotherC4.getValue())
+                return ee.equals(eduHighestFatherC4);
             else
-                return ee.equals(eduHighestMotherC3);
-        } else if (eduHighestFatherC3 !=null) {
-            return ee.equals(eduHighestFatherC3);
+                return ee.equals(eduHighestMotherC4);
+        } else if (eduHighestFatherC4 !=null) {
+            return ee.equals(eduHighestFatherC4);
         } else {
-            return ee.equals(eduHighestMotherC3);
+            return ee.equals(eduHighestMotherC4);
         }
     }
 
@@ -6072,13 +6058,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case WageOffer1 -> {
                 if (Gender.Male.equals(demMaleFlag)) {
-                    if (Education.High.equals(eduHighestC3L1)) {
+                    if (Education.High.equals(eduHighestC4L1)) {
                         return RegressionName.UnemploymentU1a;
                     } else {
                         return RegressionName.UnemploymentU1b;
                     }
                 } else {
-                    if (Education.High.equals(eduHighestC3L1)) {
+                    if (Education.High.equals(eduHighestC4L1)) {
                         return RegressionName.UnemploymentU1c;
                     } else {
                         return RegressionName.UnemploymentU1d;

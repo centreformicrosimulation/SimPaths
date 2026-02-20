@@ -28,15 +28,12 @@ use ${estimation_sample}, clear
 xtset idperson swv
 sort idperson swv 
 
-* Add household income/poverty/employment transition variables (this needs to
-* happen before children are removed, so the entire household is represented!)
-do "${dir_do}/variable_update_legacy.do"
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+/* DP: Household income/poverty/employment transition variables are moved to variable_update.do */
 
 * Remove children 
 drop if dag < 16
-
-* Adjust variables 
-do "${dir_do}/variable_update.do"
 
 **********************************************************************
 * HM1_L: GHQ12 score 0-36 of all working-age adults - baseline effects *
@@ -46,7 +43,7 @@ logit financial_distress ///
 ib11.exp_emp  i.lhw_c5 D.log_income i.exp_incchange ib0.exp_poverty L.ypncp L.ypnoab ///
 L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01  L.financial_distress ///
 i.dgn L.dag L.dagsq i.deh_c3 i.dot stm ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , vce(cluster idperson)
 
    * save raw results 

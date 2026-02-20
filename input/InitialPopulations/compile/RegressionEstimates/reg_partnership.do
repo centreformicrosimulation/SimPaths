@@ -26,7 +26,7 @@ log using "${dir_log}/reg_partnership.log", replace
 
 * Info sheet
 
-putexcel set "$dir_results/reg_partnership_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_partnership", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters for relationship status projection"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
@@ -44,7 +44,7 @@ putexcel B10 = "Estimation sample: UK_ipop.dta with grossing up weight dwt"
 putexcel B11 = "Conditions for processes are defined as globals in master.do"
 putexcel B12 = "Combined former processes U1a and U1b"
 
-putexcel set "$dir_results/reg_partnership_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
 
@@ -57,9 +57,6 @@ use "${estimation_sample}", clear
 * Set data 
 xtset idperson swv
 sort idperson swv 
-
-* Remove children 
-drop if dag < 16
 
 * Adjust variables 
 do "${dir_do}/variable_update.do"
@@ -172,14 +169,14 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_partnership_UK", sheet("U1") modify
+putexcel set "$dir_results/reg_partnership", sheet("U1") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
 preserve 
-putexcel set "$dir_results/reg_partnership_UK", sheet("U1") modify
+putexcel set "$dir_results/reg_partnership", sheet("U1") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -248,7 +245,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_partnership_UK", sheet("U1") modify 	
+    putexcel set "$dir_results/reg_partnership", sheet("U1") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -285,7 +282,7 @@ restore
 
 	
 * Export model fit statistics
-putexcel set "$dir_results/reg_partnership_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
 
 putexcel A3 = "U1- Partnership formation", bold		
 
@@ -410,14 +407,14 @@ display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 
 * Export into Excel 
-putexcel set "$dir_results/reg_partnership_UK", sheet("U2") modify
+putexcel set "$dir_results/reg_partnership", sheet("U2") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
 * Labels 
 preserve 
-putexcel set "$dir_results/reg_partnership_UK", sheet("U2") modify
+putexcel set "$dir_results/reg_partnership", sheet("U2") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -486,7 +483,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_partnership_UK", sheet("U2") modify 	
+    putexcel set "$dir_results/reg_partnership", sheet("U2") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -523,7 +520,7 @@ restore
 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_partnership_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_partnership", sheet("Gof") modify
 
 putexcel A8 = "U2 - Partnership termination", bold		
 

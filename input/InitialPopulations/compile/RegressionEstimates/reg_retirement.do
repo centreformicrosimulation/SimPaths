@@ -25,7 +25,7 @@ log using "${dir_log}/reg_retirement.log", replace
 
 * Info sheet
 
-putexcel set "$dir_results/reg_retirement_UK", sheet("Info") replace
+putexcel set "$dir_results/reg_retirement", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of retirement"
 putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
@@ -43,7 +43,7 @@ putexcel B6 = "Probit regression estimates of the probability of retiring, cohab
 putexcel A10 = "Notes:", bold
 //putexcel B10 = ""
 
-putexcel set "$dir_results/reg_retirement_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_retirement", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
 
@@ -55,9 +55,6 @@ use "${estimation_sample}", clear
 * Set data 
 xtset idperson swv
 sort idperson swv 
-
-* Remove children 
-drop if dag < 16
 
 * Adjust variables 
 do "${dir_do}/variable_update.do"
@@ -165,13 +162,13 @@ if min_ratio < 1.0e-12 {
 display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 * Export into Excel 
-putexcel set "$dir_results/reg_retirement_UK", sheet("R1a") modify
+putexcel set "$dir_results/reg_retirement", sheet("R1a") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 * Labels 
 preserve 
-putexcel set "$dir_results/reg_retirement_UK", sheet("R1a") modify
+putexcel set "$dir_results/reg_retirement", sheet("R1a") modify
 
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
@@ -240,7 +237,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_retirement_UK", sheet("R1a") modify 	
+    putexcel set "$dir_results/reg_retirement", sheet("R1a") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -276,7 +273,7 @@ end
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_retirement_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_retirement", sheet("Gof") modify
 
 putexcel A3 = "R1a - Retirement single", bold		
 
@@ -404,13 +401,13 @@ if min_ratio < 1.0e-12 {
 display "Stability Check Passed. Min/Max ratio: " min_ratio
 
 * Export into Excel 
-putexcel set "$dir_results/reg_retirement_UK", sheet("R1b") modify
+putexcel set "$dir_results/reg_retirement", sheet("R1b") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 * Labels 
 preserve 
-putexcel set "$dir_results/reg_retirement_UK", sheet("R1b") modify
+putexcel set "$dir_results/reg_retirement", sheet("R1b") modify
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
 
@@ -478,7 +475,7 @@ end
 	gen n = _n
     
     * Export labels to Excel
-    putexcel set "$dir_results/reg_retirement_UK", sheet("R1b") modify 	
+    putexcel set "$dir_results/reg_retirement", sheet("R1b") modify 	
 	
 	* Vertical labels
     summarize n, meanonly
@@ -514,7 +511,7 @@ end
 restore 
 
 * Export model fit statistics
-putexcel set "$dir_results/reg_retirement_UK", sheet("Gof") modify
+putexcel set "$dir_results/reg_retirement", sheet("Gof") modify
 
 putexcel A9 = "R1b - Retirement partnered", bold		
 

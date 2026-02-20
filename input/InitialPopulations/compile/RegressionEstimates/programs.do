@@ -1,7 +1,11 @@
 
 /*==============================================================================
-	MATA FUNCTIONS - Define all Mata functions at the top
+	MATA FUNCTIONS - Define all Mata functions 
 ==============================================================================*/
+mata:
+mata clear
+mata set matastrict off
+end
 
 mata:
 mata clear

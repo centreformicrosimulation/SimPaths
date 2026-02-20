@@ -2,7 +2,7 @@
 * PROJECT:  		SimPaths UK
 * SECTION:			SOCIAL CARE RECEIPT
 * AUTHORS:			Justin van de Ven, Matteo Richiardi, Daria Popova 
-* LAST UPDATE:		19 Jan 2026 DP  
+* LAST UPDATE:		19 Feb 2026 DP  
 * COUNTRY: 			UK  
 *
 *   NOTES: 		
@@ -95,13 +95,9 @@ putexcel A1 = "Goodness of fit", bold
 
 
 
-
 /*==============================================================================
 	MAIN ANALYSIS
 ==============================================================================*/
-
-
-/********************************* PREPARE DATA *******************************/
 
 use ${estimation_sample}, clear
 
@@ -109,219 +105,8 @@ use ${estimation_sample}, clear
 gsort idperson stm
 xtset idperson stm
 
-* Care received variables (Processes S2)
-
-rename need_socare need_care
-
-gen receive_formal_care = formal_socare_hrs > 0
-gen receive_informal_care = (partner_socare_hrs + daughter_socare_hrs + son_socare_hrs + other_socare_hrs) > 0
-gen receive_care = max(receive_informal_care, receive_formal_care)
-
-gen CareMarket = .
-replace CareMarket = 1 if (receive_informal_care == 0 & receive_formal_care == 0)
-replace CareMarket = 2 if (receive_informal_care == 1 & receive_formal_care == 0)
-replace CareMarket = 3 if (receive_informal_care == 1 & receive_formal_care == 1)
-replace CareMarket = 4 if (receive_informal_care == 0 & receive_formal_care == 1)
-
-lab def labCareMarket 1 "None" 2 "Informal" 3 "Mixed" 4 "Formal"
-lab val CareMarket labCareMarket
-
-gen HrsReceivedFormalIHS = asinh(formal_socare_hrs)
-cap drop informal_socare_hrs
-gen informal_socare_hrs = partner_socare_hrs + daughter_socare_hrs + son_socare_hrs + other_socare_hrs
-gen HrsReceivedInformalIHS = asinh(informal_socare_hrs)
-
-
-* Care provided variables (Processes S3)
-
-gen HrsProvidedInformalIHS = asinh(careHoursProvidedWeekly)
-gen provide_informal_care = (careWho >= 1)
-
-* Age variables 
-* - Categorical: 15-19, 20-24, ..., 80-84, 85+  
-gen dage5 = 0
-forval ii = 1/14 {
-	replace dage5 = `ii' if (dag>=15+5*(`ii'-1) & dag<=19+5*(`ii'-1))
-}
-replace dage5 = 15 if (dag >= 85)
-//table dage5, stat(min dag) stat(max dag)
-tabstat dag, by(dage5) stats(min max)
-
-* - Categorical: <35, 35-44, 45-54, 55-64, 65+ 
-gen dage10prime = 0
-replace dage10prime = 1 if (dag>34 & dag<45)
-replace dage10prime = 2 if (dag>44 & dag<55)
-replace dage10prime = 3 if (dag>54 & dag<65)
-replace dage10prime = 4 if (dag>64)
-//table dage10prime, stat(min dag) stat(max dag)
-table dage10prime, c(min dag max dag)
-
-* - Categorical: 65-66, 67-68, 69-70, 71-72..., 85+
-gen dage2old = 0
-forval ii = 1/10 {
-	replace dage2old = `ii' if (dag >= 65+2*(`ii'-1) & dag < 67+2*(`ii'-1))
-}
-replace dage2old = 11 if (dag >= 85)
-//table dage2old, stat(min dag) stat(max dag)
-table dage2old, c(min dag max dag)
-
-* Poor health flag
-gen poor_health = (dhe == 1)
-
-* Adjust for missing values
-replace need_care = . if (need_care<0)
-foreach var of varlist formal_socare_hrs partner_socare_hrs daughter_socare_hrs son_socare_hrs other_socare_hrs {
-	replace `var' = 0 if (`var' < 0)
-}
-
-* Prepare vars for automatic labelling
-xtset idperson stm
-gen Dgn = dgn
-gen Year = stm
-gen YearSquared = stm^2
-gen Age = dag
-gen AgeSquared = dag^2
-
-tab dage5, gen(Age_)
-//table dage5, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-tabstat dag, by(dage5) stats(min max)
-drop Age_1 Age_2
-rename Age_3 Age20to24
-rename Age_4 Age25to29
-rename Age_5 Age30to34
-rename Age_6 Age35to39
-rename Age_7 Age40to44
-rename Age_8 Age45to49
-rename Age_9 Age50to54
-rename Age_10 Age55to59
-rename Age_11 Age60to64
-rename Age_12 Age65to69
-rename Age_13 Age70to74
-rename Age_14 Age75to79
-rename Age_15 Age80to84
-rename Age_16 Age85plus
-
-tab dage10prime, gen(Age_)
-//table dage10prime, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-table dage10prime, c(min dag max dag)	
-drop Age_1
-rename Age_2 Age35to44
-rename Age_3 Age45to54
-rename Age_4 Age55to64
-rename Age_5 Age65plus
-
-tab dage2old, gen(Age_)
-//table dage2old, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-table dage2old, c(min dag max dag)
-drop Age_1	
-rename Age_2 Age65to66
-rename Age_3 Age67to68
-rename Age_4 Age69to70
-rename Age_5 Age71to72
-rename Age_6 Age73to74
-rename Age_7 Age75to76
-rename Age_8 Age77to78
-rename Age_9 Age79to80
-rename Age_10 Age81to82
-rename Age_11 Age83to84
-drop Age_12
-
-tab deh_c3, gen(Deh_c3_)
-rename Deh_c3_1 Deh_c3_High
-rename Deh_c3_2 Deh_c3_Medium
-rename Deh_c3_3 Deh_c3_Low
-
-tab deh_c4, gen(Deh_c4_)
-rename Deh_c4_1 Deh_c4_Na
-rename Deh_c4_2 Deh_c4_High
-rename Deh_c4_3 Deh_c4_Medium
-rename Deh_c4_4 Deh_c4_Low
-
-tab dhe, gen(Dhe_)
-rename Dhe_1 Dhe_Poor
-rename Dhe_2 Dhe_Fair
-rename Dhe_3 Dhe_Good
-rename Dhe_4 Dhe_VeryGood
-rename Dhe_5 Dhe_Excellent
-
-tab dcpst, gen(Dcpst_)
-rename Dcpst_1 Partnered
-rename Dcpst_2 Single
-
-tab drgn1, gen(UK)
-rename UK1 UKC
-rename UK2 UKD
-rename UK3 UKE
-rename UK4 UKF
-rename UK5 UKG
-rename UK6 UKH
-rename UK7 UKI
-rename UK8 UKJ
-rename UK9 UKK
-rename UK10 UKL
-rename UK11 UKM
-rename UK12 UKN
-
-tab dot, gen(dot_)
-rename dot_1 Ethn_White
-rename dot_2 Ethn_Asian
-rename dot_3 Ethn_Black
-rename dot_4 Ethn_Other
-
-gen Y2020 = (stm == 2020)
-gen Y2021 = (stm == 2021)
-gen Y2022 = (stm == 2022)
-
-gen NeedCare = need_care
-gen ReceiveCare = receive_care
-gen ProvideCare = provide_informal_care
-
-tab CareMarket
-gen CareMarketInformal = (CareMarket == 2)
-gen CareMarketMixed = (CareMarket == 3)
-gen CareMarketFormal = (CareMarket == 4)
-
-tab ydses_c5, gen(HHincomeQ)
-
-gen NeedCare_L1 = L.NeedCare
-gen ReceiveCare_L1 = L.ReceiveCare
-gen CareMarketFormal_L1 = L.CareMarketFormal
-gen CareMarketInformal_L1 = L.CareMarketInformal
-gen CareMarketMixed_L1 = L.CareMarketMixed
-gen HrsReceivedFormalIHS_L1 = L.HrsReceivedFormalIHS
-gen HrsReceivedInformalIHS_L1 = L.HrsReceivedInformalIHS
-gen ProvideCare_L1 = L.ProvideCare
-gen HrsProvidedInformalIHS_L1 = L.HrsProvidedInformalIHS
-
-* Add partner's outcome variables
-preserve
-drop if idpartner == -9
-keep idperson stm NeedCare ReceiveCare CareMarketFormal CareMarketInformal CareMarketMixed
-rename idperson idpartner
-rename NeedCare NeedCarePartner
-rename ReceiveCare ReceiveCarePartner
-rename CareMarketFormal CareMarketFormalPartner
-rename CareMarketInformal CareMarketInformalPartner
-rename CareMarketMixed CareMarketMixedPartner
-save "$dir_work/partner.dta", replace
-restore
-
-merge m:1 idpartner stm using "$dir_work/partner.dta"
-assert _merge == 1 if idpartner == -9
-drop _merge
-
-tab dhesp, gen(Dhesp_)
-rename Dhesp_1 Dhesp_Poor
-rename Dhesp_2 Dhesp_Fair
-rename Dhesp_3 Dhesp_Good
-rename Dhesp_4 Dhesp_VeryGood
-rename Dhesp_5 Dhesp_Excellent
-
-erase "$dir_work/partner.dta"
-
-
 * Adjust variables 
-//do "${dir_do}/variable_update.do"
+do "${dir_do}/variable_update.do"
 
 * Run Stata programs to produce Excel file 
 do "${dir_do}/programs.do" 
@@ -738,7 +523,6 @@ scalar drop _all
 matrix drop _all
 
 
-
 /******************** OLS informal care hours received (S2d) ******************/
 
 reg HrsReceivedInformalIHS HrsReceivedInformalIHS_L1 CareMarketMixed Dgn ///
@@ -747,9 +531,8 @@ reg HrsReceivedInformalIHS HrsReceivedInformalIHS_L1 CareMarketMixed Dgn ///
 	Partnered ///
 	Deh_c4_Medium Deh_c4_Low ///
 	HHincomeQ2 HHincomeQ3 HHincomeQ4 HHincomeQ5 ///
-	Y2020 Y2021 ${regions} ${ethnicity} ///
+	Y2020 Y2021 ${regions} /*${ethnicity} Ethn_White*/ ///
 	if ${s2d_if_condition} [pweight=${weight}], vce(r)
-
 	
 process_regression, process("S2d") sheet("S2d") ///
 	title("Process S2d: Informal care hours received") ///
@@ -773,7 +556,6 @@ putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A9 = ("S2d") B9 = (rmse)
 
 restore	
-
 
 /********************* OLS formal care hours received (S2e) *******************/
 

@@ -1274,6 +1274,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				TimeSeriesSimulationPlotter supplyPlotter = new TimeSeriesSimulationPlotter("Labour supply by education", "Yearly hours worked");		//'yo' means "years old"
 				int colorCounter = 0;
 				for(Education edu: Education.values()) {
+					if (Education.InEducation.equals(edu)) {
+						continue;
+					}
 					FlexibleInLabourSupplyByEducationFilter eduFilter = new FlexibleInLabourSupplyByEducationFilter(edu);
 					Weighted_CrossSection.Double supplyCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getLabourSupplyHoursYearly", true);
 					supplyCS.setFilter(eduFilter);
@@ -1296,14 +1299,17 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					earningsPlotter = new IndividualBarSimulationPlotter("Yearly Gross Earnings by Education and Region (excludes non-workers)", "Euro");
 				}
 
-				for(Region region: Parameters.getCountryRegions()) {
-		    		for(Education edu: Education.values()) {
-						RegionEducationWorkingCSfilter regionEduWorkingFilter = new RegionEducationWorkingCSfilter(region, edu);
-						Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true);
-						wagesCS.setFilter(regionEduWorkingFilter);
-						earningsPlotter.addSources("(" + region.getName() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), colorOfEducation(edu));
+					for(Region region: Parameters.getCountryRegions()) {
+			    		for(Education edu: Education.values()) {
+							if (Education.InEducation.equals(edu)) {
+								continue;
+							}
+							RegionEducationWorkingCSfilter regionEduWorkingFilter = new RegionEducationWorkingCSfilter(region, edu);
+							Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true);
+							wagesCS.setFilter(regionEduWorkingFilter);
+							earningsPlotter.addSources("(" + region.getName() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), colorOfEducation(edu));
+						}
 					}
-				}
 				earningsPlotter.setName("Gross Earnings");
 			    updateChartSet.add(earningsPlotter);			//Add to set to be updated in buildSchedule method
 				tabSet.add(earningsPlotter);
@@ -1319,16 +1325,19 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				else {
 					grossEarningsByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("Yearly Gross Earnings by Gender And Education", "Euro");
 				}
-				for(Education edu: Education.values()) {
-					for (Gender gender : Gender.values()) {
-						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
-						Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true); // Note: these are nominal values for each simulated year
-						wagesCS.setFilter(genderEducationWorkingFilter);
-						grossEarningsByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
-						grossEarningsByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("grossEarnings_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
-						colorCounter++;
+					for(Education edu: Education.values()) {
+						if (Education.InEducation.equals(edu)) {
+							continue;
+						}
+						for (Gender gender : Gender.values()) {
+							GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
+							Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true); // Note: these are nominal values for each simulated year
+							wagesCS.setFilter(genderEducationWorkingFilter);
+							grossEarningsByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
+							grossEarningsByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("grossEarnings_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
+							colorCounter++;
+						}
 					}
-				}
 				grossEarningsByGenderAndEducationPlotter.setName("Gross Earnings by Gender / Education");
 				updateChartSet.add(grossEarningsByGenderAndEducationPlotter);
 				tabSet.add(grossEarningsByGenderAndEducationPlotter);
@@ -1343,16 +1352,19 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				else {
 					hourlyWagesByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("Hourly Wages by Gender And Education", "Euro");
 				}
-				for(Education edu: Education.values()) {
-					for (Gender gender : Gender.values()) {
-						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
-						Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHourlyWageRate1", true); // Note: these are nominal values for each simulated year
-						wagesCS.setFilter(genderEducationWorkingFilter);
-						hourlyWagesByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
-						hourlyWagesByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("hourlyWage_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
-						colorCounter++;
+					for(Education edu: Education.values()) {
+						if (Education.InEducation.equals(edu)) {
+							continue;
+						}
+						for (Gender gender : Gender.values()) {
+							GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
+							Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHourlyWageRate1", true); // Note: these are nominal values for each simulated year
+							wagesCS.setFilter(genderEducationWorkingFilter);
+							hourlyWagesByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
+							hourlyWagesByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("hourlyWage_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
+							colorCounter++;
+						}
 					}
-				}
 				hourlyWagesByGenderAndEducationPlotter.setName("Hourly Wages by Gender / Education");
 				updateChartSet.add(hourlyWagesByGenderAndEducationPlotter);
 				tabSet.add(hourlyWagesByGenderAndEducationPlotter);
@@ -1478,6 +1490,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					EDIByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("EDI by Gender And Education", "Euro");
 				}
 				for(Education edu: Education.values()) {
+					if (Education.InEducation.equals(edu)) {
+						continue;
+					}
 					for (Gender gender : Gender.values()) {
 						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
 						Weighted_CrossSection.Double EDIWorkingCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getEquivalisedDisposableIncomeYearly", true); // Note: these are nominal values for each simulated year
@@ -1507,6 +1522,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					DispIncByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("Disp income by Gender And Education", "Euro");
 				}
 				for(Education edu: Education.values()) {
+					if (Education.InEducation.equals(edu)) {
+						continue;
+					}
 					for (Gender gender : Gender.values()) {
 						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
 						Weighted_CrossSection.Double DispIncWorkingCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDisposableIncomeMonthly", true); // Note: these are nominal values for each simulated year
@@ -1629,6 +1647,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 		}
 		else if(edu.equals(Education.High)) {
 			return Color.WHITE;
+		}
+		else if(edu.equals(Education.InEducation)) {
+			return Color.GRAY;
 		}
 		else throw new IllegalArgumentException("ERROR - no color is specified for " + edu + " in SimPathsObserver class!");
 	}
