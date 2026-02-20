@@ -97,7 +97,7 @@ public class Parameters {
         "bdimbwa",              //Personal Independence Payment mobility
         "bdict01",              //Incapacity Benefit
         "bdict02",              //Contributory Employment and Support Allowance
-        "bsadi_s",              //income-related Employment and Support Allowance
+        "bsadi",                //income-related Employment and Support Allowance
         "bdiwi",                //Industrial injuries pension
         "bdisv",                //Severe Disablement Allowance
     };
@@ -109,89 +109,89 @@ public class Parameters {
 		"ils_dispy",			//Disposable income : from EUROMOD output data after tax / benefit transfers (monthly demYear-scale)
 		"ils_benmt",			//EUROMOD output variable: income list: monetary benefits
 		"ils_bennt",			//EUROMOD output variable: income list: non-monetary benefits
-        "bsauc_s",               //EUROMOD output variable: simulated UC receipt
+        "bsauc_s",              //EUROMOD output variable: simulated UC receipt
         "bho_s",
         "bwkmt_s",
         "bfamt_s",
         "bunct_s",
         "bsa_s",
-        "bsadi_s"
+        "bsadi_s",
     };
 
     public static final String[] HOUSEHOLD_VARIABLES_INITIAL = new String[] {
-		"idHh",				//id of household (can contain multiple benefit units)
+		"idHh",				            //id of household (can contain multiple benefit units)
     };
 
     public static final String[] BENEFIT_UNIT_VARIABLES_INITIAL = new String[] {
-		"idHh",				//id of household (can contain multiple benefit units)
-		"idBu",	//id of a benefit unit
-		"demRgn", 			//demRgn (NUTS1)
-        "yDispMonth",         //disposable income
-		"yHhQuintilesMonthC5",			//household income quantile
-		"wealthPrptyFlag",		//flag indicating if benefit unit owns a house
-		"wealthTotValue",	    //benefit unit total net wealth (includes pensions assets and housing)
-        "wealthPensValue",   //benefit unit total private (personal and occupational) pensions
-        "wealthPrptyValue",   //benefit unit value of main home (gross of mortgage debt)
-        "wealthMortgageDebtValue",    //benefit unit value of mortgage debt
+		"idHh",				            //id of household (can contain multiple benefit units)
+		"idBu",	                        //id of a benefit unit
+		"demRgn", 			            //demRgn (NUTS1)
+        "yDispMonth",                   //disposable income
+		"yHhQuintilesMonthC5",	        //household income quantile
+		"wealthPrptyFlag",		        //flag indicating if benefit unit owns a house
+		"wealthTotValue",	            //benefit unit total net wealth (includes pensions assets and housing)
+        "wealthPensValue",              //benefit unit total private (personal and occupational) pensions
+        "wealthPrptyValue",             //benefit unit value of main home (gross of mortgage debt)
+        "wealthMortgageDebtValue",      //benefit unit value of mortgage debt
     };
 
     public static final String[] PERSON_VARIABLES_INITIAL = new String[] {
-		"idHh",					//id of household (can contain multiple benefit units)
-		"idBu",		//id of a benefit unit
-		"idPers", 			//id of person
+		"idHh",					        //id of household (can contain multiple benefit units)
+		"idBu",		                    //id of a benefit unit
+		"idPers", 			            //id of person
 		"wgtHhCross", 					//household dem
-		"idFather", 			//id of father
-		"idMother", 			//id of mother
-		"demAge", 					//age
+		"idFather", 			        //id of father
+		"idMother", 			        //id of mother
+		"demAge", 					    //age
 		"eduHighestC3", 				//highest education level
 		"eduHighestC4", 				//highest education incl. initial education spell
-		"eduHighestMotherC3",				//highest education level of mother
-		"eduHighestFatherC3",				//highest education level of father
+		"eduHighestMotherC3",			//highest education level of mother
+		"eduHighestFatherC3",			//highest education level of father
 		"eduSpellFlag",					//in education dummy
-		"eduReturnFlag",					//return to education dummy
+		"eduReturnFlag",				//return to education dummy
 		"demEthnC4",					//ethnicity
-        "demEthnC6",				//ethnicity 6 categories
-		"healthSelfRated",					//health status
+        "demEthnC6",				    //ethnicity 6 categories
+		"healthSelfRated",				//health status
         "healthMentalMcs",              //mental health - SF12 score MCS
-        "healthPhysicalPcs",              //physical health - SF12 score PCS
-        "healthMentalPartnerMcs",            //mental health - SF12 score MCS (partner)
-        "healthPhysicalPartnerPcs",            //physical health - SF12 score PCS (partner)
-        "healthWbScore0to36",					//mental health status
-		"healthPsyDstrss0to12",				// mental health status 0 to 12
-        "demLifeSatScore0to10",                  //life satisfaction
-        "yFinDstrssFlag",	//financial distress
+        "healthPhysicalPcs",            //physical health - SF12 score PCS
+        "healthMentalPartnerMcs",       //mental health - SF12 score MCS (partner)
+        "healthPhysicalPartnerPcs",     //physical health - SF12 score PCS (partner)
+        "healthWbScore0to36",			//mental health status
+		"healthPsyDstrss0to12",			//mental health status 0 to 12
+        "demLifeSatScore0to10",         //life satisfaction
+        "yFinDstrssFlag",	            //financial distress
 		"demPartnerNYear",				//years in partnership
-		"demAgePartnerDiff",				//partners age difference
+		"demAgePartnerDiff",			//partners age difference
 		"demNChild0to2",				//number children aged 0-2
 		"demNChild",					//number children
-		"yNonBenPersGrossMonth",			//gross personal non-benefit income
+		"yNonBenPersGrossMonth",		//gross personal non-benefit income
 		"yMiscPersGrossMonth",			//gross personal non-employment non-benefit income
-		"yCapitalPersMonth",  				//gross personal capital income
-		"yPensPersGrossMonth",				//gross personal pension (public / occupational) income
+		"yCapitalPersMonth",  			//gross personal capital income
+		"yPensPersGrossMonth",			//gross personal pension (public / occupational) income
 		"yEmpPersGrossMonth",			//gross personal employment income
-		"yPersAndPartnerGrossDiffMonth",			//difference partner income
-		"healthDsblLongtermFlag",				//long-term sick or disabled (we use this -and not healthDsblLongtermFlag- in the DataParser)
-		"eduExitSampleFlag",				//year left education
-		"statInterviewYear",					//system variable - year
-		"statCollectionWave",					//system variable - wave
+		"yPersAndPartnerGrossDiffMonth",//difference partner income
+		"healthDsblLongtermFlag",		//long-term sick or disabled (we use this -and not healthDsblLongtermFlag- in the DataParser)
+		"eduExitSampleFlag",			//year left education
+		"statInterviewYear",			//system variable - year
+		"statCollectionWave",			//system variable - wave
 		"demMaleFlag", 					//demSex
-		"labC4", 				//labour employment status
-		"labHrsWorkWeek", 					//hours worked per week
-        "labHrsWorkWeekL1",               //hours worked per week in the previous year
-		"demAdultChildFlag",		//flag indicating adult child living at home in the data
-		"labWageHrly", //initial value of hourly earnings from the data
-		"labWageHrlyL1", //lag(1) of initial value of hourly earnings from the data
-        "careNeedFlag",          //indicator that the individual needs social care
-        "careHrsFormal",    //number of hours of formal care received
-        "careFormalX",   //cost of formal care received
-        "careHrsInformal",   //number of hours of informal care received
-        "careHrsProvidedWeek", // number of informal care hour provided per week
-        "yBenReceivedFlag",        //indicator of benefit receipt
-        "yBenUCReceivedFlag",     //indicator of UC receipt
-        "yBenNonUCReceivedFlag",  //indicator of other benefit receipt
-        // "labWorkHist",                //Total years in employment since Jan 2007
-		//"yem", 					//employment income
-		//"yse", 					//self-employment income
+		"labC4", 				        //labour employment status
+		"labHrsWorkWeek", 				//hours worked per week
+        "labHrsWorkWeekL1",             //hours worked per week in the previous year
+		"demAdultChildFlag",		    //flag indicating adult child living at home in the data
+		"labWageHrly",                  //initial value of hourly earnings from the data
+		"labWageHrlyL1",                //lag(1) of initial value of hourly earnings from the data
+        "careNeedFlag",                 //indicator that the individual needs social care
+        "careHrsFormal",                //number of hours of formal care received
+        "careFormalX",                  //cost of formal care received
+        "careHrsInformal",              //number of hours of informal care received
+        "careHrsProvidedWeek",          //number of informal care hour provided per week
+        "yBenReceivedFlag",             //indicator of benefit receipt
+        "yBenUCReceivedFlag",           //indicator of UC receipt
+        "yBenNonUCReceivedFlag",        //indicator of other benefit receipt
+        // "labWorkHist",               //Total years in employment since Jan 2007
+		//"yem", 					    //employment income
+		//"yse", 					    //self-employment income
 
 		//From EUROMOD output data before tax / benefit transfers, so not affected by EUROMOD policy scenario (monthly demYear-scale).  We just use them calculated from EUROMOD output because EUROMOD has the correct way of aggregating each country's different component definitions
 		//"ils_earns", 			//EUROMOD output variable:- total labour earnings (employment + self-employment income + potentially other labour earnings like temporary employment, depending on country classification)

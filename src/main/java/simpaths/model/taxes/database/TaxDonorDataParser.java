@@ -216,15 +216,14 @@ public class TaxDonorDataParser {
                             + "ALTER TABLE " + personTableName + " ALTER COLUMN bdimbwa REAL;"
                             + "ALTER TABLE " + personTableName + " ALTER COLUMN bdict01 REAL;"
                             + "ALTER TABLE " + personTableName + " ALTER COLUMN bdict02 REAL;"
-                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bsadi_s REAL;"
                             + "ALTER TABLE " + personTableName + " ALTER COLUMN bdiwi REAL;"
                             + "ALTER TABLE " + personTableName + " ALTER COLUMN bdisv REAL;"
                             + "UPDATE " + personTableName + " SET temp = bdioa + bdisc + bdimb + "
-                            + "bdiscwa + bdimbwa + bdict01 + bdict02 + bsadi_s + bdiwi + bdisv;"
+                            + "bdiscwa + bdimbwa + bdict01 + bdict02 + bsadi + bdiwi + bdisv;"
                             + "ALTER TABLE " + personTableName + " ADD ddi INT DEFAULT 0;"
                             + "UPDATE " + personTableName + " SET ddi = 1 WHERE temp > 0;"
                             + "ALTER TABLE " + personTableName + " DROP COLUMN temp, bdioa, bdisc, "
-                            + "bdimb, bdiscwa, bdimbwa, bdict01, bdict02, bsadi_s, bdiwi, bdisv;"
+                            + "bdimb, bdiscwa, bdimbwa, bdict01, bdict02, bsadi, bdiwi, bdisv;"
             );
             stat.execute(
 
@@ -395,7 +394,7 @@ public class TaxDonorDataParser {
 
         }
         catch(SQLException e) {
-            throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
+            throw new IllegalArgumentException("SQL exception thrown - " + e.getMessage());
         }
         finally {
             try {

@@ -39,10 +39,7 @@ import simpaths.model.lifetime_incomes.BirthCohort;
 import simpaths.model.lifetime_incomes.Individual;
 import simpaths.model.lifetime_incomes.LifetimeIncomeImputation;
 import simpaths.model.lifetime_incomes.ManagerProjectLifetimeIncomes;
-import simpaths.model.taxes.DonorTaxUnit;
-import simpaths.model.taxes.DonorTaxUnitPolicy;
-import simpaths.model.taxes.Match;
-import simpaths.model.taxes.Matches;
+import simpaths.model.taxes.*;
 import simpaths.model.taxes.database.DatabaseExtension;
 import simpaths.model.taxes.database.TaxDonorDataParser;
 
