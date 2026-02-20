@@ -530,10 +530,10 @@ public class PersonTest {
             private void setupEducationLevelRegressionMock(double draw) {
                 Mockito.when(mockInnovations.getDoubleDraw(30)).thenReturn(draw);
 
-                Map<Education, Double> mockProbs = new HashMap<>();
-                mockProbs.put(Education.Low, 0.3);
-                mockProbs.put(Education.Medium, 0.3);
-                mockProbs.put(Education.High, 0.4);
+                Map<EducationLevel, Double> mockProbs = new HashMap<>();
+                mockProbs.put(EducationLevel.Low, 0.3);
+                mockProbs.put(EducationLevel.Medium, 0.3);
+                mockProbs.put(EducationLevel.High, 0.4);
 
                 managerRegressionsMock.when(() ->
                                 ManagerRegressions.getProbabilities(Mockito.any(Person.class), Mockito.eq(RegressionName.EducationE2)))
