@@ -3648,13 +3648,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Deh_c3_Medium_L1, Deh_c4_Medium_L1 -> {
                 return (Education.Medium.equals(eduHighestC4L1)) ? 1.0 : 0.0;
             }
-            case Deh_c3_Low, Deh_c4_Low, Deh_c3_Low_Mixed, Deh_c3_Low_Formal -> {
+            case Deh_c3_Low, Deh_c3_Low_Mixed, Deh_c3_Low_Formal -> {
+                return (Education.Low.equals(eduHighestC4) || Education.InEducation.equals(eduHighestC4)) ? 1.0 : 0.0;
+            }
+            case Deh_c4_Low -> {
                 return (Education.Low.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
             case Deh_c4_Low_Dag -> {
                 return (Education.Low.equals(eduHighestC4)) ? demAge : 0.0;
             }
-            case Deh_c3_Low_L1, Deh_c4_Low_L1 -> {
+            case Deh_c3_Low_L1 -> {
+                return (Education.Low.equals(eduHighestC4L1) || Education.InEducation.equals(eduHighestC4L1)) ? 1.0 : 0.0;
+            }
+            case Deh_c4_Low_L1 -> {
                 return (Education.Low.equals(eduHighestC4L1)) ? 1.0 : 0.0;
             }
             case Deh_c4_Medium_Dag -> {
@@ -3673,7 +3679,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (Education.Medium.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
             }
             case Dehm_c3_Low -> {
-                return (Education.Low.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
+                return (Education.Low.equals(eduHighestMotherC4) || Education.InEducation.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
             }
             case Dehf_c3_High -> {
                 return (Education.High.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
@@ -3694,16 +3700,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (checkHighestParentalEducationEquals(Education.Medium)) ? 1.0 : 0.0;
             }
             case Dehmf_c3_Low -> {
-                return (checkHighestParentalEducationEquals(Education.Low)) ? 1.0 : 0.0;
+                return (checkHighestParentalEducationEquals(Education.Low) || checkHighestParentalEducationEquals(Education.InEducation)) ? 1.0 : 0.0;
             }
             case Dehmf_c3_Low_L1, L_Dehmf_c3_Low_, L_Dehmf_c3_Low -> {
-                return (checkHighestParentalEducationEquals(Education.Low)) ? 1.0 : 0.0;
+                return (checkHighestParentalEducationEquals(Education.Low) || checkHighestParentalEducationEquals(Education.InEducation)) ? 1.0 : 0.0;
             }
             case Dehsp_c3_Medium_L1 -> {
                 return (Education.Medium.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
             }
             case Dehsp_c3_Low_L1 -> {
-                return (Education.Low.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
+                return (Education.Low.equals(eduHighestPartnerC4L1) || Education.InEducation.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
             }
             case He_eq5d -> {
                 return getDemLifeSatEQ5D();
@@ -4427,7 +4433,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
             case Deh_c3_Low_Dag -> {
-                return (Education.Low.equals(eduHighestC4)) ? demAge : 0.0;
+                return (Education.Low.equals(eduHighestC4) || Education.InEducation.equals(eduHighestC4)) ? demAge : 0.0;
             }
             case Deh_c3_Medium_Dag -> {
                 return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
