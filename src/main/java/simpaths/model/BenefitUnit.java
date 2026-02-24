@@ -3182,10 +3182,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_4 -> {
-                return (getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_40 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_1 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -3206,10 +3206,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_4 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_4 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_10 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -3236,10 +3236,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_14 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_14 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_20 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -3266,10 +3266,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_24 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_24 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_30 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -3296,40 +3296,40 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_34 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_34 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_40 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_40 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_41 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_41 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_42 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_42 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_43 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_43 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_44 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_44 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case Liwwh_1 -> {
                 if (Occupancy.Single_Female.equals(getOccupancy())) {
@@ -3616,10 +3616,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleEduM_40 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case MaleEduH_40 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleEduM_1 -> {
                 return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
@@ -3640,10 +3640,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleEduM_4 -> {
-                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case MaleEduH_4 -> {
-                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case FemaleEduM_10 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
@@ -3664,10 +3664,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case FemaleEduM_40 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case FemaleEduH_40 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case FemaleEduM_1 -> {
                 return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
@@ -3688,10 +3688,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case FemaleEduM_4 -> {
-                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case FemaleEduH_4 -> {
-                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleLeisure_dnc02 -> {
                 return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(0,1).ordinal();

@@ -147,7 +147,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     @Enumerated(EnumType.STRING) private Labour labHrsWorkEnumWeek;			//Number of hours of labour supplied each week
     @Transient private Labour labHrsWorkEnumWeekL1; // Lag(1) (previous year's value) of weekly labour supply
-    private Integer labHrsWorkWeek;
+    @Column(name = "HOURS_WORKED_WEEKLY") private Integer labHrsWorkWeek;
     private Integer labHrsWorkWeekL1; // Lag(1) of hours worked weekly - use to initialise labour supply weekly_L1 (TODO)
 
 //	Potential earnings is the gross hourly wage an individual can earn while working
@@ -614,6 +614,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (labHrsWorkEnumWeek ==null)
             labHrsWorkEnumWeek = Labour.convertHoursToLabour(model.getInitialHoursWorkedWeekly().get(key.getId()).intValue()); // TODO: this can be simplified to obtain value from already initialised hours worked weekly variable? The entire database query on setup is redundant? See initialisation of the lag below.
+        if (labHrsWorkWeek == null) {
+            Map<Long, Double> initialHours = model.getInitialHoursWorkedWeekly();
+            if (initialHours != null && initialHours.get(key.getId()) != null) {
+                labHrsWorkWeek = initialHours.get(key.getId()).intValue();
+            } else if (labHrsWorkEnumWeek != null) {
+                // Fallback for processed populations where initial-hours map is unavailable.
+                // Use discretised enum value here to avoid requiring random draws before innovations are initialised.
+                labHrsWorkWeek = labHrsWorkEnumWeek.getValue();
+            }
+        }
         yBenReceivedFlagL1 = yBenReceivedFlag;
         labHrsWorkEnumWeekL1 = Labour.convertHoursToLabour(labHrsWorkWeekL1);
         yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag;
@@ -623,7 +633,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             updateAgeGroup();
         }
 
-        labHrsWorkWeek = null;	//Not to be updated as labourSupplyWeekly contains this information.
         updateVariables(true);
     }
 
@@ -4391,7 +4400,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
             }
             case D_Econ_benefits_UC_Lhw_FORTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.FORTY ? 1. : 0.;
+                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY_EIGHT ? 1. : 0.;
             }
             case D_Home_owner -> {
                 return getBenefitUnit().isHousingOwned() ? 1. : 0.;
@@ -4530,7 +4539,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return getLabourSupplyWeekly().equals(Labour.THIRTY) ? 1. : 0.;
             }
             case Lhw_40 -> {
-                return getLabourSupplyWeekly().equals(Labour.FORTY) ? 1. : 0.;
+                return getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) ? 1. : 0.;
             }
             case Covid19GrossPayMonthly_L1 -> {
                 return getCovidYLabGrossL1();

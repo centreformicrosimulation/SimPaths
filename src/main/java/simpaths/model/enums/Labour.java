@@ -1,6 +1,7 @@
 package simpaths.model.enums;
 
 import microsim.statistics.regression.IntegerValuedEnum;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import simpaths.data.Parameters;
 import simpaths.model.Person;
 
@@ -16,15 +17,32 @@ public enum Labour implements IntegerValuedEnum {
 	TWENTY(20, 16, 25),
 	THIRTY(30, 26, 35),
     THIRTY_EIGHT(38, 36, 40),
-	FORTY(40, 36, Parameters.MAX_LABOUR_HOURS_IN_WEEK),
     FORTY_FIVE(45, 41, 49),
-    FIFTY_FIVE(55, 50, Parameters.MAX_LABOUR_HOURS_IN_WEEK);
+    FIFTY_FIVE(55, true); // Continuous hours for this category are sampled from a log-normal distribution in getHours().
 
-    private final int hours, minBound, maxBound;
+    private static final NormalDistribution STANDARD_NORMAL = new NormalDistribution();
+    private static final double FIFTY_FIVE_LOG_NORMAL_MU = 4.052454;
+    private static final double FIFTY_FIVE_LOG_NORMAL_SD = 0.1668883;
+    private static final int FIFTY_FIVE_MIN_CONTINUOUS_HOURS = 50;
+    private static final double CDF_EPSILON = 1.e-9;
+
+    private final int hours;
+    private final Integer minBound;
+    private final Integer maxBound;
+    private final boolean useLogNormalContinuousHours;
+
     Labour(int hours, int minBound, int maxBound) {
         this.hours = hours;
         this.minBound = minBound;
         this.maxBound = maxBound;
+        this.useLogNormalContinuousHours = false;
+    }
+
+    Labour(int hours, boolean useLogNormalContinuousHours) {
+        this.hours = hours;
+        this.minBound = null;
+        this.maxBound = null;
+        this.useLogNormalContinuousHours = useLogNormalContinuousHours;
     }
 
     @Override
@@ -83,7 +101,13 @@ public enum Labour implements IntegerValuedEnum {
         // There were some cases in BenefitUnit where person can be null but hours of work still needed to be obtained where individual is a single adult and labour key composed of two values needs to be defined.
         // I replaced that with a 0. value, instead of converting a ZERO labour key to hours, so person should never be null.
         // However, added a check for null persons which should result in a default number of hours returned in such cases.
-        if (this != Labour.ZERO && Parameters.USE_CONTINUOUS_LABOUR_SUPPLY_HOURS && person != null) {
+        if (useLogNormalContinuousHours && Parameters.USE_CONTINUOUS_LABOUR_SUPPLY_HOURS && person != null) {
+            double personDrawnValue = person.getLabourSupplySingleDraw();
+            double boundedCdf = Math.max(CDF_EPSILON, Math.min(1.0 - CDF_EPSILON, personDrawnValue));
+            double gauss = STANDARD_NORMAL.inverseCumulativeProbability(boundedCdf);
+            int drawnHours = (int) Math.round(Math.exp(FIFTY_FIVE_LOG_NORMAL_MU + FIFTY_FIVE_LOG_NORMAL_SD * gauss));
+            return Math.max(FIFTY_FIVE_MIN_CONTINUOUS_HOURS, drawnHours);
+        } else if (this != Labour.ZERO && Parameters.USE_CONTINUOUS_LABOUR_SUPPLY_HOURS && person != null) {
 
             // Verify that person's draw is not null. If null, draw a value first.
             double personDrawnValue = person.getLabourSupplySingleDraw();
@@ -98,4 +122,3 @@ public enum Labour implements IntegerValuedEnum {
     }
 
 }
-
