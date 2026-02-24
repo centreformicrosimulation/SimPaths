@@ -538,10 +538,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (originalPerson.labWageFullTimeHrly > Parameters.MIN_HOURLY_WAGE_RATE) {
             labWageFullTimeHrly = Math.min(Parameters.MAX_HOURLY_WAGE_RATE, Math.max(Parameters.MIN_HOURLY_WAGE_RATE, originalPerson.labWageFullTimeHrly));
         } else {
-            if (Les_c4.EmployedOrSelfEmployed.equals(labC4)) {
-                labC4 = Les_c4.NotEmployed;
-            }
-            labC4L1 = labC4;
             labWageFullTimeHrly = -9.0;
         }
         if (originalPerson.labWageFullTimeHrlyL1 !=null && originalPerson.labWageFullTimeHrlyL1 >Parameters.MIN_HOURLY_WAGE_RATE) {

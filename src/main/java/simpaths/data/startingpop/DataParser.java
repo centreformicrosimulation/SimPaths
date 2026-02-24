@@ -169,7 +169,6 @@ public class DataParser {
 
 								//Labour Market Economic Status
 								+ "ALTER TABLE " + personTable + " ADD activity_status VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET labC4 = 3 WHERE labC4 = 1 AND CAST(labWageHrly AS FLOAT)<0.01;"
 								+ "UPDATE " + personTable + " SET activity_status = 'EmployedOrSelfEmployed' WHERE labC4 = 1;"
 								+ "UPDATE " + personTable + " SET activity_status = 'Student' WHERE labC4 = 2;"
 								+ "UPDATE " + personTable + " SET activity_status = 'NotEmployed' WHERE labC4 = 3;"
