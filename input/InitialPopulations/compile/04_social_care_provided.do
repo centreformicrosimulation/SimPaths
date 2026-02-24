@@ -252,6 +252,7 @@ keep idperson swv careHoursProvidedWeekly
 sort idperson swv
 save temp, replace
 use "ukhls_pooled_all_obs_care2.dta", clear
+drop careHoursProvidedWeekly
 merge 1:1 idperson swv using temp, keep(1 3) nogen
 save "ukhls_pooled_all_obs_04.dta", replace 
 

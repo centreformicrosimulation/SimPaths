@@ -441,6 +441,7 @@ keep idperson swv need_socare informal_socare_hrs formal_socare_hrs formal_socar
 sort idperson swv
 save temp, replace
 use "ukhls_pooled_all_obs_care.dta", clear
+drop need_socare formal_socare_hrs
 merge 1:1 idperson swv using temp, keep(1 3) nogen
 save "ukhls_pooled_all_obs_03.dta", replace 
 
