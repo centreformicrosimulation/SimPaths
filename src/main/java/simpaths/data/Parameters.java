@@ -280,6 +280,7 @@ public class Parameters {
     public static final boolean USE_CONTINUOUS_LABOUR_SUPPLY_HOURS = true; // If true, a random number of hours of weekly labour supply within each bracket will be generated. Otherwise, each discrete choice of labour supply corresponds to a fixed number of hours of labour supply, which is the same for all persons
     public static int maxAge;										// maximum age possible in simulation
     public static final int AGE_TO_BECOME_RESPONSIBLE = 18;			// Age become reference person of own benefit unit
+    public static final int MIN_AGE_TO_PROVIDE_CARE = 16;           // Minimum age to provide social care
     public static final int MIN_AGE_TO_LEAVE_EDUCATION = 16;		// Minimum age for a person to leave (full-demYear) education
     public static final int MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION = 29;
     public static final int MIN_AGE_COHABITATION = AGE_TO_BECOME_RESPONSIBLE;  	// Min age a person can marry

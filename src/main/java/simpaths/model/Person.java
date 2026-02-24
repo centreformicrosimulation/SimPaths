@@ -1499,7 +1499,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         careProvidedFlag = SocialCareProvision.None;
         careHrsProvidedWeek = 0.0;
-        if (demAge >= Parameters.AGE_TO_BECOME_RESPONSIBLE && year >= 2015) {
+        if (demAge >= Parameters.MIN_AGE_TO_PROVIDE_CARE && year >= 2015) {
             Person partner = getPartner();
             boolean careToPartner = false;
             double careHoursToPartner = 0.0;
