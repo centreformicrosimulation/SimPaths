@@ -2236,16 +2236,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (partner!=null) {
             eduHighestPartnerC4L1 = partner.eduHighestC4;
             healthPartnerSelfRatedL1 = partner.healthSelfRated;
-            demPartnerStatusL1 = Dcpst.Partnered;
             demAgePartnerDiffL1 = demAge - partner.demAge;
             idPartnerL1 = partner.getId();
         } else {
             eduHighestPartnerC4L1 = null;
             healthPartnerSelfRatedL1 = null;
             demAgePartnerDiffL1 = null;
-            demPartnerStatusL1 = getDcpst();
             idPartnerL1 = null;
         }
+        demPartnerStatusL1 = Dcpst.Partnered;
         yPersAndPartnerGrossDiffMonthL1 = getYnbcpdf_dv(); //Lag(1) of difference between own and partner's gross personal non-benefit income
         labStatusPartnerAndOwnC4L1 = getLesdf_c4(); //Lag(1) of own and partner's activity status
     }
