@@ -270,6 +270,11 @@ public class LabourMarket {
             }
             for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
 
+                // Codex comment:
+                // Net effect: lines 273–284 accumulate sum-of-wages and count-by-education for male persons only; the next block (285 onward) does the same for females.
+                // Together they build ingredients for average potential hourly earnings by education (sum / count), although in this file those two local maps are not used later,
+                // so this currently behaves like intermediate aggregation with no downstream effect in LabourMarket.java.
+
                 if (benefitUnit.getMale() != null) {
 
                     Person person = benefitUnit.getMale();
