@@ -31,9 +31,11 @@ replace Dst = . if les_c3 == .
 *==================================================
 
 gen Dag    = dag
+gen L_Dag = L.dag
 gen Dag_sq = dagsq
 gen Age = dag
 gen AgeSquared = dag^2
+gen L_Dag_sq = L.dagsq
 
 gen Dag_c    = dag - 23
 gen Dag_c_sq = Dag_c^2
@@ -187,6 +189,9 @@ gen Dhe_mcs   = dhe_mcs
 gen Dhe_pcssp = dhe_pcssp
 gen Dhe_mcssp = dhe_mcssp
 
+gen FinancialDistress = financial_distress
+gen L_FinancialDistress = L.financial_distress
+
 *==================================================
 * Long-term sick or disabled
 *==================================================
@@ -224,6 +229,9 @@ rename Dcpst_1 Dcpst_Partnered
 rename Dcpst_2 Dcpst_Single
 gen Partnered = Dcpst_Partnered
 gen Single = Dcpst_Single
+
+gen L_Dcpst_Partnered = L.Dcpst_Partnered
+gen L_Dcpst_Single = L.Dcpst_Single
 
 *==================================================
 * Explicit lags
@@ -269,6 +277,8 @@ rename L_Dehmf_c3_3 L_Dehmf_c3_Low
 * Copy variables for nice labels 
 *==================================================
 gen Dnc       = dnc
+gen Dnc_L1    = L.dnc
+gen L_Dnc    = L.dnc
 gen Dnc02     = dnc02
 gen Ded       = ded
 gen Dhe       = dhe
@@ -288,7 +298,9 @@ gen Dlltsdsp   = dlltsd_sp
 gen Dlltsd01sp = dlltsd01_sp
 
 gen Ypncp = ypncp
+gen L_Ypncp = L.ypncp
 gen Ypnoab =  ypnoab
+gen L_Ypnoab =  L.ypnoab
 gen Yplgrs_dv = yplgrs_dv
 gen Ypnbihs_dv = ypnbihs_dv
 gen Ypnbihs_dv_sq = ypnbihs_dv^2
@@ -546,6 +558,10 @@ drop temp_*
 gen log_income=ln(econ_realequivinc)
 label var log_income "Log of real equivalised household net income"
 
+sort idperson swv
+xtset idperson swv
+gen RealIncomeDecrease_D = D.log_income
+
 *==================================================
 * Income change (binary, increased or decreased)
 *==================================================
@@ -554,13 +570,11 @@ sort idperson swv
 xtset idperson swv
 gen temp_incchange=econ_realequivinc - L.econ_realequivinc
 
-gen exp_incchange=.
-replace exp_incchange=1 if (econ_realequivinc < L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
-replace exp_incchange=0 if (econ_realequivinc == L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
-replace exp_incchange=0 if (econ_realequivinc > L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
+gen RealIncomeChange=.
+replace RealIncomeChange=1 if (econ_realequivinc < L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
+replace RealIncomeChange=0 if (econ_realequivinc == L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
+replace RealIncomeChange=0 if (econ_realequivinc > L.econ_realequivinc) & econ_realequivinc!=. & L.econ_realequivinc!=.
 
-label define incchangecat 1 "Decreased income" 0 "Increased or stable income"
-label values exp_incchange incchangecat
 drop temp_*
 
 *==================================================
@@ -584,15 +598,15 @@ tab temp_HHinPoverty swv, col
 
 * Generate poverty transition variable
 sort idperson swv
-gen exp_poverty= .
-replace exp_poverty=0 if temp_HHinPoverty==0 & L.temp_HHinPoverty==0
-replace exp_poverty=1 if temp_HHinPoverty==1 & L.temp_HHinPoverty==0
-replace exp_poverty=2 if temp_HHinPoverty==0 & L.temp_HHinPoverty==1
-replace exp_poverty=3 if temp_HHinPoverty==1 & L.temp_HHinPoverty==1
-label define poverty_trans 0 "No Poverty" 1 "Entering poverty" 2 "Exiting poverty" 3 "Continuous poverty"
-label values exp_poverty poverty_trans
-label var exp_poverty "Poverty transition"
-tab exp_poverty swv, m column
+gen PersistentNonPoverty = 0
+gen NonPovertyToPoverty  = 0
+gen PovertyToNonPoverty  = 0
+gen PersistentPoverty    = 0
+
+replace PersistentNonPoverty =1 if temp_HHinPoverty==0 & L.temp_HHinPoverty==0
+replace NonPovertyToPoverty  =1 if temp_HHinPoverty==1 & L.temp_HHinPoverty==0
+replace PovertyToNonPoverty  =1 if temp_HHinPoverty==0 & L.temp_HHinPoverty==1
+replace PersistentPoverty    =1 if temp_HHinPoverty==1 & L.temp_HHinPoverty==1
 drop temp_*
 
 *==================================================
@@ -607,29 +621,40 @@ drop temp_*
 * not employed (3) to not employed (3)
 sort idperson swv
 gen  exp_emp=.
+gen PersistentEmployed=0
+gen EmployedToUnemployed=0
+gen UnemployedToEmployed=0
+gen PersistentUnemployed=0
 * Starting state: employed or self-employed
-replace exp_emp=11 if L.les_c4==1 & les_c4==1
-replace exp_emp=13 if L.les_c4==1 & les_c4==3
+replace PersistentEmployed=1 if L.les_c4==1 & les_c4==1
+replace EmployedToUnemployed=1 if L.les_c4==1 & les_c4==3
 
 * Starting state: not employed
-replace exp_emp=31 if L.les_c4==3 & les_c4==1
-replace exp_emp=33 if L.les_c4==3 & les_c4==3
-label define exp_emp 11 "Continuous employment" 13 "Exiting employment" 31 "Entering employment" 33 "Continuously non-employed"
-label value exp_emp exp_emp
-tab exp_emp swv, col miss
+replace UnemployedToEmployed=1 if L.les_c4==3 & les_c4==1
+replace PersistentUnemployed=1 if L.les_c4==3 & les_c4==3
 
 *==================================================
 * Working hour categories
 *==================================================
 
-gen lhw_c5=.
-replace lhw_c5=0 if (lhw<=5)
-replace lhw_c5=10 if (lhw>=6 & lhw<=15)
-replace lhw_c5=20 if (lhw>=16 & lhw<=25)
-replace lhw_c5=30 if (lhw>=26 & lhw<=35)
-replace lhw_c5=40 if (lhw>=36 & lhw!=.)
+gen Lhw_0= 0
+gen Lhw_10= 0
+gen Lhw_20= 0
+gen Lhw_30= 0
+gen Lhw_40= 0
+replace Lhw_0  = 1 if (lhw<=5)
+replace Lhw_10 = 1 if (lhw>=6 & lhw<=15)
+replace Lhw_20 = 1 if (lhw>=16 & lhw<=25)
+replace Lhw_30 = 1 if (lhw>=26 & lhw<=35)
+replace Lhw_40 = 1 if (lhw>=36 & lhw!=.)
 
-label define lhwsp 0 "Zero" 10 "Ten" 20 "Twenty" 30 "Thirty" 40 "Forty"
-label value lhw_c5 lhwsp
-la var lhw_c5 "Hours worked per week (category)"
+*==================================================
+*  Benefits
+*==================================================
 
+sort idperson swv
+gen D_Econ_benefits = L.econ_benefits
+gen D_Econ_benefits_UC = L.econ_benefits_uc
+gen D_Econ_benefits_nonUC = L.econ_benefits_nonuc
+
+gen D_Home_owner = dhh_owned
