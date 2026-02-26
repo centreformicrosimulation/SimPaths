@@ -2704,6 +2704,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhe_mcs,                        //Mental well-being status (lowercase)
         Dhe_Mcs,
         Dhe_mcs_L1,                     //Mental well-being status lag(1)
+        Dhe_Mcs_L1,
         L_Dhe_mcs,
         dhe_mcs_L1,                     //Mental well-being status lag(1) (lowercase)
         Dhe_mcs_sq,                     //MCS score squared
@@ -2716,6 +2717,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         dhe_pcs,                        //Physical well-being status (lowercase)
         Dhe_Pcs,
         Dhe_pcs_L1,                     //Physical well-being status lag(1)
+        Dhe_Pcs_L1,
         L_Dhe_pcs,
         dhe_pcs_L1,                     //Physical well-being status lag(1) (lowercase)
         Dhe_pcs_sq,                     //PCS score squared
@@ -3501,7 +3503,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhe_mcs, dhe_mcs, Dhe_Mcs -> {
                 return healthMentalMcs;
             }
-            case Dhe_mcs_L1, dhe_mcs_L1, L_Dhe_mcs -> {
+            case Dhe_mcs_L1, dhe_mcs_L1, L_Dhe_mcs, Dhe_Mcs_L1 -> {
                 if (healthMentalMcsL1 != null && healthMentalMcsL1 >= 0.) {
                     return healthMentalMcsL1;
                 } else return 0.;
@@ -3540,7 +3542,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhe_pcs, dhe_pcs, Dhe_Pcs -> {
                 return healthPhysicalPcs;
             }
-            case Dhe_pcs_L1, dhe_pcs_L1, L_Dhe_pcs -> {
+            case Dhe_pcs_L1, dhe_pcs_L1, L_Dhe_pcs, Dhe_Pcs_L1 -> {
                 if (healthPhysicalPcsL1 != null && healthPhysicalPcsL1 >= 0.) {
                     return healthPhysicalPcsL1;
                 } else return 0.;
