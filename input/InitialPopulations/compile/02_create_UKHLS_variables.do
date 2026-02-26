@@ -1838,9 +1838,9 @@ la var scpexpy "Year prior to exiting partnership"
 
 /*****************************Women aged 18 - 44*******************************/
 gen sprfm = 0
-replace sprfm = 1 if dgn==0 &  dag >= 18 & dag <= ${age_have_child_max}
+replace sprfm = 1 if dgn==0 &  dag >= 18 & dag <= 44
 lab val sprfm dummy
-la var sprfm "Woman in fertility range dummy"
+la var sprfm "Woman in fertility range dummy (18- 44)"
 
 
 /************************UK General Fertility Rate: From ONS 2019*************/
@@ -1992,15 +1992,15 @@ tab both_parents
 restore 
 */
 
-tab dag dchpd if dgn == 0     
+tab dag dchpd if dgn == 0      
 /*      
-    45	6,085	   14		1		1	6,101 
-	46	6,201		12		3		0	6,216 
-	47	6,123		3		0		0	6,126 
-	48	6,191		2		0		0	6,193 
-	49	6,182		0		1		0	6,183 
-	50	6,343		0		0		0	6,343 
-	51	6,184		1		0		0	6,185 
+45 |     5,773         14          1          1 |     5,789 
+46 |     5,886         12          3          0 |     5,901 
+47 |     5,826          3          0          0 |     5,829 
+48 |     5,879          2          0          0 |     5,881 
+49 |     5,860          0          0          0 |     5,860 
+50 |     5,993          0          0          0 |     5,993 
+51 |     5,870          1          0          0 |     5,871 
 */
 
 gen flag_old_mother = (dchpd == 1 & dag > ${age_have_child_max} & dgn == 0)
@@ -2136,15 +2136,62 @@ replace CPI = 1.286 if intdaty_dv == 2023
 replace CPI = 1.329 if intdaty_dv == 2024 
 replace CPI = 1.329 if intdaty_dv == 2025 //to update when becomes available  
 
+/********************************Income variables***************************************/
+/*All income variables are adjusted for inflation and transformed using the inverse hyperbolic sine transformation. 
+This transformation is well suited to highly skewed data, 
+as it helps stabilise variance and improves distributional symmetry.*/
 
 
+/**********************Gross personal non-benefit income *********************************/
+/*Note: This is supposed to mirror UKMOD market income 
 
-/**************************** Hourly labour income ***************************************/
-/* Used to predict wages for non-working, aligned with working hours and self-reported status */ 
+1/ fimnlabgrs_dv: total personal monthly labour income gross	
+2/ fimnpen_dv: monthly amount of net pension income	
+   This includes receipts reported in the income data file where w_ficode equals  
+   [2] “a pension from a previous employer”, or 
+   [3] “a pension from a spouse’s previous employer”. This is assumed to be reported net of tax. 
+3/ fimnmisc_dv: monthly amount of net miscellaneous income. This includes receipts reported in the income data file where w_ficode equals 
+   [24] "educational grant (not student loan or tuition fee loan)", ==> needs to be removed from market income 
+   [27] "payments from a family member not living here", or 
+   [38] "any other regular payment (not asked in Wave 1)". This is assumed to be reported net of tax. 
+4/ variables “inc_stp” “inc_tu” “inc_ma” are generated in the UK  do-file called “01_prepare_ukhls_pooled_data” 
+   gen inc_stp = frmnthimp_dv if ficode == 1 (NI Retirement/State Retirement (Old Age) Pension) ==> needs to be removed from market income  
+   gen inc_tu = frmnthimp_dv if ficode == 25 (Trade Union / Friendly Society Payment)
+   gen inc_ma = frmnthimp_dv if ficode == 26 (Maintenance or Alimony)
+Instead of (3) and (4) , use :  
 
-//fimnlabgrs_dv=total monthly labour income gross
+gen inc_pp = frmnthimp_dv if ficode == 4 //A Private Pension/Annuity
+gen inc_tu = frmnthimp_dv if ficode == 25 //Trade Union / Friendly Society Payment
+gen inc_ma = frmnthimp_dv if ficode == 26 //Maintenance or Alimony
+gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not living here
+gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
+*/
+recode fimnlabgrs_dv fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth (-9=.) (-1=.)
+egen ypnb = rowtotal(fimnlabgrs_dv fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth) //Gross personal non-benefit income
+fre ypnb if  ypnb <0 //obs with negative income (due to negative self-employment income) but many of these are close to zero ==> recode them to zero 
+replace ypnb=0 if  ypnb <0 
+sum ypnb 
+assert ypnb>=0 
+//adjust for inflation
+replace ypnb = ypnb/CPI
 
-* Firstly, compute cross personal employment income 
+//Inverse hyperbolic sine transformation:
+gen ypnbihs_dv = asinh(ypnb)
+la var ypnbihs_dv "Gross personal non-benefit income"
+
+
+/********************Gross personal non-employment, non-benefit income***************************/
+egen yptc = rowtotal(fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth) //Gross personal non-employment, non-benefit income
+assert yptc>=0 
+//adjust for inflation:
+replace yptc = yptc/CPI
+
+//Inverse hyperbolic sine transformation:
+gen yptciihs_dv = asinh(yptc)
+la var yptciihs_dv "Gross personal non-employment, non-benefit income"
+
+
+/************************Gross personal employment income ***************************************/
 gen yplgrs = fimnlabgrs_dv 
 * impose non-negativity 
 gen flag_neg_labour = (yplgrs < 0)
@@ -2154,14 +2201,159 @@ replace yplgrs=0 if yplgrs<0 //obs with negative income (due to negative self-em
 assert yplgrs>=0 
 //adjust for inflation
 replace yplgrs = yplgrs/CPI
-sum yplgrs
+
+//Inverse hyperbolic sine transformation:
+gen yplgrs_dv = asinh(yplgrs)
+la var yplgrs_dv "Gross personal employment income"
 
 * missing labour income 
 gen flag_missing_lbr_income = (yplgrs== . & les_c3==1)
 lab var flag_missing_lbr_income ///
 	"FLAG: missing info for labour income"
+
 	
-* Compute hourly earnings 
+/*********************Gross personal non-benefit income for a spouse *******************************/
+//tempfile temp_ypnb
+preserve
+keep swv idperson idhh ypnb
+rename ypnb ypnbsp
+rename idperson idpartner
+save "$dir_data\temp_ypnb", replace
+restore
+merge m:1 swv idpartner idhh using "$dir_data\temp_ypnb"
+keep if _merge == 1 | _merge == 3
+drop _merge
+//adjust for inflation 
+replace ypnbsp = ypnbsp/CPI
+
+//Inverse hyperbolic sine transformation:
+gen ypnbihs_dv_sp = asinh(ypnbsp)
+
+/************************************Household income ********************************************/
+//Household income is sum of individual income and partner's income if coupled
+//If single, household income is equal to individual income
+egen yhhnb = rowtotal(ypnb ypnbsp) if dhhtp_c4 == 1 | dhhtp_c4 == 2 
+replace yhhnb = ypnb if dhhtp_c4 == 3 | dhhtp_c4 == 4 
+//equivalise and adjust for inflation:
+replace yhhnb = (yhhnb/moecd_eq)/CPI
+
+//Inverse hyperbolic sine transformation:
+gen yhhnb_asinh = asinh(yhhnb)
+
+
+/********************************Disposable income ************************************************/
+sort hidp
+gen ydisp = fimnnet_dv
+recode ydisp (missing = 0)
+by hidp: egen hhinc = sum(ydisp)
+gen res = fihhmnnet1_dv - hhinc
+gen mis = (fimnnet_dv>=.)*(age_dv>17.5)
+by hidp: egen nmis = sum(mis)
+replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
+
+drop hhinc res mis nmis
+by hidp: egen hhinc = sum(ydisp)
+gen res = fihhmnnet1_dv - hhinc
+gen mis = (fimnnet_dv>=.)*(age_dv>14.5)*(age_dv<17.5)
+by hidp: egen nmis = sum(mis)
+replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
+recode ydisp (missing=0)
+
+//adjust for inflation 
+replace ydisp = ydisp/CPI
+la var ydisp "Disposable income (individual)"
+
+/* checks 
+by hidp: egen hhinc2 = sum(ydisp)
+gen res2 = fihhmnnet1_dv - hhinc2
+gen chk = (abs(res2) > 0.1)*(fihhmnnet1_dv<.)
+order age_dv fihhmnnet1_dv fimnnet_dv ydisp hhinc res res2 mis nmis chk, a(hidp)
+tab chk
+drop hhinc2 res2 chk
+*/
+drop hhinc res mis nmis
+
+
+/*****************************Household income Quintiles ***************************************/
+/*Problem: if many observations in yhhnb_asinh have exactly the same value, xtile would group them into a single quintile, 
+causing one or more quintiles to have very few observations. 
+This results in 2nd quintile being extremely small compared to the first quintile, which probably has many similar values 
+Adding a very small random amount to yhhnb_asinh can help differentiate tied values enough to distribute them more evenly 
+across quintiles without distorting the data meaningfully.
+*/
+//sum yhhnb_asinh
+gen yhhnb_asinh_jittered = yhhnb_asinh + runiform() * 1e-5
+
+cap drop ydses*
+forvalues stm=2009/2024 {
+xtile ydses_c5_`stm' = yhhnb_asinh_jittered if depChild != 1 & stm==`stm', nq(5)
+bys idhh: egen ydses_c5_tmp_`stm' = max(ydses_c5_`stm') if stm==`stm'
+replace ydses_c5_`stm' = ydses_c5_tmp_`stm' if missing(ydses_c5_`stm')
+drop ydses_c5_tmp_`stm'
+} 
+egen ydses_c5 = rowtotal(ydses_c5_2009 ydses_c5_2010 ydses_c5_2011 ydses_c5_2012 ydses_c5_2013 ydses_c5_2014 ydses_c5_2015 ydses_c5_2016 ydses_c5_2017 ydses_c5_2018 ydses_c5_2019 ///
+ydses_c5_2020 ydses_c5_2021 ydses_c5_2022 ydses_c5_2023 ydses_c5_2024)
+recode ydses_c5 (0=-9) 
+drop ydses_c5_2*
+la var ydses_c5 "Household income quintiles"
+
+//bys stm: fre ydses_c5
+//fre ydses_c5
+
+
+/********************Difference between own and spouse's gross personal non-benefit income*********************/
+//gen ynbcpdf_dv = asinh(sinh(ypnbihs_dv) - sinh(ypnbihs_dv_sp))
+//Keep as simple difference between the two for compatibility with estimates
+gen ynbcpdf_dv = ypnbihs_dv - ypnbihs_dv_sp
+recode ynbcpdf_dv (.=-999) if idpartner <0
+recode ynbcpdf_dv (.=-999) 
+la var ynbcpdf_dv "Difference between own and spouse's gross personal non-benefit income"
+//sum ynbcpdf_dv 
+
+/**************************Gross-to-net ratio*********************************************/  
+gen gross_net_ratio = fimngrs_dv/fimnnet_dv 
+replace gross_net_ratio = 1 if missing(gross_net_ratio) 
+replace gross_net_ratio = 0 if gross_net_ratio<0 
+
+
+/********************************Gross personal capital income*******************************/
+/* Assumed to be reported net of tax: 
+1/ fimninvnet_dv: investment income
+2/ fimnmisc_dv: net miscellaneous income. [24] educational grant (not student loan or tuition fee loan), [27] payments from a family member not living here, or [38] any other regular payment (not asked in Wave 1).
+3/ fimnprben_dv: net private benefit income. [25] trade union / friendly society payment, [26] maintenance or alimony, or [35] sickness and accident insurance.  
+Instead of (2), use :  
+gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not living here
+gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
+*/
+recode fimninvnet_dv fimnprben_dv inc_fm inc_oth (-1=.) (-9=.)
+egen ypncp_temp = rowtotal (fimninvnet_dv inc_fm inc_oth fimnprben_dv) 
+assert ypncp_temp>=0
+//adjust for inflation and gross up 
+gen ypncp_lvl = ypncp_temp/CPI*gross_net_ratio
+lab var ypncp_lvl "Gross personal non-employment capital income (GBP)"
+//Inverse hyperbolic sine transformation  
+gen ypncp = asinh( ypncp_lvl) 
+lab var ypncp "Gross personal non-employment capital income (IHS)"
+//sum ypncp ypncp_lvl
+
+
+/****************************** Private pension income **************************************/
+/*fimnpen_dv: monthly amount of net pension income
+inc_pp = frmnthimp_dv if ficode == 4 //A Private Pension/Annuity	 
+*/
+egen ypnoab_temp = rowtotal(fimnpen_dv inc_pp) 
+assert ypnoab_temp>=0 
+//adjust for inflation and gross up 
+gen ypnoab_lvl= ypnoab_temp/CPI*gross_net_ratio
+//Inverse hyperbolic sine transformation  
+gen ypnoab = asinh( ypnoab_lvl)
+lab var  ypnoab_lvl "Gross personal private pension income"
+lab var  ypnoab "Gross personal private pension income"
+//sum ypnoab ypnoab_lvl
+
+
+/**************************** Hourly labour income ***************************************/
+/* Used to predict wages for non-working*/ 
 xtset idperson swv
 sort idperson swv 
 
@@ -2169,11 +2361,10 @@ replace lhw = . if lhw == -9
 
 gen obs_earnings_hourly = .
 
-replace obs_earnings_hourly = yplgrs/(lhw*4.33) if les_c4 == 1
+replace obs_earnings_hourly = yplgrs/lhw if les_c4 == 1
 
 lab var obs_earnings_hourly ///
-	"Observed hourly wages, emp and self-emp"
-sum obs_earnings_hourly if les_c3 ==1 & obs_earnings_hourly>0 
+	"Observed hourly wages, emp and self-emp, adjusted for timing"
 
 * Impose consistency  
 replace obs_earnings_hourly = 0 if les_c3 == 2 | les_c3 == 3 
@@ -2313,7 +2504,7 @@ replace ageband = 60 if ageband == 70
 	// group 70+ year olds with 60+ to ensure matches 
 
 cap drop stratum 
-egen stratum = group(ageband drgn1 dgn swv), label /*(stratum, replace)*/  
+egen stratum = group(ageband drgn1 dgn swv), label(stratum, replace)  
 
 * Define donor pool
 preserve
@@ -2363,284 +2554,19 @@ gen l1_obs_earnings_hourly = .
 
 replace l1_obs_earnings_hourly = l.obs_earnings_hourly 
 lab var l1_obs_earnings_hourly ///
-	"Observed hourly wages, emp and self-emp, t-1"
-
+	"Observed hourly wages, emp and self-emp, t-1, adjusted for timing"
+/*	
 sum obs_earnings_hourly if les_c3 == 1
 sum obs_earnings_hourly if les_c3 == 2
 sum obs_earnings_hourly if les_c3 == 3
 sum obs_earnings_hourly if les_c3 == -9
 sum obs_earnings_hourly if les_c3 == .
-
- 
-
-/********************************Income variables***************************************/
-/*All income variables are adjusted for inflation and transformed using the inverse hyperbolic sine transformation. 
-This transformation is well suited to highly skewed data, as it helps stabilise variance and improves distributional symmetry.*/
-
-
-/************************Gross personal employment income ***************************************/
-/*Has to be recalculated now to be consitent with hourly wages*/
-cap drop yplgrs
-gen yplgrs = obs_earnings_hourly *(lhw*4.33) 
-//already adjusted for inflation as hourly wages have been adjusted by CPI
-assert yplgrs>=0  
-
-//Inverse hyperbolic sine transformation:
-gen yplgrs_dv = asinh(yplgrs)
-la var yplgrs_dv "Gross personal employment income"
-
-sum yplgrs_dv if les_c3 == 1
-sum yplgrs_dv if les_c3 == 2
-sum yplgrs_dv if les_c3 == 3
-sum yplgrs_dv if les_c3 == -9
-sum yplgrs_dv if les_c3 == .
-
-
-count if  yplgrs_dv==.
-//  75,877
-
-fre les_c4 if yplgrs_dv==.
+*/
 /*
-les_c4 -- LABOUR MARKET: Activity status
-----------------------------------------------------------------------------------
-                                     |      Freq.    Percent      Valid       Cum.
--------------------------------------+--------------------------------------------
-Valid   -9                           |      75874     100.00     100.00     100.00
-        1  Employed or self-employed |          3       0.00       0.00     100.00
-        Total                        |      75877     100.00     100.00           
-----------------------------------------------------------------------------------
+Note that labour income is not aligned with activity status and hours, 
+but hourly wage is now. 
 */
 
-assert yplgrs_dv==0 if les_c4!=1 & les_c4>0
-assert obs_earnings_hourly==0 if les_c4!=1 & les_c4>0
-
-/**********************Gross personal non-benefit income *********************************/
-/*Note: This is supposed to mirror UKMOD market income 
-
-1/ fimnlabgrs_dv: total personal monthly labour income gross ==> use temp_yplgrs instead 
-2/ fimnpen_dv: monthly amount of net pension income	
-   This includes receipts reported in the income data file where w_ficode equals  
-   [2] “a pension from a previous employer”, or 
-   [3] “a pension from a spouse’s previous employer”. This is assumed to be reported net of tax. 
-3/ fimnmisc_dv: monthly amount of net miscellaneous income. This includes receipts reported in the income data file where w_ficode equals 
-   [24] "educational grant (not student loan or tuition fee loan)", ==> needs to be removed from market income 
-   [27] "payments from a family member not living here", or 
-   [38] "any other regular payment (not asked in Wave 1)". This is assumed to be reported net of tax. 
-4/ variables “inc_stp” “inc_tu” “inc_ma” are generated in the UK  do-file called “01_prepare_ukhls_pooled_data” 
-   gen inc_stp = frmnthimp_dv if ficode == 1 (NI Retirement/State Retirement (Old Age) Pension) ==> needs to be removed from market income  
-   gen inc_tu = frmnthimp_dv if ficode == 25 (Trade Union / Friendly Society Payment)
-   gen inc_ma = frmnthimp_dv if ficode == 26 (Maintenance or Alimony)
-Instead of (3) and (4) , use :  
-
-gen inc_pp = frmnthimp_dv if ficode == 4 //A Private Pension/Annuity
-gen inc_tu = frmnthimp_dv if ficode == 25 //Trade Union / Friendly Society Payment
-gen inc_ma = frmnthimp_dv if ficode == 26 //Maintenance or Alimony
-gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not living here
-gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
-*/
-
-cap drop temp_yplgrs
-gen temp_yplgrs = obs_earnings_hourly *(lhw*4.33)*CPI //go back to unadjusted level 
-assert temp_yplgrs>=0  
-sum yplgrs
-sum temp_yplgrs
-
-recode temp_yplgrs fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth (-9=.) (-1=.)
-
-egen ypnb = rowtotal(temp_yplgrs fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth) //Gross personal non-benefit income
-fre ypnb if  ypnb <0 //obs with negative income (due to negative self-employment income) but many of these are close to zero ==> recode them to zero 
-replace ypnb=0 if  ypnb <0 
-sum ypnb 
-assert ypnb>=0 
-//adjust for inflation
-replace ypnb = ypnb/CPI
-
-//Inverse hyperbolic sine transformation:
-gen ypnbihs_dv = asinh(ypnb)
-la var ypnbihs_dv "Gross personal non-benefit income"
-
-
-/********************Gross personal non-employment, non-benefit income***************************/
-egen yptc = rowtotal(fimnpen_dv inc_pp inc_tu inc_ma inc_fm inc_oth) //Gross personal non-employment, non-benefit income
-assert yptc>=0 
-//adjust for inflation:
-replace yptc = yptc/CPI
-
-//Inverse hyperbolic sine transformation:
-gen yptciihs_dv = asinh(yptc)
-la var yptciihs_dv "Gross personal non-employment, non-benefit income"
-
-	
-/*********************Gross personal non-benefit income for a spouse *******************************/
-//tempfile temp_ypnb
-preserve
-keep swv idperson idhh ypnb
-rename ypnb ypnbsp
-rename idperson idpartner
-save "$dir_data\temp_ypnb", replace
-restore
-merge m:1 swv idpartner idhh using "$dir_data\temp_ypnb"
-keep if _merge == 1 | _merge == 3
-drop _merge
-//adjust for inflation 
-replace ypnbsp = ypnbsp/CPI
-
-//Inverse hyperbolic sine transformation:
-gen ypnbihs_dv_sp = asinh(ypnbsp)
-
-/************************************Household income ********************************************/
-//Household income is sum of individual income and partner's income if coupled
-//If single, household income is equal to individual income
-egen yhhnb = rowtotal(ypnb ypnbsp) if dhhtp_c4 == 1 | dhhtp_c4 == 2 
-replace yhhnb = ypnb if dhhtp_c4 == 3 | dhhtp_c4 == 4 
-//equivalise and adjust for inflation:
-replace yhhnb = (yhhnb/moecd_eq)/CPI
-
-//Inverse hyperbolic sine transformation:
-gen yhhnb_asinh = asinh(yhhnb)
-
-
-/********************************Disposable income ************************************************/
-sum fimnnet_dv fimnlabgrs_dv temp_yplgrs
-misstable summarize fimnnet_dv fimnlabgrs_dv temp_yplgrs 
-
-fre fimnlabgrs_dv if fimnnet_dv==.
-/*
-fimnlabgrs_dv -- total monthly labour income gross
------------------------------------------------------------
-              |      Freq.    Percent      Valid       Cum.
---------------+--------------------------------------------
-Missing .     |     253176     100.00                      
------------------------------------------------------------
-*/
-fre temp_yplgrs if fimnnet_dv==.
-/*
-temp_yplgrs
--------------------------------------------------------
-          |      Freq.    Percent      Valid       Cum.
-----------+--------------------------------------------
-Valid   0 |     177763      70.21     100.00     100.00
-Missing . |      75413      29.79                      
-Total     |     253176     100.00                      
--------------------------------------------------------
-*/
-
-sort hidp
-gen ydisp = fimnnet_dv - fimnlabgrs_dv + temp_yplgrs //deduct reported gross labour income , add adjusted gross labour income 
-sum fimnnet_dv ydisp
-
-//residual income 
-recode ydisp (missing = 0)
-by hidp: egen hhinc = sum(ydisp)
-gen res = fihhmnnet1_dv - hhinc
-
-/*Adults get residual household income first.
-If no adults with missing income, allocate to teens.
-*/
-gen mis = (fimnnet_dv>=.)*(age_dv>17.5)
-by hidp: egen nmis = sum(mis)
-replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
-
-drop hhinc res mis nmis
-by hidp: egen hhinc = sum(ydisp)
-gen res = fihhmnnet1_dv - hhinc
-
-gen mis = (fimnnet_dv>=.)*(age_dv>14.5)*(age_dv<17.5)
-by hidp: egen nmis = sum(mis)
-replace ydisp = res / nmis if (res>0.1 & res<. & mis==1)
-recode ydisp (missing=0)
-
-//adjust for inflation 
-replace ydisp = ydisp/CPI
-la var ydisp "Disposable income (individual)"
-
-/* checks 
-by hidp: egen hhinc2 = sum(ydisp)
-gen res2 = fihhmnnet1_dv - hhinc2
-gen chk = (abs(res2) > 0.1)*(fihhmnnet1_dv<.)
-order age_dv fihhmnnet1_dv fimnnet_dv ydisp hhinc res res2 mis nmis chk, a(hidp)
-tab chk
-drop hhinc2 res2 chk
-*/
-drop hhinc res mis nmis
-
-
-/*****************************Household income Quintiles ***************************************/
-/*Problem: if many observations in yhhnb_asinh have exactly the same value, xtile would group them into a single quintile, 
-causing one or more quintiles to have very few observations. 
-This results in 2nd quintile being extremely small compared to the first quintile, which probably has many similar values 
-Adding a very small random amount to yhhnb_asinh can help differentiate tied values enough to distribute them more evenly 
-across quintiles without distorting the data meaningfully.
-*/
-//sum yhhnb_asinh
-gen yhhnb_asinh_jittered = yhhnb_asinh + runiform() * 1e-5
-
-cap drop ydses*
-forvalues stm=2009/2024 {
-xtile ydses_c5_`stm' = yhhnb_asinh_jittered if depChild != 1 & stm==`stm', nq(5)
-bys idhh: egen ydses_c5_tmp_`stm' = max(ydses_c5_`stm') if stm==`stm'
-replace ydses_c5_`stm' = ydses_c5_tmp_`stm' if missing(ydses_c5_`stm')
-drop ydses_c5_tmp_`stm'
-} 
-egen ydses_c5 = rowtotal(ydses_c5_2009 ydses_c5_2010 ydses_c5_2011 ydses_c5_2012 ydses_c5_2013 ydses_c5_2014 ydses_c5_2015 ydses_c5_2016 ydses_c5_2017 ydses_c5_2018 ydses_c5_2019 ///
-ydses_c5_2020 ydses_c5_2021 ydses_c5_2022 ydses_c5_2023 ydses_c5_2024)
-recode ydses_c5 (0=-9) 
-drop ydses_c5_2*
-la var ydses_c5 "Household income quintiles"
-
-//bys stm: fre ydses_c5
-//fre ydses_c5
-
-
-/********************Difference between own and spouse's gross personal non-benefit income*********************/
-//gen ynbcpdf_dv = asinh(sinh(ypnbihs_dv) - sinh(ypnbihs_dv_sp))
-//Keep as simple difference between the two for compatibility with estimates
-gen ynbcpdf_dv = ypnbihs_dv - ypnbihs_dv_sp
-recode ynbcpdf_dv (.=-999) if idpartner <0
-recode ynbcpdf_dv (.=-999) 
-la var ynbcpdf_dv "Difference between own and spouse's gross personal non-benefit income"
-//sum ynbcpdf_dv 
-
-/**************************Gross-to-net ratio*********************************************/  
-gen gross_net_ratio = fimngrs_dv/fimnnet_dv 
-replace gross_net_ratio = 1 if missing(gross_net_ratio) 
-replace gross_net_ratio = 0 if gross_net_ratio<0 
-
-
-/********************************Gross personal capital income*******************************/
-/* Assumed to be reported net of tax: 
-1/ fimninvnet_dv: investment income
-2/ fimnmisc_dv: net miscellaneous income. [24] educational grant (not student loan or tuition fee loan), [27] payments from a family member not living here, or [38] any other regular payment (not asked in Wave 1).
-3/ fimnprben_dv: net private benefit income. [25] trade union / friendly society payment, [26] maintenance or alimony, or [35] sickness and accident insurance.  
-Instead of (2), use :  
-gen inc_fm = frmnthimp_dv if ficode == 27 //payments from a family member not living here
-gen inc_oth = frmnthimp_dv if ficode == 38 //any other regular payment (not asked in Wave 1)
-*/
-recode fimninvnet_dv fimnprben_dv inc_fm inc_oth (-1=.) (-9=.)
-egen ypncp_temp = rowtotal (fimninvnet_dv inc_fm inc_oth fimnprben_dv) 
-assert ypncp_temp>=0
-//adjust for inflation and gross up 
-gen ypncp_lvl = ypncp_temp/CPI*gross_net_ratio
-lab var ypncp_lvl "Gross personal non-employment capital income (GBP)"
-//Inverse hyperbolic sine transformation  
-gen ypncp = asinh( ypncp_lvl) 
-lab var ypncp "Gross personal non-employment capital income (IHS)"
-//sum ypncp ypncp_lvl
-
-
-/****************************** Private pension income **************************************/
-/*fimnpen_dv: monthly amount of net pension income
-inc_pp = frmnthimp_dv if ficode == 4 //A Private Pension/Annuity	 
-*/
-egen ypnoab_temp = rowtotal(fimnpen_dv inc_pp) 
-assert ypnoab_temp>=0 
-//adjust for inflation and gross up 
-gen ypnoab_lvl= ypnoab_temp/CPI*gross_net_ratio
-//Inverse hyperbolic sine transformation  
-gen ypnoab = asinh( ypnoab_lvl)
-lab var  ypnoab_lvl "Gross personal private pension income"
-lab var  ypnoab "Gross personal private pension income"
-//sum ypnoab ypnoab_lvl
 
 /******************************Home ownership dummy***************************/
 *Dhh_owned is the definition used in the initial population and in the model predicting house ownership 
@@ -3528,39 +3454,38 @@ save "$dir_data\ukhls_pooled_all_obs_02.dta", replace
 cap log close 
 
 
-************************************************************************************
+/**************************************************************************************
 * clean-up and exit
 ************************************************************************************
-cd $dir_data
-dir *.dta
-
 #delimit ;
 local files_to_drop 
-father_edu.dta    
-mother_edu.dta    
-temp.dta          
-temp_age.dta      
-temp_dagpns.dta   
-temp_dehsp.dta    
-temp_dgn.dta      
-temp_dhe.dta      
-temp_dlltsd.dta   
-temp_donorsN.dta  
-temp_dot01.dta    
-temp_father_dag.dta
-temp_lesc3.dta    
-temp_lesc4.dta    
-temp_lhw_donors.dta
-temp_mother_dag.dta
-temp_parent_dchpd.dta
-temp_uknbrn.dta   
-temp_wages_donors.dta
-temp_ypnb.dta     
-tmp_partnershipDuration.dta
+	father_edu.dta
+	mother_edu.dta 
+	temp.dta
+	temp_age.dta
+	temp_dagpns.dta
+	temp_deh.dta
+	temp_dgn.dta
+	temp_dhe.dta
+	temp_dlltsd.dta
+	temp_father_dag.dta
+	temp_lesc3.dta
+	temp_lesc4.dta
+	temp_mother_dag.dta
+	temp_ypnb.dta
+	tmp_partnershipDuration.dta
+	temp_dot01.dta
+	temp_uknbrn.dta
+	temp_parent_dchpd.dta
+	temp_donorsN
+	temp_lhw_donors
+	temp_wages_donors
+	
 	;
 #delimit cr // cr stands for carriage return
 
 foreach file of local files_to_drop { 
 	erase "$dir_data/`file'"
 }
+*/
 

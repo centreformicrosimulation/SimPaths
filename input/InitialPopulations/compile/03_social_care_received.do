@@ -289,7 +289,6 @@ replace dhesp = 0 if (dhesp<0)					// mostly single people - missing set to zero
 replace dhm_ghq=0 if (dhm_ghq<0)				// missing set to zero
 replace drgn1=7 if (drgn1<0)					// missing set to london
 replace jbstat = 4 if (jbstat<0)				// missing set to retired
-replace ydses_c5=. if ydses_c5==-9
 
 // need social care (basic probit)
 gen need_socare_adj = need_socare
