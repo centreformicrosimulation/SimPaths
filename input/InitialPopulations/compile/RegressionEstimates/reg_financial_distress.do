@@ -22,7 +22,7 @@ log using "${dir_log}/reg_financial_distress.log", replace
 
 /********************************* PREPARE DATA *******************************/
 
-use ${estimation_sample}, clear
+use "${estimation_sample}", clear
 
 * Set data 
 xtset idperson swv
@@ -32,19 +32,35 @@ sort idperson swv
 do "${dir_do}/variable_update.do"
 /* DP: Household income/poverty/employment transition variables are moved to variable_update.do */
 
-* Remove children 
-drop if dag < 16
+* Run Stata programs to produce Excel file 
+do "${dir_do}/programs.do" 
 
 **********************************************************************
-* HM1_L: GHQ12 score 0-36 of all working-age adults - baseline effects *
+* Financial Distress - logit model predicting financial distress
 **********************************************************************
 
-logit financial_distress ///
-ib11.exp_emp  i.lhw_c5 D.log_income i.exp_incchange ib0.exp_poverty L.ypncp L.ypnoab ///
-L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01  L.financial_distress ///
-i.dgn L.dag L.dagsq i.deh_c3 i.dot stm ///
-[pweight=${weight}]  ///
-, vce(cluster idperson)
+// ib11.exp_emp  i.lhw_c5 D.log_income i.exp_incchange ib0.exp_poverty L.ypncp L.ypnoab ///
+// L.i.econ_benefits L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01  L.financial_distress ///
+// i.dgn L.dag L.dagsq i.deh_c3 i.dot stm ///
+
+logit FinancialDistress ///
+EmployedToUnemployed UnemployedToEmployed PersistentUnemployed ///
+Lhw_10 Lhw_20 Lhw_30 Lhw_40 RealIncomeChange RealIncomeDecrease_D ///
+NonPovertyToPoverty PovertyToNonPoverty PersistentPoverty ///
+L_Ypncp L_Ypnoab D_Econ_benefits D_Home_owner L_Dcpst_Single ///
+L_Dnc L_Dhe_pcs L_Dhe_mcs ///
+L_Ydses_c5_Q2 L_Ydses_c5_Q3 L_Ydses_c5_Q4 L_Ydses_c5_Q5 ///
+L_Dlltsd01 L_FinancialDistress Dgn L_Dag L_Dag_sq ///
+Deh_c4_Medium Deh_c4_Low Deh_c4_High ///
+Year_transformed ///
+${regions} ${ethnicity} ///
+if ${health1_if_condition} [pweight=${weight}], vce(r)
+
+process_regression, process("FinancialDistress") sheet("FinancialDistress") ///
+	title("Process FinancialDistress: Experiences financial distress") ///
+	gofrow(1) goflabel("FinancialDistress - Experiences financial distress") ///
+	ifcond("${health1_if_condition}") 
+
 
    * save raw results 
 matrix results = r(table)
