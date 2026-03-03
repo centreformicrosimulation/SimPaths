@@ -1374,27 +1374,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             // need care only projected for 65 and over due to limitations of data used for parameterisation
 
             double recCareInnov = statInnovations.getDoubleDraw(7);
-            if (year >= 2015 && year <= 2022) {
-                double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(this, Person.DoublesVariables.class);
-                if (recCareInnov < probNeedCare) {
-                    // need care
-                    careNeedFlag = Indicator.True;
-                }
+            double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(this, Person.DoublesVariables.class);
+            if (recCareInnov < probNeedCare) {
+                // need care
+                careNeedFlag = Indicator.True;
             }
 
-            if (year >= 2016 && year <= 2021) {
-                double probRecCare = Parameters.getRegReceiveCareS2b().getProbability(this, Person.DoublesVariables.class);
-                if (recCareInnov < probRecCare) {
-                // receive care
+            double probRecCare = Parameters.getRegReceiveCareS2b().getProbability(this, Person.DoublesVariables.class);
+            if (recCareInnov < probRecCare) {
+            // receive care
+            // if probNeedCare > probRecCare, then code here implies that anyone who receives care will also need care
 
-                    Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilities(this, Person.DoublesVariables.class);
-                    MultiValEvent event = new MultiValEvent(probs1, statInnovations.getDoubleDraw(8));
-                    SocialCareReceiptS2c socialCareReceiptS2c = (SocialCareReceiptS2c) event.eval();
-                    careReceivedFlag = SocialCareReceipt.getCode(socialCareReceiptS2c);
-                    if (SocialCareReceipt.Mixed.equals(careReceivedFlag) || SocialCareReceipt.Formal.equals(careReceivedFlag))
-                        careFormalFlag = true;
+                Map<SocialCareReceiptS2c,Double> probs1 = Parameters.getRegSocialCareMarketS2c().getProbabilities(this, Person.DoublesVariables.class);
+                MultiValEvent event = new MultiValEvent(probs1, statInnovations.getDoubleDraw(8));
+                SocialCareReceiptS2c socialCareReceiptS2c = (SocialCareReceiptS2c) event.eval();
+                careReceivedFlag = SocialCareReceipt.getCode(socialCareReceiptS2c);
+                if (SocialCareReceipt.Mixed.equals(careReceivedFlag) || SocialCareReceipt.Formal.equals(careReceivedFlag))
+                    careFormalFlag = true;
 
-                    if (SocialCareReceipt.Mixed.equals(careReceivedFlag) || SocialCareReceipt.Informal.equals(careReceivedFlag)) {
+                if (SocialCareReceipt.Mixed.equals(careReceivedFlag) || SocialCareReceipt.Informal.equals(careReceivedFlag)) {
+                    // informal care received
+
                     // S2d: hours of informal care received (conditional on receiving informal care)
                     double score = Parameters.getRegInformalCareHoursS2d().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2d");
@@ -1403,70 +1403,71 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     careFromInformalFlag = true;
                     careHrsInformalWeek = informalHours;
 
-                    /*
-                     * Retired processes (kept for future reuse):
-                     * - S2f: not-partner informal carer composition
-                     * - S2g-S2j: informal care hours by source
-                     *
-                     * if (getPartner()!=null) {
-                     *     double probPartnerCare = Parameters.getRegReceiveCarePartnerS2d().getProbability(this, Person.DoublesVariables.class);
-                     *     if (statInnovations.getDoubleDraw(9) < probPartnerCare) {
-                     *         careFromInformalFlag = true;
-                     *         Map<PartnerSupplementaryCarer,Double> probs2 =
-                     *                 Parameters.getRegPartnerSupplementaryCareS2e().getProbabilities(this, Person.DoublesVariables.class);
-                     *         event = new MultiValEvent(probs2, statInnovations.getDoubleDraw(10));
-                     *         PartnerSupplementaryCarer cc = (PartnerSupplementaryCarer) event.eval();
-                     *         if (PartnerSupplementaryCarer.Daughter.equals(cc))
-                     *             careFromInformalFlag = true;
-                     *         if (PartnerSupplementaryCarer.Son.equals(cc))
-                     *             careFromInformalFlag = true;
-                     *         if (PartnerSupplementaryCarer.Other.equals(cc))
-                     *             careFromInformalFlag = true;
-                     *     }
-                     * }
-                     * if (!careFromInformalFlag) {
-                     *     Map<NotPartnerInformalCarer,Double> probs2 =
-                     *             Parameters.getRegNotPartnerInformalCareS2f().getProbabilities(this, Person.DoublesVariables.class);
-                     *     event = new MultiValEvent(probs2, statInnovations.getDoubleDraw(11));
-                     *     NotPartnerInformalCarer cc = (NotPartnerInformalCarer) event.eval();
-                     *     if (NotPartnerInformalCarer.DaughterOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))
-                     *         careFromInformalFlag = true;
-                     *     if (NotPartnerInformalCarer.SonOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.SonAndOther.equals(cc))
-                     *         careFromInformalFlag = true;
-                     *     if (NotPartnerInformalCarer.OtherOnly.equals(cc) || NotPartnerInformalCarer.SonAndOther.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))
-                     *         careFromInformalFlag = true;
-                     * }
-                     * double careHoursInnov = statInnovations.getDoubleDraw(12);
-                     * if (careFromInformalFlag) {
-                     *     double scorePartner = Parameters.getRegPartnerCareHoursS2g().getScore(this,Person.DoublesVariables.class);
-                     *     double rmsePartner = Parameters.getRMSEForRegression("S2g");
-                     *     double gaussPartner = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
-                     *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scorePartner + rmsePartner * gaussPartner));
-                     * }
-                     * careHoursInnov = Parameters.updateProbability(careHoursInnov);
-                     * if (careFromInformalFlag) {
-                     *     double scoreDaughter = Parameters.getRegDaughterCareHoursS2h().getScore(this,Person.DoublesVariables.class);
-                     *     double rmseDaughter = Parameters.getRMSEForRegression("S2h");
-                     *     double gaussDaughter = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
-                     *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scoreDaughter + rmseDaughter * gaussDaughter));
-                     * }
-                     * careHoursInnov = Parameters.updateProbability(careHoursInnov);
-                     * if (careFromInformalFlag) {
-                     *     double scoreSon = Parameters.getRegSonCareHoursS2i().getScore(this,Person.DoublesVariables.class);
-                     *     double rmseSon = Parameters.getRMSEForRegression("S2i");
-                     *     double gaussSon = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
-                     *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scoreSon + rmseSon * gaussSon));
-                     * }
-                     * careHoursInnov = Parameters.updateProbability(careHoursInnov);
-                     * if (careFromInformalFlag) {
-                     *     double scoreOther = Parameters.getRegOtherCareHoursS2j().getScore(this,Person.DoublesVariables.class);
-                     *     double rmseOther = Parameters.getRMSEForRegression("S2j");
-                     *     double gaussOther = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
-                     *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scoreOther + rmseOther * gaussOther));
-                     * }
-                     */
-                    }
-                    if (careFormalFlag) {
+                /*
+                 * Retired processes (kept for future reuse):
+                 * - S2f: not-partner informal carer composition
+                 * - S2g-S2j: informal care hours by source
+                 *
+                 * if (getPartner()!=null) {
+                 *     double probPartnerCare = Parameters.getRegReceiveCarePartnerS2d().getProbability(this, Person.DoublesVariables.class);
+                 *     if (statInnovations.getDoubleDraw(9) < probPartnerCare) {
+                 *         careFromInformalFlag = true;
+                 *         Map<PartnerSupplementaryCarer,Double> probs2 =
+                 *                 Parameters.getRegPartnerSupplementaryCareS2e().getProbabilities(this, Person.DoublesVariables.class);
+                 *         event = new MultiValEvent(probs2, statInnovations.getDoubleDraw(10));
+                 *         PartnerSupplementaryCarer cc = (PartnerSupplementaryCarer) event.eval();
+                 *         if (PartnerSupplementaryCarer.Daughter.equals(cc))
+                 *             careFromInformalFlag = true;
+                 *         if (PartnerSupplementaryCarer.Son.equals(cc))
+                 *             careFromInformalFlag = true;
+                 *         if (PartnerSupplementaryCarer.Other.equals(cc))
+                 *             careFromInformalFlag = true;
+                 *     }
+                 * }
+                 * if (!careFromInformalFlag) {
+                 *     Map<NotPartnerInformalCarer,Double> probs2 =
+                 *             Parameters.getRegNotPartnerInformalCareS2f().getProbabilities(this, Person.DoublesVariables.class);
+                 *     event = new MultiValEvent(probs2, statInnovations.getDoubleDraw(11));
+                 *     NotPartnerInformalCarer cc = (NotPartnerInformalCarer) event.eval();
+                 *     if (NotPartnerInformalCarer.DaughterOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))
+                 *         careFromInformalFlag = true;
+                 *     if (NotPartnerInformalCarer.SonOnly.equals(cc) || NotPartnerInformalCarer.DaughterAndSon.equals(cc) || NotPartnerInformalCarer.SonAndOther.equals(cc))
+                 *         careFromInformalFlag = true;
+                 *     if (NotPartnerInformalCarer.OtherOnly.equals(cc) || NotPartnerInformalCarer.SonAndOther.equals(cc) || NotPartnerInformalCarer.DaughterAndOther.equals(cc))
+                 *         careFromInformalFlag = true;
+                 * }
+                 * double careHoursInnov = statInnovations.getDoubleDraw(12);
+                 * if (careFromInformalFlag) {
+                 *     double scorePartner = Parameters.getRegPartnerCareHoursS2g().getScore(this,Person.DoublesVariables.class);
+                 *     double rmsePartner = Parameters.getRMSEForRegression("S2g");
+                 *     double gaussPartner = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
+                 *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scorePartner + rmsePartner * gaussPartner));
+                 * }
+                 * careHoursInnov = Parameters.updateProbability(careHoursInnov);
+                 * if (careFromInformalFlag) {
+                 *     double scoreDaughter = Parameters.getRegDaughterCareHoursS2h().getScore(this,Person.DoublesVariables.class);
+                 *     double rmseDaughter = Parameters.getRMSEForRegression("S2h");
+                 *     double gaussDaughter = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
+                 *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scoreDaughter + rmseDaughter * gaussDaughter));
+                 * }
+                 * careHoursInnov = Parameters.updateProbability(careHoursInnov);
+                 * if (careFromInformalFlag) {
+                 *     double scoreSon = Parameters.getRegSonCareHoursS2i().getScore(this,Person.DoublesVariables.class);
+                 *     double rmseSon = Parameters.getRMSEForRegression("S2i");
+                 *     double gaussSon = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
+                 *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scoreSon + rmseSon * gaussSon));
+                 * }
+                 * careHoursInnov = Parameters.updateProbability(careHoursInnov);
+                 * if (careFromInformalFlag) {
+                 *     double scoreOther = Parameters.getRegOtherCareHoursS2j().getScore(this,Person.DoublesVariables.class);
+                 *     double rmseOther = Parameters.getRMSEForRegression("S2j");
+                 *     double gaussOther = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
+                 *     careHrsInformalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(scoreOther + rmseOther * gaussOther));
+                 * }
+                 */
+                }
+                if (careFormalFlag) {
+
                     // S2e: hours of formal care received (conditional on receiving formal care)
                     double score = Parameters.getRegFormalCareHoursS2e().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2e");
@@ -1478,7 +1479,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     // double score = Parameters.getRegFormalCareHoursS2k().getScore(this,Person.DoublesVariables.class);
                     // double rmse = Parameters.getRMSEForRegression("S2k");
                     // double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(careHoursInnov);
-                    }
                 }
             }
         }
@@ -1491,11 +1491,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public void evaluateSocialCareProvision(double probitAdjustment) {
-        int year = getYear();
 
         careProvidedFlag = SocialCareProvision.None;
         careHrsProvidedWeek = 0.0;
-        if (demAge >= Parameters.MIN_AGE_TO_PROVIDE_CARE && year >= 2015) {
+        if (demAge >= Parameters.MIN_AGE_TO_PROVIDE_CARE) {
+
             Person partner = getPartner();
             boolean careToPartner = false;
             double careHoursToPartner = 0.0;
@@ -1503,57 +1503,48 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 careToPartner = true;
                 careHoursToPartner = partner.getCareHoursFromPartnerWeekly();
             }
-
             double probProvideAny;
             if (partner == null) {
+
                 // S3a: probability of providing care, singles.
                 double score = Parameters.getRegCarePartnerProvCareToOtherS3a().getScore(this, Person.DoublesVariables.class);
                 probProvideAny = Parameters.getRegCarePartnerProvCareToOtherS3a().getProbability(score + probitAdjustment);
             } else {
+
                 // S3b: probability of providing care, partnered.
                 double score = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getScore(this, Person.DoublesVariables.class);
                 probProvideAny = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getProbability(score + probitAdjustment);
             }
             boolean provideCare = (statInnovations.getDoubleDraw(13) < probProvideAny);
+            if (!Parameters.flagSuppressSocialCareCosts && provideCare) {
 
-            if (careToPartner && provideCare) {
-                careProvidedFlag = SocialCareProvision.PartnerAndOther;
-            } else if (careToPartner) {
-                careProvidedFlag = SocialCareProvision.OnlyPartner;
-            } else if (provideCare) {
-                careProvidedFlag = SocialCareProvision.OnlyOther;
-            }
+                double score;
+                double rmse;
+                if (partner == null) {
 
-            if (!Parameters.flagSuppressSocialCareCosts && !SocialCareProvision.None.equals(careProvidedFlag)) {
-                if (SocialCareProvision.OnlyPartner.equals(careProvidedFlag)) {
-                    careHrsProvidedWeek = careHoursToPartner;
+                    // S3c: informal care hours provided, singles (conditional on providing care).
+                    score = Parameters.getRegCareHoursProvS3c().getScore(this, Person.DoublesVariables.class);
+                    rmse = Parameters.getRMSEForRegression("S3c");
                 } else {
-                    double score;
-                    double rmse;
-                    if (partner == null) {
-                        // S3c: informal care hours provided, singles (conditional on providing care).
-                        score = Parameters.getRegCareHoursProvS3c().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("S3c");
-                    } else {
-                        // S3d: informal care hours provided, partnered (conditional on providing care).
-                        score = Parameters.getRegCareHoursProvS3d().getScore(this, Person.DoublesVariables.class);
-                        rmse = Parameters.getRMSEForRegression("S3d");
-                    }
-                    double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(14));
-                    double hours = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * gauss));
-                    if (SocialCareProvision.PartnerAndOther.equals(careProvidedFlag)) {
-                        careHrsProvidedWeek = Math.max(careHoursToPartner + 1.0, hours);
-                    } else {
-                        careHrsProvidedWeek = hours;
-                    }
-                }
-            }
 
-            if (careToPartner) {
-                if (SocialCareProvision.None.equals(careProvidedFlag)) {
-                    careProvidedFlag = SocialCareProvision.OnlyPartner;
-                } else if (SocialCareProvision.OnlyOther.equals(careProvidedFlag)) {
-                    careProvidedFlag = SocialCareProvision.PartnerAndOther;
+                    // S3d: informal care hours provided, partnered (conditional on providing care).
+                    score = Parameters.getRegCareHoursProvS3d().getScore(this, Person.DoublesVariables.class);
+                    rmse = Parameters.getRMSEForRegression("S3d");
+                }
+                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(14));
+                careHrsProvidedWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * gauss));
+                if (careToPartner) {
+
+                    if (careHrsProvidedWeek > careHoursToPartner) {
+
+                        careProvidedFlag = SocialCareProvision.PartnerAndOther;
+                    } else {
+
+                        careProvidedFlag = SocialCareProvision.OnlyPartner;
+                    }
+                } else {
+
+                    careProvidedFlag = SocialCareProvision.OnlyOther;
                 }
             }
         }
