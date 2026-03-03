@@ -6,7 +6,7 @@
 * COUNTRY:              UK
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
 * AUTHORS: 				Justin van de Ven, Daria Popova 
-* LAST UPDATE:          15 Jan 2026 DP
+* LAST UPDATE:          03 Mar 2026 (JV)
 * NOTE:					Called from 00_master.do - see master file for further details
 ***************************************************************************************
 
@@ -302,74 +302,95 @@ replace need_socare2 = 1 if (ee<nsc_tmp & dag>64 & (swv<$firstWave | swv>$lastWa
 rename need_socare need_socare_original
 gen need_socare = need_socare_original
 replace need_socare = need_socare2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
-drop ee nsc_tmp
+drop nsc_tmp
 *tab swv need_socare
 
-// hours informal care (double hurdle model)
+// use multinomial probit to model receipt of care: 0 no care, 1 only informal, 2 only formal, 3 mixed
 gen informal_hrs = partner_socare_hrs*(partner_socare_hrs > 0) + son_socare_hrs*(son_socare_hrs > 0) + daughter_socare_hrs*(daughter_socare_hrs > 0) + other_socare_hrs*(other_socare_hrs > 0)
-gen rec_informal = (informal_hrs > 0)
-probit rec_informal dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
-predict ip if (dag>64 & (swv<$firstWave | swv>$lastWave))
-gen ee = runiform()
-gen ip2 = 0
-replace ip2 = 1 if (ee<ip & dag>64 & (swv<$firstWave | swv>$lastWave))
-drop ee ip
-*tab swv rec_informal
-*tab swv ip2
+gen rec_care = (informal_hrs > 0.01) + 2*(formal_socare_hrs > 0.01)
+mprobit rec_care i.dls_adj ib7.drgn1 i.jbstat i.dhm_ghq i.age_diff i.dlltsd01_sp i.ydses_c5 dgn partnered i.dhe i.dhesp i.deh_c3 i.dlltsd01 i.dage1 widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
+forvalues ii = 1/3 {
+	
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave)), outcome(#`ii')
+}
+replace pp2 = pp2 + pp1
+replace pp3 = pp3 + pp2
+gen rec_care2 = 0
+replace rec_care2 = 1 if ((swv<$firstWave | swv>$lastWave) & dag>64 & ee>pp1 & ee<=pp2)
+replace rec_care2 = 2 if ((swv<$firstWave | swv>$lastWave) & dag>64 & ee>pp2 & ee<=pp3)
+replace rec_care2 = 3 if ((swv<$firstWave | swv>$lastWave) & dag>64 & ee>pp3)
+drop ee pp*
+*tab swv rec_care
+*tab swv rec_care2
 
 // use categorical variable to mitigate sparse distribution
-gen hrs_grp = 0
-replace hrs_grp = 1 if (informal_hrs>0 &   informal_hrs<=5)
-replace hrs_grp = 2 if (informal_hrs>5 &   informal_hrs<=9)
-replace hrs_grp = 3 if (informal_hrs>9 &   informal_hrs<=20)
-replace hrs_grp = 4 if (informal_hrs>20 &  informal_hrs<=34)
-replace hrs_grp = 5 if (informal_hrs>34 &  informal_hrs<=50)
-replace hrs_grp = 6 if (informal_hrs>50 &  informal_hrs<=100)
-replace hrs_grp = 7 if (informal_hrs>100 & informal_hrs<=110)
-replace hrs_grp = 8 if (informal_hrs>110)
-oprobit hrs_grp dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_informal==1)
+gen ihrs_grp = 0
+replace ihrs_grp = 1 if (informal_hrs>0 &   informal_hrs<=5)
+replace ihrs_grp = 2 if (informal_hrs>5 &   informal_hrs<=9)
+replace ihrs_grp = 3 if (informal_hrs>9 &   informal_hrs<=20)
+replace ihrs_grp = 4 if (informal_hrs>20 &  informal_hrs<=34)
+replace ihrs_grp = 5 if (informal_hrs>34 &  informal_hrs<=50)
+replace ihrs_grp = 6 if (informal_hrs>50 &  informal_hrs<=100)
+replace ihrs_grp = 7 if (informal_hrs>100 & informal_hrs<=110)
+replace ihrs_grp = 8 if (informal_hrs>110)
+
+// model hours of informal care - only informal care
+oprobit ihrs_grp dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_care==1)
 forvalues ii = 1/7 {
 	
-	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1), outcome(#`ii')
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & rec_care2==1), outcome(#`ii')
 }
 gen ee = runiform()
-gen informal_hrs2 = 0
+gen imputed_hrs = 0
 replace pp2 = pp2 + pp1
 replace pp3 = pp3 + pp2
 replace pp4 = pp4 + pp3
 replace pp5 = pp5 + pp4
 replace pp6 = pp6 + pp5
 replace pp7 = pp7 + pp6
-replace informal_hrs2 = 2.5 if (ee<=pp1 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 7 if (ee>pp1 & ee<=pp2 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 14.5 if (ee>pp2 & ee<=pp3 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 27.0 if (ee>pp3 & ee<=pp4 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 42.0 if (ee>pp4 & ee<=pp5 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 74.5 if (ee>pp5 & ee<=pp6 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 100  if (ee>pp6 & ee<=pp7 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = 125  if (ee>pp7 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace informal_hrs2 = -9 if (dag<65 & (swv<$firstWave | swv>$lastWave) & ip2==0)
-
+replace imputed_hrs = 2.5  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee<=pp1)
+replace imputed_hrs = 7	   if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp1 & ee<=pp2)
+replace imputed_hrs = 14.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp2 & ee<=pp3)
+replace imputed_hrs = 27.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp3 & ee<=pp4)
+replace imputed_hrs = 42.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp4 & ee<=pp5)
+replace imputed_hrs = 74.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp5 & ee<=pp6)
+replace imputed_hrs = 100  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp6 & ee<=pp7)
+replace imputed_hrs = 125  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1 & ee>pp7)
 rename informal_hrs informal_hrs_original
 gen informal_socare_hrs = informal_hrs_original
-replace informal_socare_hrs = informal_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
-drop ip2 pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee
-*tab hrs_grp if (dag>64 & swv>=$firstWave & swv<=$lastWave)
-*tab informal_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+replace informal_socare_hrs = imputed_hrs if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==1)
+drop pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee imputed_hrs
+*tab ihrs_grp if rec_care==1
+*tab informal_socare_hrs if rec_care2==1
 
-// hours of formal care
-gen rec_formal = (formal_socare_hrs > 0)
-gen rec_informal_intensive = (informal_socare_hrs>10)
-probit rec_formal rec_informal rec_informal_intensive dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
-predict ip if (dag>64 & (swv<$firstWave | swv>$lastWave))
+// model hours of informal care - mixed care
+oprobit ihrs_grp dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_care==3)
+forvalues ii = 1/7 {
+	
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & rec_care2==3), outcome(#`ii')
+}
 gen ee = runiform()
-gen ip2 = 0
-replace ip2 = 1 if (ee<ip*1.9 & dag>64 & swv<$firstWave)
-replace ip2 = 1 if (ee<ip & dag>64 & swv>$lastWave)
-drop ee ip
-*tab swv rec_informal
-*tab swv ip2
+gen imputed_hrs = 0
+replace pp2 = pp2 + pp1
+replace pp3 = pp3 + pp2
+replace pp4 = pp4 + pp3
+replace pp5 = pp5 + pp4
+replace pp6 = pp6 + pp5
+replace pp7 = pp7 + pp6
+replace imputed_hrs = 2.5  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee<=pp1)
+replace imputed_hrs = 7    if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp1 & ee<=pp2)
+replace imputed_hrs = 14.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp2 & ee<=pp3)
+replace imputed_hrs = 27.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp3 & ee<=pp4)
+replace imputed_hrs = 42.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp4 & ee<=pp5)
+replace imputed_hrs = 74.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp5 & ee<=pp6)
+replace imputed_hrs = 100  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp6 & ee<=pp7)
+replace imputed_hrs = 125  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp7)
+replace informal_socare_hrs = imputed_hrs if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3)
+drop pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee imputed_hrs
+*tab ihrs_grp if rec_care==3
+*tab informal_socare_hrs if rec_care2==3
 
+// model hours of formal care - only formal care
 gen formal_hrs_grp = 0
 replace formal_hrs_grp = 1 if (formal_socare_hrs>0 & formal_socare_hrs<=5)
 replace formal_hrs_grp = 2 if (formal_socare_hrs>5 & formal_socare_hrs<=9)
@@ -378,34 +399,60 @@ replace formal_hrs_grp = 4 if (formal_socare_hrs>20 & formal_socare_hrs<=34)
 replace formal_hrs_grp = 5 if (formal_socare_hrs>34 & formal_socare_hrs<=50)
 replace formal_hrs_grp = 6 if (formal_socare_hrs>50 & formal_socare_hrs<=100)
 replace formal_hrs_grp = 7 if (formal_socare_hrs>100)
-oprobit formal_hrs_grp rec_informal rec_informal_intensive dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_formal==1)
+oprobit formal_hrs_grp dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_care==2)
 forvalues ii = 1/7 {
 	
-	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1), outcome(#`ii')
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & rec_care2==2), outcome(#`ii')
 }
 gen ee = runiform()
-gen formal_socare_hrs2 = 0
+gen imputed_hrs = 0
 replace pp2 = pp2 + pp1
 replace pp3 = pp3 + pp2
 replace pp4 = pp4 + pp3
 replace pp5 = pp5 + pp4
 replace pp6 = pp6 + pp5
 replace pp7 = pp7 + pp6
-replace formal_socare_hrs2 = 2.5 if (ee<=pp1 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = 7 if (ee>pp1 & ee<=pp2 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = 14.5 if (ee>pp2 & ee<=pp3 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = 27.0 if (ee>pp3 & ee<=pp4 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = 42.0 if (ee>pp4 & ee<=pp5 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = 74.5 if (ee>pp5 & ee<=pp6 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = 125  if (ee>pp6 & dag>64 & (swv<$firstWave | swv>$lastWave) & ip2==1)
-replace formal_socare_hrs2 = -9 if (dag<65 & (swv<$firstWave | swv>$lastWave) & ip2==0)
+replace imputed_hrs = 2.5  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee<=pp1)
+replace imputed_hrs = 7 	 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp1 & ee<=pp2)
+replace imputed_hrs = 14.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp2 & ee<=pp3)
+replace imputed_hrs = 27.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp3 & ee<=pp4)
+replace imputed_hrs = 42.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp4 & ee<=pp5)
+replace imputed_hrs = 74.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp5 & ee<=pp6)
+replace imputed_hrs = 100  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp6 & ee<=pp7)
+replace imputed_hrs = 125  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2 & ee>pp7)
+rename formal_socare_hrs formal_hrs_original
+gen formal_socare_hrs = formal_hrs_original
+replace formal_socare_hrs = imputed_hrs if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==2)
+drop pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee imputed_hrs
+*tab formal_hrs_grp if rec_care==2
+*tab formal_socare_hrs if rec_care2==2
 
-rename formal_socare_hrs formal_socare_hrs_original
-gen formal_socare_hrs = formal_socare_hrs_original
-replace formal_socare_hrs = formal_socare_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
-drop ip2 pp1 pp2 pp3 pp4 pp5 pp6 ee
-*tab formal_hrs_grp if (dag>64 & swv>=$firstWave & swv<=$lastWave)
-*tab formal_socare_hrs2 if (dag>64 & (swv<$firstWave | swv>$lastWave))
+// model hours of formal care - mixed care
+oprobit formal_hrs_grp dgn i.deh_c3 i.dlltsd01 i.dlltsd01_sp i.dhhtp_c4 i.ydses_c5 unemp i.dehsp_c3 partnered i.dhe i.dhesp i.dhm_ghq i.dls_adj i.dot01 i.dage1 i.age_diff ib7.drgn1 i.jbstat widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave & rec_care==3)
+forvalues ii = 1/7 {
+	
+	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave) & rec_care2==3), outcome(#`ii')
+}
+gen ee = runiform()
+gen imputed_hrs = 0
+replace pp2 = pp2 + pp1
+replace pp3 = pp3 + pp2
+replace pp4 = pp4 + pp3
+replace pp5 = pp5 + pp4
+replace pp6 = pp6 + pp5
+replace pp7 = pp7 + pp6
+replace imputed_hrs = 2.5  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee<=pp1)
+replace imputed_hrs = 7 	 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp1 & ee<=pp2)
+replace imputed_hrs = 14.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp2 & ee<=pp3)
+replace imputed_hrs = 27.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp3 & ee<=pp4)
+replace imputed_hrs = 42.0 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp4 & ee<=pp5)
+replace imputed_hrs = 74.5 if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp5 & ee<=pp6)
+replace imputed_hrs = 100  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp6 & ee<=pp7)
+replace imputed_hrs = 125  if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3 & ee>pp7)
+replace formal_socare_hrs = imputed_hrs if ((swv<$firstWave | swv>$lastWave) & dag>64 & rec_care2==3)
+drop pp1 pp2 pp3 pp4 pp5 pp6 pp7 ee imputed_hrs
+tab formal_hrs_grp if rec_care==3
+tab formal_socare_hrs if rec_care2==3
 
 
 /**************************************************************************************
