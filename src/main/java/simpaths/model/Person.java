@@ -2235,7 +2235,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             demAgePartnerDiffL1 = null;
             idPartnerL1 = null;
         }
-        demPartnerStatusL1 = Dcpst.Partnered;
+        demPartnerStatusL1 = getDcpst();
         yPersAndPartnerGrossDiffMonthL1 = getYnbcpdf_dv(); //Lag(1) of difference between own and partner's gross personal non-benefit income
         labStatusPartnerAndOwnC4L1 = getLesdf_c4(); //Lag(1) of own and partner's activity status
     }
