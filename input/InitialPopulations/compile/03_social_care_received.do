@@ -308,7 +308,7 @@ drop nsc_tmp
 // use multinomial probit to model receipt of care: 0 no care, 1 only informal, 2 only formal, 3 mixed
 gen informal_hrs = partner_socare_hrs*(partner_socare_hrs > 0) + son_socare_hrs*(son_socare_hrs > 0) + daughter_socare_hrs*(daughter_socare_hrs > 0) + other_socare_hrs*(other_socare_hrs > 0)
 gen rec_care = (informal_hrs > 0.01) + 2*(formal_socare_hrs > 0.01)
-mprobit rec_care i.dls_adj ib7.drgn1 i.jbstat i.dhm_ghq i.age_diff i.dlltsd01_sp i.ydses_c5 dgn partnered i.dhe i.dhesp i.deh_c3 i.dlltsd01 i.dage1 widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
+mprobit rec_care ib7.drgn1 i.dhm_ghq i.age_diff i.dlltsd01_sp i.ydses_c5 dgn partnered i.dhe i.dhesp i.deh_c3 i.dlltsd01 i.dage1 widow [pweight=dimxwt] if (dag>64 & swv>=$firstWave & swv<=$lastWave) 
 forvalues ii = 1/3 {
 	
 	predict pp`ii' if (dag>64 & (swv<$firstWave | swv>$lastWave)), outcome(#`ii')

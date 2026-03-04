@@ -2313,7 +2313,7 @@ replace ageband = 60 if ageband == 70
 	// group 70+ year olds with 60+ to ensure matches 
 
 cap drop stratum 
-egen stratum = group(ageband drgn1 dgn swv), label /*(stratum, replace)*/  
+egen stratum = group(ageband drgn1 dgn swv)/*, label (stratum, replace)*/  
 
 * Define donor pool
 preserve
@@ -3531,7 +3531,7 @@ cap log close
 ************************************************************************************
 * clean-up and exit
 ************************************************************************************
-cd $dir_data
+cd "$dir_data"
 dir *.dta
 
 #delimit ;
