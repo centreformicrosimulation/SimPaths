@@ -52,6 +52,12 @@ void write_all_to_excel() {
 	printf("Done\n")
 }
 
+void write_values_to_excel() {
+	stata("quietly putexcel B2 = matrix(b_trimmed')")
+	stata("quietly putexcel C2 = matrix(V_trimmed)")
+	printf("Done\n")
+}
+
 void extract_and_export_labels(string scalar sheet) {
 	nonzero_b_flag = st_matrix("nonzero_b_flag")'
 	stripe = st_matrixcolstripe("e(b)")
@@ -117,7 +123,7 @@ program define export_labels_to_excel
 	syntax, sheet(string)
 	
 	* Set up Excel file
-	putexcel set "$dir_results/reg_socialcare", sheet("`sheet'") modify
+	putexcel set "$dir_results/`workbook'", sheet("`sheet'") modify
 	
 	* Vertical labels
 	forvalues i = 1/`n_labels' {
@@ -155,9 +161,9 @@ end
 capture program drop export_gof_probit
 program define export_gof_probit
 	
-	syntax, row(integer) label(string)
+	syntax, row(integer) workbook(string) label(string)
 	
-	putexcel set "$dir_results/reg_socialcare", sheet("Gof") modify
+	putexcel set "$dir_results/`workbook'", sheet("Gof") modify
 	
 	local row1 = `row'
 	local row2 = `row' + 1
@@ -180,9 +186,9 @@ end
 capture program drop export_gof_ols
 program define export_gof_ols
 	
-	syntax, row(integer) label(string)
+	syntax, row(integer) workbook(string) label(string)
 	
-	putexcel set "$dir_results/reg_socialcare", sheet("Gof") modify
+	putexcel set "$dir_results/`workbook'", sheet("Gof") modify
 	
 	local row1 = `row'
 	local row2 = `row' + 1
@@ -201,13 +207,13 @@ end
 capture program drop save_raw_results
 program define save_raw_results
 	
-	syntax, process(string) title(string) [ifcond(string)]
+	syntax, process(string) workbook(string) title(string) [ifcond(string)]
 	
 	* Save to Excel
 	matrix results = r(table)
 	matrix results = results[1..6,1...]'
 	
-	putexcel set "$dir_raw_results/social_care/socialcare", ///
+	putexcel set "$dir_raw_results/$regression_set/`workbook'", ///
 		sheet("Process `process'") replace
 	putexcel A3 = matrix(results), names nformat(number_d2)
 	putexcel J4 = matrix(e(V))
@@ -222,13 +228,13 @@ program define save_raw_results
 		* Check if probit/logit or OLS
 		if "`e(cmd)'" == "probit" | "`e(cmd)'" == "logit" {
 			outreg2 stats(coef se pval) using ///
-				"$dir_raw_results/social_care/`process'.doc", replace ///
+				"$dir_raw_results/$regression_set/`process'.doc", replace ///
 				title("`title'") ctitle(Model) label side dec(2) noparen ///
 				addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) `note'
 		}
 		else {
 			outreg2 stats(coef se pval) using ///
-				"$dir_raw_results/social_care/`process'.doc", replace ///
+				"$dir_raw_results/$regression_set/`process'.doc", replace ///
 				title("`title'") ctitle(Model) label side dec(2) noparen ///
 				addstat(R2, e(r2)) `note'
 		}
@@ -241,7 +247,7 @@ end
 capture program drop export_results_to_excel
 program define export_results_to_excel
 	
-	syntax, sheet(string) [probit]
+	syntax, sheet(string) workbook(string) [probit]
 	
 	* Store estimates
 	matrix b = e(b)
@@ -254,12 +260,14 @@ program define export_results_to_excel
 	check_matrix_stability
 	
 	* Export to Excel - use modify mode (file already created in setup)
-	putexcel set "$dir_results/reg_socialcare", sheet("`sheet'") modify
+	putexcel set "$dir_results/`workbook'", sheet("`sheet'") modify
 	putexcel A1 = "REGRESSOR"
 	putexcel B1 = "COEFFICIENT"
 	
+	* putexcel C2 = matrix(V)
 	* Write coefficients cell-by-cell
-	mata: write_all_to_excel()
+	mata: write_values_to_excel()
+
 	
 	* Extract and export labels
 	mata: extract_and_export_labels("`sheet'")
@@ -282,11 +290,11 @@ end
 capture program drop process_regression
 program define process_regression
 	
-	syntax, process(string) sheet(string) title(string) gofrow(integer) ///
+	syntax, process(string) sheet(string) workbook(string) title(string) gofrow(integer) ///
 		goflabel(string) [ifcond(string) probit]
 	
 	* Save raw results
-	save_raw_results, process("`process'") title("`title'") ifcond("`ifcond'")
+	save_raw_results, process("`process'") workbook("`workbook'") title("`title'") ifcond("`ifcond'")
 	
 	* Save sample for validation
 	gen in_sample = e(sample)
@@ -295,12 +303,12 @@ program define process_regression
 	
 	* Export results to Excel
 	if "`probit'" == "probit" {
-		export_results_to_excel, sheet("`sheet'") probit
-		export_gof_probit, row(`gofrow') label("`goflabel'")
+		export_results_to_excel, sheet("`sheet'") workbook("`workbook'") probit
+		export_gof_probit, row(`gofrow') workbook(`workbook') label("`goflabel'")
 	}
 	else {
-		export_results_to_excel, sheet("`sheet'")
-		export_gof_ols, row(`gofrow') label("`goflabel'")
+		export_results_to_excel, sheet("`sheet'") workbook("`workbook'") 
+		export_gof_ols, row(`gofrow') workbook(`workbook') label("`goflabel'")
 	}
 	
 	* Clean up
@@ -314,13 +322,13 @@ end
 capture program drop process_mlogit
 program define process_mlogit
 	
-	syntax, process(string) sheet(string) title(string) gofrow(integer) ///
+	syntax, process(string) sheet(string) workbook(string) title(string) gofrow(integer) ///
 		goflabel(string) outcomes(integer) [ifcond(string)]
 	
 	* Save raw results (skip outreg2 for mlogit - it has issues)
 	matrix results = r(table)
 	matrix results = results[1..6,1...]'
-	putexcel set "$dir_raw_results/social_care/socialcare", ///
+	putexcel set "$dir_raw_results/$regression_set/`workbook'", ///
 		sheet("Process `process'") replace
 	putexcel A3 = matrix(results), names nformat(number_d2)
 	putexcel J4 = matrix(e(V))
