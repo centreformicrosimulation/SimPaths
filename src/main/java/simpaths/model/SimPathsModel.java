@@ -165,18 +165,24 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "tick to project mortality based on gender, age, and year specific probabilities")
     private boolean projectMortality = true;
 
-    private boolean alignPopulation = false; //TODO: routine fails to replicate results for minor variations between simulations
+    private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = false;
+    private boolean alignFertility = true;
+    private static final int FERTILITY_ALIGNMENT_END_YEAR = 2040;
+    private Double lastFertilityAdjustment = null;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
     private boolean alignInSchool = true; //Set to true to align share of students among 16-29 age group
+    private static final int IN_SCHOOL_ALIGNMENT_END_YEAR = 2023;
+    private Double lastInSchoolAdjustment = null;
 
-    private boolean alignCohabitation = false; //Set to true to align share of couples (cohabiting individuals)
+    private boolean alignCohabitation = true; //Set to true to align share of couples (cohabiting individuals)
+    private static final int PARTNERSHIP_ALIGNMENT_END_YEAR = 2023;
+    private Double lastPartnershipAdjustment = null;
 
-    private boolean alignEmployment = true; //Set to true to align employment share
+    private boolean alignEmployment = false; //Set to true to align employment share
 
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
@@ -514,7 +520,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.InSchool);
 
         // In School alignment
-        addEventToAllYears(Processes.InSchoolAlignment);
+        yearlySchedule.addEvent(this, Processes.InSchoolAlignment);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.LeavingSchool);
 
         // Align the level of education if required
@@ -2041,6 +2047,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     private void partnershipAlignment() {
+        if (getYear() > PARTNERSHIP_ALIGNMENT_END_YEAR) {
+            lastPartnershipAdjustment = getFrozenPartnershipAdjustment();
+            System.out.println("Partnership alignment skipped after " + PARTNERSHIP_ALIGNMENT_END_YEAR
+                    + "; holding adjustment at " + lastPartnershipAdjustment);
+            return;
+        }
 
         // Instantiate alignment object
         PartnershipAlignment partnershipAlignment = new PartnershipAlignment(persons);
@@ -2051,11 +2063,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double maxVal = Math.min(4.0, - partnershipAdjustment + 4.0);
 
         // run search
-        RootSearch search = getRootSearch(0.0, minVal, maxVal, partnershipAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+        RootSearch search = getRootSearch(0.0, minVal, maxVal, partnershipAlignment, 0.0, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
 
         // check result
         //double val = partnershipAlignment.evaluate(search.getTarget());
 
+        lastPartnershipAdjustment = search.getTarget()[0];
         // update and exit
         if (search.isTargetAltered()) {
             Parameters.setAlignmentValue(getYear(), search.getTarget()[0], AlignmentVariable.PartnershipAlignment); // If adjustment is altered from the initial value, update the map
@@ -2221,6 +2234,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      *
      */
     private void inSchoolAlignment() {
+        if (getYear() > IN_SCHOOL_ALIGNMENT_END_YEAR) {
+            lastInSchoolAdjustment = getFrozenInSchoolAdjustment();
+            System.out.println("InSchool alignment skipped after " + IN_SCHOOL_ALIGNMENT_END_YEAR
+                    + "; holding adjustment at " + lastInSchoolAdjustment);
+            return;
+        }
 
         InSchoolAlignment inSchoolAlignment = new InSchoolAlignment(persons);
         double inSchoolAdjustment;
@@ -2230,8 +2249,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         } else {
             inSchoolAdjustment = Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment);
         }
-        final double epsOrdinates = 1.0E-2;
-        final double epsFunction = 1.0E-2;
+        final double epsOrdinates = 0.0;
+        final double epsFunction = 5.0E-3;
         final double initialBound = 20.0;
         final double tightSideBound = 5.0;
         final double maxDirectionalExpansion = 100.0;
@@ -2314,6 +2333,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     it.isFuncTolMet(), it.isOrdTolMet());
         }
 
+        lastInSchoolAdjustment = search.getTarget()[0];
         // update and exit
         if (search.isTargetAltered()) {
             Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.InSchoolAdjustment); // If adjustment is altered from the initial value, update the map
@@ -2438,6 +2458,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
      * match official estimates.
      */
     private void fertilityAlignment() {
+        if (getYear() > FERTILITY_ALIGNMENT_END_YEAR) {
+            lastFertilityAdjustment = getFrozenFertilityAdjustment();
+            System.out.println("Fertility alignment skipped after " + FERTILITY_ALIGNMENT_END_YEAR
+                    + "; holding adjustment at " + lastFertilityAdjustment);
+            return;
+        }
 
         // Instantiate alignment object
         FertilityAlignment fertilityAlignment = new FertilityAlignment(persons);
@@ -2448,8 +2474,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double maxVal = Math.min(4.0, - fertilityAdjustment + 4.0);
 
         // run search
-        RootSearch search = getRootSearch(0.0, minVal, maxVal, fertilityAlignment, 5.0E-3, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
+        RootSearch search = getRootSearch(0.0, minVal, maxVal, fertilityAlignment, 0.0, 5.0E-3); // epsOrdinates and epsFunction determine the stopping condition for the search. For partnershipAlignment error term is the difference between target and observed share of partnered individuals.
 
+        lastFertilityAdjustment = search.getTarget()[0];
         // update and exit
         if (search.isTargetAltered()) {
             Parameters.setAlignmentValue(getYear(), search.getTarget()[0], AlignmentVariable.FertilityAlignment); // If adjustment is altered from the initial value, update the map
@@ -3234,6 +3261,65 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     }
 
     public boolean isAlignInSchool() { return alignInSchool;    }
+
+    public double getInSchoolAdjustment() {
+        if (!alignInSchool) {
+            return 0.0;
+        }
+        if (year > IN_SCHOOL_ALIGNMENT_END_YEAR) {
+            return getFrozenInSchoolAdjustment();
+        }
+        return Parameters.getTimeSeriesValue(year, TimeSeriesVariable.InSchoolAdjustment);
+    }
+
+    private double getFrozenInSchoolAdjustment() {
+        if (lastInSchoolAdjustment == null) {
+            lastInSchoolAdjustment = Parameters.getTimeSeriesValue(IN_SCHOOL_ALIGNMENT_END_YEAR, TimeSeriesVariable.InSchoolAdjustment);
+        }
+        return lastInSchoolAdjustment;
+    }
+
+    public double getPartnershipAdjustment() {
+        return getPartnershipAdjustment(year);
+    }
+
+    public double getPartnershipAdjustment(int year) {
+        if (!alignCohabitation) {
+            return 0.0;
+        }
+        if (year > PARTNERSHIP_ALIGNMENT_END_YEAR) {
+            return getFrozenPartnershipAdjustment();
+        }
+        return Parameters.getAlignmentValue(year, AlignmentVariable.PartnershipAlignment);
+    }
+
+    private double getFrozenPartnershipAdjustment() {
+        if (lastPartnershipAdjustment == null) {
+            lastPartnershipAdjustment = Parameters.getAlignmentValue(PARTNERSHIP_ALIGNMENT_END_YEAR, AlignmentVariable.PartnershipAlignment);
+        }
+        return lastPartnershipAdjustment;
+    }
+
+    public double getFertilityAdjustment() {
+        return getFertilityAdjustment(year);
+    }
+
+    public double getFertilityAdjustment(int year) {
+        if (!alignFertility) {
+            return 0.0;
+        }
+        if (year > FERTILITY_ALIGNMENT_END_YEAR) {
+            return getFrozenFertilityAdjustment();
+        }
+        return Parameters.getAlignmentValue(year, AlignmentVariable.FertilityAlignment);
+    }
+
+    private double getFrozenFertilityAdjustment() {
+        if (lastFertilityAdjustment == null) {
+            lastFertilityAdjustment = Parameters.getAlignmentValue(FERTILITY_ALIGNMENT_END_YEAR, AlignmentVariable.FertilityAlignment);
+        }
+        return lastFertilityAdjustment;
+    }
 
     public void setYear(int year) {
         this.year = year;
