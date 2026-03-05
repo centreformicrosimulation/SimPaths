@@ -2858,20 +2858,83 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Year2010,
         Year2011,
         Year2012,
+        Y2012,
         Year2013,
+        Y2013,
         Year2014,
+        Y2014,
         Year2015,
+        Y2015,
         Year2016,
+        Y2016,
         Year2017,
+        Y2017,
         Year2018,
+        Y2018,
         Year2019,
+        Y2019,
         Year2020,
         Y2020,
         Year2021,
         Y2021,
         Year2022,
+        Y2022,
         Year2023,
+        Y2023,
         Year2024,
+        Y2024,
+        Y2012_Poor,
+        Y2012_Fair,
+        Y2012_Good,
+        Y2012_VeryGood,
+        Y2013_Poor,
+        Y2013_Fair,
+        Y2013_Good,
+        Y2013_VeryGood,
+        Y2014_Poor,
+        Y2014_Fair,
+        Y2014_Good,
+        Y2014_VeryGood,
+        Y2015_Poor,
+        Y2015_Fair,
+        Y2015_Good,
+        Y2015_VeryGood,
+        Y2016_Poor,
+        Y2016_Fair,
+        Y2016_Good,
+        Y2016_VeryGood,
+        Y2017_Poor,
+        Y2017_Fair,
+        Y2017_Good,
+        Y2017_VeryGood,
+        Y2018_Poor,
+        Y2018_Fair,
+        Y2018_Good,
+        Y2018_VeryGood,
+        Y2019_Poor,
+        Y2019_Fair,
+        Y2019_Good,
+        Y2019_VeryGood,
+        Y2020_Poor,
+        Y2020_Fair,
+        Y2020_Good,
+        Y2020_VeryGood,
+        Y2021_Poor,
+        Y2021_Fair,
+        Y2021_Good,
+        Y2021_VeryGood,
+        Y2022_Poor,
+        Y2022_Fair,
+        Y2022_Good,
+        Y2022_VeryGood,
+        Y2023_Poor,
+        Y2023_Fair,
+        Y2023_Good,
+        Y2023_VeryGood,
+        Y2024_Poor,
+        Y2024_Fair,
+        Y2024_Good,
+        Y2024_VeryGood,
         Year2025,
         Year2026,
         Year2027,
@@ -3998,28 +4061,28 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2011 -> {
                 return (getYear() == 2011) ? 1. : 0.;
             }
-            case Year2012 -> {
+            case Year2012, Y2012 -> {
                 return (getYear() == 2012) ? 1. : 0.;
             }
-            case Year2013 -> {
+            case Year2013, Y2013 -> {
                 return (getYear() == 2013) ? 1. : 0.;
             }
-            case Year2014 -> {
+            case Year2014, Y2014 -> {
                 return (getYear() == 2014) ? 1. : 0.;
             }
-            case Year2015 -> {
+            case Year2015, Y2015 -> {
                 return (getYear() == 2015) ? 1. : 0.;
             }
-            case Year2016 -> {
+            case Year2016, Y2016 -> {
                 return (getYear() == 2016) ? 1. : 0.;
             }
-            case Year2017 -> {
+            case Year2017, Y2017 -> {
                 return (getYear() == 2017) ? 1. : 0.;
             }
-            case Year2018 -> {
+            case Year2018, Y2018 -> {
                 return (getYear() == 2018) ? 1. : 0.;
             }
-            case Year2019 -> {
+            case Year2019, Y2019 -> {
                 return (getYear() == 2019) ? 1. : 0.;
             }
             case Year2020, Y2020, Y2020_Mixed, Y2020_Formal -> {
@@ -4028,14 +4091,170 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2021, Y2021, Y2021_Mixed, Y2021_Formal -> {
                 return (getYear() == 2021) ? 1. : 0.;
             }
-            case Year2022 -> {
+            case Year2022, Y2022 -> {
                 return (getYear() == 2022) ? 1. : 0.;
             }
-            case Year2023 -> {
+            case Year2023, Y2023 -> {
                 return (getYear() == 2023) ? 1. : 0.;
             }
-            case Year2024 -> {
+            case Year2024, Y2024 -> {
                 return (getYear() == 2024) ? 1. : 0.;
+            }
+            case Y2012_Poor -> {
+                return (getYear() == 2012 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2012_Fair -> {
+                return (getYear() == 2012 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2012_Good -> {
+                return (getYear() == 2012 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2012_VeryGood -> {
+                return (getYear() == 2012 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2013_Poor -> {
+                return (getYear() == 2013 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2013_Fair -> {
+                return (getYear() == 2013 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2013_Good -> {
+                return (getYear() == 2013 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2013_VeryGood -> {
+                return (getYear() == 2013 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2014_Poor -> {
+                return (getYear() == 2014 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2014_Fair -> {
+                return (getYear() == 2014 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2014_Good -> {
+                return (getYear() == 2014 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2014_VeryGood -> {
+                return (getYear() == 2014 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2015_Poor -> {
+                return (getYear() == 2015 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2015_Fair -> {
+                return (getYear() == 2015 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2015_Good -> {
+                return (getYear() == 2015 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2015_VeryGood -> {
+                return (getYear() == 2015 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2016_Poor -> {
+                return (getYear() == 2016 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2016_Fair -> {
+                return (getYear() == 2016 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2016_Good -> {
+                return (getYear() == 2016 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2016_VeryGood -> {
+                return (getYear() == 2016 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2017_Poor -> {
+                return (getYear() == 2017 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2017_Fair -> {
+                return (getYear() == 2017 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2017_Good -> {
+                return (getYear() == 2017 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2017_VeryGood -> {
+                return (getYear() == 2017 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2018_Poor -> {
+                return (getYear() == 2018 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2018_Fair -> {
+                return (getYear() == 2018 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2018_Good -> {
+                return (getYear() == 2018 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2018_VeryGood -> {
+                return (getYear() == 2018 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2019_Poor -> {
+                return (getYear() == 2019 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2019_Fair -> {
+                return (getYear() == 2019 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2019_Good -> {
+                return (getYear() == 2019 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2019_VeryGood -> {
+                return (getYear() == 2019 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2020_Poor -> {
+                return (getYear() == 2020 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2020_Fair -> {
+                return (getYear() == 2020 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2020_Good -> {
+                return (getYear() == 2020 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2020_VeryGood -> {
+                return (getYear() == 2020 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2021_Poor -> {
+                return (getYear() == 2021 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2021_Fair -> {
+                return (getYear() == 2021 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2021_Good -> {
+                return (getYear() == 2021 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2021_VeryGood -> {
+                return (getYear() == 2021 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2022_Poor -> {
+                return (getYear() == 2022 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2022_Fair -> {
+                return (getYear() == 2022 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2022_Good -> {
+                return (getYear() == 2022 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2022_VeryGood -> {
+                return (getYear() == 2022 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2023_Poor -> {
+                return (getYear() == 2023 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2023_Fair -> {
+                return (getYear() == 2023 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2023_Good -> {
+                return (getYear() == 2023 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2023_VeryGood -> {
+                return (getYear() == 2023 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2024_Poor -> {
+                return (getYear() == 2024 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2024_Fair -> {
+                return (getYear() == 2024 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2024_Good -> {
+                return (getYear() == 2024 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
+            }
+            case Y2024_VeryGood -> {
+                return (getYear() == 2024 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
             }
             case Year2025 -> {
                 return (getYear() == 2025) ? 1. : 0.;
