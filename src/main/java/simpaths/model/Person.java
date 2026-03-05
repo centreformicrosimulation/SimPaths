@@ -2669,6 +2669,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhhtp_c4_CoupleChildren_L1,
         Dhhtp_c4_CoupleNoChildren_L1,
         Dhhtp_c4_SingleChildren_L1,
+        Dhhtp_c4_SingleChildren_L1_,
         Dhhtp_c4_SingleNoChildren_L1,
         L_Dhhtp_c4_CoupleChildren,
         L_Dhhtp_c4_SingleChildren,
@@ -2735,8 +2736,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Ethn_Asian,
         EthnicityAsian,
         Ethn_Black,
+        Ethn_Black_,
         EthnicityBlack,
         Ethn_Other,
+        Ethn_Other_,
         EthnicityOther,
         EthnicityMixed,
         // Ethn_Missing,
@@ -2839,7 +2842,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Union,
         Union_kids,
         UKC,				//UK
+        UKC_,
         UKD,
+        UKD_,
         UKE,
         UKF,
         UKG,
@@ -2848,7 +2853,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         UKJ,
         UKK,
         UKL,
+        UKL_,
         UKM,
+        UKM_,
         UKmissing,
         UKN,
         Year,										//Year as in the simulation, e.g. 2009
@@ -2858,8 +2865,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Y2012,
         Year2013,
         Y2013,
+        Y2013_,
         Year2014,
         Y2014,
+        Y2014_,
         Year2015,
         Y2015,
         Year2016,
@@ -3780,7 +3789,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhhtp_c4_SingleNoChildren_L1, L_Dhhtp_c4_SingleNoChildren -> {
                 return (Dhhtp_c4.SingleNoChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
-            case Dhhtp_c4_SingleChildren_L1, L_Dhhtp_c4_SingleChildren -> {
+            case Dhhtp_c4_SingleChildren_L1, L_Dhhtp_c4_SingleChildren, Dhhtp_c4_SingleChildren_L1_ -> {
                 return (Dhhtp_c4.SingleChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
             case Dhhtp_c8_2_L1 -> {
@@ -3846,10 +3855,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Ethn_Asian, EthnicityAsian -> {
                 return demEthnC6.equals(Ethnicity.Asian) ? 1. : 0.;
             }
-            case Ethn_Black, EthnicityBlack -> {
+            case Ethn_Black, EthnicityBlack, Ethn_Black_ -> {
                 return demEthnC6.equals(Ethnicity.Black) ? 1. : 0.;
             }
-            case Ethn_Other, EthnicityOther -> {
+            case Ethn_Other, EthnicityOther, Ethn_Other_ -> {
                 return (demEthnC6.equals(Ethnicity.Other) || demEthnC6.equals(Ethnicity.Missing)) ? 1. : 0.;
             }
             case EthnicityMixed -> {
@@ -4061,10 +4070,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2012, Y2012 -> {
                 return (getYear() == 2012) ? 1. : 0.;
             }
-            case Year2013, Y2013 -> {
+            case Year2013, Y2013, Y2013_ -> {
                 return (getYear() == 2013) ? 1. : 0.;
             }
-            case Year2014, Y2014 -> {
+            case Year2014, Y2014, Y2014_ -> {
                 return (getYear() == 2014) ? 1. : 0.;
             }
             case Year2015, Y2015 -> {
@@ -4668,10 +4677,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (getRegion().equals(Region.ITI)) ? 1. : 0.;
             }
             //UK
-            case UKC, UKC_Mixed, UKC_Formal -> {
+            case UKC, UKC_Mixed, UKC_Formal, UKC_ -> {
                 return Region.UKC.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKD, UKD_Mixed, UKD_Formal -> {
+            case UKD, UKD_Mixed, UKD_Formal, UKD_ -> {
                 return Region.UKD.equals(getRegion()) ? 1.0 : 0.0;
             }
             case UKE, UKE_Mixed, UKE_Formal -> {
@@ -4695,10 +4704,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case UKK, UKK_Mixed, UKK_Formal -> {
                 return Region.UKK.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKL, UKL_Mixed, UKL_Formal -> {
+            case UKL, UKL_Mixed, UKL_Formal, UKL_ -> {
                 return Region.UKL.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKM, UKM_Mixed, UKM_Formal -> {
+            case UKM, UKM_Mixed, UKM_Formal, UKM_ -> {
                 return Region.UKM.equals(getRegion()) ? 1.0 : 0.0;
             }
             case UKN, UKN_Mixed, UKN_Formal -> {
