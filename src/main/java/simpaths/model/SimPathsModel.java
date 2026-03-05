@@ -153,8 +153,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 //	@GUIparameter(description = "If true, set initial earnings from data in input population, otherwise, set using the wage equation regression estimates")
     private boolean initialisePotentialEarningsFromDatabase = true;
 
-    //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
+//	@GUIparameter(description = "If unchecked, will expand population and not use weights")
     private boolean useWeights = false;
+
+    @GUIparameter(description = "Resample initial population when not using weights")
+    private boolean resamplePopulationAtStartYear = true;
 
     private boolean ignoreTargetsAtPopulationLoad = false;
 
@@ -612,7 +615,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
-        yearlySchedule.addEvent(this, Processes.PopulationAlignment);
+        addEventToAllYears(Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
         addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
@@ -2695,7 +2698,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             // check if need to add income histories
             if (lifetimeIncomes!=null)
                 lifetimeIncomes.matchDonorProfiles(inputHouseholdList);
-            if (!useWeights) {
+            if (!useWeights && resamplePopulationAtStartYear) {
                 // Expand population, sample, and remove weights
 
                 System.out.println("Will expand the initial population to " + popSize + " individuals, each of whom has an equal weight.");
@@ -2790,6 +2793,23 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     }
                 }
                 //filter.getRemainingVacancies();
+            } else if (!useWeights) {
+                System.out.println("Skipping resampling of the initial population; using input households with equal weights.");
+
+                households.addAll(inputHouseholdList);
+                for (Household household : inputHouseholdList) {
+                    for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                        for (Person person : benefitUnit.getMembers()) {
+                            person.setAdditionalFieldsInInitialPopulation();
+                        }
+                        benefitUnit.initializeFields();
+                    }
+                    household.resetWeights(1.0d);
+                    benefitUnits.addAll(household.getBenefitUnits());
+                    for (BenefitUnit benefitUnit : household.getBenefitUnits()) {
+                        persons.addAll(benefitUnit.getMembers());
+                    }
+                }
             } else {
                 // use population weights
 
@@ -3220,6 +3240,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     public void setUseWeights(boolean useWeights) {
         this.useWeights = useWeights;
+    }
+
+    public boolean isResamplePopulationAtStartYear() {
+        return resamplePopulationAtStartYear;
+    }
+
+    public void setResamplePopulationAtStartYear(boolean resamplePopulationAtStartYear) {
+        this.resamplePopulationAtStartYear = resamplePopulationAtStartYear;
     }
 
 
