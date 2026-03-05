@@ -161,7 +161,7 @@ public class Statistics3 {
 
         // cohabitation
         double val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.PartnershipAdjustment) +
-                Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.PartnershipAlignment);
+                model.getPartnershipAdjustment(model.getYear()-1);
         setPartnershipAdjustmentFactor(val);
         long numPersonsWhoCanHavePartner = model.getPersons().stream()
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
@@ -175,7 +175,7 @@ public class Statistics3 {
 
         // fertility
         val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.FertilityAdjustment) +
-                Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.FertilityAlignment);
+                model.getFertilityAdjustment(model.getYear()-1);
         setFertilityAdjustmentFactor(val);
         FertileFilter filter = new FertileFilter();
         long numFertilePersons = model.getPersons().stream()

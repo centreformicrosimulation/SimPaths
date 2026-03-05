@@ -824,8 +824,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     // ---------------------------------------------------------------------
 
     public void fertility() {
-        double probitAdjustment = (model.isAlignFertility()) ? Parameters.getAlignmentValue(getYear(), AlignmentVariable.FertilityAlignment) : 0.0;
-        fertility(probitAdjustment);
+        fertility(model.getFertilityAdjustment());
     }
 
     public void fertility(double probitAdjustment) {
@@ -1551,8 +1550,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public void cohabitation() {
-        double probitAdjustment = (model.isAlignCohabitation()) ? Parameters.getAlignmentValue(getYear(), AlignmentVariable.PartnershipAlignment) : 0.0;
-        cohabitation(probitAdjustment);
+        cohabitation(model.getPartnershipAdjustment());
     }
 
     protected void cohabitation(double probitAdjustment) {
@@ -1629,8 +1627,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
 
     public boolean inSchool() {
-        double probitAdjustment = (model.isAlignInSchool()) ? Parameters.getTimeSeriesValue(getYear(), TimeSeriesVariable.InSchoolAdjustment) : 0.0;
-        return inSchool(probitAdjustment);
+        return inSchool(model.getInSchoolAdjustment());
     }
 
 

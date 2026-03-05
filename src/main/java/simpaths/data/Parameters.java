@@ -2524,7 +2524,7 @@ public class Parameters {
 
         // load year-specific fiscal policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "social care", 1, 8);
-        partneredShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "partnership", 1, 1);
+        partneredShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "partnered_share_targets.xlsx", "partnered_share", 1, 1);
         //employedShareSingleMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "employment_smales", 1, 1);
         //employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "employment_sfemales", 1, 1);
         //employedShareCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "policy parameters.xlsx", "employment_couples", 1, 1);
