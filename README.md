@@ -2,110 +2,71 @@
 
 by Matteo Richiardi, Patryk Bronka, Justin van de Ven
 
-## Introduction
+SimPaths is an open-source microsimulation framework for modelling individual and household life-course dynamics across health, labour market activity, family structure, and income. The framework is designed for country-specific implementations, with active support for the UK and Italy.
 
-SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. The framework builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries – versions currently exist for the UK and Italy. Careful attention is paid to model validation, and sensitivity of projections to key assumptions. The modular nature of the SimPaths framework is designed to facilitate analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates and alternative approaches for projecting labour/leisure and consumption/savings decisions. Projections for a workhorse model parameterised to the UK context are reported in [Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis* (No. CEMPA6/23), Centre for Microsimulation and Policy Analysis at the Institute for Social and Economic Research*](https://www.microsimulation.ac.uk/publications/publication-557738/), which closely reflect observed data throughout a 10-year validation window.
+## Documentation
 
-## Getting Started
+Start here:
 
-To contribute to this project, you need to fork the repository and set up your development environment.
+- [Documentation Home](docs/README.md)
+- [Getting Started](docs/getting-started.md)
+- [CLI Reference](docs/cli-reference.md)
+- [Configuration](docs/configuration.md)
+- [Scenario Cookbook](docs/scenario-cookbook.md)
+- [Data and Outputs](docs/data-and-outputs.md)
+- [Architecture](docs/architecture.md)
+- [Development and Testing](docs/development.md)
+- [GUI Guide](docs/gui-guide.md)
+- [Troubleshooting](docs/troubleshooting.md)
 
-### Access to Data
+## Quick Start
 
-We are committed to maintaining transparency and open-source principles in this project. All the code, documentation, and resources related to our project are available on GitHub for you to explore, use, and contribute to.
+### 1. Requirements
 
-The data used by this project is not freely shareable. If you are interested in accessing the data necessary to run the simulation, get in touch with the repository maintainers for further instructions.
+- Java 19 (Temurin/OpenJDK recommended)
+- Maven 3.8+
 
-However, please note that _training_ data is provided. It allows the simulation to be run and developed, but results obtained on the basis of the training dataset should not be interpreted, except for the purpose of training and development. 
+### 2. Build
 
-**How to Request Access to Data:**
-
-If you have a need for the data, please contact the repository maintainers through the [issue tracker](https://github.com/centreformicrosimulation/SimPaths/issues).
-
-
-### Forking the Repository
-
-1. Click the "Fork" button at the top-right corner of this repository.
-2. Untick the `Copy only the main branch` box.
-3. This will create a copy of the repository in your own GitHub account.
-4. Follow [instructions here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork) to periodically synchronize your fork with the most recent version of this ("upstream") repository. This will ensure you use an up-to-date version of the model.
-
-### Setting up your development environment
-1. **Java Development Kit (JDK):** Ensure you have a JDK (Java Development Kit) installed on your system. You can download and install the latest version of OpenJDK from [Adoptium](https://adoptium.net/).
-2. **Download an IDE** (integrated development environment) of your choice - we recommend [IntelliJ IDEA](https://www.jetbrains.com/idea/download/); download the Community (free) or Ultimate (paid) edition, depending on your needs.
-3. Clone your forked repository to your local machine. Import the cloned repository into IntelliJ as a Maven project 
-
-### Compiling and running SimPaths with Maven in the CLI
-
-SimPaths can also be compiled by Maven ([installation instructions here](https://maven.apache.org/install.html)) and run from the command line without an IDE. After cloning the repository and setting up the JDK, in the root directory you can run:
-```
-$ mvn clean package
-```
-... to create two runnable jars for single- and multi-run SimPaths:
-```
-.
-SimPaths/
-      ...
-      |-- multirun.jar
-      |-- singlerun.jar
-      `-- src
+```bash
+mvn clean package
 ```
 
-To run the SimPathsStart setup phases and set up a population for subsequent multiruns, `singlerun.jar` takes the following options:
+This produces runnable jars at the repository root:
 
-- `-c` Country ['UK' or 'IT']
-- `-s` Start year
-- `-g` [true/false] show/hide gui
-- `-r` Re-write policy schedule from detected policy files
-- `-Setup` do setup phases (creating input populations database) only
+- `singlerun.jar`
+- `multirun.jar`
 
-e.g.
-```
-$ java -jar singlerun.jar -c UK -s 2017 -g false -Setup
-```
-For multiple runs, `multirun.jar` takes the following options:
+### 3. First setup run
 
-- `-r` random seed for first run (incremented by +1 for subsequent runs)
-- `-p` simulated population size
-- `-n` number of runs
-- `-s` start year of runs
-- `-e` end year of runs
-- `-g` [true/false] show/hide gui
-- `-f` write console output and logs to file (in 'output/logs/run_[seed].txt')
+Create or refresh setup artifacts for a headless run:
 
-e.g.
-```
-$ java -jar multirun.jar -r 100 -p 50000 -n 20 -s 2017 -e 2020 -g false -f
+```bash
+java -jar singlerun.jar -c UK -s 2019 -g false -Setup --rewrite-policy-schedule
 ```
 
-Run `java -jar singlerun.jar -h` or `java -jar multirun.jar -h` to show these help messages.
+### 4. Multi-run simulation
 
-### Contributing
+```bash
+java -jar multirun.jar -config default.yml -g false
+```
 
-1. Create a new branch for your contributions. This will likely be based on either the `main` branch of this repository (if you seek to modify the stable version of the model) or `develop` (if you seek to modify the most recent version of the model).  Please see branch naming convention below.
-2. Make your changes, add your code, and write tests if applicable.
-3. Commit your changes.
-4. Push your changes to your fork.
-5. Open a Pull Request (PR) on this repository from your fork. Be sure to provide a detailed description of your changes in the PR.
+Outputs are written under `output/`.
 
-### Branch Naming Conventions
+## Data Access
 
-In our open-source project, we follow a clear and consistent branch naming convention to streamline the development process and maintain a structured repository. These conventions help our team of contributors collaborate effectively. Here are the primary branch naming patterns:
+SimPaths code is open source, but full research input data cannot be openly redistributed.
 
-1. **Main Branches:**
-    - `main`: Represents the stable version of our model.
-    - `develop`: Used for ongoing development and integration of new features.
+- A training dataset is included for development and CI use.
+- Full data access requests should be submitted via the repository issue tracker.
 
-2. **Feature Branches:**
-    - `feature/your-feature-name`: Create feature branches for developing new features.
+Repository issue tracker: [SimPaths Issues](https://github.com/centreformicrosimulation/SimPaths/issues)
 
-3. **Bug Fix Branches:**
-    - `bugfix/issue-number-description`: Use bug fix branches for specific issue resolutions. For example, `bugfix/123-fix-health-process-issue`.
+## Citation
 
-6. **Experimental or Miscellaneous Branches:**
-    - `experimental/your-description`: For experimental or miscellaneous work not tied to specific features or bug fixes. For instance, `experimental/new-architecture`.
+Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis*.
+[https://www.microsimulation.ac.uk/publications/publication-557738/](https://www.microsimulation.ac.uk/publications/publication-557738/)
 
-7. **Documentation Branches:**
-    - `docs/documentation-topic`: Prefix documentation branches with `docs` for updating or creating documentation. For example, `docs/update-readme`.
+## License
 
-These branch naming conventions are designed to make it easy for our contributors to understand the purpose of each branch and maintain consistency within our repository. Please adhere to these conventions when creating branches for your contributions.
+See `license.txt`.
