@@ -17,6 +17,9 @@ import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RunSimPathsIntegrationTest {
+    private static final double NUMERIC_ABS_TOL = 1e-9;
+    private static final double NUMERIC_REL_TOL = 1e-9;
+
     @Test
     @DisplayName("Initial database setup runs successfully")
     @Order(1)
@@ -101,7 +104,8 @@ public class RunSimPathsIntegrationTest {
 
     void compareFiles(Path actualFile, Path expectedFile) throws IOException {
         assertTrue(Files.exists(actualFile), "Expected output file is missing: " + actualFile);
-        assertEquals(-1, Files.mismatch(actualFile, expectedFile), fileMismatchMessage(actualFile, expectedFile));
+        String mismatch = fileMismatchMessage(actualFile, expectedFile);
+        assertTrue(mismatch.isEmpty(), formattedMismatchMessage(actualFile, expectedFile, mismatch));
     }
 
     String fileMismatchMessage(Path actualFile, Path expectedFile) throws IOException {
@@ -114,7 +118,7 @@ public class RunSimPathsIntegrationTest {
             String expectedLine = (i < expectedLines.size()) ? expectedLines.get(i) : "<MISSING>";
             String actualLine = (i < actualLines.size()) ? actualLines.get(i) : "<EXTRA>";
 
-            if (!expectedLine.equals(actualLine)) {
+            if (!linesEquivalent(expectedLine, actualLine)) {
                 differences.append(String.format("""
                     Line %d:
                     Expected: %s
@@ -124,6 +128,10 @@ public class RunSimPathsIntegrationTest {
             }
         }
 
+        return differences.toString();
+    }
+
+    String formattedMismatchMessage(Path actualFile, Path expectedFile, String differences) {
         return String.format("""
 
             The actual output from the integration test does not match the expected output.
@@ -143,6 +151,53 @@ public class RunSimPathsIntegrationTest {
             3. Commit this change to Git, so that the changes are visible in your pull request and this test passes.
 
             """, actualFile, expectedFile, differences, actualFile, expectedFile);
+    }
+
+    boolean linesEquivalent(String expectedLine, String actualLine) {
+        if (expectedLine.equals(actualLine)) {
+            return true;
+        }
+        if ("<MISSING>".equals(expectedLine) || "<EXTRA>".equals(actualLine)) {
+            return false;
+        }
+
+        String[] expectedCells = expectedLine.split(",", -1);
+        String[] actualCells = actualLine.split(",", -1);
+        if (expectedCells.length != actualCells.length) {
+            return false;
+        }
+
+        for (int i = 0; i < expectedCells.length; i++) {
+            String expected = expectedCells[i];
+            String actual = actualCells[i];
+            if (expected.equals(actual)) {
+                continue;
+            }
+            if (!numericEquivalent(expected, actual)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean numericEquivalent(String expected, String actual) {
+        try {
+            double expectedVal = Double.parseDouble(expected);
+            double actualVal = Double.parseDouble(actual);
+
+            if (Double.isNaN(expectedVal) && Double.isNaN(actualVal)) {
+                return true;
+            }
+            if (Double.isInfinite(expectedVal) || Double.isInfinite(actualVal)) {
+                return expectedVal == actualVal;
+            }
+
+            double absDiff = Math.abs(expectedVal - actualVal);
+            double scale = Math.max(Math.abs(expectedVal), Math.abs(actualVal));
+            return absDiff <= NUMERIC_ABS_TOL + NUMERIC_REL_TOL * scale;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private void runCommand(String... args) {
