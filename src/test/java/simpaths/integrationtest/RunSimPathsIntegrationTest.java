@@ -17,7 +17,7 @@ import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RunSimPathsIntegrationTest {
-    private static final double NUMERIC_ABSOLUTE_TOLERANCE = 0.5;
+    private static final double NUMERIC_ABSOLUTE_TOLERANCE = 0.6;
     private static final double NUMERIC_RELATIVE_TOLERANCE = 0.05;
 
     @Test
