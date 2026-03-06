@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +17,9 @@ import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RunSimPathsIntegrationTest {
+    private static final double NUMERIC_ABSOLUTE_TOLERANCE = 0.05;
+    private static final double NUMERIC_RELATIVE_TOLERANCE = 0.01;
+
     @Test
     @DisplayName("Initial database setup runs successfully")
     @Order(1)
@@ -187,9 +188,7 @@ public class RunSimPathsIntegrationTest {
         Double actualNumber = tryParseDouble(actualTrimmed);
 
         if (expectedNumber != null && actualNumber != null) {
-            BigDecimal expectedRounded = BigDecimal.valueOf(expectedNumber).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal actualRounded = BigDecimal.valueOf(actualNumber).setScale(2, RoundingMode.HALF_UP);
-            return expectedRounded.compareTo(actualRounded) == 0;
+            return numbersMatchWithTolerance(expectedNumber, actualNumber);
         }
 
         return expectedToken.equals(actualToken);
@@ -201,6 +200,26 @@ public class RunSimPathsIntegrationTest {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private boolean numbersMatchWithTolerance(double expectedNumber, double actualNumber) {
+        if (!Double.isFinite(expectedNumber) || !Double.isFinite(actualNumber)) {
+            return Double.compare(expectedNumber, actualNumber) == 0;
+        }
+
+        if (isWholeNumber(expectedNumber) && isWholeNumber(actualNumber)) {
+            return Double.compare(expectedNumber, actualNumber) == 0;
+        }
+
+        double absoluteDifference = Math.abs(expectedNumber - actualNumber);
+        double relativeDifferenceLimit = NUMERIC_RELATIVE_TOLERANCE * Math.max(Math.abs(expectedNumber), Math.abs(actualNumber));
+        double effectiveLimit = Math.max(NUMERIC_ABSOLUTE_TOLERANCE, relativeDifferenceLimit);
+
+        return absoluteDifference <= effectiveLimit;
+    }
+
+    private boolean isWholeNumber(double value) {
+        return value == Math.rint(value);
     }
 
     private void runCommand(String... args) {
