@@ -154,7 +154,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean initialisePotentialEarningsFromDatabase = true;
 
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
-    private boolean useWeights = false;
+    private boolean useWeights = true;
 
     private boolean ignoreTargetsAtPopulationLoad = false;
 
@@ -168,13 +168,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean alignPopulation = true; //TODO: routine fails to replicate results for minor variations between simulations
 
     //	@GUIparameter(description = "If checked, will align fertility")
-    private boolean alignFertility = true;
+    private boolean alignFertility = false;
     private static final int FERTILITY_ALIGNMENT_END_YEAR = 2040;
     private Double lastFertilityAdjustment = null;
 
     private boolean alignEducation = false; //Set to true to align level of education
 
-    private boolean alignInSchool = true; //Set to true to align share of students among 16-29 age group
+    private boolean alignInSchool = false; //Set to true to align share of students among 16-29 age group
     private static final int IN_SCHOOL_ALIGNMENT_END_YEAR = 2023;
     private Double lastInSchoolAdjustment = null;
 
@@ -612,7 +612,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // mortality (migration) and population alignment at year's end
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
-        yearlySchedule.addEvent(this, Processes.PopulationAlignment);
+        addEventToAllYears(Processes.PopulationAlignment); // start population alignment in year 0 (startYear)
+        // yearlySchedule.addEvent(this, Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES
         addCollectionEventToAllYears(persons, Person.Processes.HealthEQ5D);
