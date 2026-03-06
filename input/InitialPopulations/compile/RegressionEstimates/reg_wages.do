@@ -1,10 +1,27 @@
-********************************************************************************
-* PROJECT:  		ESPON 
+*******************************************************************************************
+* PROJECT:  		SimPaths UK
 * SECTION:			Wage regression 
 * OBJECT: 			Heckman regressions 
-* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven
-* LAST UPDATE:		3 July 2025 DP 
-********************************************************************************
+* AUTHORS:			Patryk Bronka, Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK 
+******************************************************************************************
+****************************************************************************************** 
+* NOTES: 			Strategy:  
+* 					1) Heckman estimated on the sub-sample of individuals 
+* 						who are not observed working in previous period. 
+*   					=> Wage equation does not controls for lagged wage
+* 					2) Heckman estimated on the sub-sample of individuals who 
+* 						are observed working in previous period. 
+*    					=> Wage equation controls for lagged wage
+* 					Specification of selection equation is the same in the 
+* 						two samples
+* 					
+* 					Import labour cost index to create a measure of wage growth. 
+* 					Make sure loaded into the external_data subfolder. 
+* 
+* 					Update the winsorization process if alter data 
+* 					 
+*******************************************************************************/
 clear all
 set more off
 set mem 200m
@@ -12,361 +29,30 @@ set type double
 //set maxvar 120000
 set maxvar 30000
 
-
 *******************************************************************
 cap log close 
 log using "${dir_log}/reg_wages.log", replace
 *******************************************************************
 
-global min_age = 17
-global max_age = 64
-
-
-/**************************************************************/
-*
-*	Fit (programs)
-*
-/**************************************************************/
-capture program drop computePredicted
-program computePredicted
-
-	local model = "`1'" 
-	local filter = "`2'"
-	
-	capture drop hat
-	capture drop epsilon
-	capture drop u
-	
-	if ("`model'" == "heckman") {
-		predict hat if `filter'
-		scalar sigma = e(sigma)
-	}
-	else if ("`model'" == "fe") {
-		predict hat if `filter', xbu
-		scalar sigma = e(sigma_u)
-		predict u if  `filter', u
-		hist u,  xtitle (estimated individual effect) name(u, replace)
-	}
-	else display "model not identified correctly (choose between 'fe' and 'heckman')"
-
-	replace lwage_hour_hat = hat if `filter'
-	gen epsilon = rnormal()*sigma
-	sum epsilon
-	replace wage_hour_hat = exp(lwage_hour_hat + epsilon) if `filter'
-	
-end
-
-capture program drop analyseFit 
-program analyseFit
-
-    // 1 = filter
-    // 2 = optional flag "nocorr"
-    // 3 = title
-    // 4 = suffix for filename
-
-    local filter = "`1'"
-
-    quietly sum lwage_hour lwage_hour_hat wage_hour wage_hour_hat if `filter'
-
-    if "`2'" != "nocorr" {
-        corr wage_hour L1.wage_hour if `filter' & previouslyWorking
-        corr wage_hour_hat L1.wage_hour_hat if `filter' & previouslyWorking
-    }
-
-    // Log wage graph
-    twoway (hist lwage_hour if `filter', lcolor(gs12) fcolor(gs12) ) ///
-        (hist lwage_hour_hat if `filter', fcolor(none) lcolor(red) ), ///
-        xtitle("log gross hourly wages (GBP)") ///
-        legend(label(1 "observed") label(2 "predicted")) ///
-        name(log, replace) ///
-        title("`3'")
-    
-    graph export "${dir_validation_graphs}/wages/log_`4'.png", replace
-
-    // Level wage graph
-    twoway (hist wage_hour if `filter' & wage_hour < 150, percent lcolor(gs12) fcolor(gs12) start(0) width(1)) ///
-        (hist wage_hour_hat if `filter' & wage_hour_hat < 150, percent fcolor(none) lcolor(red) start(0) width(1)), ///
-        xtitle("gross hourly wages (GBP)") ///
-        legend(label(1 "observed") label(2 "predicted")) ///
-        name(levels, replace) ///
-        title("`3'")
-    
-    graph export "${dir_validation_graphs}/wages/level_`4'.png", replace
-
-end
-
-
-capture program drop outputResults
-program outputResults
-
-	local outputFile = "`1'"
-	
-	matrix results = r(table)
-	matrix results = results[1..6,1...]'   //extract the first six rows of results, and then transpose results
-	putexcel set "$dir_raw_results/wages/`outputFile'.xlsx", sheet("Estimates") replace 
-	
-	putexcel A3 = matrix(results), names nformat(number_d2)
-	
-	matrix results = e(V)
-	putexcel set "$dir_raw_results/wages/`outputFile'.xlsx", sheet("Varcov") modify
-	putexcel A3 = matrix(results), names nformat(number_d2)
-		
-end
-
-
-/**************************************************************/
-*
-*	prepare data on real growth of wages 
-*	based on uprating factors from microsimulation's input folder
-* 	note: values are kept as in scenario_uprating_factor file to be consistent with the simulation which rebases indices to a specified BASE_PRICE_YEAR (2015)
-*
-/**************************************************************/
-/*
-import excel "$microsim_input_dir/scenario_uprating_factor.xlsx", sheet("UK_wage_growth") firstrow clear // Import nominal wage growth rates
-rename Year stm
-rename Value wage_growth
-replace stm = stm - 2000
-save "$work_dir/growth_rates", replace
-
-import excel "$microsim_input_dir/scenario_uprating_factor.xlsx", sheet("UK_inflation") firstrow clear // Import inflation rates
-rename Year stm
-rename Value inflation
-replace stm = stm - 2000
-save "$work_dir/inflation", replace
-
-use "$work_dir/growth_rates", clear
-merge 1:1 stm using "$work_dir/inflation", keep(3) nogen
-
-// Step 1: rebase wage growth index to 2015
-sum wage_growth if stm == 15
-gen base = r(mean)
-replace wage_growth = wage_growth / base // Note: switching from 100 base to 1 base as that's what happens in the simulation when rebasing indices
-drop base
-
-// Step 2: generate real wage growth index, rebased to 2015 and adjusted to 2015 price level
-replace inflation = inflation/100
-gen real_wage_growth = wage_growth/inflation
-
-save "$work_dir/growth_rates", replace
-*/
-
-// Note: use code above if calculating real wage growth inside of the simulation, but if loading from excel use values from excel in Stata too. 
-//They *should* be the same but it is more consistent to have one source of values. 
-import excel "$dir_external_data/time_series_factor.xlsx", sheet("UK_wage_growth") firstrow clear // Import real wage growth rates
-rename Year stm
-rename Value real_wage_growth
-replace stm = stm - 2000
-sum real_wage_growth if stm == 15
-gen base = r(mean)
-replace real_wage_growth = real_wage_growth / base // Note: switching from 100 base to 1 base as that's what happens in the simulation when rebasing indices
-drop base
-save "$dir_external_data/growth_rates", replace
-
-
-/**************************************************************/
-*
-*	open and format data for analysis
-*
-/**************************************************************/
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-
-do "$dir_do/variable_update"
-
-drop if dag < $min_age 
-
-* screen data to ensure that idperson and swv uniquely identify observations
-sort idperson swv
-duplicates report idperson swv
-gen chk = 0
-replace chk = 1 if (idperson == idperson[_n-1] & swv == swv[_n-1])
-drop if chk == 1
-
-
-/**************************************************************/
-*
-*	merge in real growth index from microsimulation's input folder
-*
-/**************************************************************/
-merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(real_wage_growth)
-
-//rename drgnl drgn1 // Rename region variable to drgn1 (one, not "l")
-
-*Variable stm identifies time periods. Need to ensure that combining idperson and stm ensures uniqueness.
-duplicates report idperson stm
-duplicates tag idperson stm, gen(dup)
-sort idperson stm 
-/*DP: no duplicates in terms of idperson and stm therefore the code below in no longer needed 
-
-*However, this affects many variables: idhh, dag, ddt, dpd, ddt01, potentially idpartner. Might be best to move entire household. 
-*Furthermore, the duplicated observation can occur in a year for which y-1 and y+1 have been observed. 
-*This might require moving the y-1 or y+1 observation to y-2 or y+2. Alternatively, in such cases the duplicated observation for y can be dropped. 
-
-*However, moving observations can be problematic because idhh can change. 
-*Moving just the observation will result in mismatch between variables and idhh, 
-*moving whole household will introduce longitudinal inconsistency for other household members. 
-*=> Only move those observations for which the whole household can be moved 
-
-*Generate a variable indicating which year the observation should belong to to maintain longitudinal consistency:
-
-*Can only move if: 1) there is a gap on either side of the duplicate, 2) the whole household is duplicated
-*Note: idhh is not longitudinal identifier
-
-*Check if there is a gap:
-by idperson: egen min_observed_year = min(stm)
-gen count_year = stm - min_observed_year
-sort idperson stm swv // Sort interview date in ascending order - earliest interview will be the one with the gap_prev set to 1
-by idperson: gen gap_prev = (((count_year - count_year[_n-1]) > 1) & count_year>0) // There is a gap in year -1
-by idperson: replace gap_prev = 1 if _n == 1 & dup == 1 & stm > 2009
-
-gsort +idperson -stm -swv // Sort years in reverse order. Sort int date in descending order - later interview will be the one with gap_next set to 1
-by idperson: gen gap_next = (((count_year - count_year[_n-1]) < -1) & stm != 2018) // There is a gap in year +1
-sort idperson stm swv
-by idperson: replace gap_next = 1 if _n == _N & dup == 1 
-by idperson: replace gap_prev = 0 if gap_next[_n-1] == 1 & dup[_n-1] == 1 // If previous observation already has flag set to move to next period, can't move another one to the same period
-
-
-*Check if whole household is duplicated
-bys idhh swv: egen min_dup = min(dup) // If == 1, then every observation for that household is duplicated
-
-*Check if whole household can be moved either back or forward:
-bys idhh stm: egen hh_gap_prev = min(gap_prev)
-bys idhh stm: egen hh_gap_next = min(gap_next)
-
-*Generate identifier for the whole household which should be moved: move the observation from the wave which is closer to the gap
-gen move = 1 if dup == 1 & (hh_gap_prev == 1 | hh_gap_next == 1) & min_dup == 1
-
-*Move observations:
-replace stm = stm-1 if move == 1 & hh_gap_prev == 1 /*3,425 real changes made*/
-replace stm = stm+1 if move == 1 & hh_gap_next == 1 /*3,123 real changes made*/
-
-
-*Drop households with duplicated observations, keeping observations from more recent waves if duplicated years:
-sort stm idperson swv
-drop dup
-duplicates tag idperson stm, gen(dup)
-by stm idperson: egen max_wave = max(swv) // Keep more recent obs
-gen drop_idhh = idhh if max_wave == swv & dup == 1 // This identifies idhh which should be dropped
-bys idhh stm: egen drop_idhh_max = max(drop_idhh) 
-drop if !missing(drop_idhh_max)
-
-duplicates drop idperson stm, force 
-*/
- 
-/**************************************************************/
-*
-*	preliminaries
-*
-/**************************************************************/
-* Setting STATA to recognize Panel Data
-xtset idperson stm
-
-* total hours work per week (average)
-gen hours = 0
-replace hours = jbhrs if ((jbhrs > 0) & (jbhrs < .))
-replace hours = hours + jshrs if ((jshrs > 0) & (jshrs < .))
-replace hours = hours + j2hrs / 4.333 if ((j2hrs > 0) & (j2hrs < .))
-
-* hour groups
-gen hrs1 = (hours >   0) * (hours < 10)
-gen hrs2 = (hours >= 10) * (hours < 15)
-gen hrs3 = (hours >= 15) * (hours < 20)
-gen hrs4 = (hours >= 20) * (hours < 25)
-gen hrs5 = (hours >= 25) * (hours < 30)
-gen hrs6 = (hours >= 30) * (hours < 35)
-gen hrs7 = (hours >= 35) * (hours < 40)
-
-gen hrs0_m1 = hours[_n-1] == 0
-gen hrs1_m1 = (hours[_n-1] >  0) * (hours[_n-1] <= 29)
-
-/**
-gen hrs1_m1 = (hours[_n-1] >   0) * (hours[_n-1] < 10)
-gen hrs2_m1 = (hours[_n-1] >= 10) * (hours[_n-1] < 15)
-gen hrs3_m1 = (hours[_n-1] >= 15) * (hours[_n-1] < 20)
-gen hrs4_m1 = (hours[_n-1] >= 20) * (hours[_n-1] < 25)
-gen hrs5_m1 = (hours[_n-1] >= 25) * (hours[_n-1] < 30)
-gen hrs6_m1 = (hours[_n-1] >= 30) * (hours[_n-1] < 35)
-gen hrs7_m1 = (hours[_n-1] >= 35) * (hours[_n-1] < 40)
-**/
-
-* hourly wage
-* screens population to individuals working (omits 1.58% of population aged 18+ and working):
-*	at least 1 hour per week(455 obs between 0 and 1)
-*	no more than 100 hours per week
-*	earning at least 50 per month
-*	earning no more than 83333 per month (1M per year) 
-
-// Based on yplgrs which is derived from fimnlabgrs_dv in UKHLS
-// Change to sinh(yplgrs_dv) which provides yplgrs deflated by CPI
-
-gen yplgrs_dv_level = sinh(yplgrs_dv) 
-
-gen wage_hour = .
-replace wage_hour = yplgrs_dv_level / hours / 4.333 if (yplgrs_dv_level >= 50 & yplgrs_dv_level <= 83333 & hours >= 1 & hours <= 100)
-sum wage_hour, det
-fre wage_hour if wage_hour==0
-fre wage_hour if wage_hour==.
-*replace wage_hour = . if wage_hour < 4 | wage_hour > 70
-
-* relationship status (1=cohabitating)
-gen mar = (dcpst==1)
-
-* children
-gen any02 = dnc02 > 0
-gen dnc4p = dnc
-replace dnc4p = 1 if (dnc>4)
-gen dnc2p = dnc
-replace dnc2p = 2 if (dnc>2)
-cap gen child = (dnc>0)
-
-* individual weights
-//by idperson: egen wgt = mean(dimlwt)
-by idperson: egen wgt = mean(dimxwt)
- 
-* ln wages 
-gen lwage_hour = ln(wage_hour)
-
-hist lwage_hour if lwage_hour > 0 & lwage_hour < 4.4
-
-gen swage_hour = asinh(wage_hour)
-hist swage_hour if (swage_hour > 1 & swage_hour < 5)
-
-replace lwage_hour = . if (wage_hour<5 | wage_hour>1000)
-
-gen lwage_hour_2 = lwage_hour^2
-
-*correct employment status 
-replace les_c3 = 3 if lwage_hour == . & les_c3 ! = 2 // PB: employment status is set on the basis of hourly wage not missing, so recode labour market activity status to match this for non-students
-replace les_c3 = 1 if lwage_hour != . // PB: as above, if wage present consider as employed
-
-recode deh_c3 dehm_c3 dehf_c3 drgn1 dhe (-9=.)
-
-gen L1les_c3 = L1.les_c3
-
-*part time work 
-gen pt = (hours >  0) * (hours <= 25)
-drop hrs0_m1 hrs1_m1
-
-
-
 *****************************************************************************************************************************
 * Set Excel file 
 * Info sheet - first stage 
-putexcel set "$dir_results/reg_employmentSelection", sheet("Info") replace
+putexcel set "$dir_results/reg_employment_selection", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estimates from the first stage of the Heckman selection model used to estimates wages."
-putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 1 July 2025 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin Van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
-putexcel A4 = "Process:", bold
-putexcel B4 = "Description:", bold
-putexcel A5 = "EmploymentSelection_FemaleNE"
-putexcel B5 = "First stage Heckman selection estimates for women that do not have an observed wage in the previous year"
-putexcel A6 = "EmploymentSelection_MaleNE"
+putexcel A5 = "Process:", bold
+putexcel B5 = "Description:", bold
+putexcel A6 = "W1fa-sel"
 putexcel B6 = "First stage Heckman selection estimates for women that do not have an observed wage in the previous year"
-putexcel A7 = "EmploymentSelection_FemaleE"
-putexcel B7 = "First stage Heckman selection estimates for women that have an observed wage in the previous year"
-putexcel A8 = "EmploymentSelection_MaleE"
-putexcel B8 = "First stage Heckman selection estimates for men that have an observed wage in the previous year"
+putexcel A7 = "W1ma-sel"
+putexcel B7 = "First stage Heckman selection estimates for women that do not have an observed wage in the previous year"
+putexcel A8 = "W1fb-sel"
+putexcel B8 = "First stage Heckman selection estimates for women that have an observed wage in the previous year"
+putexcel A9 = "W1mb-sel"
+putexcel B9 = "First stage Heckman selection estimates for men that have an observed wage in the previous year"
 
 putexcel A11 = "Notes:", bold
 putexcel B11 = "Estimated on panel data unlike the labour supply estimates"
@@ -377,48 +63,116 @@ putexcel B13 = "Two-step Heckman command is used which does not permit weights"
 putexcel set "$dir_results/reg_wages", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "This file contains regression estimates used to calculate potential wages for males and females in the simulation."
-putexcel A2 = "Authors:	Patryk Bronka, Daria Popova" 
-putexcel A3 = "Last edit: 1 July 2025 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
-putexcel A5 = "Wages_FemalesNE"
-putexcel B5 = "Heckman selection estimates using women that do not have an observed wage in the previous year"
-putexcel A6 = "Wages_MalesNE"
-putexcel B6 = "Heckman selection estimates using men that do not have an observed wage in the previous year"
-putexcel A7 = "Wages_FemalesE"
-putexcel B7 = "Heckman selection estimates using women that have an observed wage in the previous year"
-putexcel A8 = "Wages_MalesE"
-putexcel B8 = "Heckman selection estimates using men that have an observed wage in the previous year"
+putexcel A5 = "Process:", bold
+putexcel B5 = "Description:", bold
+putexcel A6 = "W1fa"
+putexcel B6 = "Second stage Heckman selection estimates using women that do not have an observed wage in the previous year"
+putexcel A7 = "W1ma"
+putexcel B7 = "Second stage Heckman selection estimates using men that do not have an observed wage in the previous year"
+putexcel A8 = "W1fb"
+putexcel B8 = "Second stage Heckman selection estimates using women that have an observed wage in the previous year"
+putexcel A9 = "W1mb"
+putexcel B9 = "Second stage Heckman selection estimates using men that have an observed wage in the previous year"
 
 putexcel A11 = "Notes:", bold
-putexcel B11 = "Estimated on panel data unlike the labour supply estimates"
-putexcel B12 = "Predicted wages used as input into union parameters and income process estimates"
-putexcel B13 = "Two-step Heckman command is used which does not permit weights"
-putexcel B14 = "Regions: London is the reference region" 
-
+putexcel B11 = "Estimation sample: UK_ipop.dta. Two-step Heckman command is used which does not permit weights" 
+putexcel B12 = "Conditions for processes are defined as globals in master.do"
+putexcel B13 = "Predicted wages sre saved in dataset UK_ipop2.dta and used as input into union parameters and income process estimates"
 
 /**************************************************************/
-*
-*	Regressions
-*
+*	prepare data on real growth of wages 
 /**************************************************************/
-* Strategy: 
-* 1) Heckman estimated on the sub-sample of individuals who were not observed working in previous period. 
-*    Wage equation does not controls for lagged wage
-* 2) Heckman estimated on the sub-sample of individuals who were observed working in previous period. 
-*    Wage equation controls for lagged wage
-* Specification of selection equation is the same in the two samples
+ 
+import excel "$dir_external_data/time_series_factor.xlsx", sheet("UK_wage_growth") firstrow clear // Import real wage growth rates
+rename Year stm
+rename Value real_wage_growth
+replace stm = stm - 2000
+sum real_wage_growth if stm == 15
+gen base = r(mean)
+replace real_wage_growth = real_wage_growth / base // Note: switching from 100 base to 1 base as that's what happens in the simulation when rebasing indices
+drop base
+save "$dir_external_data/growth_rates", replace
+
+/********************************* PREPARE DATA *******************************/
+
+* Load data 
+use "${estimation_sample}", clear
+
+* Set data 
+xtset idperson swv
+sort idperson swv 
+
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+
+* merge in real growth index 
+merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(real_wage_growth)
+
+* Hours work per week 
+gen hours = 0
+replace hours = lhw if ((lhw > 0) & (lhw < .))
+label var hours "Hours worked per week"
+
+* Hourly wage	
+gen wage_hour = obs_earnings_hourly
+	
+* Winsorize
+sum wage_hour, det
+replace wage_hour = . if wage_hour <= 0
+replace wage_hour = . if wage_hour >= r(p99)
+
+gen lwage_hour = ln(wage_hour)
+label var lwage_hour "Log gross hourly wage"
+
+gen lwage_hour_2 = lwage_hour^2
+label var lwage_hour_2 "Squared log gross hourly wage"
+
+
+* relationship status (1=cohabitating)
+gen mar = (dcpst==1)
+
+* children
+gen any02 = dnc02 > 0
+
+gen dnc4p = dnc
+replace dnc4p = 1 if (dnc>4)
+
+gen dnc2p = dnc
+replace dnc2p = 2 if (dnc>2)
+
+cap drop child 
+gen child = (dnc>0)
+
+*employment status in previous wave  
+sort idperson swv 
+gen L1les_c3 = L1.les_c3
+
+*part time work 
+gen pt = (hours >  0) * (hours <= 25)
 
 * Flag to identify observations to be included in the estimation sample 
-/* The sample should include only individuals who are observed for at least two periods, and then the first observation should not be used in the estimation. */
-bys idperson: gen obs_count = _N
-gen in_sample = (obs_count > 1 & swv > 1) 
+* Need to have been observed at least once in the past and activity information 
+* is not missing in the previous observation 
+bys idperson (swv): gen obs_count_ttl = _N
+bys idperson (swv): gen obs_count = _n
 
-* Flag to distinguish the two samples
+gen in_sample = (obs_count_ttl > 1 & obs_count > 1) 
+replace in_sample = 0 if swv != swv[_n-1] +1 & idperson == idperson[_n-1]
+replace in_sample = 0 if les_c3 == . | obs_earning == . 
+fre in_sample 
+
+
+* Flag to distinguish the two samples (prev work and not)
 capture drop previouslyWorking
 gen previouslyWorking = (L1.lwage_hour != .) 
+replace previouslyWorking = . if in_sample == 0 
 fre previouslyWorking
+
 
 * Prep storage 
 capture drop lwage_hour_hat wage_hour_hat esample
@@ -427,32 +181,117 @@ gen wage_hour_hat = .
 gen esample = .
 gen pred_hourly_wage = .
 
-*** 1) Heckman estimated on the sub-sample of individuals who were not observed working in previous period. 
-****   Wage equation does not control for lagged wage
-**************************************************************************************************************************
-* women
-**************************************************************************************************************************
-global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
-global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
-local filter = "dgn==0 & dag>=$min_age & dag<=$max_age & !previouslyWorking"
-*heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep 
-outputResults "Not-working women3"
+/********************************** ESTIMATION ********************************/
+
+/******************** WAGES: WOMEN, NO PREV WAGE OBSERVED *********************/
+
+* Estimate a predicted wage using a Heckman selection model 
+* Sample: Working age (16-75) women who did not receive a wage in t-1
+* DV: Log gross hourly wage 
+
+global wage_eqn "lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded
+global seln_eqn "i.L1les_c3 dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
+
+local filter = "${wages_f_no_prev_if_condition}"
+display "`filter'"
+
+heckman $wage_eqn if `filter', select($seln_eqn) twostep mills(lambda) 
 
 outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_NWW.doc", replace ///
 title("Heckman-corrected wage equation estimated on the sample of women who were not in employment last year") ///
  ctitle(Not working women) label side dec(2) noparen 
- 
- 
-*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
-computePredicted "heckman" `filter'
-analyseFit "e(sample)" "nocorr" "Not working women, 17-64 years" "NWW"
-gen in_sample_fnpw = e(sample)
-replace pred_hourly_wage = wage_hour_hat if in_sample_fnpw
+  
+/***************************************************************************/
+* Eigenvalue stability check 
 
-* Save sample for later use (internal validation)
+* Extract variance-covariance matrix
+matrix V = e(V)
+
+* Preserve data state
+preserve
+
+* Export V to dataset
+clear
+svmat double V
+
+* Drop zero rows and columns
+forvalues r = 1/2 {
+    egen rowsum = rowtotal(*)
+    drop if rowsum == 0
+    drop rowsum
+    xpose, clear
+}
+
+* Recreate trimmed VCV matrix
+mkmat *, matrix(V_trimmed)
+
+restore
+
+* Eigen decomposition
+matrix symeigen X lambda = V_trimmed
+
+* Largest eigenvalue
+scalar max_eig = lambda[1,1]
+
+* Smallest-to-largest eigenvalue ratio
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
+
+* Check 1: near singularity
+if max_eig < 1.0e-12 {
+    display as error "CRITICAL ERROR: Heckman VCV near singular"
+    display as error "Max eigenvalue = " max_eig
+    exit 999
+}
+
+* Check 2: ill-conditioning
+if min_ratio < 1.0e-12 {
+    display as error "ERROR: Heckman VCV ill-conditioned"
+    display as error "Min/Max eigenvalue ratio = " min_ratio
+    exit 506
+}
+
+display "VCV stability check passed"
+display "Max eigenvalue: " max_eig
+display "Min/Max ratio: " min_ratio
+
+/***************************************************************************/
+  
+* Obtain predicted values (log wage) with selection correction
+
+predict pred if `filter', ycond  // ycond -> include IMR in prediction to account for selection into employment
+replace lwage_hour_hat = pred if `filter'
+
+gen in_sample_fnpw = e(sample)	
+
+* Correct bias when transforming from log to levels 
+cap drop epsilon
+gen epsilon = rnormal()*e(sigma) 
+replace pred_hourly_wage = exp(lwage_hour_hat + epsilon) if `filter' 
+
+
+twoway (hist wage_hour if `filter', width(0.5) ///
+	lcolor(gs12) fcolor(gs12)) ///
+	(hist pred_hourly_wage if `filter' & (!missing(wage_hour)), width(0.5) ///
+		fcolor(none) lcolor(red)), ///
+	title("Gross Hourly Wage (Level)") ///
+	subtitle("Females, No previously observed wage") ///
+	xtitle("GBP") ///
+	legend(lab(1 "UKHLS") lab(2 "Prediction")) ///
+	note("Notes: Sample condition ${wages_f_no_prev_if_condition}", size(vsmall))	
+
+graph export "${dir_raw_results}/wages/W1fa_hist.png", replace
+
+graph drop _all 
+
+sum wage_hour if `filter' [aw=dwt]
+sum pred_hourly_wage if `filter' & (!missing(wage_hour)) [aw=dwt]
+ 
+* Save sample validation 
 save "$dir_validation_data/Female_NPW_sample", replace 
-
+	
+cap drop pred epsilon	
+ 
+ 
 * Formatted results
 * Clean up matrix of estimates 
 * Note: Zeros values are eliminated 
@@ -517,26 +356,25 @@ preserve
 import excel "$dir_raw_results/wages/reg_wages", sheet("Females_NLW") firstrow ///
 	clear
 ds 
-
+//define which cells are to be dropped 
 drop if C == 0 // UPDATE 
 drop A 
-drop AH-BM // UPDATE
-
+drop AG-BL // UPDATE
 
 
 mkmat *, matrix(Females_NLW)
-putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_FemalesNE") modify 
+putexcel set "$dir_results/reg_wages", sheet("W1fa") modify 
 putexcel B2 = matrix(Females_NLW)
 
 restore 
 
+
 * Labelling 
 putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_FemalesNE") modify 
+	sheet("W1fa") modify 
 
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1 ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
 
@@ -575,27 +413,26 @@ import excel "$dir_raw_results/wages/reg_wages", sheet("Females_NLW") firstrow /
 	clear
 ds 
 
-drop if AN == 0 // UPDATE
+drop if AG == 0 // UPDATE
 drop A 
-drop C-AG // UPDATE
-drop BN // UPDATE
+drop C-AF // UPDATE
+drop BM // UPDATE
 
 
 mkmat *, matrix(Females_NLW)
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_FemaleNE") modify 
+putexcel set "$dir_results/reg_employment_selection", ///
+	sheet("W1fa-sel") modify 
 putexcel B2 = matrix(Females_NLW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_FemaleNE") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1fa-sel") modify 
 	
-local var_list Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag  Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
-	Ethn_Asian Ethn_Black Ethn_Other  Constant 
+	Ethn_Asian Ethn_Black Ethn_Other Constant 
 	
 
 putexcel A1 = "REGRESSOR"
@@ -638,33 +475,117 @@ sum squared_residuals
 di "RMSE for Not employed women:  " sqrt(r(mean))
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
-A2=("Wages_FemalesNE") B2=(sqrt(r(mean))) 
+A2=("W1fa") B2=(sqrt(r(mean))) 
 restore 
 
 
-****************************************************************************************************************************
-* men
-****************************************************************************************************************************
-global wage_eqn "lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
-global seln_eqn "i.L1les_c3 dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
-local filter = "dgn==1 & dag>=$min_age & dag<=$max_age & !previouslyWorking"
-*heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep 
-outputResults "Not-working men3"
+/******************** WAGES: MEN, NO PREV WAGE OBSERVED *********************/
+
+* Estimate a predicted wage using a Heckman selection model 
+* Sample: Working age (16-75) men who did not receive a wage in t-1
+* DV: Log gross hourly wage 
+
+global wage_eqn "lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded 
+global seln_eqn "i.L1les_c3 dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded 
+
+local filter = "${wages_m_no_prev_if_condition}"
+display "`filter'"
+
+heckman $wage_eqn if `filter', select($seln_eqn) twostep mills(lambda) 
 
 outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_NWM.doc", replace ///
 title("Heckman-corrected wage equation estimated on the sample of men who were not in employment last year") ///
  ctitle(Not working men) label side dec(2) noparen 
- 
- 
-*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
-computePredicted "heckman" `filter'
-analyseFit "e(sample)" "nocorr" "Not working men, 17-64 years" "NWM"
-gen in_sample_mnpw = e(sample)
-replace pred_hourly_wage = wage_hour_hat if in_sample_mnpw
 
-* Save sample for later use (internal validation)
+/***************************************************************************/
+* Eigenvalue stability check 
+
+* Extract variance-covariance matrix
+matrix V = e(V)
+
+* Preserve data state
+preserve
+
+* Export V to dataset
+clear
+svmat double V
+
+* Drop zero rows and columns
+forvalues r = 1/2 {
+    egen rowsum = rowtotal(*)
+    drop if rowsum == 0
+    drop rowsum
+    xpose, clear
+}
+
+* Recreate trimmed VCV matrix
+mkmat *, matrix(V_trimmed)
+
+restore
+
+* Eigen decomposition
+matrix symeigen X lambda = V_trimmed
+
+* Largest eigenvalue
+scalar max_eig = lambda[1,1]
+
+* Smallest-to-largest eigenvalue ratio
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
+
+* Check 1: near singularity
+if max_eig < 1.0e-12 {
+    display as error "CRITICAL ERROR: Heckman VCV near singular"
+    display as error "Max eigenvalue = " max_eig
+    exit 999
+}
+
+* Check 2: ill-conditioning
+if min_ratio < 1.0e-12 {
+    display as error "ERROR: Heckman VCV ill-conditioned"
+    display as error "Min/Max eigenvalue ratio = " min_ratio
+    exit 506
+}
+
+display "VCV stability check passed"
+display "Max eigenvalue: " max_eig
+display "Min/Max ratio: " min_ratio
+
+/***************************************************************************/ 
+ 
+ 
+* Obtain predicted values (log wage) with selection correction
+predict pred if `filter', ycond 	// ycond -> include IMR in prediction to account for selection into employment
+replace lwage_hour_hat = pred if `filter'
+
+gen in_sample_mnpw = e(sample)	
+
+* Correct bias transforming from log to levels 
+gen epsilon = rnormal()*e(sigma) 
+
+replace pred_hourly_wage = exp(lwage_hour_hat + epsilon) if `filter' 
+ 
+twoway (hist wage_hour if `filter', width(0.5) ///
+	lcolor(gs12) fcolor(gs12)) ///
+	(hist pred_hourly_wage if `filter' & (!missing(wage_hour)), width(0.5) ///
+		fcolor(none) lcolor(red)), ///
+	title("Gross Hourly Wage (Level)") ///
+	subtitle("Males, No previously observed wage") ///	
+	xtitle("GBP") ///
+	legend(lab(1 "UKHLS") lab(2 "Prediction")) ///
+	note("Notes: Sample condition ${wages_m_no_prev_if_condition}", size(vsmall))	
+
+graph export "${dir_raw_results}/wages/W1ma_hist.png", replace
+
+graph drop _all 
+
+sum wage_hour if `filter' [aw=dwt]
+sum pred_hourly_wage if `filter' & (!missing(wage_hour)) [aw=dwt] 
+ 
+
+* Save sample for validation
 save "$dir_validation_data/Male_NPW_sample", replace 
+cap drop pred epsilon
+
 
 * Formatted results
 * Clean up matrix of estimates 
@@ -733,23 +654,23 @@ ds
 
 drop if C == 0 // UPDATE 
 drop A 
-drop AH-BM // UPDATE
+drop AG-BL // UPDATE
 
 
 
 mkmat *, matrix(Males_NLW)
 putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_MalesNE") modify 
+	sheet("W1ma") modify 
 putexcel B2 = matrix(Males_NLW)
 
 restore 
 
 * Labelling 
 putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_MalesNE") modify 
+	sheet("W1ma") modify 
 
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
 
@@ -788,25 +709,25 @@ import excel "$dir_raw_results/wages/reg_wages", sheet("Males_NLW") firstrow ///
 	clear
 ds 
 
-drop if AN == 0 // UPDATE
+drop if AG == 0 // UPDATE
 drop A 
-drop C-AG // UPDATE
-drop BN // UPDATE
+drop C-AF // UPDATE
+drop BM // UPDATE
 
 
 mkmat *, matrix(Males_NLW)
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_MaleNE") modify 
+putexcel set "$dir_results/reg_employment_selection", ///
+	sheet("W1ma-sel") modify 
 putexcel B2 = matrix(Males_NLW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_MaleNE") modify 
+putexcel set "$dir_results/reg_employment_selection", ///
+	sheet("W1ma-sel") modify 
 	
-local var_list Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant 
 	
@@ -850,36 +771,117 @@ sum squared_residuals
 di "RMSE for Not employed men:  " sqrt(r(mean))
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
-A3=("Wages_MalesNE") B3=(sqrt(r(mean))) 
+A3=("W1ma") B3=(sqrt(r(mean))) 
 restore 
 
 
-*** 2) Heckman estimated on the sub-sample of individuals who were observed working in previous period. 
-***    Wage equation controls for lagged wage
-***************************************************************************************************************************************
-* women
-***************************************************************************************************************************************
-global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
-global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
-local filter = "dgn==0 & dag>=$min_age & dag<=$max_age & previouslyWorking"
-*heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep 
-outputResults "Working women3"
+/******************** WAGES: WOMEN, PREV WAGE OBSERVED *********************/
+
+* Estimate a predicted wage using a Heckman selection model 
+* Sample: Working age (16-75) women who received a wage in t-1
+* DV: Log gross hourly wage 
+
+global wage_eqn "lwage_hour L1.lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag  i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded
+global seln_eqn "dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
+
+local filter = "${wages_f_prev_if_condition}"
+display "`filter'"
+
+heckman $wage_eqn if `filter', select($seln_eqn) twostep mills(lambda) 
 
 outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_WW.doc", replace ///
 title("Heckman-corrected wage equation estimated on the sample of women who were in employment last year") ///
  ctitle(Working women) label side dec(2) noparen 
  
+ /***************************************************************************/
+* Eigenvalue stability check 
+
+* Extract variance-covariance matrix
+matrix V = e(V)
+
+* Preserve data state
+preserve
+
+* Export V to dataset
+clear
+svmat double V
+
+* Drop zero rows and columns
+forvalues r = 1/2 {
+    egen rowsum = rowtotal(*)
+    drop if rowsum == 0
+    drop rowsum
+    xpose, clear
+}
+
+* Recreate trimmed VCV matrix
+mkmat *, matrix(V_trimmed)
+
+restore
+
+* Eigen decomposition
+matrix symeigen X lambda = V_trimmed
+
+* Largest eigenvalue
+scalar max_eig = lambda[1,1]
+
+* Smallest-to-largest eigenvalue ratio
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
+
+* Check 1: near singularity
+if max_eig < 1.0e-12 {
+    display as error "CRITICAL ERROR: Heckman VCV near singular"
+    display as error "Max eigenvalue = " max_eig
+    exit 999
+}
+
+* Check 2: ill-conditioning
+if min_ratio < 1.0e-12 {
+    display as error "ERROR: Heckman VCV ill-conditioned"
+    display as error "Min/Max eigenvalue ratio = " min_ratio
+    exit 506
+}
+
+display "VCV stability check passed"
+display "Max eigenvalue: " max_eig
+display "Min/Max ratio: " min_ratio
+
+/***************************************************************************/
  
-*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
-computePredicted "heckman" `filter'
-analyseFit "e(sample)" "nocorr" "Working women, 17-64 years" "WW"
-gen in_sample_fpw = e(sample)
-replace pred_hourly_wage = wage_hour_hat if in_sample_fpw
+ * Obtain predicted values (log wage) with selection correction
+predict pred if `filter', ycond // ycond -> include IMR in prediction 
+replace lwage_hour_hat = pred if `filter'
 
-* Save sample for later use (internal validation)
-save "$dir_validation_data/Female_PW_sample", replace 
+gen in_sample_fpw = 1 if e(sample) == 1
 
+* Correct bias transforming from log to levels 
+gen epsilon = rnormal()* e(sigma) 
+replace pred_hourly_wage = exp(lwage_hour_hat + epsilon) if `filter'	
+
+twoway (hist wage_hour if `filter', width(0.5) ///
+	lcolor(gs12) fcolor(gs12)) ///
+	(hist pred_hourly_wage if `filter' & (!missing(wage_hour)), width(0.5) ///
+		fcolor(none) lcolor(red)), ///
+	title("Gross Hourly Wage (Level)") ///
+	subtitle("Females, Previously observed wage") ///	
+	xtitle("GBP") ///
+	legend(lab(1 "UKHLS") lab(2 "Prediction")) ///
+	note("Notes: Sample condition ${wages_f_prev_if_condition}", ///
+	size(vsmall))	
+
+graph export "${dir_raw_results}/wages/W1fb_hist.png", replace
+
+graph drop _all 
+
+sum wage_hour if `filter' [aw=dwt]
+sum pred_hourly_wage if `filter' & (!missing(wage_hour)) [aw=dwt] 
+
+
+* Save sample for validation
+save "$dir_validation_data/Female_PW_sample", replace 	
+
+cap drop pred epsilon
+ 
 * Formatted results
 * Clean up matrix of estimates 
 * Note: Zeros values are eliminated 
@@ -944,27 +946,24 @@ preserve
 import excel "$dir_raw_results/wages/reg_wages", sheet("Females_LW") firstrow ///
 	clear
 ds 
-
 drop if C == 0 // UPDATE 
 drop A 
-drop AI-BM // UPDATE
-
+drop AH-BK // UPDATE
 
 mkmat *, matrix(Females_LW)
-putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_FemalesE") modify 
+putexcel set "$dir_results/reg_wages", sheet("W1fb") modify 
 putexcel B2 = matrix(Females_LW)
 
 restore 
 
 * Labelling 
 putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_FemalesE") modify 
+	sheet("W1fb") modify 
 
-local var_list L1_log_hourly_wage Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list L1_log_hourly_wage Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
-	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
+	Ethn_Asian Ethn_Black Ethn_Other Constant InverseMillsRatio
 
 	
 putexcel A1 = "REGRESSOR"
@@ -1000,26 +999,22 @@ preserve
 import excel "$dir_raw_results/wages/reg_wages", sheet("Females_LW") firstrow ///
 	clear
 ds 
-
-drop if AO == 0 // UPDATE
+drop if AH == 0 // UPDATE
 drop A 
-drop C-AH // UPDATE
-drop BN // UPDATE
-
+drop C-AG // UPDATE
+drop BL // UPDATE
 
 mkmat *, matrix(Females_LW)
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_FemaleE") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1fb-sel") modify 
 putexcel B2 = matrix(Females_LW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_FemaleE") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1fb-sel") modify 
 	
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant 
 	
@@ -1064,35 +1059,118 @@ sum squared_residuals
 di "RMSE for Employed women:  " sqrt(r(mean))
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
-A4=("Wages_FemalesE") B4=(sqrt(r(mean))) 
+A4=("W1fb") B4=(sqrt(r(mean))) 
 restore 
 
 
-****************************************************************************************************************************************
-* men
-****************************************************************************************************************************************
-global wage_eqn "lwage_hour L1.lwage_hour dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 dlltsd01 dhe_pcs dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //i.dhe
-global seln_eqn "dag dagsq i.deh_c3 i.deh_c3#c.dag ded i.dehmf_c3 mar child dlltsd01 dhe_pcs dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //i.dhe
-local filter = "dgn==1 & dag>=$min_age & dag<=$max_age & previouslyWorking"
-*heckman $wage_eqn if `filter' [pweight=dimxwt], select($seln_eqn) vce(robust)
-heckman $wage_eqn if `filter', select($seln_eqn) twostep 
-outputResults "Working men3"
+/******************** WAGES: MEN, PREV WAGE OBSERVED *********************/
+
+* Estimate a predicted wage using a Heckman selection model 
+* Sample: Working age (16-75) men who received a wage in t-1
+* DV: Log gross hourly wage 
+
+global wage_eqn "lwage_hour L1.lwage_hour dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag i.dehmf_c3 dlltsd01 l.dhe_pcs l.dhe_mcs  ib8.drgn1 pt real_wage_growth y2020 y2021 i.dot" //ded 
+global seln_eqn "dag dagsq ib1.deh_c4 ib1.deh_c4#c.dag  i.dehmf_c3 mar child dlltsd01 l.dhe_pcs l.dhe_mcs ib8.drgn1 y2020 y2021 i.dot" //ded
+
+local filter = "${wages_m_prev_if_condition}"
+display "`filter'"
+
+heckman $wage_eqn if `filter', select($seln_eqn) twostep mills(lambda) 
 
 outreg2 stats(coef se pval) using "$dir_raw_results/wages/Output_WM.doc", replace ///
 title("Heckman-corrected wage equation estimated on the sample of men who were in employment last year") ///
  ctitle(Working women) label side dec(2) noparen 
- 
- 
-*xtheckmanfe $wage_eqn if `filter', select($seln_eqn) reps(2)
-computePredicted "heckman" `filter'
-analyseFit "e(sample)" "nocorr" "Working men, 17-64 years" "WM"
-gen in_sample_mpw = e(sample)
-replace pred_hourly_wage = wage_hour_hat if in_sample_mpw
 
-* Save sample for later use (internal validation)
+/***************************************************************************/
+* Eigenvalue stability check 
+
+* Extract variance-covariance matrix
+matrix V = e(V)
+
+* Preserve data state
+preserve
+
+* Export V to dataset
+clear
+svmat double V
+
+* Drop zero rows and columns
+forvalues r = 1/2 {
+    egen rowsum = rowtotal(*)
+    drop if rowsum == 0
+    drop rowsum
+    xpose, clear
+}
+
+* Recreate trimmed VCV matrix
+mkmat *, matrix(V_trimmed)
+
+restore
+
+* Eigen decomposition
+matrix symeigen X lambda = V_trimmed
+
+* Largest eigenvalue
+scalar max_eig = lambda[1,1]
+
+* Smallest-to-largest eigenvalue ratio
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
+
+* Check 1: near singularity
+if max_eig < 1.0e-12 {
+    display as error "CRITICAL ERROR: Heckman VCV near singular"
+    display as error "Max eigenvalue = " max_eig
+    exit 999
+}
+
+* Check 2: ill-conditioning
+if min_ratio < 1.0e-12 {
+    display as error "ERROR: Heckman VCV ill-conditioned"
+    display as error "Min/Max eigenvalue ratio = " min_ratio
+    exit 506
+}
+
+display "VCV stability check passed"
+display "Max eigenvalue: " max_eig
+display "Min/Max ratio: " min_ratio
+
+/***************************************************************************/ 
+ * Obtain predicted values (log wage) with selection correction
+predict pred if `filter', ycond // ycond -> include IMR in prediction 
+
+replace lwage_hour_hat = pred if `filter'
+
+gen in_sample_mpw = e(sample)	
+
+* Correct bias transforming from log to levels 
+gen epsilon = rnormal()*e(sigma) 
+replace pred_hourly_wage = exp(lwage_hour_hat + epsilon) if `filter'	
+	 
+twoway (hist wage_hour if `filter', width(0.5) ///
+	lcolor(gs12) fcolor(gs12)) ///
+	(hist pred_hourly_wage if `filter' & (!missing(wage_hour)), width(0.5) ///
+		fcolor(none) lcolor(red)), ///
+	title("Gross Hourly Wage (Level)") ///
+	subtitle("Male, Previously observed wage") ///
+	xtitle("GBP") ///
+	legend(lab(1 "UKHLS") lab(2 "Prediction")) ///
+	note("Notes: Sample condition ${wages_m_prev_if_condition}", ///
+	size(vsmall))	
+
+graph export "${dir_raw_results}/wages/W1mb_hist.png", replace
+
+graph drop _all 
+
+sum wage_hour if `filter' [aw=dwt]
+sum pred_hourly_wage if `filter' & (!missing(wage_hour)) [aw=dwt] 
+
+* Save sample for validation
 save "$dir_validation_data/Male_PW_sample", replace 
 
-* Formatted results
+cap drop pred epsilon	
+ 
+
+ * Formatted results
 * Clean up matrix of estimates 
 * Note: Zeros values are eliminated 
 matrix b = e(b)	
@@ -1156,25 +1234,23 @@ preserve
 import excel "$dir_raw_results/wages/reg_wages", sheet("Males_LW") firstrow ///
 	clear
 ds 
-
 drop if C == 0 // UPDATE 
 drop A 
-drop AI-BM // UPDATE
+drop AH-BK // UPDATE
 
 
 mkmat *, matrix(Males_LW)
-putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_MalesE") modify 
+putexcel set "$dir_results/reg_wages", sheet("W1mb") modify 
 putexcel B2 = matrix(Males_LW)
 
 restore 
 
 * Labelling 
 putexcel set "$dir_results/reg_wages", ///
-	sheet("UK_Wages_MalesE") modify 
+	sheet("W1mb") modify 
 
-local var_list L1_log_hourly_wage Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 dhe_pcs dhe_mcs  ///
+local var_list L1_log_hourly_wage Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Pt RealWageGrowth Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant InverseMillsRatio
 
@@ -1212,26 +1288,22 @@ preserve
 import excel "$dir_raw_results/wages/reg_wages", sheet("Males_LW") firstrow ///
 	clear
 ds 
-
-drop if AO == 0 // UPDATE
+drop if AH == 0 // UPDATE
 drop A 
-drop C-AH // UPDATE
-drop BN // UPDATE
-
+drop C-AG // UPDATE
+drop BL // UPDATE
 
 mkmat *, matrix(Males_LW)
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_MaleE") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1mb-sel") modify 
 putexcel B2 = matrix(Males_LW)
 
 restore 
 
 * Labelling 
-putexcel set "$dir_results/reg_employmentSelection", ///
-	sheet("UK_EmploymentSelection_MaleE") modify 
+putexcel set "$dir_results/reg_employment_selection", sheet("W1mb-sel") modify 
 	
-local var_list Dag Dag_sq Deh_c3_Medium Deh_c3_Low Deh_c3_Medium_Dag ///
-	Deh_c3_Low_Dag Ded Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs Dhe_Mcs  ///
+local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_Pcs_L1 Dhe_Mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant 
 	
@@ -1276,40 +1348,15 @@ sum squared_residuals
 di "RMSE for Employed men:  " sqrt(r(mean))
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
 putexcel A1=("REGRESSOR") B1=("COEFFICIENT") ///
-A5=("Wages_MalesE") B5=(sqrt(r(mean))) 
+A5=("W1mb") B5=(sqrt(r(mean))) 
 restore 
 
-
-sum wage_hour if wage_hour >0& stm==19, d
-sum pred_hourly_wage if pred_hourly_wage >0& stm==19, d
-
-/*
-******************************************************************************************************************************************
-* all
-analyseFit "esample == 1"
-analyseFit "esample == 1 & dgn == 0"	// women
-analyseFit "esample == 1 & dgn == 1"	// men
-
-
-* Analyse fit per year:
-forvalues year = 11/23 {
-	di "Current year: `year'"
-	analyseFit2 "esample == 1 & stm == `year'" "nocorr" "Year 20`year' all obs prv emp" "all_`year'_graph.png"
-	analyseFit2 "esample == 1 & dgn == 0 & stm == `year'" "nocorr" "Year 20`year' women prv emp"	"women_`year'_graph.png"  // women
-	analyseFit2 "esample == 1 & dgn == 1 & stm == `year'" "nocorr" "Year 20`year' men prv emp" "men_`year'_graph.png"	// men
-	analyseFit2 "esample == 1 & dgn == 1 & deh_c3 == 1 & stm == `year'" "nocorr" "Year 20`year' men prv emp high ed" "men_highed_`year'_graph.png"	// men
-}
-
-*/
-
-// Note: sigma reported in the estimated regressions is the standard deviation of the residuals (=RMSE, assuming residuals are normally distributed)
-
-*** Save for use in the do file estimating non-employment income
+* Save for use in the do-file "reg_income" estimating non-employment incomes
+// use predicted wage for all 
+// use the observed wage for those that are working today and not in any 
+//	estimation sample above (first observation for an individual)
 replace pred_hourly_wage = exp(lwage_hour) if missing(pred_hourly_wage)
 
-save "$dir_ukhls_data/ukhls_pooled_all_obs_10.dta", replace
-
-*** Calculate the proportion of "true zero" hours of work among those in the "ZERO" weekly hours of labour supply bracket. 
-*I.e. the share of zero hours among 0-5 hours for those at risk of work. 
+save "${estimation_sample2}", replace
 
 capture log close 

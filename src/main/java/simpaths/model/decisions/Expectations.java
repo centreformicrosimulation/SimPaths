@@ -100,7 +100,7 @@ public class Expectations {
         benefitUnitProxyThisPeriod = new BenefitUnit(true);
         benefitUnitProxyThisPeriod.setYearLocal(currentStates.getYear());
         benefitUnitProxyThisPeriod.setOccupancyLocal(currentStates.getOccupancyCode());
-        benefitUnitProxyThisPeriod.setDeh_c3Local(currentStates.getEducationCode());
+        benefitUnitProxyThisPeriod.setDeh_c4Local(currentStates.getEducationCode());
         benefitUnitProxyThisPeriod.setRegion(currentStates.getRegionCode());
     }
 
@@ -173,7 +173,7 @@ public class Expectations {
         personProxyThisPeriod.setRegionLocal(currentStates.getRegionCode());
         personProxyThisPeriod.setDemMaleFlag(currentStates.getGenderCode());
         personProxyThisPeriod.setDhe(currentStates.getHealthCode());
-        personProxyThisPeriod.setDeh_c3(currentStates.getEducationCode());
+        personProxyThisPeriod.setDeh_c4(currentStates.getEducationCode());
         personProxyThisPeriod.setDcpstLocal(currentStates.getDcpst());
         personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
         personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
@@ -196,24 +196,24 @@ public class Expectations {
         personProxyNextPeriod.populateSocialCareReceipt_lag1(currentStates.getSocialCareReceiptStateCode());
         personProxyNextPeriod.setSocialCareProvision_lag1(currentStates.getSocialCareProvisionCode());
         personProxyNextPeriod.setDed(currentStates.getStudentIndicator());
-        personProxyNextPeriod.setDeh_c3(currentStates.getEducationCode());
-        personProxyNextPeriod.setDeh_c3_lag1(currentStates.getEducationCode());
-        personProxyNextPeriod.setDehf_c3(DecisionParams.EDUCATION_FATHER);
-        personProxyNextPeriod.setDehm_c3(DecisionParams.EDUCATION_MOTHER);
+        personProxyNextPeriod.setDeh_c4(currentStates.getEducationCode());
+        personProxyNextPeriod.setDeh_c4_lag1(currentStates.getEducationCode());
+        personProxyNextPeriod.setDehf_c4(DecisionParams.EDUCATION_FATHER);
+        personProxyNextPeriod.setDehm_c4(DecisionParams.EDUCATION_MOTHER);
         if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
             personProxyNextPeriod.setDcpstLocal(currentStates.getDcpst());
         } else {
             if (currentStates.getDcpst().equals(Dcpst.Partnered))
-                personProxyNextPeriod.setDcpstLocal(Dcpst.PreviouslyPartnered);
+                personProxyNextPeriod.setDcpstLocal(Dcpst.Single);
             else
-                personProxyNextPeriod.setDcpstLocal(Dcpst.SingleNeverMarried);
+                personProxyNextPeriod.setDcpstLocal(Dcpst.Single);
         }
         personProxyNextPeriod.setDcpst_lag1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);
         personProxyNextPeriod.setLabWageFullTimeHrlyL1(labWageFullTimeHrly);
         personProxyNextPeriod.setIoFlag(true);
         if (cohabitation) {
-            personProxyNextPeriod.setDehsp_c3_lag1(currentStates.getEducationCode());
+            personProxyNextPeriod.setDehsp_c4_lag1(currentStates.getEducationCode());
             personProxyNextPeriod.setDhesp_lag1(DecisionParams.DEFAULT_HEALTH);
             personProxyNextPeriod.setDemPartnerNYearL1(DecisionParams.DEFAULT_YEARS_MARRIED);
             personProxyNextPeriod.setDcpagdf_lag1(DecisionParams.DEFAULT_AGE_DIFFERENCE);
@@ -393,7 +393,7 @@ public class Expectations {
             }
 
             // student - don't need to track separately from education (no need for flagStudentVaries)
-            if (DecisionParams.flagEducation && ageYearsNextPeriod<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+            if (DecisionParams.flagEducation && ageYearsNextPeriod<=Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
                 futures.updateStudent();
             }
 
@@ -421,7 +421,7 @@ public class Expectations {
             futures.updateChildren();
 
             // social care receipt
-            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveFormalCare) {
+            if (Parameters.flagSocialCare  && ageYearsNextPeriod >= DecisionParams.minAgeReceiveSocialCare) {
                 futures.updateSocialCareReceipt();
             }
 
@@ -477,15 +477,19 @@ public class Expectations {
     private double evalSocialCareCostWeekly() {
 
         double socialCareCostWeekly = 0.0;
-        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveFormalCare)) {
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts && (ageYearsThisPeriod>=DecisionParams.minAgeReceiveSocialCare)) {
 
             SocialCareReceiptState market = currentStates.getSocialCareReceiptStateCode();
             if (SocialCareReceiptState.Mixed.equals(market) || SocialCareReceiptState.Formal.equals(market)) {
 
-                double score = Parameters.getRegFormalCareHoursS2k().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
-                double rmse = Parameters.getRMSEForRegression("S2k");
+                double score = Parameters.getRegFormalCareHoursS2e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
+                double rmse = Parameters.getRMSEForRegression("S2e");
                 double hours = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse*rmse/2.0));
                 socialCareCostWeekly = hours * Parameters.getTimeSeriesValue(currentStates.getYear(), TimeSeriesVariable.CarerWageRate);
+
+                // Retired process (kept for future reuse): S2k formal care hours.
+                // double score = Parameters.getRegFormalCareHoursS2k().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
+                // double rmse = Parameters.getRMSEForRegression("S2k");
             }
         }
         return socialCareCostWeekly;
@@ -498,10 +502,13 @@ public class Expectations {
 
             SocialCareProvision status = currentStates.getSocialCareProvisionCode();
             if (!SocialCareProvision.None.equals(status)) {
+                // With S3e retired, no separate regression is used for hours provided in expectations.
+                socialCareHoursProvidedWeekly = 0.0;
 
-                double score = Parameters.getRegCareHoursProvS3e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
-                double rmse = Parameters.getRMSEForRegression("S3e");
-                socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
+                // Retired process (kept for future reuse): S3e provided care hours.
+                // double score = Parameters.getRegCareHoursProvS3e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
+                // double rmse = Parameters.getRMSEForRegression("S3e");
+                // socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
             }
         }
         return socialCareHoursProvidedWeekly;

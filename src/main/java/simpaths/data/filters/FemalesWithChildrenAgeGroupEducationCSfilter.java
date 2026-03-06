@@ -25,7 +25,7 @@ public class FemalesWithChildrenAgeGroupEducationCSfilter implements ICollection
 				(person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) &&
 				( person.getBenefitUnit().getIndicatorChildren(0,3).equals(Indicator.True) ||
 						person.getBenefitUnit().getIndicatorChildren(4,12).equals(Indicator.True) ) &&
-				(person.getDeh_c3().equals(edu))
+				(person.getDeh_c4().equals(edu))
 		);
 	}
 	

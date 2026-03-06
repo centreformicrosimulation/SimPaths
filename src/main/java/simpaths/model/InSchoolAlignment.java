@@ -21,9 +21,9 @@ import java.util.Set;
  */
 public class InSchoolAlignment implements IEvaluation {
 
-    private double targetStudentShare;
-    private Set<Person> persons;
-    private SimPathsModel model;
+    private final double targetStudentShare;
+    private final Set<Person> persons;
+    private final SimPathsModel model;
 
 
     // CONSTRUCTOR
@@ -48,12 +48,20 @@ public class InSchoolAlignment implements IEvaluation {
     @Override
     public double evaluate(double[] args) {
 
-        persons.parallelStream()
-                .forEach(person -> person.inSchool(args[0]));
+        // Ensure each trial point is evaluated from lagged status (pure function for root search).
+        persons.parallelStream().forEach(person -> {
+            if (person.getLes_c4_lag1() != null) {
+                person.setLes_c4(person.getLes_c4_lag1());
+            }
+            person.inSchool(args[0]);
+        });
 
         return targetStudentShare - evalStudentShare();
     }
 
+    public double getTargetStudentShare() {
+        return targetStudentShare;
+    }
 
     /**
      * Evaluates the aggregate share of students.
@@ -64,11 +72,18 @@ public class InSchoolAlignment implements IEvaluation {
      */
     private double evalStudentShare() {
 
+        // Counts aligned students within education age range: 16-29 (range is defined in Model)
         long numStudents = model.getPersons().stream()
-                .filter(person -> (!person.isToLeaveSchool() && !Les_c4.EmployedOrSelfEmployed.equals(person.getLes_c4()) && !Les_c4.NotEmployed.equals(person.getLes_c4()) && !Les_c4.Retired.equals(person.getLes_c4()))) // count number of students who are not supposed to leave school
+                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
+                        && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
+                        && !person.isToLeaveSchool()
+                        && Les_c4.Student.equals(person.getLes_c4())) // count aligned student group only
                 .count();
+        // Counts individuals within education age range: 16-29 (range is defined in Model)
         long numPeople = model.getPersons().stream()
-                .filter(person -> person.getLes_c4() != null)
+                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
+                        && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
+                        && person.getLes_c4() != null)
                 .count();
 
         return (numStudents > 0) ? (double) numStudents / numPeople : 0.0;

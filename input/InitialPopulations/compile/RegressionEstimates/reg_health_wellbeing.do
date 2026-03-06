@@ -3,7 +3,7 @@
 * SECTION:		Health and wellbeing
 * OBJECT: 		Health status and Disability
 * AUTHORS:		Andy Baxter
-* LAST UPDATE:		04 Dec 2025  
+* LAST UPDATE:	17 Feb 2026
 * COUNTRY: 		UK 
 *
 * NOTES:		
@@ -20,26 +20,30 @@ cap log close
 log using "${dir_log}/reg_health_wellbeing.log", replace
 *******************************************************************
 
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-do "$dir_do/variable_update"
+/********************************* PREPARE DATA *******************************/
 
+use ${estimation_sample}, clear
 
+* Set data 
+xtset idperson swv
+sort idperson swv 
 
-* Sample selection 
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+/* DP: Household income/poverty/employment transition variables are moved to variable_update.do */
+
+* Remove children 
 drop if dag < 16
 
-
-xtset idperson swv
-gen wave = swv
 
 ********************************************************************************
 * DHE_MCS1 - SF12 MCS score 0-100 of all working-age adults - baseline effects *
 ********************************************************************************
 
 reg dhe_mcs ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_mcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_mcs ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , vce(cluster idperson)
 
    * save raw results 
@@ -91,7 +95,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_MCS1", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_MCS1", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -122,7 +126,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_MCS1") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_MCS1") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 
@@ -148,7 +152,7 @@ putexcel A17 = "Ydses_c5_Q2_L1"
 putexcel A18 = "Ydses_c5_Q3_L1"
 putexcel A19 = "Ydses_c5_Q4_L1"
 putexcel A20 = "Ydses_c5_Q5_L1"
-putexcel A21 = "Dlltsd_L1"
+putexcel A21 = "Dlltsd01_L1"
 putexcel A22 = "Dhe_mcs_L1"
 putexcel A23 = "Dag_L1"
 putexcel A24 = "Dag_sq_L1"
@@ -181,7 +185,7 @@ putexcel R1 = "Ydses_c5_Q2_L1"
 putexcel S1 = "Ydses_c5_Q3_L1"
 putexcel T1 = "Ydses_c5_Q4_L1"
 putexcel U1 = "Ydses_c5_Q5_L1"
-putexcel V1 = "Dlltsd_L1"
+putexcel V1 = "Dlltsd01_L1"
 putexcel W1 = "Dhe_mcs_L1"
 putexcel X1 = "Dag_L1"
 putexcel Y1 = "Dag_sq_L1"
@@ -196,7 +200,7 @@ putexcel AG1 = "Constant"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A16 = ("DHE_MCS1") B16 = rmse 
+putexcel A18 = ("DHE_MCS1") B18 = rmse 
 		
 
 drop in_sample p
@@ -213,10 +217,10 @@ scalar drop r2_p N chi2 ll
 reghdfe dhe_mcs ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_mcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_mcs ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==0 ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , absorb(idperson) vce(cluster idperson)  
 
 
@@ -278,7 +282,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_MCS2_Females", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_MCS2_Females", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -309,7 +313,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_MCS2_Females") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_MCS2_Females") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 * Labelling 
@@ -343,7 +347,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A17 = ("DHE_MCS2_Females") B17 = rmse 
+putexcel A19 = ("DHE_MCS2_Females") B19 = rmse 
 
 		
 drop in_sample p
@@ -359,10 +363,10 @@ scalar drop r2_p N chi2 ll
 reghdfe dhe_mcs ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_mcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_mcs ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==1 ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , absorb(idperson) vce(cluster idperson)
 
 
@@ -424,7 +428,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_MCS2_Males", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_MCS2_Males", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -455,7 +459,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_MCS2_Males") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_MCS2_Males") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 * Labelling 
@@ -489,7 +493,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A18 = ("DHE_MCS2_Males") B18 = rmse 
+putexcel A20 = ("DHE_MCS2_Males") B20 = rmse 
 
 		
 drop in_sample p
@@ -501,9 +505,9 @@ scalar drop r2_p N chi2 ll
 ********************************************************************************
 
 reg dhe_pcs ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_pcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_pcs ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , vce(cluster idperson)
 
    * save raw results 
@@ -555,7 +559,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_PCS1", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_PCS1", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -586,7 +590,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_PCS1") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_PCS1") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 
@@ -612,7 +616,7 @@ putexcel A17 = "Ydses_c5_Q2_L1"
 putexcel A18 = "Ydses_c5_Q3_L1"
 putexcel A19 = "Ydses_c5_Q4_L1"
 putexcel A20 = "Ydses_c5_Q5_L1"
-putexcel A21 = "Dlltsd_L1"
+putexcel A21 = "Dlltsd01_L1"
 putexcel A22 = "Dhe_pcs_L1"
 putexcel A23 = "Dag_L1"
 putexcel A24 = "Dag_sq_L1"
@@ -645,7 +649,7 @@ putexcel R1 = "Ydses_c5_Q2_L1"
 putexcel S1 = "Ydses_c5_Q3_L1"
 putexcel T1 = "Ydses_c5_Q4_L1"
 putexcel U1 = "Ydses_c5_Q5_L1"
-putexcel V1 = "Dlltsd_L1"
+putexcel V1 = "Dlltsd01_L1"
 putexcel W1 = "Dhe_pcs_L1"
 putexcel X1 = "Dag_L1"
 putexcel Y1 = "Dag_sq_L1"
@@ -660,7 +664,7 @@ putexcel AG1 = "Constant"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A19 = ("DHE_PCS1") B19 = rmse 
+putexcel A21 = ("DHE_PCS1") B21 = rmse 
 
 		
 drop in_sample p
@@ -677,10 +681,10 @@ scalar drop r2_p N chi2 ll
 reghdfe dhe_pcs ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_pcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_pcs ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==0 ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , absorb(idperson) vce(cluster idperson)
 
 
@@ -742,7 +746,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_PCS2_Females", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_PCS2_Females", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -773,7 +777,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_PCS2_Females") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_PCS2_Females") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 * Labelling 
@@ -807,7 +811,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A20 = ("DHE_PCS2_Females") B20 = rmse 
+putexcel A22 = ("DHE_PCS2_Females") B22 = rmse 
 
 		
 		
@@ -824,10 +828,10 @@ scalar drop r2_p N chi2 ll
 reghdfe dhe_pcs ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dhe_pcs ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_mcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dhe_pcs ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==1 ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , absorb(idperson) vce(cluster idperson)
 
 
@@ -889,7 +893,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_PCS2_Males", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_PCS2_Males", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -920,7 +924,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DHE_PCS2_Males") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DHE_PCS2_Males") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 * Labelling 
@@ -954,7 +958,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A21 = ("DHE_PCS2_Males") B21 = rmse 
+putexcel A23 = ("DHE_PCS2_Males") B23 = rmse 
 
 		
 drop in_sample p
@@ -966,9 +970,9 @@ scalar drop r2_p N chi2 ll
 ********************************************************************************
 
 reg dls ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dls ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dls ///
 L.dag L.dagsq i.deh_c3 i.dot i.dgn stm ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , vce(cluster idperson)
 
    * save raw results 
@@ -1020,7 +1024,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DLS1", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DLS1", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -1051,7 +1055,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DLS1") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DLS1") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 
@@ -1077,7 +1081,7 @@ putexcel A17 = "Ydses_c5_Q2_L1"
 putexcel A18 = "Ydses_c5_Q3_L1"
 putexcel A19 = "Ydses_c5_Q4_L1"
 putexcel A20 = "Ydses_c5_Q5_L1"
-putexcel A21 = "Dlltsd_L1"
+putexcel A21 = "Dlltsd01_L1"
 putexcel A22 = "Dls_L1"
 putexcel A23 = "Dag_L1"
 putexcel A24 = "Dag_sq_L1"
@@ -1110,7 +1114,7 @@ putexcel R1 = "Ydses_c5_Q2_L1"
 putexcel S1 = "Ydses_c5_Q3_L1"
 putexcel T1 = "Ydses_c5_Q4_L1"
 putexcel U1 = "Ydses_c5_Q5_L1"
-putexcel V1 = "Dlltsd_L1"
+putexcel V1 = "Dlltsd01_L1"
 putexcel W1 = "Dls_L1"
 putexcel X1 = "Dag_L1"
 putexcel Y1 = "Dag_sq_L1"
@@ -1125,7 +1129,7 @@ putexcel AG1 = "Constant"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A22 = ("DLS1") B22 = rmse 
+putexcel A24 = ("DLS1") B24 = rmse 
 
 		
 drop in_sample p
@@ -1142,10 +1146,10 @@ scalar drop r2_p N chi2 ll
 reghdfe dls ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dls ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dls ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==0 ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , absorb(idperson) vce(cluster idperson)
 
 
@@ -1207,7 +1211,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DLS2_Females", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DLS2_Females", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -1238,7 +1242,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DLS2_Females") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DLS2_Females") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 * Labelling 
@@ -1272,7 +1276,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A23 = ("DLS2_Females") B23 = rmse 
+putexcel A25 = ("DLS2_Females") B25 = rmse 
 
 		
 drop in_sample p
@@ -1288,10 +1292,10 @@ scalar drop r2_p N chi2 ll
 reghdfe dls ///
 ib11.exp_emp i.exp_poverty i.exp_incchange D.log_income financial_distress ///
 y2020 y2021 ///
-L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd L.dls ///
+L.i.dhh_owned L.i.dcpst L.dnc L.dhe_pcs L.ib8.drgn L.i.ydses_c5 L.dlltsd01 L.dls ///
 L.dag L.dagsq i.deh_c3 stm ///
 if dag>=25 & dag<=64 & dgn==1 ///
-[pweight=dimxwt]  ///
+[pweight=${weight}]  ///
 , absorb(idperson) vce(cluster idperson)
 
 
@@ -1353,7 +1357,7 @@ forvalues i = 1/2 {
 }	
 	
 mkmat v*, matrix(var)	
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DLS2_Males", replace) modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DLS2_Males", replace) modify
 putexcel C2 = matrix(var)
 		
 restore	
@@ -1384,7 +1388,7 @@ forvalues i = 1/`no_vars' {
     }
 }
 
-putexcel set "$dir_results/reg_health_wellbeing", sheet("UK_DLS2_Males") modify
+putexcel set "$dir_results/reg_health_wellbeing", sheet("DLS2_Males") modify
 putexcel A1 = matrix(nonzero_b'), names nformat(number_d2) 
 
 * Labelling 
@@ -1418,7 +1422,7 @@ putexcel M1 = "Covid_2021_D"
 
 * save RMSE
 putexcel set "$dir_results/reg_RMSE.xlsx", sheet("UK") modify
-putexcel A24 = ("DLS2_Males") B24 = rmse 
+putexcel A26 = ("DLS2_Males") B26 = rmse 
 
 		
 drop in_sample p

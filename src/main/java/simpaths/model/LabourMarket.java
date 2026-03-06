@@ -11,6 +11,8 @@ import simpaths.data.Parameters;
 //import experiment.SimPathsObserver;
 //import microsim.data.MultiKeyCoefficientMap;
 import microsim.engine.SimulationEngine;
+
+import static simpaths.data.Parameters.EMPLOYMENT_ALIGNMENT_END_YEAR;
 //import microsim.statistics.IDoubleSource;
 //import microsim.statistics.ILongSource;
 
@@ -209,7 +211,7 @@ public class LabourMarket {
             }
 
             // When all the monthly transitions in a year have been predicted, choose one monthly value to represent the whole year for each individual and set labour force status, work hours, gross and disposable income.
-        //	benefitUnitsCovid19Update.parallelStream().forEach(benefitUnit -> benefitUnit.chooseRandomMonthlyOutcomeCovid19());
+            //	benefitUnitsCovid19Update.parallelStream().forEach(benefitUnit -> benefitUnit.chooseRandomMonthlyOutcomeCovid19());
             for (BenefitUnit benefitUnit : benefitUnitsCovid19Update) {
                 benefitUnit.chooseRandomMonthlyOutcomeCovid19();
             }
@@ -234,16 +236,28 @@ public class LabourMarket {
                 }
             }
 
-            if (model.isAlignEmployment() & model.getYear() <= 2019) {
+            // Employment alignment phase (pre-alignment setup + subgroup-specific calibration)
+            if (model.isAlignEmployment() && model.getYear() <= EMPLOYMENT_ALIGNMENT_END_YEAR ) {
+
+                // Precompute labour choices, utility scores (without fixed costs), and atRisk flags
+                benefitUnits.parallelStream().forEach(BenefitUnit::computeAtRiskOfWorkFlags);
+                benefitUnits.parallelStream().forEach(BenefitUnit::updateLabourChoices);
+                benefitUnits.parallelStream().forEach(BenefitUnit::updateUtilityRegressionScoresWithoutFC);
+
+
+                // Run alignment separately by b.u. subgroup
+
+                model.activityAlignmentCouples();
                 model.activityAlignmentSingleMales();
                 model.activityAlignmentSingleFemales();
-                model.activityAlignmentCouples();
+                model.activityAlignmentSingleACFemales();
+                model.activityAlignmentSingleACMales();
+
+                model.activityAlignmentSingleDepFemale();
+                model.activityAlignmentSingleDepMale();
             }
 
             //Update Labour Supply
-//            for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
-//                benefitUnit.updateLabourSupplyAndIncome();
-//            }
             benefitUnitsAllRegions.parallelStream()
                     .forEach(BenefitUnit::updateLabourSupplyAndIncome);
 
@@ -256,12 +270,17 @@ public class LabourMarket {
             }
             for (BenefitUnit benefitUnit : benefitUnitsAllRegions) {
 
+                // Codex comment:
+                // Net effect: lines 273–284 accumulate sum-of-wages and count-by-education for male persons only; the next block (285 onward) does the same for females.
+                // Together they build ingredients for average potential hourly earnings by education (sum / count), although in this file those two local maps are not used later,
+                // so this currently behaves like intermediate aggregation with no downstream effect in LabourMarket.java.
+
                 if (benefitUnit.getMale() != null) {
 
                     Person person = benefitUnit.getMale();
                     if (person.atRiskOfWork()) {
 
-                        Education ed = person.getDeh_c3();
+                        Education ed = person.getDeh_c4();
                         double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);
@@ -273,7 +292,7 @@ public class LabourMarket {
                     Person person = benefitUnit.getFemale();
                     if (person.atRiskOfWork()) {
 
-                        Education ed = person.getDeh_c3();
+                        Education ed = person.getDeh_c4();
                         double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);
@@ -283,9 +302,8 @@ public class LabourMarket {
             }
 
             // Update activity status of persons residing within the benefit unit
-            benefitUnits.stream()
+            benefitUnits.parallelStream()
                     .forEach(BenefitUnit::updateActivityOfPersonsWithinBenefitUnit);
-
         }
     }
 

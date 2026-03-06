@@ -147,7 +147,7 @@ public class ExpectationsFactory {
             int numberExpectedInitial = numberExpected;
             boolean flagEval = false;
             LocalExpectations lexpect = new LocalExpectations();
-            lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2a);
+            lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2);
             for (int ii = 0; ii < numberExpectedInitial; ii++) {
 
                 if (anyVaries()) {
@@ -155,7 +155,7 @@ public class ExpectationsFactory {
                 }
                 if (flagEval) {
                     lexpect = new LocalExpectations();
-                    lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2a);
+                    lexpect.evaluateDiscrete(personProxyNextPeriod, RegressionName.EducationE2);
                 }
 
                 if (anticipated[ii].getStudent() == 1) {
@@ -197,10 +197,11 @@ public class ExpectationsFactory {
                             // birth possible
 
                             if (anticipated[ii].getStudent()==1) {
-                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1a);
-                            } else {
-                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
+                                expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1);
                             }
+                            // else {
+                            //     expandExpectationsFertility(ii, stateIndexNextPeriod, jj, options, RegressionName.FertilityF1b);
+                            // }
                         } else {
                             // birth not possible
 
@@ -427,7 +428,7 @@ public class ExpectationsFactory {
             val0 = personProxyNextPeriod.getRegion();
             val1 = states.getRegionCode();
         } else if (Axis.Education.equals(axis)) {
-            val0 = personProxyNextPeriod.getDeh_c3();
+            val0 = personProxyNextPeriod.getDeh_c4();
             val1 = states.getEducationCode();
             if (val0==val1) {
                 val0 = personProxyNextPeriod.getDed();
@@ -468,7 +469,7 @@ public class ExpectationsFactory {
             if (Axis.Region.equals(axis)) {
                 personProxyNextPeriod.setRegion(states.getRegionCode());
             } else if (Axis.Education.equals(axis)) {
-                personProxyNextPeriod.setDeh_c3(states.getEducationCode());
+                personProxyNextPeriod.setDeh_c4(states.getEducationCode());
                 personProxyNextPeriod.setDed(states.getStudentIndicator());
             } else if (Axis.Health.equals(axis)) {
                 personProxyNextPeriod.setDhe(states.getHealthCode());

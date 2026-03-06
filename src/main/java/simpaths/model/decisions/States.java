@@ -103,7 +103,7 @@ public class States {
             populate(Axis.Disability, (double)refPerson.getDisability());
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptState().getValue());
 
         // social care provision
@@ -115,7 +115,7 @@ public class States {
             populate(Axis.Region, benefitUnit.getRegionIndex());
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation)
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation)
             populate(Axis.Student, refPerson.getStudent());
 
         // education
@@ -415,7 +415,7 @@ public class States {
         return getCohabitationIndex() == 1;
     }
     Dcpst getDcpst() {
-        return (getCohabitation()) ? Dcpst.Partnered : Dcpst.SingleNeverMarried;
+        return (getCohabitation()) ? Dcpst.Partnered : Dcpst.Single;
     }
 
     /**
@@ -628,7 +628,7 @@ public class States {
      * @return integer (0 none needed, 1 no formal (needed but not received or only informal), 2 formal and informal, 3 only formal
      */
     int getSocialCareReceipt() {
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare) {
             return (int) labStatesContObject[scale.getIndex(Axis.SocialCareReceipt, ageYears)];
         } else {
             return 0;
@@ -679,7 +679,7 @@ public class States {
      */
     int getStudent() {
         int student = 0;
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
             student = (int) labStatesContObject[scale.getIndex(Axis.Student, ageYears)];
         }
         return student;
@@ -852,7 +852,7 @@ public class States {
         Les_c4 code;
         int student = 0;
         if (DecisionParams.flagEducation) {
-            if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION) {
+            if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
                 student = getStudent();
             }
         }
@@ -892,7 +892,7 @@ public class States {
      */
     SocialCareReceiptState getSocialCareReceiptStateCode() {
         SocialCareReceiptState code;
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             code = SocialCareReceiptState.getCode(getVal(Axis.SocialCareReceipt));
         else
             code = SocialCareReceiptState.NoneNeeded;
@@ -904,7 +904,7 @@ public class States {
      */
     SocialCareReceipt getSocialCareReceiptCode() {
         SocialCareReceipt code;
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare)
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             code = SocialCareReceipt.getCode(getVal(Axis.SocialCareReceipt));
         else
             code = SocialCareReceipt.None;
@@ -1036,7 +1036,7 @@ public class States {
         }
 
         // social care receipt
-        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveFormalCare) {
+        if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare) {
             stateIndex = scale.getIndex(Axis.SocialCareReceipt, ageYears);
             printOutOfBounds(stateIndex);
             msg = "social care receipt: " + String.format(fmtIndicator, labStatesContObject[stateIndex]);
@@ -1060,7 +1060,7 @@ public class States {
         }
 
         // student
-        if (ageYears <= Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
+        if (ageYears <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && DecisionParams.flagEducation) {
             stateIndex = scale.getIndex(Axis.Student, ageYears);
             printOutOfBounds(stateIndex);
             msg = "student: " + String.format(fmtIndicator, labStatesContObject[stateIndex]);

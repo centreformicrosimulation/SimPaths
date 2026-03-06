@@ -7,5 +7,9 @@ public enum TargetShares {
     Students,
     EmploymentSingleMales,
     EmploymentSingleFemales,
-    EmploymentCouples;
+    EmploymentACMales,
+    EmploymentACFemales,
+    EmploymentCouples,
+    EmploymentSingleDepMales,
+    EmploymentSingleDepFemales ;
 }

@@ -1,13 +1,13 @@
 *********************************************************************************
-* PROJECT:  		ESPON 
+* PROJECT:  		SimPaths UK 
 * SECTION:			Fertility
 * OBJECT: 			Final Probit Models
-* AUTHORS:			Daria Popova, Justin van de Ven
-* LAST UPDATE:		21 Oct 2025 DP  
+* AUTHORS:			Daria Popova, Justin van de Ven, Aleksandra Kolndrekaj
+* LAST UPDATE:		18 Feb 2026 AK  
 * COUNTRY: 			UK 
 *
-* NOTES:			    Simplified the fertility process for those in this initial 
-* 						education spell.  
+* NOTES:			     
+* 						Combined former a and b processes.
 ********************************************************************************
 clear all
 set more off
@@ -20,14 +20,6 @@ set maxvar 30000
 cap log close 
 log using "${dir_log}/reg_fertility.log", replace
 *******************************************************************
-use "$dir_ukhls_data/ukhls_pooled_all_obs_09.dta", clear
-
-do "$dir_do/variable_update"
-
-
-* sample selection 
-drop if dag < 16
-
 
 * Set Excel file 
 
@@ -36,82 +28,89 @@ drop if dag < 16
 putexcel set "$dir_results/reg_fertility", sheet("Info") replace
 putexcel A1 = "Description:"
 putexcel B1 = "Model parameters governing projection of fertility"
-putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova" 
-putexcel A3 = "Last edit: 3 Nov 2025 DP"
+putexcel A2 = "Authors:	Patryk Bronka, Justin van de Ven, Daria Popova, Aleksandra Kolndrekaj" 
+putexcel A3 = "Last edit: 18 Feb 2026 AK"
 
 putexcel A4 = "Process:", bold
 putexcel B4 = "Description:", bold
-putexcel A5 = "F1a"
-putexcel B5 = "Probit regression estimates of the probability of  having a child for women aged 18-44 in initial education spell"
-putexcel A6 = "F1b"
-putexcel B6 = "Probit regression estimates of probability of having a child for women aged 18-44 not in initial education spell"
+putexcel A5 = "F1"
+putexcel B5 = "Probit regression estimates of the probability of  having a child for women aged 18-44"
 
 putexcel A10 = "Notes:", bold
-putexcel B10 = "All processes: replaced dhe with dhe_pcs and dhe_mcs, added ethnicity-4 cat (dot), covid dummies (y2020 y2021)"
-putexcel B11 = "F1a: only 24 obs having a child when in initial education spell, therefore have to take away some covariates to obtain estimate"
-putexcel B12 = "All processes: replaced dcpst with a dummy version (1=partnered 2=single)"
+putexcel B10 = "Estimation sample: UK_ipop.dta with grossing up weight dwt" 
+putexcel B11 = "Conditions for processes are defined as globals in master.do"
+putexcel B12 = "Combined former processes F1a and F1b"
 
 putexcel set "$dir_results/reg_fertility", sheet("Gof") modify
 putexcel A1 = "Goodness of fit", bold		
 
+
+/********************************* PREPARE DATA *******************************/
+
+* Load data 
+use "${estimation_sample}", clear
+
+* Set data 
 xtset idperson swv
+sort idperson swv 
 
-**********************************************
-* F1a - Having a child, in initial edu spell * 
-**********************************************
+* Adjust variables 
+do "${dir_do}/variable_update.do"
+ 
+*--------------------------------------------------
+* Any-children dummy (dchpd collapsing)
+*--------------------------------------------------
+replace dchpd = 1 if inlist(dchpd, 2, 3, 4, 5)
+fre dchpd 
 
-* Process F1a: Probabiltiy of having a child 
-* Sample: Women aged 18-44, in initial education spell education.
-* DV: New born child dummy (note that in the estimation sample dchpd contains the number of newborn children, which could be >1) 
-tab sprfm dgn
-replace dchpd=1 if dchpd>1 & dchpd<. 
-replace dchpd = 0 if dchpd==-9 
-tab2 swv dchpd, row
+/********************************** ESTIMATION ********************************/
 
-tab dchpd if (sprfm == 1 & ded == 1) 
+/*********************** F1: PROBABILITY OF HAVING A CHILD ********************/
+display "${f1_if_condition}" 
 
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit dchpd dag /*dhe dhe_mcs dhe_pcs*/ ib1.dcpst stm /*y2020 y2021*/ i.dot if ///
-    sprfm == 1 & ded == 1 [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_F1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(F1a, dimlwt) side dec(4) 
+probit dchpd ///
+	i.Ded Dag Dag_sq ///
+	l.Dhe_pcs l.Dhe_mcs ///
+	Dcpst_Single li.Dcpst_Single ///
+	/*Ded_Dag Ded_Dhe_pcs Ded_Dhe_mcs*/ ///
+	Ded_Dcpst_Single /*Ded_Dcpst_Single_L1*/ ///
+	li.Ydses_c5_Q2 li.Ydses_c5_Q3 li.Ydses_c5_Q4 li.Ydses_c5_Q5 ///
+	l.Dnc l.Dnc02 ///
+	i.Deh_c4_Low i.Deh_c4_High ///
+	FertilityRate ///
+	/*li.Les_c3_Student*/ li.Les_c3_NotEmployed ///
+	$regions Year_transformed Y2020 Y2021 $ethnicity ///
+	 if ${f1_if_condition} [pw=dwt], vce(robust)
 
-probit dchpd dag /*dhe dhe_mcs dhe_pcs*/ ib1.dcpst stm /*y2020 y2021*/ i.dot if ///
-    sprfm == 1 & ded == 1 [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_F1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(F1a, disclwt) side dec(4)
-
-probit dchpd dag /*dhe dhe_mcs dhe_pcs*/ ib1.dcpst stm /*y2020 y2021*/ i.dot if ///
-    sprfm == 1 & ded == 1 [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_F1a.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(F1a, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_F1a.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-
-probit dchpd Dag /*dhe dhe_mcs dhe_pcs li.Dcpst_Single*/ Year_transformed /*y2020 y2021*/ Ethn_Asian Ethn_Black Ethn_Other if ///
-    sprfm == 1 & ded == 1 [pweight=dimxwt], vce(robust)
-
-* raw results 
+	 
+* Save raw results 
 matrix results = r(table)
 matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/fertility/fertility", sheet("Process F1a - In education") replace
+
+putexcel set "$dir_raw_results/fertility/fertility", ///
+	sheet("Process F1") replace
 putexcel A3 = matrix(results), names nformat(number_d2) 
 putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/fertility/F1a.doc", replace ///
-title("Process F1a: Probability of giving birth to a child. Sample: Women aged 18-44 in initial education spell.") ///
- ctitle(Giving birth) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
+
+outreg2 stats(coef se pval) using "$dir_raw_results/fertility/F1.doc", replace ///
+ title("Process F1: Probability of Having a Child") ///
+	ctitle(Having a Child) label side dec(2) noparen ///
+	addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll)) ///
+	addnote(`"Note: Regression if condition = (${f1_if_condition})"')
+
 	
-
+* Save sample inclusion indicator and predicted probabilities			
 gen in_sample = e(sample)	
-
 predict p
 
-save "$dir_validation_data/F1a_sample", replace
+* Save sample for estimate validation 
+save "$dir_validation_data/F1_sample", replace
 
+* Store model summary statistics
 scalar r2_p = e(r2_p) 
-scalar N = e(N)	
+scalar N_sample = e(N)	 
 scalar chi2 = e(chi2)
-scalar ll = e(ll)	
+scalar ll = e(ll)
 
 * Store results in Excel 
 
@@ -142,219 +141,165 @@ mata:
 	st_matrix("nonzero_b_flag", keep)
 end	
 
+* Eigenvalue tests for var-cov invertablility in SimPaths
+matrix symeigen X lambda = V_trimmed
+
+scalar max_eig = lambda[1,1]
+
+scalar min_ratio = lambda[1, colsof(lambda)] / max_eig
+
+* Outcome of max eigenvalue test 
+if max_eig < 1.0e-12 {
+	
+    display as error "CRITICAL ERROR: Maximum eigenvalue is too small (`max_eig')."
+    display as error "The Variance-Covariance matrix is likely singular."
+    exit 999
+
+}
+
+display "Stability Check Passed: Max Eigenvalue is " max_eig
+
+* Outcome of eigenvalue ratio test 
+if min_ratio < 1.0e-12 {
+	
+    display as error "Matrix is ill-conditioned. Min/Max ratio: " min_ratio
+    exit 506
+
+}
+
+display "Stability Check Passed. Min/Max ratio: " min_ratio
+
 * Export into Excel 
-putexcel set "$dir_results/reg_fertility", sheet("UK_F1a") modify
+putexcel set "$dir_results/reg_fertility", sheet("F1") modify
 putexcel B2 = matrix(b_trimmed)
 putexcel C2 = matrix(V_trimmed)
 
 
-* Labelling 
-// Need to variable label when add new variable to model. Order matters. 
-local var_list Dag Year_transformed Ethn_Asian Ethn_Black Ethn_Other Constant
-	   
-	
+* Labels 
+preserve 
+putexcel set "$dir_results/reg_fertility", sheet("F1") modify
+
 putexcel A1 = "REGRESSOR"
 putexcel B1 = "COEFFICIENT"
-	
-local i = 1 	
-foreach var in `var_list' {
-	local ++i
-	
-	putexcel A`i' = "`var'"
-	
-} 	
 
-local i = 2 	
-foreach var in `var_list' {
-    local ++i
+* Use Mata to extract nice labels from colstripe of e(b)
 
-    if `i' <= 26 {
-        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
-        putexcel `letter'1 = "`var'"
+local dir_results "$dir_results"
+cap erase "$dir_results/temp_labels.txt"
+
+mata:
+    // --------------------------------------------------
+    // Import objects from Stata
+    // --------------------------------------------------
+    nonzero_b_flag = st_matrix("nonzero_b_flag")
+    stripe         = st_matrixcolstripe("e(b)")
+
+    // Ensure column vector
+    nonzero_b_flag = nonzero_b_flag'
+    
+    // --------------------------------------------------
+    // Extract variable names
+    // --------------------------------------------------
+    varnames = stripe[.,2]
+
+    // Keep non-baseline coefficients
+    varnames_no_bl = select(varnames, nonzero_b_flag :== 1)
+
+    // --------------------------------------------------
+    // Clean labels
+    // --------------------------------------------------
+    labels_no_bl = usubinstr(varnames_no_bl, "1.", "", 1)
+    labels_no_bl = regexr(labels_no_bl, "^_cons", "Constant")
+
+    // Handle lags: L.var -> var_L1
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^L\.") :* ///
+        (regexr(labels_no_bl, "^L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^L\.") :* labels_no_bl)
+
+    // Handle 1L.var
+    labels_no_bl = ///
+        regexm(labels_no_bl, "^1L\.") :* ///
+        (regexr(labels_no_bl, "^1L\.", "") :+ "_L1") :+ ///
+        (!regexm(labels_no_bl, "^1L\.") :* labels_no_bl)
+
+    // --------------------------------------------------
+    // Add header
+    // --------------------------------------------------
+    labels_out = "v1" \ labels_no_bl
+
+    // --------------------------------------------------
+    // Write to temp file
+    // --------------------------------------------------
+    outfile = st_local("dir_results") + "/temp_labels.txt"
+    fh = fopen(outfile, "w")
+    for (i=1; i<=rows(labels_out); i++) {
+        fput(fh, labels_out[i])
     }
-    else {
-        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
-        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
-        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
-    }
-}
+    fclose(fh)
+end
 
 
+    * Import cleaned labels into Stata
+    import delimited "$dir_results/temp_labels.txt", clear varnames(1) ///
+		encoding(utf8)
+	gen n = _n
+    
+    * Export labels to Excel
+    putexcel set "$dir_results/reg_fertility", sheet("F1") modify
+	
+	* Vertical labels
+    summarize n, meanonly
+	local N = r(max)+1
+	forvalue i = 2/`N' {
+	
+		local j = `i' - 1
+		putexcel A`i' = v1[`j'] 
+	
+	}	
+	
+	* Horizontal labels 
+	summarize n, meanonly
+	local N = r(max) + 1  // Adjusted since we're working across columns
+
+	forvalues j = 1/`N' {
+	
+		local n = `j'+2 // Shift by 2 to start from column C
+		local col ""
+		
+		while `n' > 0 {
+			local rem = mod(`n' - 1, 26)
+			local col = char(65 + `rem') + "`col'"
+			local n = floor((`n' - 1)/26)
+		}
+
+		putexcel `col'1 = v1[`j']
+	}
+	
+    * Clean up
+    cap erase "$dir_results/temp_labels.txt"
+
+restore 
+
+	
 * Export model fit statistics
 putexcel set "$dir_results/reg_fertility", sheet("Gof") modify
 
-putexcel A9 = "F1a - Fertility, in initial education spell", bold		
+putexcel A3 = "U1- Partnership formation", bold		
 
 putexcel A5 = "Pseudo R-squared" 
 putexcel B5 = r2_p 
 putexcel A6 = "N"
-putexcel B6 = N 
+putexcel B6 = N_sample
 putexcel E5 = "Chi^2"		
 putexcel F5 = chi2
 putexcel E6 = "Log likelihood"		
 putexcel F6 = ll		
 
+* Clean up 
 drop in_sample p
-scalar drop r2_p N chi2 ll		
-
-	
-
-
-************************************************
-* F1b - Having a child, left initial edu spell *
-************************************************
-
-* Process F1b: Probabiltiy of having a child 
-* Sample:	Women aged 18-44, left initial education spell
-* DV:	New born child dummy 
-
-tab dchpd if (sprfm == 1 & ded == 0) 
-
-/*/////////////////////////////////////////////////////////////////////////////////////////////////	 
-//check weights //////////////////////////////////////////////////////////////////////////////////	 
-probit dchpd dag dagsq li.ydses_c5 l.dnc l.dnc02 /*ib1.dhe*/ dhe_pcs dhe_mcs /*ib1.dcpst*/ ///
-    lib1.dcpst ib1.deh_c3 dukfr li.les_c3 ib8.drgn1 stm y2020 y2021 i.dot if ///
-    (sprfm == 1 & ded == 0) [pweight=dimlwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_F1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) replace ctitle(F1b, dimlwt) side dec(4) 
-
-probit dchpd dag dagsq li.ydses_c5 l.dnc l.dnc02 /*ib1.dhe*/ dhe_pcs dhe_mcs /*ib1.dcpst*/ ///
-    lib1.dcpst ib1.deh_c3 dukfr li.les_c3 ib8.drgn1 stm y2020 y2021 i.dot if ///
-    (sprfm == 1 & ded == 0) [pweight=disclwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_F1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(F1b, disclwt) side dec(4)
-
-probit dchpd dag dagsq li.ydses_c5 l.dnc l.dnc02 /*ib1.dhe*/ dhe_pcs dhe_mcs /*ib1.dcpst*/ ///
-    lib1.dcpst ib1.deh_c3 dukfr li.les_c3 ib8.drgn1 stm y2020 y2021 i.dot if ///
-    (sprfm == 1 & ded == 0) [pweight=dimxwt], vce(robust)
-outreg2 using "${weight_checks}/weight_comparison_F1b.xls", alpha(0.001, 0.01, 0.05, 0.1) symbol(***, **, *, +) append ctitle(F1b, dimxwt) side dec(4) 
-erase "${weight_checks}/weight_comparison_F1b.txt"
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-*/
-
-probit dchpd Dag Dag_sq Ydses_c5_Q2_L1 Ydses_c5_Q3_L1 Ydses_c5_Q4_L1 Ydses_c5_Q5_L1 ///
-    Dnc_L1 Dnc02_L1 ///
-	Dhe_pcs Dhe_mcs ///
-	Dcpst_Single_L1  ///
-	Deh_c3_Medium Deh_c3_Low ///
-	FertilityRate ///
-	Les_c3_Student_L1 Les_c3_NotEmployed_L1 ///
-	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
-	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other ///
-if (sprfm == 1 & ded == 0) [pweight = dimxwt], vce(robust)	
-	
-
-	* raw results 
-matrix results = r(table)
-matrix results = results[1..6,1...]'
-putexcel set "$dir_raw_results/fertility/fertility", sheet("Process F1b - Not in education") modify
-putexcel A3 = matrix(results), names nformat(number_d2) 
-putexcel J4 = matrix(e(V))
-outreg2 stats(coef se pval) using "$dir_raw_results/fertility/F1b.doc", replace ///
-title("Process F1b: Probability of giving birth to a child. Sample: Women aged 18-44 not in initial education spell.") ///
- ctitle(Giving birth) label side dec(2) noparen addstat(R2, e(r2_p), Chi2, e(chi2), Log-likelihood, e(ll))
-
- 
-gen in_sample = e(sample)	
-
-predict p
-
-save "$dir_validation_data/F1b_sample", replace
-
-scalar r2_p = e(r2_p) 
-scalar N = e(N)	 
-scalar chi2 = e(chi2)
-scalar ll = e(ll)
-
-
-* Store results in Excel 
-
-* Store estimates
-matrix b = e(b)	
-matrix V = e(V)
-
-mata:
-	// Call matrices into mata 
-    V = st_matrix("V")
-    b = st_matrix("b")
-
-    // Find which coefficients are nonzero
-    keep = (b :!= 0)
-	
-	// Eliminate zeros
-	b_trimmed = select(b, keep)
-    V_trimmed = select(V, keep)
-    V_trimmed = select(V_trimmed', keep)'
-
-	// Inspection
-	b_trimmed 
-	V_trimmed 
-	
-    // Return to Stata
-    st_matrix("b_trimmed", b_trimmed')
-    st_matrix("V_trimmed", V_trimmed)
-	st_matrix("nonzero_b_flag", keep)
-end	
-
-* Export into Excel 
-putexcel set "$dir_results/reg_fertility", sheet("UK_F1b") modify
-putexcel B2 = matrix(b_trimmed)
-putexcel C2 = matrix(V_trimmed)
-
-* Labelling 
-// Need to variable label when add new variable to model. Order matters. 
-local var_list Dag Dag_sq Ydses_c5_Q2_L1 Ydses_c5_Q3_L1 Ydses_c5_Q4_L1 Ydses_c5_Q5_L1 ///
-    Dnc_L1 Dnc02_L1 ///
-	Dhe_pcs Dhe_mcs ///
-	Dcpst_Single_L1  ///
-	Deh_c3_Medium Deh_c3_Low ///
-	FertilityRate ///
-	Les_c3_Student_L1 Les_c3_NotEmployed_L1 ///
-	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN ///
-	Year_transformed Y2020 Y2021 Ethn_Asian Ethn_Black Ethn_Other Constant
-	   
-	
-putexcel A1 = "REGRESSOR"
-putexcel B1 = "COEFFICIENT"
-	
-local i = 1 	
-foreach var in `var_list' {
-	local ++i
-	
-	putexcel A`i' = "`var'"
-	
-} 	
-
-local i = 2 	
-foreach var in `var_list' {
-    local ++i
-
-    if `i' <= 26 {
-        local letter = char(64 + `i')  // Convert 1=A, 2=B, ..., 26=Z
-        putexcel `letter'1 = "`var'"
-    }
-    else {
-        local first = char(64 + int((`i' - 1) / 26))  // First letter: A-Z
-        local second = char(65 + mod((`i' - 1), 26)) // Second letter: A-Z
-        putexcel `first'`second'1 = "`var'"  // Correctly places AA-ZZ
-    }
-}
-
-* Export model fit statistics
-putexcel set "$dir_results/reg_fertility", sheet("Gof") modify
-
-putexcel A9 = "F1b - Fertility, left initial education spell", bold		
-
-putexcel A11 = "Pseudo R-squared" 
-putexcel B11 = r2_p 
-putexcel A12 = "N"
-putexcel B12 = N 
-putexcel E11 = "Chi^2"		
-putexcel F11 = chi2
-putexcel E12 = "Log likelihood"		
-putexcel F12 = ll		
-
-drop in_sample p
-scalar drop r2_p N chi2 ll	
+scalar drop _all
+matrix drop _all
 		
 
 capture log close 

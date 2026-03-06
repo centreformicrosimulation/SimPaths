@@ -37,10 +37,7 @@ public class SocialCareAlignment implements IEvaluation {
         maturePopulation = 0;
         for (Person person : persons) {
 
-            careReceived += person.getCareHoursFromPartnerWeekly();
-            careReceived += person.getCareHoursFromDaughterWeekly();
-            careReceived += person.getCareHoursFromSonWeekly();
-            careReceived += person.getCareHoursFromOtherWeekly();
+            careReceived += person.getHoursInformalSocialCare();
             if (person.getDemAge() >= Parameters.AGE_TO_BECOME_RESPONSIBLE)
                 maturePopulation++;
         }

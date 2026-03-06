@@ -1,11 +1,15 @@
-/**********************************************************************
-*
-*	WEIGHT ADJUSTMENT TO ACCOUNT FOR USING HOUSEHOLDS WITHOUT MISSING VALUES
-*	
-*	AUTH: Patryk Bronka, Daria Popova, Justin van de Ven
-*	LAST EDIT: 21 Oct 2025 DP 
-*
-*********************************************************************/
+***************************************************************************************
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data 
+* DO-FILE NAME:         05_reweight_and_slice.do
+* DESCRIPTION:          WEIGHT ADJUSTMENT TO ACCOUNT FOR USING HOUSEHOLDS WITHOUT MISSING VALUES 
+***************************************************************************************
+* COUNTRY:              UK
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
+* AUTHORS: 				Patryk Bronka, Daria Popova, Justin van de Ven
+* LAST UPDATE:          15 Jan 2026 DP 
+* NOTE:					Called from 00_master.do - see master file for further details
+***************************************************************************************
+
 ********************************************************************************
 cap log close 
 log using "${dir_log}/06_reweight_and_slice.log", replace

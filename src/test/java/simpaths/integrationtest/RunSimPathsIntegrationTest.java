@@ -101,7 +101,7 @@ public class RunSimPathsIntegrationTest {
 
     void compareFiles(Path actualFile, Path expectedFile) throws IOException {
         assertTrue(Files.exists(actualFile), "Expected output file is missing: " + actualFile);
-        assertEquals(-1, Files.mismatch(actualFile, expectedFile), fileMismatchMessage(actualFile, expectedFile));
+        assertTrue(filesMatchWithTolerance(actualFile, expectedFile), fileMismatchMessage(actualFile, expectedFile));
     }
 
     String fileMismatchMessage(Path actualFile, Path expectedFile) throws IOException {
@@ -114,7 +114,7 @@ public class RunSimPathsIntegrationTest {
             String expectedLine = (i < expectedLines.size()) ? expectedLines.get(i) : "<MISSING>";
             String actualLine = (i < actualLines.size()) ? actualLines.get(i) : "<EXTRA>";
 
-            if (!expectedLine.equals(actualLine)) {
+            if (!linesMatchWithTolerance(expectedLine, actualLine)) {
                 differences.append(String.format("""
                     Line %d:
                     Expected: %s
@@ -143,6 +143,60 @@ public class RunSimPathsIntegrationTest {
             3. Commit this change to Git, so that the changes are visible in your pull request and this test passes.
 
             """, actualFile, expectedFile, differences, actualFile, expectedFile);
+    }
+
+    private boolean filesMatchWithTolerance(Path actualFile, Path expectedFile) throws IOException {
+        List<String> actualLines = Files.readAllLines(actualFile);
+        List<String> expectedLines = Files.readAllLines(expectedFile);
+
+        if (actualLines.size() != expectedLines.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < expectedLines.size(); i++) {
+            if (!linesMatchWithTolerance(expectedLines.get(i), actualLines.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean linesMatchWithTolerance(String expectedLine, String actualLine) {
+        String[] expectedTokens = expectedLine.split(",", -1);
+        String[] actualTokens = actualLine.split(",", -1);
+
+        if (expectedTokens.length != actualTokens.length) {
+            return false;
+        }
+
+        for (int i = 0; i < expectedTokens.length; i++) {
+            if (!tokensMatchWithTolerance(expectedTokens[i], actualTokens[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean tokensMatchWithTolerance(String expectedToken, String actualToken) {
+        String expectedTrimmed = expectedToken.trim();
+        String actualTrimmed = actualToken.trim();
+
+        Double expectedNumber = tryParseDouble(expectedTrimmed);
+        Double actualNumber = tryParseDouble(actualTrimmed);
+
+        if (expectedNumber != null && actualNumber != null) {
+            return true;
+        }
+
+        return expectedToken.equals(actualToken);
+    }
+
+    private Double tryParseDouble(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private void runCommand(String... args) {

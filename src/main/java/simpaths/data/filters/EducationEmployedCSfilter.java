@@ -17,7 +17,7 @@ public class EducationEmployedCSfilter implements ICollectionFilter{
 	
 	public boolean isFiltered(Object object) {
 			Person person = (Person) object;
-			return (person.getDeh_c3().equals(education) && person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed));
+			return (person.getDeh_c4().equals(education) && person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed));
 			
 	}
 	

@@ -287,6 +287,7 @@ public class Validator implements IDoubleSource {
         labour_supply_High,
         labour_supply_Medium,
         labour_supply_Low,
+        labour_supply_InEducation,
         activityStatus_Employed,
         activityStatus_NotEmployedRetired,
         activityStatus_Student,
@@ -294,9 +295,11 @@ public class Validator implements IDoubleSource {
         grossEarnings_Female_High,
         grossEarnings_Female_Medium,
         grossEarnings_Female_Low,
+        grossEarnings_Female_InEducation,
         grossEarnings_Male_High,
         grossEarnings_Male_Medium,
         grossEarnings_Male_Low,
+        grossEarnings_Male_InEducation,
         lhw_Female_High,
         lhw_Female_Medium,
         lhw_Female_Low,
@@ -308,9 +311,11 @@ public class Validator implements IDoubleSource {
         hourlyWage_Female_High,
         hourlyWage_Female_Medium,
         hourlyWage_Female_Low,
+        hourlyWage_Female_InEducation,
         hourlyWage_Male_High,
         hourlyWage_Male_Medium,
         hourlyWage_Male_Low,
+        hourlyWage_Male_InEducation,
         }
 
     @Override
@@ -1329,6 +1334,11 @@ public class Validator implements IDoubleSource {
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
+            case labour_supply_InEducation:
+                value = ((Number) Parameters.getValidationLabourSupplyByEducation().getValue(model.getYear()-1, "labour_supply_InEducation"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case activityStatus_Employed:
                 value = ((Number) Parameters.getValidationActivityStatus().getValue(model.getYear()-1, "as_employed"));
                 if (value != null) {
@@ -1364,6 +1374,11 @@ public class Validator implements IDoubleSource {
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
+            case grossEarnings_Female_InEducation:
+                 value = ((Number) Parameters.getValidationGrossEarningsByGenderAndEducation().getValue(model.getYear()-1, "grossearnings_female_dehc3_ineducation"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case grossEarnings_Male_High:
                  value = ((Number) Parameters.getValidationGrossEarningsByGenderAndEducation().getValue(model.getYear()-1, "grossearnings_male_dehc3_high"));
                 if (value != null) {
@@ -1376,6 +1391,11 @@ public class Validator implements IDoubleSource {
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case grossEarnings_Male_Low:
                  value = ((Number) Parameters.getValidationGrossEarningsByGenderAndEducation().getValue(model.getYear()-1, "grossearnings_male_dehc3_low"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
+            case grossEarnings_Male_InEducation:
+                 value = ((Number) Parameters.getValidationGrossEarningsByGenderAndEducation().getValue(model.getYear()-1, "grossearnings_male_dehc3_ineducation"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
@@ -1434,6 +1454,11 @@ public class Validator implements IDoubleSource {
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
+            case hourlyWage_Female_InEducation:
+                 value = ((Number) Parameters.getHourlyWageByGenderAndEducation().getValue(model.getYear()-1, "hourlywage_female_dehc3_ineducation"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case hourlyWage_Male_High:
                  value = ((Number) Parameters.getHourlyWageByGenderAndEducation().getValue(model.getYear()-1, "hourlywage_male_dehc3_high"));
                 if (value != null) {
@@ -1446,6 +1471,11 @@ public class Validator implements IDoubleSource {
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case hourlyWage_Male_Low:
                  value = ((Number) Parameters.getHourlyWageByGenderAndEducation().getValue(model.getYear()-1, "hourlywage_male_dehc3_low"));
+                if (value != null) {
+                    return value.doubleValue();
+                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
+            case hourlyWage_Male_InEducation:
+                 value = ((Number) Parameters.getHourlyWageByGenderAndEducation().getValue(model.getYear()-1, "hourlywage_male_dehc3_ineducation"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap

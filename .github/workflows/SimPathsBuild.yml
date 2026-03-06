@@ -42,6 +42,12 @@ jobs:
         cache: maven
     - name: Run integration tests
       run: mvn verify
+    - name: Upload Actual CSVs for Inspection
+      if: failure()  # This ensures it only runs when the tests fail
+      uses: actions/upload-artifact@v4
+      with:
+        name: actual-simulation-results
+        path: output/INTEGRATION_TESTS/csv/
 
   run-simpaths-start:
     needs: build

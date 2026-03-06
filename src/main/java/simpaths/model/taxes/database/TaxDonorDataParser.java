@@ -209,6 +209,23 @@ public class TaxDonorDataParser {
                 + "ALTER TABLE " + personTableName + " ALTER COLUMN GENDER RENAME TO DGN;"
             );
             stat.execute(
+                    "ALTER TABLE " + personTableName + " ADD temp REAL DEFAULT 0;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdioa REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdisc REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdiscwa REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdimbwa REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdict01 REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdict02 REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdiwi REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdisv REAL;"
+                            + "UPDATE " + personTableName + " SET temp = bdioa + bdisc + bdimb + "
+                            + "bdiscwa + bdimbwa + bdict01 + bdict02 + bsadi + bdiwi + bdisv;"
+                            + "ALTER TABLE " + personTableName + " ADD ddi INT DEFAULT 0;"
+                            + "UPDATE " + personTableName + " SET ddi = 1 WHERE temp > 0;"
+                            + "ALTER TABLE " + personTableName + " DROP COLUMN temp, bdioa, bdisc, "
+                            + "bdimb, bdiscwa, bdimbwa, bdict01, bdict02, bsadi, bdiwi, bdisv;"
+            );
+            stat.execute(
 
                 //Weights
                 "ALTER TABLE " + personTableName + " ALTER COLUMN DWT RENAME TO WEIGHT;"
@@ -377,7 +394,7 @@ public class TaxDonorDataParser {
 
         }
         catch(SQLException e) {
-            throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
+            throw new IllegalArgumentException("SQL exception thrown - " + e.getMessage());
         }
         finally {
             try {

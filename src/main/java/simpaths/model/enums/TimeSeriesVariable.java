@@ -13,8 +13,12 @@ public enum TimeSeriesVariable {
     PartnershipAdjustment,
     FertilityAdjustment,
     UtilityAdjustmentSingleMales,
+    UtilityAdjustmentACMales,
     UtilityAdjustmentSingleFemales,
+    UtilityAdjustmentACFemales,
     UtilityAdjustmentCouples,
     InSchoolAdjustment,
     WageGrowth,
+    UtilityAdjustmentSingleDepMen,
+    UtilityAdjustmentSingleDepWomen,
 }
