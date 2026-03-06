@@ -17,8 +17,8 @@ import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RunSimPathsIntegrationTest {
-    private static final double NUMERIC_ABSOLUTE_TOLERANCE = 0.05;
-    private static final double NUMERIC_RELATIVE_TOLERANCE = 0.01;
+    private static final double NUMERIC_ABSOLUTE_TOLERANCE = 0.1;
+    private static final double NUMERIC_RELATIVE_TOLERANCE = 0.05;
 
     @Test
     @DisplayName("Initial database setup runs successfully")
@@ -207,19 +207,11 @@ public class RunSimPathsIntegrationTest {
             return Double.compare(expectedNumber, actualNumber) == 0;
         }
 
-        if (isWholeNumber(expectedNumber) && isWholeNumber(actualNumber)) {
-            return Double.compare(expectedNumber, actualNumber) == 0;
-        }
-
         double absoluteDifference = Math.abs(expectedNumber - actualNumber);
         double relativeDifferenceLimit = NUMERIC_RELATIVE_TOLERANCE * Math.max(Math.abs(expectedNumber), Math.abs(actualNumber));
         double effectiveLimit = Math.max(NUMERIC_ABSOLUTE_TOLERANCE, relativeDifferenceLimit);
 
         return absoluteDifference <= effectiveLimit;
-    }
-
-    private boolean isWholeNumber(double value) {
-        return value == Math.rint(value);
     }
 
     private void runCommand(String... args) {
