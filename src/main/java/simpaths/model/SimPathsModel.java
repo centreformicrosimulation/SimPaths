@@ -154,7 +154,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private boolean initialisePotentialEarningsFromDatabase = true;
 
     //	@GUIparameter(description = "If unchecked, will expand population and not use weights")
-    private boolean useWeights = true;
+    private boolean useWeights = false;
 
     private boolean ignoreTargetsAtPopulationLoad = false;
 
