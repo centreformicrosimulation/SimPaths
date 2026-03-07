@@ -1,0 +1,141 @@
+site_name: SimPaths Documentation
+site_description: >-
+  An open-source microsimulation framework for modelling individual
+  and household life course events.
+site_url: https://centreformicrosimulation.github.io/SimPaths/
+repo_url: https://github.com/centreformicrosimulation/SimPaths
+repo_name: centreformicrosimulation/SimPaths
+edit_uri: edit/main/docs/
+
+copyright: >-
+  Copyright &copy; Matteo Richiardi, Patryk Bronka, Justin van de Ven —
+  Centre for Microsimulation and Policy Analysis
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.action.edit
+    - content.code.copy
+
+plugins:
+  - search:
+      lang: en
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - attr_list
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/centreformicrosimulation/SimPaths
+    - icon: fontawesome/solid/globe
+      link: https://www.microsimulation.ac.uk/
+
+nav:
+  - Home: index.md
+
+  - Overview:
+      - overview/index.md
+      - Model Description: overview/model-description.md
+      - Simulated Modules: overview/simulated-modules.md
+      - Model Parameterisation: overview/parameterisation.md
+      - Country Variants: overview/country-variants.md
+      - How to Cite: overview/how-to-cite.md
+
+  - Getting Started:
+      - getting-started/index.md
+      - Environment Setup: getting-started/environment-setup.md
+      - Input Data:
+          - getting-started/data/index.md
+          - Initial Population (UK): getting-started/data/initial-population-uk.md
+          - Tax-Benefit Donors (UK): getting-started/data/tax-benefit-donors-uk.md
+      - Running Your First Simulation: getting-started/first-simulation.md
+      - Video Tutorials: getting-started/video-tutorials.md
+
+  - User Guide:
+      - user-guide/index.md
+      - Single Runs: user-guide/single-runs.md
+      - Multiple Runs: user-guide/multiple-runs.md
+      - Graphical User Interface: user-guide/gui.md
+      - Modifying Parameters: user-guide/modifying-parameters.md
+      - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
+      - Uncertainty Analysis: user-guide/uncertainty-analysis.md
+
+  - Developer Guide:
+      - developer-guide/index.md
+      - Working in GitHub: developer-guide/working-in-github.md
+      - JAS-mine Architecture:
+          - developer-guide/jasmine/index.md
+          - Project Structure: developer-guide/jasmine/project-structure.md
+          - The Model and the Schedule: developer-guide/jasmine/model-and-schedule.md
+          - The Start Class: developer-guide/jasmine/start-class.md
+          - The MultiRun Class: developer-guide/jasmine/multirun-class.md
+          - Updating JAS-mine: developer-guide/jasmine/updating-jasmine.md
+      - SimPaths Internals:
+          - developer-guide/internals/index.md
+          - SimPaths API: developer-guide/internals/api.md
+          - File Organisation: developer-guide/internals/file-organisation.md
+          - The SimPathsModel Class: developer-guide/internals/simpaths-model.md
+          - Start Class Implementation: developer-guide/internals/start-class-implementation.md
+          - MultiRun Implementation: developer-guide/internals/multirun-implementation.md
+      - How-To Guides:
+          - developer-guide/how-to/index.md
+          - Introduce a New Variable: developer-guide/how-to/new-variable.md
+          - Add Parameters to the GUI: developer-guide/how-to/add-gui-parameters.md
+          - Perform MultiRun Simulations: developer-guide/how-to/multirun-simulations.md
+
+  - JAS-mine Reference:
+      - jasmine-reference/index.md
+      - Statistical Package: jasmine-reference/statistical-package.md
+      - Collection Filters: jasmine-reference/collection-filters.md
+      - Alignment Library: jasmine-reference/alignment-library.md
+      - Matching Library: jasmine-reference/matching-library.md
+      - Regression Library: jasmine-reference/regression-library.md
+      - Saving Outputs: jasmine-reference/saving-outputs.md
+      - Querying the Database: jasmine-reference/querying-database.md
+      - Links and Resources: jasmine-reference/links.md
+      - Enums: jasmine-reference/enums.md
+
+  - Model Validation:
+      - validation/index.md
+
+  - Research:
+      - research/index.md
