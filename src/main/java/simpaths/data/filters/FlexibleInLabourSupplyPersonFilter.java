@@ -16,7 +16,7 @@ public class FlexibleInLabourSupplyPersonFilter<T extends Person> implements Pre
 	public boolean evaluate(T person) {
 
 		
-		return (person.getDag() >= 18 && person.getDag() <= 64 &&
+		return (person.getDemAge() >= 18 && person.getDemAge() <= 64 &&
 				person.getLes_c4() != Les_c4.Student && person.getLes_c4() != Les_c4.Retired &&
 				person.getDlltsd() != Indicator.True);
 	}

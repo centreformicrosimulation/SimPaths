@@ -4,6 +4,7 @@ package simpaths.experiment;
 // import Java packages
 import org.apache.log4j.Level;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,7 +12,9 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import simpaths.data.Parameters;
+import simpaths.data.XLSXfileWriter;
 import simpaths.model.SimPathsModel;
+import microsim.data.db.Experiment;
 import microsim.data.MultiKeyCoefficientMap;
 import microsim.data.excel.ExcelAssistant;
 import microsim.engine.MultiRun;
@@ -47,6 +50,7 @@ public class SimPathsMultiRun extends MultiRun {
 	private static Map<String, Object> modelArgs;
 	private static Map<String, Object> innovationArgs;
 	private static Map<String, Object> collectorArgs;
+	private static Map<String, Object> parameterArgs;
 	public static String configFile = "default.yml";
 
 	// other working variables
@@ -56,6 +60,11 @@ public class SimPathsMultiRun extends MultiRun {
 	private Long counter = 0L;
 	public static Logger log = Logger.getLogger(SimPathsMultiRun.class);
 
+	private static boolean persist_population;
+	private static boolean persist_root;
+
+    private static boolean integrationTest = false;
+
 	/**
 	 *
 	 * 	MAIN PROGRAM ENTRY FOR MULTI-SIMULATION
@@ -63,24 +72,38 @@ public class SimPathsMultiRun extends MultiRun {
 	 */
 	public static void main(String[] args) {
 
-		// set default values for country and start year
-		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap("input" + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1, 1);
-		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
-			countryString = "Italy";
-		} else {
-			countryString = "United Kingdom";
-		}
-		country = Country.getCountryFromNameString(countryString);
-		String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
-		startYear = Integer.parseInt(valueYear);
-
 		// process Yaml config file
 		if (!parseYamlConfig(args)) {
 			// if parseYamlConfig returns false (indicating bad filename passed), exit main
 			return;
 		}
+
+		if (parameterArgs != null)
+			updateParameters(parameterArgs);
+		// set default values for country and start year
+		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + File.separator + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1);
+		try {
+			if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
+				countryString = "Italy";
+				country = Country.IT;
+			} else {
+				countryString = "United Kingdom";
+				country = Country.UK;
+			}
+			String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
+			startYear = Integer.parseInt(valueYear);
+		} catch (NullPointerException e) {
+			System.out.println("No last database country and year found.");
+			countryString = "United Kingdom";
+			startYear = 2019;
+		}
+
+        country = Country.getCountryFromNameString(countryString);
+
 		if (innovationArgs!=null)
 			updateLocalParameters(innovationArgs);
+
+		parseYamlConfig(args);
 
 		// Parse command line arguments to override defaults
 		if (!parseCommandLineArgs(args)) {
@@ -89,9 +112,20 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 		country = Country.getCountryFromNameString(countryString);
 
+		//Save the last selected country and year to Excel to use in the model
+		String[] columnNames = {"Country", "Year"};
+		Object[][] data = new Object[1][columnNames.length];
+		data[0][0] = country.toString();
+		data[0][1] = startYear;
+		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.DatabaseCountryYearFilename, "Data", columnNames, data);
+
 		if (flagDatabaseSetup) {
 
-			Parameters.databaseSetup(country, executeWithGui, startYear);
+			try {
+				Parameters.databaseSetup(country, executeWithGui, startYear);
+			} catch (RuntimeException e) {
+				throw e;
+			}
 		} else {
 			// standard simulation
 
@@ -102,6 +136,27 @@ public class SimPathsMultiRun extends MultiRun {
 			SimPathsMultiRun experimentBuilder = new SimPathsMultiRun();
 			engine.setExperimentBuilder(experimentBuilder);
 			engine.setup();		//This is needed to update model attributes (from model_args in config file)
+
+
+            if (integrationTest) {
+
+                String integrationOutputFolder = "./output" + File.separator + "INTEGRATION_TESTS";
+
+                Experiment.testOutputFolder = integrationOutputFolder;
+
+
+                try {
+
+                    if (FileUtils.isDirectory(new File(integrationOutputFolder))) {
+                        FileUtils.deleteDirectory(new File(integrationOutputFolder));
+                    }
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Parameters.setTrainingFlag(true);
+            }
 
 			if (executeWithGui)
 				new MultiRunFrame(experimentBuilder, "SimPaths MultiRun", maxNumberOfRuns);
@@ -148,6 +203,15 @@ public class SimPathsMultiRun extends MultiRun {
 		Option fileOption = new Option("f", "Output to file");
 		options.addOption(fileOption);
 
+		Option persistRoot = new Option("P", "persist", true,
+				"Write and read processed database to root or run-specific database. Accepted arguments:" +
+				"\n - root: persist to root output folder (input/)" +
+				"\n - run: persist to run output folder (output/[yyyymmdd_seed]/input/)" +
+				"\n - none: do not write/read processed dataset.\n" +
+				"(default: `root` - persist to root folder for further runs)");
+		persistRoot.setArgName("persist");
+		options.addOption(persistRoot);
+
 		Option helpOption = new Option("h", "help", false, "Print this help message");
 		options.addOption(helpOption);
 
@@ -189,6 +253,29 @@ public class SimPathsMultiRun extends MultiRun {
 			if (cmd.hasOption("p")) {
 				popSize = Integer.parseInt(cmd.getOptionValue("p"));
 			}
+
+				switch (cmd.getOptionValue("P", "root")) {
+					case "root":
+						log.info("Persisting processed data to root folder");
+						persist_population = true;
+						persist_root = true;
+						break;
+					case "run":
+						log.info("Persisting processed data to run folder");
+						persist_population = true;
+						persist_root = false;
+						break;
+					case "none":
+						log.info("Not persisting processed data");
+						persist_population = false;
+						persist_root = false;
+						break;
+					default:
+						System.out.println("Persist option `" + cmd.getOptionValue("P") + "` not recognised. Valid values: `none`, `root`, `run`. Persisting processed data to root folder");
+						persist_population = true;
+						persist_root = true;
+				}
+
 			if (cmd.hasOption("f")) {
 				try {
 					File logDir = new File("output/logs");
@@ -268,6 +355,12 @@ public class SimPathsMultiRun extends MultiRun {
 					continue;
 				}
 
+				// Read in parameter arguments - to be handled differently as no Parameters object
+				if ("parameter_args".equals(key)) {
+					parameterArgs = (Map<String, Object>) value;
+					continue;
+				}
+
 				// Use reflection to dynamically set the field based on the key
 				updateLocalParameters(key, value);
 			}
@@ -337,6 +430,85 @@ public class SimPathsMultiRun extends MultiRun {
 		}
 	}
 
+	// Specifically for updating parameters when no object called - i.e. Parameters.java
+	public static void updateParameters(Map<String, Object> parameter_args) {
+
+		for (Map.Entry<String, Object> entry : parameter_args.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+
+			switch (key) {
+				case "working_directory":
+					Parameters.setWorkingDirectory(value.toString());
+					setExperimentFolders(value.toString(), true);
+					break;
+				case "input_directory":
+					Parameters.setInputDirectory(value.toString());
+					setExperimentFolders();
+					break;
+				case "input_directory_initial_populations":
+					Parameters.setInputDirectoryInitialPopulations(value.toString());
+					break;
+				case "euromod_output_directory":
+					Parameters.setEuromodOutputDirectory(value.toString());
+					break;
+				default:
+					try {
+						Field field = Parameters.class.getDeclaredField(key);
+						field.setAccessible(true);
+
+						// Determine the field type
+						Class<?> fieldType = field.getType();
+
+						// Convert the YAML value to the field type
+						Object convertedValue = convertToType(value, fieldType);
+
+						// Set the field value
+						field.set(Parameters.class, convertedValue);
+
+						field.setAccessible(false);
+					} catch (NoSuchFieldException | IllegalAccessException e) {
+						// Handle exceptions if the field is not found or inaccessible
+						e.printStackTrace();
+					}
+
+			}
+
+		}
+
+	}
+
+	public static void setExperimentFolders() {
+
+		try {
+			Field inputDir = Experiment.class.getDeclaredField("inputFolder");
+			inputDir.setAccessible(true);
+			inputDir.set(Experiment.class, Parameters.getInputDirectory());
+			inputDir.setAccessible(false);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+	}
+	public static void setExperimentFolders(String root_dir, boolean working_dir) {
+
+		try {
+			Field inputDir = Experiment.class.getDeclaredField("inputFolder");
+			inputDir.setAccessible(true);
+			inputDir.set(null, root_dir + File.separator + "input");
+			inputDir.setAccessible(false);
+			if (working_dir) {
+				Field outputDir = Experiment.class.getDeclaredField("outputRootFolder");
+				outputDir.setAccessible(true);
+				outputDir.set(null, root_dir + File.separator + "output");
+				outputDir.setAccessible(false);
+			}
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	private static Object convertToType(Object value, Class<?> targetType) {
 		// Convert the YAML value to the target type
 		if (int.class.equals(targetType)) {
@@ -361,6 +533,8 @@ public class SimPathsMultiRun extends MultiRun {
 	public void buildExperiment(SimulationEngine engine) {
 
 		SimPathsModel model = new SimPathsModel(Country.getCountryFromNameString(countryString), startYear);
+		if (persist_population) model.setPersistPopulation(true);
+		if (persist_root) model.setPersistDatabasePath(Parameters.getInputDirectory() + "input");
 		updateLocalParameters(model);
 		if (modelArgs != null)
 			updateParameters(model, modelArgs);

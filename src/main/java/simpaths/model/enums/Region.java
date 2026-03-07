@@ -1,5 +1,7 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 public enum Region implements IntegerValuedEnum {
 	
 	//Uses NUTS Level 1 system for each country

@@ -2,7 +2,8 @@ package simpaths.model;
 
 import jakarta.persistence.*;
 import microsim.data.db.PanelEntityKey;
-import simpaths.data.Parameters;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import simpaths.data.startingpop.Processed;
 import simpaths.experiment.SimPathsCollector;
 import microsim.engine.SimulationEngine;
@@ -32,8 +33,9 @@ public class Household implements EventListener, IDoubleSource {
     @Transient public static long householdIdCounter = 1; //Because this is static all instances of a household access and increment the same counter
 
     @EmbeddedId @Column(unique = true, nullable = false) private final PanelEntityKey key;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "household")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "household")
     @OrderBy("key ASC")
+    @Fetch(FetchMode.SUBSELECT)
     private Set<BenefitUnit> benefitUnits = new LinkedHashSet<>();
     @ManyToOne(fetch = FetchType.EAGER, cascade=CascadeType.REFRESH)
     @JoinColumns({
@@ -41,7 +43,7 @@ public class Household implements EventListener, IDoubleSource {
     })
     private Processed processed;
 
-    private Long idOriginalHH;
+    private Long idHhOriginal;
 
 
     /*
@@ -61,13 +63,13 @@ public class Household implements EventListener, IDoubleSource {
                 model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
                 collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
                 key  = new PanelEntityKey(originalHousehold.getId());
-                this.idOriginalHH = originalHousehold.getIdOriginalHH();
+                this.idHhOriginal = originalHousehold.getIdOriginalHH();
             }
             default -> {
                 model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
                 collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
                 key  = new PanelEntityKey(householdIdCounter++);
-                idOriginalHH = originalHousehold.key.getId();
+                idHhOriginal = originalHousehold.key.getId();
             }
         }
     }
@@ -81,13 +83,13 @@ public class Household implements EventListener, IDoubleSource {
     /*
     METHODS
      */
-    public Long getIdOriginalHH() {return idOriginalHH;}
+    public Long getIdOriginalHH() {return idHhOriginal;}
 
     public void resetWeights(double newWeight) {
 
         for (BenefitUnit benefitUnit : benefitUnits) {
             for( Person person : benefitUnit.getMembers()) {
-                person.setWeight(newWeight);
+                person.setWgt(newWeight);
             }
         }
     }
@@ -124,7 +126,7 @@ public class Household implements EventListener, IDoubleSource {
     public void setWeight(double weight) {
         for (BenefitUnit benefitUnit : benefitUnits) {
             for ( Person person : benefitUnit.getMembers()) {
-                person.setWeight(weight);
+                person.setWgt(weight);
             }
         }
     }
@@ -141,4 +143,28 @@ public class Household implements EventListener, IDoubleSource {
     }
 
     public static void setHouseholdIdCounter(long id) {householdIdCounter = id;}
+
+    public double getEquivalisedDisposableIncomeYearly() {
+        double income = 0.0;
+        double eqscale = 0.0;
+        boolean firstAdult = true;
+        for (BenefitUnit benefitUnit : benefitUnits) {
+            income += benefitUnit.getDisposableIncomeMonthly() * 12.0;
+            for (Person person : benefitUnit.getMembers()) {
+                if (person.getDemAge() > 13) {
+                    if (firstAdult) {
+                        eqscale += 1.0;
+                        firstAdult = false;
+                    }
+                    else {
+                        eqscale += 0.5;
+                    }
+                }
+                else {
+                    eqscale += 0.3;
+                }
+            }
+        }
+        return income / eqscale;
+    }
 }

@@ -87,13 +87,13 @@ public class CESUtility implements IEvaluation {
         for (States states : expectations.anticipated) {
             dim = 0;
             // allow for liquid wealth
-            numeraire = expectations.liquidWealth + expectations.disposableIncomeAnnual - consumptionAnnual;
+            numeraire = expectations.wealthLiqValue + expectations.disposableIncomeAnnual - consumptionAnnual;
             gridValue = Math.log( Math.max(1.0, numeraire + DecisionParams.C_LIQUID_WEALTH) );
             if (expectations.ageIndexNextPeriod < valueFunction.scale.axes.length) {
                 gridValue = Math.max(gridValue, valueFunction.scale.axes[expectations.ageIndexNextPeriod][0][1]);
                 gridValue = Math.min(gridValue, valueFunction.scale.axes[expectations.ageIndexNextPeriod][0][2]);
             }
-            states.states[dim] = gridValue;
+            states.labStatesContObject[dim] = gridValue;
         }
 
         // evaluate expected utility
@@ -116,7 +116,7 @@ public class CESUtility implements IEvaluation {
                             throw new RuntimeException("expected utility expected utility 1");
                     }
                     if (expectations.mortalityProbability > probThreshold && ZETA0 > 0) {
-                        bequest = Math.max(0, Math.exp(expectations.anticipated[ii].states[0])- DecisionParams.C_LIQUID_WEALTH);
+                        bequest = Math.max(0, Math.exp(expectations.anticipated[ii].labStatesContObject[0])- DecisionParams.C_LIQUID_WEALTH);
                         utilBequest = ZETA0 * Math.pow(bequest / BEQUEST_NORMALISATION_FACTOR, ZETA1);
                         if (utilBequest.isNaN())
                             throw new RuntimeException("expected utility expected utility 2");

@@ -23,7 +23,7 @@ public class FlexibleInLabourSupplyFilter implements ICollectionFilter {
         not disabled
          */
 
-        return (person.getDag() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY && person.getDag() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY &&
+        return (person.getDemAge() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY && person.getDemAge() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY &&
                 person.getLes_c4() != Les_c4.Student && person.getLes_c4() != Les_c4.Retired &&
                 person.getDlltsd() != Indicator.True);
     }

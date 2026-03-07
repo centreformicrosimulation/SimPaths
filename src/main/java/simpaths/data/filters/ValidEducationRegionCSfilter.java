@@ -13,22 +13,22 @@ For individuals who have completed education and had education level assigned (i
 
 public class ValidEducationRegionCSfilter implements ICollectionFilter{
 
-	private Region region;
+	private Region demRgn;
 
-	public ValidEducationRegionCSfilter(Region region) {
+	public ValidEducationRegionCSfilter(Region demRgn) {
 		super();
-		this.region = region;
+		this.demRgn = demRgn;
 		
 	}
 	
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getRegion().equals(region) && !person.getLes_c4().equals(Les_c4.Student) && person.getDag() >= 18 && person.getDeh_c3() != null);
+			return (person.getRegion().equals(demRgn) && !person.getLes_c4().equals(Les_c4.Student) && person.getDemAge() >= 18 && person.getDeh_c4() != null);
 		}
 		else if(object instanceof BenefitUnit) {
 			BenefitUnit benefitUnit = (BenefitUnit) object;
-			return benefitUnit.getRegion().equals(region);
+			return benefitUnit.getRegion().equals(demRgn);
 		}
 		else throw new IllegalArgumentException("Object passed to RegionCSfilter must be of type Person or BenefitUnit!");
 	}

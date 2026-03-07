@@ -7,17 +7,17 @@ import simpaths.model.enums.Region;
 
 public class FemaleRegionCSfilter implements ICollectionFilter{
 	
-	private Region region;
+	private Region demRgn;
 	
-	public FemaleRegionCSfilter(Region region) {
+	public FemaleRegionCSfilter(Region demRgn) {
 		super();
-		this.region = region;
+		this.demRgn = demRgn;
 		
 	}
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		return person.getRegion().equals(region) && person.getDgn().equals(Gender.Female);
+		return person.getRegion().equals(demRgn) && person.getDemMaleFlag().equals(Gender.Female);
 	}
 	
 }

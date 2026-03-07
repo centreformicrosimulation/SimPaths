@@ -12,7 +12,7 @@ import java.util.*;
  * CLASS TO MANAGE ONE SPECIFICATION FOR EVALUATING DONOR KEYS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
  *
  */
-public class KeyFunction3 {
+public class KeyFunction3 implements IKeyFunction {
 
 
     /**
@@ -47,7 +47,7 @@ public class KeyFunction3 {
      */
     public Integer[] evaluateKeys(int simYear, int priceYear, int age, int numberMembersOver17, int numberChildrenUnder5, int numberChildren5To9,
                                       int numberChildren10To17, double hoursWorkedPerWeekMan, double hoursWorkedPerWeekWoman, int dlltsdMan, int dlltsdWoman,
-                                      double originalIncomePerWeek, double secondIncomePerWeek, double childcareCostPerWeek) {
+                                      int careProvision, double originalIncomePerWeek, double secondIncomePerWeek, double childcareCostPerWeek) {
 
         // initialise working variables
         int spa = getStatePensionAge(age, simYear);
@@ -267,19 +267,39 @@ public class KeyFunction3 {
         return result;
     }
 
+    public int getMatchFeatureIndex(MatchFeature feature, int taxDBRegime, int keyValue) {
+
+        Map<MatchFeature, Map<Integer, Integer>> taxdbCounter = getTaxdbCounter();
+        int keyLocal = keyValue;
+        for (int ii = MatchFeature.values().length-1; ii>=0; ii--) {
+
+            MatchFeature featureHere = MatchFeature.values()[ii];
+            try {
+                int size = taxdbCounter.get(featureHere).get(taxDBRegime);
+                int index = keyLocal / size;
+                if (feature.equals(featureHere))
+                    return index;
+                else
+                    keyLocal -= index * size;
+            } catch (Exception e) {
+                System.out.println("Issue retrieving feature" + featureHere + "for regime " + taxDBRegime);
+                e.printStackTrace();
+            }
+        }
+        throw new RuntimeException("failed to identify match feature for indexing");
+    }
+
+
     /**
      * METHOD TO INDICATE IF TAX UNIT IS MEMBER OF 'LOW INCOME' CATEGORY FOR DATABASE MATCHING
-     * @param priceYear year of prices used to measure income
-     * @param originalIncomePerWeek original income per week of family
-     * @return boolean equal to true if family treated as low income
      */
-    public boolean isLowIncome(int priceYear, double originalIncomePerWeek) {
+    public boolean[] isLowIncome(Integer[] keys) {
 
-        boolean lowIncome = false;
-        double originalIncomePerWeekAdjusted = originalIncomePerWeek * Parameters.getTimeSeriesIndex(INCOME_REF_YEAR, UpratingCase.TaxDonor) /
-                Parameters.getTimeSeriesIndex(priceYear, UpratingCase.TaxDonor);
-        if (originalIncomePerWeekAdjusted < LO_INCOME) {
-            lowIncome = true;
+        boolean[] lowIncome = new boolean[Parameters.TAXDB_REGIMES];
+        for (int regime=0; regime<Parameters.TAXDB_REGIMES; regime++) {
+
+            int index = getMatchFeatureIndex(MatchFeature.Income, regime, keys[regime]);
+            lowIncome[regime] = (index == 0);
         }
         return lowIncome;
     }

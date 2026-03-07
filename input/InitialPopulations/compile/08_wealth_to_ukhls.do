@@ -1,25 +1,32 @@
-/**********************************************************************
+**********************************************************************************************************
+* PROJECT:              SimPaths UK: construct initial populations for SimPaths using UKHLS data 
+* DO-FILE NAME:         08_wealth_to_ukhls.do
+* DESCRIPTION:          MANAGES IMPUTATION OF WEALTH DATA FROM WAS TO UKHLS FOR SIMPATHS INPUT DATA 
+**********************************************************************************************************
+* COUNTRY:              UK
+* DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
+*                       WAS EUL version - UKDA-7215-stata [to wave 7]
+* AUTHORS: 				Justin van de Ven, Daria Popova
+* LAST UPDATE:          15 Jan 2026 DP 
+* NOTE:					Called from 00_master.do - see master file for further details
 *
-*	MANAGES IMPUTATION OF WEALTH DATA FROM WAS TO UKHLS FOR SIMPATHS INPUT DATA
-*		Imputes data for year defined by $yearWealth
-*		May be called multiple times from 00_master.do
-*
-*	AUTH: Justin van de Ven (JV)
-*	LAST EDIT: 01/11/2023 (JV)
-*
-**********************************************************************/
+*********************************************************************/
 
+********************************************************************************
+cap log close 
+log using "${dir_log}/08_wealth_to_ukhls.log", replace
+********************************************************************************
 
 /**********************************************************************
 *	start analysis
-**********************************************************************/
+*********************************************************************/
 cd "${dir_data}"
 disp "imputing wealth data"
 *global yearWealth = 2019
 
 /**********************************************************************
 *	preliminaries
-**********************************************************************/
+*********************************************************************/
 * define seed to ensure replicatability of results
 global seedBase = 3141592
 global seedAdjust = 0
@@ -27,15 +34,15 @@ global seedAdjust = 0
 
 /**********************************************************************
 *	adjust UKHLS data to facilitate imputation
-**********************************************************************/
+*********************************************************************/
 use "population_initial_fs_UK_$yearWealth", clear
 sort idperson
-drop liquid_wealth tot_pen nvmhome smp rnk mtc
+drop total_wealth total_pensions housing_wealth mortgage_debt smp rnk mtc
 
 
 /**********************************************************************
 *	align variable definitions
-**********************************************************************/
+*********************************************************************/
 gen dvage17 = 0
 forval ii = 1/16 {
 	
@@ -147,13 +154,13 @@ drop pct1
 
 /**********************************************************************
 *	save working data
-**********************************************************************/
+*********************************************************************/
 save "ukhls_wealthtemp.dta", replace
 
 
 /**********************************************************************
 *	analyse sample
-**********************************************************************/
+*********************************************************************/
 /*
 use "ukhls_wealthtemp.dta", clear
 tab gor2 [fweight=dwt2]
@@ -179,7 +186,7 @@ sum inc [fweight=dwt2] if (chk==0)
 *	matching organised around 3 sets of ranking criteria, where rank 1
 *	criteria are the most fine grained, and rank 3 are the most coarse
 *	grained.
-**********************************************************************/
+*********************************************************************/
 * identify non-reference population and save for retrieval
 use "ukhls_wealthtemp.dta", clear
 gen treat = (single_woman + single_man + couple_ref)
@@ -286,7 +293,8 @@ gen rnk = 0
 gen mtc = 0
 gen wealthi = -9
 gen tot_peni = -9
-gen nvmhomei = -9
+gen housingi = -9
+gen mortgagei = -9
 qui {
 	sum treat, mean
 	local nn = r(mean) * r(N)
@@ -295,10 +303,13 @@ forval kk = 1/`nn' {
 // loop over each reference person in dataset to match to 
 
 	qui {
-		gen chk = 1-treat 		// consider data points in "from" dataset
+	// consider data points in "from" dataset
+	
+		gen chk = 1-treat
 		local rnk = 1
 		foreach vv in tt grad gradsp gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp {
-			replace chk = 0 if (`vv'!=`vv'[`kk'])  // limit data point in from dataset to those with the same discrete characteristics
+		// limit data point in from dataset to those with the same discrete characteristics
+			replace chk = 0 if (`vv'!=`vv'[`kk'])  
 		}
 		sum chk, mean
 	}
@@ -341,7 +352,7 @@ forval kk = 1/`nn' {
 			preserve
 			keep if (chk==1)
 			if (r(mean)*r(N)>1) {
-				* multiple matches - select random observation
+			// multiple matches - select random observation
 				
 				sum dwt
 				gen smp_cdf = 0
@@ -355,14 +366,16 @@ forval kk = 1/`nn' {
 				keep if slct==1
 			}
 			local mtc = bu[1]
-			local wealth = wealth[1]
-			local tot_pen = tot_pen[1]
-			local nvmhome = nvmhome[1]
+			local ww = wealth[1]
+			local pw = tot_pen[1]
+			local hw = dvhvalue[1]
+			local mm = main_mort[1]
 			restore
 			replace mtc=`mtc' if (_n==`kk')
-			replace wealthi = `wealth' if (_n==`kk')
-			replace tot_peni = `tot_pen' if (_n==`kk')
-			replace nvmhomei = `nvmhome' if (_n==`kk')
+			replace wealthi = `ww' if (_n==`kk')
+			replace tot_peni = `pw' if (_n==`kk')
+			replace housingi = `hw' if (_n==`kk')
+			replace mortgagei = `mm' if (_n==`kk')
 		}
 		replace rnk=`rnk' if (_n==`kk')
 		drop chk
@@ -370,49 +383,58 @@ forval kk = 1/`nn' {
 	if (mod(`kk',100)==0) disp "matched to observation `kk'"
 }
 keep if (treat)
-drop wealth tot_pen nvmhome
 
 
 /**********************************************************************
 *	append non-reference population
-**********************************************************************/
+*********************************************************************/
 append using "ukhls_wealthtemp2.dta"
 sort bu
-recode wealthi tot_peni nvmhomei (mis=0)
-by bu: egen wealth = sum(wealthi)
-by bu: egen tot_pen = sum(tot_peni)
-by bu: egen nvmhome = sum(nvmhomei)
-gen liquid_wealth = wealth - tot_pen - nvmhome
-recode liquid_wealth tot_pen nvmhome (-9=0)
+recode wealthi (mis=0)
+recode tot_peni (mis=0)
+recode housingi (mis=0)
+recode mortgagei (mis=0)
+by bu: egen total_wealth = sum(wealthi)
+by bu: egen total_pensions = sum(tot_peni)
+by bu: egen housing_wealth = sum(housingi)
+by bu: egen mortgage_debt = sum(mortgagei)
+recode total_wealth (-9=0)
+recode total_pensions (-9=0)
+recode housing_wealth (-9=0)
+recode mortgage_debt (-9=0)
+label var total_wealth "total wealth net of liabilities of benefit unit including housing, business and private (personal and occupational) pensions"
+label var total_pensions "value of all private (personal and occupational) pensions of benefit unit"
+label var housing_wealth "value of main home gross of mortgage debt of benefit unit"
+label var mortgage_debt "total mortgage debt owed on main home of benefit unit"
 save ukhls_wealthtemp3, replace
 
 /*
-sum liquid_wealth [fweight=dwt2] if (single_woman & rnk<4), detail
-sum liquid_wealth [fweight=dwt2] if (single_man & rnk<4), detail
-sum liquid_wealth [fweight=dwt2] if (couple_ref & rnk<4), detail
-sum liquid_wealth [fweight=dwt2] if (rnk<4), detail
+sum total_wealth [fweight=dwt2] if (single_woman & rnk<4), detail
+sum total_wealth [fweight=dwt2] if (single_man & rnk<4), detail
+sum total_wealth [fweight=dwt2] if (couple_ref & rnk<4), detail
+sum total_wealth [fweight=dwt2] if (rnk<4), detail
 
-sum liquid_wealth [fweight=dwt2] if (single_woman), detail
-sum liquid_wealth [fweight=dwt2] if (single_man), detail
-sum liquid_wealth [fweight=dwt2] if (couple_ref), detail
-sum liquid_wealth [fweight=dwt2], detail
+sum total_wealth [fweight=dwt2] if (single_woman), detail
+sum total_wealth [fweight=dwt2] if (single_man), detail
+sum total_wealth [fweight=dwt2] if (couple_ref), detail
+sum total_wealth [fweight=dwt2], detail
 */
 
 
 /**********************************************************************
 *	clean data and save
-**********************************************************************/
+*********************************************************************/
 use ukhls_wealthtemp3, clear
-drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi wealth
+drop dvage17 year gor gor2 sex nk na dhe2 dhesp2 grad gradsp emp empsp inci inc nk04i nk04 idnk04 dhe2grad dhe2ngrad ///
+dlltsdgrad dlltsdngrad empage single_woman single_man couple single ee ee2 was bu couple_ref pct dwt2 treat case person_id ///
+p_healths dlltsdsp healths wealth bu_rp tt dhe3 dhe4 dvage07 nk2 nk3 gor3 gor4 pct2 wealthi tot_peni housingi mortgagei
 recode rnk smp mtc (missing = -9)
 label var rnk "matching level: 1 = most fine, 2, 3 = most coarse, 4=no match"
 label var smp "matching sample - number of matched candidates to choose from"
 label var mtc "benefit unit id (bu) of matched observation"
-label var tot_pen "total private (personal and occupational) pension wealth"
-label var nvmhome "value of main home net of all mortage debts"
-label var liquid_wealth "net wealth excluding private pensions and main home" 
 save "population_initial_fs_UK_$yearWealth", replace
 
+cap log close 
 
 /**************************************************************************************
 * clean-up and exit
@@ -431,6 +453,3 @@ foreach file of local files_to_drop {
 }
 
 
-/**************************************************************************************
-*	fin
-**************************************************************************************/
