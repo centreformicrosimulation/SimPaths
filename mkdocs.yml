@@ -59,11 +59,6 @@ extra_css:
 plugins:
   - search:
       lang: en
-  - git-revision-date-localized:
-      enable_creation_date: true
-      type: timeago
-      fallback_to_build_date: true
-  - tags
 
 markdown_extensions:
   - admonition
