@@ -32,8 +32,6 @@ theme:
     repo: fontawesome/brands/github
     logo: material/chart-timeline-variant-shimmer
   features:
-    - navigation.instant
-    - navigation.instant.progress
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
