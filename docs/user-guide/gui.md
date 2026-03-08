@@ -3,7 +3,7 @@
 # 1. Introduction
 In this section, we discuss the different components that make up the JAS-mine Graphical User Interface (GUI).
 
-![SimPaths GUI Screenshot](https://github.com/centreformicrosimulation/SimPaths/blob/develop/docs/figures/SimPaths%20GUI.png)
+![SimPaths GUI Screenshot](https://raw.githubusercontent.com/centreformicrosimulation/SimPaths/develop/docs/figures/SimPaths%20GUI.png)
 
 JAS-mine supports three different types of execution mode:- [interactive mode](https://www.microsimulation.ac.uk/jas-mine/resources/cookbook/start/), [batch mode](https://www.microsimulation.ac.uk/jas-mine/resources/cookbook/start/) and [multi-run mode](https://www.microsimulation.ac.uk/jas-mine/resources/tutorials/run-a-simulation-many-times/). The most common mode for prototyping a JAS-mine project, developing an intuition about how it works and demonstrating it to an audience is the interactive mode. This features a graphical user interface, where model parameters can be set and updated during a simulation run, and pre-determined graphical objects can be displayed to allow for real-time inspection of a number of the model's output quantities.
 
@@ -37,7 +37,7 @@ There are three menu tabs at the top of the JAS-mine:
 
 ## 1.2 Simulation Control Pane
 
-![JAS-mine Buttons](https://github.com/centreformicrosimulation/SimPaths/blob/develop/docs/figures/SimPaths-Buttons.png)
+![JAS-mine Buttons](https://raw.githubusercontent.com/centreformicrosimulation/SimPaths/develop/docs/figures/SimPaths-Buttons.png)
 
 Below the Menu tabs are the simulation control buttons. The user can easily discover the meaning of each of the buttons by hovering the mouse pointer over each button. We describe the actions associated with each button below, ordered from left to right:
 
@@ -56,7 +56,7 @@ The sliding scale on the right labelled **'Simulation speed'** adjusts the real-
 
 A JAS-mine model's *[GUI parameters](https://www.microsimulation.ac.uk/jas-mine/resources/cookbook/gui-parameters/)* appear in the parameter boxes below the Simulation Control Pane.  One parameter box for each of the '[Model-Collector-Observer](https://www.microsimulation.ac.uk/jas-mine/resources/focus/model-collector-observer/)' manager classes is displayed, as long as there are any variables in each of the manager classes that have the `@GUIparameter` annotation.
 
-![JAS-mine GUI Parameters](https://github.com/centreformicrosimulation/SimPaths/blob/develop/docs/figures/SimPaths%20parameters.png)
+![JAS-mine GUI Parameters](https://raw.githubusercontent.com/centreformicrosimulation/SimPaths/develop/docs/figures/SimPaths%20parameters.png)
 
 The description of a GUI parameter can be observed by hovering the mouse pointer over the value, upon which a yellow box containing the description appears if it has been defined as an attribute in the `@GUIparameter` annotation where the variable is declared, e.g.:
 ```java
@@ -76,11 +76,11 @@ The graphics do not immediately appear in the GUI when the JAS-mine project's St
 
 The settings of a graphical widget can be adjusted by right clicking on it with the mouse pointer, and selecting the appropriate controls that are available for the type of widget. For example, the labels, line-type, colour and appearance of time series plots can be altered while running the simulation as shown below:
 
-![JAS-mine Chart Properties](https://github.com/centreformicrosimulation/SimPaths/blob/develop/docs/figures/Chart%20Properties.png)
+![JAS-mine Chart Properties](https://raw.githubusercontent.com/centreformicrosimulation/SimPaths/develop/docs/figures/Chart%20Properties.png)
 
 In addition, for a time series plot, it is possible to zoom in to areas of data points by left-clicking and dragging the mouse pointer diagonally downwards and to right in order to select a rectangle of area to enlarge. The left hand side of the figure below shows the rectangle created by dragging the mouse pointer (the mouse pointer is not shown), and the right hand side is the resulting enlarged chart. The user can zoom out again either by dragging the mouse pointer upwards or leftwards, or by right clicking and selecting 'Auto Range -> Both Axes' from the list of options.
 
-![JAS-mine Chart Zoom](https://github.com/centreformicrosimulation/SimPaths/blob/develop/docs/figures/SimPaths-Chart-Zoom.png)
+![JAS-mine Chart Zoom](https://raw.githubusercontent.com/centreformicrosimulation/SimPaths/develop/docs/figures/SimPaths-Chart-Zoom.png)
 
 Finally, the time series plots can be saved as a PNG file, printed or copied by right clicking on the chart and selecting the relevant option.
 
@@ -88,4 +88,4 @@ Finally, the time series plots can be saved as a PNG file, printed or copied by 
 
 The output stream is the white coloured window at the bottom of the GUI. It contains the system and debugger out-stream data that would be printed out to the Command Prompt (in Windows), the Terminal (Linux), or in Eclipse if running in batch mode without the GUI. Such output includes any data produced by `System.out.println()` or `System.err.println()` commands in Java, and also information about the creation of database tables when building the project. The stack trace of any exceptions thrown will be printed out. The buttons on top of the output stream window include an option to save the text to file.
 
-![JAS-mine Output Stream](https://github.com/centreformicrosimulation/SimPaths/blob/develop/docs/figures/Output%20stream.png)
+![JAS-mine Output Stream](https://raw.githubusercontent.com/centreformicrosimulation/SimPaths/develop/docs/figures/Output%20stream.png)

@@ -1,7 +1,7 @@
 site_name: SimPaths Documentation
 site_description: >-
   An open-source microsimulation framework for modelling individual
-  and household life course events.
+  and household life course events across the UK and Europe.
 site_url: https://centreformicrosimulation.github.io/SimPaths/
 repo_url: https://github.com/centreformicrosimulation/SimPaths
 repo_name: centreformicrosimulation/SimPaths
@@ -15,33 +15,42 @@ theme:
   name: material
   palette:
     - scheme: default
-      primary: indigo
-      accent: blue
+      primary: custom
+      accent: custom
       toggle:
-        icon: material/brightness-7
+        icon: material/weather-night
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: blue
+      primary: custom
+      accent: custom
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-sunny
         name: Switch to light mode
   font:
-    text: Roboto
-    code: Roboto Mono
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/chart-timeline-variant-shimmer
   features:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
-    - navigation.expand
     - navigation.indexes
     - navigation.top
     - navigation.footer
+    - navigation.tracking
     - toc.follow
     - search.suggest
     - search.highlight
+    - search.share
     - content.action.edit
+    - content.action.view
     - content.code.copy
+    - content.code.annotate
+
+extra_css:
+  - assets/css/extra.css
 
 plugins:
   - search:
@@ -55,19 +64,30 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
       toc_depth: 3
   - attr_list
   - md_in_html
+  - tables
+  - footnotes
+  - def_list
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/centreformicrosimulation/SimPaths
+      name: GitHub
     - icon: fontawesome/solid/globe
       link: https://www.microsimulation.ac.uk/
+      name: Centre for Microsimulation and Policy Analysis
 
 nav:
   - Home: index.md

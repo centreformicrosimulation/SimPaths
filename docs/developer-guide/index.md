@@ -16,7 +16,7 @@ New developers of SimPaths are strongly recommended to familiarise themselves wi
 ***
 
 # 1. Guiding principles
-<details>
+<details markdown>
   <summary><b>Clarity</b></summary>  
 A clear distinction is made in JAS-mine between objects with a modelling content, which specify the structure of the simulation, and objects which perform useful but auxiliary tasks, from enumerating categorical variables to building graphical widgets, from creating filters for the collection of agents to computing aggregate statistics to be saved in the output database.
 
@@ -30,7 +30,7 @@ This three-layer methodological protocol allows for extensive re-use of code and
 Moreover, JAS-mine envisages **strict separation between the code and the data**, with all parameters and input tables stored either in an input database or in specific MS Excel files. The regression package provides tools for simulating outcomes from standard regression models (OLS, probit/logit, multinomial, ordered and generalised ordered models): in particular, there is no need to specify the variables that enter a regression model, as they are directly read from the data files. This greatly facilitates exploration of the parameter space, testing different econometric specifications, and scenario analysis.
 </details>
 
-<details>
+<details markdown>
   <summary><b>Transparency</b></summary>  
 
 Transparent coding for transparent modelling is achieved by
@@ -45,7 +45,7 @@ Transparent coding for transparent modelling is achieved by
 # 2. Architecture
 SimPaths shares with all JAS-mine projects some architectural choices.
 
-<details>
+<details markdown>
   <summary><b> Model-Collector-Observer</b></summary> 
 
 The [Swarm protocol](https://www.swarm.org/wiki/Swarm_main_page) for agent-based platforms architecture recommends splitting the simulation into an internal *Model* and an external *Observer*. These two aspects of the artificial world should remain markedly separate.
@@ -66,14 +66,14 @@ JAS-mine allows multiple *Models* (and multiple *Collectors* and *Observers*) to
 </details>
 
 
-<details>
+<details markdown>
   <summary><b> The JAS-mine engine</b></summary> 
 
 The core of the JAS-mine toolkit is represented by the simulation engine. It is based on the standard discrete-event simulation paradigm, which allows to manage the time with high flexibility and multi-scale perspective.
 
 The JAS-mine engine is based on the scheduler, which handles all the events in the simulation. The scheduler is a “singleton” (in software engineering, the singleton pattern is a design pattern that restricts the instantiation of a class to one object), which means that all the agents in the simulation share the same scheduler. Events can be scheduled in advance (for instance once every simulation period) or dynamically, by the agents themselves (for instance, job termination is scheduled upon hiring). This allows to implement both continuous-time and discrete-time simulations.
 
-<details>
+<details markdown>
 <summary><b>🔴 FOCUS: Time in simulation</b></summary>
 
 The abstract representation of a continuous phenomenon in a simulation model requires that all events be presented in discrete terms.
@@ -89,14 +89,14 @@ The event list orders the events and the simulation is performed by extracting t
 
 </details>
 
-<details>
+<details markdown>
   <summary><b> Input-Output communication</b></summary> 
 
 Data management is a major factor to be weighed in for the creation of a simulation tool. Building on the vast number of software solutions available, JAS-mine allows the user to separate data representation and management from the implementation of processes and behavioral algorithms.
 
 One distinguishing feature of the platform lies in the integration with relational database management systems (RDBMS) through ad-hoc Java libraries. The management of input data persistence layers and simulation results in JAS-mine is performed using standard database management tools, and the platform takes care of the automatic translation of the relational model of the database into the object-oriented simulation framework thanks to an ORM layer.
 
-<details>
+<details markdown>
 <summary><b>🔴 FOCUS: Object-Relational Mapping (ORM)</b></summary>
 
 The software paradigm that is best suited to represent and manipulate population data is object-oriented programming (OOP). On the other hand, input and output data (especially in complex projects) are best stored in a relational database. Unfortunately, database relational modelling is less intuitive than OOP and requires a specific language (SQL) to retrieve and modify data.

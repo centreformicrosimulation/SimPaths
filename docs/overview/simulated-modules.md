@@ -43,7 +43,7 @@ Individuals who cease to be students are assigned a level of education based on 
 The health module projects an individual’s health status, comprising both self-rated general health and mental health metrics (based on a clinically validated measure of psychological distress using a Likert scale and a caseness indicator), and determines whether an individual is long-term sick or disabled (in which case, he/she is not at risk of work and may require social care). 
 
 
-<details>
+<details markdown>
   <summary><b>3.1 Physical health </b></summary>
 
 Physical health status is projected on a discrete 5-point scale, designed to reflect self-reported survey responses (between “poor” and “excellent” health). Physical health dynamics are based on an ordered probit, distinguishing those still in continuous education. For continuing full-time students, the ordered probit conditions on gender, age, lagged benefit unit income quintile, lagged physical health status, region, and year. The same variables are considered for individuals who have left continuous education, with the addition of education level, lagged employment status, and lagged benefit unit composition.
@@ -53,7 +53,7 @@ Physical health status is projected on a discrete 5-point scale, designed to ref
 </details>
 
 
-<details>
+<details markdown>
   <summary><b>3.2 Long-term sick and disabled </b></summary>
 
 Any individual aged 16 and above who is not in continuous education can become long-term sick or disabled. The probability of being long-term sick or disabled is described by a probit equation defined with respect to lagged disability status, prevailing and lagged physical health status, gender, age, education, income quintile, and lagged family demographics.
@@ -66,7 +66,7 @@ We split disability out for illustration purpose.
 </details>
 
 
-<details>
+<details markdown>
   <summary><b>3.3 Psychological distress </b></summary>
 
 * Psychological distress 1 (baseline level and caseness)
@@ -94,7 +94,7 @@ Females in couples can give birth to a (single) child in each simulated year, as
 
 
 <br>
-<details>
+<details markdown>
 <summary><b> 4.1 Family composition module code structure </b></summary>
 <br>
 <img width="780" height="630" alt="Family composition module overview" src="https://github.com/user-attachments/assets/df909be6-aec9-4452-9a3a-f580b3682d68" />
@@ -125,7 +125,7 @@ Every year the model conducts union matching to form households and benefit unio
 
 
 <br>
-<details>
+<details markdown>
 <summary><b> 4.2 Partnerships and cohabitation </b></summary>  
 
 Individuals aged 18 and over who do not have a partner may decide to enter a partnership based on the outcome of a probit model. For students, the probit conditions on gender, age, lagged household income quintile, lagged number of (all) dependent children, lagged number of children aged 0-2, lagged self-rated health status, region, and year. For non-students, the probit conditions on the same set of variables as for students, expanded to include level of education and lagged employment status. 
@@ -136,7 +136,7 @@ Individuals who enter a partnership are matched using either a parametric or non
 
 
 <br>
-<details>
+<details markdown>
   <summary><b> 4.3 Cohabitation method code structure </b></summary>
 
 The cohabitation method (in Person class) computes a group of persons to be considered in the union matching process (a map of personsToMatch).
@@ -149,7 +149,7 @@ The cohabitation method (in Person class) computes a group of persons to be cons
 
 
 <br>
-<details>
+<details markdown>
   <summary><b> 4.4 UnionMatching class code structure </b></summary>
 
 The `UnionMatching` class receives sets of unmatched males and females (passed as unmatched, constructed from personsToMatch) and forms new couples by creating benefit units and households via male.setupNewBenefitUnit(female, true). 
@@ -187,7 +187,7 @@ The key method, `evaluateGM()`, implements the global matching procedure as foll
 
 <br>
 
-<details>
+<details markdown>
   <summary><b> 4.5 Partnership dissolution </b></summary>
 
 Partnership dissolution is modeled at the benefit unit level with the probability described by a probit model conditional on female partner’s age, level of education, lagged personal gross non-benefit income, lagged number of (all) children, lagged number of children aged 0-2, lagged self-rated health status, lagged level of education of the spouse, lagged self-rated health status of the spouse, lagged difference between own and spouse’s gross, non-benefit income, lagged duration of partnership in years, lagged difference between own and spouse’s age, lagged household composition, lagged own and spouse’s employment status, region, and year. 
@@ -200,7 +200,7 @@ The matching processes for new relationships outlined above fails to identify ma
 
 <br>
 
-<details>
+<details markdown>
   <summary><b> 4.6 Fertility  </b></summary> 
 
 Females aged 18 to 44 can give birth to a child whenever they are identified in a partnership. The probability of giving birth is described by a probit model conditional on a woman’s age, benefit unit income quintile, lagged number of children, lagged number of children aged 0-2, lagged health status of the woman, lagged partnership status for those in continuous education. For those not in continuous education, the probability of giving birth is described by a probit model conditional on a woman’s age, the fertility rate of the UK population, benefit unit income quintile, lagged number of children, lagged number of children aged 0-2, lagged health status of the woman, lagged partnership status, lagged labour market activity status, level of education, and region. The inclusion of the overall fertility rate allows the model to capture fertility projections for future years, whereas the overall change in projected fertility is distributed across individuals according to their observable characteristics. 

@@ -1,39 +1,117 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
+<div class="hero" markdown>
+
 # SimPaths
 
-Welcome to the Wiki of the [SimPaths](https://github.com/centreformicrosimulation/SimPaths) project! This Wiki serves as the central hub for all documentation related to our project. Whether you are a new contributor, user, or just curious about what we are working on, you'll find useful information here.
+<p class="tagline">Open-source dynamic microsimulation for life course modelling — projecting careers, families, health, and finances across populations.</p>
 
-SimPaths is an open-source framework for modelling individual and household life course events across multiple domains. The framework projects life histories over time, developing detailed representations of career paths, family and intergenerational relationships, health, and financial circumstances. As a family of models, SimPaths offers a dynamic simulation of how life events evolve and interact within populations. For a detailed description of the building blocks of the model, visit the [Model structure](https://github.com/centreformicrosimulation/SimPaths/wiki/1.-Model-structure) page.  
+<div class="hero-badges">
+  <span class="hero-badge">:material-check-circle: Open Source</span>
+  <span class="hero-badge">:material-earth: 5 Countries</span>
+  <span class="hero-badge">:material-language-java: Java / JAS-mine</span>
+  <span class="hero-badge">:material-flask: UKRI HealthMod</span>
+</div>
 
-SimPaths builds upon `JAS-mine`, an open-source Java platform designed for discrete-event simulations. Useful resources on `JAS-mine` are collected in the [Centre for Microsimulation and Policy Analysis website](https://www.microsimulation.ac.uk/jas-mine/resources/).
- 
-SimPaths models currently exist for the UK, Greece, Hungary, Italy, and Poland. This page refers to the UK model; the other European models are available at the corresponding [SimPathsEU](https://github.com/centreformicrosimulation/SimPathsEU) page.
+<div class="hero-cta">
+  <a href="getting-started/" class="btn-primary">:material-rocket-launch: Get Started</a>
+  <a href="overview/" class="btn-outline">:material-book-open-variant: Read the Docs</a>
+  <a href="https://github.com/centreformicrosimulation/SimPaths" class="btn-outline">:fontawesome-brands-github: View on GitHub</a>
+</div>
 
-Research based on SimPaths is rich and growing. See the full list of published and working papers in the [Research](overview/how-to-cite.md) page.
+</div>
 
-***
-# Outline 
+---
 
+## What is SimPaths?
 
-# [0. How to cite & Research](overview/how-to-cite.md)
-A list of references for SimPaths, including the SimPaths reference paper that users are requested to cite in their derived work.
+SimPaths is an open-source framework for modelling individual and household life course events across multiple domains. It projects life histories over time — building detailed representations of career paths, family and intergenerational relationships, health, and financial circumstances.
 
-# [1. Model structure](overview/index.md)
-All the basic information on SimPaths and the functionality provided by the model.
+SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
 
-# [2. Input data](getting-started/data/index.md)
-SimPaths runs with demo data. This section explains how to apply for input data representative of the UK population.
+<div class="countries">
+  <span class="country-tag">🇬🇧 United Kingdom</span>
+  <span class="country-tag">🇬🇷 Greece</span>
+  <span class="country-tag">🇭🇺 Hungary</span>
+  <span class="country-tag">🇮🇹 Italy</span>
+  <span class="country-tag">🇵🇱 Poland</span>
+</div>
 
-# [3. End-Users guide](user-guide/index.md)
-How to run the model though the GUI, modify parameters, create scenarios, and perform uncertainty analysis.
+---
 
-# [4. Developers guide](developer-guide/index.md)
-How the code is structured and how to modify it.
+## Explore the Documentation
 
-# [5. Model validation](https://github.com/centreformicrosimulation/SimPaths/wiki/5.-Model-validation)
-How to validate simulated outputs against real survey data.
+<div class="card-grid" markdown>
 
-# [6. Focus](jasmine-reference/index.md)
- How to make the best use of the embedded JAS-mine functionalities. 
+<div class="feature-card" markdown>
+<span class="card-icon">:material-map-outline:</span>
 
-# [7. Video tutorials](getting-started/video-tutorials.md)
-Step-by-step instructions from installing the environment to understanding the code structure and running SimPaths simulations.
+### Overview
+
+What SimPaths models and why — architecture, modules, parameterisation, and country variants.
+
+[Explore Overview →](overview/)
+</div>
+
+<div class="feature-card" markdown>
+<span class="card-icon">:material-play-circle-outline:</span>
+
+### Getting Started
+
+Set up your environment, load input data, and run your first simulation in minutes.
+
+[Get Started →](getting-started/)
+</div>
+
+<div class="feature-card" markdown>
+<span class="card-icon">:material-cog-outline:</span>
+
+### User Guide
+
+Single and multi-run simulations, the graphical interface, parameter editing, and uncertainty analysis.
+
+[View User Guide →](user-guide/)
+</div>
+
+<div class="feature-card" markdown>
+<span class="card-icon">:material-code-braces:</span>
+
+### Developer Guide
+
+JAS-mine architecture, SimPaths internals, and step-by-step how-to guides for extending the model.
+
+[Developer Guide →](developer-guide/)
+</div>
+
+<div class="feature-card" markdown>
+<span class="card-icon">:material-library-outline:</span>
+
+### JAS-mine Reference
+
+Statistical packages, alignment and matching libraries, regression tools, and database utilities.
+
+[JAS-mine Reference →](jasmine-reference/)
+</div>
+
+<div class="feature-card" markdown>
+<span class="card-icon">:material-chart-bar:</span>
+
+### Research & Validation
+
+Published papers, working papers, and model validation results.
+
+[Research →](research/)
+</div>
+
+</div>
+
+---
+
+!!! tip "New to SimPaths?"
+    Start with the [Overview](overview/) to understand what the model does, then follow the [Getting Started](getting-started/) guide to run your first simulation.
+
+For papers using SimPaths, see the [Research](research/) page. For European country variants, visit the [SimPathsEU](https://github.com/centreformicrosimulation/SimPaths) repository.
