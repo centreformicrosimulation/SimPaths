@@ -27,11 +27,9 @@ hide:
 
 ---
 
-## What is SimPaths?
+## About SimPaths
 
-SimPaths is an open-source framework for modelling individual and household life course events across multiple domains. It projects life histories over time — building detailed representations of career paths, family and intergenerational relationships, health, and financial circumstances.
-
-SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
+SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**. This documentation primarily covers the **UK model**.
 
 <div class="countries">
   <span class="country-tag">🇬🇧 United Kingdom</span>
