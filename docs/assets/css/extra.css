@@ -188,39 +188,57 @@
 }
 
 .md-typeset {
-  font-size: 0.9rem;
-  line-height: 1.7;
+  font-size: 0.88rem;
+  line-height: 1.65;
 }
 
 .md-typeset h1 {
   font-weight: 700;
-  font-size: 2rem;
-  letter-spacing: -0.025em;
+  font-size: 1.55rem;
+  letter-spacing: -0.02em;
   border-bottom: 2px solid transparent;
   border-image: var(--sp-gradient) 1;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.2rem;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
 }
 
 .md-typeset h2 {
   font-weight: 650;
-  font-size: 1.35rem;
-  letter-spacing: -0.015em;
-  margin-top: 2rem;
+  font-size: 1.18rem;
+  letter-spacing: -0.01em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.6rem;
   color: var(--md-default-fg-color);
 }
 
 .md-typeset h3 {
   font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
+  font-size: 1.0rem;
+  letter-spacing: -0.005em;
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
   color: var(--md-default-fg-color);
 }
 
 /* Smooth paragraph spacing */
 .md-typeset p {
   margin-top: 0;
-  margin-bottom: 0.9em;
+  margin-bottom: 0.75em;
+}
+
+/* Tighter list spacing */
+.md-typeset ul,
+.md-typeset ol {
+  margin-top: 0.35em;
+  margin-bottom: 0.75em;
+}
+.md-typeset ul li,
+.md-typeset ol li {
+  margin-bottom: 0.2em;
+}
+.md-typeset ul li:last-child,
+.md-typeset ol li:last-child {
+  margin-bottom: 0;
 }
 
 /* Blockquote — elegant lateral line */

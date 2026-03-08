@@ -101,6 +101,7 @@ Females in couples can give birth to a (single) child in each simulated year, as
 
 This figure illustrates the timeline of the family composition module as defined by the `buildSchedule()` method in the SimPathsModel class. 
 Every year the model conducts union matching to form households and benefit unions. Specifically, the model executes:
+
 1. Process `UpdatePotentialHourlyEarnings`, which calls `updateFullTimeHourlyEarnings()` method (`Person` class) and compute `fullTimeHourlyEarningPotentials` (used in union matching process).
 2. Process `Cohabitation`, which calls `cohabitation()` method (`Person` class) and compute a group of persons to be considered in the union matching process (a map of `personsToMatch`).
 3. Process `CohabitationAlignment`, which is NOT called by default.
@@ -110,12 +111,14 @@ Every year the model conducts union matching to form households and benefit unio
 `onEvent()` method, **case UnionMatching**. There are three union matching approaches (SBAM, Parametric, ParametricNoRegion) in the SimPaths model. By default, the model uses the ParametricNoRegion approach, which calls unionMatching first and then the unionMatchingNoRegion methods to determine matched pairs of males and females.
 
 `unionMatching()` method clears existing matched pairs first, then evaluates union matching for candidates in the same region. For each region, the method:
+
 1. Creates fresh empty sets `unmatchedMales` and `unmatchedFemales`,
 2. Populates these sets by copying the current period’s eligible-to-match males and females stored in the `personsToMatch` group,
 3. Stores unmatched males and females in a pair of "unmatched",
 4. Sends every unmatched pair to the `evalMatches()` method, which creates matched couples and removes them from the `personsToMatch` group.
 
 `unionMatchingNoRegion()` method is executed after the `unionMatching` method updates the `personsToMatch` group. Then, this method executes union matching procedures again by relaxing the region restriction. Now all candidates in the `personsToMatch` group are evaluated in a national pool:
+
 1. For every region, "unmatchedMales" and "unmatchedFemales" are populated with reduced `personsToMatch` group of males and females.
 2. All unmatched males and females are stored in pairs of unmatched,
 3. These pairs of unmatched are sent to the `evalMatches()` method.
@@ -167,6 +170,7 @@ The key method, `evaluateGM()`, implements the global matching procedure as foll
 
 
 `localMatch()`. This method is called as "match" in the `GlobalMatching.matching()` core algorithm. Its arguments (male, female) are candidates selected by GlobalMatching during execution. GlobalMatching.matching returns the unmatched ones (leftovers), and for each matched pair it calls `UnionMatching.match(agent1, agent2)`. This callback calls localMatch(male,female), which:
+
 1. adds the pair to "matches" (`matches.add(...)`),
 2. removes males and females in matches from the UnionMatching object’s `unmatchedMales`/`unmatchedFemales` sets (which are references to the sets passed in from `SimPathsModel.evalMatches`).
 3. update simulation state:\
@@ -176,6 +180,7 @@ The key method, `evaluateGM()`, implements the global matching procedure as foll
 
 
 `localGetValue()`. This method is called as `getValue` in the `GlobalMatching.matching()` core algorithm. Its arguments (male, female) are candidate pairs considered by GlobalMatching. This method calculate the score for a pair of male and female for the sorting purpose in the `GlobalMatching.matching()`. Within the method:
+
 1. `ageDiff` is the male's age minus the female's age,
 2. `potentialHourlyEarningsDiff` is the male's full time hourly earnings potential minus the female's. In SimPaths UK, this full time hourly earnings potential is updated earlier in the yearly schedule, via the `Person.updateFullTimeHourlyEarnings()` method in each period of the simulation, before cohabitation and union matching.
 3. earningsMatch is calculated as `potentialHourlyEarningsDiff` minus `female.getDesiredEarningsPotentialDiff()`, where the latter is from the `setMarrageTargets()` method in the constructor for the `Person` class, .

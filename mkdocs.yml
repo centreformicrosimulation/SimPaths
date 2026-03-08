@@ -5,7 +5,6 @@ site_description: >-
 site_url: https://centreformicrosimulation.github.io/SimPaths/
 repo_url: https://github.com/centreformicrosimulation/SimPaths
 repo_name: centreformicrosimulation/SimPaths
-edit_uri: edit/main/docs/
 
 copyright: >-
   Copyright &copy; Matteo Richiardi, Patryk Bronka, Justin van de Ven —
@@ -34,7 +33,6 @@ theme:
     logo: material/chart-timeline-variant-shimmer
   features:
     - navigation.instant
-    - navigation.instant.prefetch
     - navigation.instant.progress
     - navigation.tabs
     - navigation.tabs.sticky
@@ -43,13 +41,10 @@ theme:
     - navigation.top
     - navigation.footer
     - navigation.tracking
-    - navigation.prune
     - toc.follow
     - search.suggest
     - search.highlight
     - search.share
-    - content.action.edit
-    - content.action.view
     - content.code.copy
     - content.code.annotate
 
