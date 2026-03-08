@@ -11,16 +11,16 @@ hide:
 <p class="tagline">Open-source dynamic microsimulation for life course modelling — projecting careers, families, health, and finances across populations.</p>
 
 <div class="hero-badges">
-  <span class="hero-badge">:material-check-circle: Open Source</span>
-  <span class="hero-badge">:material-earth: 5 Countries</span>
-  <span class="hero-badge">:material-language-java: Java / JAS-mine</span>
-  <span class="hero-badge">:material-flask: UKRI HealthMod</span>
+  <span class="hero-badge">✓ Open Source</span>
+  <span class="hero-badge">🌍 5 Countries</span>
+  <span class="hero-badge">☕ Java / JAS-mine</span>
+  <span class="hero-badge">🔬 UKRI HealthMod</span>
 </div>
 
 <div class="hero-cta">
-  <a href="getting-started/" class="btn-primary">:material-rocket-launch: Get Started</a>
-  <a href="overview/" class="btn-outline">:material-book-open-variant: Read the Docs</a>
-  <a href="https://github.com/centreformicrosimulation/SimPaths" class="btn-outline">:fontawesome-brands-github: View on GitHub</a>
+  <a href="getting-started/" class="btn-primary">Get Started →</a>
+  <a href="overview/" class="btn-outline">Read the Docs</a>
+  <a href="https://github.com/centreformicrosimulation/SimPaths" class="btn-outline">View on GitHub</a>
 </div>
 
 </div>
@@ -48,7 +48,7 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
 <div class="card-grid" markdown>
 
 <div class="feature-card" markdown>
-<span class="card-icon">:material-map-outline:</span>
+<span class="card-icon">🗺</span>
 
 ### Overview
 
@@ -58,7 +58,7 @@ What SimPaths models and why — architecture, modules, parameterisation, and co
 </div>
 
 <div class="feature-card" markdown>
-<span class="card-icon">:material-play-circle-outline:</span>
+<span class="card-icon">▶</span>
 
 ### Getting Started
 
@@ -68,7 +68,7 @@ Set up your environment, load input data, and run your first simulation in minut
 </div>
 
 <div class="feature-card" markdown>
-<span class="card-icon">:material-cog-outline:</span>
+<span class="card-icon">⚙</span>
 
 ### User Guide
 
@@ -78,7 +78,7 @@ Single and multi-run simulations, the graphical interface, parameter editing, an
 </div>
 
 <div class="feature-card" markdown>
-<span class="card-icon">:material-code-braces:</span>
+<span class="card-icon">💻</span>
 
 ### Developer Guide
 
@@ -88,7 +88,7 @@ JAS-mine architecture, SimPaths internals, and step-by-step how-to guides for ex
 </div>
 
 <div class="feature-card" markdown>
-<span class="card-icon">:material-library-outline:</span>
+<span class="card-icon">📚</span>
 
 ### JAS-mine Reference
 
@@ -98,7 +98,7 @@ Statistical packages, alignment and matching libraries, regression tools, and da
 </div>
 
 <div class="feature-card" markdown>
-<span class="card-icon">:material-chart-bar:</span>
+<span class="card-icon">📊</span>
 
 ### Research & Validation
 

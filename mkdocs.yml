@@ -33,6 +33,9 @@ theme:
     repo: fontawesome/brands/github
     logo: material/chart-timeline-variant-shimmer
   features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
@@ -40,6 +43,7 @@ theme:
     - navigation.top
     - navigation.footer
     - navigation.tracking
+    - navigation.prune
     - toc.follow
     - search.suggest
     - search.highlight
@@ -55,6 +59,11 @@ extra_css:
 plugins:
   - search:
       lang: en
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+      fallback_to_build_date: true
+  - tags
 
 markdown_extensions:
   - admonition
