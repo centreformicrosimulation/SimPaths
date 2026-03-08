@@ -379,9 +379,11 @@
   color: rgba(255,255,255,0.8);
   margin-bottom: 1.6rem;
   font-weight: 400;
-  max-width: 540px;
+  max-width: 100%;
   line-height: 1.6;
   text-align: left;
+  hyphens: none;
+  -webkit-hyphens: none;
 }
 
 /* ── Hero badges ── */
