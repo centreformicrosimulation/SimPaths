@@ -116,7 +116,7 @@ nav:
       - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
       - Uncertainty Analysis: user-guide/uncertainty-analysis.md
 
-  - Developer Guide:
+  - Development:
       - developer-guide/index.md
       - Working in GitHub: developer-guide/working-in-github.md
       - JAS-mine Architecture:
@@ -138,18 +138,17 @@ nav:
           - Introduce a New Variable: developer-guide/how-to/new-variable.md
           - Add Parameters to the GUI: developer-guide/how-to/add-gui-parameters.md
           - Perform MultiRun Simulations: developer-guide/how-to/multirun-simulations.md
-
-  - JAS-mine Reference:
-      - jasmine-reference/index.md
-      - Statistical Package: jasmine-reference/statistical-package.md
-      - Collection Filters: jasmine-reference/collection-filters.md
-      - Alignment Library: jasmine-reference/alignment-library.md
-      - Matching Library: jasmine-reference/matching-library.md
-      - Regression Library: jasmine-reference/regression-library.md
-      - Saving Outputs: jasmine-reference/saving-outputs.md
-      - Querying the Database: jasmine-reference/querying-database.md
-      - Links and Resources: jasmine-reference/links.md
-      - Enums: jasmine-reference/enums.md
+      - JAS-mine Reference:
+          - jasmine-reference/index.md
+          - Statistical Package: jasmine-reference/statistical-package.md
+          - Collection Filters: jasmine-reference/collection-filters.md
+          - Alignment Library: jasmine-reference/alignment-library.md
+          - Matching Library: jasmine-reference/matching-library.md
+          - Regression Library: jasmine-reference/regression-library.md
+          - Saving Outputs: jasmine-reference/saving-outputs.md
+          - Querying the Database: jasmine-reference/querying-database.md
+          - Links and Resources: jasmine-reference/links.md
+          - Enums: jasmine-reference/enums.md
 
   - Model Validation:
       - validation/index.md
