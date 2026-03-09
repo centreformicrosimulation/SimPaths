@@ -1,5 +1,7 @@
 package simpaths.model.taxes;
 
+import simpaths.data.Parameters;
+import simpaths.model.BenefitUnit;
 import simpaths.model.TaxEvaluation;
 
 
@@ -29,10 +31,10 @@ public class TestTaxRoutine {
         children1017 = 0;
         hoursWork1 = 0.0;
         hoursWork2 = 0.0;
-        disability1 = 1;
+        disability1 = 0;
         disability2 = 0;
-        careProvision = 0;
-        originalIncomePerMonth = 1500.0;
+        careProvision = 1;
+        originalIncomePerMonth = 0.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 0.0;
         evaluatedTransfers = new TaxEvaluation(year, age, adults, children04, children59, children1017, hoursWork1, hoursWork2, disability1, disability2, careProvision, originalIncomePerMonth, secondIncomePerMonth, childcarePerMonth, -2);
@@ -40,7 +42,6 @@ public class TestTaxRoutine {
         donorID = evaluatedTransfers.getImputedTransfers().getDonorID();
         disposableIncomePerMonth = evaluatedTransfers.getDisposableIncomePerMonth();
         matchRegime = evaluatedTransfers.getImputedTransfers().getMatchCriterion();
-
 
         year = 2025;
         age = 48;
@@ -50,9 +51,9 @@ public class TestTaxRoutine {
         children1017 = 0;
         hoursWork1 = 20.0;
         hoursWork2 = 0.0;
-        disability1 = 1;
+        disability1 = 0;
         disability2 = 0;
-        careProvision = 0;
+        careProvision = 1;
         originalIncomePerMonth = 4800.0;
         secondIncomePerMonth = 0.0;
         childcarePerMonth = 700.0;

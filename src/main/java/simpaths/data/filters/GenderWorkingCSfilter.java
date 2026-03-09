@@ -7,17 +7,17 @@ import microsim.statistics.ICollectionFilter;
 
 public class GenderWorkingCSfilter implements ICollectionFilter{
 
-	private Gender gender;
+	private Gender demSex;
 
-	public GenderWorkingCSfilter(Gender gender) {
+	public GenderWorkingCSfilter(Gender demSex) {
 		super();
-		this.gender = gender;
+		this.demSex = demSex;
 	}
 	
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getDgn().equals(gender) && person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed) && person.getGrossEarningsYearly() >= 0.);
+			return (person.getDemMaleFlag().equals(demSex) && person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed) && person.getGrossEarningsYearly() >= 0.);
 		}
 		else throw new IllegalArgumentException("Object passed to GenderEducationWorkingCSfilter must be of type Person!");
 	}			

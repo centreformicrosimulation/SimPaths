@@ -435,10 +435,10 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					Weighted_PyramidPlotter populationAgeGenderPlotter = new Weighted_PyramidPlotter();
 					// Please note that the Pyramid plotter requires a Weighted_CrossSection.Double[2]
 					Weighted_CrossSection.Integer[] populationData = new Weighted_CrossSection.Integer[2];
-					Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "demAge", false);
 					maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
 					populationData[0] = maleAgesCS;
-					Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "dag", false);
+					Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "demAge", false);
 					femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female));
 					populationData[1] = femaleAgesCS;
 
@@ -885,6 +885,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 				tabSet.add(createScrollPaneFromPlots(healthAgePlots, "Health: age/gender", 2));
 
+				// mental health plots
 				Set<JInternalFrame> healthMentalAgePlots = new LinkedHashSet<>();
 				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
 					int ageFrom = ageFilter.getAgeFrom();
@@ -892,9 +893,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 
 					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
 					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
-					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhm", true);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthWbScore0to36", true);
 					maleCS.setFilter(maleAgeFilter);
-					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDhm", true);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthWbScore0to36", true);
 					femaleCS.setFilter(femaleAgeFilter);
 
 					TimeSeriesSimulationPlotter healthMentalAgePlotter = new TimeSeriesSimulationPlotter("Psychological distress score by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
@@ -983,6 +984,81 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					}
 
 				tabSet.add(createScrollPaneFromPlots(psychologicalDistressCasesEducationPlots, "Share in psychological distress (case-based): gender/education", 2));
+
+				// life satisfaction plots
+				Set<JInternalFrame> lifeSatisfactionAgePlots = new LinkedHashSet<>();
+				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
+					int ageFrom = ageFilter.getAgeFrom();
+					int ageTo = ageFilter.getAgeTo();
+
+					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
+					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDemLifeSatScore0to10", true);
+					maleCS.setFilter(maleAgeFilter);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDemLifeSatScore0to10", true);
+					femaleCS.setFilter(femaleAgeFilter);
+
+					TimeSeriesSimulationPlotter lifeSatisfactionAgePlotter = new TimeSeriesSimulationPlotter("Life satisfaction score by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
+					lifeSatisfactionAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
+					lifeSatisfactionAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
+					lifeSatisfactionAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("lifeSatisfactionMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					lifeSatisfactionAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("lifeSatisfactionFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+
+					updateChartSet.add(lifeSatisfactionAgePlotter);
+					lifeSatisfactionAgePlots.add(lifeSatisfactionAgePlotter);
+				}
+
+				tabSet.add(createScrollPaneFromPlots(lifeSatisfactionAgePlots, "Life Satisfaction score: age/gender", 2));
+
+				// health plots
+				Set<JInternalFrame> healthMCSAgePlots = new LinkedHashSet<>();
+				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
+					int ageFrom = ageFilter.getAgeFrom();
+					int ageTo = ageFilter.getAgeTo();
+
+					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
+					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthMentalMcs", true);
+					maleCS.setFilter(maleAgeFilter);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthMentalMcs", true);
+					femaleCS.setFilter(femaleAgeFilter);
+
+					TimeSeriesSimulationPlotter healthMCSAgePlotter = new TimeSeriesSimulationPlotter("Mental health by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
+					healthMCSAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
+					healthMCSAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
+					healthMCSAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("healthMCSMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					healthMCSAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("healthMCSFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+
+					updateChartSet.add(healthMCSAgePlotter);
+					healthMCSAgePlots.add(healthMCSAgePlotter);
+				}
+
+				tabSet.add(createScrollPaneFromPlots(healthMCSAgePlots, "Mental health MCS score: age/gender", 2));
+
+				Set<JInternalFrame> healthPCSAgePlots = new LinkedHashSet<>();
+				for (AgeGroupCSfilter ageFilter : healthMentalAgeGroupFilterSet) {
+					int ageFrom = ageFilter.getAgeFrom();
+					int ageTo = ageFilter.getAgeTo();
+
+					MaleAgeGroupCSfilter maleAgeFilter = new MaleAgeGroupCSfilter(ageFrom, ageTo);
+					FemaleAgeGroupCSfilter femaleAgeFilter = new FemaleAgeGroupCSfilter(ageFrom, ageTo);
+					Weighted_CrossSection.Double maleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthPhysicalPcs", true);
+					maleCS.setFilter(maleAgeFilter);
+					Weighted_CrossSection.Double femaleCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHealthPhysicalPcs", true);
+					femaleCS.setFilter(femaleAgeFilter);
+
+					TimeSeriesSimulationPlotter healthPCSAgePlotter = new TimeSeriesSimulationPlotter("Physical health by age: " + ageFilter.getAgeFrom() + " - " + ageFilter.getAgeTo(), "");
+					healthPCSAgePlotter.addSeries("males", new Weighted_MeanArrayFunction(maleCS), null, colorArrayList.get(0), false);
+					healthPCSAgePlotter.addSeries("females", new Weighted_MeanArrayFunction(femaleCS), null, colorArrayList.get(1), false);
+					healthPCSAgePlotter.addSeries("Validation males", validator, Validator.DoublesVariables.valueOf("healthPCSMale_" + ageFrom + "_" + ageTo), colorArrayList.get(0), true);
+					healthPCSAgePlotter.addSeries("Validation females", validator, Validator.DoublesVariables.valueOf("healthPCSFemale_" + ageFrom + "_" + ageTo), colorArrayList.get(1), true);
+
+					updateChartSet.add(healthPCSAgePlotter);
+					healthPCSAgePlots.add(healthPCSAgePlotter);
+				}
+				
+				tabSet.add(createScrollPaneFromPlots(healthPCSAgePlots, "Physical health PCS score: age/gender", 2));
+
 				/*
 				TimeSeriesSimulationPlotter disabledAgePlotter = new TimeSeriesSimulationPlotter("Proportion of long-term sick or disabled by age & gender", "");
 			    disabledAgePlotter.setName("Disabled: age/gender");
@@ -1198,6 +1274,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				TimeSeriesSimulationPlotter supplyPlotter = new TimeSeriesSimulationPlotter("Labour supply by education", "Yearly hours worked");		//'yo' means "years old"
 				int colorCounter = 0;
 				for(Education edu: Education.values()) {
+					if (Education.InEducation.equals(edu)) {
+						continue;
+					}
 					FlexibleInLabourSupplyByEducationFilter eduFilter = new FlexibleInLabourSupplyByEducationFilter(edu);
 					Weighted_CrossSection.Double supplyCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getLabourSupplyHoursYearly", true);
 					supplyCS.setFilter(eduFilter);
@@ -1220,14 +1299,17 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					earningsPlotter = new IndividualBarSimulationPlotter("Yearly Gross Earnings by Education and Region (excludes non-workers)", "Euro");
 				}
 
-				for(Region region: Parameters.getCountryRegions()) {
-		    		for(Education edu: Education.values()) {
-						RegionEducationWorkingCSfilter regionEduWorkingFilter = new RegionEducationWorkingCSfilter(region, edu);
-						Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true);
-						wagesCS.setFilter(regionEduWorkingFilter);
-						earningsPlotter.addSources("(" + region.getName() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), colorOfEducation(edu));
+					for(Region region: Parameters.getCountryRegions()) {
+			    		for(Education edu: Education.values()) {
+							if (Education.InEducation.equals(edu)) {
+								continue;
+							}
+							RegionEducationWorkingCSfilter regionEduWorkingFilter = new RegionEducationWorkingCSfilter(region, edu);
+							Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true);
+							wagesCS.setFilter(regionEduWorkingFilter);
+							earningsPlotter.addSources("(" + region.getName() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), colorOfEducation(edu));
+						}
 					}
-				}
 				earningsPlotter.setName("Gross Earnings");
 			    updateChartSet.add(earningsPlotter);			//Add to set to be updated in buildSchedule method
 				tabSet.add(earningsPlotter);
@@ -1243,16 +1325,19 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				else {
 					grossEarningsByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("Yearly Gross Earnings by Gender And Education", "Euro");
 				}
-				for(Education edu: Education.values()) {
-					for (Gender gender : Gender.values()) {
-						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
-						Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true); // Note: these are nominal values for each simulated year
-						wagesCS.setFilter(genderEducationWorkingFilter);
-						grossEarningsByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
-						grossEarningsByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("grossEarnings_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
-						colorCounter++;
+					for(Education edu: Education.values()) {
+						if (Education.InEducation.equals(edu)) {
+							continue;
+						}
+						for (Gender gender : Gender.values()) {
+							GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
+							Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getGrossEarningsYearly", true); // Note: these are nominal values for each simulated year
+							wagesCS.setFilter(genderEducationWorkingFilter);
+							grossEarningsByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
+							grossEarningsByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("grossEarnings_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
+							colorCounter++;
+						}
 					}
-				}
 				grossEarningsByGenderAndEducationPlotter.setName("Gross Earnings by Gender / Education");
 				updateChartSet.add(grossEarningsByGenderAndEducationPlotter);
 				tabSet.add(grossEarningsByGenderAndEducationPlotter);
@@ -1267,16 +1352,19 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				else {
 					hourlyWagesByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("Hourly Wages by Gender And Education", "Euro");
 				}
-				for(Education edu: Education.values()) {
-					for (Gender gender : Gender.values()) {
-						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
-						Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHourlyWageRate1", true); // Note: these are nominal values for each simulated year
-						wagesCS.setFilter(genderEducationWorkingFilter);
-						hourlyWagesByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
-						hourlyWagesByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("hourlyWage_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
-						colorCounter++;
+					for(Education edu: Education.values()) {
+						if (Education.InEducation.equals(edu)) {
+							continue;
+						}
+						for (Gender gender : Gender.values()) {
+							GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
+							Weighted_CrossSection.Double wagesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getHourlyWageRate1", true); // Note: these are nominal values for each simulated year
+							wagesCS.setFilter(genderEducationWorkingFilter);
+							hourlyWagesByGenderAndEducationPlotter.addSeries("(" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(wagesCS), null, colorArrayList.get(colorCounter), false);
+							hourlyWagesByGenderAndEducationPlotter.addSeries("Validation (" + gender + ", " + edu + ")", validator, Validator.DoublesVariables.valueOf("hourlyWage_"+ gender +"_"+ edu), colorArrayList.get(colorCounter), true);
+							colorCounter++;
+						}
 					}
-				}
 				hourlyWagesByGenderAndEducationPlotter.setName("Hourly Wages by Gender / Education");
 				updateChartSet.add(hourlyWagesByGenderAndEducationPlotter);
 				tabSet.add(hourlyWagesByGenderAndEducationPlotter);
@@ -1402,6 +1490,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					EDIByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("EDI by Gender And Education", "Euro");
 				}
 				for(Education edu: Education.values()) {
+					if (Education.InEducation.equals(edu)) {
+						continue;
+					}
 					for (Gender gender : Gender.values()) {
 						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
 						Weighted_CrossSection.Double EDIWorkingCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getEquivalisedDisposableIncomeYearly", true); // Note: these are nominal values for each simulated year
@@ -1431,6 +1522,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					DispIncByGenderAndEducationPlotter = new TimeSeriesSimulationPlotter("Disp income by Gender And Education", "Euro");
 				}
 				for(Education edu: Education.values()) {
+					if (Education.InEducation.equals(edu)) {
+						continue;
+					}
 					for (Gender gender : Gender.values()) {
 						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
 						Weighted_CrossSection.Double DispIncWorkingCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDisposableIncomeMonthly", true); // Note: these are nominal values for each simulated year
@@ -1450,104 +1544,6 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 				tabSet.add(DispIncByGenderAndEducationPlotter);
 			}
 
-		    if (securityIndex) {
-
-		    	/*
-		    	Set<JInternalFrame> sIndexPyramidPlots = new LinkedHashSet<>();
-		    	Weighted_PyramidPlotter sIndexAgeGenderPlotter = new Weighted_PyramidPlotter();
-		    	Weighted_CrossSection.Double[] populationData = new Weighted_CrossSection.Double[2];
-				Weighted_CrossSection.Double maleAgesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndex);
-				maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
-				populationData[0] = maleAgesCS;
-				Weighted_CrossSection.Double femaleAgesCS = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndex);
-				femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female));
-				populationData[1] = femaleAgesCS;
-
-				sIndexAgeGenderPlotter.setScalingFactor(model.getScalingFactor());
-				sIndexAgeGenderPlotter.addCollectionSource(populationData);
-
-				updateChartSet.add(sIndexAgeGenderPlotter);
-				sIndexPyramidPlots.add(sIndexAgeGenderPlotter);
-
-				tabSet.add(createScrollPaneFromPlots(sIndexPyramidPlots, "SIndex Pyramid", 1));
-		    	 */
-
-				//Filters
-				ValidPersonSIndexCSfilter validSIndexFilter = new ValidPersonSIndexCSfilter();
-				ValidPersonAgeGenderSIndexCSfilter validSIndexMalesFilter = new ValidPersonAgeGenderSIndexCSfilter(0,100,Gender.Male);
-				ValidPersonAgeGenderSIndexCSfilter validSIndexFemalesFilter = new ValidPersonAgeGenderSIndexCSfilter(0,100,Gender.Female);
-				ValidPersonAgeGenderSIndexCSfilter validSIndexMales_50_100_Filter = new ValidPersonAgeGenderSIndexCSfilter(50,100,Gender.Male);
-				ValidPersonAgeGenderSIndexCSfilter validSIndexFemales_50_100_Filter = new ValidPersonAgeGenderSIndexCSfilter(50,100,Gender.Female);
-				ValidPersonAgeSIndexCSfilter validSIndexAge_0_29_Filter = new ValidPersonAgeSIndexCSfilter(0,29);
-				ValidPersonAgeSIndexCSfilter validSIndexAge_30_49_Filter = new ValidPersonAgeSIndexCSfilter(30,49);
-				ValidPersonAgeSIndexCSfilter validSIndexAge_50_100_Filter = new ValidPersonAgeSIndexCSfilter(50,100);
-
-
-				//Histogram
-				Set<JInternalFrame> histogramSIndex = new LinkedHashSet<>();
-				Weighted_HistogramSimulationPlotter sIndexHistPlotter = new Weighted_HistogramSimulationPlotter("Security Index (" + model.getsIndexTimeWindow() + " years lag)", "Value", histogramType.getHistogramType(), numberOfHistogramBins, 0., 5., true);
-				Weighted_CrossSection.Double sIndexCS = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS.setFilter(validSIndexFilter);
-				sIndexHistPlotter.addCollectionSource("Security Index", sIndexCS);
-				updateChartSet.add(sIndexHistPlotter);
-				histogramSIndex.add(sIndexHistPlotter);
-
-
-				//Time series plot
-				TimeSeriesSimulationPlotter sIndexTSPlot = new TimeSeriesSimulationPlotter("Security Index (" + model.getsIndexTimeWindow() + " years lag) \n By Gender", "");
-				sIndexTSPlot.addSeries("Everyone", new Weighted_MeanArrayFunction(sIndexCS));
-
-				Weighted_CrossSection.Double sIndexCS_males = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_males.setFilter(validSIndexMalesFilter);
-
-				Weighted_CrossSection.Double sIndexCS_females = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_females.setFilter(validSIndexFemalesFilter);
-
-				Weighted_CrossSection.Double sIndexCS_males_50_100 = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_males_50_100.setFilter(validSIndexMales_50_100_Filter);
-
-				Weighted_CrossSection.Double sIndexCS_females_50_100 = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_females_50_100.setFilter(validSIndexFemales_50_100_Filter);
-
-				sIndexTSPlot.addSeries("Male", new Weighted_MeanArrayFunction(sIndexCS_males)); //But note this is current age, while s Index refer to t-specified_time_window_for_s_index
-				sIndexTSPlot.addSeries("Female", new Weighted_MeanArrayFunction(sIndexCS_females));
-	//			sIndexTSPlot.addSeries("Female above 50", new Weighted_MeanArrayFunction(sIndexCS_females_50_100));
-	//			sIndexTSPlot.addSeries("Male above 50", new Weighted_MeanArrayFunction(sIndexCS_males_50_100));
-
-
-				//By region:
-				TimeSeriesSimulationPlotter sIndexTSPlotRegion = new TimeSeriesSimulationPlotter("Security Index (" + model.getsIndexTimeWindow() + " years lag) \n By Region", "");
-				for(Region region: Parameters.getCountryRegions()) {
-					ValidPersonRegionSIndexCSfilter validSIndexRegion = new ValidPersonRegionSIndexCSfilter(region);
-					Weighted_CrossSection.Double sIndexCSRegion = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-					sIndexCSRegion.setFilter(validSIndexRegion);
-					sIndexTSPlotRegion.addSeries(region.getName(), new Weighted_MeanArrayFunction(sIndexCSRegion));
-				}
-
-				//By age
-				TimeSeriesSimulationPlotter sIndexTSPlotAge = new TimeSeriesSimulationPlotter("Security Index (" + model.getsIndexTimeWindow() + " years lag) \n By Age", "");
-				Weighted_CrossSection.Double sIndexCS_Age_0_29 = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_Age_0_29.setFilter(validSIndexAge_0_29_Filter);
-				Weighted_CrossSection.Double sIndexCS_Age_30_49 = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_Age_30_49.setFilter(validSIndexAge_30_49_Filter);
-				Weighted_CrossSection.Double sIndexCS_Age_50_100 = new Weighted_CrossSection.Double(model.getPersons(), Person.DoublesVariables.sIndexNormalised);
-				sIndexCS_Age_50_100.setFilter(validSIndexAge_50_100_Filter);
-				sIndexTSPlotAge.addSeries("Under 30", new Weighted_MeanArrayFunction(sIndexCS_Age_0_29));
-				sIndexTSPlotAge.addSeries("30 - 49", new Weighted_MeanArrayFunction(sIndexCS_Age_30_49));
-				sIndexTSPlotAge.addSeries("Above 50", new Weighted_MeanArrayFunction(sIndexCS_Age_50_100));
-
-
-				updateChartSet.add(sIndexTSPlot);
-				updateChartSet.add(sIndexTSPlotRegion);
-				updateChartSet.add(sIndexTSPlotAge);
-				histogramSIndex.add(sIndexTSPlot);
-				histogramSIndex.add(sIndexTSPlotRegion);
-				histogramSIndex.add(sIndexTSPlotAge);
-
-				tabSet.add(createScrollPaneFromPlots(histogramSIndex, "Security Index", 2));
-
-			}
-		    
 		    // WORKING HOURS PYRAMID GRAPH
 		    if (workingHoursPyramid) {
 		    	Set<JInternalFrame> workingHoursPyramidPlots = new LinkedHashSet<JInternalFrame>();
@@ -1555,10 +1551,10 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			    // Please note that the Pyramid plotter requires a Weighted_CrossSection[2]
 			    // The exact type (int, double etc) must match the variable in Person  
 			    Weighted_CrossSection.Integer[] populationData = new Weighted_CrossSection.Integer[2];
-			    Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "liwwh", false);
+			    Weighted_CrossSection.Integer maleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "labEmpNyear", false);
 			    maleAgesCS.setFilter(new GenderCSfilter(Gender.Male));
 			    populationData[0] = maleAgesCS; 
-			    Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "liwwh", false);
+			    Weighted_CrossSection.Integer femaleAgesCS = new Weighted_CrossSection.Integer(model.getPersons(), Person.class, "labEmpNyear", false);
 			    femaleAgesCS.setFilter(new GenderCSfilter(Gender.Female)); 
 			    populationData[1] = femaleAgesCS; 
 			    
@@ -1651,6 +1647,9 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 		}
 		else if(edu.equals(Education.High)) {
 			return Color.WHITE;
+		}
+		else if(edu.equals(Education.InEducation)) {
+			return Color.GRAY;
 		}
 		else throw new IllegalArgumentException("ERROR - no color is specified for " + edu + " in SimPathsObserver class!");
 	}

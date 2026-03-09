@@ -20,7 +20,7 @@ public class MaleAgeGroupEducationCSfilter implements ICollectionFilter{
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		return ( person.getDgn().equals(Gender.Male) && (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) && person.getDeh_c3().equals(education) );
+		return ( person.getDemMaleFlag().equals(Gender.Male) && (person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) && person.getDeh_c4().equals(education) );
 	}
 	
 }

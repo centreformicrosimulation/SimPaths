@@ -5,20 +5,20 @@ import simpaths.model.Person;
 import simpaths.model.enums.Gender;
 
 public class GenderCSfilter  implements ICollectionFilter{
-	private final Gender gender;
+	private final Gender demSex;
 	
-	public GenderCSfilter(Gender gender) {
+	public GenderCSfilter(Gender demSex) {
 		super();
-		this.gender = gender;
+		this.demSex = demSex;
 	}
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		return (person.getDgn().equals(gender));
+		return (person.getDemMaleFlag().equals(demSex));
 	}
 	
 	public Gender getGender() {
-		return gender;
+		return demSex;
 	}
 	
 }

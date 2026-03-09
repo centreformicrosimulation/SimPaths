@@ -2,11 +2,19 @@
 
 by Matteo Richiardi, Patryk Bronka, Justin van de Ven
 
-SimPaths is an open-source microsimulation framework for modelling individual and household life-course dynamics across health, labour market activity, family structure, and income. The framework is designed for country-specific implementations, with active support for the UK and Italy.
+## What is SimPaths and how to use it?
 
-## Documentation
+SimPaths is an open-source framework for modelling individual and household life course events across multiple domains. The framework projects life histories over time, developing detailed representations of career paths, family and intergenerational relationships, health, and financial circumstances. As a family of models, SimPaths offers a dynamic simulation of how life events evolve and interact within populations.
 
-Start here:
+SimPaths models currently exist for the UK, Greece, Hungary, Italy, and Poland. This page refers to the UK model; the other European models are available at the corresponding [SimPathsEU](https://github.com/centreformicrosimulation/SimPathsEU) page. 
+
+The entire SimPaths documentation is available on its [WikiPage](https://github.com/centreformicrosimulation/SimPaths/wiki), which includes: a detailed description of its building blocks; instructions on how to set up and run the model; information about contributing to the model's development.
+
+<!-- Projections for a workhorse model parameterised to the UK context are reported in [Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis* (No. CEMPA6/23), Centre for Microsimulation and Policy Analysis at the Institute for Social and Economic Research*](https://www.microsimulation.ac.uk/publications/publication-557738/), which closely reflect observed data throughout a 10-year validation window. -->
+
+
+<!--
+## Getting Started
 
 - [Documentation Home](docs/README.md)
 - [Getting Started](docs/getting-started.md)
@@ -34,8 +42,11 @@ mvn clean package
 
 This produces runnable jars at the repository root:
 
-- `singlerun.jar`
-- `multirun.jar`
+- `-c` Country ['UK' or 'IT']
+- `-s` Start year
+- `-g` [true/false] show/hide gui
+- `--rewrite-policy-schedule` Re-write policy schedule from detected policy files
+- `-Setup` do setup phases (creating input populations database) only
 
 ### 3. First setup run
 
@@ -69,4 +80,5 @@ Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for li
 
 ## License
 
-See `license.txt`.
+These branch naming conventions are designed to make it easy for our contributors to understand the purpose of each branch and maintain consistency within our repository. Please adhere to these conventions when creating branches for your contributions.
+-->

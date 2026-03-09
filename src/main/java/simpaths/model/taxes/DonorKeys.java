@@ -2,8 +2,6 @@ package simpaths.model.taxes;
 
 import simpaths.data.Parameters;
 
-import java.util.List;
-
 
 /**
  *
@@ -23,7 +21,7 @@ public class DonorKeys {
     private double hoursWorkedPerWeekMan, hoursWorkedPerWeekWoman;
     private Double originalIncomePerWeek = null;
     private Double secondIncomePerWeek = null;
-    private Double childcareCostPerWeek = null;
+    private Double xChildCareWeek = null;
     private double randomDraw = -1.0;  // random innovation used to select candidate for imputation - initialised to -1.0 results in averaging over set of "preferred candidates"
 
 
@@ -56,7 +54,7 @@ public class DonorKeys {
         return originalIncomePerWeek;
     }
     public Double getSecondIncomePerWeek() { return secondIncomePerWeek; }
-    public Double getChildcareCostPerWeek() { return childcareCostPerWeek; }
+    public Double getChildcareCostPerWeek() { return xChildCareWeek; }
     public double getHoursWorkedPerWeekMan() { return hoursWorkedPerWeekMan; }
     public double getHoursWorkedPerWeekWoman() { return hoursWorkedPerWeekWoman; }
 
@@ -75,7 +73,7 @@ public class DonorKeys {
 
         originalIncomePerWeek = function.getOriginalIncomePerWeek();
         secondIncomePerWeek = function.getSecondIncomePerWeek();
-        childcareCostPerWeek = function.getChildcareCostPerWeek();
+        xChildCareWeek = function.getChildcareCostPerWeek();
         simYear = function.getSimYear();
         priceYear = function.getPriceYear();
         keys = function.evaluateKeys();

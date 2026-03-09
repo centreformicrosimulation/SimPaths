@@ -17,7 +17,7 @@ public class MaleAgeGroupCSfilter implements ICollectionFilter{
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		return ( person.getDgn().equals(Gender.Male) && (person.getDag() >= ageFrom) && (person.getDag() <= ageTo) );
+		return ( person.getDemMaleFlag().equals(Gender.Male) && (person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) );
 	}
 	
 }
