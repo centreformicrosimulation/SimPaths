@@ -71,7 +71,5 @@ process_regression, process("FinancialDistress") sheet("FinancialDistress") ///
 	ifcond("${health1_if_condition}") 
 
 
-drop in_sample p 
-scalar drop r2_p N chi2 ll	
 drop regression_set
 macro drop _local
