@@ -1,6 +1,6 @@
 # Simulated Modules
 
-# 1. Ageing
+## 1. Ageing
 
 The first simulated process in each period increments the age of each simulated person by one year. Any dependent child that reaches an exogenously assumed “age of independence” (18 years-of-age in the parameterization for the UK) is extracted from their parental benefit unit and allocated to a new benefit unit. Individuals are then subject to a risk of death, based on age, gender and year specific probabilities that are commonly reported as components of official population projections. Death is simulated at the individual level but omitting single parent benefit units (to avoid the creation of orphans).
 
@@ -17,7 +17,7 @@ Individuals who have recently attained the assumed age of independence and were 
 
 
 
-# 2. Education
+## 2. Education
 The education module determines transitions into and out of student status. Students are assumed not to work and therefore do not enter the labour supply module. Individuals who leave education have their level of education re-evaluated and can become employed. 
 
 <br>
@@ -38,7 +38,7 @@ Individuals who cease to be students are assigned a level of education based on 
 
 
 
-# 3. Health 
+## 3. Health 
 
 The health module projects an individual’s health status, comprising both self-rated general health and mental health metrics (based on a clinically validated measure of psychological distress using a Likert scale and a caseness indicator), and determines whether an individual is long-term sick or disabled (in which case, he/she is not at risk of work and may require social care). 
 
@@ -85,7 +85,7 @@ The baseline measures of the level and caseness of psychological distress descri
 </details>
 
 
-# 4. Family composition
+## 4. Family composition
 
 The family composition module is the principal source of interactions between simulated agents in the model. The module projects the formation and dissolution of cohabiting relationships and fertility. Where a relationship forms, then spouses are selected via a matching process that is designed to reflect correlations between partners’ characteristics observed in survey data. The proportion of the population in a cohabiting relationship is, by default, aligned to the population aggregate in the years for which observational data is available, to account for changes in household structure introduced by the population alignment. 
 
@@ -225,7 +225,7 @@ The number of projected births is aligned to the number of newborns supplied by 
 </details>
 
 
-# 5. Social care
+## 5. Social care
 The social care module projects provision and receipt of social care activities for people in need of help due to poor health or advanced age. The module is designed to distinguish between formal and informal social care, and the social relationships associated with informal care. The social care module accounts for the time cost incurred by care providers with respect to informal care, and the financial cost incurred by care receivers with respect to formal care. 
 
 _Receipt of social care_  
@@ -252,7 +252,7 @@ Specifically, the model distinguishes between four population subgroups with res
 
 
 
-# 6 Investment income 
+## 6. Investment income 
 
 The investment income module projects income from investment returns and (private) pensions. The approach taken to project these measures of income depends upon the model variant considered for analysis. Where consumption/savings decisions are simulated using a structural behavioural framework, then asset income is projected based on accrued asset values and exogenously projected rates of return. Alternatively, computational burden of model projections can be economised by proxying non-labour income without explicitly projecting asset holdings. 
 
@@ -277,7 +277,7 @@ $r_{dl,t} + (r_{du,t} - r_{dl,t}) \phi_{i,t}$ otherwise
 where $i$ denotes the benefit unit and $t$ denotes time. $1 \ge \phi_{i,t} \ge 0$ denotes the (bounded) ratio of benefit unit debt to full-time potential earnings. Assuming $r_{du,t} \ge r_{dl,t}$ reflects a ‘soft constraint’ where interest rates increase with indebtedness.
 
 
-# 7. Labour income 
+## 7. Labour income 
 The labour income module projects potential (hourly) wage rates for each simulated adult in each year and their associated labour activity. Given potential wage rates, hours of paid employment by all adult members of a benefit unit are generated. Labour (gross) income is then determined by multiplying hours worked by the wage rate. 
 
 _Wage rates_  
@@ -343,7 +343,7 @@ _Alignment_
 When the default specification of SimPaths for projecting labour supply is used, the estimated utility of single men, single women, and couples is adjusted to align the aggregate employment rate to the employment rate observed in the data in the validation period. The final adjustment value is used in the subsequent periods, for which no data is available. This procedure accounts for the existence of unemployment in the real economy and the fact that labour supply decisions simulated using the random utility model assume no constraints on labour demand in the economy. 
 
 
-# 8. Disposable income 
+## 8. Disposable income 
 Disposable income is simulated by matching each simulated benefit unit in each projected period with a donor benefit unit reported by a tax-benefit reference database, following the procedure described by [van de Ven et al. (2022)](https://www.iser.essex.ac.uk/wp-content/uploads/files/working-papers/cempa/cempa3-22.pdf). The database stores details of taxes and benefits alongside associated demographic and private income characteristics for a sample of benefit units. This database could be populated from a wide range of sources. The approach was originally formulated to draw upon output data derived from the UK version of EUROMOD (UKMOD), and then extended to accommodate projections from any EUROMOD country. 
 
 The matching procedure for benefit units applies coarsened exact matching over a number of discrete-valued characteristics, followed by nearest-neighbour matching on a set of continuous variables. The nearest neighbour matching is performed with respect to Mahalanobis distance measures evaluated over multiple continuous valued characteristics. 
@@ -356,7 +356,7 @@ Finally, adjustments to account for public subsidies for the costs of (formal) s
  
 
 
-# 9. Consumption
+## 9. Consumption
 Given disposable income and household demographics, the consumption module projects measures of benefit unit expenditure. Where the model projects wealth, then a simple accounting identity is used to track the evolution of benefit unit assets through time. A regression-based homeownership process predicts if the primary residence is owned by either of the responsible adults in a benefit unit, in which case the benefit unit is considered to own its home. 
 
 _Non-discretionary expenditure_  
@@ -385,7 +385,7 @@ Although net wealth is not disaggregated in the model, the incidence of homeowne
 
 
 
-# 10. Mental health 
+## 10. Mental health 
 
 A secondary subjective-wellbeing process adjusts estimates obtained by the primary process to account for the effect of exposure to labour market transitions, such as moving in and out of employment and/or poverty. 
 Specifically, in the SimPaths model, method `Person.healthMentalHM2level()` corresponds to the Step 2 of such a mental health evaluation, as illustrated in the right half of the Figure 1 below:
@@ -401,6 +401,6 @@ The first and second processes for mental health in cases are combined, as illus
 
 
 
-# 11 Statistical display 
+## 11. Statistical display 
 At the end of each simulated year, SimPaths generates a series of year specific summary statistics. All of these statistics are saved for post-simulation analysis, with a subset of results also reported graphically as the simulation proceeds. 
 

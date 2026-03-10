@@ -10,7 +10,7 @@ The most recent parametrisation of the model is [stored on Github](https://githu
 
 
 
-# 1. Description of the tax and benefit system display </b></summary>
+## 1. Description of the tax and benefit system display
 
 Description of the tax and benefit system is provided through UKMOD output files stored in the [EUROMODoutput](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input/EUROMODoutput/) folder. Version developed on the basis of test data, which can be shared on GitHub, is available in the [training subfolder](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input/EUROMODoutput/training). 
 
@@ -18,7 +18,7 @@ To learn more about UKMOD, visit [UKMOD's website](https://www.microsimulation.a
 
 
 
-# 2. Model parameters 
+## 2. Model parameters 
 
 Source: [Github](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input).
 

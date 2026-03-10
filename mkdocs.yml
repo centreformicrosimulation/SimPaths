@@ -116,7 +116,7 @@ nav:
       - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
       - Uncertainty Analysis: user-guide/uncertainty-analysis.md
 
-  - Development:
+  - Developer Guide:
       - developer-guide/index.md
       - Working in GitHub: developer-guide/working-in-github.md
       - JAS-mine Architecture:
