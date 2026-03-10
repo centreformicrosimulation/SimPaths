@@ -28,6 +28,14 @@ public class Innovations {
         }
     }
 
+    public Innovations(int nDoubleInnovs, int nSingleDrawDoubleInnovs, long seed) {
+        this(nDoubleInnovs, seed);
+        singleDrawDoubleInnovs = new double[nSingleDrawDoubleInnovs];
+        for (int ii = 0; ii < nSingleDrawDoubleInnovs; ii++) {
+            singleDrawDoubleInnovs[ii] = generator.nextDouble();
+        }
+    }
+
     public void getNewDoubleDraws() {
         for (int ii = 0; ii < doubleInnovs.length; ii++) {
             doubleInnovs[ii] = generator.nextDouble();

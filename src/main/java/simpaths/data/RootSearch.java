@@ -1,5 +1,9 @@
 package simpaths.data;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class RootSearch {
 
     private int nn;                     // number of arguments of function - currently limited to 1 dimension
@@ -10,6 +14,38 @@ public class RootSearch {
     double[] target;                    // starting co-ordinates at entry and co-ordinates of root at exit
     IEvaluation function;               // function to find root for
     boolean targetAltered = false;      // indicates if target was altered from starting value
+    private boolean bracketed = false;
+    private Double lowerEvalX = null;
+    private Double lowerEvalFx = null;
+    private Double upperEvalX = null;
+    private Double upperEvalFx = null;
+    private int iterationCount = 0;
+    private final List<IterationInfo> iterationHistory = new ArrayList<>();
+
+    public static final class IterationInfo {
+        private final int iteration;        // 1-based iteration index (0 for initial evaluation)
+        private final double x;             // current abscissa (since 1-D)
+        private final double fx;            // function value at x
+        private final double step;          // |x_k - x_{k-1}| (NaN for first iter)
+        private final boolean funcTolMet;   // |f(x)| <= epsFunction ?
+        private final boolean ordTolMet;    // step <= epsOrdinates ?
+
+        public IterationInfo(int iteration, double x, double fx, double step,
+                             boolean funcTolMet, boolean ordTolMet) {
+            this.iteration = iteration;
+            this.x = x;
+            this.fx = fx;
+            this.step = step;
+            this.funcTolMet = funcTolMet;
+            this.ordTolMet = ordTolMet;
+        }
+        public int getIteration() { return iteration; }
+        public double getX() { return x; }
+        public double getFx() { return fx; }
+        public double getStep() { return step; }
+        public boolean isFuncTolMet() { return funcTolMet; }
+        public boolean isOrdTolMet() { return ordTolMet; }
+    }
 
     public RootSearch(double[] lowerBounds, double[] upperBounds, double[] target, IEvaluation function, double epsOrdinates, double epsFunction) {
         this.lowerBounds = lowerBounds;
@@ -24,12 +60,16 @@ public class RootSearch {
     }
 
     public void evaluate() {
+        iterationHistory.clear();
+        iterationCount = 0;
 
         double[] xg, xn=null, xp=null;
         double fg, fn, fp;
 
         xg = target;
         fg = function.evaluate(xg);
+        iterationHistory.add(new IterationInfo(0, xg[0], fg, Double.NaN,
+                Math.abs(fg) <= epsFunction, false));
         if (Math.abs(fg) > epsFunction) {
             // need to conduct search
 
@@ -41,16 +81,23 @@ public class RootSearch {
             fn = bounds.getFn();
             xp = bounds.getXp();
             fp = bounds.getFp();
-            if (bounds.getBracketed()) {
+            lowerEvalX = xn[0];
+            lowerEvalFx = fn;
+            upperEvalX = xp[0];
+            upperEvalFx = fp;
+            bracketed = bounds.getBracketed();
+            if (bracketed) {
                 target = zbrent(xn, xp, fn, fp);
             } else {
-                if (Math.abs(fn) < Math.abs(fp)) {
-                    target = xn;
-                } else {
-                    target = xp;
-                }
+                final boolean chooseNeg = Math.abs(fn) < Math.abs(fp);
+                target = chooseNeg ? xn : xp;
+                final double fChosen = chooseNeg ? fn : fp;
+                iterationHistory.add(new IterationInfo(
+                        iterationHistory.size(), target[0], fChosen, Double.NaN,
+                        Math.abs(fChosen) <= epsFunction, true));
             }
         }
+        iterationCount = iterationHistory.isEmpty() ? 0 : iterationHistory.get(iterationHistory.size() - 1).getIteration();
     }
 
     private double[] bisection(double[] xn, double[] xg, double[] xp, double fn, double fg, double fp) {
@@ -63,6 +110,7 @@ public class RootSearch {
 
         // start search
         int nn = 0;
+        Double prevX = null;
         while ( (euclideanDistance(xgg, xpp) > epsOrdinates) || (Math.abs(fgg) > epsFunction) ) {
 
             if (fgg < 0.0) {
@@ -73,7 +121,14 @@ public class RootSearch {
             xgg = midPoint(xnn, xpp);
             fgg = function.evaluate(xgg);
 
+            double currX = xgg[0];
+            double step = (prevX == null) ? Double.NaN : Math.abs(currX - prevX);
+            boolean funcOk = Math.abs(fgg) <= epsFunction;
+            boolean ordOk = (prevX != null) && step <= epsOrdinates;
+
             nn++;
+            iterationHistory.add(new IterationInfo(nn, currX, fgg, step, funcOk, ordOk));
+            prevX = currX;
             if (nn>ITMAX)
                 throw new RuntimeException("Root search failed to identify solution");
         }
@@ -95,6 +150,8 @@ public class RootSearch {
         final double EPS = 3.0 * Math.ulp(1.0);
         double aa=xn[0], bb=xp[0], cc=xp[0], dd=0.0, ee=0.0, pp, qq, rr, ss, tol1, xm;
         double fa=fn, fb=fp, fc=fp;
+        Double prevX = null;
+        int it = (iterationHistory.isEmpty() ? 0 : iterationHistory.get(iterationHistory.size() - 1).getIteration());
         for (int iter=0; iter<ITMAX; iter++) {
             if ((fb > 0.0 && fc > 0.0) || (fb < 0.0 && fc < 0.0)) {
                 cc=aa;      //Rename a, b, c and adjust bounding interval d.
@@ -114,6 +171,11 @@ public class RootSearch {
             xm = 0.5 * (cc - bb);
             if (Math.abs(xm) <= tol1 || fb == 0.0) {
                 bbv[0] = bb;
+                double step = (prevX == null) ? Double.NaN : Math.abs(bb - prevX);
+                boolean funcOk = Math.abs(fb) <= epsFunction;
+                boolean ordOk = (prevX != null) && step <= epsOrdinates;
+                it++;
+                iterationHistory.add(new IterationInfo(it, bb, fb, step, funcOk, ordOk));
                 return bbv;
             }
             if (Math.abs(ee) >= tol1 && Math.abs(fa) > Math.abs(fb)) {
@@ -157,6 +219,12 @@ public class RootSearch {
             }
             bbv[0] = bb;
             fb=function.evaluate(bbv);
+            double step = (prevX == null) ? Double.NaN : Math.abs(bb - prevX);
+            boolean funcOk = Math.abs(fb) <= epsFunction;
+            boolean ordOk = (prevX != null) && step <= epsOrdinates;
+            it++;
+            iterationHistory.add(new IterationInfo(it, bb, fb, step, funcOk, ordOk));
+            prevX = bb;
         }
         throw new RuntimeException("Maximum number of iterations exceeded in zbrent");
     }
@@ -187,6 +255,13 @@ public class RootSearch {
 
     public boolean isTargetAltered() {return targetAltered;}
     public double[] getTarget() {return target;}
+    public boolean isBracketed() {return bracketed;}
+    public Double getLowerEvalX() {return lowerEvalX;}
+    public Double getLowerEvalFx() {return lowerEvalFx;}
+    public Double getUpperEvalX() {return upperEvalX;}
+    public Double getUpperEvalFx() {return upperEvalFx;}
+    public int getIterationCount() {return iterationCount;}
+    public List<IterationInfo> getIterationHistory() {return Collections.unmodifiableList(iterationHistory);}
 
 
 }

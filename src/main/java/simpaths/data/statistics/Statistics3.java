@@ -19,115 +19,152 @@ public class Statistics3 {
     private PanelEntityKey key = new PanelEntityKey(1L);
 
     @Column(name= "social_care_adj_factor")
-    private double socialCareAdjustmentFactor;
+    private double careAdj;
 
     @Column(name = "partnership_adj_factor")
-    private double partnershipAdjustmentFactor;
+    private double demPartnerAdj;
 
     @Column(name = "share_cohabiting_sim")
-    private double shareCohabitingSimulated;
+    private double demPartnerSimShare;
 
     @Column(name = "share_cohabiting_tgt")
-    private double shareCohabitingTarget;
+    private double demPartnerTargetShare;
 
     @Column(name = "fertility_adj_factor")
-    private double fertilityAdjustmentFactor;
+    private double demFertAdj;
 
     @Column(name = "fertiilty_rate_sim")
-    private double fertilityRateSimulated;
+    private double demFertRateSim;
 
     @Column(name = "fertiilty_rate_tgt")
-    private double fertilityRateTarget;
+    private double demFertRateTarget;
 
     @Column(name = "utility_adj_factor_smales")
-    private double utilityAdjustmentFactorSmales;
+    private double demUtilAdjSingleM;
+
+    @Column(name = "utility_adj_factor_ac_males")
+    private double demUtilAdjSingleACM;
 
     @Column(name = "utility_adj_factor_sfemales")
-    private double utilityAdjustmentFactorSfemales;
+    private double demUtilAdjSingleF;
+
+    @Column(name = "utility_adj_factor_ac_females")
+    private double demUtilAdjSingleACF;
 
     @Column(name = "utility_adj_factor_couples")
-    private double utilityAdjustmentFactorCouples;
+    private double demUtilAdjCouple;
+
+    @Column(name = "utility_adj_factor_smales_dep")
+    private double demUtilAdjSDepM;
+
+    @Column(name = "utility_adj_factor_sfemales_dep")
+    private double demUtilAdjSDepF;
 
     public double getPartnershipAdjustmentFactor() {
-        return partnershipAdjustmentFactor;
+        return demPartnerAdj;
     }
 
-    public void setPartnershipAdjustmentFactor(double partnershipAdjustmentFactor) {
-        this.partnershipAdjustmentFactor = partnershipAdjustmentFactor;
+    public void setPartnershipAdjustmentFactor(double demPartnerAdj) {
+        this.demPartnerAdj = demPartnerAdj;
     }
 
     public double getFertilityAdjustmentFactor() {
-        return fertilityAdjustmentFactor;
+        return demFertAdj;
     }
 
     public void setFertilityAdjustmentFactor(double factor) {
-        this.fertilityAdjustmentFactor = factor;
+        this.demFertAdj = factor;
     }
 
     public double getUtilityAdjustmentFactorSmales() {
-        return utilityAdjustmentFactorSmales;
+        return demUtilAdjSingleM;
     }
 
-    public void setUtilityAdjustmentFactorSmales(double utilityAdjustmentFactorSmales) {
-        this.utilityAdjustmentFactorSmales = utilityAdjustmentFactorSmales;
+    public void setUtilityAdjustmentFactorSmales(double demUtilAdjSingleM) {
+        this.demUtilAdjSingleM = demUtilAdjSingleM;
+    }
+
+    public double getUtilityAdjustmentFactorACmales() {return demUtilAdjSingleACM; }
+
+    public void setUtilityAdjustmentFactorACmales(double demUtilAdjACM) {
+        this.demUtilAdjSingleACM = demUtilAdjACM;
     }
 
     public double getUtilityAdjustmentFactorSfemales() {
-        return utilityAdjustmentFactorSfemales;
+        return demUtilAdjSingleF;
     }
 
-    public void setUtilityAdjustmentFactorSfemales(double utilityAdjustmentFactorSfemales) {
-        this.utilityAdjustmentFactorSfemales = utilityAdjustmentFactorSfemales;
+    public void setUtilityAdjustmentFactorSfemales(double demUtilAdjSingleF) {
+        this.demUtilAdjSingleF = demUtilAdjSingleF;
+    }
+
+    public double getUtilityAdjustmentFactorACfemales() { return demUtilAdjSingleACF;}
+
+    public void setUtilityAdjustmentFactorACfemales(double demUtilAdjACF) {
+        this.demUtilAdjSingleACF = demUtilAdjACF;
     }
 
     public double getUtilityAdjustmentFactorCouples() {
-        return utilityAdjustmentFactorCouples;
+        return demUtilAdjCouple;
     }
 
-    public void setUtilityAdjustmentFactorCouples(double utilityAdjustmentFactorCouples) {
-        this.utilityAdjustmentFactorCouples = utilityAdjustmentFactorCouples;
+    public void setUtilityAdjustmentFactorCouples(double demUtilAdjCouple) {
+        this.demUtilAdjCouple = demUtilAdjCouple;
     }
 
-    public double getSocialCareAdjustmentFactor() { return socialCareAdjustmentFactor; }
+    public double getUtilityAdjustmentFactorSDepFemales() {return demUtilAdjSDepF;}
 
-    public void setSocialCareAdjustmentFactor(double factor) {socialCareAdjustmentFactor = factor;}
+    public void setUtilityAdjustmentFactorSDepFemales(double demUtilAdjSDepF) {
+        this.demUtilAdjSDepF = demUtilAdjSDepF;
+    }
 
-    public double getShareCohabitingSimulated() {return shareCohabitingSimulated;}
+    public double getUtilityAdjustmentFactorSDepMales(){return demUtilAdjSDepM;}
 
-    public void setShareCohabitingSimulated(double shareCohabitingSimulated) { this.shareCohabitingSimulated = shareCohabitingSimulated; }
+    public void setUtilityAdjustmentFactorSDepMales(double demUtilAdjSDepM) {
+        this.demUtilAdjSDepM = demUtilAdjSDepM;
+    }
+
+    public double getSocialCareAdjustmentFactor() { return careAdj; }
+
+    public void setSocialCareAdjustmentFactor(double factor) {
+        careAdj = factor;}
+
+    public double getShareCohabitingSimulated() {return demPartnerSimShare;}
+
+    public void setShareCohabitingSimulated(double demPartnerSimShare) { this.demPartnerSimShare = demPartnerSimShare; }
 
     public double getFertilityRateSimulated() {
-        return fertilityRateSimulated;
+        return demFertRateSim;
     }
 
-    public void setFertilityRateSimulated(double fertilityRateSimulated) {
-        this.fertilityRateSimulated = fertilityRateSimulated;
+    public void setFertilityRateSimulated(double demFertRateSim) {
+        this.demFertRateSim = demFertRateSim;
     }
 
     public double getFertilityRateTarget() {
-        return fertilityRateTarget;
+        return demFertRateTarget;
     }
 
-    public void setFertilityRateTarget(double fertilityRateTarget) {
-        this.fertilityRateTarget = fertilityRateTarget;
+    public void setFertilityRateTarget(double demFertRateTarget) {
+        this.demFertRateTarget = demFertRateTarget;
     }
 
     public double getShareCohabitingTarget() {
-        return shareCohabitingTarget;
+        return demPartnerTargetShare;
     }
 
-    public void setShareCohabitingTarget(double shareCohabitingTarget) {
-        this.shareCohabitingTarget = shareCohabitingTarget;
+    public void setShareCohabitingTarget(double demPartnerTargetShare) {
+        this.demPartnerTargetShare = demPartnerTargetShare;
     }
 
     public void update(SimPathsModel model) {
 
         // cohabitation
         double val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.PartnershipAdjustment) +
-                Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.PartnershipAlignment);
+                model.getPartnershipAdjustment(model.getYear()-1);
         setPartnershipAdjustmentFactor(val);
         long numPersonsWhoCanHavePartner = model.getPersons().stream()
-                .filter(person -> person.getDag() >= Parameters.MIN_AGE_COHABITATION)
+                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .count();
         long numPersonsPartnered = model.getPersons().stream()
                 .filter(person -> (person.getDcpst().equals(Dcpst.Partnered)))
@@ -138,14 +175,14 @@ public class Statistics3 {
 
         // fertility
         val = Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.FertilityAdjustment) +
-                Parameters.getAlignmentValue(model.getYear()-1, AlignmentVariable.FertilityAlignment);
+                model.getFertilityAdjustment(model.getYear()-1);
         setFertilityAdjustmentFactor(val);
         FertileFilter filter = new FertileFilter();
         long numFertilePersons = model.getPersons().stream()
                 .filter(person -> filter.evaluate(person))
                 .count();
         long numBirths = model.getPersons().stream()
-                .filter(person -> (person.getDag() < 1))
+                .filter(person -> (person.getDemAge() < 1))
                 .count();
         val = (numFertilePersons > 0) ? (double) numBirths / numFertilePersons : 0.0;
         setFertilityRateSimulated(val);
@@ -153,7 +190,11 @@ public class Statistics3 {
 
         setSocialCareAdjustmentFactor(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.CareProvisionAdjustment));
         setUtilityAdjustmentFactorSmales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentSingleMales));
+        setUtilityAdjustmentFactorACmales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentACMales));
         setUtilityAdjustmentFactorSfemales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentSingleFemales));
+        setUtilityAdjustmentFactorACfemales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentACFemales));
         setUtilityAdjustmentFactorCouples(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentCouples));
+        setUtilityAdjustmentFactorSDepFemales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentSingleDepWomen));
+        setUtilityAdjustmentFactorSDepMales(Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.UtilityAdjustmentSingleDepMen));
     }
 }

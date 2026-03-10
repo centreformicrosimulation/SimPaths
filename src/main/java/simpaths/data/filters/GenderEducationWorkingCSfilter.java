@@ -8,20 +8,20 @@ import microsim.statistics.ICollectionFilter;
 
 public class GenderEducationWorkingCSfilter implements ICollectionFilter{
 
-	private Gender gender;
+	private Gender demSex;
 	private Education education;
 
-	public GenderEducationWorkingCSfilter(Gender gender, Education education) {
+	public GenderEducationWorkingCSfilter(Gender demSex, Education education) {
 		super();
-		this.gender = gender;
+		this.demSex = demSex;
 		this.education = education;
 	}
 	
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getDgn().equals(gender) &&
-					person.getDeh_c3().equals(education) &&
+			return (person.getDemMaleFlag().equals(demSex) &&
+					person.getDeh_c4().equals(education) &&
 					person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed) &&
 					person.getGrossEarningsYearly() >= 1. &&
 					person.getLabourSupplyHoursWeekly() > 0);

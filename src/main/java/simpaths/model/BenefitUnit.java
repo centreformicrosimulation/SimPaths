@@ -5,9 +5,9 @@ import java.util.*;
 import jakarta.persistence.*;
 
 import microsim.data.db.PanelEntityKey;
+import org.hibernate.annotations.Fetch;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
-import simpaths.data.filters.ValidHomeownersCSfilter;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -48,57 +48,101 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             @JoinColumn(name="prid", referencedColumnName = "working_id")
     })
     private Household household;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "benefitUnit")
+    @Fetch(org.hibernate.annotations.FetchMode.SUBSELECT)
     private Set<Person> members = new LinkedHashSet<>();
 
     // identifiers
-    private Long idOriginalBU;
-    private Long idOriginalHH;
-    private Long idHousehold;
-    private Long seed;
+    private Long idBuOriginal;
+    private Long idHhOriginal;
+    private Long idHh;
+    private Long statSeed;
 
     // unit specific variables
-    @Transient private States states;
-    private Double investmentIncomeAnnual;
-    private Double pensionIncomeAnnual;
-    private Double discretionaryConsumptionPerYear;
-    @Column(name="liquid_wealth") private Double liquidWealth;
-    @Column(name="tot_pen") private Double pensionWealth;
-    @Column(name="nvmhome") private Double housingWealth;
-    private Double disposableIncomeMonthly;
-    private Double grossIncomeMonthly;
-    private Double benefitsReceivedPerMonth;
-    private Double equivalisedDisposableIncomeYearly;
-    @Transient private Double equivalisedDisposableIncomeYearly_lag1;
-    @Transient private Double yearlyChangeInLogEDI;
-    private Integer atRiskOfPoverty;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
-    @Transient private Integer atRiskOfPoverty_lag1;
-    @Transient private Indicator indicatorChildren03_lag1;                //Lag(1) of d_children_3under;
-    @Transient private Indicator indicatorChildren412_lag1;                //Lag(1) of d_children_4_12;
+    @Transient private States labStatesContObject;
+    private Double yInvestYear;
+    private Double yPensYear;
+    private Double xDiscretionaryYear;
+    @Column(name="wealthTotValue") private Double wealthTotValue;            // total net wealth (includes pensions assets and housing)
+    @Column(name="wealthPensValue") private Double wealthPensValue;        // total private (personal and occupational) pensions
+    @Column(name="wealthPrptyValue") private Double wealthPrptyValue;        // value of main home (gross of mortgage debt)
+    @Column(name="wealthMortgageDebtValue") private Double wealthMortgageDebtValue;          // value of outstanding mortgage debt
+    private Double yDispMonth;
+    private Double yGrossMonth;
+    private Double yBenAmountMonth;
+    private Integer yBenUCReceivedFlag;
+    private Integer yBenLegacyReceivedFlag;
+    private Double yDispEquivYear;
+    @Transient private Double yDispEquivYearL1;
+    @Transient private Double yDiffDispEquivPrevYear;
+    private Integer yPvrtyFlag;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
+    @Transient private Integer yPvrtyFlagL1;
+    @Transient private Indicator i_demNChild0to2L1;                //Lag(1) of d_children_3under;
+    @Transient private Indicator dem4to12L1;                //Lag(1) of d_children_4_12;
     @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
     @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
-    private Double childcareCostPerWeek;
-    private Double socialCareCostPerWeek;
-    private Integer socialCareProvision;
-    private Long taxDbDonorId;
-    @Transient private Match taxDbMatch;
+    private Double xChildCareWeek;
+    private Double xCareWeek;
+    private Integer careProvidedFlag;
+    private Long idtaxDbDonor;
+    @Transient private Match demDbMatchTax;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
-    @Enumerated(EnumType.STRING) private Ydses_c5 ydses_c5;
-    @Transient private Ydses_c5 ydses_c5_lag1;
-    @Transient private Double tmpHHYpnbihs_dv_asinh;
-    @Transient private Dhhtp_c4 dhhtp_c4_lag1;
-    private String createdByConstructor;
-    @Column(name="dhh_owned") private Boolean dhhOwned; // are any of the individuals in the benefit unit a homeowner? True / false
+    @Enumerated(EnumType.STRING) private Ydses_c5 yHhQuintilesMonthC5;
+    @Transient private Ydses_c5 yHhQuintilesC5L1;
+    @Transient private Double i_yNonBenHhGrossAsinh;
+    private Dhhtp_c4 dhhtp_c4;
+    @Transient private Dhhtp_c4 demCompHhC4L1;
+    private String demCreatedByConstructor;
+    @Column(name="wealthPrptyFlag") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale = new ArrayList<>(); // This ArrayList stores monthly values of labour market states and gross incomes, to be sampled from by the LabourMarket class, for the female member of the benefit unit
 
-    @Transient Innovations innovations;
+    @Transient Innovations statInnovations;
+    @Transient private Double labPersistValueLabourInnov;
+    @Transient private Integer lastYear;
 
-    @Transient private Integer yearLocal;
-    @Transient private Occupancy occupancyLocal;
-    @Transient private Education deh_c3Local;
-    @Transient private Integer labourHoursWeekly1Local;
-    @Transient private Integer labourHoursWeekly2Local;
+    @Transient private Integer i_demYear;
+    @Transient private Occupancy i_demOccupancy;
+    @Transient private Education i_eduHighestC4;
+    @Transient private Integer i_labHrsWork1Week;
+    @Transient private Integer i_labHrsWork2Week;
+
+    // ================= At Risk of Work cache to avoid unnecessary atRiskOfWork() calls =================
+    @Transient private Boolean cachedMaleAtRiskOfWork = null;
+    @Transient private Boolean cachedFemaleAtRiskOfWork = null;
+
+    // ================= Labour-choice cache for fast alignment =================
+    @Transient private Integer labourChoiceCacheYear = null;
+
+    // cached discrete choice set
+    @Transient private LinkedHashSet<MultiKey<Labour>> cachedPossibleLabourCombinations = null;
+
+    // cached tax/income outputs by labour pair
+    @Transient private MultiKeyMap<Labour, LabourEval> cachedEvalByLabourPairs =
+            MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+    // cached utility regression scores by labour pair
+    @Transient private MultiKeyMap<Labour, Double> cachedUtilityScoreByLabourPairs =
+            MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+    // score cache validity markers
+    @Transient private Integer labourScoreCacheYear = null;
+    @Transient private Object labourScoreCacheKey = null;
+
+    // helper – NOT persisted, no annotation needed
+    private static class LabourEval {
+        final double disposableIncomeMonthly;
+        final double benefitsReceivedPerMonth;
+        final double grossIncomeMonthly;
+        final Match taxDbMatch;
+
+        LabourEval(TaxEvaluation ev) {
+            this.disposableIncomeMonthly = ev.getDisposableIncomePerMonth();
+            this.benefitsReceivedPerMonth = ev.getBenefitsReceivedPerMonth();
+            this.grossIncomeMonthly = ev.getGrossIncomePerMonth();
+            this.taxDbMatch = ev.getMatch();
+        }
+    }
 
 
     /*********************************************************************
@@ -108,14 +152,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey();        //Sets up key
-        createdByConstructor = "Empty";
+        demCreatedByConstructor = "Empty";
     }
 
     public BenefitUnit(long id) {
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(id);        //Sets up key
-        createdByConstructor = "Empty";
+        demCreatedByConstructor = "Empty";
     }
 
     // USED BY EXPECTATIONS OBJECT TO INTERACT WITH REGRESSION MODELS
@@ -134,9 +178,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         this(regressionModel);
         if (regressionModel) {
-            yearLocal = originalBenefitUnit.yearLocal;
-            occupancyLocal = originalBenefitUnit.occupancyLocal;
-            deh_c3Local = originalBenefitUnit.deh_c3Local;
+            i_demYear = originalBenefitUnit.i_demYear;
+            i_demOccupancy = originalBenefitUnit.i_demOccupancy;
+            i_eduHighestC4 = originalBenefitUnit.i_eduHighestC4;
             region = originalBenefitUnit.region;
         } else {
             throw new RuntimeException("error accessing copy constructor of benefitUnit for use with regression models");
@@ -144,50 +188,50 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     // USED BY OTHER CONSTRUCTORS
-    public BenefitUnit(Long id, long seed) {
+    public BenefitUnit(Long id, long statSeed) {
         super();
         model = (SimPathsModel) SimulationEngine.getInstance().getManager(SimPathsModel.class.getCanonicalName());
         collector = (SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName());
         key  = new PanelEntityKey(id);        //Sets up key
 
-        this.seed = seed;
-        innovations = new Innovations(9, seed);
+        this.statSeed = statSeed;
+        statInnovations = new Innovations(9, 1, statSeed);
 
         this.numberChildrenAll_lag1 = 0;
         this.numberChildren02_lag1 = 0;
-        this.indicatorChildren03_lag1 = Indicator.False;
-        this.indicatorChildren412_lag1 = Indicator.False;
-        this.childcareCostPerWeek = 0.0;
-        this.socialCareCostPerWeek = 0.0;
-        this.socialCareProvision = 0;
-        this.disposableIncomeMonthly = 0.;
-        this.grossIncomeMonthly = 0.;
-        this.equivalisedDisposableIncomeYearly = 0.;
-        this.benefitsReceivedPerMonth = 0.;
-        this.createdByConstructor = "LongID";
+        this.i_demNChild0to2L1 = Indicator.False;
+        this.dem4to12L1 = Indicator.False;
+        this.xChildCareWeek = 0.0;
+        this.xCareWeek = 0.0;
+        this.careProvidedFlag = 0;
+        this.yDispMonth = 0.;
+        this.yGrossMonth = 0.;
+        this.yDispEquivYear = 0.;
+        this.yBenAmountMonth = 0.;
+        this.demCreatedByConstructor = "LongID";
         if (Parameters.projectLiquidWealth)
-            setLiquidWealth(0.);
+            setWealthTotValue(0.);
     }
 
     // USED TO CONSTRUCT NEW BENEFIT UNITS FOR PEOPLE AS NEEDED
     // SEE THE PERSON OBJECT, setupNewBenefitUnit METHOD
-    public BenefitUnit(Person person, long seed) {
+    public BenefitUnit(Person person, long statSeed) {
 
         // initialise benefit unit
-        this(benefitUnitIdCounter++, seed);
+        this(benefitUnitIdCounter++, statSeed);
         region = person.getRegion();
         if (Parameters.projectLiquidWealth) {
             // transfer wealth between benefit units
 
             BenefitUnit fromBenefitUnit = person.getBenefitUnit();
-            setLiquidWealth(person.getLiquidWealth());
+            setWealthTotValue(person.getLiquidWealth());
             if (this != fromBenefitUnit) {
-                fromBenefitUnit.setLiquidWealth(fromBenefitUnit.getLiquidWealth() - person.getLiquidWealth());
+                fromBenefitUnit.setWealthTotValue(fromBenefitUnit.getWealthTotValue() - person.getLiquidWealth());
             }
         }
 
         // finalise
-        this.createdByConstructor = "Singles";
+        this.demCreatedByConstructor = "Singles";
     }
 
     public BenefitUnit(Person p1, Person p2) {
@@ -200,19 +244,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (Parameters.projectLiquidWealth) {
             // transfer wealth between benefit units
 
-            setLiquidWealth(p1.getLiquidWealth() + p2.getLiquidWealth());
+            setWealthTotValue(p1.getLiquidWealth() + p2.getLiquidWealth());
             BenefitUnit pBU = p1.getBenefitUnit();
             if (this!=pBU) {
-                pBU.setLiquidWealth(pBU.getLiquidWealth() - p1.getLiquidWealth());
+                pBU.setWealthTotValue(pBU.getWealthTotValue() - p1.getLiquidWealth());
             }
             pBU = p2.getBenefitUnit();
             if (this!=pBU) {
-                pBU.setLiquidWealth(pBU.getLiquidWealth() - p2.getLiquidWealth());
+                pBU.setWealthTotValue(pBU.getWealthTotValue() - p2.getLiquidWealth());
             }
         }
 
         // finalise
-        createdByConstructor = "Couples";
+        demCreatedByConstructor = "Couples";
     }
 
     // Below is a "copy constructor" for benefitUnits: it takes an original benefit unit as input, changes the ID, copies
@@ -223,48 +267,48 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         switch (sampleEntry) {
             case ProcessedInputData -> {
                 key.setId(originalBenefitUnit.getId());
-                idOriginalBU = originalBenefitUnit.getIdOriginalBU();
-                idOriginalHH = originalBenefitUnit.getIdOriginalHH();
+                idBuOriginal = originalBenefitUnit.getIdOriginalBU();
+                idHhOriginal = originalBenefitUnit.getIdOriginalHH();
             }
             default -> {
-                idOriginalBU = originalBenefitUnit.getId();
-                idOriginalHH = originalBenefitUnit.household.getId();
+                idBuOriginal = originalBenefitUnit.getId();
+                idHhOriginal = originalBenefitUnit.household.getId();
             }
         }
 
 
         this.log = originalBenefitUnit.log;
-        disposableIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getDisposableIncomeMonthly(),0.0);
-        discretionaryConsumptionPerYear = Objects.requireNonNullElse(originalBenefitUnit.discretionaryConsumptionPerYear, 0.0);
-        grossIncomeMonthly = Objects.requireNonNullElse(originalBenefitUnit.getGrossIncomeMonthly(),0.0);
-        equivalisedDisposableIncomeYearly = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly,0.0);
-        equivalisedDisposableIncomeYearly_lag1 = Objects.requireNonNullElse(originalBenefitUnit.equivalisedDisposableIncomeYearly_lag1,equivalisedDisposableIncomeYearly);
-        benefitsReceivedPerMonth = Objects.requireNonNullElse(originalBenefitUnit.getBenefitsReceivedPerMonth(),0.0);
-        atRiskOfPoverty = Objects.requireNonNullElse(originalBenefitUnit.atRiskOfPoverty,0);
-        atRiskOfPoverty_lag1 = Objects.requireNonNullElse(originalBenefitUnit.atRiskOfPoverty_lag1,atRiskOfPoverty);
-        yearlyChangeInLogEDI = Objects.requireNonNullElse(originalBenefitUnit.yearlyChangeInLogEDI,0.0);
+        yDispMonth = Objects.requireNonNullElse(originalBenefitUnit.getDisposableIncomeMonthly(),0.0);
+        xDiscretionaryYear = Objects.requireNonNullElse(originalBenefitUnit.xDiscretionaryYear, 0.0);
+        yGrossMonth = Objects.requireNonNullElse(originalBenefitUnit.getGrossIncomeMonthly(),0.0);
+        yDispEquivYear = Objects.requireNonNullElse(originalBenefitUnit.yDispEquivYear,0.0);
+        yDispEquivYearL1 = Objects.requireNonNullElse(originalBenefitUnit.yDispEquivYearL1, yDispEquivYear);
+        yBenAmountMonth = Objects.requireNonNullElse(originalBenefitUnit.getBenefitsReceivedPerMonth(),0.0);
+        yPvrtyFlag = Objects.requireNonNullElse(originalBenefitUnit.yPvrtyFlag,0);
+        yPvrtyFlagL1 = Objects.requireNonNullElse(originalBenefitUnit.yPvrtyFlagL1, yPvrtyFlag);
+        yDiffDispEquivPrevYear = Objects.requireNonNullElse(originalBenefitUnit.yDiffDispEquivPrevYear,0.0);
         if (Parameters.projectLiquidWealth)
             initialiseLiquidWealth(
-                    originalBenefitUnit.getRefPersonForDecisions().getDag(),
-                    originalBenefitUnit.getLiquidWealth(),
+                    originalBenefitUnit.getRefPersonForDecisions().getDemAge(),
+                    originalBenefitUnit.getWealthTotValue(),
                     originalBenefitUnit.getPensionWealth(false),
                     originalBenefitUnit.getHousingWealth(false)
             );
         this.numberChildrenAll_lag1 = originalBenefitUnit.numberChildrenAll_lag1;
         this.numberChildren02_lag1 = originalBenefitUnit.numberChildren02_lag1;
-        this.indicatorChildren03_lag1 = originalBenefitUnit.indicatorChildren03_lag1;
-        this.indicatorChildren412_lag1 = originalBenefitUnit.indicatorChildren412_lag1;
-        this.childcareCostPerWeek = originalBenefitUnit.childcareCostPerWeek;
-        this.socialCareCostPerWeek = originalBenefitUnit.socialCareCostPerWeek;
-        this.socialCareProvision = originalBenefitUnit.socialCareProvision;
+        this.i_demNChild0to2L1 = originalBenefitUnit.i_demNChild0to2L1;
+        this.dem4to12L1 = originalBenefitUnit.dem4to12L1;
+        this.xChildCareWeek = originalBenefitUnit.xChildCareWeek;
+        this.xCareWeek = originalBenefitUnit.xCareWeek;
+        this.careProvidedFlag = originalBenefitUnit.careProvidedFlag;
         this.region = originalBenefitUnit.region;
-        this.ydses_c5 = originalBenefitUnit.getYdses_c5();
-        this.ydses_c5_lag1 = originalBenefitUnit.ydses_c5_lag1;
-        this.dhhtp_c4_lag1 = originalBenefitUnit.dhhtp_c4_lag1;
-        this.dhhOwned = originalBenefitUnit.dhhOwned;
-        createdByConstructor = Objects.requireNonNullElse(originalBenefitUnit.createdByConstructor,"CopyConstructor");
-        tmpHHYpnbihs_dv_asinh = Objects.requireNonNullElse(originalBenefitUnit.tmpHHYpnbihs_dv_asinh, 0.0);
-        taxDbMatch = originalBenefitUnit.getTaxDbMatch();
+        this.yHhQuintilesMonthC5 = originalBenefitUnit.getYdses_c5();
+        this.yHhQuintilesC5L1 = originalBenefitUnit.yHhQuintilesC5L1;
+        this.demCompHhC4L1 = originalBenefitUnit.demCompHhC4L1;
+        this.wealthPrptyFlag = originalBenefitUnit.wealthPrptyFlag;
+        demCreatedByConstructor = Objects.requireNonNullElse(originalBenefitUnit.demCreatedByConstructor,"CopyConstructor");
+        i_yNonBenHhGrossAsinh = Objects.requireNonNullElse(originalBenefitUnit.i_yNonBenHhGrossAsinh, 0.0);
+        demDbMatchTax = originalBenefitUnit.getTaxDbMatch();
     }
 
 
@@ -275,6 +319,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Processes {
         Update,        //This updates the household fields, such as number of children of a certain age
+        UpdateOutputVariables,
         UpdateWealth,
         CalculateChangeInEDI, //Calculate change in equivalised disposable income
         Homeownership,
@@ -291,6 +336,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case Update -> {
                 updateAttributes();
                 clearStates();
+            }
+            case UpdateOutputVariables -> {
+                updateOutputVariables();
             }
             case UpdateWealth -> {
                 updateWealth();
@@ -320,12 +368,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     protected void initializeFields() {
 
         if (getNumberChildrenAll()==0)
-            childcareCostPerWeek = 0.0;
-        dhhtp_c4_lag1 = getDhhtp_c4();
+            xChildCareWeek = 0.0;
+        // Transient lagged values are not loaded from DB; initialize them for year-1 regressors.
+        if (i_demNChild0to2L1 == null) i_demNChild0to2L1 = getIndicatorChildren(0,3);
+        if (dem4to12L1 == null) dem4to12L1 = getIndicatorChildren(4,12);
+        if (numberChildrenAll_lag1 == null) numberChildrenAll_lag1 = getNumberChildrenAll();
+        if (numberChildren02_lag1 == null) numberChildren02_lag1 = getNumberChildren(0,2);
+        demCompHhC4L1 = getDhhtp_c4();
 
         // clean-up odd ends
         if (getYdses_c5() == null) {
-            ydses_c5 = Ydses_c5.Q3;
+            yHhQuintilesMonthC5 = Ydses_c5.Q3;
         }
         if (region == null)
             throw new RuntimeException("problem identifying region of new benefit unit");
@@ -335,25 +388,32 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // unit specific variables
         if (getNumberChildrenAll()==0)
-            childcareCostPerWeek = 0.0;
+            xChildCareWeek = 0.0;
 
         // lags
-        indicatorChildren03_lag1 = getIndicatorChildren(0,3);
-        indicatorChildren412_lag1 = getIndicatorChildren(4,12);
+        i_demNChild0to2L1 = getIndicatorChildren(0,3);
+        dem4to12L1 = getIndicatorChildren(4,12);
         numberChildrenAll_lag1 = getNumberChildrenAll();
         numberChildren02_lag1 = getNumberChildren(0,2);
-        dhhtp_c4_lag1 = getDhhtp_c4();
+        demCompHhC4L1 = getDhhtp_c4();
 
-        equivalisedDisposableIncomeYearly_lag1 = getEquivalisedDisposableIncomeYearly();
-        atRiskOfPoverty_lag1 = getAtRiskOfPoverty();
-        ydses_c5_lag1 = getYdses_c5();
+        yDispEquivYearL1 = getEquivalisedDisposableIncomeYearly();
+        yPvrtyFlagL1 = getAtRiskOfPoverty();
+        yHhQuintilesC5L1 = getYdses_c5();
 
         // random draws
-        innovations.getNewDoubleDraws();
+        statInnovations.getNewDoubleDraws();
     }
 
     protected void updateWealth() {
-        liquidWealth += disposableIncomeMonthly * 12.0 - discretionaryConsumptionPerYear - getNonDiscretionaryConsumptionPerYear();
+        wealthTotValue += yDispMonth * 12.0 - xDiscretionaryYear - getNonDiscretionaryConsumptionPerYear();
+    }
+
+    /*
+Contemporaneous values of dhhtp_c4 are required for validation. Update and output here.
+ */
+    private void updateOutputVariables() {
+        dhhtp_c4 = getDhhtp_c4();
     }
 
 
@@ -444,6 +504,32 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
+    public void setReceivesBenefitsFlagUCNonUC() {
+
+        // TO DO: this will require an additional test of whether UC is received or not - for now all receive UC if any ben
+        boolean receivesBenefitsFlagUC = getReceivedUC() == 1 && Parameters.UC_ROLLOUT;
+        boolean receivesLegacyBenefitsFlag = !receivesBenefitsFlagUC && getReceivedLegacyBenefits() == 1;
+        Occupancy occupancy = getOccupancy();
+        switch (occupancy) {
+            case Couple -> {
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getMale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+            }
+            case Single_Male -> {
+                getMale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getMale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+            }
+            case Single_Female -> {
+                getFemale().setReceivesBenefitsFlagUC(receivesBenefitsFlagUC);
+                getFemale().setReceivesBenefitsFlagNonUC(receivesLegacyBenefitsFlag);
+            }
+            default ->
+                throw new IllegalStateException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());
+        }
+    }
+
     /*
     updateDisposableIncomeIfNotAtRiskOfWork process is used to calculate disposable income for benefit units in which no individual is at risk of work, and which therefore do not enter the updateLabourSupply process.
     There are two cases to consider: i) single benefit units, ii) couples where no individual is at risk of work
@@ -466,8 +552,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                 male.setLabourSupplyWeekly(Labour.convertHoursToLabour(hoursWorkedPerWeekM));
                 getFemale().setLabourSupplyWeekly(Labour.convertHoursToLabour(hoursWorkedPerWeekF));
-                double maleIncome = Math.sinh(male.getYptciihs_dv());
-                double femaleIncome = Math.sinh(getFemale().getYptciihs_dv());
+                double maleIncome = Math.sinh(male.getyMiscPersGrossMonth());
+                double femaleIncome = Math.sinh(getFemale().getyMiscPersGrossMonth());
                 if (maleIncome>0.01 && femaleIncome>0.01)
                     secondIncomePerMonth = Math.min(maleIncome, femaleIncome);
                 originalIncomePerMonth = maleIncome + femaleIncome;
@@ -476,12 +562,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else if (male!=null) {
 
                 male.setLabourSupplyWeekly(Labour.convertHoursToLabour(hoursWorkedPerWeekM));
-                originalIncomePerMonth = Math.sinh(male.getYptciihs_dv());
+                originalIncomePerMonth = Math.sinh(male.getyMiscPersGrossMonth());
                 dlltsdM = male.getDisability();
             } else if (female!=null){
 
                 getFemale().setLabourSupplyWeekly(Labour.convertHoursToLabour(hoursWorkedPerWeekF));
-                originalIncomePerMonth = Math.sinh(getFemale().getYptciihs_dv());
+                originalIncomePerMonth = Math.sinh(getFemale().getyMiscPersGrossMonth());
                 dlltsdF = getFemale().getDisability();
             } else
                 throw new RuntimeException("Benefit Unit with the following ID has no recognised occupancy: " + getKey().getId());
@@ -489,12 +575,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             // update disposable income
             TaxEvaluation evaluatedTransfers = taxWrapper(hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, originalIncomePerMonth, secondIncomePerMonth);
 
-            disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-            benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-            grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+            yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+            yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+            yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
             calculateBUIncome();
-            taxDbMatch = evaluatedTransfers.getMatch();
-            taxDbDonorId = taxDbMatch.getCandidateID();
+            demDbMatchTax = evaluatedTransfers.getMatch();
+            idtaxDbDonor = demDbMatchTax.getCandidateID();
         } else {
             throw new RuntimeException("call to evaluate disposable income on assumption of zero risk of employment where there is risk");
         }
@@ -502,20 +588,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     private TaxEvaluation taxWrapper(double hoursWorkedPerWeekM, double hoursWorkedPerWeekF, int dlltsdM, int dlltsdF, double originalIncomePerMonth, double secondIncomePerMonth) {
 
-        childcareCostPerWeek = 0.0;
+        xChildCareWeek = 0.0;
         double childcareCostPerMonth = 0.0;
         if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
-            updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
-            childcareCostPerMonth = childcareCostPerWeek * Parameters.WEEKS_PER_MONTH;
+            updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDemAge());
+            childcareCostPerMonth = xChildCareWeek * Parameters.WEEKS_PER_MONTH;
         }
 
-        socialCareCostPerWeek = 0.0;
-        socialCareProvision = 0;
+        xCareWeek = 0.0;
+        careProvidedFlag = 0;
         double socialCareCostPerMonth = 0.0;
         if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
             updateSocialCareProvision();
             updateSocialCareCostPerWeek();
-            socialCareCostPerMonth = socialCareCostPerWeek * Parameters.WEEKS_PER_MONTH;
+            socialCareCostPerMonth = xCareWeek * Parameters.WEEKS_PER_MONTH;
         }
 
         if (Parameters.flagSuppressSocialCareCosts) {
@@ -525,8 +611,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         // update disposable income
         TaxEvaluation evaluatedTransfers;
-        double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : innovations.getDoubleDraw(8);
-        evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDag(), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, socialCareProvision, originalIncomePerMonth, secondIncomePerMonth, childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
+        double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : statInnovations.getDoubleDraw(8);
+        evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDemAge(), getIntValue(Regressors.NumberMembersOver17),
+                getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017),
+                hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvidedFlag, originalIncomePerMonth, secondIncomePerMonth,
+                childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
 
         return evaluatedTransfers;
     }
@@ -564,8 +653,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
     protected void chooseRandomMonthlyOutcomeCovid19() {
 
-        double labourInnov = innovations.getDoubleDraw(2);
-        double taxRandomUniform = innovations.getDoubleDraw(8);
+        double labourInnov = statInnovations.getDoubleDraw(2);
+        double taxRandomUniform = statInnovations.getDoubleDraw(8);
         Person male = getMale();
         Person female = getFemale();
         if (male!=null && female!=null) {
@@ -596,9 +685,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                         evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
 
-                        disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                        benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                        grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                        yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                        yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
                     } else {
                         throw new RuntimeException("Inconsistent atRiskOfWork indicator and covid19MonthlyStateAndGrossIncomeAndWorkHoursTriples");
                     }
@@ -620,9 +709,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         TaxEvaluation evaluatedTransfers;
                         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                         evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                        disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                        benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                        grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                        yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                        yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
                     } else {
                         throw new RuntimeException("Inconsistent atRiskOfWork indicator and covid19MonthlyStateAndGrossIncomeAndWorkHoursTriples (2)");
                     }
@@ -646,9 +735,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     TaxEvaluation evaluatedTransfers;
                     double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                     evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                    disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                    benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                    grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                    yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                    yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                    yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
                 } else {
                     throw new RuntimeException("Inconsistent atRiskOfWork indicator and covid19MonthlyStateAndGrossIncomeAndWorkHoursTriples (3)");
                 }
@@ -669,9 +758,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 TaxEvaluation evaluatedTransfers;
                 double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                 evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), -1, 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
             } else {
                 throw new IllegalArgumentException("In consistent indicators for at risk of work in single male benefit unit " + getKey().getId());
             }
@@ -689,9 +778,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 TaxEvaluation evaluatedTransfers;
                 double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : taxRandomUniform;
                 evaluatedTransfers = new TaxEvaluation(model.getYear(), getIntValue(Regressors.MaximumAge), getIntValue(Regressors.NumberMembersOver17), getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017), labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), -1, female.getDisability(), 0, simulatedIncomeToConvertPerMonth, 0.0, 0.0, taxInnov);
-                disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
             } else {
                 throw new IllegalArgumentException("In consistent indicators for at risk of work in single female benefit unit " + getKey().getId());
             }
@@ -709,7 +798,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         if (person.getLes_c7_covid_lag1() == null) {
             person.initialise_les_c6_from_c4();
-            person.setCovidModuleGrossLabourIncome_lag1(person.getCovidModuleGrossLabourIncome_Baseline());
+            person.setCovidYLabGrossL1(person.getCovidModuleGrossLabourIncome_Baseline());
         }
 
 
@@ -717,8 +806,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         Les_c7_covid stateFrom = person.getLes_c7_covid_lag1();
         Les_c7_covid stateTo = stateFrom; // Labour market state to which individual transitions. Initialise to stateFrom value if the outcome is "no changes"
         int newWorkHours; // Predicted work hours. Initialise to previous value if available, or hours from labour enum.
-        if (person.getNewWorkHours_lag1() != null) {
-            newWorkHours = person.getNewWorkHours_lag1();
+        if (person.getLabHrsWorkNewL1() != null) {
+            newWorkHours = person.getLabHrsWorkNewL1();
         } else {
             newWorkHours = person.getLabourSupplyHoursWeekly(); // Note: prediction for hours is in logs, needs to be transformed to levels
             person.setNewWorkHours_lag1(newWorkHours);
@@ -726,9 +815,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         double grossMonthlyIncomeToReturn = 0; // Gross income to return to updateLabourSupplyCovid19() method
 
         // Transitions from employment
-        double labourInnov2 = innovations.getDoubleDraw(3), labourInnov3 = innovations.getDoubleDraw(4);
+        double labourInnov2 = statInnovations.getDoubleDraw(3), labourInnov3 = statInnovations.getDoubleDraw(4);
         if (Les_c7_covid.Employee.equals(stateFrom)) {
-            Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_E1.class);
+            Map<Les_transitions_E1,Double> probs = Parameters.getRegC19LS_E1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_E1 transitionTo = (Les_transitions_E1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -737,23 +826,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if (Les_transitions_E1.SelfEmployed.equals(transitionTo) || Les_transitions_E1.SomeChanges.equals(transitionTo)) {
 
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_E2a().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_E1.NotEmployed)) {
                 newWorkHours = 0;
                 grossMonthlyIncomeToReturn = 0;
             } else if (transitionTo.equals(Les_transitions_E1.FurloughedFull)) {
                 // If furloughed, don't change hours of work initialised at the beginning
-                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_E1.FurloughedFlex)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_E2b().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else { // Else "no changes" = employee. Use initialisation value for stateTo and newWorkHours and fill gross monthly income
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             }
 
             // Transitions from furlough full
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFull)) {
-            Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FF1.class);
+            Map<Les_transitions_FF1,Double> probs = Parameters.getRegC19LS_FF1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FF1 transitionTo = (Les_transitions_FF1) event.eval();
 
@@ -762,23 +851,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             if (transitionTo.equals(Les_transitions_FF1.Employee)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_F2b().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_FF1.SelfEmployed)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_F2a().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_FF1.FurloughedFlex)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_F2c().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_FF1.NotEmployed)) {
                 newWorkHours = 0;
                 grossMonthlyIncomeToReturn = 0;
             } else { // Else remains furloughed. Use 80% of initialisation value for stateTo and newWorkHours and fill gross monthly income
-                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             }
 
             // Transitions from furlough flex
         } else if (stateFrom.equals(Les_c7_covid.FurloughedFlex)) {
-            Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_FX1.class);
+            Map<Les_transitions_FX1,Double> probs = Parameters.getRegC19LS_FX1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_FX1 transitionTo = (Les_transitions_FX1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -786,23 +875,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             if (transitionTo.equals(Les_transitions_FX1.Employee)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_F2b().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_FX1.SelfEmployed)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_F2a().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_FX1.FurloughedFull)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_F2a().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv()); // 80% of earnings they would have had working normal hours, hence hours predicted as for employed in the line above
+                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth()); // 80% of earnings they would have had working normal hours, hence hours predicted as for employed in the line above
             } else if (transitionTo.equals(Les_transitions_FX1.NotEmployed)) {
                 newWorkHours = 0;
                 grossMonthlyIncomeToReturn = 0;
             } else { // Else remains furloughed. Use 80% of initialisation value for stateTo and newWorkHours and fill gross monthly income
-                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = 0.8 * Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             }
 
             // Transitions from self-employment
         } else if (stateFrom.equals(Les_c7_covid.SelfEmployed)) {
-            Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_S1.class);
+            Map<Les_transitions_S1,Double> probs = Parameters.getRegC19LS_S1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_S1 transitionTo = (Les_transitions_S1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -810,17 +899,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             if (transitionTo.equals(Les_transitions_S1.Employee) || transitionTo.equals(Les_transitions_S1.SelfEmployed)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_S2a().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
 
                 // If transition to is self-employed (i.e. continues in self-employment), and earnings have decreased (gross monthly income lower than lag1 of gross monthly income, obtained from person.getCovidModuleGrossLabourIncome_lag1), predict probabiltiy of SEISS
-                if (transitionTo.equals(Les_transitions_S1.SelfEmployed) && grossMonthlyIncomeToReturn < person.getCovidModuleGrossLabourIncome_lag1()) {
+                if (transitionTo.equals(Les_transitions_S1.SelfEmployed) && grossMonthlyIncomeToReturn < person.getCovidYLabGrossL1()) {
 
                     double prob = Parameters.getRegC19LS_S3().getProbability(person, Person.DoublesVariables.class);
                     if (labourInnov3 < prob) {
                         // receives SEISS
 
-                        person.setCovidModuleReceivesSEISS(Indicator.True);
-                        grossMonthlyIncomeToReturn = 0.8 * person.getCovidModuleGrossLabourIncome_lag1();
+                        person.setCovidSEISSReceivedFlag(Indicator.True);
+                        grossMonthlyIncomeToReturn = 0.8 * person.getCovidYLabGrossL1();
                     }
                 }
             } else if (transitionTo.equals(Les_transitions_S1.NotEmployed)) {
@@ -830,7 +919,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // Transitions from non-employment
         } else if (stateFrom.equals(Les_c7_covid.NotEmployed)) {
-            Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilites(person, Person.DoublesVariables.class, Les_transitions_U1.class);
+            Map<Les_transitions_U1,Double> probs = Parameters.getRegC19LS_U1().getProbabilities(person, Person.DoublesVariables.class);
             MultiValEvent event = new MultiValEvent(probs, labourInnov2);
             Les_transitions_U1 transitionTo = (Les_transitions_U1) event.eval();
             stateTo = transitionTo.convertToLes_c7_covid();
@@ -838,7 +927,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             if (transitionTo.equals(Les_transitions_U1.Employee) || transitionTo.equals(Les_transitions_U1.SelfEmployed)) {
                 newWorkHours = (Labour.convertHoursToLabour(exponentiateAndConstrainWorkHoursPrediction(Parameters.getRegC19LS_U2a().getScore(person, Person.DoublesVariables.class)))).getHours(person);
-                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getYptciihs_dv());
+                grossMonthlyIncomeToReturn = Parameters.WEEKS_PER_MONTH * person.getEarningsWeekly(newWorkHours) + Math.sinh(person.getyMiscPersGrossMonth());
             } else if (transitionTo.equals(Les_transitions_U1.NotEmployed)) {
                 newWorkHours = 0;
                 grossMonthlyIncomeToReturn = 0;
@@ -849,7 +938,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
 
         Triple<Les_c7_covid, Double, Integer> stateGrossIncomeWorkHoursTriple = Triple.of(stateTo, grossMonthlyIncomeToReturn, newWorkHours); // Triple contains outcome labour market state after transition, gross income, and work hours
-        person.setCovidModuleGrossLabourIncome_lag1(grossMonthlyIncomeToReturn); // used as a regressor in the Covid-19 regressions
+        person.setCovidYLabGrossL1(grossMonthlyIncomeToReturn); // used as a regressor in the Covid-19 regressions
         person.setNewWorkHours_lag1(newWorkHours); // newWorkHours is not a state variable of a person and is only used from month to month in the covid module, so set lag here
         person.setLes_c7_covid_lag1(stateTo); // Update lagged value of monthly labour market state
         return stateGrossIncomeWorkHoursTriple;
@@ -862,12 +951,575 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         } else return workHoursConverted;
     }
 
+
+    /**
+     * atRiskOfWork() depends on dag, les_c4, dlltsd, and inverseMillsRatio
+     * — none of these should change fixed-costs that are adjusted inside the alignment loop.
+     * - caching it is safe and removes a lot of repeated work.
+     */
+    public void computeAtRiskOfWorkFlags() {
+
+        Occupancy occ = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        switch (occ) {
+            case Couple -> {
+                cachedMaleAtRiskOfWork   = (male != null) && male.atRiskOfWork();
+                cachedFemaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+            }
+            case Single_Male -> {
+                cachedMaleAtRiskOfWork   = (male != null) && male.atRiskOfWork();
+                cachedFemaleAtRiskOfWork = false;
+            }
+            case Single_Female -> {
+                cachedMaleAtRiskOfWork   = false;
+                cachedFemaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+            }
+            default -> {
+                cachedMaleAtRiskOfWork = false;
+                cachedFemaleAtRiskOfWork = false;
+            }
+        }
+    }
+
+
+    /**
+     * Precomputes and caches tax/benefit evaluations for all feasible discrete labour options.
+     * Resets labour states, updates non-labour income for consistency, and then (if cache is stale) rebuilds:
+     *  - the feasible labour combinations, and
+     *  - the mapping from labour-pairs to evaluated disposable/gross income, benefits and tax DB match.
+     * The cache is intended for the non-intertemporal discrete-choice branch only;
+     * when IO is enabled - this method exits early.
+     */
+    public void updateLabourChoices() {
+
+        resetLabourStates();
+
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        // This cache is only used for the non-intertemporal discrete-choice branch.
+        if (Parameters.enableIntertemporalOptimisations
+                && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2)) {
+            return;
+        }
+
+        // Must be current since investment/pension enter originalIncomePerMonth in IO branch,
+        // and may matter for regressors; keep consistent with existing method.
+        updateNonLabourIncome();
+
+
+        boolean cacheValid =
+                labourChoiceCacheYear != null
+                        && labourChoiceCacheYear == model.getYear()
+                        && cachedPossibleLabourCombinations != null
+                        && !cachedPossibleLabourCombinations.isEmpty()
+                        && cachedEvalByLabourPairs != null
+                        && !cachedEvalByLabourPairs.isEmpty();
+
+        if (cacheValid) return;
+
+        // rebuild cache
+        labourChoiceCacheYear = model.getYear();
+
+        cachedPossibleLabourCombinations = findPossibleLabourCombinations();
+        cachedEvalByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+        // precompute tax/income for each discrete option
+        if (Occupancy.Couple.equals(occupancy)) {
+
+            for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+
+                double maleIncome = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
+                double femaleIncome = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
+                double originalIncomePerMonth = maleIncome + femaleIncome;
+                double secondIncomePerMonth = Math.min(maleIncome, femaleIncome);
+
+                TaxEvaluation ev = taxWrapper(labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), originalIncomePerMonth, secondIncomePerMonth);
+
+                cachedEvalByLabourPairs.put(labourKey, new LabourEval(ev));
+            }
+
+        } else if (Occupancy.Single_Male.equals(occupancy)) {
+
+            for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+                double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
+                TaxEvaluation ev = taxWrapper(labourKey.getKey(0).getHours(male), 0.0, male.getDisability(), -1, originalIncomePerMonth, 0.0);
+
+                cachedEvalByLabourPairs.put(labourKey, new LabourEval(ev));
+            }
+
+        } else if (Occupancy.Single_Female.equals(occupancy)) {
+
+            for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+                double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
+                TaxEvaluation ev = taxWrapper(0.0, labourKey.getKey(1).getHours(female), -1, female.getDisability(), originalIncomePerMonth, 0.0);
+
+                cachedEvalByLabourPairs.put(labourKey, new LabourEval(ev));
+            }
+        }
+    }
+
+
+    /**
+     * Computes the utility regression score with fixed-cost components removed.
+     * Used during employment alignment to isolate the non–fixed-cost part of utility,
+     * enabling fast recomputation when fixed costs are adjusted.
+     * Called by the utility score precomputation and alignment routines.
+     */
+    private double computeUtilityRegressionScoreWithoutFC(Occupancy occupancy, Person male, Person female) {
+        boolean maleAtRiskOfWork = Boolean.TRUE.equals(cachedMaleAtRiskOfWork);
+        boolean femaleAtRiskOfWork = Boolean.TRUE.equals(cachedFemaleAtRiskOfWork);
+
+        if (cachedMaleAtRiskOfWork == null || cachedFemaleAtRiskOfWork == null) {
+            // fallback: compute once (still avoids inside-loop calls)
+            switch (occupancy) {
+                case Couple -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                case Single_Male -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = false;
+                }
+                case Single_Female -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                default -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = false;
+                }
+            }
+            // optionally store so future calls reuse
+            cachedMaleAtRiskOfWork = maleAtRiskOfWork;
+            cachedFemaleAtRiskOfWork = femaleAtRiskOfWork;
+        }
+
+        if (Occupancy.Couple.equals(occupancy)) {
+            // Both partners at risk of work → subtract both fixed costs
+            if (maleAtRiskOfWork) {
+                if (femaleAtRiskOfWork) {
+                    double utilityScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
+                    var reg = Parameters.getRegLabourSupplyUtilityCouples();
+
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    utilityScore = utilityScore - (betaMen * xMen + betaWomen * xWomen);
+                    return utilityScore;
+
+                } else {
+                    // Male only at risk → subtract male fixed cost
+                    double utilityScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+
+                    // Alignment-only regressor for the single-dep male subgroup.
+                    double betaSingleDepMen = reg.getCoefficient("AlignmentSingleDepMen");
+                    double xSingleDepMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepMen"));
+
+                    utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen) - (betaSingleDepMen * xSingleDepMen);
+                    return utilityScore;
+                }
+            } else if (femaleAtRiskOfWork) {
+                // Female only at risk → subtract female fixed cost
+                double utilityScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+
+                double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+                double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                // Alignment-only regressor for the single-dep female subgroup.
+                double betaSingleDepWomen = reg.getCoefficient("AlignmentSingleDepWomen");
+                double xSingleDepWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepWomen"));
+                utilityScore = utilityScore - (betaMen * xMen) - (betaWomen * xWomen) - (betaSingleDepWomen * xSingleDepWomen);
+                return utilityScore;
+
+            } else if (!model.isAlignEmployment()) {
+                // Defensive check: unexpected state outside alignment
+                throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
+            }
+            // No-one at risk during alignment → utility fixed cost is irrelevant
+            return 0.0;
+
+        } else if (Occupancy.Single_Male.equals(occupancy)) {
+
+            if (male.getAdultChildFlag() == 1) {
+                // Male adult child case → subtract male fixed cost
+                double utilityScore = Parameters.getRegLabourSupplyUtilityACMales().getScore(this, Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilityACMales();
+                Double coefExist = reg.getCoefficient("AlignmentFixedCostMen");
+
+                if (coefExist != null) {
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    utilityScore = utilityScore - (betaMen * xMen);
+                }
+                return utilityScore;
+
+            }
+            // Standard single male case → subtract male fixed cost
+            double utilityScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
+            var reg = Parameters.getRegLabourSupplyUtilityMales();
+
+            double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+            double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+            utilityScore = utilityScore - (betaMen * xMen);
+            return utilityScore;
+
+        } else {
+            // Female adult child → subtract female fixed cost
+            if (female.getAdultChildFlag() == 1) {
+                double utilityScore = Parameters.getRegLabourSupplyUtilityACFemales().getScore(this, BenefitUnit.Regressors.class);
+                var reg = Parameters.getRegLabourSupplyUtilityACFemales();
+
+                double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                utilityScore = utilityScore - (betaWomen * xWomen);
+                return utilityScore;
+
+            }
+            // Standrad single female case → subtract female fixed cost
+            double utilityScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
+            var reg = Parameters.getRegLabourSupplyUtilityFemales();
+
+            double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+            double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+            utilityScore = utilityScore - (betaWomen * xWomen);
+            return utilityScore;
+
+        }
+    }
+
+
+    /**
+     * Precomputes and caches utility regression scores excluding fixed costs.
+     * This is done to speed up employment alignment by avoiding repeated utility evaluation.
+     * Called once before the alignment loop and reused across alignment iterations.
+     */
+    public void updateUtilityRegressionScoresWithoutFC() {
+
+        resetLabourStates();
+
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        // Not used in IO branch
+        if (Parameters.enableIntertemporalOptimisations
+                && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2)) {
+            return;
+        }
+
+        // Ensure tax eval cache exists
+        if (cachedPossibleLabourCombinations == null || cachedPossibleLabourCombinations.isEmpty()
+                || cachedEvalByLabourPairs == null || cachedEvalByLabourPairs.isEmpty()) {
+            updateLabourChoices();
+        }
+
+        boolean scoreCacheValid =
+                labourScoreCacheYear != null
+                        && labourScoreCacheYear == model.getYear()
+                        && cachedUtilityScoreByLabourPairs != null
+                        && !cachedUtilityScoreByLabourPairs.isEmpty();
+
+        if (scoreCacheValid) return;
+
+        // rebuild score cache
+        labourScoreCacheYear = model.getYear();
+        cachedUtilityScoreByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+        for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+            // set candidate labour for regressors
+            if (Occupancy.Couple.equals(occupancy)) {
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+            } else if (Occupancy.Single_Male.equals(occupancy)) {
+                male.setLabourSupplyWeekly(labourKey.getKey(0));
+            } else { // Single_Female
+                female.setLabourSupplyWeekly(labourKey.getKey(1));
+            }
+
+            // inject cached incomes into BU fields for regressors
+            LabourEval le = cachedEvalByLabourPairs.get(labourKey);
+            yDispMonth = le.disposableIncomeMonthly;
+            yBenAmountMonth = le.benefitsReceivedPerMonth;
+            yGrossMonth = le.grossIncomeMonthly;
+
+            double regressionScore = computeUtilityRegressionScoreWithoutFC(occupancy, male, female);
+
+            if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
+                regressionScore = 0.0;
+            }
+
+            cachedUtilityScoreByLabourPairs.put(labourKey, regressionScore);
+        }
+    }
+
+
+    public void updateFixedCostsAndLabour() {
+
+        resetLabourStates();
+
+        Occupancy occupancy = getOccupancy();
+        Person male = getMale();
+        Person female = getFemale();
+
+        // If IO is on, fast mode isn't applicable; keep original behavior.
+        if (Parameters.enableIntertemporalOptimisations
+                && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2)) {
+            updateLabourSupplyAndIncome();
+            return;
+        }
+
+        // Ensure cache exists (alignment should call updateLabourChoices() once beforehand)
+        if (cachedPossibleLabourCombinations == null || cachedPossibleLabourCombinations.isEmpty()
+                || cachedEvalByLabourPairs == null || cachedEvalByLabourPairs.isEmpty()) {
+            updateLabourChoices();
+        }
+
+        // Ensure regression scores exist (computed separately & cached)
+        if (cachedUtilityScoreByLabourPairs == null || cachedUtilityScoreByLabourPairs.isEmpty()) {
+            updateUtilityRegressionScoresWithoutFC();
+        }
+
+        MultiKey<? extends Labour> labourSupplyChoice = null;
+        MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs =
+                MultiKeyMap.multiKeyMap(new LinkedMap<>());
+
+        // ------------------------------------------------------------------
+        // atRiskOfWork flags MUST be precomputed outside this method.
+        // Defensive fallback: if missing, compute once here (still hoisted).
+        // ------------------------------------------------------------------
+        boolean maleAtRiskOfWork = Boolean.TRUE.equals(cachedMaleAtRiskOfWork);
+        boolean femaleAtRiskOfWork = Boolean.TRUE.equals(cachedFemaleAtRiskOfWork);
+
+        if (cachedMaleAtRiskOfWork == null || cachedFemaleAtRiskOfWork == null) {
+            // fallback: compute once (still avoids inside-loop calls)
+            switch (occupancy) {
+                case Couple -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                case Single_Male -> {
+                    maleAtRiskOfWork = (male != null) && male.atRiskOfWork();
+                    femaleAtRiskOfWork = false;
+                }
+                case Single_Female -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = (female != null) && female.atRiskOfWork();
+                }
+                default -> {
+                    maleAtRiskOfWork = false;
+                    femaleAtRiskOfWork = false;
+                }
+            }
+            // optionally store so future calls reuse
+            cachedMaleAtRiskOfWork = maleAtRiskOfWork;
+            cachedFemaleAtRiskOfWork = femaleAtRiskOfWork;
+        }
+
+        for (MultiKey<? extends Labour> labourKey : cachedPossibleLabourCombinations) {
+
+            // 1) set candidate labour for this key
+            switch (occupancy) {
+                case Couple -> {
+                    male.setLabourSupplyWeekly(labourKey.getKey(0));
+                    female.setLabourSupplyWeekly(labourKey.getKey(1));
+                }
+                case Single_Male -> male.setLabourSupplyWeekly(labourKey.getKey(0));
+                case Single_Female -> female.setLabourSupplyWeekly(labourKey.getKey(1));
+                default -> { /* no-op or throw if impossible */ }
+            }
+
+            // 2) inject cached incomes
+            LabourEval le = cachedEvalByLabourPairs.get(labourKey);
+            yDispMonth = le.disposableIncomeMonthly;
+            yBenAmountMonth = le.benefitsReceivedPerMonth;
+            yGrossMonth = le.grossIncomeMonthly;
+
+            // 3) get cached score
+            Double utilityScore = cachedUtilityScoreByLabourPairs.get(labourKey);
+
+            // 4) add adjusted fixed cost (atRisk flags are now cached/hoisted)
+            if (Occupancy.Couple.equals(occupancy)) {
+
+                if (maleAtRiskOfWork) {
+                    if (femaleAtRiskOfWork) {
+
+                        var reg = Parameters.getRegLabourSupplyUtilityCouples();
+
+                        double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                        double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                        double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                        double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                        utilityScore += betaMen * xMen + betaWomen * xWomen;
+
+                    } else {
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    // Alignment-only regressor for the single-dep male subgroup.
+                    double betaSingleDepMen = reg.getCoefficient("AlignmentSingleDepMen");
+                    double xSingleDepMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepMen"));
+
+                    utilityScore += betaMen * xMen + betaSingleDepMen * xSingleDepMen;
+                    }
+                } else if (femaleAtRiskOfWork) {
+
+                    var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    // Alignment-only regressor for the single-dep female subgroup.
+                    double betaSingleDepWomen = reg.getCoefficient("AlignmentSingleDepWomen");
+                    double xSingleDepWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentSingleDepWomen"));
+                    utilityScore += betaWomen * xWomen + betaSingleDepWomen * xSingleDepWomen;
+
+                }
+
+            } else if (Occupancy.Single_Male.equals(occupancy)) {
+
+                if (male.getAdultChildFlag() == 1) {
+
+                    var reg = Parameters.getRegLabourSupplyUtilityACMales();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    utilityScore += betaMen * xMen;
+                } else {
+                    var reg = Parameters.getRegLabourSupplyUtilityMales();
+                    double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                    double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                    utilityScore += betaMen * xMen;
+                }
+
+            } else { // Single_Female
+
+                if (female.getAdultChildFlag() == 1) {
+
+                    var reg = Parameters.getRegLabourSupplyUtilityACFemales();
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    utilityScore += betaWomen * xWomen;
+                } else {
+
+                    var reg = Parameters.getRegLabourSupplyUtilityFemales();
+
+                    double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                    double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+                    utilityScore += betaWomen * xWomen;
+                }
+            }
+
+            if (utilityScore == null) {
+                throw new IllegalStateException(
+                        "Missing cached regression score for labourKey " + labourKey
+                                + " (HHID " + getKey().getId() + ")"
+                );
+            }
+
+            // 5) store obtained utility scores
+            labourSupplyUtilityRegressionScoresByLabourPairs.put(labourKey, utilityScore);
+        }
+
+        if (labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
+            System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
+            if (male != null) System.out.print("male : " + male.getKey().getId() + ", ");
+            if (female != null) System.out.print("female : " + female.getKey().getId() + ", ");
+            System.out.print("is empty!");
+        }
+
+        // sample labour supply (exactly as your code)
+        double labourInnov = statInnovations.getDoubleDraw(5);
+
+        try {
+            MultiKeyMap<Labour, Double> probs =
+                    convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
+            labourSupplyChoice = ManagerRegressions.multiEvent(probs, labourInnov);
+        } catch (RuntimeException e) {
+            System.out.print("Could not determine labour supply choice for BU with ID: " + getKey().getId());
+        }
+
+        if (model.debugCommentsOn && labourSupplyChoice != null) {
+            log.trace("labour supply choice " + labourSupplyChoice);
+        }
+
+        // realise labour choice
+        if (Occupancy.Couple.equals(occupancy)) {
+            male.setLabourSupplyWeekly(labourSupplyChoice.getKey(0));
+            female.setLabourSupplyWeekly(labourSupplyChoice.getKey(1));
+        } else if (Occupancy.Single_Male.equals(occupancy)) {
+            male.setLabourSupplyWeekly(labourSupplyChoice.getKey(0));
+        } else {
+            female.setLabourSupplyWeekly(labourSupplyChoice.getKey(1));
+        }
+
+        // childcare / social care (kept consistent)
+        if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
+            updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDemAge());
+        }
+        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
+            updateSocialCareCostPerWeek();
+        }
+
+        // populate final incomes from cache (NO taxWrapper)
+        LabourEval chosenEval = cachedEvalByLabourPairs.get(labourSupplyChoice);
+        yDispMonth = chosenEval.disposableIncomeMonthly;
+        yPensYear = chosenEval.benefitsReceivedPerMonth;
+        yGrossMonth = chosenEval.grossIncomeMonthly;
+        demDbMatchTax = chosenEval.taxDbMatch;
+        idtaxDbDonor = demDbMatchTax.getCandidateID();
+
+        calculateBUIncome();
+    }
+
+
+
+    /**
+     * Main labour-supply + income update for a benefit unit.
+     *
+     * If intertemporal optimisations (IO) are enabled, derives (continuous) hours from the IO grids,
+     * converts to discrete labour states, computes labour + non-labour income, and evaluates taxes/
+     * benefits once via taxWrapper.
+     *
+     * If IO is disabled, enumerates all feasible discrete labour options (single or couple), evaluates
+     * taxes/benefits for each, computes regression utilities, samples a labour choice, applies optional
+     * childcare/social care costs, and stores the chosen disposable/gross income, benefits and tax DB match.
+     *
+     * Always finishes by recalculating BU/occupant income aggregates via calculateBUIncome().
+     */
     protected void updateLabourSupplyAndIncome() {
 
         resetLabourStates();
         Occupancy occupancy = getOccupancy();
         Person male = getMale();
         Person female = getFemale();
+
         if (Parameters.enableIntertemporalOptimisations && (DecisionParams.FLAG_IO_EMPLOYMENT1 || DecisionParams.FLAG_IO_EMPLOYMENT2) ) {
             // intertemporal optimisations enabled
 
@@ -875,20 +1527,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             double emp1, emp2, labourIncomeWeeklyM, labourIncomeWeeklyF, hoursWorkedPerWeekM, hoursWorkedPerWeekF;
             labourIncomeWeeklyM = labourIncomeWeeklyF = hoursWorkedPerWeekM = hoursWorkedPerWeekF = 0.0;
             int dlltsdM = -1, dlltsdF = -1;
-            if (DecisionParams.FLAG_IO_EMPLOYMENT1 && states.getAgeYears() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) {
-                emp1 = Parameters.grids.employment1.interpolateAll(states, false);
+            if (DecisionParams.FLAG_IO_EMPLOYMENT1 && labStatesContObject.getAgeYears() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) {
+                emp1 = Parameters.grids.employment1.interpolateAll(labStatesContObject, false);
             } else {
                 emp1 = 0.0;
             }
             if (male!=null && female!=null) {
                 // couples
 
-                if (DecisionParams.FLAG_IO_EMPLOYMENT2 && states.getAgeYears() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) {
-                    emp2 = Parameters.grids.employment2.interpolateAll(this.states, false);
+                if (DecisionParams.FLAG_IO_EMPLOYMENT2 && labStatesContObject.getAgeYears() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY) {
+                    emp2 = Parameters.grids.employment2.interpolateAll(this.labStatesContObject, false);
                 } else {
                     emp2 = 0.0;
                 }
-                if ( getRefPersonForDecisions().getGender()==0) {
+                if (getRefPersonForDecisions().getGender()==0) {
                     // reference person is male
 
                     hoursWorkedPerWeekM = DecisionParams.FULLTIME_HOURS_WEEKLY * emp1;
@@ -927,16 +1579,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // evaluate original income
             double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * (labourIncomeWeeklyM + labourIncomeWeeklyF) +
-                    investmentIncomeAnnual/12.0 + pensionIncomeAnnual/12.0;
+                    yInvestYear /12.0 + yPensYear /12.0;
             double secondIncomePerMonth = Math.min(labourIncomeWeeklyM, labourIncomeWeeklyF) * Parameters.WEEKS_PER_MONTH;
 
             TaxEvaluation evaluatedTransfers = taxWrapper(hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, originalIncomePerMonth, secondIncomePerMonth);
 
-            disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-            benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-            grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
-            taxDbMatch = evaluatedTransfers.getMatch();
-            taxDbDonorId = taxDbMatch.getCandidateID();
+            yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+            yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+            yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
+            demDbMatchTax = evaluatedTransfers.getMatch();
+            idtaxDbDonor = demDbMatchTax.getCandidateID();
+            setReceivedUC(evaluatedTransfers.getReceivedUC());
+            setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
         } else {
             // intertemporal optimisations disabled
 
@@ -951,46 +1605,59 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             LinkedHashSet<MultiKey<Labour>> possibleLabourCombinations = findPossibleLabourCombinations(); // Find possible labour combinations for this benefit unit
             MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionScoresByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
+            // Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).
+            // For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
+            if (Occupancy.Couple.equals(occupancy)) {
 
-            //Sometimes one of the occupants of the couple will be retired (or even under the age to work, which is currently the age to leave home).  For this case, the person (not at risk of work)'s labour supply will always be zero, while the other person at risk of work has a choice over the single person Labour Supply set.
-            if(Occupancy.Couple.equals(occupancy)) {
+                for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
 
-                for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) { //PB: for each possible discrete number of hours
-
-                    //Sets values for regression score calculation
+                    // Sets values for regression score calculation
                     male.setLabourSupplyWeekly(labourKey.getKey(0));
                     female.setLabourSupplyWeekly(labourKey.getKey(1));
 
-                    //Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)
-                    double maleIncome = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getYptciihs_dv());
-                    double femaleIncome = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getYptciihs_dv());
+                    // Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)
+                    double maleIncome = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
+                    double femaleIncome = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
                     double originalIncomePerMonth = maleIncome + femaleIncome;
                     double secondIncomePerMonth = Math.min(maleIncome, femaleIncome);
 
                     TaxEvaluation evaluatedTransfers = taxWrapper(labourKey.getKey(0).getHours(male), labourKey.getKey(1).getHours(female), male.getDisability(), female.getDisability(), originalIncomePerMonth, secondIncomePerMonth);
 
-                    disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                    benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                    grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                    yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                    yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                    yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
+                    setReceivedUC(evaluatedTransfers.getReceivedUC());
+                    setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
-                    //Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
+                    // Note that only benefitUnits at risk of work are considered, so at least one partner is at risk of work
                     double regressionScore = 0.;
                     if (male.atRiskOfWork()) { //If male has flexible labour supply
                         if (female.atRiskOfWork()) { //And female has flexible labour supply
                             //Follow utility process for couples
                             regressionScore = Parameters.getRegLabourSupplyUtilityCouples().getScore(this, BenefitUnit.Regressors.class);
                         } else if (!female.atRiskOfWork()) { //Male has flexible labour supply, female doesn't
-                            //Follow utility process for single males for the UK
-                            regressionScore = Parameters.getRegLabourSupplyUtilityMalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
-                            //In Italy, this should follow a separate set of estimates. One way is to differentiate between countries here; another would be to add a set of estimates for both countries, but for the UK have the same number as for singles
-                            //Introduced a new category of estimates, Males/Females with Dependent to be used when only one of the couple is flexible in labour supply. In Italy, these have a separate set of estimates; in the UK they use the same estimates as "independent" singles
+                            //Male is at risk of work and has dependent female
+                            regressionScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+
+                            var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                            double betaWomen = reg.getCoefficient("AlignmentFixedCostWomen");
+                            double xWomen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostWomen"));
+
+                            regressionScore = regressionScore - (betaWomen * xWomen); //term "(betaWomen * xWomen)" should be zero but this is just a precaution
                         }
                     } else if (female.atRiskOfWork() && !male.atRiskOfWork()) { //Male not at risk of work - female must be at risk of work since only benefitUnits at risk are considered here
-                        //Follow utility process for single female
-                        regressionScore = Parameters.getRegLabourSupplyUtilityFemalesWithDependent().getScore(this, BenefitUnit.Regressors.class);
+                        //Female is at risk of work and has dependent male
+                        regressionScore = Parameters.getRegLabourSupplyUtilitySingleDep().getScore(this, BenefitUnit.Regressors.class);
+
+                        var reg = Parameters.getRegLabourSupplyUtilitySingleDep();
+                        double betaMen = reg.getCoefficient("AlignmentFixedCostMen");
+                        double xMen = this.getDoubleValue(Enum.valueOf(BenefitUnit.Regressors.class, "AlignmentFixedCostMen"));
+
+                        regressionScore = regressionScore - (betaMen * xMen); //term "(betaMen * xMen)" should be zero but this is just a precaution
+
                     } else throw new IllegalArgumentException("None of the partners are at risk of work! HHID " + getKey().getId());
-                    if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
-                        throw new RuntimeException("problem evaluating exponential regression score in labour supply module (1)");
+                    if (!Parameters.checkFinite(regressionScore)) {
+                        regressionScore = -700.0;
                     }
 
                     disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
@@ -1002,17 +1669,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else {
                 // single adult
 
-                if(Occupancy.Single_Male.equals(occupancy)) {
+                if (Occupancy.Single_Male.equals(occupancy)) {
 
-                    for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
+                    for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
 
                         male.setLabourSupplyWeekly(labourKey.getKey(0));
-                        double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getYptciihs_dv());
+                        double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * male.getEarningsWeekly() + Math.sinh(male.getyMiscPersGrossMonth());
                         TaxEvaluation evaluatedTransfers = taxWrapper(labourKey.getKey(0).getHours(male), 0.0, male.getDisability(), -1, originalIncomePerMonth, 0.0);
 
-                        disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                        benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                        grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                        yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                        yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
+                        setReceivedUC(evaluatedTransfers.getReceivedUC());
+                        setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
                         double regressionScore = 0.;
                         if (male.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for male adult children
@@ -1020,8 +1689,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         } else {
                             regressionScore = Parameters.getRegLabourSupplyUtilityMales().getScore(this, Regressors.class);
                         }
-                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
-                            throw new RuntimeException("problem evaluating exponential regression score in labour supply module (2)");
+                        if (!Parameters.checkFinite(regressionScore)) {
+                            regressionScore = -700.0;
                         }
 
                         disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
@@ -1032,15 +1701,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     }
                 } else if (Occupancy.Single_Female.equals(occupancy)) {        //Occupant must be a single female
 
-                    for(MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
+                    for (MultiKey<? extends Labour> labourKey : possibleLabourCombinations) {
 
                         female.setLabourSupplyWeekly(labourKey.getKey(1));
-                        double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getYptciihs_dv());
+                        double originalIncomePerMonth = Parameters.WEEKS_PER_MONTH * female.getEarningsWeekly() + Math.sinh(female.getyMiscPersGrossMonth());
                         TaxEvaluation evaluatedTransfers = taxWrapper(0.0, labourKey.getKey(1).getHours(female), -1, female.getDisability(), originalIncomePerMonth, 0.0);
 
-                        disposableIncomeMonthly = evaluatedTransfers.getDisposableIncomePerMonth();
-                        benefitsReceivedPerMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
-                        grossIncomeMonthly = evaluatedTransfers.getGrossIncomePerMonth();
+                        yDispMonth = evaluatedTransfers.getDisposableIncomePerMonth();
+                        yBenAmountMonth = evaluatedTransfers.getBenefitsReceivedPerMonth();
+                        yGrossMonth = evaluatedTransfers.getGrossIncomePerMonth();
+                        setReceivedUC(evaluatedTransfers.getReceivedUC());
+                        setReceivedLegacyBenefits(evaluatedTransfers.getReceivedLegacyBenefit());
 
                         double regressionScore = 0.;
                         if (female.getAdultChildFlag() == 1) { //If adult children use labour supply estimates for female adult children
@@ -1048,8 +1719,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                         } else {
                             regressionScore = Parameters.getRegLabourSupplyUtilityFemales().getScore(this, BenefitUnit.Regressors.class);
                         }
-                        if (Double.isNaN(regressionScore) || Double.isInfinite(regressionScore)) {
-                            throw new RuntimeException("problem evaluating exponential regression score in labour supply module (3)");
+                        if (!Parameters.checkFinite(regressionScore)) {
+                            regressionScore = -700.0;
                         }
                         disposableIncomeMonthlyByLabourPairs.put(labourKey, getDisposableIncomeMonthly());
                         benefitsReceivedMonthlyByLabourPairs.put(labourKey, getBenefitsReceivedPerMonth());
@@ -1059,21 +1730,41 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     }
                 }
             }
-            if(labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
+            if (labourSupplyUtilityRegressionScoresByLabourPairs.isEmpty()) {
                 // error check
 
                 System.out.print("\nlabourSupplyUtilityExponentialRegressionScoresByLabourPairs for household " + key.getId() + " with occupants ");
-                if(male != null) {
+                if (male != null) {
                     System.out.print("male : " + male.getKey().getId() + ", ");
                 }
-                if(female != null) {
+                if (female != null) {
                     System.out.print("female : " + female.getKey().getId() + ", ");
                 }
                 System.out.print("is empty!");
             }
 
             //Sample labour supply from possible labour (pairs of) values
-            double labourInnov = innovations.getDoubleDraw(5);
+            double labourInnov = 0;
+
+            // Check if:
+            // - single occupant who was employed in preceding period
+            // - or male of couple who was employed in preceding period
+            // - or male is not at risk of work and female who was employed in preceding period
+            // -> then persist employment innovation with probability Parameters.labour_innovation_employment_persistence_probability
+            // Otherwise
+            // -> persist employment innovation with probability Parameters.labour_innovation_notinemployment_persistence_probability
+            if (occupancy.Single_Male.equals(occupancy) && male.atRiskOfWork() && male.getEmployed_Lag1() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.Single_Female.equals(occupancy) && female.atRiskOfWork() && female.getEmployed_Lag1() == 1) {
+                    labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else if (occupancy.equals(Occupancy.Couple) &&
+                    ((male.atRiskOfWork() && male.getEmployed_Lag1() == 1) ||
+                            (!male.atRiskOfWork() && female.atRiskOfWork() && female.getEmployed_Lag1() == 1))) {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_employment_persistence_probability);
+            } else {
+                labourInnov = getLabourInnovation(Parameters.labour_innovation_notinemployment_persistence_probability);
+            }
+
             try {
                 MultiKeyMap<Labour, Double> labourSupplyUtilityRegressionProbabilitiesByLabourPairs = convertRegressionScoresToProbabilities(labourSupplyUtilityRegressionScoresByLabourPairs);
                 labourSupplyChoice = ManagerRegressions.multiEvent(labourSupplyUtilityRegressionProbabilitiesByLabourPairs, labourInnov);
@@ -1098,18 +1789,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // allow for formal childcare costs
             if (Parameters.flagFormalChildcare && !Parameters.flagSuppressChildcareCosts) {
-                updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDag());
+                updateChildcareCostPerWeek(model.getYear(), getRefPersonForDecisions().getDemAge());
             }
             if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
                 updateSocialCareCostPerWeek();
             }
 
             // populate disposable income
-            disposableIncomeMonthly = disposableIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
-            benefitsReceivedPerMonth = benefitsReceivedMonthlyByLabourPairs.get(labourSupplyChoice);
-            grossIncomeMonthly = grossIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
-            taxDbMatch = taxDbMatchByLabourPairs.get(labourSupplyChoice);
-            taxDbDonorId = taxDbMatch.getCandidateID();
+            yDispMonth = disposableIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
+            yBenAmountMonth = benefitsReceivedMonthlyByLabourPairs.get(labourSupplyChoice);
+            yGrossMonth = grossIncomeMonthlyByLabourPairs.get(labourSupplyChoice);
+            demDbMatchTax = taxDbMatchByLabourPairs.get(labourSupplyChoice);
+            idtaxDbDonor = demDbMatchTax.getCandidateID();
         }
 
         //Update gross income variables for the household and all occupants:
@@ -1190,16 +1881,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             // male
             double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-            male.setYplgrs_dv(asinh(labourEarningsMaleMonthly));
-            double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getYptciihs_dv()); //personal non-benefit income per month
-            male.setYpnbihs_dv(asinh(ypnbihsMaleMonthly));
+            male.setyEmpPersGrossMonth(asinh(labourEarningsMaleMonthly));
+            double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getyMiscPersGrossMonth()); //personal non-benefit income per month
+            male.setyNonBenPersGrossMonth(asinh(ypnbihsMaleMonthly));
             male.setCovidModuleGrossLabourIncome_Baseline(ypnbihsMaleMonthly); // Used in the Covid-19 labour supply module
 
             // female
             double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-            female.setYplgrs_dv(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
-            double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getYptciihs_dv()); //In levels
-            female.setYpnbihs_dv(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
+            female.setyEmpPersGrossMonth(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
+            double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getyMiscPersGrossMonth()); //In levels
+            female.setyNonBenPersGrossMonth(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
             female.setCovidModuleGrossLabourIncome_Baseline(ypnbihsFemaleMonthly); // Used in the Covid-19 labour supply module
 
             // benefit unit income is the sum of male and female non-benefit income
@@ -1209,15 +1900,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             //Based on the percentiles calculated by the collector, assign household to one of the quintiles of (equivalised) income distribution
             if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
                 if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p20()) {
-                    ydses_c5 = Ydses_c5.Q1;
+                    yHhQuintilesMonthC5 = Ydses_c5.Q1;
                 } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p40()) {
-                    ydses_c5 = Ydses_c5.Q2;
+                    yHhQuintilesMonthC5 = Ydses_c5.Q2;
                 } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p60()) {
-                    ydses_c5 = Ydses_c5.Q3;
+                    yHhQuintilesMonthC5 = Ydses_c5.Q3;
                 } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p80()) {
-                    ydses_c5 = Ydses_c5.Q4;
+                    yHhQuintilesMonthC5 = Ydses_c5.Q4;
                 } else {
-                    ydses_c5 = Ydses_c5.Q5;
+                    yHhQuintilesMonthC5 = Ydses_c5.Q5;
                 }
             }
         } else if(getOccupancy().equals(Occupancy.Single_Male)) {
@@ -1225,9 +1916,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             if (male != null) {
 
                 double labourEarningsMaleMonthly = male.getEarningsWeekly(male.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-                male.setYplgrs_dv(asinh(labourEarningsMaleMonthly)); //This follows asinh transform of labourEarnings
-                double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getYptciihs_dv()); //In levels
-                male.setYpnbihs_dv(asinh(ypnbihsMaleMonthly)); //Set asinh transformed
+                male.setyEmpPersGrossMonth(asinh(labourEarningsMaleMonthly)); //This follows asinh transform of labourEarnings
+                double ypnbihsMaleMonthly = labourEarningsMaleMonthly + Math.sinh(male.getyMiscPersGrossMonth()); //In levels
+                male.setyNonBenPersGrossMonth(asinh(ypnbihsMaleMonthly)); //Set asinh transformed
                 male.setCovidModuleGrossLabourIncome_Baseline(ypnbihsMaleMonthly); // Used in the Covid-19 labour supply module
 
                 //BenefitUnit income is the male non-benefit income
@@ -1236,15 +1927,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
                     if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p20()) {
-                        ydses_c5 = Ydses_c5.Q1;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q1;
                     } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p40()) {
-                        ydses_c5 = Ydses_c5.Q2;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q2;
                     } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p60()) {
-                        ydses_c5 = Ydses_c5.Q3;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q3;
                     } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p80()) {
-                        ydses_c5 = Ydses_c5.Q4;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
-                        ydses_c5 = Ydses_c5.Q5;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q5;
                     }
                 }
             } else
@@ -1255,9 +1946,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
                 //If not a couple nor a single male, occupancy must be single female
                 double labourEarningsFemaleMonthly = female.getEarningsWeekly(female.getLabourSupplyHoursWeekly()) * Parameters.WEEKS_PER_MONTH; //Level of monthly labour earnings
-                female.setYplgrs_dv(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
-                double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getYptciihs_dv()); //In levels
-                female.setYpnbihs_dv(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
+                female.setyEmpPersGrossMonth(asinh(labourEarningsFemaleMonthly)); //This follows asinh transform of labourEarnings
+                double ypnbihsFemaleMonthly = labourEarningsFemaleMonthly + Math.sinh(female.getyMiscPersGrossMonth()); //In levels
+                female.setyNonBenPersGrossMonth(asinh(ypnbihsFemaleMonthly)); //Set asinh transformed
                 female.setCovidModuleGrossLabourIncome_Baseline(ypnbihsFemaleMonthly); // Used in the Covid-19 labour supply module
 
                 //BenefitUnit income is the female non-benefit income
@@ -1267,15 +1958,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
 
                     if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p20()) {
-                        ydses_c5 = Ydses_c5.Q1;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q1;
                     } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p40()) {
-                        ydses_c5 = Ydses_c5.Q2;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q2;
                     } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p60()) {
-                        ydses_c5 = Ydses_c5.Q3;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q3;
                     } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p80()) {
-                        ydses_c5 = Ydses_c5.Q4;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
-                        ydses_c5 = Ydses_c5.Q5;
+                        yHhQuintilesMonthC5 = Ydses_c5.Q5;
                     }
                 }
             } else
@@ -1310,77 +2001,60 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Regressors {
 
-        IncomeSquared,
-        HoursMaleSquared,
-        HoursFemaleSquared,
-        HoursMaleByIncome,
-        HoursFemaleByIncome,
-        HoursMaleByHoursFemale,
-        Income,
-        IncomeByAge,
-        IncomeByAgeSquared,
-        IncomeByNumberChildren,
-        HoursMale,
-        HoursMaleByAgeMale,
-        HoursMaleByAgeMaleSquared,
-        HoursMaleByNumberChildren,
-        HoursMaleByDelderly,
-        HoursMaleByDregion,
-        HoursFemale,
-        HoursFemaleByAgeFemale,
-        HoursFemaleByAgeFemaleSquared,
-        HoursFemaleByDchildren2under,
-        HoursFemaleByDchildren3_6,
-        HoursFemaleByDchildren7_12,
-        HoursFemaleByDchildren13_17,
-        HoursFemaleByDelderly,
-        HoursFemaleByDregion,
-
-        FixedCostMaleByNumberChildren,
-        FixedCostMaleByDchildren2under,
-
-        FixedCostFemaleByNumberChildren,
-        FixedCostFemaleByDchildren2under,
-        FixedCostByHighEducation,
-
-        //New set of regressors for LS models from Zhechun:
-        IncomeDiv100,                             //Disposable monthly income from donor household divided by 100
-        IncomeSqDiv10000,                        //Income squared divided by 10000
-        IncomeDiv100_MeanPartnersAgeDiv100,        //Income divided by 100 interacted with mean age of male and female in the household divided by 100
-        IncomeDiv100_MeanPartnersAgeSqDiv10000,     //Income divided by 100 interacted with square of mean age of male and female in the household divided by 100
-        IncomeDiv100_NChildren017,                 //Income divided by 100 interacted with the number of children aged 0-17
-        IncomeDiv100_DChildren2Under,            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
-        MaleLeisure,                            //24*7 - labour supply weekly for male
-        MaleLeisureSq,
-        MaleLeisure_IncomeDiv100,
-        MaleLeisure_MaleAgeDiv100,                //Male Leisure interacted with age of male
-        MaleLeisure_MaleAgeSqDiv10000,
-        MaleLeisure_NChildren017,
-        MaleLeisure_DChildren2Under,
-        MaleLeisure_MaleDeh_c3_Low,
-        MaleLeisure_MaleDeh_c3_Medium,
-        MaleLeisure_UKC,
-        MaleLeisure_UKD,
-        MaleLeisure_UKE,
-        MaleLeisure_UKF,
-        MaleLeisure_UKG,
-        MaleLeisure_UKH,
-        MaleLeisure_UKJ,
-        MaleLeisure_UKK,
-        MaleLeisure_UKL,
-        MaleLeisure_UKM,
-        MaleLeisure_UKN,
-        MaleLeisure_MaleAge50Above,         //Male leisure interacted with dummy for age >= 50
-        MaleLeisure_FemaleLeisure,            //Male leisure interacted with female leisure
+        AlignmentFixedCostWomen,
+        AlignmentFixedCostMen,
+        // Alignment-only regressors for single-dependent subgroups.
+        AlignmentSingleDepMen,
+        AlignmentSingleDepWomen,
+        Constant,
+        couple_emp_2ft,
+        couple_emp_2ne,
+        couple_emp_2pt,
+        couple_emp_ftne,
+        couple_emp_ftpt,
+        couple_emp_ptne,
+        Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
+        Cut10,
+        Cut2,
+        Cut3,
+        Cut4,
+        Cut5,
+        Cut6,
+        Cut7,
+        Cut8,
+        Cut9,
+        FemaleEduH_1,
+        FemaleEduH_10,
+        FemaleEduH_2,
+        FemaleEduH_20,
+        FemaleEduH_3,
+        FemaleEduH_30,
+        FemaleEduH_4,
+        FemaleEduH_40,
+        FemaleEduM_1,
+        FemaleEduM_10,
+        FemaleEduM_2,
+        FemaleEduM_20,
+        FemaleEduM_3,
+        FemaleEduM_30,
+        FemaleEduM_4,
+        FemaleEduM_40,
+        FemaleHoursAbove40,
         FemaleLeisure,                            //24*7 - labour supply weekly for Female
-        FemaleLeisureSq,
-        FemaleLeisure_IncomeDiv100,
+        FemaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
+        FemaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
+        FemaleLeisure_DChildren2Under,
+        FemaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
+        FemaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
+        FemaleLeisure_dnc,
+        FemaleLeisure_dnc02,
+        FemaleLeisure_FemaleAge50Above,         //Female leisure interacted with dummy for age >= 50
         FemaleLeisure_FemaleAgeDiv100,                //Female Leisure interacted with age of Female
         FemaleLeisure_FemaleAgeSqDiv10000,
-        FemaleLeisure_NChildren017,
-        FemaleLeisure_DChildren2Under,
         FemaleLeisure_FemaleDeh_c3_Low,
         FemaleLeisure_FemaleDeh_c3_Medium,
+        FemaleLeisure_IncomeDiv100,
+        FemaleLeisure_NChildren017,
         FemaleLeisure_UKC,
         FemaleLeisure_UKD,
         FemaleLeisure_UKE,
@@ -1392,44 +2066,81 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         FemaleLeisure_UKL,
         FemaleLeisure_UKM,
         FemaleLeisure_UKN,
-        FemaleLeisure_FemaleAge50Above,         //Female leisure interacted with dummy for age >= 50
-        FixedCostMale,
-        FixedCostMale_NorthernRegions,
-        FixedCostMale_SouthernRegions,
+        FemaleLeisureSq,
+        FixedCost_Female,
+        FixedCost_Male,
+        FixedCost_Disabled,
+        FixedCost_Disabled_Female,
+        FixedCost_Disabled_Male,
+        FixedCost_RetirementAge,
+        FixedCost_RetirementAge_Female,
+        FixedCost_RetirementAge_Male,
+        FixedCostByHighEducation,
         FixedCostFemale,
-        FixedCostFemale_NorthernRegions,
-        FixedCostFemale_SouthernRegions,
-        FixedCostMale_NChildren017,
-        FixedCostMale_DChildren2Under,
-        FixedCostFemale_NChildren017,
         FixedCostFemale_DChildren2Under,
-
-        MaleHoursAbove40,
-        FemaleHoursAbove40,
-
-        //Additional regressors for single female or single male benefitUnits:
-
-        MaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
-        MaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
-        MaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
-        MaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
-        FixedCostMale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
-        FixedCostMale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
-
-        FemaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
-        FemaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
-        FemaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
-        FemaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
         FixedCostFemale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
         FixedCostFemale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
-
-        // Additional variables for re-estimated LS processes
-        FixedCost_Male,
-        FixedCost_Female,
-        IncomeDiv100_MaleAgeDiv100,
-        IncomeDiv100_MaleAgeSqDiv10000,
+        FixedCostFemale_NChildren017,
+        FixedCostFemale_NorthernRegions,
+        FixedCostFemale_SouthernRegions,
+        FixedCostFemaleByDchildren2under,
+        FixedCostFemaleByNumberChildren,
+        FixedCostMale,
+        FixedCostMale_DChildren2Under,
+        FixedCostMale_Dlltsdsp,    //Fixed cost interacted with dummy for partner being long-term sick or disabled
+        FixedCostMale_Lesspc3_Student, //Fixed cost interacted with dummy for partner being a student
+        FixedCostMale_NChildren017,
+        FixedCostMale_NorthernRegions,
+        FixedCostMale_SouthernRegions,
+        FixedCostMaleByDchildren2under,
+        FixedCostMaleByNumberChildren,
+        Graduate,
+        Homeownership_D, // Indicator: does the benefit unit own home?
+        HoursFemale,
+        HoursFemaleByAgeFemale,
+        HoursFemaleByAgeFemaleSquared,
+        HoursFemaleByDchildren13_17,
+        HoursFemaleByDchildren2under,
+        HoursFemaleByDchildren3_6,
+        HoursFemaleByDchildren7_12,
+        HoursFemaleByDelderly,
+        HoursFemaleByDregion,
+        HoursFemaleByIncome,
+        HoursFemaleSquared,
+        HoursMale,
+        HoursMaleByAgeMale,
+        HoursMaleByAgeMaleSquared,
+        HoursMaleByDelderly,
+        HoursMaleByDregion,
+        HoursMaleByHoursFemale,
+        HoursMaleByIncome,
+        HoursMaleByNumberChildren,
+        HoursMaleSquared,
+        Hrs_36plus_Female,
+        Hrs_36plus_Male,
+        Hrs_below36_Disabled,
+        Hrs_below36_Disabled_Female,
+        Hrs_below36_Disabled_Male,
+        Hrs_below36_RetirementAge,
+        Hrs_below36_RetirementAge_Female,
+        Hrs_below36_RetirementAge_Male,
+        Income,
+        IncomeByAge,
+        IncomeByAgeSquared,
+        IncomeByNumberChildren,
+        IncomeDiv100,                             //Disposable monthly income from donor household divided by 100
+        IncomeDiv100_DChildren2Under,            //Income divided by 100 interacted with dummy for presence of children aged 0-2 in the household
         IncomeDiv100_dnc,
         IncomeDiv100_dnc02,
+        IncomeDiv100_FemaleAgeDiv100,
+        IncomeDiv100_FemaleAgeSqDiv10000,
+        IncomeDiv100_MaleAgeDiv100,
+        IncomeDiv100_MaleAgeSqDiv10000,
+        IncomeDiv100_MeanPartnersAgeDiv100,        //Income divided by 100 interacted with mean age of male and female in the household divided by 100
+        IncomeDiv100_MeanPartnersAgeSqDiv10000,     //Income divided by 100 interacted with square of mean age of male and female in the household divided by 100
+        IncomeDiv100_NChildren017,                 //Income divided by 100 interacted with the number of children aged 0-17
+        IncomeSqDiv10000,                        //Income squared divided by 10000
+        IncomeSquared,
         L1_lhw_1,
         L1_lhw_10,
         L1_lhw_2,
@@ -1438,83 +2149,247 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         L1_lhw_30,
         L1_lhw_4,
         L1_lhw_40,
-        L1_lhw_Male_1,
         L1_lhw_Female_1,
-        L1_lhw_Male_2,
-        L1_lhw_Female_2,
-        L1_lhw_Male_3,
-        L1_lhw_Female_3,
-        L1_lhw_Male_4,
-        L1_lhw_Female_4,
-        L1_lhw_Male_10,
         L1_lhw_Female_10,
-        L1_lhw_Male_11,
         L1_lhw_Female_11,
-        L1_lhw_Male_12,
         L1_lhw_Female_12,
-        L1_lhw_Male_13,
         L1_lhw_Female_13,
-        L1_lhw_Male_14,
         L1_lhw_Female_14,
-        L1_lhw_Male_20,
+        L1_lhw_Female_2,
         L1_lhw_Female_20,
-        L1_lhw_Male_21,
         L1_lhw_Female_21,
-        L1_lhw_Male_22,
         L1_lhw_Female_22,
-        L1_lhw_Male_23,
         L1_lhw_Female_23,
-        L1_lhw_Male_24,
         L1_lhw_Female_24,
-        L1_lhw_Male_30,
+        L1_lhw_Female_3,
         L1_lhw_Female_30,
-        L1_lhw_Male_31,
         L1_lhw_Female_31,
-        L1_lhw_Male_32,
         L1_lhw_Female_32,
-        L1_lhw_Male_33,
         L1_lhw_Female_33,
-        L1_lhw_Male_34,
         L1_lhw_Female_34,
-        L1_lhw_Male_40,
+        L1_lhw_Female_4,
         L1_lhw_Female_40,
-        L1_lhw_Male_41,
         L1_lhw_Female_41,
-        L1_lhw_Male_42,
         L1_lhw_Female_42,
-        L1_lhw_Male_43,
         L1_lhw_Female_43,
-        L1_lhw_Male_44,
         L1_lhw_Female_44,
-        MaleEduM_10,
+        L1_lhw_Male_1,
+        L1_lhw_Male_10,
+        L1_lhw_Male_11,
+        L1_lhw_Male_12,
+        L1_lhw_Male_13,
+        L1_lhw_Male_14,
+        L1_lhw_Male_2,
+        L1_lhw_Male_20,
+        L1_lhw_Male_21,
+        L1_lhw_Male_22,
+        L1_lhw_Male_23,
+        L1_lhw_Male_24,
+        L1_lhw_Male_3,
+        L1_lhw_Male_30,
+        L1_lhw_Male_31,
+        L1_lhw_Male_32,
+        L1_lhw_Male_33,
+        L1_lhw_Male_34,
+        L1_lhw_Male_4,
+        L1_lhw_Male_40,
+        L1_lhw_Male_41,
+        L1_lhw_Male_42,
+        L1_lhw_Male_43,
+        L1_lhw_Male_44,
+        Liwwh_1,
+        Liwwh_10,
+        Liwwh_2,
+        Liwwh_20,
+        Liwwh_3,
+        Liwwh_30,
+        Liwwh_4,
+        Liwwh_40,
+        Liwwh_5,
+        Liwwh_50,
+        Liwwh_6,
+        Liwwh_60,
+        Liwwh_Female_01,
+        Liwwh_Female_02,
+        Liwwh_Female_03,
+        Liwwh_Female_04,
+        Liwwh_Female_05,
+        Liwwh_Female_06,
+        Liwwh_Female_1,
+        Liwwh_Female_10,
+        Liwwh_Female_11,
+        Liwwh_Female_12,
+        Liwwh_Female_13,
+        Liwwh_Female_14,
+        Liwwh_Female_15,
+        Liwwh_Female_16,
+        Liwwh_Female_2,
+        Liwwh_Female_20,
+        Liwwh_Female_21,
+        Liwwh_Female_22,
+        Liwwh_Female_23,
+        Liwwh_Female_24,
+        Liwwh_Female_25,
+        Liwwh_Female_26,
+        Liwwh_Female_3,
+        Liwwh_Female_30,
+        Liwwh_Female_31,
+        Liwwh_Female_32,
+        Liwwh_Female_33,
+        Liwwh_Female_34,
+        Liwwh_Female_35,
+        Liwwh_Female_36,
+        Liwwh_Female_4,
+        Liwwh_Female_40,
+        Liwwh_Female_41,
+        Liwwh_Female_42,
+        Liwwh_Female_43,
+        Liwwh_Female_44,
+        Liwwh_Female_45,
+        Liwwh_Female_46,
+        Liwwh_Female_5,
+        Liwwh_Female_50,
+        Liwwh_Female_51,
+        Liwwh_Female_52,
+        Liwwh_Female_53,
+        Liwwh_Female_54,
+        Liwwh_Female_55,
+        Liwwh_Female_56,
+        Liwwh_Female_6,
+        Liwwh_Female_60,
+        Liwwh_Female_61,
+        Liwwh_Female_62,
+        Liwwh_Female_63,
+        Liwwh_Female_64,
+        Liwwh_Female_65,
+        Liwwh_Female_66,
+        Liwwh_Male_01,
+        Liwwh_Male_02,
+        Liwwh_Male_03,
+        Liwwh_Male_04,
+        Liwwh_Male_05,
+        Liwwh_Male_06,
+        Liwwh_Male_1,
+        Liwwh_Male_10,
+        Liwwh_Male_11,
+        Liwwh_Male_12,
+        Liwwh_Male_13,
+        Liwwh_Male_14,
+        Liwwh_Male_15,
+        Liwwh_Male_16,
+        Liwwh_Male_2,
+        Liwwh_Male_20,
+        Liwwh_Male_21,
+        Liwwh_Male_22,
+        Liwwh_Male_23,
+        Liwwh_Male_24,
+        Liwwh_Male_25,
+        Liwwh_Male_26,
+        Liwwh_Male_3,
+        Liwwh_Male_30,
+        Liwwh_Male_31,
+        Liwwh_Male_32,
+        Liwwh_Male_33,
+        Liwwh_Male_34,
+        Liwwh_Male_35,
+        Liwwh_Male_36,
+        Liwwh_Male_4,
+        Liwwh_Male_40,
+        Liwwh_Male_41,
+        Liwwh_Male_42,
+        Liwwh_Male_43,
+        Liwwh_Male_44,
+        Liwwh_Male_45,
+        Liwwh_Male_46,
+        Liwwh_Male_5,
+        Liwwh_Male_50,
+        Liwwh_Male_51,
+        Liwwh_Male_52,
+        Liwwh_Male_53,
+        Liwwh_Male_54,
+        Liwwh_Male_55,
+        Liwwh_Male_56,
+        Liwwh_Male_6,
+        Liwwh_Male_60,
+        Liwwh_Male_61,
+        Liwwh_Male_62,
+        Liwwh_Male_63,
+        Liwwh_Male_64,
+        Liwwh_Male_65,
+        Liwwh_Male_66,
+        Leisure,
+        Leisure_IncomeDiv100,
+        LeisureSq,
+        MaleEduH_1,
         MaleEduH_10,
-        MaleEduM_20,
+        MaleEduH_2,
         MaleEduH_20,
-        MaleEduM_30,
+        MaleEduH_3,
         MaleEduH_30,
-        MaleEduM_40,
+        MaleEduH_4,
         MaleEduH_40,
+        MaleEduM_1,
+        MaleEduM_10,
+        MaleEduM_2,
+        MaleEduM_20,
+        MaleEduM_3,
+        MaleEduM_30,
+        MaleEduM_4,
+        MaleEduM_40,
+        MaleHoursAbove40,
+        MaleLeisure,                            //24*7 - labour supply weekly for male
+        MaleLeisure_DChildren017,  //Male leisure interacted with dummy for presence of children aged 0 - 17
+        MaleLeisure_DChildren1317, //Male leisure interacted with dummy for presence of children aged 13-17
+        MaleLeisure_DChildren2Under,
+        MaleLeisure_DChildren36,   //Male leisure interacted with dummy for presence of children aged 3 - 6
+        MaleLeisure_DChildren712,  //Male leisure interacted with dummy for presence of children aged 7 - 12
         MaleLeisure_dnc,
-        FemaleLeisure_dnc,
         MaleLeisure_dnc02,
-        FemaleLeisure_dnc02,
-        IncomeDiv100_FemaleAgeDiv100,
-        IncomeDiv100_FemaleAgeSqDiv10000,
-                //Other
-        Homeownership_D, // Indicator: does the benefit unit own home?
-
-        //Enums for use with the tax-benefit matching method
+        MaleLeisure_FemaleLeisure,            //Male leisure interacted with female leisure
+        MaleLeisure_IncomeDiv100,
+        MaleLeisure_MaleAge50Above,         //Male leisure interacted with dummy for age >= 50
+        MaleLeisure_MaleAgeDiv100,                //Male Leisure interacted with age of male
+        MaleLeisure_MaleAgeSqDiv10000,
+        MaleLeisure_MaleDeh_c3_Low,
+        MaleLeisure_MaleDeh_c3_Medium,
+        MaleLeisure_NChildren017,
+        MaleLeisure_UKC,
+        MaleLeisure_UKD,
+        MaleLeisure_UKE,
+        MaleLeisure_UKF,
+        MaleLeisure_UKG,
+        MaleLeisure_UKH,
+        MaleLeisure_UKJ,
+        MaleLeisure_UKK,
+        MaleLeisure_UKL,
+        MaleLeisure_UKM,
+        MaleLeisure_UKN,
+        MaleLeisureSq,
         MaximumAge, // Returns maximum age of responsible individuals in the benefit (tax) unit
         MinimumAge, // Returns maximum age of all people in benefit unit
-        NumberMembersOver17, // Return number of members of benefit unit aged over 17
+        n_children_0,
+        n_children_1,
+        n_children_10,
+        n_children_11,
+        n_children_12,
+        n_children_13,
+        n_children_14,
+        n_children_2,
+        n_children_3,
+        n_children_4,
+        n_children_5,
+        n_children_6,
+        n_children_7,
+        n_children_8,
+        n_children_9,
         NumberChildren04,  // Return number of children aged <0;5)
-        NumberChildren59,
         NumberChildren1017,
         NumberChildren517, // Return number of children aged <5;17>
-
-        // regressors for childcare costs
-        Constant,
-        Year_transformed,
+        NumberChildren59,
+        NumberMembersOver17, // Return number of members of benefit unit aged over 17
+        single_emp_ft,
+        single_emp_ne,
+        single_emp_pt,
         UKC,
         UKD,
         UKE,
@@ -1527,41 +2402,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         UKL,
         UKM,
         UKN,
-        n_children_0,
-        n_children_1,
-        n_children_2,
-        n_children_3,
-        n_children_4,
-        n_children_5,
-        n_children_6,
-        n_children_7,
-        n_children_8,
-        n_children_9,
-        n_children_10,
-        n_children_11,
-        n_children_12,
-        n_children_13,
-        n_children_14,
-        couple_emp_2ft,
-        couple_emp_ftpt,
-        couple_emp_2pt,
-        couple_emp_ftne,
-        couple_emp_ptne,
-        couple_emp_2ne,
-        single_emp_ft,
-        single_emp_pt,
-        single_emp_ne,
-        Graduate,
-        Cut1,       // ordered probit/logit cut points - ignore these when evaluating score
-        Cut2,
-        Cut3,
-        Cut4,
-        Cut5,
-        Cut6,
-        Cut7,
-        Cut8,
-        Cut9,
-        Cut10,
+        Year_transformed,
 
     }
 
@@ -1574,22 +2415,22 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 Person female = getFemale();
                 int maxAgeBu = 0;
                 if (male!=null && female!=null) {
-                    if (male.getDag() >= female.getDag()) {
-                        maxAgeBu = male.getDag();
+                    if (male.getDemAge() >= female.getDemAge()) {
+                        maxAgeBu = male.getDemAge();
                     } else {
-                        maxAgeBu = female.getDag();
+                        maxAgeBu = female.getDemAge();
                     }
                 } else if (male!=null) {
-                    maxAgeBu = male.getDag();
+                    maxAgeBu = male.getDemAge();
                 } else {
-                    maxAgeBu = female.getDag();
+                    maxAgeBu = female.getDemAge();
                 }
                 return maxAgeBu;
             }
             case MinimumAge -> {
                 int age = 200;
                 for (Person person : members) {
-                    if (person.getDag() < age) age = person.getDag();
+                    if (person.getDemAge() < age) age = person.getDemAge();
                 }
                 return age;
             }
@@ -1633,21 +2474,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case IncomeDiv100_MeanPartnersAgeDiv100 -> {        //Income divided by 100 interacted with mean age of male and female in the household divided by 100
                 if(getFemale() == null) {        //Single so no need for mean age
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDag() * 1.e-4;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDemAge() * 1.e-4;
                 } else if(getMale() == null) {
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDag() * 1.e-4;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDemAge() * 1.e-4;
                 } else {        //Must be a couple, so use mean age
-                    double meanAge = (getFemale().getDag() + getMale().getDag()) * 0.5;
+                    double meanAge = (getFemale().getDemAge() + getMale().getDemAge()) * 0.5;
                     return getDisposableIncomeMonthlyUpratedToBasePriceYear() * meanAge * 1.e-4;
                 }
             }
             case IncomeDiv100_MeanPartnersAgeSqDiv10000 -> {     //Income divided by 100 interacted with square of mean age of male and female in the household divided by 10000
                 if(getFemale() == null) {        //Single so no need for mean age
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDag() * getMale().getDag() * 1.e-6;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDemAge() * getMale().getDemAge() * 1.e-6;
                 } else if(getMale() == null) {
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDag() * getFemale().getDag() * 1.e-6;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDemAge() * getFemale().getDemAge() * 1.e-6;
                 } else {        //Must be a couple, so use mean age
-                    double meanAge = (getFemale().getDag() + getMale().getDag()) * 0.5;
+                    double meanAge = (getFemale().getDemAge() + getMale().getDemAge()) * 0.5;
                     return getDisposableIncomeMonthlyUpratedToBasePriceYear() * meanAge * meanAge * 1.e-6;
                 }
             }
@@ -1659,233 +2500,284 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
                         getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getIndicatorChildren(0,2).ordinal() * 1.e-2;
             }
+
+            case AlignmentFixedCostMen -> {
+                return (getMale() != null && (!getMale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
+            case AlignmentFixedCostWomen -> {
+                return (getFemale() != null && (!getFemale().getLabourSupplyWeekly().equals(Labour.ZERO))) ? 1. :0.; // Note != ZERO condition
+            }
+
+            case AlignmentSingleDepMen -> {
+                if (getOccupancy() != Occupancy.Couple) return 0.0;
+                Person male = getMale();
+                Person female = getFemale();
+                boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+                boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+                boolean maleEmployed = (male != null) && (!male.getLabourSupplyWeekly().equals(Labour.ZERO));
+                // Varies with male employment so alignment can shift employment probabilities.
+                return (maleAtRisk && !femaleAtRisk && maleEmployed) ? 1.0 : 0.0;
+            }
+            case AlignmentSingleDepWomen -> {
+                if (getOccupancy() != Occupancy.Couple) return 0.0;
+                Person male = getMale();
+                Person female = getFemale();
+                boolean maleAtRisk = (male != null) && male.atRiskOfWork();
+                boolean femaleAtRisk = (female != null) && female.atRiskOfWork();
+                boolean femaleEmployed = (female != null) && (!female.getLabourSupplyWeekly().equals(Labour.ZERO));
+                // Varies with female employment so alignment can shift employment probabilities.
+                return (!maleAtRisk && femaleAtRisk && femaleEmployed) ? 1.0 : 0.0;
+            }
+
             case MaleLeisure -> {                            //24*7 - labour supply weekly for male
-                return Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly();
+                return getMaleLeisureHoursWeekly();
             }
             case MaleLeisureSq -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                return (getMaleLeisureHoursWeekly()) * (getMaleLeisureHoursWeekly());
             }
             case MaleLeisure_IncomeDiv100 -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                return (getMaleLeisureHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
             }
             case MaleLeisure_MaleAgeDiv100 -> {                //Male Leisure interacted with age of male
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getMale().getDag() * 1.e-2;
+                return (getMaleLeisureHoursWeekly()) * getMale().getDemAge() * 1.e-2;
             }
             case MaleLeisure_MaleAgeSqDiv10000 -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getMale().getDag() * getMale().getDag() * 1.e-4;
+                return (getMaleLeisureHoursWeekly()) * getMale().getDemAge() * getMale().getDemAge() * 1.e-4;
             }
             case MaleLeisure_NChildren017, MaleLeisure_dnc -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * (double)getNumberChildren(0,17);
+                return (getMaleLeisureHoursWeekly()) * (double)getNumberChildren(0,17);
             }
             case MaleLeisure_DChildren2Under -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
             }
             case MaleLeisure_MaleDeh_c3_Low -> {
-                if(getMale().getDeh_c3().equals(Education.Low)) {
-                    return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                if(getMale().getDeh_c4().equals(Education.Low)) {
+                    return (getMaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case MaleLeisure_MaleDeh_c3_Medium -> {
-                if(getMale().getDeh_c3().equals(Education.Medium)) {
-                    return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                if(getMale().getDeh_c4().equals(Education.Medium)) {
+                    return (getMaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case MaleLeisure_UKC -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKC)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKD -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKD)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKE -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKE)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKF -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKF)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKG -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKG)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKH -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKH)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKJ -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKJ)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKK -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKK)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKL -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKL)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKM -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKM)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_UKN -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKN)) {
-                        return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                        return (getMaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case MaleLeisure_MaleAge50Above -> {
-                if (getMale().getDag() >= 50) {
-                    return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly());
+                if (getMale().getDemAge() >= 50) {
+                    return (getMaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case MaleLeisure_FemaleLeisure -> {            //Male leisure interacted with female leisure
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                return (getMaleLeisureHoursWeekly()) * (getFemaleLeisureHoursWeekly());
+            }
+            case Leisure -> {
+                if (getMale() != null && getFemale() == null) {
+                    return getMaleLeisureHoursWeekly();
+                } else if (getFemale() != null && getMale() == null) {
+                    return getFemaleLeisureHoursWeekly();
+                } else return 0.;
+            }
+            case LeisureSq -> {
+                if (getMale() != null && getFemale() == null) {
+                    return getMaleLeisureHoursWeekly() * getMaleLeisureHoursWeekly();
+                } else if (getFemale() != null && getMale() == null) {
+                    return getFemaleLeisureHoursWeekly() * getFemaleLeisureHoursWeekly();
+                } else return 0.;
+            }
+            case Leisure_IncomeDiv100 -> {
+                if (getMale() != null && getFemale() == null) {
+                    return getMaleLeisureHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                } else if (getFemale() != null && getMale() == null) {
+                    return getFemaleLeisureHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                } else return 0.;
             }
             case FemaleLeisure -> {                            //24*7 - labour supply weekly for Female
-                return Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly();
+                return getFemaleLeisureHoursWeekly();
             }
             case FemaleLeisureSq -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                return (getFemaleLeisureHoursWeekly()) * (getFemaleLeisureHoursWeekly());
             }
             case FemaleLeisure_IncomeDiv100 -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
+                return (getFemaleLeisureHoursWeekly()) * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-2;
             }
             case FemaleLeisure_FemaleAgeDiv100 -> {                //Female Leisure interacted with age of Female
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getFemale().getDag() * 1.e-2;
+                return (getFemaleLeisureHoursWeekly()) * getFemale().getDemAge() * 1.e-2;
             }
             case FemaleLeisure_FemaleAgeSqDiv10000 -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getFemale().getDag() * getFemale().getDag() * 1.e-4;
+                return (getFemaleLeisureHoursWeekly()) * getFemale().getDemAge() * getFemale().getDemAge() * 1.e-4;
             }
             case FemaleLeisure_NChildren017, FemaleLeisure_dnc -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * (double)getNumberChildren(0,17);
+                return (getFemaleLeisureHoursWeekly()) * (double)getNumberChildren(0,17);
             }
             case FemaleLeisure_DChildren2Under -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(0,2).ordinal();
             }
             case FemaleLeisure_FemaleDeh_c3_Low -> {
-                if(getFemale().getDeh_c3().equals(Education.Low)) {
-                    return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                if(getFemale().getDeh_c4().equals(Education.Low)) {
+                    return (getFemaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case FemaleLeisure_FemaleDeh_c3_Medium -> {
-                if(getFemale().getDeh_c3().equals(Education.Medium)) {
-                    return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                if(getFemale().getDeh_c4().equals(Education.Medium)) {
+                    return (getFemaleLeisureHoursWeekly());
                 } else return 0.;
             }
             case FemaleLeisure_UKC -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKC)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKD -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKD)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKE -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKE)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKF -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKF)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKG -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKG)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKH -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKH)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKJ -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKJ)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKK -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKK)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKL -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKL)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKM -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKM)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_UKN -> {
                 if(model.getCountry().equals(Country.UK)) {
                     if(getRegion().equals(Region.UKN)) {
-                        return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                        return (getFemaleLeisureHoursWeekly());
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - the region used in regression doesn't match the country in the simulation!");
             }
             case FemaleLeisure_FemaleAge50Above -> {
-                if (getFemale().getDag() >= 50) {
-                    return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly());
+                if (getFemale().getDemAge() >= 50) {
+                    return (getFemaleLeisureHoursWeekly());
                 } else return 0.;
                 //Note: In the previous version of the model, Fixed Cost was returning -1 to match the regression coefficients
             }
@@ -1897,6 +2789,40 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case FixedCost_Female -> {
                 if(getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0) {
                     return 1.;
+                } else return 0.;
+            }
+            case FixedCost_Disabled -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0) ? getMale().getDlltsd().ordinal() : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0) ? getFemale().getDlltsd().ordinal() : 0.;
+                } else return 0.;
+            }
+            case FixedCost_RetirementAge -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0) ? getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0) ? getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else return 0.;
+            }
+            case FixedCost_Disabled_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0) {
+                    return getMale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case FixedCost_Disabled_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0) {
+                    return getFemale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case FixedCost_RetirementAge_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0) {
+                    return getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
+                } else return 0.;
+            }
+            case FixedCost_RetirementAge_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0) {
+                    return getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
                 } else return 0.;
             }
             case FixedCostMale_NorthernRegions -> {
@@ -1957,17 +2883,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 //Note: couples in which one person is not at risk of work have utility set according to the process for singles
             }
             case MaleLeisure_DChildren1317 -> { //Male leisure interacted with dummy for presence of children aged 13-17
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
             }
             case MaleLeisure_DChildren712 -> {  //Male leisure interacted with dummy for presence of children aged 7 - 12
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
             }
             case MaleLeisure_DChildren36 -> {   //Male leisure interacted with dummy for presence of children aged 3 - 6
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
             }
             case MaleLeisure_DChildren017 -> {  //Male leisure interacted with dummy for presence of children aged 0 - 17
                 if(getNumberChildren(0,17) > 0) { //Instead of creating a new variable, use number of children aged 0 - 17
-                    return Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly();
+                    return getMaleLeisureHoursWeekly();
                 } else return 0.;
                 //The following two regressors refer to a partner in single LS model - this is for those with an inactive partner, but not everyone will have a partner so check for nulls
             }
@@ -1987,17 +2913,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             }
             case FemaleLeisure_DChildren1317 -> { //Male leisure interacted with dummy for presence of children aged 13-17
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(13,17).ordinal();
             }
             case FemaleLeisure_DChildren712 -> {  //Male leisure interacted with dummy for presence of children aged 7 - 12
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(7,12).ordinal();
             }
             case FemaleLeisure_DChildren36 -> {   //Male leisure interacted with dummy for presence of children aged 3 - 6
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(3,6).ordinal();
             }
             case FemaleLeisure_DChildren017 -> {  //Male leisure interacted with dummy for presence of children aged 0 - 17
                 if(getNumberChildren(0,17) > 0) { //Instead of creating a new variable, use number of children aged 0 - 17
-                    return Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly();
+                    return getFemaleLeisureHoursWeekly();
                 } else return 0.;
             }
             case FixedCostFemale_Dlltsdsp -> {    //Fixed cost interacted with dummy for partner being long-term sick or disabled
@@ -2023,8 +2949,56 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case HoursMaleSquared -> {
                 return getMale().getLabourSupplyHoursWeekly() * getMale().getLabourSupplyHoursWeekly();
             }
+            case Hrs_36plus_Male -> {
+                if (getMale() != null) {
+                    return getMale().getLabourSupplyHoursWeekly() >=36 ? 1.:0.;
+                } else{
+                    return 0.;
+                }
+            }
             case HoursFemaleSquared -> {
                 return getFemale().getLabourSupplyHoursWeekly() * getFemale().getLabourSupplyHoursWeekly();
+            }
+            case Hrs_36plus_Female -> {
+                if (getFemale() != null) {
+                    return getFemale().getLabourSupplyHoursWeekly() >=36 ? 1.:0.;
+                } else{
+                    return 0.;
+                }
+            }
+            case Hrs_below36_Disabled -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) ? getMale().getDlltsd().ordinal() : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) ? getFemale().getDlltsd().ordinal() : 0.;
+                } else return 0.;
+            }
+            case Hrs_below36_RetirementAge -> {
+                if (getMale() != null && getFemale() == null) {
+                    return (getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) ? getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else if (getFemale() != null && getMale() == null) {
+                    return (getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) ? getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age) : 0.;
+                } else return 0.;
+            }
+            case Hrs_below36_Disabled_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) {
+                    return getMale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case Hrs_below36_Disabled_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) {
+                    return getFemale().getDlltsd().ordinal();
+                } else return 0.;
+            }
+            case Hrs_below36_RetirementAge_Male -> {
+                if (getMale() != null && getMale().getLabourSupplyHoursWeekly() > 0 && getMale().getLabourSupplyHoursWeekly() < 36) {
+                    return getMale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
+                } else return 0.;
+            }
+            case Hrs_below36_RetirementAge_Female -> {
+                if (getFemale() != null && getFemale().getLabourSupplyHoursWeekly() > 0 && getFemale().getLabourSupplyHoursWeekly() < 36) {
+                    return getFemale().getDoubleValue(Person.DoublesVariables.Reached_Retirement_Age);
+                } else return 0.;
             }
             case HoursMaleByIncome -> {
                 return getMale().getLabourSupplyHoursWeekly() * getDisposableIncomeMonthlyUpratedToBasePriceYear() * 1.e-3;
@@ -2040,21 +3014,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case IncomeByAge -> {        //Use mean age for couples
                 if(getFemale() == null) {        //Single so no need for mean age
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDag() * 1.e-1;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDemAge() * 1.e-1;
                 } else if(getMale() == null) {
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDag() * 1.e-1;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDemAge() * 1.e-1;
                 } else {        //Must be a couple, so use mean age
-                    double meanAge = (getFemale().getDag() + getMale().getDag()) * 0.5;
+                    double meanAge = (getFemale().getDemAge() + getMale().getDemAge()) * 0.5;
                     return getDisposableIncomeMonthlyUpratedToBasePriceYear() * meanAge * 1.e-1;
                 }
             }
             case IncomeByAgeSquared -> {        //Use mean age for couples
                 if(getFemale() == null) {        //Single so no need for mean age
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDag() * getMale().getDag() * 1.e-2;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getMale().getDemAge() * getMale().getDemAge() * 1.e-2;
                 } else if(getMale() == null) {
-                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDag() * getFemale().getDag() * 1.e-2;
+                    return getDisposableIncomeMonthlyUpratedToBasePriceYear() * getFemale().getDemAge() * getFemale().getDemAge() * 1.e-2;
                 } else {        //Must be a couple, so use mean age
-                    double meanAge = (getFemale().getDag() + getMale().getDag()) * 0.5;
+                    double meanAge = (getFemale().getDemAge() + getMale().getDemAge()) * 0.5;
                     return getDisposableIncomeMonthlyUpratedToBasePriceYear() * meanAge * meanAge * 1.e-2;
                 }
             }
@@ -2065,10 +3039,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return getMale().getLabourSupplyHoursWeekly();
             }
             case HoursMaleByAgeMale -> {
-                return getMale().getLabourSupplyHoursWeekly() * getMale().getDag() * 1.e-1;
+                return getMale().getLabourSupplyHoursWeekly() * getMale().getDemAge() * 1.e-1;
             }
             case HoursMaleByAgeMaleSquared -> {
-                return getMale().getLabourSupplyHoursWeekly() * getMale().getDag() * getMale().getDag() * 1.e-2;
+                return getMale().getLabourSupplyHoursWeekly() * getMale().getDemAge() * getMale().getDemAge() * 1.e-2;
             }
             case HoursMaleByNumberChildren -> {
                 return getMale().getLabourSupplyHoursWeekly() * getNumberChildrenAll();
@@ -2092,10 +3066,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return getFemale().getLabourSupplyHoursWeekly();
             }
             case HoursFemaleByAgeFemale -> {
-                return getFemale().getLabourSupplyHoursWeekly() * getFemale().getDag() * 1.e-1;
+                return getFemale().getLabourSupplyHoursWeekly() * getFemale().getDemAge() * 1.e-1;
             }
             case HoursFemaleByAgeFemaleSquared -> {
-                return getFemale().getLabourSupplyHoursWeekly() * getFemale().getDag() * getFemale().getDag() * 1.e-2;
+                return getFemale().getLabourSupplyHoursWeekly() * getFemale().getDemAge() * getFemale().getDemAge() * 1.e-2;
             }
             case HoursFemaleByDchildren2under -> {
                 return getFemale().getLabourSupplyHoursWeekly() * getIndicatorChildren(0,2).ordinal();
@@ -2157,11 +3131,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             case FixedCostByHighEducation -> {
                 if(getFemale() == null) {        //For single males
                     if(getMale().getLabourSupplyHoursWeekly() > 0) {
-                        return getMale().getDeh_c3().equals(Education.High) ? -1. : 0.;
+                        return getMale().getDeh_c4().equals(Education.High) ? -1. : 0.;
                     } else return 0.;
                 } else if (getMale() == null) {    //For single females
                     if(getFemale().getLabourSupplyHoursWeekly() > 0) {
-                        return getFemale().getDeh_c3().equals(Education.High) ? -1. : 0.;
+                        return getFemale().getDeh_c4().equals(Education.High) ? -1. : 0.;
                     } else return 0.;
                 } else throw new IllegalArgumentException("Error - FixedCostByHighEducation regressor should only be called for Households containing single people (with or without children), however household " + key.getId() + " has a couple, with male " + getMale().getKey().getId() + " and female " + getFemale().getKey().getId());
 
@@ -2169,19 +3143,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case IncomeDiv100_MaleAgeDiv100 -> {
                     return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
-                            getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getMale().getDag() * 1.e-4;
+                            getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getMale().getDemAge() * 1.e-4;
             }
             case IncomeDiv100_MaleAgeSqDiv10000 -> {
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
-                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getMale().getDag() * 1.e-6;
+                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getMale().getDemAge() * 1.e-6;
             }
             case IncomeDiv100_FemaleAgeDiv100 -> {
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
-                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getFemale().getDag() * 1.e-4;
+                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getFemale().getDemAge() * 1.e-4;
             }
             case IncomeDiv100_FemaleAgeSqDiv10000 -> {
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
-                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getFemale().getDag() * 1.e-6;
+                        getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear()) * getFemale().getDemAge() * 1.e-6;
             }
             case IncomeDiv100_dnc02 -> {
                 return (getDisposableIncomeMonthlyUpratedToBasePriceYear() -
@@ -2208,10 +3182,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_4 -> {
-                return (getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_40 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_1 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -2232,10 +3206,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_4 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_4 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.ZERO) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_10 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -2262,10 +3236,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_14 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_14 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_20 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -2292,10 +3266,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_24 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_24 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_30 -> {
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
@@ -2322,74 +3296,412 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_34 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_34 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_40 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_40 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_41 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_41 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_42 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_42 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_43 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_43 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Male_44 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getL1LabourSupplyHoursWeekly() : 0.;
             }
             case L1_lhw_Female_44 -> {
-                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getFemale().getLabourSupplyWeekly().equals(Labour.FORTY)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getL1LabourSupplyHoursWeekly() : 0.;
+            }
+            case Liwwh_1 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_1 for non-single woman");
+                }
+            }
+            case Liwwh_10 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_10 for non-single man");
+                }
+            }
+            case Liwwh_2 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_2 for non-single woman");
+                }
+            }
+            case Liwwh_20 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_20 for non-single man");
+                }
+            }
+            case Liwwh_3 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_3 for non-single woman");
+                }
+            }
+            case Liwwh_30 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_30 for non-single man");
+                }
+            }
+            case Liwwh_4 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_4 for non-single woman");
+                }
+            }
+            case Liwwh_40 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_40 for non-single man");
+                }
+            }
+            case Liwwh_5 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_5 for non-single woman");
+                }
+            }
+            case Liwwh_50 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_50 for non-single man");
+                }
+            }
+            case Liwwh_6 -> {
+                if (Occupancy.Single_Female.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_6 for non-single woman");
+                }
+            }
+            case Liwwh_60 -> {
+                if (Occupancy.Single_Male.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_60 for non-single man");
+                }
+            }
+            case Liwwh_Female_1 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_2 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_3 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_4 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_5 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_6 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getMale().atRiskOfWork()) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Female_10, Liwwh_Female_20, Liwwh_Female_30, Liwwh_Female_40, Liwwh_Female_50, Liwwh_Female_60  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_01, Liwwh_Female_11, Liwwh_Female_21, Liwwh_Female_31, Liwwh_Female_41, Liwwh_Female_51, Liwwh_Female_61  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_02, Liwwh_Female_12, Liwwh_Female_22, Liwwh_Female_32, Liwwh_Female_42, Liwwh_Female_52, Liwwh_Female_62  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_03, Liwwh_Female_13, Liwwh_Female_23, Liwwh_Female_33, Liwwh_Female_43, Liwwh_Female_53, Liwwh_Female_63  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_04, Liwwh_Female_14, Liwwh_Female_24, Liwwh_Female_34, Liwwh_Female_44, Liwwh_Female_54, Liwwh_Female_64  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_05, Liwwh_Female_15, Liwwh_Female_25, Liwwh_Female_35, Liwwh_Female_45, Liwwh_Female_55, Liwwh_Female_65  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Female_06, Liwwh_Female_16, Liwwh_Female_26, Liwwh_Female_36, Liwwh_Female_46, Liwwh_Female_56, Liwwh_Female_66  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getFemale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getFemale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Female_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_1 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_2 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_3 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_4 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_5 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_6 -> {
+                if (Occupancy.Couple.equals(getOccupancy()) && !getFemale().atRiskOfWork()) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    return 0.;
+                }
+            }
+            case Liwwh_Male_01, Liwwh_Male_02, Liwwh_Male_03, Liwwh_Male_04, Liwwh_Male_05, Liwwh_Male_06  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.ZERO)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_10, Liwwh_Male_11, Liwwh_Male_12, Liwwh_Male_13, Liwwh_Male_14, Liwwh_Male_15, Liwwh_Male_16  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TEN)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_20, Liwwh_Male_21, Liwwh_Male_22, Liwwh_Male_23, Liwwh_Male_24, Liwwh_Male_25, Liwwh_Male_26  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.TWENTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_30, Liwwh_Male_31, Liwwh_Male_32, Liwwh_Male_33, Liwwh_Male_34, Liwwh_Male_35, Liwwh_Male_36  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_40, Liwwh_Male_41, Liwwh_Male_42, Liwwh_Male_43, Liwwh_Male_44, Liwwh_Male_45, Liwwh_Male_46  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_50, Liwwh_Male_51, Liwwh_Male_52, Liwwh_Male_53, Liwwh_Male_54, Liwwh_Male_55, Liwwh_Male_56  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FORTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
+            }
+            case Liwwh_Male_60, Liwwh_Male_61, Liwwh_Male_62, Liwwh_Male_63, Liwwh_Male_64, Liwwh_Male_65, Liwwh_Male_66  -> {
+                if (Occupancy.Couple.equals(getOccupancy())) {
+                    return (getMale().getLabourSupplyWeekly().equals(Labour.FIFTY_FIVE)) ? getMale().getLiwwh() : 0.;
+                } else {
+                    throw new RuntimeException("request for parameter Liwwh_Male_XY for non-couple");
+                }
             }
             case MaleEduM_10 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case MaleEduH_10 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleEduM_20 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case MaleEduH_20 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleEduM_30 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case MaleEduH_30 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleEduM_40 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.Medium)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
             }
             case MaleEduH_40 -> {
-                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.FORTY) && getMale().getDeh_c3().equals(Education.High)) ? 1. : 0.;
+                return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case MaleEduM_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case MaleEduH_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getMale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_10 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_10 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_20 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_20 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_30 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_30 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_40 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_40 -> {
+                return (getMale() != null && getFemale() != null && getMale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_1 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TEN) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_2 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.TWENTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_3 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
+            }
+            case FemaleEduM_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.Medium)) ? 1. : 0.;
+            }
+            case FemaleEduH_4 -> {
+                return (getMale() != null  && getFemale() != null && getFemale().getLabourSupplyWeekly().equals(Labour.THIRTY_EIGHT) && getFemale().getDeh_c4().equals(Education.High)) ? 1. : 0.;
             }
             case MaleLeisure_dnc02 -> {
-                return (Parameters.HOURS_IN_WEEK - getMale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
+                return (getMaleLeisureHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
             }
             case FemaleLeisure_dnc02 -> {
-                return (Parameters.HOURS_IN_WEEK - getFemale().getLabourSupplyHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
+                return (getFemaleLeisureHoursWeekly()) * getIndicatorChildren(0,1).ordinal();
 
             }
             case Homeownership_D -> {
-                return isDhhOwned()? 1. : 0.;
+                return isHousingOwned()? 1. : 0.;
             }
             case Constant -> {
                 return 1.0;
@@ -2436,7 +3748,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 return (!getCoupleBoolean() && (getMaxWeeklyHoursWorked() == 0)) ? 1.0 : 0.0;
             }
             case Graduate -> {
-                return (Education.High.equals(getHighestDehC3())) ? 1.0 : 0.0;
+                return (Education.High.equals(getHighestDehC4())) ? 1.0 : 0.0;
             }
             case UKC -> {
                 return Region.UKC.equals(region) ? 1.0 : 0.0;
@@ -2556,6 +3868,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
+    private double getMaleLeisureHoursWeekly() {
+        return getMale().getLeisureHoursPerWeek();
+    }
+
+    private double getFemaleLeisureHoursWeekly() {
+        return getFemale().getLeisureHoursPerWeek();
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////
     //
@@ -2611,6 +3931,27 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return atRiskOfWork;
     }
 
+    public double fracEmployed() {
+        double  fracEmployed    = 0.0;
+        int     femaleQuantity  = 0;
+        int     maleQuantity    = 0;
+        int     femaleEmployed  = 0;
+        int     maleEmployed    = 0;
+        Person male = getMale();
+        Person female = getFemale();
+        if(female != null) {
+            femaleQuantity = 1;
+            if (Les_c4.EmployedOrSelfEmployed.equals(female.getLes_c4())) {femaleEmployed = 1;};
+        }
+        if( male != null) {
+            maleQuantity = 1;
+            if (Les_c4.EmployedOrSelfEmployed.equals(male.getLes_c4())) {maleEmployed = 1;}
+        }
+
+        fracEmployed = (femaleEmployed + maleEmployed) /  (double) (femaleQuantity + maleQuantity);
+        return fracEmployed;
+    }
+
     public boolean isEmployed() {
         boolean isEmployed = false;
         Person male = getMale();
@@ -2626,58 +3967,36 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     protected void homeownership() {
 
-        ValidHomeownersCSfilter filter = new ValidHomeownersCSfilter();
-        Person male = getMale();
-        Person female = getFemale();
-        if (filter.isFiltered(this)) {
-
-            boolean male_homeowner = false, female_homeowner = false;
-            if (male!=null) {
-
-                double prob = Parameters.getRegHomeownershipHO1a().getProbability(male, Person.DoublesVariables.class);
-                if (innovations.getDoubleDraw(6) < prob) {
-                    male_homeowner = true;
-                }
-                male.setDhhOwned(male_homeowner);
-            }
-            if (female!=null) {
-
-                double prob = Parameters.getRegHomeownershipHO1a().getProbability(female, Person.DoublesVariables.class);
-                if (innovations.getDoubleDraw(7) < prob) {
-                    female_homeowner = true;
-                }
-                female.setDhhOwned(female_homeowner);
-            }
-            if (male_homeowner || female_homeowner) { //If neither person in the BU is a homeowner, BU not classified as owning home
-                setDhhOwned(true);
-            } else {
-                setDhhOwned(false);
-            }
+        Person refPerson = getRefPersonForDecisions();
+        if (refPerson.getDemAge() >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            double prob = Parameters.getRegHomeownershipHO1a().getProbability(refPerson, Person.DoublesVariables.class);
+            boolean homeowner = (statInnovations.getDoubleDraw(6) < prob);
+            setWealthPrptyFlag(homeowner);
         }
     }
 
     public double calculateEquivalisedDisposableIncomeYearly() {
 
         if(getDisposableIncomeMonthly() != null && Double.isFinite(getDisposableIncomeMonthly())) {
-            equivalisedDisposableIncomeYearly = (getDisposableIncomeMonthly() / getEquivalisedWeight()) * 12;
+            yDispEquivYear = (getDisposableIncomeMonthly() / getEquivalisedWeight()) * 12;
         } else {
-            equivalisedDisposableIncomeYearly = 0.;
+            yDispEquivYear = 0.;
         }
-        return equivalisedDisposableIncomeYearly;
+        return yDispEquivYear;
     }
 
 
     private double calculateYearlyChangeInLogEquivalisedDisposableIncome() {
         double yearlyChangeInLogEquivalisedDisposableIncome = 0.;
-        if (equivalisedDisposableIncomeYearly != null && equivalisedDisposableIncomeYearly_lag1 != null && equivalisedDisposableIncomeYearly >= 0. && equivalisedDisposableIncomeYearly_lag1 >= 0.) {
+        if (yDispEquivYear != null && yDispEquivYearL1 != null && yDispEquivYear >= 0. && yDispEquivYearL1 >= 0.) {
             // Note that income is uprated to the base price year, as specified in parameters class, as the estimated change uses real income change
             // +1 added as log(0) is not defined
             yearlyChangeInLogEquivalisedDisposableIncome =
-                    Math.log(equivalisedDisposableIncomeYearly / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation) + 1)
-                            - Math.log(equivalisedDisposableIncomeYearly_lag1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
+                    Math.log(yDispEquivYear / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation) + 1)
+                            - Math.log(yDispEquivYearL1 / Parameters.getTimeSeriesValue(model.getYear()-1, TimeSeriesVariable.Inflation) + 1);
         }
-        yearlyChangeInLogEDI = yearlyChangeInLogEquivalisedDisposableIncome;
-        if (yearlyChangeInLogEDI==null)
+        yDiffDispEquivPrevYear = yearlyChangeInLogEquivalisedDisposableIncome;
+        if (!Parameters.checkFinite(yDiffDispEquivPrevYear))
             throw new RuntimeException("problem evaluating yearly change in log edi");
         return yearlyChangeInLogEquivalisedDisposableIncome;
     }
@@ -2708,29 +4027,25 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             wealth += (1.0 - Parameters.getPensionWealthDiscount(age)) * donorPensionWealth;
         if (!Parameters.projectHousingWealth)
             wealth += (1.0 - Parameters.getHousingWealthDiscount(age)) * donorHousingWealth;
-        setLiquidWealth(wealth);
+        setWealthTotValue(wealth);
     }
 
-    public double getLiquidWealth() {
+    public double getWealthTotValue() {
         return getLiquidWealth(true);
     }
 
     public double getLiquidWealth(boolean throwError) {
-        if (throwError) {
-            if (liquidWealth == null)
+        if (!Parameters.checkFinite(wealthTotValue)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
-            return liquidWealth;
-        } else {
-            if (liquidWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return liquidWealth;
-            }
         }
+        return wealthTotValue;
     }
 
-    public void setLiquidWealth(Double liquidWealth) {
-        this.liquidWealth = liquidWealth;
+    public void setWealthTotValue(Double liquidWealth) {
+        this.wealthTotValue = liquidWealth;
     }
 
     public double getPensionWealth() {
@@ -2738,21 +4053,17 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getPensionWealth(boolean throwError) {
-        if (throwError) {
-            if (pensionWealth == null)
+        if (!Parameters.checkFinite(wealthPensValue)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
-            return pensionWealth;
-        } else {
-            if (pensionWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return pensionWealth;
-            }
         }
+        return wealthPensValue;
     }
 
-    public void setPensionWealth(Double pensionWealth) {
-        this.pensionWealth = pensionWealth;
+    public void setPensionWealth(Double wealthPensValue) {
+        this.wealthPensValue = wealthPensValue;
     }
 
     public double getHousingWealth() {
@@ -2760,51 +4071,45 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public double getHousingWealth(boolean throwError) {
-        if (throwError) {
-            if (housingWealth == null)
+        if (!Parameters.checkFinite(wealthPrptyValue)) {
+            if (throwError)
                 throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
-            return housingWealth;
-        } else {
-            if (housingWealth==null) {
+            else
                 return 0.0;
-            } else {
-                return housingWealth;
-            }
         }
+        return wealthPrptyValue;
     }
 
     public void setHousingWealth(Double wealth) {
-        housingWealth = wealth;
+        wealthPrptyValue = wealth;
     }
 
     public double getChildcareCostPerWeek() {
         return getChildcareCostPerWeek(true);
     }
     public double getChildcareCostPerWeek(boolean throwError) {
-        if (childcareCostPerWeek == null) {
+        if (!Parameters.checkFinite(xChildCareWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit childcare cost before it is initialised.");
             } else {
                 return 0.0;
             }
-        } else {
-            return childcareCostPerWeek;
         }
+        return xChildCareWeek;
     }
 
     public double getSocialCareCostPerWeek() {
         return getSocialCareCostPerWeek(true);
     }
     public double getSocialCareCostPerWeek(boolean throwError) {
-        if (socialCareCostPerWeek == null) {
+        if (!Parameters.checkFinite(xCareWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit social care cost before it is initialised.");
             } else {
                 return 0.0;
             }
-        } else {
-            return socialCareCostPerWeek;
         }
+        return xCareWeek;
     }
 
     public Household getHousehold() {
@@ -2817,7 +4122,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             household.getBenefitUnits().remove(this);
 
         household = newHousehold;
-        idHousehold = household.getId();
+        idHh = household.getId();
         if (household!=null)
             household.getBenefitUnits().add(this);
     }
@@ -2843,7 +4148,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public Set<Person> getChildren() {
         Set<Person> children = new LinkedHashSet<>();
         for (Person member : members) {
-            if (member.getDag() < Parameters.AGE_TO_BECOME_RESPONSIBLE)
+            if (member.getDemAge() < Parameters.AGE_TO_BECOME_RESPONSIBLE)
                 children.add(member);
         }
         return children;
@@ -2871,7 +4176,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
         } else {
             for (Person member : members) {
-                if ( (member.getDag()>=minAge) && (member.getDag()<=maxAge) )
+                if ( (member.getDemAge()>=minAge) && (member.getDemAge()<=maxAge) )
                     nChildren++;
             }
         }
@@ -2893,15 +4198,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return numberChildrenAll_lag1;
     }
     public Integer getNumberChildren02_lag1() { return numberChildren02_lag1; }
-    public Indicator getIndicatorChildren03_lag1() { return indicatorChildren03_lag1; }
+    public Indicator getIndicatorChildren03_lag1() { return i_demNChild0to2L1; }
     public Indicator getIndicatorChildren412_lag1() {
-        return indicatorChildren412_lag1;
+        return dem4to12L1;
     }
 
     public double getEquivalisedDisposableIncomeYearly() {
         double val;
-        if (equivalisedDisposableIncomeYearly != null) {
-            val = equivalisedDisposableIncomeYearly;
+        if (yDispEquivYear != null) {
+            val = yDispEquivYear;
         } else {
             val = -9999.99;
         }
@@ -2909,40 +4214,57 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public int getAtRiskOfPoverty() {
-        if (atRiskOfPoverty != null) {
-            return atRiskOfPoverty;
+        if (yPvrtyFlag != null) {
+            return yPvrtyFlag;
         } else return 0;
     }
 
     public Integer getAtRiskOfPoverty_lag1() {
-        return atRiskOfPoverty_lag1;
+        return yPvrtyFlagL1;
     }
 
-    public void setAtRiskOfPoverty(Integer atRiskOfPoverty) {
-        this.atRiskOfPoverty = atRiskOfPoverty;
+    public void setAtRiskOfPoverty(Integer yPvrtyFlag) {
+        this.yPvrtyFlag = yPvrtyFlag;
     }
 
     public Double getDisposableIncomeMonthly() {
-        return disposableIncomeMonthly;
+        return yDispMonth;
     }
 
     public Double getGrossIncomeMonthly() {
-        return grossIncomeMonthly;
+        return yGrossMonth;
     }
 
     public Double getBenefitsReceivedPerMonth() {
-        return benefitsReceivedPerMonth;
+        return yBenAmountMonth;
     }
 
+    public Integer getReceivedUC() {
+        return (yBenUCReceivedFlag == null ? 0 : yBenUCReceivedFlag);
+    }
+
+    public void setReceivedUC(Integer yBenUCReceivedFlag) {
+        this.yBenUCReceivedFlag = yBenUCReceivedFlag;
+    }
+
+    public Integer getReceivedLegacyBenefits() {
+        return (yBenLegacyReceivedFlag == null ? 0 : yBenLegacyReceivedFlag);
+    }
+
+    public void setReceivedLegacyBenefits(Integer yBenLegacyReceivedFlag) {
+        this.yBenLegacyReceivedFlag = yBenLegacyReceivedFlag;
+    }
+
+
     public void setOccupancyLocal(Occupancy occupancy) {
-        occupancyLocal = occupancy;
+        i_demOccupancy = occupancy;
     }
 
     public Occupancy getOccupancy() {
         if (model==null) {
-            if (occupancyLocal==null)
+            if (i_demOccupancy ==null)
                 throw new RuntimeException("occupancyLocal not initialised");
-            return occupancyLocal;
+            return i_demOccupancy;
         }
         if (getMale()!=null) {
             if (getFemale()!=null)
@@ -2969,21 +4291,21 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public Ydses_c5 getYdses_c5() {
-        return ydses_c5;
+        return yHhQuintilesMonthC5;
     }
 
     public Ydses_c5 getYdses_c5_lag1() {
-        return ydses_c5_lag1;
+        return yHhQuintilesC5L1;
     }
 
     public double getTmpHHYpnbihs_dv_asinh() {
-        if (tmpHHYpnbihs_dv_asinh==null)
+        if (i_yNonBenHhGrossAsinh ==null)
             throw new RuntimeException("tmpHHYpnbihs_dv_asinh accessed before initialised");
-        return tmpHHYpnbihs_dv_asinh;
+        return i_yNonBenHhGrossAsinh;
     }
 
     public void setTmpHHYpnbihs_dv_asinh(double val) {
-        tmpHHYpnbihs_dv_asinh = val;
+        i_yNonBenHhGrossAsinh = val;
     }
 
     public Dhhtp_c4 getDhhtp_c4() {
@@ -3001,25 +4323,25 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
 
-    public Dhhtp_c4 getDhhtp_c4_lag1() {
-        return dhhtp_c4_lag1;
+    public Dhhtp_c4 getDemCompHhC4L1() {
+        return demCompHhC4L1;
     }
 
     public double getYearlyChangeInLogEDI() {
-        if (yearlyChangeInLogEDI==null)
+        if (yDiffDispEquivPrevYear ==null)
             throw new RuntimeException("yearlyChangeInLogEDI requested before set");
-        return yearlyChangeInLogEDI;
+        return yDiffDispEquivPrevYear;
     }
 
-    public boolean isDhhOwned() {
-        if (dhhOwned ==null) {
-            dhhOwned = false;
+    public boolean isHousingOwned() {
+        if (wealthPrptyFlag ==null) {
+            wealthPrptyFlag = false;
         }
-        return dhhOwned;
+        return wealthPrptyFlag;
     }
 
-    public void setDhhOwned(boolean dhh_owned) {
-        this.dhhOwned = dhh_owned;
+    public void setWealthPrptyFlag(boolean wealthPrptyFlag) {
+        this.wealthPrptyFlag = wealthPrptyFlag;
     }
 
     public ArrayList<Triple<Les_c7_covid, Double, Integer>> getCovid19MonthlyStateAndGrossIncomeAndWorkHoursTripleFemale() {
@@ -3032,42 +4354,42 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     // Uprate disposable income from level of prices in any given year to 2017, as utility function was estimated on 2017 data
     public double getDisposableIncomeMonthlyUpratedToBasePriceYear() {
-        return disposableIncomeMonthly / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
+        return yDispMonth / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
     }
 
     public double getAdjustedDisposableIncomeMonthlyUpratedToBasePriceYear() {
-        return disposableIncomeMonthly / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
+        return yDispMonth / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
     }
 
     public double getNonDiscretionaryExpenditureMonthlyUpratedToBasePriceYear() {
         double cost = 0.0;
         if (Parameters.flagFormalChildcare)
-            cost += childcareCostPerWeek;
+            cost += xChildCareWeek;
         if (Parameters.flagSocialCare)
-            cost += socialCareCostPerWeek;
+            cost += xCareWeek;
         if (Math.abs(cost) > 0.01)
             cost *= Parameters.WEEKS_PER_MONTH / Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.Inflation);
         return cost;
     }
 
     public boolean isDecreaseInYearlyEquivalisedDisposableIncome() {
-        return (equivalisedDisposableIncomeYearly != null && equivalisedDisposableIncomeYearly_lag1 != null && equivalisedDisposableIncomeYearly < equivalisedDisposableIncomeYearly_lag1);
+        return (yDispEquivYear != null && yDispEquivYearL1 != null && yDispEquivYear < yDispEquivYearL1);
     }
 
     public void clearStates() {
-        if (states!=null) states = null;
+        if (labStatesContObject !=null) labStatesContObject = null;
     }
 
     void setStates() {
 
         // reset states if necessary
-        if (states!=null) clearStates();
+        if (labStatesContObject !=null) clearStates();
 
         // populate states object
         if ( Parameters.grids == null) {
             throw new IllegalStateException("ERROR - attempt to fetch uninitialised grids attribute from Parameters object");
         }
-        states = new States(this, Parameters.grids.getScale());
+        labStatesContObject = new States(this, Parameters.grids.getScale());
     }
 
     public Person getRefPersonForDecisions() {
@@ -3099,7 +4421,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             } else if (Indicator.True.equals(female.getNeedSocialCare())) {
                 ref = female;
             } else if (male.getLes_c4()==Les_c4.Retired && female.getLes_c4()==Les_c4.Retired) {
-                if (male.getDag() >= female.getDag()) {
+                if (male.getDemAge() >= female.getDemAge()) {
                     ref = male;
                 } else {
                     ref = female;
@@ -3108,12 +4430,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 ref = male;
             } else if (female.getLes_c4()==Les_c4.Retired) {
                 ref = female;
-            } else if (male.getLes_c4()==Les_c4.Student && male.getDag()<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && female.getLes_c4()!=Les_c4.Student) {
+            } else if (male.getLes_c4()==Les_c4.Student && male.getDemAge()<=Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && female.getLes_c4()!=Les_c4.Student) {
                 ref = male;
-            } else if (female.getLes_c4()==Les_c4.Student && female.getDag()<=Parameters.MAX_AGE_TO_LEAVE_CONTINUOUS_EDUCATION && male.getLes_c4()!=Les_c4.Student) {
+            } else if (female.getLes_c4()==Les_c4.Student && female.getDemAge()<=Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION && male.getLes_c4()!=Les_c4.Student) {
                 ref = female;
             } else {
-                if (male.getFullTimeHourlyEarningsPotential() >= female.getFullTimeHourlyEarningsPotential()) {
+                if (male.getLabWageFullTimeHrly() >= female.getLabWageFullTimeHrly()) {
                     ref = male;
                 } else {
                     ref = female;
@@ -3160,7 +4482,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     public int getNumberChildrenByAge(int age) {
         int children = 0;
         for (Person member : members) {
-            if (member.getDag()==age)
+            if (member.getDemAge()==age)
                 children++;
         }
         return children;
@@ -3191,30 +4513,30 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             Person refPerson = getRefPersonForDecisions();
             boolean toRetire = refPerson.considerRetirement();
             Occupancy occupancy = getOccupancy();
-            if (toRetire && getLiquidWealth() > 0.0) {
-                pensionIncomeAnnual = liquidWealth * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
-                        Parameters.annuityRates.getAnnuityRate(occupancy, getYear()-refPerson.getDag(), refPerson.getDag());
-                liquidWealth *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
+            if (toRetire && getWealthTotValue() > 0.0) {
+                yPensYear = wealthTotValue * Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT /
+                        Parameters.annuityRates.getAnnuityRate(occupancy, getYear()-refPerson.getDemAge(), refPerson.getDemAge());
+                wealthTotValue *= (1.0 - Parameters.SHARE_OF_WEALTH_TO_ANNUITISE_AT_RETIREMENT);
 
                 // upate person variables
                 double val;
                 if (Occupancy.Couple.equals(occupancy)) {
-                    val = asinh(pensionIncomeAnnual/12.0/2.0);
-                    getMale().setYpnoab(val);
-                    getFemale().setYpnoab(val);
+                    val = asinh(yPensYear /12.0/2.0);
+                    getMale().setyPensPersGrossMonth(val);
+                    getFemale().setyPensPersGrossMonth(val);
                 } else if (Occupancy.Single_Male.equals(occupancy)) {
-                    val = asinh(pensionIncomeAnnual/12.0);
-                    getMale().setYpnoab(val);
+                    val = asinh(yPensYear /12.0);
+                    getMale().setyPensPersGrossMonth(val);
                 } else {
-                    val = asinh(pensionIncomeAnnual/12.0);
-                    getFemale().setYpnoab(val);
+                    val = asinh(yPensYear /12.0);
+                    getFemale().setyPensPersGrossMonth(val);
                 }
             } else {
                 if (Occupancy.Couple.equals(occupancy)) {
-                    pensionIncomeAnnual = getMale().getPensionIncomeAnnual();
-                    pensionIncomeAnnual += getFemale().getPensionIncomeAnnual();
+                    yPensYear = getMale().getPensionIncomeAnnual();
+                    yPensYear += getFemale().getPensionIncomeAnnual();
                 } else {
-                    pensionIncomeAnnual = refPerson.getPensionIncomeAnnual();
+                    yPensYear = refPerson.getPensionIncomeAnnual();
                 }
             }
         } else {
@@ -3228,7 +4550,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             Person male = getMale();
             Person female = getFemale();
-            if (getLiquidWealth() < 0) {
+            if (getWealthTotValue() < 0) {
 
                 double wageFactor = 0.0;
                 if (male != null) wageFactor += 0.7 * male.getEarningsWeekly(DecisionParams.FULLTIME_HOURS_WEEKLY) * 52.0;
@@ -3237,38 +4559,38 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (wageFactor < 0.1) {
                     phi = 1.0;
                 } else {
-                    phi = - liquidWealth / wageFactor;
+                    phi = -wealthTotValue / wageFactor;
                 }
                 phi = Math.min(phi, 1.0);
-                investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostLow)*(1.0-phi) +
+                yInvestYear = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostLow)*(1.0-phi) +
                         Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostHigh)*phi +
-                        Parameters.realInterestRateInnov) * liquidWealth;
+                        Parameters.realInterestRateInnov) * wealthTotValue;
             } else {
-                investmentIncomeAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealSavingReturns) +
-                        Parameters.realInterestRateInnov) * liquidWealth;
+                yInvestYear = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealSavingReturns) +
+                        Parameters.realInterestRateInnov) * wealthTotValue;
             }
-            if ((investmentIncomeAnnual < -20000000.0) || (investmentIncomeAnnual > 200000000.0))
-                throw new RuntimeException("odd projection for annual investment income: " + investmentIncomeAnnual);
+            if ((yInvestYear < -20000000.0) || (yInvestYear > 200000000.0))
+                throw new RuntimeException("odd projection for annual investment income: " + yInvestYear);
 
             // update person level variables
             double val;
             Occupancy occupancy = getOccupancy();
             if (Occupancy.Couple.equals(occupancy)) {
-                val = asinh(investmentIncomeAnnual/12.0/2.0);
-                male.setYpncp(val);
-                female.setYpncp(val);
-                val = asinh((investmentIncomeAnnual + pensionIncomeAnnual)/12.0/2.0);
+                val = asinh(yInvestYear /12.0/2.0);
+                male.setyCapitalPersMonth(val);
+                female.setyCapitalPersMonth(val);
+                val = asinh((yInvestYear + yPensYear)/12.0/2.0);
                 male.setYptciihs_dv(val);
                 female.setYptciihs_dv(val);
             } else if (Occupancy.Single_Male.equals(occupancy)) {
-                val = asinh(investmentIncomeAnnual/12.0);
-                male.setYpncp(val);
-                val = asinh((investmentIncomeAnnual + pensionIncomeAnnual)/12.0);
+                val = asinh(yInvestYear /12.0);
+                male.setyCapitalPersMonth(val);
+                val = asinh((yInvestYear + yPensYear)/12.0);
                 male.setYptciihs_dv(val);
             } else {
-                val = asinh(investmentIncomeAnnual/12.0);
-                female.setYpncp(val);
-                val = asinh((investmentIncomeAnnual + pensionIncomeAnnual)/12.0);
+                val = asinh(yInvestYear /12.0);
+                female.setyCapitalPersMonth(val);
+                val = asinh((yInvestYear + yPensYear)/12.0);
                 female.setYptciihs_dv(val);
             }
         } else {
@@ -3276,31 +4598,31 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         }
     }
 
-    public double getInvestmentIncomeAnnual() {return (investmentIncomeAnnual!=null) ? investmentIncomeAnnual : 0.0;}
-    public double getPensionIncomeAnnual() {return (pensionIncomeAnnual!=null) ? pensionIncomeAnnual : 0.0;}
+    public double getInvestmentIncomeAnnual() {return (yInvestYear !=null) ? yInvestYear : 0.0;}
+    public double getPensionIncomeAnnual() {return (yPensYear !=null) ? yPensYear : 0.0;}
 
     void updateDiscretionaryConsumption() {
 
         if ( Parameters.enableIntertemporalOptimisations ) {
 
             // project benefit unit consumption
-            if ((getDisposableIncomeMonthly()==null) || (Double.isNaN(getDisposableIncomeMonthly()))) {
+            if (!Parameters.checkFinite(getDisposableIncomeMonthly())) {
                 throw new RuntimeException("Disposable income not defined.");
             }
 
-            double cashOnHand = Math.max(getLiquidWealth(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
-                    + getDisposableIncomeMonthly()*12.0 + states.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
-            if (Double.isNaN(cashOnHand)) {
+            double cashOnHand = Math.max(getWealthTotValue(), DecisionParams.getMinWealthByAge(getIntValue(Regressors.MaximumAge)))
+                    + getDisposableIncomeMonthly()*12.0 + labStatesContObject.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
+            if (!Parameters.checkFinite(cashOnHand)) {
                 throw new RuntimeException("Problem identifying cash on hand");
             }
             if (cashOnHand < 1.0E-5) {
                 // allow for simulated debt exceeding assumed limit for behavioural solutions
-                discretionaryConsumptionPerYear = DecisionParams.MIN_CONSUMPTION_PER_YEAR;
+                xDiscretionaryYear = DecisionParams.MIN_CONSUMPTION_PER_YEAR;
             } else {
-                discretionaryConsumptionPerYear = Parameters.grids.consumption.interpolateAll(states, false);
-                discretionaryConsumptionPerYear *= cashOnHand;
+                xDiscretionaryYear = Parameters.grids.consumption.interpolateAll(labStatesContObject, false);
+                xDiscretionaryYear *= cashOnHand;
             }
-            if ( Double.isNaN(discretionaryConsumptionPerYear) ) {
+            if ( !Parameters.checkFinite(xDiscretionaryYear) ) {
                 throw new RuntimeException("annual discretionary consumption not defined (1)");
             }
         } else {
@@ -3322,14 +4644,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return getDiscretionaryConsumptionPerYear(true);
     }
     public double getDiscretionaryConsumptionPerYear(boolean throwError) {
-        if (discretionaryConsumptionPerYear ==null) {
+        if (!Parameters.checkFinite(xDiscretionaryYear)) {
             if (throwError) {
                 throw new RuntimeException("annual consumption not defined (2)");
             } else {
                 return 0.0;
             }
         } else {
-            return discretionaryConsumptionPerYear;
+            return xDiscretionaryYear;
         }
     }
 
@@ -3340,13 +4662,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         double weight = 0.0;
         boolean firstAdult = true;
         for (Person member : members) {
-            if (member.getDag() >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            if (member.getDemAge() >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
                 if (firstAdult)
                     weight += 1.0;
                 else
                     weight += 0.5;
             } else {
-                if (member.getDag()<14)
+                if (member.getDemAge()<14)
                     weight += 0.3;
                 else
                     weight += 0.5;
@@ -3361,19 +4683,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     private void updateChildcareCostPerWeek(int year, int age) {
 
-        childcareCostPerWeek = 0.0;
+        xChildCareWeek = 0.0;
         if (hasChildrenEligibleForCare() && (age < Parameters.getStatePensionAge(year, age))) {
 
             double prob = Parameters.getRegChildcareC1a().getProbability(this, Regressors.class);
-            if (innovations.getDoubleDraw(0) < prob) {
+            if (statInnovations.getDoubleDraw(0) < prob) {
 
                 double score = Parameters.getRegChildcareC1b().getScore(this, Regressors.class);
                 double rmse = Parameters.getRMSEForRegression("C1b");
-                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(innovations.getDoubleDraw(1));
-                childcareCostPerWeek = Math.exp(score + rmse * gauss);
+                double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(1));
+                xChildCareWeek = Math.exp(score + rmse * gauss);
                 double costCap = childCareCostCapWeekly();
                 if (costCap > 0.0 && costCap < getChildcareCostPerWeek()) {
-                    childcareCostPerWeek = costCap;
+                    xChildCareWeek = costCap;
                 }
             }
         }
@@ -3381,46 +4703,46 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     private void updateSocialCareCostPerWeek() {
 
-        socialCareCostPerWeek = 0.0;
+        xCareWeek = 0.0;
         for (Person person : getMembers()) {
-            socialCareCostPerWeek += person.getSocialCareCostWeekly();
+            xCareWeek += person.getSocialCareCostWeekly();
         }
     }
 
     private void updateSocialCareProvision() {
 
-        socialCareProvision = 0;
+        careProvidedFlag = 0;
         for (Person person : getMembers()) {
             if (!SocialCareProvision.None.equals(person.getSocialCareProvision()))
-                socialCareProvision = 1;
+                careProvidedFlag = 1;
         }
     }
 
-    public void setDeh_c3Local(Education edu) {
-        deh_c3Local = edu;
+    public void setDeh_c4Local(Education edu) {
+        i_eduHighestC4 = edu;
     }
 
-    private Education getHighestDehC3() {
+    private Education getHighestDehC4() {
 
         Education max = Education.Low;
         if (model==null) {
 
-            if (deh_c3Local == null)
+            if (i_eduHighestC4 == null)
                 throw new RuntimeException("reference to uninitialised education status");
-            max = deh_c3Local;
+            max = i_eduHighestC4;
         } else {
 
             Person male = getMale();
             Person female = getFemale();
             if(male != null || female != null) {
 
-                if (male != null) max = male.getDeh_c3();
-                if (female != null) {
-
-                    if (Education.High.equals(female.getDeh_c3())) {
-                        max = Education.High;
-                    } else if (Education.Medium.equals(female.getDeh_c3()) && !(max == Education.High)) {
-                        max = Education.Medium;
+                if (male != null && male.getDeh_c4() != null) {
+                    max = male.getDeh_c4();
+                }
+                if (female != null && female.getDeh_c4() != null) {
+                    Education femaleEdu = female.getDeh_c4();
+                    if (max == null || femaleEdu.getRank() > max.getRank()) {
+                        max = femaleEdu;
                     }
                 }
             }
@@ -3430,11 +4752,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public void setLabourHoursWeekly1Local(Integer hours) {
-        labourHoursWeekly1Local = hours;
+        i_labHrsWork1Week = hours;
     }
 
     public void setLabourHoursWeekly2Local(Integer hours) {
-        labourHoursWeekly2Local = hours;
+        i_labHrsWork2Week = hours;
     }
 
     private Integer getMinWeeklyHoursWorked() {
@@ -3442,14 +4764,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         Integer val = null;
         if (model==null) {
 
-            if (labourHoursWeekly1Local == null) {
+            if (i_labHrsWork1Week == null) {
                 throw new RuntimeException("reference to uninitialised labourHoursWeekly attribute of benefitUnit");
             } else {
-                val = labourHoursWeekly1Local;
+                val = i_labHrsWork1Week;
             }
-            if (labourHoursWeekly2Local != null)
-                if (labourHoursWeekly2Local < val)
-                    val = labourHoursWeekly2Local;
+            if (i_labHrsWork2Week != null)
+                if (i_labHrsWork2Week < val)
+                    val = i_labHrsWork2Week;
         } else {
 
             Person male = getMale();
@@ -3492,13 +4814,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
         } else {
 
-            if (labourHoursWeekly1Local == null) {
+            if (i_labHrsWork1Week == null) {
                 throw new RuntimeException("reference to uninitialised labourHoursWeekly attribute of benefitUnit");
             } else {
-                val = labourHoursWeekly1Local;
+                val = i_labHrsWork1Week;
             }
-            if (labourHoursWeekly2Local != null) {
-                if (labourHoursWeekly2Local > val) val = labourHoursWeekly2Local;
+            if (i_labHrsWork2Week != null) {
+                if (i_labHrsWork2Week > val) val = i_labHrsWork2Week;
             }
         }
         return val;
@@ -3506,7 +4828,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     private boolean hasChildrenEligibleForCare() {
         for (Person member: members) {
-            if (member.getDag() <= Parameters.MAX_CHILD_AGE_FOR_FORMAL_CARE)
+            if (member.getDemAge() <= Parameters.MAX_CHILD_AGE_FOR_FORMAL_CARE)
                 return true;
         }
         return false;
@@ -3533,23 +4855,23 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public void setYearLocal(Integer year) {
-        yearLocal = year;
+        i_demYear = year;
     }
 
     public int getYear() {
         if (model == null) {
-            if (yearLocal == null)
+            if (i_demYear == null)
                 throw new RuntimeException("call to get uninitialised year in benefit unit");
-            return yearLocal;
+            return i_demYear;
         }
         return model.getYear();
     }
 
     public long getTaxDbDonorId() {
-        return taxDbDonorId;
+        return idtaxDbDonor;
     }
     public Match getTaxDbMatch() {
-        return taxDbMatch;
+        return demDbMatchTax;
     }
     public Set<Person> getMembers() {return members;}
 
@@ -3557,15 +4879,15 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         key.setWorkingId(id);
     }
 
-    public long getSeed(){return (seed!=null) ? seed : 0L;}
+    public long getSeed(){return (statSeed !=null) ? statSeed : 0L;}
 
-    public long getIdOriginalBU() {return idOriginalBU;}
+    public long getIdOriginalBU() {return idBuOriginal;}
 
-    public long getIdOriginalHH() {return idOriginalHH;}
+    public long getIdOriginalHH() {return idHhOriginal;}
 
     public Person getFemale() {
         for (Person member : members) {
-            if (member.getDag()>=Parameters.AGE_TO_BECOME_RESPONSIBLE && Gender.Female.equals(member.getDgn()))
+            if (member.getDemAge()>=Parameters.AGE_TO_BECOME_RESPONSIBLE && Gender.Female.equals(member.getDemMaleFlag()))
                 return member;
         }
         return null;
@@ -3573,7 +4895,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public Person getMale() {
         for (Person member : members) {
-            if (member.getDag()>=Parameters.AGE_TO_BECOME_RESPONSIBLE && Gender.Male.equals(member.getDgn()))
+            if (member.getDemAge()>=Parameters.AGE_TO_BECOME_RESPONSIBLE && Gender.Male.equals(member.getDemMaleFlag()))
                 return member;
         }
         return null;
@@ -3584,7 +4906,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (getMale()==null && getFemale()==null) {
             if (!members.isEmpty()) {
                 for (Person orphan : members) {
-                    System.out.println("WARNING: Removed orphan aged " + orphan.getDag() + " in benefit unit without reference adult");
+                    System.out.println("WARNING: Removed orphan aged " + orphan.getDemAge() + " in benefit unit without reference adult");
                     model.getPersons().remove(orphan);
                 }
             }
@@ -3594,4 +4916,62 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     }
 
     public static void setBenefitUnitIdCounter(long id) {benefitUnitIdCounter = id;}
+
+    /**
+     * Calculates the labour innovation value for the current period with persistence.
+     *
+     * This method implements a persistence mechanism for labour innovations where there's
+     * a probability that the previous period's innovation will persist into the current period.
+     * A new innovation is drawn each period, but it's only used with probability (1 - persistenceProbability).
+     *
+     * The persistence mechanism works as follows:
+     * 1. Draw a new potential innovation value
+     * 2. Draw a random number to determine if we should use the new value or persist with the old one
+     * 3. If it's the first period or there was a gap in years, use the new innovation
+     * 4. Otherwise, use the persistence probability to decide between new and old values
+     *
+     * @param persistenceProbability The probability (between 0 and 1) that the previous period's
+     *                              innovation will persist. A value of 0 means always use new innovations,
+     *                              while 1 means always keep the old innovation.
+     * @return The labour innovation value for this period
+     */
+    private double getLabourInnovation(double persistenceProbability) {
+
+        double newLabourInnovation = statInnovations.getDoubleDraw(5);
+
+        // persistenceRandomDraw - random value to determine if we keep old innovation
+        double persistenceRandomDraw = statInnovations.getDoubleDraw(6);
+
+        int currentYear = model.getYear();
+
+        // Initialize on first call
+        if (labPersistValueLabourInnov == null || lastYear == null) {
+            labPersistValueLabourInnov = newLabourInnovation;
+            lastYear = currentYear;
+            return newLabourInnovation;
+        }
+
+        double labourInnov;
+        if (persistenceRandomDraw < persistenceProbability) {
+            labourInnov = labPersistValueLabourInnov;
+        } else {
+            labourInnov = newLabourInnovation;
+        }
+
+        // Store values for next period
+        labPersistValueLabourInnov = labourInnov;
+        lastYear = currentYear;
+
+        return labourInnov;
+    }
+
+    private Person getSingle() {
+        if (getMale() != null & getFemale() == null) {
+            return null;
+        } else if (getMale() != null) {
+            return getMale();
+        } else {
+            return getFemale();
+        }
+    }
 }

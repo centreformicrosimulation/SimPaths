@@ -125,9 +125,9 @@ public class UnionMatching {
 
     private void localMatch(Person male, Person female) {
 
-        if (!male.getDgn().equals(Gender.Male))
+        if (!male.getDemMaleFlag().equals(Gender.Male))
             throw new RuntimeException("male in match() of UnionMatching.evaluate does not actually have the Male gender type");
-        if (!female.getDgn().equals(Gender.Female))
+        if (!female.getDemMaleFlag().equals(Gender.Female))
             throw new RuntimeException("female in match() of UnionMatching.evaluate does not actually have the Female gender type");
 
         unmatchedMales.remove(male);
@@ -142,8 +142,8 @@ public class UnionMatching {
             if (!male.getRegion().equals(female.getRegion()))
                 female.setRegion(male.getRegion());
 
-            male.setDcpyy(0); //Set years in partnership to 0
-            female.setDcpyy(0);
+            male.setDemPartnerNYear(0); //Set years in partnership to 0
+            female.setDemPartnerNYear(0);
 
             //Update household
             male.setupNewBenefitUnit(female, true);        //All the lines below are executed within the setupNewHome() method for both male and female.  Note need to have partner reference before calling setupNewHome!
@@ -152,9 +152,9 @@ public class UnionMatching {
 
     private Double localGetValue(Person male, Person female) {
 
-        if (!male.getDgn().equals(Gender.Male))
+        if (!male.getDemMaleFlag().equals(Gender.Male))
             throw new RuntimeException("male in getValue() of UnionMatching.evaluate does not actually have the Male gender type");
-        if (!female.getDgn().equals(Gender.Female))
+        if (!female.getDemMaleFlag().equals(Gender.Female))
             throw new RuntimeException("female in getValue() of UnionMatching.evaluate does not actually have the Female gender type");
 
         // Differentials are defined in a way that (in case we break symmetry later), a higher
@@ -162,10 +162,10 @@ public class UnionMatching {
         // all want younger, wealthier partners.  However, it is probably not going to be used as we
         // will probably end up just trying to minimise the square difference between that observed
         // in data and here.
-        double ageDiff = male.getDag() - female.getDag();            //If male.getDesiredAgeDiff > 0, favours younger women
-        double potentialHourlyEarningsDiff = male.getFullTimeHourlyEarningsPotential() - female.getFullTimeHourlyEarningsPotential();        //If female.getDesiredEarningPotential > 0, favours wealthier men
-        double earningsMatch = (potentialHourlyEarningsDiff - female.getDesiredEarningsPotentialDiff());
-        double ageMatch = (ageDiff - male.getDesiredAgeDiff());
+        double ageDiff = male.getDemAge() - female.getDemAge();            //If male.getDesiredAgeDiff > 0, favours younger women
+        double potentialHourlyEarningsDiff = male.getLabWageFullTimeHrly() - female.getLabWageFullTimeHrly();        //If female.getDesiredEarningPotential > 0, favours wealthier men
+        double earningsMatch = (potentialHourlyEarningsDiff - female.getYWageDesired());
+        double ageMatch = (ageDiff - male.getDemAgeDiffDesired());
         boolean flagAllow = (male.getIdMother() == null || male.getIdMother() != female.getId()) &&
                 (female.getIdFather() == null || female.getIdFather() != male.getId());
 

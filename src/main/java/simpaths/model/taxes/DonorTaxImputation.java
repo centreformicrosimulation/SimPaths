@@ -42,6 +42,9 @@ public class DonorTaxImputation {
     private double grossIncomePerWeek;
     private double targetNormalisedOriginalIncome;
 
+    private Integer yBenUCFlag;
+    private Integer receivedLegacyBenefit;
+
 
     /**
      * CONSTRUCTORS
@@ -77,6 +80,19 @@ public class DonorTaxImputation {
     }
     public long getDonorID() { return donorID; }
     public double getTargetNormalisedOriginalIncome() { return targetNormalisedOriginalIncome; }
+
+    public Integer getReceivedUC() {
+        return yBenUCFlag;
+    }
+    public void setReceivedUC(Integer yBenUCFlag) {
+        this.yBenUCFlag = yBenUCFlag;
+    }
+    public Integer getReceivedLegacyBenefit() {
+        return receivedLegacyBenefit;
+    }
+    public void setReceivedLegacyBenefit(Integer receivedLegacyBenefit) {
+        this.receivedLegacyBenefit = receivedLegacyBenefit;
+    }
 
 
     /**
@@ -207,7 +223,7 @@ public class DonorTaxImputation {
             } else {
                 ii = iiTarget;
             }
-            while (ii>=0 && ii<candidatePool.size()-1) {
+            while (ii>=0 && ii<candidatePool.size()) {
 
                 DonorTaxUnit candidate = Parameters.getDonorPool().get(candidatePool.get(ii));
                 double[] candidateVector = getCandidateMeasVector(candidate, flagSecondIncome, flagChildcareCost);
@@ -247,7 +263,20 @@ public class DonorTaxImputation {
                 break;
             }
         }
-        candidatesList = candidatesList.subList(0, candidateLast);
+        if (candidateLast > 0) {
+            candidatesList = candidatesList.subList(0, candidateLast);
+        }
+
+        // If focussed search produced no candidates, fall back to nearest neighbour.
+        if (candidatesList.isEmpty()) {
+            DonorTaxUnit candidate = Parameters.getDonorPool().get(candidatePool.get(iiTarget));
+            candidatesList.add(new CandidateList(candidate, candidate.getWeight(), 0.0));
+            weightSum = candidate.getWeight();
+        }
+        if (weightSum <= 0.0) {
+            // Degenerate weights: use equal probabilities over selected candidates.
+            weightSum = (double) candidatesList.size();
+        }
 
 
         //------------------------------------------------------------
@@ -259,12 +288,20 @@ public class DonorTaxImputation {
         matchCriterion += Math.min(9, candidatesList.size());
         double weightHere = 0.0;
         double infAdj = 1.0;
+        double UCmean = 0.;  // Take a weighted mean of whether received UC or not across all candidates
+        double LBmean = 0.;  // Take a weighted mean of whether received LB or not across all candidates
+        setReceivedUC(0);
+        setReceivedLegacyBenefit(0);
         if (systemYear != keys.getPriceYear())
             infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
         for (CandidateList candidateList : candidatesList) {
             // loop over each preferred candidate
 
-            double weight = candidateList.getWeight() / weightSum;
+            double baseWeight = candidateList.getWeight();
+            if (baseWeight <= 0.0) {
+                baseWeight = 1.0;
+            }
+            double weight = baseWeight / weightSum;
             weightHere += weight;
             if (keys.getRandomDraw() <= weightHere) {
 
@@ -277,15 +314,46 @@ public class DonorTaxImputation {
                     // impute based on observed disposable income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / Parameters.WEEKS_PER_MONTH * weight * infAdj;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / Parameters.WEEKS_PER_MONTH * weight * infAdj;
+                    UCmean += candidate.getPolicyBySystemYear(systemYear).getReceivesUC() * weight * infAdj;
+                    LBmean += candidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit() * weight * infAdj;
                 } else {
                     // impute based on ratio of disposable to original income
                     disposableIncomePerWeek += candidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
                     benefitsReceivedPerWeek += (candidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth() + candidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / candidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth() * weight;
+                    UCmean += candidate.getPolicyBySystemYear(systemYear).getReceivesUC() * weight * infAdj;
+                    LBmean += candidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit() * weight * infAdj;
                 }
                 if (keys.getRandomDraw()>0.0 || Math.abs(keys.getRandomDraw()+2.0)<1.0E-2) {
                     donorID = candidate.getId();
                     break;
                 }
+            }
+        }
+        if (Math.abs(disposableIncomePerWeek+999.0)<1.0E-5) {
+            // Deterministic fallback: use nearest neighbour directly.
+            DonorTaxUnit fallback = (targetCandidate != null) ? targetCandidate :
+                    (!candidatesList.isEmpty() ? candidatesList.get(0).getCandidate() : null);
+            if (fallback != null) {
+                donorID = fallback.getId();
+                if (keys.isLowIncome(matchRegime)) {
+                    disposableIncomePerWeek = fallback.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth()
+                            / Parameters.WEEKS_PER_MONTH * infAdj;
+                    benefitsReceivedPerWeek = (fallback.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth()
+                            + fallback.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth())
+                            / Parameters.WEEKS_PER_MONTH * infAdj;
+                } else {
+                    double origIncMonth = fallback.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth();
+                    if (Math.abs(origIncMonth) > 1.0E-9) {
+                        disposableIncomePerWeek = fallback.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / origIncMonth;
+                        benefitsReceivedPerWeek = (fallback.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth()
+                                + fallback.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / origIncMonth;
+                    } else {
+                        disposableIncomePerWeek = 0.0;
+                        benefitsReceivedPerWeek = 0.0;
+                    }
+                }
+                setReceivedUC(fallback.getPolicyBySystemYear(systemYear).getReceivesUC());
+                setReceivedLegacyBenefit(fallback.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit());
             }
         }
         if (Math.abs(disposableIncomePerWeek+999.0)<1.0E-5)
@@ -297,6 +365,12 @@ public class DonorTaxImputation {
         if (keys.getHoursWorkedPerWeekMan() + keys.getHoursWorkedPerWeekWoman() > 0.1) {
             disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
             benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
+        }
+        if (UCmean > Math.random()) {  // Weighted probability of receiving UC
+            setReceivedUC(1);
+        }
+        if (LBmean > 0 && getReceivedUC() == 0) {  // Setting as received LB if benefits but not UC
+            setReceivedLegacyBenefit(1);
         }
     }
 
@@ -349,6 +423,7 @@ public class DonorTaxImputation {
         }
         throw new RuntimeException("attempt to evaluate index of unrecognised target feature");
     }
+
     private double[] getMeasurementVector(int priceYear, double originalIncomePerWeek, boolean flagSecondIncome, double secondIncomePerWeek,
                                           boolean flagChildcareCost, double childcareCostPerWeek) {
 

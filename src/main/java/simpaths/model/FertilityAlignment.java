@@ -49,9 +49,8 @@ public class FertilityAlignment implements IEvaluation {
     @Override
     public double evaluate(double[] args) {
 
-        double newAlignAdjustment = args[0] + Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.FertilityAdjustment);
         persons.parallelStream()
-                .forEach(person -> person.fertility(newAlignAdjustment));
+                .forEach(person -> person.fertility(args[0]));
 
         return targetFertilityRate - evalFertilityRate();
     }

@@ -28,8 +28,8 @@ import simpaths.model.taxes.*;
 /**
  *
  * CLASS TO MANAGE TRANSLATION OF CSV DATA FROM EUROMOD TO DATABASE FOR DONORS USED TO IMPUTE TAX AND BENEFIT PAYMENTS
- * csv data are processed and saved to the DONORPERSON_<country code> table in the relational database. These data
- * are used as working variables to construct the DONORTAXUNIT_<country code> table, which is then used exclusively \
+ * csv data are processed and saved to the DONORPERSON_{country code} table in the relational database. These data
+ * are used as working variables to construct the DONORTAXUNIT_{country code} table, which is then used exclusively \
  * for imputing tax and benefit payments, drawing heavily on SQL calls made via Hibernate
  *
  */
@@ -63,7 +63,7 @@ public class TaxDonorDataParser {
         Connection conn = null;
         try {
             Class.forName("org.h2.Driver");
-            conn = DriverManager.getConnection("jdbc:h2:file:./input" + File.separator + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
+            conn = DriverManager.getConnection("jdbc:h2:file:" + Parameters.getInputDirectory() + "input;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE", "sa", "");
 
             createTaxDonorTables(conn, country, startYear);
             updateDefaultDonorTables(conn, country);
@@ -207,6 +207,23 @@ public class TaxDonorDataParser {
                 + "UPDATE " + personTableName + " SET GENDER = 'Male' WHERE DGN = 1;"
                 + "ALTER TABLE " + personTableName + " DROP COLUMN DGN;"
                 + "ALTER TABLE " + personTableName + " ALTER COLUMN GENDER RENAME TO DGN;"
+            );
+            stat.execute(
+                    "ALTER TABLE " + personTableName + " ADD temp REAL DEFAULT 0;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdioa REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdisc REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdiscwa REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdimbwa REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdict01 REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdict02 REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdiwi REAL;"
+                            + "ALTER TABLE " + personTableName + " ALTER COLUMN bdisv REAL;"
+                            + "UPDATE " + personTableName + " SET temp = bdioa + bdisc + bdimb + "
+                            + "bdiscwa + bdimbwa + bdict01 + bdict02 + bsadi + bdiwi + bdisv;"
+                            + "ALTER TABLE " + personTableName + " ADD ddi INT DEFAULT 0;"
+                            + "UPDATE " + personTableName + " SET ddi = 1 WHERE temp > 0;"
+                            + "ALTER TABLE " + personTableName + " DROP COLUMN temp, bdioa, bdisc, "
+                            + "bdimb, bdiscwa, bdimbwa, bdict01, bdict02, bsadi, bdiwi, bdisv;"
             );
             stat.execute(
 
@@ -377,7 +394,7 @@ public class TaxDonorDataParser {
 
         }
         catch(SQLException e) {
-            throw new IllegalArgumentException("SQL Exception thrown!" + e.getMessage());
+            throw new IllegalArgumentException("SQL exception thrown - " + e.getMessage());
         }
         finally {
             try {
@@ -421,7 +438,6 @@ public class TaxDonorDataParser {
      * output .txt files, picking up the relevant columns for each EUROMOD policy scenario, that
      * will eventually be parsed into the JAS-mine input database.
      *
-     * @return The name of the created CSV file (without the .csv extension)
      *
      */
     public static void constructAggregateTaxDonorPopulationCSVfile(Country country, boolean showGui) {
@@ -606,8 +622,10 @@ public class TaxDonorDataParser {
         // establish session for database link
         EntityTransaction txn = null;
         try {
-
-            EntityManager em = Persistence.createEntityManagerFactory("tax-database").createEntityManager();
+            // access database and obtain donor pool
+            Map propertyMap = new HashMap();
+            propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + Parameters.getInputDirectory() + "input" + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
+            EntityManager em = Persistence.createEntityManagerFactory("tax-database", propertyMap).createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
@@ -650,6 +668,8 @@ public class TaxDonorDataParser {
                     double principalIncome = -999999.0;
                     double childcare = 0.0;
                     int ageTest = 0;
+                    boolean receivesUC = false;
+                    boolean receivesLB = false;
                     for(DonorPerson person : taxUnit.getPersons()) {
                         // loop through persons
 
@@ -661,6 +681,8 @@ public class TaxDonorDataParser {
                         benmt += person.getPolicy(fromYear).getMonetaryBenefitsAmount();
                         bennt += person.getPolicy(fromYear).getNonMonetaryBenefitsAmount();
                         childcare += person.getPolicy(fromYear).getChildcareCostPerMonth();
+                        receivesUC = receivesUC || person.getPolicy(fromYear).getReceivesUC() == 1;
+                        receivesLB = receivesLB || person.getPolicy(fromYear).getReceivesLegacyBenefit() == 1;
                         int agePerson = person.getAge();
                         if (flagInitialiseDemographics) {
                             // need to instantiate variables to evaluate keys
@@ -724,6 +746,8 @@ public class TaxDonorDataParser {
                         taxUnitPolicy.setBenNonMeansTestPerMonth(bennt);
                         taxUnitPolicy.setSecondIncomePerMonth(secondIncome);
                         taxUnitPolicy.setChildcareCostPerMonth(childcare);
+                        taxUnitPolicy.setReceivesUC(receivesUC ? 1 : 0);
+                        taxUnitPolicy.setReceivesLegacyBenefit(receivesLB ? 1 : 0);
                         for(int ii=0; ii<Parameters.TAXDB_REGIMES; ii++) {
                             taxUnitPolicy.setDonorKey(ii, keys.getKey(ii));
                         }

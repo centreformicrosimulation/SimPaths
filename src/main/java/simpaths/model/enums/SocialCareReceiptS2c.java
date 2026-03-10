@@ -1,5 +1,7 @@
 package simpaths.model.enums;
 
+import microsim.statistics.regression.IntegerValuedEnum;
+
 // for interaction with multi-nomial logit (S2c)
 public enum SocialCareReceiptS2c implements IntegerValuedEnum {
     Informal(0),

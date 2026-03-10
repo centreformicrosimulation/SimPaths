@@ -18,8 +18,8 @@ public class FemalesWithoutChildrenAgeGroupCSfilter implements ICollectionFilter
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		return ( person.getDgn().equals(Gender.Female) && 
-				(person.getDag() >= ageFrom) && (person.getDag() <= ageTo) &&
+		return ( person.getDemMaleFlag().equals(Gender.Female) && 
+				(person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) &&
 				!( person.getBenefitUnit().getIndicatorChildren(0,3).equals(Indicator.True) ||
 						person.getBenefitUnit().getIndicatorChildren(4,12).equals(Indicator.True) ||
 						person.getBenefitUnit().getIndicatorChildren(13,17).equals(Indicator.True) )

@@ -11,13 +11,13 @@ public class FlexibleInLabourSupplyByAgeAndGenderFilter implements ICollectionFi
 
     private int ageFrom;
     private int ageTo;
-    private Gender gender;
+    private Gender demSex;
 
-    public FlexibleInLabourSupplyByAgeAndGenderFilter(int ageFrom, int ageTo, Gender gender) {
+    public FlexibleInLabourSupplyByAgeAndGenderFilter(int ageFrom, int ageTo, Gender demSex) {
         super();
         this.ageFrom = ageFrom;
         this.ageTo = ageTo;
-        this.gender = gender;
+        this.demSex = demSex;
     }
 
 
@@ -32,9 +32,9 @@ public class FlexibleInLabourSupplyByAgeAndGenderFilter implements ICollectionFi
         not disabled
          */
 
-        return (person.getDag() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY && person.getDag() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY &&
-                person.getDag() >= ageFrom && person.getDag() <= ageTo &&
-                person.getDgn().equals(gender) &&
+        return (person.getDemAge() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY && person.getDemAge() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY &&
+                person.getDemAge() >= ageFrom && person.getDemAge() <= ageTo &&
+                person.getDemMaleFlag().equals(demSex) &&
                 person.getLes_c4() != Les_c4.Student && person.getLes_c4() != Les_c4.Retired &&
                 person.getDlltsd() != Indicator.True);
     }

@@ -2,6 +2,8 @@ package simpaths.data.startingpop;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import simpaths.model.BenefitUnit;
 import simpaths.model.Household;
 import simpaths.model.Person;
@@ -22,8 +24,9 @@ public class Processed {
      * ATTRIBUTES
      */
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id", unique = true, nullable = false) private Long id;
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "processed")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processed")
     @OrderBy("key ASC")
+    @Fetch(FetchMode.SUBSELECT)
     private Set<Household> households = new LinkedHashSet<>();
 
     @Enumerated(EnumType.STRING) Country country;

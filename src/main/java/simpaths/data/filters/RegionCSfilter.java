@@ -7,22 +7,22 @@ import simpaths.model.enums.Region;
 
 public class RegionCSfilter implements ICollectionFilter{
 	
-	private Region region;
+	private Region demRgn;
 	
-	public RegionCSfilter(Region region) {
+	public RegionCSfilter(Region demRgn) {
 		super();
-		this.region = region;
+		this.demRgn = demRgn;
 		
 	}
 	
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return person.getRegion().equals(region);
+			return person.getRegion().equals(demRgn);
 		}
 		else if(object instanceof BenefitUnit) {
 			BenefitUnit benefitUnit = (BenefitUnit) object;
-			return benefitUnit.getRegion().equals(region);
+			return benefitUnit.getRegion().equals(demRgn);
 		}
 		else throw new IllegalArgumentException("Object passed to RegionCSfilter must be of type Person or BenefitUnit!");
 	}

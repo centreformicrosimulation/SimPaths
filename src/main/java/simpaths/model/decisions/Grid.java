@@ -1,7 +1,6 @@
 package simpaths.model.decisions;
 
 import java.security.InvalidParameterException;
-import simpaths.model.decisions.DecisionParams;
 
 
 /**
@@ -131,7 +130,7 @@ public class Grid {
             if (scale.axes[supplied.ageIndex][ii][3] > continuousCutoff) {
                 // treat as continuous
                 numberContinuous++;
-                copy.states[ii] = scale.axes[supplied.ageIndex][ii][1];    // set copy value to lower bound
+                copy.labStatesContObject[ii] = scale.axes[supplied.ageIndex][ii][1];    // set copy value to lower bound
                 if (!flagAllContinuous) {
                     throw new InvalidParameterException("continuous states do not appear to have been organised contiguously");
                 }
@@ -184,7 +183,7 @@ public class Grid {
 
         // identify reference points
         for (int ii = 0; ii<dimensions; ii++) {
-            ss[ii] = (supplied.states[ii] - scale.axes[supplied.ageIndex][ii][1]) *
+            ss[ii] = (supplied.labStatesContObject[ii] - scale.axes[supplied.ageIndex][ii][1]) *
                     (scale.axes[supplied.ageIndex][ii][0]-1) /
                     (scale.axes[supplied.ageIndex][ii][2] - scale.axes[supplied.ageIndex][ii][1]);
             mm[ii] = (int)(ss[ii] + TOL);
@@ -198,10 +197,10 @@ public class Grid {
         // check that point is internal to grid
         for (int ii=0; ii<dimensions; ii++) {
             double err = Math.ulp(scale.axes[supplied.ageIndex][ii][2]);
-            if (supplied.states[ii] < scale.axes[supplied.ageIndex][ii][1]-err) {
+            if (supplied.labStatesContObject[ii] < scale.axes[supplied.ageIndex][ii][1]-err) {
                 supplied.systemReportError();
                 throw new InvalidParameterException("interpolation point below minimum described by grid");
-            } else if (supplied.states[ii] > scale.axes[supplied.ageIndex][ii][2]+err) {
+            } else if (supplied.labStatesContObject[ii] > scale.axes[supplied.ageIndex][ii][2]+err) {
                 supplied.systemReportError();
                 throw new InvalidParameterException("interpolation point above maximum described by grid");
             }
