@@ -25,9 +25,7 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
-  font:
-    text: Inter
-    code: JetBrains Mono
+  font: false
   icon:
     repo: fontawesome/brands/github
     logo: material/chart-timeline-variant-shimmer
