@@ -1,6 +1,6 @@
 # Model Validation
 
-# 1. Introduction 
+## 1. Introduction 
 
 This section explains the current procedures implemented to validate the SimPaths' inputs and outputs.  
 
@@ -18,7 +18,7 @@ At present, validation is organised into three main steps:
    *To be completed.*
 
 
-# 2. Obtaining the validation scripts
+## 2. Obtaining the validation scripts
 
 Validation procedures are currently executed in **Stata**. The corresponding do-files are located in the *validation* subfolder on the `develop` branch of the *SimPaths* GitHub repository.  
 
@@ -37,12 +37,12 @@ You can access these files in one of three ways:
 Each method gives you the same file contents; the difference is whether you download just one file, a snapshot of the branch, or the entire version-controlled repository.
 
 
-# 3. Running the validation scripts
+## 3. Running the validation scripts
 
 Once you have obtained the relevant validation files, the next step is to run them in **Stata**.  
 This section explains how to set up your working environment, what data are required, and how to execute the validation do-files for each stage of validation.
 
-## 3.1 Validating regression estimates
+### 3.1 Validating regression estimates
 
 These do-files are contained in the subfolder *01_estimate_validation*.  
 Before running these scripts, four preparatory steps are required:
@@ -77,7 +77,7 @@ Before running these scripts, four preparatory steps are required:
 Once these steps have been completed, you can straightforwardly run the do-files to produce the validation plots.
 
 
-## 3.2 Validating the simulated output
+### 3.2 Validating the simulated output
 
 The do-files for validating the simulated output are contained in the subfolder *02_simulation_validation*.  
 These should be run **after executing *SimPaths***, as they rely on a number of *.csv* files produced by the model.  

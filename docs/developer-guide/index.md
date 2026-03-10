@@ -15,7 +15,7 @@ New developers of SimPaths are strongly recommended to familiarise themselves wi
 
 ***
 
-# 1. Guiding principles
+## 1. Guiding principles
 <details markdown>
   <summary><b>Clarity</b></summary>  
 A clear distinction is made in JAS-mine between objects with a modelling content, which specify the structure of the simulation, and objects which perform useful but auxiliary tasks, from enumerating categorical variables to building graphical widgets, from creating filters for the collection of agents to computing aggregate statistics to be saved in the output database.
@@ -42,7 +42,7 @@ Transparent coding for transparent modelling is achieved by
 
 ***
 
-# 2. Architecture
+## 2. Architecture
 SimPaths shares with all JAS-mine projects some architectural choices.
 
 <details markdown>

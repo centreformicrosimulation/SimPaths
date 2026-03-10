@@ -1,13 +1,13 @@
 # Research
 
-# 1 SimPaths reference paper
+## 1. SimPaths reference paper
 
 If you use SimPaths or derived work, please cite:
 
 Bronka P, van de Ven J, Kopasker D, Katikireddi SV, Richiardi M (2025). [SimPaths: an open-source microsimulation model for life course analysis](https://microsimulation.pub/articles/00318). *International Journal of Microsimulation*, 18(1): 95-133.
 
 
-# 2 Further references
+## 2. Further references
 
 - van de Ven J, Bronka P, Richiardi M (2025). [Welfare effects of social care policies](https://www.microsimulation.ac.uk/publications/publication-588564/). CeMPA WP 5/25.
 - van de Ven J, Bronka P, Richiardi M (2024). [The life course effects of care](https://www.microsimulation.ac.uk/publications/publication-578383/). CeMPA WP 7/24.

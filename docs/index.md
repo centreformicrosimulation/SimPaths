@@ -29,7 +29,7 @@ hide:
 
 ## About SimPaths
 
-SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**. This documentation primarily covers the **UK model**.
+SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
 
 <div class="countries">
   <span class="country-tag">🇬🇧 United Kingdom</span>
