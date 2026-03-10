@@ -516,6 +516,15 @@ erase "$dir_work/partner.dta"
  - reg_health_wellbeing.do
 *********************************************************************/
 
+sort idperson swv
+xtset idperson swv
+
+rename dhm Dhm
+gen L_Dhm = L.Dhm
+rename scghq2_dv DhmGhq
+gen L_DhmGhq = L.DhmGhq
+
+
 *==================================================
 * Modified OECD equivalence scale
 *==================================================
