@@ -2,17 +2,13 @@
 
 SimPaths multi-run behavior is controlled by YAML files in `config/`.
 
-Examples in this repository include:
+This repository ships with three configs:
 
-- `default.yml`
-- `test_create_database.yml`
-- `test_run.yml`
-- `create database.yml`
-- `sc analysis*.yml`
-- `intertemporal elasticity.yml`
-- `labour supply elasticity.yml`
+- `default.yml` — standard baseline run
+- `test_create_database.yml` — database setup using training data
+- `test_run.yml` — short integration-test run
 
-For command-by-command guidance for each provided config, see [Scenario Cookbook](scenario-cookbook.md).
+For command-by-command guidance and a template for building your own config, see [Scenario Cookbook](scenario-cookbook.md).
 
 ## How config is applied
 

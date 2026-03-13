@@ -1,16 +1,16 @@
 # Scenario Cookbook
 
-This guide maps every provided YAML scenario in `config/` to its intended use.
+This guide maps every YAML config currently in `config/` to its intended use, and explains how to build your own.
 
-All commands below assume you are running from repository root after building jars.
+All commands assume you are running from repository root after building jars.
 
-## Baseline and testing scenarios
+---
+
+## Provided configs
 
 ### `default.yml`
 
-Use when you want the standard baseline run with conservative defaults.
-
-Command:
+The standard baseline run with conservative defaults. Use this as your starting point for any new analysis.
 
 ```bash
 java -jar multirun.jar -config default.yml -g false
@@ -18,9 +18,7 @@ java -jar multirun.jar -config default.yml -g false
 
 ### `test_create_database.yml`
 
-Use for test-oriented database setup with training data (`trainingFlag: true`).
-
-Command:
+Test-oriented database setup using training data (`trainingFlag: true`). Creates the H2 donor database needed before running simulations.
 
 ```bash
 java -jar multirun.jar -DBSetup -config test_create_database.yml
@@ -28,144 +26,89 @@ java -jar multirun.jar -DBSetup -config test_create_database.yml
 
 ### `test_run.yml`
 
-Use for integration-style short runs (2 runs, test settings).
-
-Command:
+Short integration-style run (2 runs, test settings, training data). Used by CI and useful for reproducing CI behavior locally.
 
 ```bash
 java -jar multirun.jar -config test_run.yml -P root
 ```
 
-### `programming test.yml`
+---
 
-Use for quick developer smoke runs with smaller population and simplified behavior flags.
+## Building your own config
 
-Command:
+Place a new `.yml` file in `config/` and pass it via `-config`. You only need to specify the values you want to override — everything else inherits defaults from `default.yml` or class field defaults.
 
-```bash
-java -jar multirun.jar -config "programming test.yml" -g false
+### Minimal template
+
+```yaml
+maxNumberOfRuns: 5
+executeWithGui: false
+randomSeed: 42
+startYear: 2019
+endYear: 2030
+countryString: UK
+popSize: 20000
+
+collector_args:
+  persistStatistics: true
+  persistStatistics2: true
+  persistStatistics3: true
+  persistPersons: false
+  persistBenefitUnits: false
+  persistHouseholds: false
 ```
 
-## Setup-focused scenario
+### Enabling alignment
 
-### `create database.yml`
+To align simulated aggregates to external targets, add `model_args` with the relevant flags:
 
-Use to build a full database object set for UK long-horizon work. This file sets `flagDatabaseSetup: true` in `innovation_args`, so it runs setup mode.
-
-Command:
-
-```bash
-java -jar multirun.jar -config "create database.yml"
+```yaml
+model_args:
+  alignPopulation: true
+  alignCohabitation: true
+  alignFertility: true
+  alignInSchool: true
+  alignEducation: true
 ```
 
-## Sensitivity and robustness scenarios
+See [Configuration](configuration.md) for a full list of `model_args` toggles, and [Model Concepts](model-concepts.md) for what each alignment dimension does.
 
-### `random seed.yml`
+### Running sensitivity analyses
 
-Use to run multiple replications with random-seed iteration enabled.
+To vary a parameter across runs, use `innovation_args`. For example, to sweep the intertemporal interest-rate innovation:
 
-Command:
+```yaml
+maxNumberOfRuns: 3
+model_args:
+  enableIntertemporalOptimisations: true
 
-```bash
-java -jar multirun.jar -config "random seed.yml" -g false
+innovation_args:
+  intertemporalElasticityInnov: true
 ```
 
-### `intertemporal elasticity.yml`
+### Saving and reusing a behavioural grid
 
-Use for intertemporal elasticity sensitivity (3 runs with interest-rate innovation pattern).
+If you have computed a decision grid for a baseline scenario and want to reuse it in a counterfactual:
 
-Command:
+```yaml
+# Baseline run — saves the grid
+model_args:
+  enableIntertemporalOptimisations: true
+  saveBehaviour: true
+  # readGrid is set to the run name automatically
 
-```bash
-java -jar multirun.jar -config "intertemporal elasticity.yml" -g false
+# Counterfactual run — loads the saved grid
+model_args:
+  enableIntertemporalOptimisations: true
+  useSavedBehaviour: true
+  readGrid: "my_baseline_run"
 ```
 
-### `labour supply elasticity.yml`
-
-Use for labour-supply elasticity sensitivity (3 runs with labour-income innovation pattern).
-
-Command:
-
-```bash
-java -jar multirun.jar -config "labour supply elasticity.yml" -g false
-```
-
-## Targeted output scenarios
-
-### `employmentTransStats.yml`
-
-Use when you mainly want employment transition statistics and minimal other persisted outputs.
-
-Command:
-
-```bash
-java -jar multirun.jar -config employmentTransStats.yml -g false
-```
-
-## Social care scenario family
-
-### `sc calibration.yml`
-
-Use to calibrate preference parameters for social care analysis.
-
-Command:
-
-```bash
-java -jar multirun.jar -config "sc calibration.yml" -g false
-```
-
-### `sc analysis0.yml`
-
-Base social care analysis run with social care enabled and alignment on.
-
-Command:
-
-```bash
-java -jar multirun.jar -config "sc analysis0.yml" -g false
-```
-
-### `sc analysis1.yml`
-
-Main social care analysis run with named behavioral grid output (`saveBehaviour: true`, `readGrid: "sc analysis1"`).
-
-Command:
-
-```bash
-java -jar multirun.jar -config "sc analysis1.yml" -g false
-```
-
-### `sc analysis1b.yml`
-
-Variant of analysis1 with `alignPopulation: false` and `useSavedBehaviour: true` for comparison.
-
-Command:
-
-```bash
-java -jar multirun.jar -config "sc analysis1b.yml" -g false
-```
-
-### `sc analysis2.yml`
-
-Zero-costs social care scenario (`flagSuppressChildcareCosts: true`, `flagSuppressSocialCareCosts: true`).
-
-Command:
-
-```bash
-java -jar multirun.jar -config "sc analysis2.yml" -g false
-```
-
-### `sc analysis3.yml`
-
-Ignore-costs response scenario that reuses behavior from analysis2 (`useSavedBehaviour: true`, `readGrid: "sc analysis2"`).
-
-Command:
-
-```bash
-java -jar multirun.jar -config "sc analysis3.yml" -g false
-```
+---
 
 ## Practical notes
 
-- Use quotes around config filenames that contain spaces.
+- Use quotes around config filenames that contain spaces: `-config "my config.yml"`.
 - Add `-f` to write run logs to `output/logs/`.
-- Override config values via CLI flags when needed (for example `-n`, `-r`, `-P`, `-g`).
+- Override individual values at runtime without editing the YAML, for example `-n 10` overrides `maxNumberOfRuns`.
+- Add `-P none` when you do not need the processed dataset to persist between runs (faster).

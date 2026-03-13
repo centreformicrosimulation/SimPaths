@@ -62,4 +62,4 @@ Use `-g true` (default behavior in several flows) to run with GUI components.
 
 In headless/remote environments, set `-g false`.
 
-See [GUI Guide](gui-guide.md) for screenshots.
+For GUI usage, see the GUI section of the user guide on the project website.
