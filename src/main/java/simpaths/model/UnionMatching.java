@@ -138,6 +138,11 @@ public class UnionMatching {
             male.setHasTestPartner(true);
             female.setHasTestPartner(true);
         } else {
+            // Record successful real matches before the new benefit unit is formed.
+            male.setMatchedUnionMatchingThisYear(true);
+            male.setUnmatchedUnionMatchingThisYear(false);
+            female.setMatchedUnionMatchingThisYear(true);
+            female.setUnmatchedUnionMatchingThisYear(false);
 
             if (!male.getRegion().equals(female.getRegion()))
                 female.setRegion(male.getRegion());

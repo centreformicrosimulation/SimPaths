@@ -120,6 +120,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean demBePartnerFlag;
     @Transient private Boolean demAlignPartnerProcess;
     @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    // Year-specific diagnostics for tracing union-matching participation and outcome in Person.csv.
+    private Boolean enteredUnionMatchingThisYear;
+    private Boolean matchedUnionMatchingThisYear;
+    private Boolean unmatchedUnionMatchingThisYear;
     @Column(name="wgt") private Double wgt;
     @Column(name="healthPsyDstrss0to12") private Double healthPsyDstrss0to12; //Psychological distress GHQ-12 0-12 caseness score
     @Transient private Double healthPsyDstrss0to12L1;
@@ -1562,6 +1566,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demBePartnerFlag = false;
         demLeavePartnerFlag = false;
         demAlignPartnerProcess = false;
+        // Reset yearly union-matching diagnostics before evaluating current-year partnership formation.
+        enteredUnionMatchingThisYear = false;
+        matchedUnionMatchingThisYear = false;
+        unmatchedUnionMatchingThisYear = false;
         double cohabitInnov = statInnovations.getDoubleDraw(25);
         Person partner = getPartner();
         if (demAge >= Parameters.MIN_AGE_COHABITATION) {
@@ -1576,8 +1584,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
                     prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
                     demBePartnerFlag = (cohabitInnov < prob);
-                    if (demBePartnerFlag)
+                    if (demBePartnerFlag) {
+                        // Record entry at the exact point the person is queued for matching.
+                        enteredUnionMatchingThisYear = true;
                         model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
+                    }
                 } else if (demMaleFlag == Gender.Female) {
                     // partnership dissolution
 
@@ -1594,8 +1605,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
                         double prob = Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class);
                         demBePartnerFlag = (cohabitInnov < prob);
-                        if (demBePartnerFlag)
+                        if (demBePartnerFlag) {
+                            // Record entry at the exact point the person is queued for matching.
+                            enteredUnionMatchingThisYear = true;
                             model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
+                        }
                     }
                 } else if (demMaleFlag == Gender.Female && ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student))) {
 
@@ -6339,6 +6353,30 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean getToBePartnered() {return demBePartnerFlag;}
+
+    public Boolean getEnteredUnionMatchingThisYear() {
+        return enteredUnionMatchingThisYear;
+    }
+
+    public void setEnteredUnionMatchingThisYear(Boolean enteredUnionMatchingThisYear) {
+        this.enteredUnionMatchingThisYear = enteredUnionMatchingThisYear;
+    }
+
+    public Boolean getMatchedUnionMatchingThisYear() {
+        return matchedUnionMatchingThisYear;
+    }
+
+    public void setMatchedUnionMatchingThisYear(Boolean matchedUnionMatchingThisYear) {
+        this.matchedUnionMatchingThisYear = matchedUnionMatchingThisYear;
+    }
+
+    public Boolean getUnmatchedUnionMatchingThisYear() {
+        return unmatchedUnionMatchingThisYear;
+    }
+
+    public void setUnmatchedUnionMatchingThisYear(Boolean unmatchedUnionMatchingThisYear) {
+        this.unmatchedUnionMatchingThisYear = unmatchedUnionMatchingThisYear;
+    }
 
     public static void setPersonIdCounter(long id) {personIdCounter=id;}
 

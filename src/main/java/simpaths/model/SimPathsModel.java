@@ -872,6 +872,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     unionMatching(false);
                     unionMatchingNoRegion(false); //Run matching again relaxing regions this time
                 }
+                flagUnmatchedUnionMatchingPersons();
                 if (commentsOn) log.info("Union matching complete.");
             }
             case SocialCareMarketClearing -> {
@@ -1797,6 +1798,11 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         // throw new RuntimeException("Error - both parties to match have the same gender!");
                                     } else {
 
+                                        // Record successful real matches in the SBAM path.
+                                        p1.setMatchedUnionMatchingThisYear(true);
+                                        p1.setUnmatchedUnionMatchingThisYear(false);
+                                        p2.setMatchedUnionMatchingThisYear(true);
+                                        p2.setUnmatchedUnionMatchingThisYear(false);
                                         p1.setDemPartnerNYear(0); //Set years in partnership to 0
                                         p2.setDemPartnerNYear(0);
 
@@ -1820,6 +1826,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             unmatchedSet.addAll(personsToMatch2.get(key));
             for (Person unmatchedPerson : unmatchedSet) {
 
+                unmatchedPerson.setUnmatchedUnionMatchingThisYear(true);
                 if (unmatchedPerson.getDemMaleFlag().equals(Gender.Male)) malesUnmatched++;
                 else if (unmatchedPerson.getDemMaleFlag().equals(Gender.Female)) femalesUnmatched++;
             }
@@ -3585,6 +3592,18 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                         String tmpKey = gender + " " + region + " " + education + " " + ageGroup;
                         personsToMatch2.get(tmpKey).clear();
                     }
+                }
+            }
+        }
+    }
+
+    private void flagUnmatchedUnionMatchingPersons() {
+
+        // Finalize yearly unmatched status after all union-matching passes have completed.
+        for (Gender gender: Gender.values()) {
+            for (Region region: Region.values()) {
+                for (Person person : personsToMatch.get(gender).get(region)) {
+                    person.setUnmatchedUnionMatchingThisYear(true);
                 }
             }
         }
