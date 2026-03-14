@@ -18,6 +18,8 @@ For contributors and advanced users:
 
 - [Architecture](architecture.md) — source package structure and data flow
 - [Development and Testing](development.md) — build, tests, CI, contributor workflow
+- [Data Pipeline](data-pipeline.md) — how input files are generated from UKHLS/EUROMOD/WAS survey data
+- [Validation Guide](validation-guide.md) — two-stage validation workflow (estimate validation + simulated output validation)
 
 ## Conventions
 

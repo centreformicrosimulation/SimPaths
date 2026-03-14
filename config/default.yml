@@ -82,7 +82,7 @@ model_args:
                                               # across years (currently applies to wage equations only)
 
   # --- Time-series defaults ---
-#    flagDefaultToTimeSeriesAverages: true    # if true, use the sample average of time-series variables
+#    flagDefaultToTimeSeriesAverages: false   # if true, use the sample average of time-series variables
                                               # rather than the year-specific value when data is unavailable
 
   # --- Intertemporal optimisation (IO) ---

@@ -36,7 +36,7 @@ java -jar multirun.jar -config test_run.yml -P root
 
 ## Building your own config
 
-Place a new `.yml` file in `config/` and pass it via `-config`. You only need to specify the values you want to override — everything else inherits defaults from `default.yml` or class field defaults.
+Place a new `.yml` file in `config/` and pass it via `-config`. You only need to specify the values you want to change — everything else falls back to the Java class field defaults. Each config file is independent; there is no inheritance from `default.yml` or any other YAML file.
 
 The keys under `model_args` map directly to the `@GUIparameter`-annotated fields on `SimPathsModel` — so anything you can set in the GUI can also be set here.
 
@@ -93,17 +93,17 @@ innovation_args:
 If you have computed a decision grid for a baseline scenario and want to reuse it in a counterfactual:
 
 ```yaml
-# Baseline run — saves the grid
+# Baseline run — saves the grid to output/<run-folder>/
 model_args:
   enableIntertemporalOptimisations: true
   saveBehaviour: true
-  # readGrid is set to the run name automatically
 
 # Counterfactual run — loads the saved grid
+# readGrid must be set to the exact output folder name of the baseline run
 model_args:
   enableIntertemporalOptimisations: true
   useSavedBehaviour: true
-  readGrid: "my_baseline_run"
+  readGrid: "my_baseline_run"   # replace with the actual folder name under output/
 ```
 
 ---
