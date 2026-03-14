@@ -38,6 +38,8 @@ java -jar multirun.jar -config test_run.yml -P root
 
 Place a new `.yml` file in `config/` and pass it via `-config`. You only need to specify the values you want to override — everything else inherits defaults from `default.yml` or class field defaults.
 
+The keys under `model_args` map directly to the `@GUIparameter`-annotated fields on `SimPathsModel` — so anything you can set in the GUI can also be set here.
+
 ### Minimal template
 
 ```yaml

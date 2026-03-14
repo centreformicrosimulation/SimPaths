@@ -1,6 +1,8 @@
 # SimPaths Documentation
 
-This documentation is structured to support both first-time users and contributors.
+These files are a **CLI- and developer-workflow quick reference** for working directly with the repository — building, running, configuring, and troubleshooting from the command line. For the full model documentation (simulated modules, parameterisation, GUI usage, country variants, research), see the [website](../documentation/wiki/index.md).
+
+---
 
 ## Recommended reading order
 
@@ -16,17 +18,6 @@ For contributors and advanced users:
 
 - [Architecture](architecture.md) — source package structure and data flow
 - [Development and Testing](development.md) — build, tests, CI, contributor workflow
-
-## Scope
-
-These guides cover:
-
-- Understanding the simulation model and its mechanisms
-- Building SimPaths with Maven
-- Running single-run and multi-run workflows
-- Configuring model, collector, and runtime behavior via YAML
-- Understanding expected input/output files and generated artifacts
-- Running unit and integration tests locally and in CI
 
 ## Conventions
 
