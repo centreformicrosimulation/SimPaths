@@ -1,4 +1,4 @@
-# Scenario Cookbook
+# Run Configuration
 
 This guide maps every YAML config currently in `config/` to its intended use, and explains how to build your own.
 

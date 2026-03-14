@@ -8,7 +8,7 @@ This repository ships with three configs:
 - `test_create_database.yml` — database setup using training data
 - `test_run.yml` — short integration-test run
 
-For command-by-command guidance and a template for building your own config, see [Scenario Cookbook](scenario-cookbook.md).
+For command-by-command guidance and a template for building your own config, see [Run Configuration](run-configuration.md).
 
 ## How config is applied
 
@@ -79,7 +79,7 @@ The IO state-space flags control which personal characteristics enter the grid (
 | `responsesToLowWageOffer` | `true` |
 | `responsesToRegion` | `false` |
 
-Grid persistence flags allow a baseline grid to be solved once and reused in counterfactual runs (`saveBehaviour: true` / `useSavedBehaviour: true` with `readGrid: "<run-name>"`). See [Scenario Cookbook](scenario-cookbook.md) for an example.
+Grid persistence flags allow a baseline grid to be solved once and reused in counterfactual runs (`saveBehaviour: true` / `useSavedBehaviour: true` with `readGrid: "<run-name>"`). See [Run Configuration](run-configuration.md) for an example.
 
 ---
 

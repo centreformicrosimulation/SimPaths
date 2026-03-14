@@ -10,7 +10,7 @@ These files are a **CLI- and developer-workflow quick reference** for working di
 2. [Getting Started](getting-started.md) — prerequisites, build, first run
 3. [CLI Reference](cli-reference.md) — all flags for `singlerun.jar` and `multirun.jar`
 4. [Configuration](configuration.md) — YAML structure and all config keys
-5. [Scenario Cookbook](scenario-cookbook.md) — provided configs and how to build your own
+5. [Run Configuration](run-configuration.md) — provided configs and how to build your own
 6. [Data and Outputs](data-and-outputs.md) — input layout, setup artifacts, output files
 7. [Troubleshooting](troubleshooting.md) — common errors and fixes
 
