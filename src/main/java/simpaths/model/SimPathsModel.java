@@ -1803,6 +1803,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         p1.setUnmatchedUnionMatchingThisYear(false);
                                         p2.setMatchedUnionMatchingThisYear(true);
                                         p2.setUnmatchedUnionMatchingThisYear(false);
+                                        p1.setCarryOverUnionMatching(false);
+                                        p2.setCarryOverUnionMatching(false);
                                         p1.setDemPartnerNYear(0); //Set years in partnership to 0
                                         p2.setDemPartnerNYear(0);
 
@@ -3604,6 +3606,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             for (Region region: Region.values()) {
                 for (Person person : personsToMatch.get(gender).get(region)) {
                     person.setUnmatchedUnionMatchingThisYear(true);
+                    person.setCarryOverUnionMatching(true);
                 }
             }
         }

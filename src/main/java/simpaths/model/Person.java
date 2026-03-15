@@ -118,6 +118,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean demGiveBirthFlag;
     @Transient private Boolean eduLeaveSchoolFlag;
     @Transient private Boolean demBePartnerFlag;
+    @Transient private Boolean carryOverUnionMatching;
     @Transient private Boolean demAlignPartnerProcess;
     @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     // Year-specific diagnostics for tracing union-matching participation and outcome in Person.csv.
@@ -1580,14 +1581,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 double prob;
                 if (partner == null) {
                     // partnership formation
-
-                    double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
-                    demBePartnerFlag = (cohabitInnov < prob);
-                    if (demBePartnerFlag) {
-                        // Record entry at the exact point the person is queued for matching.
-                        enteredUnionMatchingThisYear = true;
-                        model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
+                    if (carryOverUnionMatching()) {
+                        enterUnionMatchingQueue();
+                    } else {
+                        double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                        prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
+                        demBePartnerFlag = (cohabitInnov < prob);
+                        if (demBePartnerFlag) {
+                            enterUnionMatchingQueue();
+                        }
                     }
                 } else if (demMaleFlag == Gender.Female) {
                     // partnership dissolution
@@ -1601,14 +1603,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             } else if (model.getCountry() == Country.IT) {
 
                 if (partner == null) {
-                    if ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student)) {
+                    if (carryOverUnionMatching()) {
+                        enterUnionMatchingQueue();
+                    } else if ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student)) {
 
                         double prob = Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class);
                         demBePartnerFlag = (cohabitInnov < prob);
                         if (demBePartnerFlag) {
-                            // Record entry at the exact point the person is queued for matching.
-                            enteredUnionMatchingThisYear = true;
-                            model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
+                            enterUnionMatchingQueue();
                         }
                     }
                 } else if (demMaleFlag == Gender.Female && ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student))) {
@@ -1620,6 +1622,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
             }
         }
+    }
+
+    private boolean carryOverUnionMatching() {
+        return carryOverUnionMatching != null && carryOverUnionMatching;
+    }
+
+    private void enterUnionMatchingQueue() {
+        demBePartnerFlag = true;
+        enteredUnionMatchingThisYear = true;
+        model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
     }
 
     protected void partnershipDissolution() {
@@ -6376,6 +6388,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setUnmatchedUnionMatchingThisYear(Boolean unmatchedUnionMatchingThisYear) {
         this.unmatchedUnionMatchingThisYear = unmatchedUnionMatchingThisYear;
+    }
+
+    public Boolean getCarryOverUnionMatching() {
+        return carryOverUnionMatching;
+    }
+
+    public boolean isCarryOverUnionMatching() {
+        return carryOverUnionMatching();
+    }
+
+    public void setCarryOverUnionMatching(Boolean carryOverUnionMatching) {
+        this.carryOverUnionMatching = carryOverUnionMatching;
     }
 
     public static void setPersonIdCounter(long id) {personIdCounter=id;}

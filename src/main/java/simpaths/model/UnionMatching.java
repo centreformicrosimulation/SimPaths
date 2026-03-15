@@ -143,6 +143,8 @@ public class UnionMatching {
             male.setUnmatchedUnionMatchingThisYear(false);
             female.setMatchedUnionMatchingThisYear(true);
             female.setUnmatchedUnionMatchingThisYear(false);
+            male.setCarryOverUnionMatching(false);
+            female.setCarryOverUnionMatching(false);
 
             if (!male.getRegion().equals(female.getRegion()))
                 female.setRegion(male.getRegion());
