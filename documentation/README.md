@@ -8,9 +8,7 @@ These files are a **quick reference** for working directly with the repository �
 
 1. [Model Concepts](model-concepts.md) — what SimPaths simulates, agents, annual cycle, alignment, EUROMOD
 2. [Configuration](configuration.md) — prerequisites, quick run, YAML structure, config keys
-3. [Repository Structure](repository-structure.md) — directory layout, input files, output files
-4. [CLI Reference](cli-reference.md) — all flags for `singlerun.jar` and `multirun.jar`
-5. [Troubleshooting](troubleshooting.md) — common errors and fixes
+3. [Troubleshooting](troubleshooting.md) — common errors and fixes
 
 For contributors and advanced users:
 
