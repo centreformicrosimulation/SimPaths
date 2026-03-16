@@ -38,7 +38,7 @@ The pipeline runs in numbered stages:
 | `08_wealth_to_ukhls.do` | Merges WAS wealth into UKHLS records |
 | `09_finalise_input_data.do` | Final cleaning and formatting |
 | `10_check_yearly_data.do` | Per-year consistency checks |
-| `99_training_data.do` | Extracts the small training subset committed to the repo |
+| `99_training_data.do` | Produces the de-identified synthetic population committed to `input/InitialPopulations/training/`. Selects a random subset of households, anonymises all IDs, collapses wave identifiers, randomises survey weights, and adds 15% random noise to all continuous variables (income, wealth, wages, care hours). This produces a file that is structurally identical to the real population data but contains no traceable individual records, so it can be distributed with the repo without breaching data licence terms. |
 
 ### Employment history sub-pipeline (`compile/do_emphist/`)
 
