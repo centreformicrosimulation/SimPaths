@@ -75,17 +75,7 @@ CSV filenames follow the pattern `<EntityClass><RunNumber>.csv`. With a single r
 
 ### `model/`
 
-Core simulation logic. The central class is `SimPathsModel`, which owns all agent collections, builds the yearly event schedule (44 ordered processes), and coordinates the annual simulation cycle.
-
-Agent classes:
-
-| Class | Description |
-| --- | --- |
-| `Person` | Individual agent. Carries all demographics, health, education, labour, income, and social care state. Contains the per-person process methods invoked by the schedule. |
-| `BenefitUnit` | Tax-and-benefit assessment unit: one or two adults plus their dependents. Tax-benefit evaluation is performed at this level. |
-| `Household` | Grouping of benefit units sharing the same address. |
-
-Other key classes in `model/`:
+Core simulation logic. The three agent classes — `Person`, `BenefitUnit`, `Household` — are described in the [Model Concepts](../../../../documentation/model-concepts.md) page. Other key classes:
 
 | Class | Purpose |
 | --- | --- |
@@ -97,54 +87,12 @@ Other key classes in `model/`:
 | `Validator` | Runtime consistency checks on the simulated population. |
 | `*Alignment` classes | `FertilityAlignment`, `ActivityAlignmentV2`, `InSchoolAlignment`, `PartnershipAlignment`, `SocialCareAlignment` — each aligns a specific outcome to external calibration targets. |
 
-### `model/enums/`
+Sub-packages:
 
-46 enumeration classes defining the categorical variables used throughout the simulation: `Gender`, `Education`, `Labour`, `HealthStatus`, `Country`, `Region`, `Ethnicity`, `Occupancy`, and others. These are referenced by the ORM for database persistence and by regression models for covariate encoding.
-
-### `model/decisions/`
-
-Intertemporal optimisation (IO) computational engine. When IO is enabled, computing optimal consumption–labour choices for every agent at every time step during the simulation would be prohibitively slow. This package solves the problem once before the simulation runs: it constructs a grid covering all meaningful combinations of state variables (wealth, age, health, family status, etc.), then works backwards from the end of life to find the optimal choice at each grid point (backward induction). During the simulation, agents simply look up their current state in the pre-computed grid rather than solving an optimisation problem.
-
-Key classes:
-
-| Class | Purpose |
-| --- | --- |
-| `DecisionParams` | Defines the state-space dimensions and grid parameters for the optimisation problem. |
-| `ManagerPopulateGrids` | Populates the state-space grid points and evaluates value functions by backward induction. |
-| `ManagerSolveGrids` | Solves for optimal policy at each grid point. |
-| `ManagerFileGrids` | Reads and writes pre-computed grids to disk, so they can be reused across runs. |
-| `Grids` | Container for the set of solved decision grids. |
-| `States` | Enumerates the state variables that define each grid point. |
-| `Expectations` / `LocalExpectations` | Computes expected future values over stochastic transitions. |
-| `CESUtility` | CES utility function used in the optimisation. |
-
-### `model/taxes/`
-
-EUROMOD donor-matching subsystem. Imputes taxes and benefits onto simulated benefit units by matching them to pre-computed EUROMOD donor records.
-
-| Class | Purpose |
-| --- | --- |
-| `DonorTaxImputation` | Main entry point. Implements the three-step matching process: coarse-exact matching on characteristics, income proximity filtering, and candidate selection/averaging. |
-| `KeyFunction` / `KeyFunction1`–`4` | Four progressively relaxed matching-key definitions. The system tries the tightest key first and falls back through wider keys if no donors are found. |
-| `DonorKeys` | Builds composite matching keys from benefit-unit characteristics. |
-| `DonorTaxUnit` / `DonorPerson` | Represent the pre-computed EUROMOD donor records loaded from the database. |
-| `CandidateList` | Ranked list of donor matches for a given benefit unit, sorted by income proximity. |
-| `Match` / `Matches` | Store the final selected donor(s) and their imputed tax-benefit values. |
-
-The `taxes/database/` sub-package handles loading donor data from the H2 database into memory (`TaxDonorDataParser`, `DatabaseExtension`, `MatchIndices`).
-
-### `model/lifetime_incomes/`
-
-Synthetic lifetime income trajectory generator. When IO is enabled, this package creates projected income paths for birth cohorts using an AR(2) process anchored to age-gender geometric means, and matches simulated persons to donor income profiles.
-
-| Class | Purpose |
-| --- | --- |
-| `ManagerProjectLifetimeIncomes` | Generates the synthetic income trajectory database for all birth cohorts in the simulation horizon. |
-| `LifetimeIncomeImputation` | Matches each simulated person to a donor income trajectory via binary search on the income CDF. |
-| `AnnualIncome` | Implements the AR(2) income process with age-gender anchoring. |
-| `BirthCohort` | Groups individuals by birth year for cohort-level income projection. |
-| `Individual` | Entity carrying age dummies and log GDP per capita for income regression. |
-
+- **`model/enums/`** — 46 enumeration classes defining categorical variables: `Gender`, `Education`, `Labour`, `HealthStatus`, `Region`, `Ethnicity`, `Occupancy`, and others. Referenced by the ORM for database persistence and by regression models for covariate encoding.
+- **`model/decisions/`** — Intertemporal optimisation (IO) computational engine. Pre-computes decision grids by backward induction so agents can look up optimal consumption–labour choices during the simulation.
+- **`model/taxes/`** — EUROMOD donor-matching subsystem. Imputes taxes and benefits onto simulated benefit units by matching them to pre-computed EUROMOD donor records.
+- **`model/lifetime_incomes/`** — Synthetic lifetime income trajectory generator. Creates projected income paths for birth cohorts using an AR(2) process, used when IO is enabled.
 
 For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](../documentation/wiki/overview/parameterisation.md) on the website.
 
@@ -165,3 +113,51 @@ The repository includes de-identified training data under `input/InitialPopulati
 ## Logging
 
 With `-f` on `multirun.jar`, logs are written to `output/logs/run_<seed>.txt` (stdout) and `output/logs/run_<seed>.log` (log4j).
+
+---
+
+## Sub-package detail
+
+The following sub-packages are self-contained subsystems whose internals are not obvious from the class names alone.
+
+### `model/decisions/` — IO engine
+
+When IO is enabled, computing optimal consumption–labour choices for every agent at every time step would be prohibitively slow. This package solves the problem once before the simulation runs: it constructs a grid covering all meaningful combinations of state variables (wealth, age, health, family status, etc.), then works backwards from the end of life to find the optimal choice at each grid point (backward induction). During the simulation, agents simply look up their current state in the pre-computed grid.
+
+| Class | Purpose |
+| --- | --- |
+| `DecisionParams` | Defines the state-space dimensions and grid parameters for the optimisation problem. |
+| `ManagerPopulateGrids` | Populates the state-space grid points and evaluates value functions by backward induction. |
+| `ManagerSolveGrids` | Solves for optimal policy at each grid point. |
+| `ManagerFileGrids` | Reads and writes pre-computed grids to disk, so they can be reused across runs. |
+| `Grids` | Container for the set of solved decision grids. |
+| `States` | Enumerates the state variables that define each grid point. |
+| `Expectations` / `LocalExpectations` | Computes expected future values over stochastic transitions. |
+| `CESUtility` | CES utility function used in the optimisation. |
+
+### `model/taxes/` — EUROMOD donor matching
+
+Imputes taxes and benefits onto simulated benefit units by matching them to pre-computed EUROMOD donor records.
+
+| Class | Purpose |
+| --- | --- |
+| `DonorTaxImputation` | Main entry point. Implements the three-step matching process: coarse-exact matching on characteristics, income proximity filtering, and candidate selection/averaging. |
+| `KeyFunction` / `KeyFunction1`–`4` | Four progressively relaxed matching-key definitions. The system tries the tightest key first and falls back through wider keys if no donors are found. |
+| `DonorKeys` | Builds composite matching keys from benefit-unit characteristics. |
+| `DonorTaxUnit` / `DonorPerson` | Represent the pre-computed EUROMOD donor records loaded from the database. |
+| `CandidateList` | Ranked list of donor matches for a given benefit unit, sorted by income proximity. |
+| `Match` / `Matches` | Store the final selected donor(s) and their imputed tax-benefit values. |
+
+The `taxes/database/` sub-package handles loading donor data from the H2 database into memory (`TaxDonorDataParser`, `DatabaseExtension`, `MatchIndices`).
+
+### `model/lifetime_incomes/` — synthetic income trajectories
+
+When IO is enabled, this package creates projected income paths for birth cohorts using an AR(2) process anchored to age-gender geometric means, and matches simulated persons to donor income profiles.
+
+| Class | Purpose |
+| --- | --- |
+| `ManagerProjectLifetimeIncomes` | Generates the synthetic income trajectory database for all birth cohorts in the simulation horizon. |
+| `LifetimeIncomeImputation` | Matches each simulated person to a donor income trajectory via binary search on the income CDF. |
+| `AnnualIncome` | Implements the AR(2) income process with age-gender anchoring. |
+| `BirthCohort` | Groups individuals by birth year for cohort-level income projection. |
+| `Individual` | Entity carrying age dummies and log GDP per capita for income regression. |
