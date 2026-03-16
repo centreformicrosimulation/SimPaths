@@ -60,7 +60,7 @@ Other key classes in `model/`:
 
 ### `model/decisions/`
 
-Intertemporal optimisation (IO) module. When IO is enabled, this package pre-computes decision grids by backward induction over a discretised state space, and agents look up optimal consumption–labour choices each simulated year.
+Intertemporal optimisation (IO) computational engine. When IO is enabled, computing optimal consumption–labour choices for every agent at every time step during the simulation would be prohibitively slow. This package solves the problem once before the simulation runs: it constructs a grid covering all meaningful combinations of state variables (wealth, age, health, family status, etc.), then works backwards from the end of life to find the optimal choice at each grid point (backward induction). During the simulation, agents simply look up their current state in the pre-computed grid rather than solving an optimisation problem.
 
 Key classes:
 
