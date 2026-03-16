@@ -107,6 +107,5 @@ Population projection targets (`align_popProjections.xlsx`) and fertility/mortal
 | Adding a new data year to the simulation | Part 1 (re-slice the population for the new year) + Part 3 (update alignment targets) |
 | Re-estimating a behavioural module | Part 2 (the affected `reg_*.do` script only) + Stage 1 validation |
 | Updating employment alignment targets | Part 3 (`01_employment_shares_initpopdata.do`) |
-| Adding a new country | All three parts with country-appropriate data sources |
 
 After re-running any part, re-run setup (`singlerun -Setup` or `multirun -DBSetup`) to rebuild `input/input.mv.db` before running the simulation.

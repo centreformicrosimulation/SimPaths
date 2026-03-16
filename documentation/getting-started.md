@@ -28,23 +28,13 @@ SimPaths supports two entry points:
 
 ## First run (headless)
 
-### Step 1: setup input artifacts
-
 ```bash
-java -jar singlerun.jar -c UK -s 2019 -g false -Setup --rewrite-policy-schedule
+mvn clean package
+java -jar multirun.jar -DBSetup
+java -jar multirun.jar
 ```
 
-This prepares required setup files such as:
-
-- `input/input.mv.db`
-- `input/EUROMODpolicySchedule.xlsx`
-- `input/DatabaseCountryYear.xlsx`
-
-### Step 2: execute a multi-run configuration
-
-```bash
-java -jar multirun.jar -config default.yml -g false
-```
+The first command builds the JARs. The second creates the H2 donor database from the input data. The third runs the simulation using `default.yml`.
 
 Results are written under `output/<run-folder>/`.
 

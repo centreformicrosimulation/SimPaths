@@ -49,7 +49,6 @@ Place a new `.yml` file in `config/` and pass it via `-config`. You only need to
 | `startYear` | `2019` | First simulation year (must have matching input/donor data) |
 | `endYear` | `2022` | Last simulation year (inclusive) |
 | `popSize` | `50000` | Simulated population size; larger = more accurate but slower |
-| `countryString` | auto | `"United Kingdom"` or `"Italy"`; auto-detected from donor DB if omitted |
 
 ### Collector arguments
 

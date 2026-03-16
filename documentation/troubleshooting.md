@@ -26,7 +26,7 @@ Fix:
 - Re-run setup with rewrite enabled:
 
 ```bash
-java -jar singlerun.jar -c UK -s 2019 -g false --rewrite-policy-schedule -Setup
+java -jar singlerun.jar -s 2019 -g false --rewrite-policy-schedule -Setup
 ```
 
 ## GUI errors on server or CI

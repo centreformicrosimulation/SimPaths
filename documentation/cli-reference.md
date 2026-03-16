@@ -12,7 +12,6 @@ java -jar singlerun.jar [options]
 
 | Option | Meaning |
 |---|---|
-| `-c`, `--country <CC>` | Country code (`UK` or `IT`) |
 | `-s`, `--startYear <year>` | Simulation start year |
 | `-Setup` | Setup only (do not run simulation) |
 | `-Run` | Run only (skip setup) |
@@ -30,7 +29,7 @@ Notes:
 Setup only:
 
 ```bash
-java -jar singlerun.jar -c UK -s 2019 -g false -Setup --rewrite-policy-schedule
+java -jar singlerun.jar -s 2019 -g false -Setup --rewrite-policy-schedule
 ```
 
 Run only (after setup exists):
