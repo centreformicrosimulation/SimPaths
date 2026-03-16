@@ -77,6 +77,8 @@ Reconstructs each respondent's monthly employment history from January 2007 onwa
 | `reg_socialcare.do` | Social care receipt and provision | Probit / ordered logit |
 | `reg_unemployment.do` | Unemployment transitions | Probit |
 | `reg_financial_distress.do` | Financial distress | Probit |
+| `programs.do` | Shared utility programs called by the estimation scripts | — |
+| `variable_update.do` | Prepares and recodes variables before estimation | — |
 
 After running, output Excel files are placed in `input/` (overwriting the existing `reg_*.xlsx` files).
 
