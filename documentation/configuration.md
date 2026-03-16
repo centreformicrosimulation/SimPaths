@@ -1,12 +1,14 @@
 # Configuration
 
-SimPaths batch runs are controlled by YAML files in `config/`. The main config is `default.yml`, which is fully annotated with inline comments.
+## Prerequisites
 
----
+- Java 19
+- Maven 3.8+
+- Optional IDE: IntelliJ IDEA (import as a Maven project)
 
 ## Quick run
 
-After building, three commands are all you need:
+Three commands are all you need:
 
 ```bash
 mvn clean package
