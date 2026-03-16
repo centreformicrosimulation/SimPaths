@@ -125,4 +125,4 @@ This gives SimPaths annually updated policy rules without re-implementing the fu
 
 When `enableIntertemporalOptimisations: true`, SimPaths solves a life-cycle consumption and labour supply problem. Decision grids are pre-computed in year 0 (`RationalOptimisation`) by solving backwards over the remaining horizon. In each subsequent year agents look up their optimal choice from the grid given their current state.
 
-This is computationally intensive and disabled by default. When enabled, `saveBehaviour` and `useSavedBehaviour` allow a baseline grid to be reused in counterfactual runs without recomputing it — see [Run Configuration](run-configuration.md) for an example.
+This is computationally intensive and disabled by default. When enabled, `saveBehaviour` and `useSavedBehaviour` allow a baseline grid to be reused in counterfactual runs without recomputing it — see the annotated `config/default.yml` for the relevant keys.

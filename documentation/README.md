@@ -9,14 +9,12 @@ These files are a **CLI- and developer-workflow quick reference** for working di
 1. [Model Concepts](model-concepts.md) — what SimPaths simulates, agents, annual cycle, alignment, EUROMOD
 2. [Getting Started](getting-started.md) — prerequisites, build, first run
 3. [CLI Reference](cli-reference.md) — all flags for `singlerun.jar` and `multirun.jar`
-4. [Configuration](configuration.md) — YAML structure and all config keys
-5. [Run Configuration](run-configuration.md) — provided configs and how to build your own
-6. [Data and Outputs](data-and-outputs.md) — input layout, setup artifacts, output files
-7. [Troubleshooting](troubleshooting.md) — common errors and fixes
+4. [Configuration](configuration.md) — YAML structure, config keys, and how to write your own
+5. [Data and Outputs](data-and-outputs.md) — input layout, setup artifacts, output files
+6. [Troubleshooting](troubleshooting.md) — common errors and fixes
 
 For contributors and advanced users:
 
-- [Architecture](architecture.md) — source package structure and data flow
 - [Development and Testing](development.md) — build, tests, CI, contributor workflow
 - [Data Pipeline](data-pipeline.md) — how input files are generated from UKHLS/EUROMOD/WAS survey data
 - [Validation Guide](validation-guide.md) — two-stage validation workflow (estimate validation + simulated output validation)
