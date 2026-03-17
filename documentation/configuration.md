@@ -96,3 +96,6 @@ Note that some settings — particularly alignment — are primarily controlled 
 - Use quotes around config filenames that contain spaces: `-config "my config.yml"`.
 - Add `-f` to write run logs to `output/logs/`.
 - Override individual values at runtime without editing the YAML, for example `-n 10` overrides `maxNumberOfRuns`.
+- If you see `Config file <name> not found`, the `-config` flag points to a file not present in `config/` — check the filename and extension.
+- If `EUROMODpolicySchedule.xlsx` is missing, re-run setup: `java -jar multirun.jar -DBSetup`.
+- On headless servers or CI, always use `executeWithGui: false` in your YAML (or `-g false` on the command line) to avoid GUI errors.
