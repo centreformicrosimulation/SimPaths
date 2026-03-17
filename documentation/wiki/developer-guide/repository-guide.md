@@ -2,21 +2,6 @@
 
 A guide to navigating the SimPaths repository structure and codebase.
 
----
-
-## Table of Contents
-
-1. [Repository Structure](#repository-structure)
-2. [Core Components](#core-components)
-3. [Key Directories Explained](#key-directories-explained)
-4. [Sub-package Detail](#sub-package-detail)
-5. [Data Pipeline Reference](#data-pipeline-reference)
-6. [Development Workflow](#development-workflow)
-7. [Code Navigation Tips](#code-navigation-tips)
-8. [Additional Resources](#additional-resources)
-
----
-
 ## Repository Structure
 
 ```
@@ -209,17 +194,6 @@ YAML configuration files override default parameters. The main file is **default
 - **innovation_args**: Experimental parameters for sensitivity analysis
 
 Additional configuration files for testing: **test_create_database.yml**, **test_run.yml**
-
-### `/documentation/wiki/`
-
-Complete documentation organized by audience:
-
-- **getting-started/**: Environment setup, data access, first simulation
-- **overview/**: Model description, modules, parameterization
-- **user-guide/**: GUI, parameter modification, multiple runs
-- **developer-guide/**: JAS-mine architecture, internals, how-to guides
-- **jasmine-reference/**: Statistical packages, alignment, regression tools
-- **research/**: Published papers and validation results
 
 ---
 
@@ -526,8 +500,4 @@ Or via IDE test runner.
 
 ## Additional Resources
 
-- **Full Documentation**: See `documentation/wiki/` for comprehensive guides
-- **Getting Started**: `documentation/wiki/getting-started/`
-- **Running Simulations**: `documentation/wiki/user-guide/`
-- **Model Overview**: `documentation/wiki/overview/`
 - **Issues**: [GitHub Issues](https://github.com/centreformicrosimulation/SimPaths/issues)
