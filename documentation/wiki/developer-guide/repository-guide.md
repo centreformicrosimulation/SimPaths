@@ -271,7 +271,7 @@ When IO is enabled, this package creates projected income paths for birth cohort
 
 CSV filenames follow the pattern `<EntityClass><RunNumber>.csv`. With a single run the suffix is `1`; with multiple runs each run produces its own numbered file.
 
-For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](wiki/overview/parameterisation.md) on the website.
+For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](../overview/parameterisation.md) on the website.
 
 ---
 
@@ -288,7 +288,7 @@ The pipeline has three independent parts: (1) initial populations, (2) regressio
 | **UKHLS** (Understanding Society) | Main household panel survey; waves 1 to O (UKDA-6614-stata) | Requires EUL licence from UK Data Service |
 | **BHPS** (British Household Panel Survey) | Historical predecessor to UKHLS; used for pre-2009 employment history | Bundled with UKHLS EUL |
 | **WAS** (Wealth and Assets Survey) | Biennial survey of household wealth; waves 1 to 7 (UKDA-7215-stata) | Requires EUL licence from UK Data Service |
-| **EUROMOD / UKMOD** | Tax-benefit microsimulation system | See [Tax-Benefit Donors (UK)](wiki/getting-started/data/tax-benefit-donors-uk.md) on the website |
+| **EUROMOD / UKMOD** | Tax-benefit microsimulation system | See [Tax-Benefit Donors (UK)](../getting-started/data/tax-benefit-donors-uk.md) on the website |
 
 ### Part 1 — Initial populations (`input/InitialPopulations/compile/`)
 
