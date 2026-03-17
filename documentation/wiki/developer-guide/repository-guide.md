@@ -2,8 +2,6 @@
 
 A guide to navigating the SimPaths repository structure and codebase.
 
----
-
 ## Repository Structure
 
 ```
