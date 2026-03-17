@@ -146,6 +146,35 @@
   box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(10,20,40,0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  height: 3rem;
+}
+
+/* ── Logo ── */
+.md-header__button.md-logo {
+  padding: 0.3rem 0.4rem;
+  margin-right: 0.1rem;
+}
+
+.md-header__button.md-logo img {
+  width: 26px;
+  height: 26px;
+  filter: drop-shadow(0 0 6px rgba(126,206,244,0.55)) drop-shadow(0 0 14px rgba(79,179,240,0.25));
+  transition: filter 0.3s ease;
+}
+
+.md-header__button.md-logo:hover img {
+  filter: drop-shadow(0 0 9px rgba(126,206,244,0.8)) drop-shadow(0 0 22px rgba(79,179,240,0.4));
+}
+
+/* ── Header title ── */
+.md-header__title {
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+
+.md-header__title .md-header__topic {
+  align-items: center;
 }
 
 /* ── Tab bar ── */
