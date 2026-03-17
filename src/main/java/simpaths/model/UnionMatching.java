@@ -17,6 +17,36 @@ import java.util.*;
  */
 public class UnionMatching {
 
+    public static final class MatchMetrics {
+        private final boolean admissible;
+        private final double ageMismatch;
+        private final double earningsMismatch;
+        private final double score;
+
+        public MatchMetrics(boolean admissible, double ageMismatch, double earningsMismatch, double score) {
+            this.admissible = admissible;
+            this.ageMismatch = ageMismatch;
+            this.earningsMismatch = earningsMismatch;
+            this.score = score;
+        }
+
+        public boolean isAdmissible() {
+            return admissible;
+        }
+
+        public double getAgeMismatch() {
+            return ageMismatch;
+        }
+
+        public double getEarningsMismatch() {
+            return earningsMismatch;
+        }
+
+        public double getScore() {
+            return score;
+        }
+    }
+
     Pair<Set<Person>, Set<Person>> unmatched;
     Set<Person> unmatchedMales;
     Set<Person> unmatchedFemales;
@@ -145,6 +175,8 @@ public class UnionMatching {
             female.setUnmatchedUnionMatchingThisYear(false);
             male.setCarryOverUnionMatching(false);
             female.setCarryOverUnionMatching(false);
+            male.resetUnionMatchingContinuousUnmatchedYears();
+            female.resetUnionMatchingContinuousUnmatchedYears();
 
             if (!male.getRegion().equals(female.getRegion()))
                 female.setRegion(male.getRegion());
@@ -185,5 +217,23 @@ public class UnionMatching {
             // Score currently based on an equally weighted measure.  The Iterative (Simple and Random) Matching algorithm prioritises matching to the potential partner that returns the lowest score from this method (therefore, on aggregate we are trying to minimize the value below).
             return earningsMatch * earningsMatch + ageMatch * ageMatch;
         } else return Double.POSITIVE_INFINITY;        //Not to be included in possible partners
+    }
+
+    public static MatchMetrics evaluateMatchMetrics(Person male, Person female) {
+        if (!male.getDemMaleFlag().equals(Gender.Male))
+            throw new RuntimeException("male in evaluateMatchMetrics() does not actually have the Male gender type");
+        if (!female.getDemMaleFlag().equals(Gender.Female))
+            throw new RuntimeException("female in evaluateMatchMetrics() does not actually have the Female gender type");
+
+        double ageDiff = male.getDemAge() - female.getDemAge();
+        double potentialHourlyEarningsDiff = male.getLabWageFullTimeHrly() - female.getLabWageFullTimeHrly();
+        double earningsMatch = potentialHourlyEarningsDiff - female.getYWageDesired();
+        double ageMatch = ageDiff - male.getDemAgeDiffDesired();
+        boolean admissible = (male.getIdMother() == null || male.getIdMother() != female.getId()) &&
+                (female.getIdFather() == null || female.getIdFather() != male.getId()) &&
+                Math.abs(ageMatch) < Parameters.AGE_DIFFERENCE_INITIAL_BOUND &&
+                Math.abs(earningsMatch) < Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND;
+        double score = admissible ? earningsMatch * earningsMatch + ageMatch * ageMatch : Double.POSITIVE_INFINITY;
+        return new MatchMetrics(admissible, Math.abs(ageMatch), Math.abs(earningsMatch), score);
     }
 }

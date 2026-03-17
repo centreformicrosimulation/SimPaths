@@ -863,6 +863,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 //				if (commentsOn) log.info("Health alignment complete.");
 //			}
             case UnionMatching -> {
+                recordUnionMatchingPoolDiagnostics();
 
                 if(UnionMatchingMethod.SBAM.equals(unionMatchingMethod)) {
                     unionMatchingSBAM();
@@ -1805,6 +1806,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                                         p2.setUnmatchedUnionMatchingThisYear(false);
                                         p1.setCarryOverUnionMatching(false);
                                         p2.setCarryOverUnionMatching(false);
+                                        p1.resetUnionMatchingContinuousUnmatchedYears();
+                                        p2.resetUnionMatchingContinuousUnmatchedYears();
                                         p1.setDemPartnerNYear(0); //Set years in partnership to 0
                                         p2.setDemPartnerNYear(0);
 
@@ -3599,6 +3602,77 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         }
     }
 
+    private void recordUnionMatchingPoolDiagnostics() {
+
+        Set<Person> allMales = new LinkedHashSet<>();
+        Set<Person> allFemales = new LinkedHashSet<>();
+        for (Region region : Parameters.getCountryRegions()) {
+            Set<Person> regionalMales = personsToMatch.get(Gender.Male).get(region);
+            Set<Person> regionalFemales = personsToMatch.get(Gender.Female).get(region);
+            recordUnionMatchingPoolDiagnosticsForScope(regionalMales, regionalFemales, true);
+            allMales.addAll(regionalMales);
+            allFemales.addAll(regionalFemales);
+        }
+        recordUnionMatchingPoolDiagnosticsForScope(allMales, allFemales, false);
+    }
+
+    private void recordUnionMatchingPoolDiagnosticsForScope(Set<Person> males, Set<Person> females, boolean sameRegion) {
+        for (Person male : males) {
+            male.setUnionMatchingScopeDiagnostics(sameRegion, 0, null, null, null);
+        }
+        for (Person female : females) {
+            female.setUnionMatchingScopeDiagnostics(sameRegion, 0, null, null, null);
+        }
+
+        for (Person male : males) {
+            int eligiblePartners = 0;
+            Double bestAgeMismatch = null;
+            Double bestEarningsMismatch = null;
+            Double bestScore = null;
+            for (Person female : females) {
+                UnionMatching.MatchMetrics metrics = UnionMatching.evaluateMatchMetrics(male, female);
+                if (!metrics.isAdmissible()) {
+                    continue;
+                }
+                eligiblePartners++;
+                if (bestAgeMismatch == null || metrics.getAgeMismatch() < bestAgeMismatch) {
+                    bestAgeMismatch = metrics.getAgeMismatch();
+                }
+                if (bestEarningsMismatch == null || metrics.getEarningsMismatch() < bestEarningsMismatch) {
+                    bestEarningsMismatch = metrics.getEarningsMismatch();
+                }
+                if (bestScore == null || metrics.getScore() < bestScore) {
+                    bestScore = metrics.getScore();
+                }
+            }
+            male.setUnionMatchingScopeDiagnostics(sameRegion, eligiblePartners, bestAgeMismatch, bestEarningsMismatch, bestScore);
+        }
+
+        for (Person female : females) {
+            int eligiblePartners = 0;
+            Double bestAgeMismatch = null;
+            Double bestEarningsMismatch = null;
+            Double bestScore = null;
+            for (Person male : males) {
+                UnionMatching.MatchMetrics metrics = UnionMatching.evaluateMatchMetrics(male, female);
+                if (!metrics.isAdmissible()) {
+                    continue;
+                }
+                eligiblePartners++;
+                if (bestAgeMismatch == null || metrics.getAgeMismatch() < bestAgeMismatch) {
+                    bestAgeMismatch = metrics.getAgeMismatch();
+                }
+                if (bestEarningsMismatch == null || metrics.getEarningsMismatch() < bestEarningsMismatch) {
+                    bestEarningsMismatch = metrics.getEarningsMismatch();
+                }
+                if (bestScore == null || metrics.getScore() < bestScore) {
+                    bestScore = metrics.getScore();
+                }
+            }
+            female.setUnionMatchingScopeDiagnostics(sameRegion, eligiblePartners, bestAgeMismatch, bestEarningsMismatch, bestScore);
+        }
+    }
+
     private void flagUnmatchedUnionMatchingPersons() {
 
         // Finalize yearly unmatched status after all union-matching passes have completed.
@@ -3607,6 +3681,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 for (Person person : personsToMatch.get(gender).get(region)) {
                     person.setUnmatchedUnionMatchingThisYear(true);
                     person.setCarryOverUnionMatching(true);
+                    person.incrementUnionMatchingContinuousUnmatchedYears();
                 }
             }
         }

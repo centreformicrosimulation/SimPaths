@@ -281,6 +281,12 @@ public class PersonTest {
             assertEquals(30, testPerson.getDemAge(), "Person's age should not have changed.");
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
             assertTrue(testPerson.isToBePartnered(), "Person should be set to be partnered.");
+            assertTrue(testPerson.getNewUnionMatchingEntrantThisYear(), "Lottery-selected person should be tagged as a new entrant.");
+            assertFalse(testPerson.getCarryOverUnionMatchingEntrantThisYear(), "Lottery-selected person should not be tagged as a carry-over entrant.");
+            assertEquals(0, testPerson.getUnionMatchingUnmatchedYearsAtEntryThisYear(), "New entrants should start with no prior unmatched streak.");
+            assertEquals("30-32", testPerson.getUnionMatchingAgeBandThisYear(), "Age band should be exported for union-matching analysis.");
+            assertEquals(0.0, testPerson.getUnionMatchingDesiredAgeDiffThisYear(), "Desired age differential should be exported.");
+            assertEquals(0.0, testPerson.getUnionMatchingDesiredEarningsDiffThisYear(), "Desired earnings differential should be exported.");
             assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "One person should be in persons to match.");
             assertEquals(testPerson, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).stream().findFirst().get(), "Person should be in persons to match.");
         }
@@ -306,6 +312,35 @@ public class PersonTest {
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
             assertFalse(testPerson.isToBePartnered(), "Person should not be set to be partnered.");
             assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Persons to match should be empty.");
+        }
+
+        @Test
+        @DisplayName("OUTCOME D+: Previously unmatched person re-enters matching without lottery")
+        public void previouslyUnmatchedPersonReentersWithoutLottery() {
+            testPerson.setDemAge(30);
+            testPerson.setDemMaleFlag(Gender.Female);
+            testPerson.setBenefitUnit(testBenefitUnit);
+            testPerson.setCarryOverUnionMatching(true);
+            testPerson.setUnionMatchingContinuousUnmatchedYears(2);
+
+            testBenefitUnit.setRegion(Region.UKD);
+
+            parametersMock.when(() -> Parameters.getRegPartnershipU1()).thenReturn(mockBinomialRegression);
+            Mockito.when(mockBinomialRegression.getProbability(Mockito.anyDouble())).thenReturn(NEGATE_PROBABILITY_TO_PARTNER);
+            Mockito.when(mockInnovations.getDoubleDraw(25)).thenReturn(INNOVATION_TO_PARTNER);
+
+            testPerson.cohabitation();
+
+            assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
+            assertTrue(testPerson.isToBePartnered(), "Previously unmatched person should be set to be partnered.");
+            assertTrue(testPerson.isCarryOverUnionMatching(), "Carry-over flag should remain until a real match happens.");
+            assertTrue(testPerson.getEnteredUnionMatchingThisYear(), "Carry-over re-entry should still be recorded as current-year pool entry.");
+            assertFalse(testPerson.getNewUnionMatchingEntrantThisYear(), "Carry-over person should not be tagged as a new entrant.");
+            assertTrue(testPerson.getCarryOverUnionMatchingEntrantThisYear(), "Carry-over person should be tagged distinctly.");
+            assertEquals(2, testPerson.getUnionMatchingUnmatchedYearsAtEntryThisYear(), "Prior unmatched streak should be exported at re-entry.");
+            assertEquals("30-32", testPerson.getUnionMatchingAgeBandThisYear(), "Age band should still be exported for carry-over entrants.");
+            assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Previously unmatched person should re-enter persons to match.");
+            assertEquals(testPerson, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).stream().findFirst().get(), "Person should be in persons to match.");
         }
 
         @Test

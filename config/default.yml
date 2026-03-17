@@ -5,8 +5,8 @@ maxNumberOfRuns: 1
 executeWithGui: false
 randomSeed: 606
 startYear: 2011
-endYear: 2022
-popSize: 50000
+endYear: 2020
+popSize: 80000
 # countryString: "United Kingdom"
 # integrationTest: false
 

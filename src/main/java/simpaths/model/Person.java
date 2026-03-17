@@ -125,6 +125,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     private Boolean enteredUnionMatchingThisYear;
     private Boolean matchedUnionMatchingThisYear;
     private Boolean unmatchedUnionMatchingThisYear;
+    private Boolean newUnionMatchingEntrantThisYear;
+    private Boolean carryOverUnionMatchingEntrantThisYear;
+    private Integer unionMatchingContinuousUnmatchedYears;
+    private Integer unionMatchingUnmatchedYearsAtEntryThisYear;
+    private String unionMatchingAgeBandThisYear;
+    private Double unionMatchingDesiredAgeDiffThisYear;
+    private Double unionMatchingDesiredEarningsDiffThisYear;
+    private Integer unionMatchingEligiblePartnersSameRegionThisYear;
+    private Integer unionMatchingEligiblePartnersAllRegionsThisYear;
+    private Double unionMatchingBestAgeMismatchSameRegionThisYear;
+    private Double unionMatchingBestAgeMismatchAllRegionsThisYear;
+    private Double unionMatchingBestEarningsMismatchSameRegionThisYear;
+    private Double unionMatchingBestEarningsMismatchAllRegionsThisYear;
+    private Double unionMatchingBestScoreSameRegionThisYear;
+    private Double unionMatchingBestScoreAllRegionsThisYear;
     @Column(name="wgt") private Double wgt;
     @Column(name="healthPsyDstrss0to12") private Double healthPsyDstrss0to12; //Psychological distress GHQ-12 0-12 caseness score
     @Transient private Double healthPsyDstrss0to12L1;
@@ -517,6 +532,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         double[] sampleDifferentials = setMarriageTargets();
         demAgeDiffDesired = Objects.requireNonNullElseGet(originalPerson.demAgeDiffDesired, () -> sampleDifferentials[0]);
         yWageDesired = Objects.requireNonNullElseGet(originalPerson.yWageDesired, () -> sampleDifferentials[1]);
+        unionMatchingContinuousUnmatchedYears = originalPerson.unionMatchingContinuousUnmatchedYears;
+        unionMatchingUnmatchedYearsAtEntryThisYear = originalPerson.unionMatchingUnmatchedYearsAtEntryThisYear;
+        newUnionMatchingEntrantThisYear = originalPerson.newUnionMatchingEntrantThisYear;
+        carryOverUnionMatchingEntrantThisYear = originalPerson.carryOverUnionMatchingEntrantThisYear;
+        unionMatchingAgeBandThisYear = originalPerson.unionMatchingAgeBandThisYear;
+        unionMatchingDesiredAgeDiffThisYear = originalPerson.unionMatchingDesiredAgeDiffThisYear;
+        unionMatchingDesiredEarningsDiffThisYear = originalPerson.unionMatchingDesiredEarningsDiffThisYear;
+        unionMatchingEligiblePartnersSameRegionThisYear = originalPerson.unionMatchingEligiblePartnersSameRegionThisYear;
+        unionMatchingEligiblePartnersAllRegionsThisYear = originalPerson.unionMatchingEligiblePartnersAllRegionsThisYear;
+        unionMatchingBestAgeMismatchSameRegionThisYear = originalPerson.unionMatchingBestAgeMismatchSameRegionThisYear;
+        unionMatchingBestAgeMismatchAllRegionsThisYear = originalPerson.unionMatchingBestAgeMismatchAllRegionsThisYear;
+        unionMatchingBestEarningsMismatchSameRegionThisYear = originalPerson.unionMatchingBestEarningsMismatchSameRegionThisYear;
+        unionMatchingBestEarningsMismatchAllRegionsThisYear = originalPerson.unionMatchingBestEarningsMismatchAllRegionsThisYear;
+        unionMatchingBestScoreSameRegionThisYear = originalPerson.unionMatchingBestScoreSameRegionThisYear;
+        unionMatchingBestScoreAllRegionsThisYear = originalPerson.unionMatchingBestScoreAllRegionsThisYear;
 
         statMScore = originalPerson.statMScore;
         statFScore = originalPerson.statFScore;
@@ -1567,10 +1597,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demBePartnerFlag = false;
         demLeavePartnerFlag = false;
         demAlignPartnerProcess = false;
-        // Reset yearly union-matching diagnostics before evaluating current-year partnership formation.
-        enteredUnionMatchingThisYear = false;
-        matchedUnionMatchingThisYear = false;
-        unmatchedUnionMatchingThisYear = false;
+        resetUnionMatchingDiagnosticsForYear();
         double cohabitInnov = statInnovations.getDoubleDraw(25);
         Person partner = getPartner();
         if (demAge >= Parameters.MIN_AGE_COHABITATION) {
@@ -1629,9 +1656,91 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     private void enterUnionMatchingQueue() {
+        boolean carryOverEntry = carryOverUnionMatching();
         demBePartnerFlag = true;
         enteredUnionMatchingThisYear = true;
+        newUnionMatchingEntrantThisYear = !carryOverEntry;
+        carryOverUnionMatchingEntrantThisYear = carryOverEntry;
+        unionMatchingUnmatchedYearsAtEntryThisYear = carryOverEntry ? getUnionMatchingContinuousUnmatchedYears() : 0;
         model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
+    }
+
+    private void resetUnionMatchingDiagnosticsForYear() {
+        enteredUnionMatchingThisYear = false;
+        matchedUnionMatchingThisYear = false;
+        unmatchedUnionMatchingThisYear = false;
+        newUnionMatchingEntrantThisYear = false;
+        carryOverUnionMatchingEntrantThisYear = false;
+        unionMatchingUnmatchedYearsAtEntryThisYear = 0;
+        unionMatchingAgeBandThisYear = getUnionMatchingAgeBandLabel();
+        unionMatchingDesiredAgeDiffThisYear = demAgeDiffDesired;
+        unionMatchingDesiredEarningsDiffThisYear = yWageDesired;
+        unionMatchingEligiblePartnersSameRegionThisYear = null;
+        unionMatchingEligiblePartnersAllRegionsThisYear = null;
+        unionMatchingBestAgeMismatchSameRegionThisYear = null;
+        unionMatchingBestAgeMismatchAllRegionsThisYear = null;
+        unionMatchingBestEarningsMismatchSameRegionThisYear = null;
+        unionMatchingBestEarningsMismatchAllRegionsThisYear = null;
+        unionMatchingBestScoreSameRegionThisYear = null;
+        unionMatchingBestScoreAllRegionsThisYear = null;
+    }
+
+    private String getUnionMatchingAgeBandLabel() {
+        if (demAge < Parameters.MIN_AGE_COHABITATION) {
+            return null;
+        } else if (demAge < 21) {
+            return "18-20";
+        } else if (demAge < 24) {
+            return "21-23";
+        } else if (demAge < 27) {
+            return "24-26";
+        } else if (demAge < 30) {
+            return "27-29";
+        } else if (demAge < 33) {
+            return "30-32";
+        } else if (demAge < 36) {
+            return "33-35";
+        } else if (demAge < 40) {
+            return "36-39";
+        } else if (demAge < 45) {
+            return "40-44";
+        } else if (demAge < 55) {
+            return "45-54";
+        } else if (demAge < 65) {
+            return "55-64";
+        }
+        return "65+";
+    }
+
+    public void resetUnionMatchingContinuousUnmatchedYears() {
+        unionMatchingContinuousUnmatchedYears = 0;
+    }
+
+    public void incrementUnionMatchingContinuousUnmatchedYears() {
+        unionMatchingContinuousUnmatchedYears = getUnionMatchingContinuousUnmatchedYears() + 1;
+    }
+
+    public int getUnionMatchingContinuousUnmatchedYears() {
+        return unionMatchingContinuousUnmatchedYears == null ? 0 : unionMatchingContinuousUnmatchedYears;
+    }
+
+    public void setUnionMatchingContinuousUnmatchedYears(Integer unionMatchingContinuousUnmatchedYears) {
+        this.unionMatchingContinuousUnmatchedYears = unionMatchingContinuousUnmatchedYears;
+    }
+
+    public void setUnionMatchingScopeDiagnostics(boolean sameRegion, int eligiblePartners, Double bestAgeMismatch,
+                                                 Double bestEarningsMismatch, Double bestScore) {
+        if (sameRegion) {
+            unionMatchingEligiblePartnersSameRegionThisYear = eligiblePartners;
+            unionMatchingBestAgeMismatchSameRegionThisYear = bestAgeMismatch;
+            unionMatchingBestEarningsMismatchSameRegionThisYear = bestEarningsMismatch;
+            unionMatchingBestScoreSameRegionThisYear = bestScore;
+        } else {
+            unionMatchingEligiblePartnersAllRegionsThisYear = eligiblePartners;
+            unionMatchingBestAgeMismatchAllRegionsThisYear = bestAgeMismatch;
+            unionMatchingBestEarningsMismatchAllRegionsThisYear = bestEarningsMismatch;
+            unionMatchingBestScoreAllRegionsThisYear = bestScore;
+        }
     }
 
     protected void partnershipDissolution() {
@@ -6388,6 +6497,74 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setUnmatchedUnionMatchingThisYear(Boolean unmatchedUnionMatchingThisYear) {
         this.unmatchedUnionMatchingThisYear = unmatchedUnionMatchingThisYear;
+    }
+
+    public Boolean getNewUnionMatchingEntrantThisYear() {
+        return newUnionMatchingEntrantThisYear;
+    }
+
+    public void setNewUnionMatchingEntrantThisYear(Boolean newUnionMatchingEntrantThisYear) {
+        this.newUnionMatchingEntrantThisYear = newUnionMatchingEntrantThisYear;
+    }
+
+    public Boolean getCarryOverUnionMatchingEntrantThisYear() {
+        return carryOverUnionMatchingEntrantThisYear;
+    }
+
+    public void setCarryOverUnionMatchingEntrantThisYear(Boolean carryOverUnionMatchingEntrantThisYear) {
+        this.carryOverUnionMatchingEntrantThisYear = carryOverUnionMatchingEntrantThisYear;
+    }
+
+    public Integer getUnionMatchingUnmatchedYearsAtEntryThisYear() {
+        return unionMatchingUnmatchedYearsAtEntryThisYear;
+    }
+
+    public void setUnionMatchingUnmatchedYearsAtEntryThisYear(Integer unionMatchingUnmatchedYearsAtEntryThisYear) {
+        this.unionMatchingUnmatchedYearsAtEntryThisYear = unionMatchingUnmatchedYearsAtEntryThisYear;
+    }
+
+    public String getUnionMatchingAgeBandThisYear() {
+        return unionMatchingAgeBandThisYear;
+    }
+
+    public Double getUnionMatchingDesiredAgeDiffThisYear() {
+        return unionMatchingDesiredAgeDiffThisYear;
+    }
+
+    public Double getUnionMatchingDesiredEarningsDiffThisYear() {
+        return unionMatchingDesiredEarningsDiffThisYear;
+    }
+
+    public Integer getUnionMatchingEligiblePartnersSameRegionThisYear() {
+        return unionMatchingEligiblePartnersSameRegionThisYear;
+    }
+
+    public Integer getUnionMatchingEligiblePartnersAllRegionsThisYear() {
+        return unionMatchingEligiblePartnersAllRegionsThisYear;
+    }
+
+    public Double getUnionMatchingBestAgeMismatchSameRegionThisYear() {
+        return unionMatchingBestAgeMismatchSameRegionThisYear;
+    }
+
+    public Double getUnionMatchingBestAgeMismatchAllRegionsThisYear() {
+        return unionMatchingBestAgeMismatchAllRegionsThisYear;
+    }
+
+    public Double getUnionMatchingBestEarningsMismatchSameRegionThisYear() {
+        return unionMatchingBestEarningsMismatchSameRegionThisYear;
+    }
+
+    public Double getUnionMatchingBestEarningsMismatchAllRegionsThisYear() {
+        return unionMatchingBestEarningsMismatchAllRegionsThisYear;
+    }
+
+    public Double getUnionMatchingBestScoreSameRegionThisYear() {
+        return unionMatchingBestScoreSameRegionThisYear;
+    }
+
+    public Double getUnionMatchingBestScoreAllRegionsThisYear() {
+        return unionMatchingBestScoreAllRegionsThisYear;
     }
 
     public Boolean getCarryOverUnionMatching() {
