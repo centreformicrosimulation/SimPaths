@@ -500,4 +500,6 @@ Or via IDE test runner.
 
 ## Additional Resources
 
+- **Full Documentation**: See `documentation/wiki/` for comprehensive guides
+- **Variables**: `documentation/SimPaths_Variable_Codebook.xlsx/`
 - **Issues**: [GitHub Issues](https://github.com/centreformicrosimulation/SimPaths/issues)
