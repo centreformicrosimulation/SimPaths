@@ -8,7 +8,33 @@ SimPaths is an open-source framework for modelling individual and household life
 
 SimPaths models currently exist for the UK, Greece, Hungary, Italy, and Poland. This page refers to the UK model; the other European models are available at the corresponding [SimPathsEU](https://github.com/centreformicrosimulation/SimPathsEU) page. 
 
-The entire SimPaths documentation is available on its [WikiPage](https://github.com/centreformicrosimulation/SimPaths/wiki), which includes: a detailed description of its building blocks; instructions on how to set up and run the model; information about contributing to the model's development.
+The entire SimPaths documentation is available on its [website](https://centreformicrosimulation.github.io/SimPaths/), which includes: a detailed description of its building blocks; instructions on how to set up and run the model; information about contributing to the model's development.
+
+## Quick start
+
+### Prerequisites
+
+- Java 19
+- Maven 3.8+
+- Optional IDE: IntelliJ IDEA (import as a Maven project)
+
+### Build and run
+
+```bash
+mvn clean package
+java -jar multirun.jar -DBSetup
+java -jar multirun.jar
+```
+
+The first command builds the JARs. The second creates the H2 donor database from the input data. The third runs the simulation using `default.yml`.
+
+To use a different config file:
+
+```bash
+java -jar multirun.jar -config my_run.yml
+```
+
+For configuration options, see the annotated `config/default.yml`. For the data pipeline and further reference, see [`documentation/`](documentation/README.md).
 
 <!-- Projections for a workhorse model parameterised to the UK context are reported in [Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis* (No. CEMPA6/23), Centre for Microsimulation and Policy Analysis at the Institute for Social and Economic Research*](https://www.microsimulation.ac.uk/publications/publication-557738/), which closely reflect observed data throughout a 10-year validation window. -->
 
