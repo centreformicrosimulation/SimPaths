@@ -69,52 +69,6 @@ SimPaths/
 └── multirun.jar                         # Multi-run executable
 ```
 
-CSV filenames follow the pattern `<EntityClass><RunNumber>.csv`. With a single run the suffix is `1`; with multiple runs each run produces its own numbered file.
-
-## Source code — `src/main/java/simpaths/`
-
-### `model/`
-
-Core simulation logic. The three agent classes — `Person`, `BenefitUnit`, `Household` — are described in the [Model Concepts](../../../../documentation/model-concepts.md) page. Other key classes:
-
-| Class | Purpose |
-| --- | --- |
-| `SimPathsModel` | Model manager. Initialises the population, registers all 44 yearly processes with the JAS-mine scheduler, manages alignment and aggregate state. |
-| `TaxEvaluation` | Orchestrates EUROMOD donor matching to impute taxes and benefits onto simulated benefit units. |
-| `UnionMatching` | Partnership formation algorithm. Matches unpartnered individuals into couples based on characteristics and preferences. |
-| `LabourMarket` | Labour market clearing: matches labour supply decisions to employment outcomes. |
-| `Innovations` | Applies parameter shocks (innovation perturbations) across sequential runs for sensitivity analysis. |
-| `Validator` | Runtime consistency checks on the simulated population. |
-| `*Alignment` classes | `FertilityAlignment`, `ActivityAlignmentV2`, `InSchoolAlignment`, `PartnershipAlignment`, `SocialCareAlignment` — each aligns a specific outcome to external calibration targets. |
-
-Sub-packages:
-
-- **`model/enums/`** — 46 enumeration classes defining categorical variables: `Gender`, `Education`, `Labour`, `HealthStatus`, `Region`, `Ethnicity`, `Occupancy`, and others. Referenced by the ORM for database persistence and by regression models for covariate encoding.
-- **`model/decisions/`** — Intertemporal optimisation (IO) computational engine. Pre-computes decision grids by backward induction so agents can look up optimal consumption–labour choices during the simulation.
-- **`model/taxes/`** — EUROMOD donor-matching subsystem. Imputes taxes and benefits onto simulated benefit units by matching them to pre-computed EUROMOD donor records.
-- **`model/lifetime_incomes/`** — Synthetic lifetime income trajectory generator. Creates projected income paths for birth cohorts using an AR(2) process, used when IO is enabled.
-
-For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](../documentation/wiki/overview/parameterisation.md) on the website.
-
-## Setup-generated artifacts
-
-Running setup (`multirun -DBSetup`) creates or refreshes three files in `input/`:
-
-- `input.mv.db` — H2 database of EUROMOD donor tax-benefit outcomes
-- `EUROMODpolicySchedule.xlsx` — maps simulation years to EUROMOD policy systems
-- `DatabaseCountryYear.xlsx` — year-specific macro parameters
-
-These must exist before any simulation run. If they are missing, re-run setup.
-
-## Training mode
-
-The repository includes de-identified training data under `input/InitialPopulations/training/` and `input/EUROMODoutput/training/`. If no initial-population CSV files are found in the main input location, SimPaths automatically switches to training mode. Training mode supports development and CI but is not intended for research interpretation.
-
-## Logging
-
-With `-f` on `multirun.jar`, logs are written to `output/logs/run_<seed>.txt` (stdout) and `output/logs/run_<seed>.log` (log4j).
-
----
 
 ## Sub-package detail
 
@@ -161,3 +115,28 @@ When IO is enabled, this package creates projected income paths for birth cohort
 | `AnnualIncome` | Implements the AR(2) income process with age-gender anchoring. |
 | `BirthCohort` | Groups individuals by birth year for cohort-level income projection. |
 | `Individual` | Entity carrying age dummies and log GDP per capita for income regression. |
+
+CSV filenames follow the pattern `<EntityClass><RunNumber>.csv`. With a single run the suffix is `1`; with multiple runs each run produces its own numbered file.
+
+For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](../documentation/wiki/overview/parameterisation.md) on the website.
+
+## Setup-generated artifacts
+
+Running setup (`multirun -DBSetup`) creates or refreshes three files in `input/`:
+
+- `input.mv.db` — H2 database of EUROMOD donor tax-benefit outcomes
+- `EUROMODpolicySchedule.xlsx` — maps simulation years to EUROMOD policy systems
+- `DatabaseCountryYear.xlsx` — year-specific macro parameters
+
+These must exist before any simulation run. If they are missing, re-run setup.
+
+## Training mode
+
+The repository includes de-identified training data under `input/InitialPopulations/training/` and `input/EUROMODoutput/training/`. If no initial-population CSV files are found in the main input location, SimPaths automatically switches to training mode. Training mode supports development and CI but is not intended for research interpretation.
+
+## Logging
+
+With `-f` on `multirun.jar`, logs are written to `output/logs/run_<seed>.txt` (stdout) and `output/logs/run_<seed>.log` (log4j).
+
+---
+
