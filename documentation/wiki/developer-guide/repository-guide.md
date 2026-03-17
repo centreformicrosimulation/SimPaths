@@ -1,6 +1,24 @@
+---
+hide:
+  - toc
+---
+
 # SimPaths Repository Guide
 
 A guide to navigating the SimPaths repository structure and codebase.
+
+---
+
+## Table of Contents
+
+1. [Repository Structure](#repository-structure)
+2. [Core Components](#core-components)
+3. [Key Directories Explained](#key-directories-explained)
+4. [Sub-package Detail](#sub-package-detail)
+5. [Data Pipeline Reference](#data-pipeline-reference)
+6. [Development Workflow](#development-workflow)
+7. [Code Navigation Tips](#code-navigation-tips)
+8. [Additional Resources](#additional-resources)
 
 ---
 
