@@ -30,7 +30,7 @@ To use a different config file:
 java -jar multirun.jar -config my_run.yml
 ```
 
-For configuration options, see the annotated `config/default.yml`. For the data pipeline and further reference, see [`documentation/`](documentation/README.md).
+For configuration options, see the annotated `config/default.yml`. For the data pipeline and further reference, see [`documentation/`](../../developer-guide/repository-guide.md).
 
 <!-- Projections for a workhorse model parameterised to the UK context are reported in [Bronka, P. et al. (2023). *SimPaths: an open-source microsimulation model for life course analysis* (No. CEMPA6/23), Centre for Microsimulation and Policy Analysis at the Institute for Social and Economic Research*](https://www.microsimulation.ac.uk/publications/publication-557738/), which closely reflect observed data throughout a 10-year validation window. -->
 
