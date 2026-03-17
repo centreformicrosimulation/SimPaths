@@ -418,6 +418,18 @@
 }
 
 /* ═══════════════════════════════════════════════
+   HOMEPAGE WIDTH CONSTRAINT
+   (nav + toc hidden on index → content goes full-width; cap it)
+═══════════════════════════════════════════════ */
+
+.md-content[data-md-component="content"] .md-typeset .hero,
+.md-content[data-md-component="content"] .md-typeset .card-grid,
+.md-content[data-md-component="content"] .md-typeset .countries,
+.md-content[data-md-component="content"] .md-typeset .section-heading {
+  max-width: 61rem;
+}
+
+/* ═══════════════════════════════════════════════
    HERO SECTION (homepage)
 ═══════════════════════════════════════════════ */
 
