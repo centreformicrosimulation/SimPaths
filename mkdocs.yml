@@ -119,6 +119,7 @@ nav:
   - Developer Guide:
       - developer-guide/index.md
       - Working in GitHub: developer-guide/working-in-github.md
+      - Repository Guide: developer-guide/repository-guide.md
       - JAS-mine Architecture:
           - developer-guide/jasmine/index.md
           - Project Structure: developer-guide/jasmine/project-structure.md
@@ -129,7 +130,6 @@ nav:
       - SimPaths Internals:
           - developer-guide/internals/index.md
           - SimPaths API: developer-guide/internals/api.md
-          - File Organisation: developer-guide/internals/file-organisation.md
           - The SimPathsModel Class: developer-guide/internals/simpaths-model.md
           - Start Class Implementation: developer-guide/internals/start-class-implementation.md
           - MultiRun Implementation: developer-guide/internals/multirun-implementation.md
