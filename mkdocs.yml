@@ -6,6 +6,8 @@ site_url: https://centreformicrosimulation.github.io/SimPaths/
 repo_url: https://github.com/centreformicrosimulation/SimPaths
 repo_name: centreformicrosimulation/SimPaths
 
+docs_dir: documentation/wiki
+
 copyright: >-
   Copyright &copy; Matteo Richiardi, Patryk Bronka, Justin van de Ven —
   Centre for Microsimulation and Policy Analysis

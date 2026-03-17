@@ -246,5 +246,3 @@ input/EUROMODoutput/baseline/*
 
 # IntelliJ
 .idea/
-.DS_Store
-**/.DS_Store
