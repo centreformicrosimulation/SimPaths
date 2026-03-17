@@ -118,7 +118,7 @@ When IO is enabled, this package creates projected income paths for birth cohort
 
 CSV filenames follow the pattern `<EntityClass><RunNumber>.csv`. With a single run the suffix is `1`; with multiple runs each run produces its own numbered file.
 
-For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](../../overview/parameterisation.md) on the website.
+For a description of the variables in output CSV files, see `documentation/SimPaths_Variable_Codebook.xlsx`. For a description of each `reg_*`, `align_*`, and `scenario_*` input file, see [Model Parameterisation](../documentation/wiki/overview/parameterisation.md) on the website.
 
 ## Setup-generated artifacts
 
