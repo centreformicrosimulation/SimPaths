@@ -81,21 +81,21 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
 <span class="card-link">Developer Guide →</span>
 </a>
 
-<a href="jasmine-reference/" class="feature-card">
+<a href="validation/" class="feature-card">
 <div class="card-icon-wrap card-icon--ref">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="17" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
 </div>
-<h3>JAS-mine Reference</h3>
-<p>Statistical packages, alignment and matching libraries, regression tools, and database utilities.</p>
-<span class="card-link">Reference →</span>
+<h3>Model Validation</h3>
+<p>Validation procedures, alignment diagnostics, and comparison against external targets.</p>
+<span class="card-link">Validation →</span>
 </a>
 
 <a href="research/" class="feature-card">
 <div class="card-icon-wrap card-icon--research">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
 </div>
-<h3>Research & Validation</h3>
-<p>Published papers, working papers, and model validation results.</p>
+<h3>Research</h3>
+<p>Published papers, working papers, and ongoing research using SimPaths.</p>
 <span class="card-link">Research →</span>
 </a>
 

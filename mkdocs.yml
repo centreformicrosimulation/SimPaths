@@ -32,6 +32,8 @@ theme:
   icon:
     repo: fontawesome/brands/github
   features:
+    - navigation.instant
+    - navigation.instant.prefetch
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
@@ -112,7 +114,6 @@ nav:
       - Single Runs: user-guide/single-runs.md
       - Multiple Runs: user-guide/multiple-runs.md
       - Graphical User Interface: user-guide/gui.md
-      - Modifying Parameters: user-guide/modifying-parameters.md
       - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
       - Uncertainty Analysis: user-guide/uncertainty-analysis.md
 
