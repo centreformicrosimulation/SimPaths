@@ -3,7 +3,7 @@ name: Deploy Documentation
 on:
   push:
     branches:
-      - main
+      - documentation
     paths:
       - 'documentation/wiki/**'
       - 'mkdocs.yml'
