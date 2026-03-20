@@ -51,7 +51,7 @@ public class PartnershipAlignment implements IEvaluation {
     public double evaluate(double[] args) {
 
         model.clearPersonsToMatch();
-        persons.parallelStream()
+        persons.stream()
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .forEach(person -> person.cohabitation(args[0]));
 
