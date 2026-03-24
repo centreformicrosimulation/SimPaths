@@ -6,7 +6,7 @@ site_url: https://centreformicrosimulation.github.io/SimPaths/
 repo_url: https://github.com/centreformicrosimulation/SimPaths
 repo_name: centreformicrosimulation/SimPaths
 
-docs_dir: documentation/wiki
+docs_dir: documentation
 
 copyright: >-
   Copyright &copy; Matteo Richiardi, Patryk Bronka, Justin van de Ven —
@@ -28,7 +28,7 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
   font: false
-  logo: assets/images/logo.svg
+  logo: wiki/assets/images/logo.svg
   icon:
     repo: fontawesome/brands/github
   features:
@@ -49,7 +49,7 @@ theme:
     - content.code.annotate
 
 extra_css:
-  - assets/css/extra.css
+  - wiki/assets/css/extra.css
 
 plugins:
   - search:
@@ -89,70 +89,70 @@ extra:
       name: Centre for Microsimulation and Policy Analysis
 
 nav:
-  - Home: index.md
+  - Home: wiki/index.md
 
   - Overview:
-      - overview/index.md
-      - Model Description: overview/model-description.md
-      - Simulated Modules: overview/simulated-modules.md
-      - Model Parameterisation: overview/parameterisation.md
-      - Country Variants: overview/country-variants.md
-      - How to Cite: overview/how-to-cite.md
+      - wiki/overview/index.md
+      - Model Description: wiki/overview/model-description.md
+      - Simulated Modules: wiki/overview/simulated-modules.md
+      - Model Parameterisation: wiki/overview/parameterisation.md
+      - Country Variants: wiki/overview/country-variants.md
+      - How to Cite: wiki/overview/how-to-cite.md
 
   - Getting Started:
-      - getting-started/index.md
-      - Environment Setup: getting-started/environment-setup.md
+      - wiki/getting-started/index.md
+      - Environment Setup: wiki/getting-started/environment-setup.md
       - Input Data:
-          - getting-started/data/index.md
-          - Initial Population (UK): getting-started/data/initial-population-uk.md
-          - Tax-Benefit Donors (UK): getting-started/data/tax-benefit-donors-uk.md
-      - Running Your First Simulation: getting-started/first-simulation.md
-      - Video Tutorials: getting-started/video-tutorials.md
+          - wiki/getting-started/data/index.md
+          - Initial Population (UK): wiki/getting-started/data/initial-population-uk.md
+          - Tax-Benefit Donors (UK): wiki/getting-started/data/tax-benefit-donors-uk.md
+      - Running Your First Simulation: wiki/getting-started/first-simulation.md
+      - Video Tutorials: wiki/getting-started/video-tutorials.md
 
   - User Guide:
-      - user-guide/index.md
-      - Single Runs: user-guide/single-runs.md
-      - Multiple Runs: user-guide/multiple-runs.md
-      - Graphical User Interface: user-guide/gui.md
-      - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
-      - Uncertainty Analysis: user-guide/uncertainty-analysis.md
+      - wiki/user-guide/index.md
+      - Single Runs: wiki/user-guide/single-runs.md
+      - Multiple Runs: wiki/user-guide/multiple-runs.md
+      - Graphical User Interface: wiki/user-guide/gui.md
+      - Modifying Tax-Benefit Settings: wiki/user-guide/tax-benefit-parameters.md
+      - Uncertainty Analysis: wiki/user-guide/uncertainty-analysis.md
 
   - Developer Guide:
-      - developer-guide/index.md
-      - Working in GitHub: developer-guide/working-in-github.md
-      - Repository Guide: developer-guide/repository-guide.md
+      - wiki/developer-guide/index.md
+      - Working in GitHub: wiki/developer-guide/working-in-github.md
+      - Repository Guide: wiki/developer-guide/repository-guide.md
       - JAS-mine Architecture:
-          - developer-guide/jasmine/index.md
-          - Project Structure: developer-guide/jasmine/project-structure.md
-          - The Model and the Schedule: developer-guide/jasmine/model-and-schedule.md
-          - The Start Class: developer-guide/jasmine/start-class.md
-          - The MultiRun Class: developer-guide/jasmine/multirun-class.md
-          - Updating JAS-mine: developer-guide/jasmine/updating-jasmine.md
+          - wiki/developer-guide/jasmine/index.md
+          - Project Structure: wiki/developer-guide/jasmine/project-structure.md
+          - The Model and the Schedule: wiki/developer-guide/jasmine/model-and-schedule.md
+          - The Start Class: wiki/developer-guide/jasmine/start-class.md
+          - The MultiRun Class: wiki/developer-guide/jasmine/multirun-class.md
+          - Updating JAS-mine: wiki/developer-guide/jasmine/updating-jasmine.md
       - SimPaths Internals:
-          - developer-guide/internals/index.md
-          - SimPaths API: developer-guide/internals/api.md
-          - The SimPathsModel Class: developer-guide/internals/simpaths-model.md
-          - Start Class Implementation: developer-guide/internals/start-class-implementation.md
-          - MultiRun Implementation: developer-guide/internals/multirun-implementation.md
+          - wiki/developer-guide/internals/index.md
+          - SimPaths API: wiki/developer-guide/internals/api.md
+          - The SimPathsModel Class: wiki/developer-guide/internals/simpaths-model.md
+          - Start Class Implementation: wiki/developer-guide/internals/start-class-implementation.md
+          - MultiRun Implementation: wiki/developer-guide/internals/multirun-implementation.md
       - How-To Guides:
-          - developer-guide/how-to/index.md
-          - Introduce a New Variable: developer-guide/how-to/new-variable.md
-          - Add Parameters to the GUI: developer-guide/how-to/add-gui-parameters.md
-          - Perform MultiRun Simulations: developer-guide/how-to/multirun-simulations.md
+          - wiki/developer-guide/how-to/index.md
+          - Introduce a New Variable: wiki/developer-guide/how-to/new-variable.md
+          - Add Parameters to the GUI: wiki/developer-guide/how-to/add-gui-parameters.md
+          - Perform MultiRun Simulations: wiki/developer-guide/how-to/multirun-simulations.md
       - JAS-mine Reference:
-          - jasmine-reference/index.md
-          - Statistical Package: jasmine-reference/statistical-package.md
-          - Collection Filters: jasmine-reference/collection-filters.md
-          - Alignment Library: jasmine-reference/alignment-library.md
-          - Matching Library: jasmine-reference/matching-library.md
-          - Regression Library: jasmine-reference/regression-library.md
-          - Saving Outputs: jasmine-reference/saving-outputs.md
-          - Querying the Database: jasmine-reference/querying-database.md
-          - Links and Resources: jasmine-reference/links.md
-          - Enums: jasmine-reference/enums.md
+          - wiki/jasmine-reference/index.md
+          - Statistical Package: wiki/jasmine-reference/statistical-package.md
+          - Collection Filters: wiki/jasmine-reference/collection-filters.md
+          - Alignment Library: wiki/jasmine-reference/alignment-library.md
+          - Matching Library: wiki/jasmine-reference/matching-library.md
+          - Regression Library: wiki/jasmine-reference/regression-library.md
+          - Saving Outputs: wiki/jasmine-reference/saving-outputs.md
+          - Querying the Database: wiki/jasmine-reference/querying-database.md
+          - Links and Resources: wiki/jasmine-reference/links.md
+          - Enums: wiki/jasmine-reference/enums.md
 
   - Model Validation:
-      - validation/index.md
+      - wiki/validation/index.md
 
   - Research:
-      - research/index.md
+      - wiki/research/index.md
