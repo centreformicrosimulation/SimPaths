@@ -532,21 +532,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         double[] sampleDifferentials = setMarriageTargets();
         demAgeDiffDesired = Objects.requireNonNullElseGet(originalPerson.demAgeDiffDesired, () -> sampleDifferentials[0]);
         yWageDesired = Objects.requireNonNullElseGet(originalPerson.yWageDesired, () -> sampleDifferentials[1]);
+        carryOverUnionMatching = originalPerson.carryOverUnionMatching;
         unionMatchingContinuousUnmatchedYears = originalPerson.unionMatchingContinuousUnmatchedYears;
-        unionMatchingUnmatchedYearsAtEntryThisYear = originalPerson.unionMatchingUnmatchedYearsAtEntryThisYear;
-        newUnionMatchingEntrantThisYear = originalPerson.newUnionMatchingEntrantThisYear;
-        carryOverUnionMatchingEntrantThisYear = originalPerson.carryOverUnionMatchingEntrantThisYear;
-        unionMatchingAgeBandThisYear = originalPerson.unionMatchingAgeBandThisYear;
-        unionMatchingDesiredAgeDiffThisYear = originalPerson.unionMatchingDesiredAgeDiffThisYear;
-        unionMatchingDesiredEarningsDiffThisYear = originalPerson.unionMatchingDesiredEarningsDiffThisYear;
-        unionMatchingEligiblePartnersSameRegionThisYear = originalPerson.unionMatchingEligiblePartnersSameRegionThisYear;
-        unionMatchingEligiblePartnersAllRegionsThisYear = originalPerson.unionMatchingEligiblePartnersAllRegionsThisYear;
-        unionMatchingBestAgeMismatchSameRegionThisYear = originalPerson.unionMatchingBestAgeMismatchSameRegionThisYear;
-        unionMatchingBestAgeMismatchAllRegionsThisYear = originalPerson.unionMatchingBestAgeMismatchAllRegionsThisYear;
-        unionMatchingBestEarningsMismatchSameRegionThisYear = originalPerson.unionMatchingBestEarningsMismatchSameRegionThisYear;
-        unionMatchingBestEarningsMismatchAllRegionsThisYear = originalPerson.unionMatchingBestEarningsMismatchAllRegionsThisYear;
-        unionMatchingBestScoreSameRegionThisYear = originalPerson.unionMatchingBestScoreSameRegionThisYear;
-        unionMatchingBestScoreAllRegionsThisYear = originalPerson.unionMatchingBestScoreAllRegionsThisYear;
+        resetUnionMatchingDiagnosticsForClone();
 
         statMScore = originalPerson.statMScore;
         statFScore = originalPerson.statFScore;
@@ -610,6 +598,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (labWageFullTimeHrlyL1 < Parameters.MIN_HOURLY_WAGE_RATE)
                 labWageFullTimeHrlyL1 = labWageFullTimeHrly;
         }
+    }
+
+    private void resetUnionMatchingDiagnosticsForClone() {
+        enteredUnionMatchingThisYear = false;
+        matchedUnionMatchingThisYear = false;
+        unmatchedUnionMatchingThisYear = false;
+        newUnionMatchingEntrantThisYear = false;
+        carryOverUnionMatchingEntrantThisYear = false;
+        unionMatchingUnmatchedYearsAtEntryThisYear = 0;
+        unionMatchingAgeBandThisYear = null;
+        unionMatchingDesiredAgeDiffThisYear = null;
+        unionMatchingDesiredEarningsDiffThisYear = null;
+        unionMatchingEligiblePartnersSameRegionThisYear = null;
+        unionMatchingEligiblePartnersAllRegionsThisYear = null;
+        unionMatchingBestAgeMismatchSameRegionThisYear = null;
+        unionMatchingBestAgeMismatchAllRegionsThisYear = null;
+        unionMatchingBestEarningsMismatchSameRegionThisYear = null;
+        unionMatchingBestEarningsMismatchAllRegionsThisYear = null;
+        unionMatchingBestScoreSameRegionThisYear = null;
+        unionMatchingBestScoreAllRegionsThisYear = null;
     }
 
     private double[] setMarriageTargets() {
@@ -1598,6 +1606,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demLeavePartnerFlag = false;
         demAlignPartnerProcess = false;
         resetUnionMatchingDiagnosticsForYear();
+        carryOverUnionMatching = false;
         double cohabitInnov = statInnovations.getDoubleDraw(25);
         Person partner = getPartner();
         if (demAge >= Parameters.MIN_AGE_COHABITATION) {
@@ -1608,15 +1617,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 double prob;
                 if (partner == null) {
                     // partnership formation
-                    if (carryOverUnionMatching()) {
+                    double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
+                    demBePartnerFlag = (cohabitInnov < prob);
+                    if (demBePartnerFlag) {
                         enterUnionMatchingQueue();
-                    } else {
-                        double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
-                        prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
-                        demBePartnerFlag = (cohabitInnov < prob);
-                        if (demBePartnerFlag) {
-                            enterUnionMatchingQueue();
-                        }
                     }
                 } else if (demMaleFlag == Gender.Female) {
                     // partnership dissolution
@@ -1630,10 +1635,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             } else if (model.getCountry() == Country.IT) {
 
                 if (partner == null) {
-                    if (carryOverUnionMatching()) {
-                        enterUnionMatchingQueue();
-                    } else if ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student)) {
-
+                    if ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student)) {
                         double prob = Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class);
                         demBePartnerFlag = (cohabitInnov < prob);
                         if (demBePartnerFlag) {
@@ -1656,12 +1658,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     private void enterUnionMatchingQueue() {
-        boolean carryOverEntry = carryOverUnionMatching();
         demBePartnerFlag = true;
         enteredUnionMatchingThisYear = true;
-        newUnionMatchingEntrantThisYear = !carryOverEntry;
-        carryOverUnionMatchingEntrantThisYear = carryOverEntry;
-        unionMatchingUnmatchedYearsAtEntryThisYear = carryOverEntry ? getUnionMatchingContinuousUnmatchedYears() : 0;
+        newUnionMatchingEntrantThisYear = true;
+        carryOverUnionMatchingEntrantThisYear = false;
+        unionMatchingUnmatchedYearsAtEntryThisYear = 0;
         model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
     }
 

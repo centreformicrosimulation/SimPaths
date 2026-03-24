@@ -315,8 +315,8 @@ public class PersonTest {
         }
 
         @Test
-        @DisplayName("OUTCOME D+: Previously unmatched person re-enters matching without lottery")
-        public void previouslyUnmatchedPersonReentersWithoutLottery() {
+        @DisplayName("OUTCOME D+: Previously unmatched person does not re-enter automatically")
+        public void previouslyUnmatchedPersonDoesNotReenterAutomatically() {
             testPerson.setDemAge(30);
             testPerson.setDemMaleFlag(Gender.Female);
             testPerson.setBenefitUnit(testBenefitUnit);
@@ -332,15 +332,14 @@ public class PersonTest {
             testPerson.cohabitation();
 
             assertFalse(testPerson.isPartnered(), "Person should not yet be partnered.");
-            assertTrue(testPerson.isToBePartnered(), "Previously unmatched person should be set to be partnered.");
-            assertTrue(testPerson.isCarryOverUnionMatching(), "Carry-over flag should remain until a real match happens.");
-            assertTrue(testPerson.getEnteredUnionMatchingThisYear(), "Carry-over re-entry should still be recorded as current-year pool entry.");
-            assertFalse(testPerson.getNewUnionMatchingEntrantThisYear(), "Carry-over person should not be tagged as a new entrant.");
-            assertTrue(testPerson.getCarryOverUnionMatchingEntrantThisYear(), "Carry-over person should be tagged distinctly.");
-            assertEquals(2, testPerson.getUnionMatchingUnmatchedYearsAtEntryThisYear(), "Prior unmatched streak should be exported at re-entry.");
-            assertEquals("30-32", testPerson.getUnionMatchingAgeBandThisYear(), "Age band should still be exported for carry-over entrants.");
-            assertEquals(1, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Previously unmatched person should re-enter persons to match.");
-            assertEquals(testPerson, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).stream().findFirst().get(), "Person should be in persons to match.");
+            assertFalse(testPerson.isToBePartnered(), "Previously unmatched person should not be re-entered without a fresh lottery draw.");
+            assertFalse(testPerson.isCarryOverUnionMatching(), "Carry-over state should be cleared in the no-carry-over experiment.");
+            assertFalse(testPerson.getEnteredUnionMatchingThisYear(), "No automatic re-entry should be recorded this year.");
+            assertFalse(testPerson.getNewUnionMatchingEntrantThisYear(), "Automatic new-entry tagging should not occur.");
+            assertFalse(testPerson.getCarryOverUnionMatchingEntrantThisYear(), "Carry-over entrant tagging should not occur without re-entry.");
+            assertEquals(0, testPerson.getUnionMatchingUnmatchedYearsAtEntryThisYear(), "No re-entry means no yearly unmatched-at-entry diagnostic.");
+            assertEquals("30-32", testPerson.getUnionMatchingAgeBandThisYear(), "Age band diagnostics should still be initialised for the year.");
+            assertEquals(0, mockModel.getPersonsToMatch().get(Gender.Female).get(Region.UKD).size(), "Previously unmatched person should not re-enter persons to match automatically.");
         }
 
         @Test
@@ -775,6 +774,71 @@ public class PersonTest {
                 assertFalse(testPerson.isLeftEducation());
                 Mockito.verify(mockInnovations, Mockito.never()).getDoubleDraw(30);
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("Clone Constructor")
+    class CloneConstructorTests {
+
+        @BeforeEach
+        void setUp() {
+            parametersMock = Mockito.mockStatic(Parameters.class);
+            mockStaticDependenciesForConstructor();
+        }
+
+        @Test
+        @DisplayName("Clone resets yearly union-matching diagnostics but preserves persistent unmatched state")
+        void cloneResetsYearlyUnionMatchingDiagnostics() throws Exception {
+            Person originalPerson = new Person(1L, 123L);
+            originalPerson.setDemAge(35);
+            originalPerson.setDemMaleFlag(Gender.Female);
+            originalPerson.setLes_c4(Les_c4.EmployedOrSelfEmployed);
+            originalPerson.setLes_c4_lag1(Les_c4.EmployedOrSelfEmployed);
+            originalPerson.setLabourSupplyWeekly(Labour.THIRTY);
+            originalPerson.setCarryOverUnionMatching(true);
+            originalPerson.setUnionMatchingContinuousUnmatchedYears(3);
+            setPrivateField(originalPerson, "labWageFullTimeHrly", 15.0);
+            setPrivateField(originalPerson, "labWageFullTimeHrlyL1", 14.5);
+            originalPerson.setEnteredUnionMatchingThisYear(true);
+            originalPerson.setMatchedUnionMatchingThisYear(false);
+            originalPerson.setUnmatchedUnionMatchingThisYear(true);
+            originalPerson.setNewUnionMatchingEntrantThisYear(false);
+            originalPerson.setCarryOverUnionMatchingEntrantThisYear(true);
+            originalPerson.setUnionMatchingUnmatchedYearsAtEntryThisYear(2);
+            setPrivateField(originalPerson, "unionMatchingAgeBandThisYear", "33-35");
+            setPrivateField(originalPerson, "unionMatchingDesiredAgeDiffThisYear", 1.5);
+            setPrivateField(originalPerson, "unionMatchingDesiredEarningsDiffThisYear", 2.5);
+            setPrivateField(originalPerson, "unionMatchingEligiblePartnersSameRegionThisYear", 4);
+            setPrivateField(originalPerson, "unionMatchingEligiblePartnersAllRegionsThisYear", 11);
+            setPrivateField(originalPerson, "unionMatchingBestAgeMismatchSameRegionThisYear", 0.5);
+            setPrivateField(originalPerson, "unionMatchingBestAgeMismatchAllRegionsThisYear", 0.25);
+            setPrivateField(originalPerson, "unionMatchingBestEarningsMismatchSameRegionThisYear", 1.25);
+            setPrivateField(originalPerson, "unionMatchingBestEarningsMismatchAllRegionsThisYear", 0.75);
+            setPrivateField(originalPerson, "unionMatchingBestScoreSameRegionThisYear", 3.5);
+            setPrivateField(originalPerson, "unionMatchingBestScoreAllRegionsThisYear", 2.0);
+
+            Person clonedPerson = new Person(originalPerson, 456L, SampleEntry.ProcessedInputData);
+
+            assertTrue(clonedPerson.isCarryOverUnionMatching(), "Clone should preserve carry-over matching state.");
+            assertEquals(3, clonedPerson.getUnionMatchingContinuousUnmatchedYears(), "Clone should preserve the persistent unmatched streak.");
+            assertFalse(clonedPerson.getEnteredUnionMatchingThisYear(), "Clone should not inherit current-year entry flags.");
+            assertFalse(clonedPerson.getMatchedUnionMatchingThisYear(), "Clone should not inherit current-year match flags.");
+            assertFalse(clonedPerson.getUnmatchedUnionMatchingThisYear(), "Clone should not inherit current-year unmatched flags.");
+            assertFalse(clonedPerson.getNewUnionMatchingEntrantThisYear(), "Clone should not inherit entrant-type diagnostics.");
+            assertFalse(clonedPerson.getCarryOverUnionMatchingEntrantThisYear(), "Clone should not inherit entrant-type diagnostics.");
+            assertEquals(0, clonedPerson.getUnionMatchingUnmatchedYearsAtEntryThisYear(), "Clone should reset yearly unmatched-at-entry diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingAgeBandThisYear(), "Clone should reset yearly age-band diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingDesiredAgeDiffThisYear(), "Clone should reset yearly desired age-difference diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingDesiredEarningsDiffThisYear(), "Clone should reset yearly desired earnings diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingEligiblePartnersSameRegionThisYear(), "Clone should reset yearly same-region eligibility diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingEligiblePartnersAllRegionsThisYear(), "Clone should reset yearly all-region eligibility diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingBestAgeMismatchSameRegionThisYear(), "Clone should reset yearly same-region age mismatch diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingBestAgeMismatchAllRegionsThisYear(), "Clone should reset yearly all-region age mismatch diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingBestEarningsMismatchSameRegionThisYear(), "Clone should reset yearly same-region earnings mismatch diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingBestEarningsMismatchAllRegionsThisYear(), "Clone should reset yearly all-region earnings mismatch diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingBestScoreSameRegionThisYear(), "Clone should reset yearly same-region score diagnostics.");
+            assertNull(clonedPerson.getUnionMatchingBestScoreAllRegionsThisYear(), "Clone should reset yearly all-region score diagnostics.");
         }
     }
 }

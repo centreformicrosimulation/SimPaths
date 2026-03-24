@@ -51,7 +51,7 @@ public class PartnershipAlignment implements IEvaluation {
     public double evaluate(double[] args) {
 
         model.clearPersonsToMatch();
-        persons.parallelStream()
+        persons.stream()
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .forEach(person -> person.cohabitation(args[0]));
 
@@ -75,16 +75,27 @@ public class PartnershipAlignment implements IEvaluation {
     private double evalAggregateShareOfPartneredPersons() {
 
         long numPersonsWhoCanHavePartner = persons.stream()
-                .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
+                .filter(this::isEligibleForPartnershipShare)
                 .count();
 
         long numPersonsPartnered = persons.stream()
-                .filter(person -> (person.getTestPartner() ||
-                        (person.getPartner()!=null &&
-                                !person.getLeavePartner() && !person.getPartner().getLeavePartner())))
+                .filter(this::isEligibleForPartnershipShare)
+                .filter(person -> person.getTestPartner() || hasObservedAdultPartner(person))
                 .count();
 
         return numPersonsWhoCanHavePartner > 0 ?
                 (double) numPersonsPartnered / numPersonsWhoCanHavePartner : 0.0;
+    }
+
+    private boolean isEligibleForPartnershipShare(Person person) {
+        return person.getDemAge() >= Parameters.MIN_AGE_COHABITATION;
+    }
+
+    private boolean hasObservedAdultPartner(Person person) {
+        Person partner = person.getPartner();
+        return partner != null
+                && partner.getDemAge() >= Parameters.MIN_AGE_COHABITATION
+                && !person.getLeavePartner()
+                && !partner.getLeavePartner();
     }
 }

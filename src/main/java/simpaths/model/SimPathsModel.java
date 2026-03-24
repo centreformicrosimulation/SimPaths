@@ -3680,8 +3680,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             for (Region region: Region.values()) {
                 for (Person person : personsToMatch.get(gender).get(region)) {
                     person.setUnmatchedUnionMatchingThisYear(true);
-                    person.setCarryOverUnionMatching(true);
-                    person.incrementUnionMatchingContinuousUnmatchedYears();
+                    person.setCarryOverUnionMatching(false);
                 }
             }
         }
