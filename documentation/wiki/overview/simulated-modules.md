@@ -22,7 +22,7 @@ The education module determines transitions into and out of student status. Stud
 
 <br>
 
-<img width="1000" height="650" alt="Education" src="../../figures/modules/SimPaths GUI (2).png" />
+<img width="1000" height="650" alt="Education" src="../../figures/modules/education_module.png" />
 
 _Student status_  
 
