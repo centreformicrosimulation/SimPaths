@@ -6,7 +6,6 @@ on:
       - documentation
     paths:
       - 'documentation/wiki/**'
-      - 'documentation/figures/**'
       - 'mkdocs.yml'
   workflow_dispatch:
 
