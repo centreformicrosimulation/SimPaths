@@ -13,7 +13,7 @@
 ## Cloning the repository
 
 ```bash
-git clone https://github.com/centreformicrosimulation/SimPaths.git
+git clone https://github.com/simpaths/SimPaths.git
 cd SimPaths
 ```
 

@@ -2,9 +2,9 @@
 
 SimPaths uses three types of data as input: 
 
-1. The initial population to be evolved over time. [Available here](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input/InitialPopulations/training)
-2. Donor populations used to impute the effects of tax and benefit policy. [Available here](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input/EUROMODoutput/training)
-3. Estimated parameters governing transition probabilities assumed by the model. [Available here](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input)
+1. The initial population to be evolved over time. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input/InitialPopulations/training)
+2. Donor populations used to impute the effects of tax and benefit policy. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training)
+3. Estimated parameters governing transition probabilities assumed by the model. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input)
 
 Training data are provided for the first two of these data sets, while 'release' data are provided for the third data set.
 
