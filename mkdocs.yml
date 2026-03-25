@@ -2,7 +2,7 @@ site_name: SimPaths Documentation
 site_description: >-
   An open-source microsimulation framework for modelling individual
   and household life course events across the UK and Europe.
-site_url: https://simpaths.github.io/SimPaths/
+site_url: https://simpaths.org/
 repo_url: https://github.com/simpaths/SimPaths
 repo_name: simpaths/SimPaths
 
