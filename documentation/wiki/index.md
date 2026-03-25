@@ -20,7 +20,7 @@ hide:
 <div class="hero-cta">
   <a href="getting-started/" class="btn-primary">Get Started →</a>
   <a href="overview/" class="btn-outline">Read the Docs</a>
-  <a href="https://github.com/centreformicrosimulation/SimPaths" class="btn-outline">View on GitHub</a>
+  <a href="https://github.com/simpaths/SimPaths" class="btn-outline">View on GitHub</a>
 </div>
 
 </div>

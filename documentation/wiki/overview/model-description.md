@@ -18,4 +18,4 @@ SimPaths implements a hierarchical architecture where individuals are organised 
 
 Each module is composed of one or more processes; for example, the ageing module contains ageing, mortality, child maturation, and population alignment processes. Empirical specification of dynamic processes makes extensive use of cross-module characteristics (state variables). A graphical representation of the simulated modules is shown below:
 
-![model_structure](https://github.com/centreformicrosimulation/SimPaths/assets/56582427/d4c773a2-b720-4546-bca6-c76d07282dc4)
+![model_structure](https://github.com/simpaths/SimPaths/assets/56582427/d4c773a2-b720-4546-bca6-c76d07282dc4)

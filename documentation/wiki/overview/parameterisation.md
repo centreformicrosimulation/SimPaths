@@ -4,15 +4,15 @@ The estimates for the utility functions used in the labour supply model are sepa
 
 The estimates for the psychological distress models are separately described in Kopasker, D., et al. "_Evaluating the influence of taxation and social security policies on psychological distress: a microsimulation study of the UK during the COVID-19 economic crisis._" Social Science & Medicine (2024): 116953.
 
-The model has been parametrised for the UK using data described in the [data section](https://github.com/centreformicrosimulation/SimPaths/wiki/4.-Data).
+The model has been parametrised for the UK using data described in the [data section](https://github.com/simpaths/SimPaths/wiki/4.-Data).
 
-The most recent parametrisation of the model is [stored on Github](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input). 
+The most recent parametrisation of the model is [stored on Github](https://github.com/simpaths/SimPaths/tree/develop/input). 
 
 
 
 ## 1. Description of the tax and benefit system display
 
-Description of the tax and benefit system is provided through UKMOD output files stored in the [EUROMODoutput](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input/EUROMODoutput/) folder. Version developed on the basis of test data, which can be shared on GitHub, is available in the [training subfolder](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input/EUROMODoutput/training). 
+Description of the tax and benefit system is provided through UKMOD output files stored in the [EUROMODoutput](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/) folder. Version developed on the basis of test data, which can be shared on GitHub, is available in the [training subfolder](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training). 
 
 To learn more about UKMOD, visit [UKMOD's website](https://www.microsimulation.ac.uk/ukmod/). 
 
@@ -20,7 +20,7 @@ To learn more about UKMOD, visit [UKMOD's website](https://www.microsimulation.a
 
 ## 2. Model parameters 
 
-Source: [Github](https://github.com/centreformicrosimulation/SimPaths/tree/develop/input).
+Source: [Github](https://github.com/simpaths/SimPaths/tree/develop/input).
 
 **align_ files**  
 Files listed below contain alignment targets.
@@ -37,7 +37,7 @@ Files listed below contain demographic projections.
 * projections_mortality.xlsx
 
 **reg_ files**  
-Files listed below contain regression estimates for specific processes described in the [model structure](https://github.com/centreformicrosimulation/SimPaths/wiki/1.-Model-structure) section.
+Files listed below contain regression estimates for specific processes described in the [model structure](https://github.com/simpaths/SimPaths/wiki/1.-Model-structure) section.
 
 * reg_RMSE.xlsx 
 * reg_childcarecost.xlsx 
