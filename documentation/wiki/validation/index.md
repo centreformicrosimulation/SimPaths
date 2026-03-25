@@ -85,7 +85,7 @@ These should be run **after executing *SimPaths***, as they rely on a number of 
 Before running these scripts, complete the following preparatory steps:
 
 - **a. Obtain simulated output from *SimPaths***  
-  Ensure that the most recent simulated output is available. See [Section 2](https://github.com/centreformicrosimulation/SimPaths/wiki/2.-Running-SimPaths) to run SimPaths and obtain the simulation outputs.  
+  Ensure that the most recent simulated output is available. See [Section 2](https://github.com/simpaths/SimPaths/wiki/2.-Running-SimPaths) to run SimPaths and obtain the simulation outputs.  
 
 - **b. Set up the file structure**  
   Place the downloaded do-files in a **simulation validation** folder in a subfolder called *do_files*.  

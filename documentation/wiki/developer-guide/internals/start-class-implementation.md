@@ -1,6 +1,6 @@
 # Start Class Implementation
 
-The [SimPathsStart](https://github.com/centreformicrosimulation/SimPaths/blob/main/src/main/java/simpaths/experiment/SimPathsStart.java) class is the entry point for running the SimPaths microsimulation model. It provides essential functionalities for initializing the simulation environment and offers methods for configuring simulation parameters, database setup, and user interactions.
+The [SimPathsStart](https://github.com/simpaths/SimPaths/blob/main/src/main/java/simpaths/experiment/SimPathsStart.java) class is the entry point for running the SimPaths microsimulation model. It provides essential functionalities for initializing the simulation environment and offers methods for configuring simulation parameters, database setup, and user interactions.
 
 # 1. Overview
 

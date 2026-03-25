@@ -2,11 +2,11 @@
 
 # 1. An application using "Ethnicity"
 
-This page explains how to add a new variable to the SimPaths model. A similar approach can be used to add other variables. This example concerns the insertion of an additional variable, "Ethnicity", named `dot01`, defined in six categories, and whose issue is detailed [here](https://github.com/centreformicrosimulation/SimPaths/issues/212). 
+This page explains how to add a new variable to the SimPaths model. A similar approach can be used to add other variables. This example concerns the insertion of an additional variable, "Ethnicity", named `dot01`, defined in six categories, and whose issue is detailed [here](https://github.com/simpaths/SimPaths/issues/212). 
 
 # 2. Update the input data
 
-Before starting, the user must ensure that they have the updated version of the data for the model, which shall include the variable(s) to be added to the code. If not, they should get the [UKHLS](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6914) (Understanding Society) and [WAS](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=7215) (Wealth and Assets Survey) data from the [UK Data Service](https://ukdataservice.ac.uk/) (DS) and generate the input data for the model using these datasets and the [do files from GitHub](https://github.com/centreformicrosimulation/SimPaths/tree/main/input/InitialPopulations/compile).
+Before starting, the user must ensure that they have the updated version of the data for the model, which shall include the variable(s) to be added to the code. If not, they should get the [UKHLS](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6914) (Understanding Society) and [WAS](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=7215) (Wealth and Assets Survey) data from the [UK Data Service](https://ukdataservice.ac.uk/) (DS) and generate the input data for the model using these datasets and the [do files from GitHub](https://github.com/simpaths/SimPaths/tree/main/input/InitialPopulations/compile).
 
 
 # 3. Load the `dot01` variable in SimPaths

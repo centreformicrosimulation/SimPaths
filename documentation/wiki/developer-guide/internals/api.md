@@ -1,6 +1,6 @@
 # SimPaths API
 
-SimPaths APIs are published [here](https://centreformicrosimulation.github.io/SimPaths/javadoc/).
+SimPaths APIs are published [here](https://simpaths.github.io/SimPaths/javadoc/).
 
 # 1. Introduction
 
@@ -8,13 +8,13 @@ The SimPaths API documentation is generated using [Maven's Javadoc Plugin](https
 
 Javadoc is a Java tool that automatically generates HTML documentation from [Javadoc comments](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html) embedded in the source code.  
 
-The documentation website is updated automatically whenever a commit is pushed to the `develop` branch of SimPaths. This process is handled via GitHub Actions using a [Javadoc-publisher workflow developed by MathieuSoysal](https://github.com/MathieuSoysal/Javadoc-publisher.yml). The workflow file is available [here](https://github.com/centreformicrosimulation/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml).
+The documentation website is updated automatically whenever a commit is pushed to the `develop` branch of SimPaths. This process is handled via GitHub Actions using a [Javadoc-publisher workflow developed by MathieuSoysal](https://github.com/MathieuSoysal/Javadoc-publisher.yml). The workflow file is available [here](https://github.com/simpaths/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml).
 
 To update the API documentation, add or modify Javadoc comments in the source code following [this guide](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html), then push your changes to the `develop` branch.
 
 # 2. Workflow Details
 
-[The workflow](https://github.com/centreformicrosimulation/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml) automates the generation and publishing of HTML documentation from Javadoc comments whenever changes are pushed to the `develop` branch.
+[The workflow](https://github.com/simpaths/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml) automates the generation and publishing of HTML documentation from Javadoc comments whenever changes are pushed to the `develop` branch.
 
 ```
 on:

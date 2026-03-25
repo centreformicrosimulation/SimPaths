@@ -50,7 +50,7 @@ However, please note that _training_ data is provided. It allows the simulation 
 
 **How to Request Access to Data:**
 
-If you have a need for the data, please contact the repository maintainers through the [issue tracker](https://github.com/centreformicrosimulation/SimPaths/issues).
+If you have a need for the data, please contact the repository maintainers through the [issue tracker](https://github.com/simpaths/SimPaths/issues).
 
 
 ### Forking the Repository
