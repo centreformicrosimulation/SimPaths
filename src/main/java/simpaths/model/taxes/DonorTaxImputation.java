@@ -1,6 +1,7 @@
 package simpaths.model.taxes;
 
 
+import microsim.engine.SimulationEngine;
 import org.apache.commons.lang3.tuple.Triple;
 import simpaths.model.enums.UpratingCase;
 
@@ -366,7 +367,7 @@ public class DonorTaxImputation {
             disposableIncomePerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
             benefitsReceivedPerWeek *= (1.0 + Parameters.disposableIncomeFromLabourInnov);
         }
-        if (UCmean > Math.random()) {  // Weighted probability of receiving UC
+        if (UCmean > SimulationEngine.getRnd().nextDouble()) {  // Weighted probability of receiving UC
             setReceivedUC(1);
         }
         if (LBmean > 0 && getReceivedUC() == 0) {  // Setting as received LB if benefits but not UC
