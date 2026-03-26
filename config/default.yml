@@ -143,7 +143,7 @@ innovation_args:
 # Output files:
 #   Statistics1.csv    — income distribution: Gini coefficients, income percentiles, median EDI, S-Index
 #   Statistics2.csv    — demographic validation: partnership rates, employment, health, disability by age/gender
-#   Statistics3.csv    — alignment diagnostics: simulated vs target rates and adjustment factors
+#   AlignmentAdjustmentFactors1.csv — alignment diagnostics: factors, simulated shares, and target shares
 #   EmploymentStatistics.csv — labour market transitions and participation rates
 #   HealthStatistics.csv     — health measures (SF-12, GHQ-12, EQ-5D) by age/gender
 
@@ -153,7 +153,7 @@ collector_args:
 #    exportToCSV: true                  # write outputs to CSV files under output/<run>/csv/
 #    persistStatistics: true            # write Statistics1.csv (income distribution)
 #    persistStatistics2: true           # write Statistics2.csv (demographic validation outputs)
-#    persistStatistics3: true           # write Statistics3.csv (alignment diagnostics)
+#    persistAlignmentAdjustmentFactors: true # write AlignmentAdjustmentFactors1.csv
 #    persistPersons: false              # write one row per person per year (large files)
 #    persistBenefitUnits: false         # write one row per benefit unit per year (large files)
 #    persistHouseholds: false           # write one row per household per year

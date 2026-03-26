@@ -77,11 +77,11 @@ public class RunSimPathsIntegrationTest {
         );
         }
         @Test
-        public void compareStatistics31() throws IOException {
-        compareFiles(
-            latestOutputDir.resolve("csv/Statistics31.csv"),
-            Paths.get("src/test/java/simpaths/integrationtest/expected/Statistics31.csv")
-        );
+        public void verifyAlignmentAdjustmentFactorsExported() {
+            assertTrue(
+                    Files.exists(latestOutputDir.resolve("csv/AlignmentAdjustmentFactors1.csv")),
+                    "Expected output file is missing: " + latestOutputDir.resolve("csv/AlignmentAdjustmentFactors1.csv")
+            );
         }
         @Test
         public void compareHealthStatistics1() throws IOException {

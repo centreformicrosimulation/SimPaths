@@ -59,7 +59,7 @@
 		<class>simpaths.model.BenefitUnit</class>
 		<class>simpaths.data.statistics.Statistics</class>
 		<class>simpaths.data.statistics.Statistics2</class>
-		<class>simpaths.data.statistics.Statistics3</class>
+		<class>simpaths.data.statistics.AlignmentAdjustmentFactors</class>
 		<class>simpaths.data.statistics.HealthStatistics</class>
 		<class>simpaths.data.statistics.EmploymentStatistics</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>

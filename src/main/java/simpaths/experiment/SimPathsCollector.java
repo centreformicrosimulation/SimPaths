@@ -31,9 +31,9 @@ import microsim.statistics.CrossSection;
 import microsim.statistics.IDoubleSource;
 // import LABOURsim packages
 import simpaths.data.Parameters;
+import simpaths.data.statistics.AlignmentAdjustmentFactors;
 import simpaths.data.statistics.Statistics;
 import simpaths.data.statistics.Statistics2;
-import simpaths.data.statistics.Statistics3;
 import simpaths.model.Person;
 import simpaths.model.enums.Region;
 
@@ -56,8 +56,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     @GUIparameter(description="Calculate extended set of population characteristics (useful for validation)")
     private boolean persistStatistics2 = true;
 
-    @GUIparameter(description="Report alignment adjustments")
-    private boolean persistStatistics3 = true;
+    @GUIparameter(description="Report alignment adjustment factors (AlignmentAdjustmentFactors1.csv)")
+    private boolean persistAlignmentAdjustmentFactors = true;
 
     private boolean persistEmploymentStatistics = true;
 
@@ -96,7 +96,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private Statistics2 stats2;
 
-    private Statistics3 stats3;
+    private AlignmentAdjustmentFactors alignmentAdjustmentFactors;
 
     private EmploymentStatistics statsEmployment;
 
@@ -122,7 +122,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     private DataExport exportStatistics2;
 
-    private DataExport exportStatistics3;
+    private DataExport exportAlignmentAdjustmentFactors;
 
     private DataExport exportStatisticsEmployment;
 
@@ -161,7 +161,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         DumpHouseholds,
         DumpStatistics,
         DumpStatistics2,
-		DumpStatistics3,
+        DumpAlignmentAdjustmentFactors,
         DumpStatisticsEmployment,
         DumpHealthStatistics
     }
@@ -222,14 +222,14 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
                 log.error(e.getMessage());
             }
             break;
-		case DumpStatistics3:
-			stats3.update(model);
-			try {
-				exportStatistics3.export();
-			} catch (Exception e) {
-				log.error(e.getMessage());
-			}
-			break;
+        case DumpAlignmentAdjustmentFactors:
+            alignmentAdjustmentFactors.update(model);
+            try {
+                exportAlignmentAdjustmentFactors.export();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+            break;
         case DumpStatisticsEmployment:
             statsEmployment.update(model);
             try {
@@ -264,7 +264,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
         stats = new Statistics();
         stats2 = new Statistics2();
-        stats3 = new Statistics3();
+        alignmentAdjustmentFactors = new AlignmentAdjustmentFactors();
         statsEmployment = new EmploymentStatistics();
         statsHealth = new HealthStatistics();
 
@@ -279,8 +279,8 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             exportStatistics = new DataExport(stats, exportToDatabase, exportToCSV);
         if (persistStatistics2)
             exportStatistics2 = new DataExport(stats2, exportToDatabase, exportToCSV);
-        if (persistStatistics3)
-            exportStatistics3 = new DataExport(stats3, exportToDatabase, exportToCSV);
+        if (persistAlignmentAdjustmentFactors)
+            exportAlignmentAdjustmentFactors = new DataExport(alignmentAdjustmentFactors, exportToDatabase, exportToCSV);
         if (persistEmploymentStatistics)
             exportStatisticsEmployment = new DataExport(statsEmployment, exportToDatabase, exportToCSV);
         if (persistHealthStatistics)
@@ -338,9 +338,9 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
             getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatistics2), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
         }
 
-		if (persistStatistics3) {
-			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatistics3), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
-		}
+        if (persistAlignmentAdjustmentFactors) {
+            getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpAlignmentAdjustmentFactors), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
+        }
 
         if (persistEmploymentStatistics) {
 			getEngine().getEventQueue().scheduleRepeat(new SingleTargetEvent(this, Processes.DumpStatisticsEmployment), model.getStartYear() + dataDumpStartTime, ordering, dataDumpTimePeriod);
@@ -822,12 +822,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     public void setStats2(Statistics2 stats2) { this.stats2 = stats2; }
 
-	public Statistics3 getStats3() { return stats3; }
-
-	public void setStats3(Statistics3 stats3) {
-		this.stats3 = stats3;
-	}
-
     public boolean isExportToDatabase() {
         return exportToDatabase;
     }
@@ -867,14 +861,6 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
     public void setPersistStatistics2(boolean val) {
         persistStatistics2 = val;
     }
-
-	public boolean isPersistStatistics3() {
-		return persistStatistics3;
-	}
-
-	public void setPersistStatistics3(boolean val) {
-		persistStatistics3 = val;
-	}
 
     public void calculateAtRiskOfPoverty() {
         calculateEquivalisedHouseholdDisposableIncome();
