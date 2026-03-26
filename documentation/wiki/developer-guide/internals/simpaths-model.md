@@ -1,8 +1,6 @@
 # The SimPathsModel Class
 
-``_Under Construction_``
-
-This page complements [4.05 - The Model and the Schedule] by explaining how SimPaths instantiates the generic JAS-mine scheduling framework in practice. It documents current SimPaths practice, not theory or design justification. It is not a complete specification of the model's behaviour, and should be read together with the codebase and validation documentation.
+This page complements **[4.05 - The Model and the Schedule]** by explaining how SimPaths instantiates the generic JAS-mine scheduling framework in practice. It documents current SimPaths practice, not theory or design justification. It is not a complete specification of the model's behaviour, and should be read together with the codebase and validation documentation.
 
 ## 1. The SimPaths model manager
 
@@ -10,17 +8,20 @@ The core simulation logic in SimPaths is implemented in a model manager class th
 
 The SimPaths model class functions primarily as a coordinator of simulation structure. Its primary responsibilities are to initialise the population and global data structures, define the temporal structure of the simulation via schedules, and respond to aggregate-level events.
 
-### **Model construction**:
+### Model construction
 
 The **buildObjects()** method defines the initial simulation state before any time evolution takes place.
-In SimPaths, this phase typically includes:
-* Initialising random number generators, including the creation of separate random streams for different modules (e.g. matching, alignment, initialisation), to reduce unintended coupling between processes.
-* Loading global parameters and projections for the simulation horizon.
-* Preparing auxiliary infrastructures, such as indices for tax-benefit donor data.
-* Creating the initial population by loading or constructing Person, BenefitUnit, and Household objects, including any required population expansion or preprocessing.
-* Initialising internal state variables (e.g. the simulation year counter).
 
-### Simulation execution schedule
+In SimPaths, this phase typically includes:
+
+- Initialising random number generators, including the creation of separate random streams for different modules (e.g. matching, alignment, initialisation), to reduce unintended coupling between processes.
+- Loading global parameters and projections for the simulation horizon.
+- Preparing auxiliary infrastructures, such as indices for tax-benefit donor data.
+- Creating the initial population by loading or constructing `Person`, `BenefitUnit`, and `Household` objects, including any required population expansion or preprocessing.
+- Initialising internal state variables, such as the simulation year counter.
+
+
+### Simulation execution schedule:
 
 The temporal structure of the simulation is defined in the **buildSchedule()** method. This method specifies the sequence of events that govern the evolution of the simulated population and determines how processes are executed over time. All model dynamics are implemented as events managed by the JAS-mine discrete-event simulation engine.
 
