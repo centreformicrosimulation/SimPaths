@@ -29,6 +29,8 @@ hide:
 
 ## About SimPaths
 
+SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. It builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries.
+
 SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
 
 <div class="countries">

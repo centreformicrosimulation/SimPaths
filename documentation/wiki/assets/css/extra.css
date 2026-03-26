@@ -372,6 +372,7 @@
 .md-typeset details {
   border-radius: 8px !important;
   border-left-width: 4px;
+  border-left-color: var(--sp-accent) !important;
   box-shadow: 0 1px 8px rgba(0,0,0,0.05);
   font-size: 0.81rem;
 }
@@ -380,6 +381,28 @@
 .md-typeset summary {
   font-weight: 600;
   font-size: 0.81rem;
+  background-color: rgba(36,120,181,0.08) !important;
+}
+
+/* Override icon colour for all admonition types */
+.md-typeset .admonition-title::before,
+.md-typeset summary::before {
+  background-color: var(--sp-accent) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition,
+[data-md-color-scheme="slate"] .md-typeset details {
+  border-left-color: var(--sp-accent-light) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition-title,
+[data-md-color-scheme="slate"] .md-typeset summary {
+  background-color: rgba(59,158,222,0.12) !important;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .admonition-title::before,
+[data-md-color-scheme="slate"] .md-typeset summary::before {
+  background-color: var(--sp-accent-light) !important;
 }
 
 /* ═══════════════════════════════════════════════
