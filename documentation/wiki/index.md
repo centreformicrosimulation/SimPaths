@@ -92,7 +92,34 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
 
 ---
 
-!!! tip "New to SimPaths?"
-    Start with the [Overview](overview/) to understand what the model does, then follow the [Getting Started](getting-started/) guide to run your first simulation.
+<div class="research-section">
+<div class="research-header">
+  <h2 class="section-heading">Latest Research</h2>
+  <a href="research/" class="archive-link">ALL PUBLICATIONS →</a>
+</div>
 
-For papers using SimPaths, see the [Research](research/) page.
+<div class="research-grid">
+
+<a href="https://www.sciencedirect.com/science/article/pii/S0167268125000319" class="research-card">
+  <span class="research-label">LIFE COURSE · 2025</span>
+  <h3>Attenuation and reinforcement mechanisms over the life course</h3>
+  <p>Richiardi M, Bronka P, van de Ven J</p>
+  <span class="research-journal">Journal of Economic Behavior & Organization</span>
+</a>
+
+<a href="https://doi.org/10.1016/j.socscimed.2024.116953" class="research-card">
+  <span class="research-label">POLICY ANALYSIS · 2024</span>
+  <h3>Evaluating the influence of taxation and social security policies on psychological distress</h3>
+  <p>Kopasker D, Bronka P, Thomson RM, et al.</p>
+  <span class="research-journal">Social Science and Medicine</span>
+</a>
+
+<a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004358" class="research-card">
+  <span class="research-label">HEALTH POLICY · 2024</span>
+  <h3>Short-term impacts of Universal Basic Income on population mental health inequalities in the UK</h3>
+  <p>Thomson RM, Kopasker D, Bronka P, et al.</p>
+  <span class="research-journal">PLOS Medicine</span>
+</a>
+
+</div>
+</div>
