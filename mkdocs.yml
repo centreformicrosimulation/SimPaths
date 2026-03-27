@@ -7,8 +7,8 @@ site_url: https://simpaths.org/
 docs_dir: documentation/wiki
 
 copyright: >-
-  Copyright &copy; Matteo Richiardi, Patryk Bronka, Justin van de Ven —
-  Centre for Microsimulation and Policy Analysis
+  <strong class="footer-brand">SimPaths</strong><br>
+  &copy; 2025 SimPaths Framework. An open-source microsimulation initiative.
 
 theme:
   name: material
@@ -78,7 +78,10 @@ extra:
       name: GitHub
     - icon: fontawesome/solid/globe
       link: https://www.microsimulation.ac.uk/
-      name: Centre for Microsimulation and Policy Analysis
+      name: CMPA
+    - icon: fontawesome/solid/scale-balanced
+      link: https://github.com/simpaths/SimPaths/blob/main/LICENSE
+      name: License
 
 nav:
   - Home: index.md

@@ -820,7 +820,7 @@
 }
 
 /* ═══════════════════════════════════════════════
-   FOOTER
+   FOOTER — Stitch-inspired editorial footer
 ═══════════════════════════════════════════════ */
 
 .md-footer {
@@ -831,25 +831,96 @@
 
 .md-footer-meta {
   background: transparent;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
-/* Hide "Made with Material for MkDocs" */
+.md-footer-meta__inner {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* ── Copyright block — brand + line ── */
 .md-copyright {
+  color: var(--sp-midnight);
+  max-width: none;
+  width: auto;
+  /* Hide bare "Made with" text node + link via visibility trick */
   visibility: hidden;
-  height: 1.2rem;
   overflow: hidden;
 }
 
+/* Hide "Made with Material for MkDocs" link */
+.md-copyright > a {
+  display: none !important;
+}
+
+/* Show the actual copyright content */
 .md-copyright__highlight {
+  visibility: visible;
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.6;
+  color: var(--sp-ghost) !important;
+}
+
+/* SimPaths brand name in footer */
+.md-copyright .footer-brand {
+  font-family: var(--sp-heading-font) !important;
+  font-size: 1.1rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--sp-midnight) !important;
+  display: block;
+  margin-bottom: 0.4rem;
   visibility: visible;
 }
 
-.md-copyright {
-  color: var(--sp-ghost);
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
+/* ── Social links — text labels instead of icons ── */
+.md-social {
+  display: flex !important;
+  gap: 2.5rem;
+  align-items: center;
+  padding: 0 !important;
 }
 
+.md-social__link {
+  display: inline-flex !important;
+  align-items: center;
+  width: auto !important;
+  height: auto !important;
+  white-space: nowrap;
+}
+
+/* Hide the SVG icons */
+.md-social__link svg {
+  display: none !important;
+}
+
+/* Show link name as text */
+.md-social__link::after {
+  content: attr(title);
+  font-family: "Inter", var(--md-text-font) !important;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sp-ghost);
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.md-social__link:hover::after {
+  color: var(--sp-midnight);
+}
+
+/* ── Prev/Next navigation links ── */
 .md-footer__link {
   color: var(--sp-midnight);
   opacity: 0.5;
@@ -859,14 +930,26 @@
   opacity: 1;
 }
 
-/* Dark mode footer */
+/* ── Dark mode footer ── */
 [data-md-color-scheme="slate"] .md-footer {
   background: #141e2a;
   border-top-color: rgba(195,198,213,0.1);
 }
 
 [data-md-color-scheme="slate"] .md-copyright {
-  color: rgba(195,198,213,0.4);
+  color: rgba(195,198,213,0.5);
+}
+
+[data-md-color-scheme="slate"] .md-copyright .footer-brand {
+  color: #c8d8e8;
+}
+
+[data-md-color-scheme="slate"] .md-social__link::after {
+  color: rgba(195,198,213,0.3);
+}
+
+[data-md-color-scheme="slate"] .md-social__link:hover::after {
+  color: #c8d8e8;
 }
 
 /* ═══════════════════════════════════════════════
