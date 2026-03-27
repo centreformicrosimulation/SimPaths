@@ -1179,6 +1179,12 @@
   padding: 0;
 }
 
+.md-typeset .funding-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .md-typeset .funding-panel li {
   margin: 0;
   padding: 0.8rem 0;
@@ -1192,12 +1198,34 @@
 
 .md-typeset .funding-funder {
   display: inline-block;
-  margin-top: 0.22rem;
+  margin-top: 0.28rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--sp-midnight);
+}
+
+.md-typeset .funding-years {
+  font-family: "Inter", var(--md-text-font) !important;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sp-crimson);
+  margin-bottom: 0.24rem;
+}
+
+.md-typeset .funding-title {
+  font-family: var(--sp-heading-font) !important;
+  font-size: 1rem;
+  line-height: 1.38;
+  color: var(--sp-midnight);
+}
+
+.md-typeset .funding-link {
+  margin-top: 0.35rem;
+  font-size: 0.74rem;
 }
 
 [data-md-color-scheme="slate"] .md-typeset .funding-panel {
@@ -1208,6 +1236,14 @@
 
 [data-md-color-scheme="slate"] .md-typeset .funding-funder {
   color: #d9e3ec;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .funding-title {
+  color: #eef3f7;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .funding-years {
+  color: #f2c15c;
 }
 
 @media screen and (max-width: 76.1875em) {
