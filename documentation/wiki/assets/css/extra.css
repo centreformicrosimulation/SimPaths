@@ -654,6 +654,15 @@
   margin-bottom: 1.2rem;
 }
 
+[data-md-color-scheme="slate"] .md-typeset .section-intro,
+.md-typeset .section-intro {
+  max-width: 46rem;
+  margin: -0.55rem 0 1rem;
+  color: var(--md-default-fg-color--light);
+  text-align: left;
+  hyphens: none;
+}
+
 [data-md-color-scheme="slate"] .md-typeset .section-heading {
   color: #c8d8e8;
 }
@@ -669,8 +678,18 @@
   margin: 1.2rem 0;
 }
 
+.md-typeset .card-grid--primary {
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 0.85rem;
+}
+
+.md-typeset .card-grid--secondary {
+  margin-top: 0;
+}
+
 .md-typeset a.feature-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   background: var(--md-default-bg-color);
   border: 0.5px solid var(--sp-ghost);
   border-radius: 8px;
@@ -684,6 +703,11 @@
   border-bottom: none !important;
   color: inherit !important;
   cursor: pointer;
+}
+
+.md-typeset a.feature-card.feature-card--primary {
+  padding: 1.6rem 1.6rem 1.4rem;
+  min-height: 13.2rem;
 }
 
 /* Crimson top-border reveal on hover */
@@ -730,11 +754,13 @@
 
 /* Per-card icon colours — muted, scholarly tones */
 .card-icon--overview  { background: rgba(42,56,72,0.08);  color: #2A3848; }
+.card-icon--docs      { background: rgba(42,86,72,0.08);  color: #2a5648; }
 .card-icon--start     { background: rgba(42,86,72,0.08);  color: #2a5648; }
 .card-icon--user      { background: rgba(72,52,92,0.08);  color: #48345c; }
 .card-icon--dev       { background: rgba(92,68,42,0.08);  color: #5c442a; }
 .card-icon--ref       { background: rgba(42,56,72,0.08);  color: #2A3848; }
 .card-icon--research  { background: rgba(117,0,3,0.07);   color: var(--sp-crimson); }
+.card-icon--funding   { background: rgba(122,95,32,0.08); color: #7a5f20; }
 
 /* ── Card text ── */
 .md-typeset a.feature-card h3 {
@@ -747,12 +773,22 @@
   border: none !important;
 }
 
+.md-typeset a.feature-card.feature-card--primary h3 {
+  font-size: 1.1rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
 .md-typeset a.feature-card p {
   font-size: 0.73rem;
   color: var(--md-default-fg-color--light);
   margin: 0 0 0.6rem;
   line-height: 1.55;
   text-align: left;
+}
+
+.md-typeset a.feature-card.feature-card--primary p {
+  font-size: 0.78rem;
+  line-height: 1.6;
 }
 
 .md-typeset a.feature-card .card-link {
@@ -763,6 +799,7 @@
   align-items: center;
   gap: 0.15rem;
   transition: gap 0.2s ease, color 0.15s ease;
+  margin-top: auto;
 }
 
 .md-typeset a.feature-card:hover .card-link {
@@ -786,19 +823,23 @@
 }
 
 [data-md-color-scheme="slate"] .card-icon--overview  { background: rgba(195,198,213,0.1); color: #a0b0c4; }
+[data-md-color-scheme="slate"] .card-icon--docs      { background: rgba(16,163,100,0.12); color: #34d399; }
 [data-md-color-scheme="slate"] .card-icon--start     { background: rgba(16,163,100,0.12); color: #34d399; }
 [data-md-color-scheme="slate"] .card-icon--user      { background: rgba(139,92,214,0.12); color: #a78bfa; }
 [data-md-color-scheme="slate"] .card-icon--dev       { background: rgba(220,120,30,0.12); color: #f0a050; }
 [data-md-color-scheme="slate"] .card-icon--ref       { background: rgba(195,198,213,0.1); color: #a0b0c4; }
 [data-md-color-scheme="slate"] .card-icon--research  { background: rgba(200,60,80,0.12); color: #f06080; }
+[data-md-color-scheme="slate"] .card-icon--funding   { background: rgba(242,193,92,0.12); color: #f2c15c; }
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
+  .md-typeset .card-grid--primary,
   .md-typeset .card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (max-width: 420px) {
+  .md-typeset .card-grid--primary,
   .md-typeset .card-grid {
     grid-template-columns: 1fr;
   }
@@ -868,7 +909,8 @@
   visibility: visible;
   display: block;
   font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  letter-spacing: 0.125em;
   text-transform: uppercase;
   line-height: 1.35;
   color: var(--sp-midnight) !important;
@@ -1089,6 +1131,14 @@
   margin-bottom: 0;
 }
 
+.md-typeset .research-intro {
+  max-width: 46rem;
+  margin: 0 0 0.85rem;
+  color: var(--md-default-fg-color--light);
+  text-align: left;
+  hyphens: none;
+}
+
 .md-typeset .archive-link {
   font-family: "Inter", var(--md-text-font) !important;
   font-size: 0.6rem;
@@ -1189,6 +1239,15 @@
   color: var(--md-default-fg-color--light);
   margin: 0.2rem 0 0 !important;
   text-align: left;
+  grid-column: 1;
+}
+
+.md-typeset .research-summary {
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--light);
+  margin: 0.35rem 0 0 !important;
+  text-align: left;
+  line-height: 1.55;
   grid-column: 1;
 }
 
