@@ -824,24 +824,44 @@
 ═══════════════════════════════════════════════ */
 
 .md-footer {
-  background: var(--sp-midnight-deep);
+  background: var(--sp-paper);
+  color: var(--sp-midnight);
+  border-top: 0.5px solid var(--sp-ghost);
 }
 
 .md-footer-meta {
-  background: rgba(0,0,0,0.18);
+  background: transparent;
 }
 
 /* Hide "Made with Material for MkDocs" */
+.md-footer-meta html .md-copyright__highlight,
 .md-copyright__highlight {
-  display: none;
+  display: none !important;
+}
+
+.md-copyright {
+  color: var(--sp-ghost);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
 }
 
 .md-footer__link {
-  opacity: 0.75;
+  color: var(--sp-midnight);
+  opacity: 0.5;
   transition: opacity 0.12s ease;
 }
 .md-footer__link:hover {
   opacity: 1;
+}
+
+/* Dark mode footer */
+[data-md-color-scheme="slate"] .md-footer {
+  background: #141e2a;
+  border-top-color: rgba(195,198,213,0.1);
+}
+
+[data-md-color-scheme="slate"] .md-copyright {
+  color: rgba(195,198,213,0.4);
 }
 
 /* ═══════════════════════════════════════════════
