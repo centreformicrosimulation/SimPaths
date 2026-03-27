@@ -3,8 +3,6 @@ site_description: >-
   An open-source microsimulation framework for modelling individual
   and household life course events across the UK and Europe.
 site_url: https://simpaths.org/
-repo_url: https://github.com/simpaths/SimPaths
-repo_name: simpaths/SimPaths
 
 docs_dir: documentation/wiki
 
@@ -25,8 +23,6 @@ theme:
       accent: custom
   font: false
   logo: assets/images/logo.svg
-  icon:
-    repo: fontawesome/brands/github
   features:
     - navigation.instant
     - navigation.instant.prefetch
@@ -45,7 +41,7 @@ theme:
     - content.code.annotate
 
 extra_css:
-  - assets/css/extra.css
+  - assets/css/extra.css?v=2
 
 plugins:
   - search:
