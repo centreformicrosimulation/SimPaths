@@ -100,6 +100,16 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
 
 <div class="research-list">
 
+<a href="https://doi.org/10.1093/eurpub/ckaf161.076" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">MENTAL HEALTH · 2025</span>
+    <span class="research-journal">European Journal of Public Health</span>
+  </div>
+  <h3>Tax reforms vs benefit enhancement to address mental health inequalities: a microsimulation study</h3>
+  <p class="research-authors">Igelstrom E, Kopasker D, Richiardi MG, Katikireddi SV</p>
+  <span class="research-arrow">→</span>
+</a>
+
 <a href="https://www.sciencedirect.com/science/article/pii/S0167268125000319" class="research-entry">
   <div class="research-entry__meta">
     <span class="research-label">LIFE COURSE · 2025</span>
