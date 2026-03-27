@@ -46,9 +46,9 @@ SimPaths documentation is organised around three routes: getting the model runni
     <h3>First-time setup</h3>
     <p>For a clean first run, these are the main pages to work through in order.</p>
     <ul>
-      <li><a href="../getting-started/environment-setup.md">Environment Setup</a></li>
-      <li><a href="../getting-started/data/index.md">Input Data</a></li>
-      <li><a href="../getting-started/first-simulation.md">Running Your First Simulation</a></li>
+      <li><a href="../getting-started/environment-setup/">Environment Setup</a></li>
+      <li><a href="../getting-started/data/">Input Data</a></li>
+      <li><a href="../getting-started/first-simulation/">Running Your First Simulation</a></li>
     </ul>
   </section>
 
@@ -56,9 +56,9 @@ SimPaths documentation is organised around three routes: getting the model runni
     <h3>Running SimPaths</h3>
     <p>Once the model is set up, these are the main operational guides.</p>
     <ul>
-      <li><a href="../user-guide/single-runs.md">Single Runs</a></li>
-      <li><a href="../user-guide/multiple-runs.md">Multiple Runs</a></li>
-      <li><a href="../user-guide/tax-benefit-parameters.md">Modifying Tax-Benefit Settings</a></li>
+      <li><a href="../user-guide/single-runs/">Single Runs</a></li>
+      <li><a href="../user-guide/multiple-runs/">Multiple Runs</a></li>
+      <li><a href="../user-guide/tax-benefit-parameters/">Modifying Tax-Benefit Settings</a></li>
     </ul>
   </section>
 
@@ -66,9 +66,9 @@ SimPaths documentation is organised around three routes: getting the model runni
     <h3>Working on the codebase</h3>
     <p>These are the strongest entry points if you are changing code or architecture.</p>
     <ul>
-      <li><a href="../developer-guide/repository-guide.md">Repository Guide</a></li>
-      <li><a href="../developer-guide/internals/start-class-implementation.md">Start Class Implementation</a></li>
-      <li><a href="../developer-guide/internals/multirun-implementation.md">MultiRun Implementation</a></li>
+      <li><a href="../developer-guide/repository-guide/">Repository Guide</a></li>
+      <li><a href="../developer-guide/internals/start-class-implementation/">Start Class Implementation</a></li>
+      <li><a href="../developer-guide/internals/multirun-implementation/">MultiRun Implementation</a></li>
     </ul>
   </section>
 
