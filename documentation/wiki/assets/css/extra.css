@@ -911,7 +911,6 @@
   font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.15em;
-  text-transform: uppercase;
   color: var(--sp-ghost);
   transition: color 0.15s ease;
   white-space: nowrap;
