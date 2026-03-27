@@ -174,21 +174,9 @@
   height: 3rem;
 }
 
-/* ── Logo ── */
+/* ── Logo — hidden for clean typographic header ── */
 .md-header__button.md-logo {
-  padding: 0.3rem 0.4rem;
-  margin-right: 0.1rem;
-}
-
-.md-header__button.md-logo img {
-  width: 26px;
-  height: 26px;
-  filter: drop-shadow(0 0 6px rgba(126,206,244,0.55)) drop-shadow(0 0 14px rgba(79,179,240,0.25));
-  transition: filter 0.3s ease;
-}
-
-.md-header__button.md-logo:hover img {
-  filter: drop-shadow(0 0 9px rgba(126,206,244,0.8)) drop-shadow(0 0 22px rgba(79,179,240,0.4));
+  display: none !important;
 }
 
 /* ── Header title — Newsreader ── */
@@ -573,9 +561,6 @@
 }
 
 /* ── Hero body text ── */
-.md-typeset .hero p:not(.hero-title):not(.hero-subtitle) {
-  max-width: 40rem;
-}
 
 /* ── Hero CTA buttons — on paper background ── */
 .md-typeset .hero .hero-cta {
