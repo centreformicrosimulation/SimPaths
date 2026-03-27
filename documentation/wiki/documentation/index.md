@@ -42,7 +42,7 @@ Choose the pathway that matches what you need to do next: get the model running,
     <ol class="doc-pathway-steps">
       <li><a href="../user-guide/single-runs/">Single Runs</a></li>
       <li><a href="../user-guide/multiple-runs/">Multiple Runs</a></li>
-      <li><a href="../user-guide/tax-benefit-parameters/">Modifying Tax-Benefit Settings</a></li>
+      <li><a href="../user-guide/gui/">Graphical User Interface</a></li>
     </ol>
     <a href="../user-guide/" class="doc-pathway-link">Open User Guide →</a>
   </section>
