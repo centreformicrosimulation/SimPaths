@@ -831,6 +831,11 @@
   background: rgba(0,0,0,0.18);
 }
 
+/* Hide "Made with Material for MkDocs" */
+.md-copyright__highlight {
+  display: none;
+}
+
 .md-footer__link {
   opacity: 0.75;
   transition: opacity 0.12s ease;
