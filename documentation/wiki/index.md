@@ -98,27 +98,36 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
   <a href="research/" class="archive-link">ALL PUBLICATIONS →</a>
 </div>
 
-<div class="research-grid">
+<div class="research-list">
 
-<a href="https://www.sciencedirect.com/science/article/pii/S0167268125000319" class="research-card">
-  <span class="research-label">LIFE COURSE · 2025</span>
+<a href="https://www.sciencedirect.com/science/article/pii/S0167268125000319" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">LIFE COURSE · 2025</span>
+    <span class="research-journal">Journal of Economic Behavior &amp; Organization</span>
+  </div>
   <h3>Attenuation and reinforcement mechanisms over the life course</h3>
-  <p>Richiardi M, Bronka P, van de Ven J</p>
-  <span class="research-journal">Journal of Economic Behavior & Organization</span>
+  <p class="research-authors">Richiardi M, Bronka P, van de Ven J</p>
+  <span class="research-arrow">→</span>
 </a>
 
-<a href="https://doi.org/10.1016/j.socscimed.2024.116953" class="research-card">
-  <span class="research-label">POLICY ANALYSIS · 2024</span>
+<a href="https://doi.org/10.1016/j.socscimed.2024.116953" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">POLICY ANALYSIS · 2024</span>
+    <span class="research-journal">Social Science &amp; Medicine</span>
+  </div>
   <h3>Evaluating the influence of taxation and social security policies on psychological distress</h3>
-  <p>Kopasker D, Bronka P, Thomson RM, et al.</p>
-  <span class="research-journal">Social Science and Medicine</span>
+  <p class="research-authors">Kopasker D, Bronka P, Thomson RM, et al.</p>
+  <span class="research-arrow">→</span>
 </a>
 
-<a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004358" class="research-card">
-  <span class="research-label">HEALTH POLICY · 2024</span>
+<a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004358" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">HEALTH POLICY · 2024</span>
+    <span class="research-journal">PLOS Medicine</span>
+  </div>
   <h3>Short-term impacts of Universal Basic Income on population mental health inequalities in the UK</h3>
-  <p>Thomson RM, Kopasker D, Bronka P, et al.</p>
-  <span class="research-journal">PLOS Medicine</span>
+  <p class="research-authors">Thomson RM, Kopasker D, Bronka P, et al.</p>
+  <span class="research-arrow">→</span>
 </a>
 
 </div>
