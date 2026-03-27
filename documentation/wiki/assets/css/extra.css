@@ -832,15 +832,15 @@
 
 .md-footer-meta {
   background: transparent;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .md-footer-meta__inner {
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
 }
 
 /* ── Copyright block — brand + line ── */
@@ -879,7 +879,7 @@
   text-transform: none;
   color: var(--sp-midnight) !important;
   display: block;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
   visibility: visible;
 }
 
@@ -925,12 +925,16 @@
 .md-footer__inner {
   background: var(--sp-paper);
   border-top: 0.5px solid var(--sp-ghost);
+  padding-top: 0.3rem !important;
+  padding-bottom: 0.3rem !important;
+  min-height: 0 !important;
 }
 
 .md-footer__link {
   color: var(--sp-midnight) !important;
   transition: all 0.2s ease;
-  padding: 1.2rem 1rem;
+  padding: 0.5rem 1rem !important;
+  min-height: 0 !important;
 }
 
 .md-footer__link:hover {
