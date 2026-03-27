@@ -834,9 +834,14 @@
 }
 
 /* Hide "Made with Material for MkDocs" */
-.md-footer-meta html .md-copyright__highlight,
+.md-copyright {
+  visibility: hidden;
+  height: 1.2rem;
+  overflow: hidden;
+}
+
 .md-copyright__highlight {
-  display: none !important;
+  visibility: visible;
 }
 
 .md-copyright {
