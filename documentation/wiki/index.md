@@ -8,9 +8,9 @@ hide:
 
 <h1 class="hero-title">SimPaths</h1>
 
-SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. It builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries.
+SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
 
-SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
+This site documents the main SimPaths codebase built on **JAS-mine**, including the model architecture, operational documentation, validation work, research outputs, and project context. The broader SimPaths family spans work across the **UK and other European countries**.
 
 <div class="countries">
   <span class="country-tag">🇬🇧 United Kingdom</span>
@@ -32,11 +32,6 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
 
 <h2 class="section-heading">Explore SimPaths</h2>
 
-<p class="section-intro">
-  SimPaths now brings together model explanation, practical documentation, validation work,
-  research outputs, and project-level information in one place.
-</p>
-
 <div class="card-grid card-grid--primary">
 
 <a href="overview/" class="feature-card feature-card--primary">
@@ -44,7 +39,7 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
 </div>
 <h3>Model</h3>
-<p>Understand what SimPaths models, how it is parameterised, which modules it includes, and how the framework extends across countries.</p>
+<p>Understand what SimPaths models, how it is parameterised, and which modules it includes.</p>
 <span class="card-link">Explore the model →</span>
 </a>
 
@@ -97,11 +92,6 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
   <h2 class="section-heading">Recent Research Highlights</h2>
   <a href="research/" class="archive-link">ALL PUBLICATIONS →</a>
 </div>
-
-<p class="research-intro">
-  Peer-reviewed research using SimPaths spans life-course dynamics, mental health inequalities,
-  and the design of tax and welfare policy.
-</p>
 
 <div class="research-list">
 

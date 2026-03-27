@@ -11,5 +11,4 @@ The modular nature of the SimPaths framework is designed to facilitate analysis 
 - [Model Description](model-description.md) — what SimPaths models and why
 - [Simulated Modules](simulated-modules.md) — the behavioural modules
 - [Model Parameterisation](parameterisation.md) — how parameters are specified
-- [Country Variants](country-variants.md) — adapting SimPaths to other countries
 - [How to Cite](how-to-cite.md) — citation guidance and published research
