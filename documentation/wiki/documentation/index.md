@@ -1,6 +1,11 @@
+---
+hide:
+  - toc
+---
+
 # Documentation
 
-SimPaths documentation is organised around three routes depending on what you need to do: get the model running, work with simulations in practice, or extend the codebase.
+SimPaths documentation is organised around three routes: getting the model running, working with simulations in practice, and extending the codebase.
 
 <div class="card-grid card-grid--docs">
 
@@ -9,7 +14,7 @@ SimPaths documentation is organised around three routes depending on what you ne
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
 </div>
 <h3>Getting Started</h3>
-<p>Set up your environment, obtain the required input data, and run your first simulation.</p>
+<p>Set up your environment, obtain the required input data, and complete a first successful run.</p>
 <span class="card-link">Start here →</span>
 </a>
 
@@ -33,8 +38,38 @@ SimPaths documentation is organised around three routes depending on what you ne
 
 </div>
 
-## How to use this section
+## Recommended paths
 
-- Start with [Getting Started](../getting-started/index.md) if you are new to SimPaths.
-- Use the [User Guide](../user-guide/index.md) if you already have the model running and want to work with simulations.
-- Go to the [Developer Guide](../developer-guide/index.md) if you are changing code, architecture, or model internals.
+<div class="docs-link-grid">
+
+  <section class="docs-link-panel">
+    <h3>First-time setup</h3>
+    <p>For a clean first run, these are the main pages to work through in order.</p>
+    <ul>
+      <li><a href="../getting-started/environment-setup.md">Environment Setup</a></li>
+      <li><a href="../getting-started/data/index.md">Input Data</a></li>
+      <li><a href="../getting-started/first-simulation.md">Running Your First Simulation</a></li>
+    </ul>
+  </section>
+
+  <section class="docs-link-panel">
+    <h3>Running SimPaths</h3>
+    <p>Once the model is set up, these are the main operational guides.</p>
+    <ul>
+      <li><a href="../user-guide/single-runs.md">Single Runs</a></li>
+      <li><a href="../user-guide/multiple-runs.md">Multiple Runs</a></li>
+      <li><a href="../user-guide/tax-benefit-parameters.md">Modifying Tax-Benefit Settings</a></li>
+    </ul>
+  </section>
+
+  <section class="docs-link-panel">
+    <h3>Working on the codebase</h3>
+    <p>These are the strongest entry points if you are changing code or architecture.</p>
+    <ul>
+      <li><a href="../developer-guide/repository-guide.md">Repository Guide</a></li>
+      <li><a href="../developer-guide/internals/start-class-implementation.md">Start Class Implementation</a></li>
+      <li><a href="../developer-guide/internals/multirun-implementation.md">MultiRun Implementation</a></li>
+    </ul>
+  </section>
+
+</div>

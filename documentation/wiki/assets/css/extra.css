@@ -807,6 +807,52 @@
   color: var(--sp-midnight);
 }
 
+/* ═══════════════════════════════════════════════
+   DOCUMENTATION LANDING PAGE
+═══════════════════════════════════════════════ */
+
+.md-typeset .docs-link-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 1.6rem;
+}
+
+.md-typeset .docs-link-panel {
+  background: rgba(255,255,255,0.58);
+  border: 0.5px solid rgba(42,56,72,0.12);
+  border-radius: 10px;
+  padding: 1rem 1.1rem 0.9rem;
+  box-shadow: 0 2px 12px rgba(42,56,72,0.05);
+}
+
+.md-typeset .docs-link-panel h3 {
+  margin-top: 0.05rem;
+  margin-bottom: 0.35rem;
+}
+
+.md-typeset .docs-link-panel p {
+  font-size: 0.74rem;
+  line-height: 1.55;
+  color: var(--md-default-fg-color--light);
+  margin: 0 0 0.7rem;
+}
+
+.md-typeset .docs-link-panel ul {
+  margin: 0;
+  padding-left: 1.05rem;
+}
+
+.md-typeset .docs-link-panel li {
+  margin: 0.3rem 0;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .docs-link-panel {
+  background: rgba(26,40,54,0.86);
+  border-color: rgba(250,249,245,0.08);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+}
+
 /* ── Dark-mode card overrides ── */
 [data-md-color-scheme="slate"] .md-typeset a.feature-card {
   background: #1a2836;
@@ -833,12 +879,14 @@
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
+  .md-typeset .docs-link-grid,
   .md-typeset .card-grid--primary,
   .md-typeset .card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (max-width: 420px) {
+  .md-typeset .docs-link-grid,
   .md-typeset .card-grid--primary,
   .md-typeset .card-grid {
     grid-template-columns: 1fr;
