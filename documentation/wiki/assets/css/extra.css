@@ -551,6 +551,11 @@
   border: none;
 }
 
+/* Suppress the automatic heading permalink glyph on the homepage hero title */
+.md-typeset .hero .hero-title > .headerlink {
+  display: none !important;
+}
+
 /* ── Hairline under hero title ── */
 .md-typeset .hero .hero-title::after {
   content: '';
@@ -832,8 +837,8 @@
 
 .md-footer-meta {
   background: transparent;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 0.55rem;
+  padding-bottom: 0.75rem;
 }
 
 .md-footer-meta__inner {
@@ -865,7 +870,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  line-height: 1.6;
+  line-height: 1.35;
   color: var(--sp-midnight) !important;
 }
 
@@ -879,7 +884,8 @@
   text-transform: none;
   color: var(--sp-midnight) !important;
   display: block;
-  margin-bottom: 0.2rem;
+  line-height: 1.1;
+  margin-bottom: 0.05rem;
   visibility: visible;
 }
 
