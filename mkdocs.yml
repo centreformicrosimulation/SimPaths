@@ -8,7 +8,7 @@ docs_dir: documentation/wiki
 
 copyright: >-
   <strong class="footer-brand">SimPaths</strong><br>
-  &copy; 2025 SimPaths Framework. An open-source microsimulation initiative.
+  An open-source microsimulation initiative.
 
 theme:
   name: material
@@ -78,7 +78,7 @@ extra:
       name: GitHub
     - icon: fontawesome/solid/globe
       link: https://www.microsimulation.ac.uk/
-      name: CMPA
+      name: CeMPA
     - icon: fontawesome/solid/scale-balanced
       link: https://github.com/simpaths/SimPaths/blob/main/LICENSE
       name: License

@@ -183,12 +183,13 @@
 .md-header__title {
   font-family: var(--sp-heading-font) !important;
   font-size: 0.92rem !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   letter-spacing: 0.01em;
 }
 
 .md-header__title .md-header__topic {
   align-items: center;
+  font-weight: 400 !important;
 }
 
 /* ── Tab bar ── */
@@ -865,7 +866,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.6;
-  color: var(--sp-ghost) !important;
+  color: var(--sp-midnight) !important;
 }
 
 /* SimPaths brand name in footer */
@@ -921,13 +922,67 @@
 }
 
 /* ── Prev/Next navigation links ── */
-.md-footer__link {
-  color: var(--sp-midnight);
-  opacity: 0.5;
-  transition: opacity 0.12s ease;
+.md-footer__inner {
+  background: var(--sp-paper);
+  border-top: 0.5px solid var(--sp-ghost);
 }
+
+.md-footer__link {
+  color: var(--sp-midnight) !important;
+  transition: all 0.2s ease;
+  padding: 1.2rem 1rem;
+}
+
 .md-footer__link:hover {
+  background: rgba(42,56,72,0.03);
+}
+
+.md-footer__link .md-footer__direction {
+  font-family: "Inter", var(--md-text-font) !important;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sp-crimson);
   opacity: 1;
+}
+
+.md-footer__link .md-ellipsis {
+  font-family: var(--sp-heading-font) !important;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--sp-midnight);
+}
+
+.md-footer__link:hover .md-ellipsis {
+  color: var(--sp-crimson);
+}
+
+.md-footer__link .md-footer__button {
+  color: var(--sp-midnight);
+}
+
+.md-footer__link:hover .md-footer__button {
+  color: var(--sp-crimson);
+}
+
+/* ── Dark mode prev/next ── */
+[data-md-color-scheme="slate"] .md-footer__inner {
+  background: #141e2a;
+  border-top-color: rgba(195,198,213,0.1);
+}
+
+[data-md-color-scheme="slate"] .md-footer__link .md-ellipsis {
+  color: #c8d8e8;
+}
+
+[data-md-color-scheme="slate"] .md-footer__link:hover .md-ellipsis,
+[data-md-color-scheme="slate"] .md-footer__link:hover .md-footer__button {
+  color: #5cb8f0;
+}
+
+[data-md-color-scheme="slate"] .md-footer__link .md-footer__button {
+  color: #c8d8e8;
 }
 
 /* ── Dark mode footer ── */
