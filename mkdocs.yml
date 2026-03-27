@@ -15,18 +15,14 @@ copyright: >-
 theme:
   name: material
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: custom
       accent: custom
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       primary: custom
       accent: custom
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
   font: false
   logo: assets/images/logo.svg
   icon:

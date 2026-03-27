@@ -6,28 +6,7 @@ hide:
 
 <div class="hero" markdown>
 
-# SimPaths
-
-<p class="tagline">Open-source dynamic microsimulation for life course modelling — projecting careers, families, health, and finances across populations.</p>
-
-<div class="hero-badges">
-  <span class="hero-badge">✓ Open Source</span>
-  <span class="hero-badge">🌍 5 Countries</span>
-  <span class="hero-badge">☕ Java / JAS-mine</span>
-  <span class="hero-badge">🔬 UKRI HealthMod</span>
-</div>
-
-<div class="hero-cta">
-  <a href="getting-started/" class="btn-primary">Get Started →</a>
-  <a href="overview/" class="btn-outline">Read the Docs</a>
-  <a href="https://github.com/simpaths/SimPaths" class="btn-outline">View on GitHub</a>
-</div>
-
-</div>
-
----
-
-## About SimPaths
+<h1 class="hero-title">SimPaths</h1>
 
 SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. It builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries.
 
@@ -39,6 +18,14 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
   <span class="country-tag">🇭🇺 Hungary</span>
   <span class="country-tag">🇮🇹 Italy</span>
   <span class="country-tag">🇵🇱 Poland</span>
+</div>
+
+<div class="hero-cta">
+  <a href="getting-started/" class="btn-primary">Get Started →</a>
+  <a href="overview/" class="btn-secondary">Read the Docs</a>
+  <a href="https://github.com/simpaths/SimPaths" class="btn-secondary">View on GitHub</a>
+</div>
+
 </div>
 
 ---
