@@ -551,8 +551,8 @@
   border: none;
 }
 
-/* Suppress the automatic heading permalink glyph on the homepage hero title */
-.md-typeset .hero .hero-title > .headerlink {
+/* Remove MkDocs' automatic heading permalink glyphs site-wide */
+.md-typeset .headerlink {
   display: none !important;
 }
 
