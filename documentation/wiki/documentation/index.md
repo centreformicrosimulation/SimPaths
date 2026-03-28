@@ -5,7 +5,7 @@ hide:
 
 # Documentation
 
-SimPaths is built in Java using the [JAS-mine](http://www.jas-mine.net/) simulation libraries. Choose the pathway that matches what you need to do next: get the model running, work with simulations in practice, or move into the codebase.
+Choose the pathway that matches what you need to do next: get the model running, work with simulations in practice, or move into the codebase.
 
 <div class="doc-pathways">
 
@@ -55,7 +55,7 @@ SimPaths is built in Java using the [JAS-mine](http://www.jas-mine.net/) simulat
       <div>
         <p class="doc-pathway-kicker">Working on the codebase</p>
         <h2>Understand architecture and development flow</h2>
-        <p>Use this path if you intend to implement code changes, trace execution, or understand how SimPaths is structured on top of JAS-mine.</p>
+        <p>Use this path if you are changing code, tracing execution, or trying to understand how SimPaths is structured on top of JAS-mine.</p>
       </div>
     </div>
     <ol class="doc-pathway-steps">
