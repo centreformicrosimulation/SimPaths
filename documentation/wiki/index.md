@@ -8,9 +8,9 @@ hide:
 
 <h1 class="hero-title">SimPaths</h1>
 
-SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
+SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
 
-This site documents the main SimPaths codebase built on **JAS-mine**, including the model architecture, operational documentation, validation work, research outputs, and project context. The broader SimPaths family spans work across the **UK and other European countries**.
+The broader SimPaths family spans **the UK and other European countries**.
 
 <div class="countries">
   <span class="country-tag">🇬🇧 United Kingdom</span>
