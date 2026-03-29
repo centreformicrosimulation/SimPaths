@@ -6,30 +6,11 @@ hide:
 
 <div class="hero" markdown>
 
-# SimPaths
+<h1 class="hero-title">SimPaths</h1>
 
-<p class="tagline">Open-source dynamic microsimulation for life course modelling — projecting careers, families, health, and finances across populations.</p>
+SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
 
-<div class="hero-badges">
-  <span class="hero-badge">✓ Open Source</span>
-  <span class="hero-badge">🌍 5 Countries</span>
-  <span class="hero-badge">☕ Java / JAS-mine</span>
-  <span class="hero-badge">🔬 UKRI HealthMod</span>
-</div>
-
-<div class="hero-cta">
-  <a href="getting-started/" class="btn-primary">Get Started →</a>
-  <a href="overview/" class="btn-outline">Read the Docs</a>
-  <a href="https://github.com/simpaths/SimPaths" class="btn-outline">View on GitHub</a>
-</div>
-
-</div>
-
----
-
-## About SimPaths
-
-SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
+The broader SimPaths family spans **the UK and other European countries**.
 
 <div class="countries">
   <span class="country-tag">🇬🇧 United Kingdom</span>
@@ -39,53 +20,47 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
   <span class="country-tag">🇵🇱 Poland</span>
 </div>
 
+<div class="hero-cta">
+  <a href="documentation/" class="btn-primary">Explore Documentation →</a>
+  <a href="overview/" class="btn-secondary">Explore the Model</a>
+  <a href="https://github.com/simpaths/SimPaths" class="btn-secondary">View on GitHub</a>
+</div>
+
+</div>
+
 ---
 
-<h2 class="section-heading">Explore the Documentation</h2>
+<h2 class="section-heading">Explore SimPaths</h2>
 
-<div class="card-grid">
+<div class="card-grid card-grid--primary">
 
-<a href="overview/" class="feature-card">
+<a href="overview/" class="feature-card feature-card--primary">
 <div class="card-icon-wrap card-icon--overview">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
 </div>
-<h3>Overview</h3>
-<p>What SimPaths models and why — architecture, modules, and parameterisation.</p>
-<span class="card-link">Explore →</span>
+<h3>Model</h3>
+<p>Understand what SimPaths models, how it is parameterised, and which modules it includes.</p>
+<span class="card-link">Explore the model →</span>
 </a>
 
-<a href="getting-started/" class="feature-card">
-<div class="card-icon-wrap card-icon--start">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+<a href="documentation/" class="feature-card feature-card--primary">
+<div class="card-icon-wrap card-icon--docs">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
 </div>
-<h3>Getting Started</h3>
-<p>Set up your environment, load input data, and run your first simulation.</p>
-<span class="card-link">Get Started →</span>
+<h3>Documentation</h3>
+<p>Find the paths for getting started, running simulations in practice, and navigating the developer-facing internals of SimPaths.</p>
+<span class="card-link">Open documentation →</span>
 </a>
 
-<a href="user-guide/" class="feature-card">
-<div class="card-icon-wrap card-icon--user">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 </div>
-<h3>User Guide</h3>
-<p>Single and multi-run simulations, GUI, parameter editing, and uncertainty analysis.</p>
-<span class="card-link">View Guide →</span>
-</a>
 
-<a href="developer-guide/" class="feature-card">
-<div class="card-icon-wrap card-icon--dev">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-</div>
-<h3>Developer Guide</h3>
-<p>JAS-mine architecture, SimPaths internals, and how-to guides for extending the model.</p>
-<span class="card-link">Developer Guide →</span>
-</a>
+<div class="card-grid card-grid--secondary">
 
 <a href="validation/" class="feature-card">
 <div class="card-icon-wrap card-icon--ref">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
 </div>
-<h3>Model Validation</h3>
+<h3>Validation</h3>
 <p>Validation procedures, alignment diagnostics, and comparison against external targets.</p>
 <span class="card-link">Validation →</span>
 </a>
@@ -99,11 +74,59 @@ SimPaths builds upon **JAS-mine**, an open-source Java platform designed for dis
 <span class="card-link">Research →</span>
 </a>
 
+<a href="funding/" class="feature-card">
+<div class="card-icon-wrap card-icon--funding">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"/><path d="M5 10v8"/><path d="M9 10v8"/><path d="M15 10v8"/><path d="M19 10v8"/><path d="M2 18h20"/><path d="M12 2l10 5H2l10-5z"/></svg>
+</div>
+<h3>Funding</h3>
+<p>See the grants and programmes that have supported the development and application of SimPaths.</p>
+<span class="card-link">Funding →</span>
+</a>
+
 </div>
 
 ---
 
-!!! tip "New to SimPaths?"
-    Start with the [Overview](overview/) to understand what the model does, then follow the [Getting Started](getting-started/) guide to run your first simulation.
+<div class="research-section">
+<div class="research-header">
+  <h2 class="section-heading">Recent Research Highlights</h2>
+  <a href="research/" class="archive-link">ALL PUBLICATIONS →</a>
+</div>
 
-For papers using SimPaths, see the [Research](research/) page.
+<div class="research-list">
+
+<a href="https://doi.org/10.1093/eurpub/ckaf161.076" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">MENTAL HEALTH · 2025</span>
+    <span class="research-journal">European Journal of Public Health</span>
+  </div>
+  <h3>Tax reforms vs benefit enhancement to address mental health inequalities: a microsimulation study</h3>
+  <p class="research-authors">Igelstrom E, Kopasker D, Richiardi MG, Katikireddi SV</p>
+  <p class="research-summary">Compares alternative fiscal policy responses and their implications for mental health inequalities.</p>
+  <span class="research-arrow">→</span>
+</a>
+
+<a href="https://www.sciencedirect.com/science/article/pii/S0167268125000319" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">LIFE COURSE · 2025</span>
+    <span class="research-journal">Journal of Economic Behavior &amp; Organization</span>
+  </div>
+  <h3>Attenuation and reinforcement mechanisms over the life course</h3>
+  <p class="research-authors">Richiardi M, Bronka P, van de Ven J</p>
+  <p class="research-summary">Examines how early advantage and disadvantage can compound or soften across the life course.</p>
+  <span class="research-arrow">→</span>
+</a>
+
+<a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004358" class="research-entry">
+  <div class="research-entry__meta">
+    <span class="research-label">HEALTH POLICY · 2024</span>
+    <span class="research-journal">PLOS Medicine</span>
+  </div>
+  <h3>Short-term impacts of Universal Basic Income on population mental health inequalities in the UK</h3>
+  <p class="research-authors">Thomson RM, Kopasker D, Bronka P, et al.</p>
+  <p class="research-summary">Uses microsimulation to estimate how Universal Basic Income could affect mental health across the UK population.</p>
+  <span class="research-arrow">→</span>
+</a>
+
+</div>
+</div>

@@ -1,36 +1,28 @@
-site_name: SimPaths Documentation
+site_name: "SimPaths: life course microsimulation"
 site_description: >-
   An open-source microsimulation framework for modelling individual
   and household life course events across the UK and Europe.
-site_url: https://simpaths.github.io/SimPaths/
-repo_url: https://github.com/simpaths/SimPaths
-repo_name: simpaths/SimPaths
+site_url: https://simpaths.org/
 
 docs_dir: documentation/wiki
 
 copyright: >-
-  Copyright &copy; Matteo Richiardi, Patryk Bronka, Justin van de Ven —
-  Centre for Microsimulation and Policy Analysis
+  <strong class="footer-brand">SimPaths</strong><br>
+  An open-source microsimulation initiative.
 
 theme:
   name: material
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: custom
       accent: custom
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
       primary: custom
       accent: custom
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
   font: false
   logo: assets/images/logo.svg
-  icon:
-    repo: fontawesome/brands/github
   features:
     - navigation.instant
     - navigation.instant.prefetch
@@ -83,76 +75,81 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/simpaths/SimPaths
-      name: GitHub
+      name: GITHUB
     - icon: fontawesome/solid/globe
       link: https://www.microsimulation.ac.uk/
-      name: Centre for Microsimulation and Policy Analysis
+      name: CeMPA
+    - icon: fontawesome/solid/scale-balanced
+      link: https://github.com/simpaths/SimPaths/blob/main/LICENSE
+      name: LICENSE
 
 nav:
   - Home: index.md
 
-  - Overview:
+  - Model:
       - overview/index.md
       - Model Description: overview/model-description.md
       - Simulated Modules: overview/simulated-modules.md
       - Model Parameterisation: overview/parameterisation.md
-      - Country Variants: overview/country-variants.md
       - How to Cite: overview/how-to-cite.md
 
-  - Getting Started:
-      - getting-started/index.md
-      - Environment Setup: getting-started/environment-setup.md
-      - Input Data:
-          - getting-started/data/index.md
-          - Initial Population (UK): getting-started/data/initial-population-uk.md
-          - Tax-Benefit Donors (UK): getting-started/data/tax-benefit-donors-uk.md
-      - Running Your First Simulation: getting-started/first-simulation.md
-      - Video Tutorials: getting-started/video-tutorials.md
+  - Documentation:
+      - documentation/index.md
+      - Getting Started:
+          - getting-started/index.md
+          - Environment Setup: getting-started/environment-setup.md
+          - Input Data:
+              - getting-started/data/index.md
+              - Initial Population (UK): getting-started/data/initial-population-uk.md
+              - Tax-Benefit Donors (UK): getting-started/data/tax-benefit-donors-uk.md
+          - Running Your First Simulation: getting-started/first-simulation.md
+          - Video Tutorials: getting-started/video-tutorials.md
+      - User Guide:
+          - user-guide/index.md
+          - Single Runs: user-guide/single-runs.md
+          - Multiple Runs: user-guide/multiple-runs.md
+          - Graphical User Interface: user-guide/gui.md
+          - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
+          - Uncertainty Analysis: user-guide/uncertainty-analysis.md
+      - Developer Guide:
+          - developer-guide/index.md
+          - Working in GitHub: developer-guide/working-in-github.md
+          - Repository Guide: developer-guide/repository-guide.md
+          - JAS-mine Architecture:
+              - developer-guide/jasmine/index.md
+              - Project Structure: developer-guide/jasmine/project-structure.md
+              - The Model and the Schedule: developer-guide/jasmine/model-and-schedule.md
+              - The Start Class: developer-guide/jasmine/start-class.md
+              - The MultiRun Class: developer-guide/jasmine/multirun-class.md
+              - Updating JAS-mine: developer-guide/jasmine/updating-jasmine.md
+          - SimPaths Internals:
+              - developer-guide/internals/index.md
+              - SimPaths API: developer-guide/internals/api.md
+              - The SimPathsModel Class: developer-guide/internals/simpaths-model.md
+              - Start Class Implementation: developer-guide/internals/start-class-implementation.md
+              - MultiRun Implementation: developer-guide/internals/multirun-implementation.md
+          - How-To Guides:
+              - developer-guide/how-to/index.md
+              - Introduce a New Variable: developer-guide/how-to/new-variable.md
+              - Add Parameters to the GUI: developer-guide/how-to/add-gui-parameters.md
+              - Perform MultiRun Simulations: developer-guide/how-to/multirun-simulations.md
+          - JAS-mine Reference:
+              - jasmine-reference/index.md
+              - Statistical Package: jasmine-reference/statistical-package.md
+              - Collection Filters: jasmine-reference/collection-filters.md
+              - Alignment Library: jasmine-reference/alignment-library.md
+              - Matching Library: jasmine-reference/matching-library.md
+              - Regression Library: jasmine-reference/regression-library.md
+              - Saving Outputs: jasmine-reference/saving-outputs.md
+              - Querying the Database: jasmine-reference/querying-database.md
+              - Links and Resources: jasmine-reference/links.md
+              - Enums: jasmine-reference/enums.md
 
-  - User Guide:
-      - user-guide/index.md
-      - Single Runs: user-guide/single-runs.md
-      - Multiple Runs: user-guide/multiple-runs.md
-      - Graphical User Interface: user-guide/gui.md
-      - Modifying Tax-Benefit Settings: user-guide/tax-benefit-parameters.md
-      - Uncertainty Analysis: user-guide/uncertainty-analysis.md
-
-  - Developer Guide:
-      - developer-guide/index.md
-      - Working in GitHub: developer-guide/working-in-github.md
-      - Repository Guide: developer-guide/repository-guide.md
-      - JAS-mine Architecture:
-          - developer-guide/jasmine/index.md
-          - Project Structure: developer-guide/jasmine/project-structure.md
-          - The Model and the Schedule: developer-guide/jasmine/model-and-schedule.md
-          - The Start Class: developer-guide/jasmine/start-class.md
-          - The MultiRun Class: developer-guide/jasmine/multirun-class.md
-          - Updating JAS-mine: developer-guide/jasmine/updating-jasmine.md
-      - SimPaths Internals:
-          - developer-guide/internals/index.md
-          - SimPaths API: developer-guide/internals/api.md
-          - The SimPathsModel Class: developer-guide/internals/simpaths-model.md
-          - Start Class Implementation: developer-guide/internals/start-class-implementation.md
-          - MultiRun Implementation: developer-guide/internals/multirun-implementation.md
-      - How-To Guides:
-          - developer-guide/how-to/index.md
-          - Introduce a New Variable: developer-guide/how-to/new-variable.md
-          - Add Parameters to the GUI: developer-guide/how-to/add-gui-parameters.md
-          - Perform MultiRun Simulations: developer-guide/how-to/multirun-simulations.md
-      - JAS-mine Reference:
-          - jasmine-reference/index.md
-          - Statistical Package: jasmine-reference/statistical-package.md
-          - Collection Filters: jasmine-reference/collection-filters.md
-          - Alignment Library: jasmine-reference/alignment-library.md
-          - Matching Library: jasmine-reference/matching-library.md
-          - Regression Library: jasmine-reference/regression-library.md
-          - Saving Outputs: jasmine-reference/saving-outputs.md
-          - Querying the Database: jasmine-reference/querying-database.md
-          - Links and Resources: jasmine-reference/links.md
-          - Enums: jasmine-reference/enums.md
-
-  - Model Validation:
+  - Validation:
       - validation/index.md
 
   - Research:
       - research/index.md
+
+  - Funding:
+      - funding/index.md

@@ -1,6 +1,6 @@
 # SimPaths API
 
-SimPaths APIs are published [here](https://simpaths.github.io/SimPaths/javadoc/).
+SimPaths APIs are published [here](https://simpaths.org/javadoc/).
 
 # 1. Introduction
 
