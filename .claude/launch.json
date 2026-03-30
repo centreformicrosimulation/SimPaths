@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "logo-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/hrushikeshkalakandra/Documents/GitHub/SimPaths/documentation/wiki/assets/images/logo-concepts"],
+      "port": 8765
+    },
+    {
+      "name": "mkdocs",
+      "runtimeExecutable": "mkdocs",
+      "runtimeArgs": ["serve", "-a", "127.0.0.1:8766"],
+      "port": 8766
+    }
+  ]
+}

@@ -76,7 +76,7 @@ replace base_val = r(mean)
 replace growth= growth/base_val
 drop base_val
 replace stm = stm - 2000
-save "$dir_external_data\growth_rates", replace
+save "$dir_external_data/gdp_growth_rates", replace
 
 
 /********************************* PREPARE DATA *******************************/
@@ -85,7 +85,7 @@ save "$dir_external_data\growth_rates", replace
 use "${estimation_sample2}", clear //panel with predicted wages 
 
 * Merge in growth rates 
-merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(growth)
+merge m:1 stm using "$dir_external_data/gdp_growth_rates", keep(3) nogen keepusing(growth)
 
 * Set data 
 xtset idperson swv

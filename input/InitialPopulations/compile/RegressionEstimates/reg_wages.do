@@ -96,7 +96,7 @@ sum real_wage_growth if stm == 15
 gen base = r(mean)
 replace real_wage_growth = real_wage_growth / base // Note: switching from 100 base to 1 base as that's what happens in the simulation when rebasing indices
 drop base
-save "$dir_external_data/growth_rates", replace
+save "$dir_external_data/wage_growth_rates", replace
 
 /********************************* PREPARE DATA *******************************/
 
@@ -111,7 +111,7 @@ sort idperson swv
 do "${dir_do}/variable_update.do"
 
 * merge in real growth index 
-merge m:1 stm using "$dir_external_data/growth_rates", keep(3) nogen keepusing(real_wage_growth)
+merge m:1 stm using "$dir_external_data/wage_growth_rates", keep(3) nogen keepusing(real_wage_growth)
 
 * Hours work per week 
 gen hours = 0

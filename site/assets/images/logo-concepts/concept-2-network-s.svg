@@ -1,0 +1,52 @@
+<svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Concept 2: Node Network S
+       Life-stage nodes connected by curved paths forming an S shape.
+       Each node represents a life domain (career, family, health, finance).
+       Clean, geometric, academic. -->
+
+  <defs>
+    <linearGradient id="pathGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e3050"/>
+      <stop offset="50%" stop-color="#2478b5"/>
+      <stop offset="100%" stop-color="#4fb3f0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- S-curve backbone connecting all nodes -->
+  <path d="M60 200 C60 225, 180 225, 180 170 C180 120, 60 130, 60 80 C60 30, 180 30, 180 50"
+        stroke="url(#pathGrad)" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Secondary connecting arcs between nearby nodes -->
+  <path d="M120 195 C145 195, 155 185, 180 170" stroke="#2478b5" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.3"/>
+  <path d="M120 55 C95 55, 85 65, 60 80" stroke="#4fb3f0" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.3"/>
+
+  <!-- Node 1 — Origin (bottom-left) -->
+  <circle cx="60" cy="200" r="18" fill="#1e3050"/>
+  <circle cx="60" cy="200" r="10" fill="#2478b5"/>
+  <circle cx="60" cy="200" r="4" fill="white"/>
+
+  <!-- Node 2 — Career (bottom curve) -->
+  <circle cx="120" cy="195" r="13" fill="#1e3050" opacity="0.8"/>
+  <circle cx="120" cy="195" r="7" fill="#2478b5"/>
+
+  <!-- Node 3 — Family (right middle) -->
+  <circle cx="180" cy="170" r="15" fill="#1e3050" opacity="0.85"/>
+  <circle cx="180" cy="170" r="8" fill="#3b9ede"/>
+
+  <!-- Node 4 — Health (middle inflection) -->
+  <circle cx="120" cy="120" r="12" fill="#2478b5" opacity="0.7"/>
+  <circle cx="120" cy="120" r="6" fill="#4fb3f0"/>
+
+  <!-- Node 5 — Finance (left upper) -->
+  <circle cx="60" cy="80" r="15" fill="#1e3050" opacity="0.85"/>
+  <circle cx="60" cy="80" r="8" fill="#3b9ede"/>
+
+  <!-- Node 6 — Simulation (upper curve) -->
+  <circle cx="120" cy="55" r="13" fill="#2478b5" opacity="0.8"/>
+  <circle cx="120" cy="55" r="7" fill="#4fb3f0"/>
+
+  <!-- Node 7 — Destination (top-right) -->
+  <circle cx="180" cy="50" r="18" fill="#2478b5"/>
+  <circle cx="180" cy="50" r="10" fill="#4fb3f0"/>
+  <circle cx="180" cy="50" r="4" fill="white"/>
+</svg>
