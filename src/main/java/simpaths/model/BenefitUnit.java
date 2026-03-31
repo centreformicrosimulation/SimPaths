@@ -2826,14 +2826,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 } else return 0.;
             }
             case FixedCostMale_NorthernRegions -> {
-                if(getMale().getLabourSupplyHoursWeekly() > 0 && (region.equals(Region.ITC) || region.equals(Region.ITH))) {
-                    return 1.;
-                } else return 0.;
+                return 0.;
             }
             case FixedCostMale_SouthernRegions -> {
-                if(getMale().getLabourSupplyHoursWeekly() > 0 && (region.equals(Region.ITF) || region.equals(Region.ITG))) {
-                    return 1.;
-                } else return 0.;
+                return 0.;
             }
             case FixedCostFemale -> {
                 if(getFemale().getLabourSupplyHoursWeekly() > 0) {
@@ -2841,14 +2837,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 } else return 0.;
             }
             case FixedCostFemale_NorthernRegions -> {
-                if(getFemale().getLabourSupplyHoursWeekly() > 0 && (region.equals(Region.ITC) || region.equals(Region.ITH))) {
-                    return 1.;
-                } else return 0.;
+                return 0.;
             }
             case FixedCostFemale_SouthernRegions -> {
-                if(getFemale().getLabourSupplyHoursWeekly() > 0 && (region.equals(Region.ITF) || region.equals(Region.ITG))) {
-                    return 1.;
-                } else return 0.;
+                return 0.;
             }
             case FixedCostMale_NChildren017 -> {
                 if(getMale().getLabourSupplyHoursWeekly() > 0) {
@@ -3051,16 +3043,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return 0.;        //Our model doesn't take account of elderly (as people move out of parental home when 18 years old, and we do not provide a mechanism for parents to move back in.
             }
             case HoursMaleByDregion -> {
-                if(model.getCountry().equals(Country.IT)) {
-                    if(getRegion().equals(Region.ITF) || getRegion().equals(Region.ITG)) {        //For South Italy (Sud) and Islands (Isole)
-                        return getMale().getLabourSupplyHoursWeekly();
-                    } else return 0.;
-                } else if(model.getCountry().equals(Country.UK)) {
-                    if(getRegion().equals(Region.UKI)) {        //For London
-                        return getMale().getLabourSupplyHoursWeekly();
-                    } else return 0.;
-                } else throw new IllegalArgumentException("Error - household " + this.getId() + " has region " + getRegion() + " which is not yet handled in DonorHousehold.getDoubleValue()!");
-
+                if(getRegion().equals(Region.UKI)) {        //For London
+                    return getMale().getLabourSupplyHoursWeekly();
+                } else return 0.;
             }
             case HoursFemale -> {
                 return getFemale().getLabourSupplyHoursWeekly();
@@ -3087,15 +3072,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 return 0.;        //Our model doesn't take account of elderly (as people move out of parental home when 18 years old, and we do not provide a mechanism for parents to move back in.
             }
             case HoursFemaleByDregion -> {        //Value of hours are already taken into account by multiplying regression coefficients in Parameters class
-                if(model.getCountry().equals(Country.IT)) {
-                    if(getRegion().equals(Region.ITF) || getRegion().equals(Region.ITG)) {        //For South Italy (Sud) and Islands (Isole)
-                        return getFemale().getLabourSupplyHoursWeekly();
-                    } else return 0.;
-                } else if(model.getCountry().equals(Country.UK)) {
-                    if(getRegion().equals(Region.UKI)) {        //For London
-                        return getFemale().getLabourSupplyHoursWeekly();
-                    } else return 0.;
-                } else throw new IllegalArgumentException("Error - household " + this.getKey().getId() + " has region " + getRegion() + " which is not yet handled in DonorHousehold.getDoubleValue()!");
+                if(getRegion().equals(Region.UKI)) {        //For London
+                    return getFemale().getLabourSupplyHoursWeekly();
+                } else return 0.;
 
                 //The following regressors for FixedCosts appear as negative in the Utility regression, and so are multiplied by a factor of -1 below.
                 //The following regressors only apply when the male hours worked is greater than 0

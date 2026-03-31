@@ -6,14 +6,6 @@ public enum Region implements IntegerValuedEnum {
 	
 	//Uses NUTS Level 1 system for each country
 	
-	//Italy					//Name										//EUROMOD drgn1 value
-	ITC("Nord Ovest", 1),	//Nord Ovest								1
-	ITF("Sud", 4),			//Sud										4
-	ITG("Isole", 5),		//Isole										5
-	ITH("Nord Est", 2),		//Nord Est (formerly ITD)					2
-	ITI("Centro", 3),		//Centro (formerly ITE)						3
-	//See https://www.euromod.ac.uk/sites/default/files/country-reports/year6/Y7_CR_IT_Final.pdf page 41 for definition EUROMOD variable drgn2 which corresponds to NUTS level 2, from which can be imputed the NUTS level 1 and therefore meaning of drgn1 values. 
-	
 	//UK									//Name							//EUROMOD drgn1 value
 	UKC("North East", 1),					//North East					//1
 	UKD("North West", 2),					//North West					//2

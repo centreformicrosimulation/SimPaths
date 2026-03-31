@@ -85,12 +85,7 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		//Adjust the country and year to the value read from Excel, which is updated when the database is rebuilt. Otherwise it will set the country and year to the last one used to build the database
 		MultiKeyCoefficientMap lastDatabaseCountryAndYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + Parameters.DatabaseCountryYearFilename + ".xlsx", "Data", 1);
-		if (lastDatabaseCountryAndYear.keySet().stream().anyMatch(key -> key.toString().equals("MultiKey[IT]"))) {
-			country = Country.IT;
-		} else {
-			country = Country.UK;
-//			country = Country.IT;
-		}
+		country = Country.UK;
 		String valueYear = lastDatabaseCountryAndYear.getValue(country.toString()).toString();
 		startYear = Integer.parseInt(valueYear);
 
@@ -311,7 +306,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		// initiate radio buttons to define policy environment and input database
 		count = 0;
 		Map<String,Integer> startUpOptionsStringsMap = new LinkedHashMap<>();
-		startUpOptionsStringsMap.put("Change country and/or simulation start year", count++);
+		startUpOptionsStringsMap.put("Change simulation start year", count++);
 		startUpOptionsStringsMap.put("Load new input data for starting populations", count++);
 		startUpOptionsStringsMap.put("Use UKMOD Light to alter description of tax and benefit systems", count++);
 		startUpOptionsStringsMap.put("Load new input data for tax and benefit systems", count++);
@@ -447,14 +442,12 @@ public class SimPathsStart implements ExperimentBuilder {
 
 	/**
 	 *
-	 * METHOD FOR DISPLAYING GUI FOR SELECTING COUNTRY AND START YEAR OF SIMULATION
+	 * METHOD FOR DISPLAYING GUI FOR SELECTING START YEAR OF SIMULATION
 	 *
 	 */
 	private static void chooseCountryAndStartYear() {
 
 		// set-up combo-boxes
-		String textC = null;
-		ComboBoxCountry cbCountry = new ComboBoxCountry(textC);
 		String textY = null;
 		ComboBoxYear cbStartYear = new ComboBoxYear(textY);
 
@@ -463,10 +456,8 @@ public class SimPathsStart implements ExperimentBuilder {
 		BasicInternalFrameUI bi = (BasicInternalFrameUI)countryAndYearFrame.getUI();
 		bi.setNorthPane(null);
 		countryAndYearFrame.setBorder(null);
-        cbCountry.setBorder(BorderFactory.createTitledBorder("Country selection drop-down menu"));
         cbStartYear.setBorder(BorderFactory.createTitledBorder("Start year selection drop-down menu"));
         countryAndYearFrame.setLayout(new BoxLayout(countryAndYearFrame.getContentPane(), BoxLayout.PAGE_AXIS));
-        countryAndYearFrame.add(cbCountry);
         JPanel border = new JPanel();
         countryAndYearFrame.add(border);
         countryAndYearFrame.add(cbStartYear);
@@ -475,11 +466,11 @@ public class SimPathsStart implements ExperimentBuilder {
         countryAndYearFrame.setVisible(true);
 
 		// text for GUI
-		String title = "Country and Start Year";
-		String text = "<html><h2 style=\"text-align: center; font-size:120%;\">Select simulation country and start year</h2>";
+		String title = "Start Year";
+		String text = "<html><h2 style=\"text-align: center; font-size:120%;\">Select simulation start year</h2>";
 
 		// sizing for GUI
-		int height = 350, width = 600;
+		int height = 280, width = 600;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		if (screenSize.width < 850) {
 			width = (int) (screenSize.width * 0.95);
@@ -495,8 +486,8 @@ public class SimPathsStart implements ExperimentBuilder {
         // Therefore, we should pass some sort of setting to the model blocking the alteration of
         // the country if possible.  Could this be done by making the setCountry method ineffective
         // when the country has been set by the user in the dialog box in the start class?
-      	country = cbCountry.getCountryEnum();	 //Temporarily commented out to disallow choice of the country
-        //country = Country.IT;
+        //country = cbCountry.getCountryEnum();	 //Temporarily commented out to disallow choice of the country
+        country = Country.UK;
 		startYear = cbStartYear.getYear();
 
 		//Save the last selected country and year to Excel to use in the model if GUI launched straight away

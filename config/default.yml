@@ -10,7 +10,7 @@ randomSeed: 606           # seed for the first run; incremented automatically if
 startYear: 2019           # first year of simulation (must have matching input/donor data)
 endYear: 2022             # last year of simulation (inclusive)
 popSize: 50000            # simulated population size (larger = more accurate, slower)
-# countryString: "United Kingdom"   # "United Kingdom" or "Italy" (auto-detected from donor DB if omitted)
+# countryString: "United Kingdom"   # Auto-detected from donor DB if omitted
 # integrationTest: false            # true = write output to a fixed folder for comparison in CI tests
 
 

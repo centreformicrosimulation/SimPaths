@@ -558,9 +558,6 @@ public class Parameters {
     // private static MultiKeyCoefficientMap coeffCovariancePartnershipU1b; //Probit enter partnership if not in continuous education
     private static MultiKeyCoefficientMap coeffCovariancePartnershipU2; //Probit exit partnership (females)
 
-    //Partnership for Italy
-    private static MultiKeyCoefficientMap coeffCovariancePartnershipITU1; //Probit enter partnership for Italy
-    private static MultiKeyCoefficientMap coeffCovariancePartnershipITU2; //Probit exit partnership for Italy
 
     //Fertility
     private static MultiKeyCoefficientMap coeffCovarianceFertilityF1; //Probit fertility if in continuous education
@@ -794,8 +791,6 @@ public class Parameters {
     private static BinomialRegression regPartnershipU1b;
     private static BinomialRegression regPartnershipU2;
 
-    private static BinomialRegression regPartnershipITU1;
-    private static BinomialRegression regPartnershipITU2;
 
     //Fertility
     private static BinomialRegression regFertilityF1;
@@ -936,12 +931,7 @@ public class Parameters {
         loadTimeSeriesFactorMaps(country);
         instantiateAlignmentMaps();
 
-        // scenario parameters
-        if (country.equals(Country.IT)) {
-            SAVINGS_RATE = 0.056;
-        } else {
-            SAVINGS_RATE = 0.056;
-        }
+        SAVINGS_RATE = 0.056;
         saveImperfectTaxDBMatches = taxDBMatches;
 
         flagDefaultToTimeSeriesAverages = defaultToTimeSeriesAverages;
@@ -1287,8 +1277,6 @@ public class Parameters {
                     {"coeffCovarianceChildcareC1b", coeffCovarianceChildcareC1b},
                     {"coeffCovariancePartnershipU1", coeffCovariancePartnershipU1},
                     {"coeffCovariancePartnershipU2", coeffCovariancePartnershipU2},
-                    //{"coeffCovariancePartnershipITU1", coeffCovariancePartnershipITU1},
-                    //{"coeffCovariancePartnershipITU2", coeffCovariancePartnershipITU2},
                     {"coeffCovarianceFertilityF1", coeffCovarianceFertilityF1},
                 });
             }
@@ -1408,16 +1396,10 @@ public class Parameters {
             coeffCovarianceChildcareC1b = bootstrapWithTrace("coeffCovarianceChildcareC1b", coeffCovarianceChildcareC1b);
 
             //Specification of some processes depends on the country:
-            if (country.equals(Country.UK)) {
-                coeffCovariancePartnershipU1 = bootstrapWithTrace("coeffCovariancePartnershipU1", coeffCovariancePartnershipU1);
-                // coeffCovariancePartnershipU1b = RegressionUtils.bootstrap(coeffCovariancePartnershipU1b);
-                coeffCovariancePartnershipU2 = bootstrapWithTrace("coeffCovariancePartnershipU2", coeffCovariancePartnershipU2);
-                coeffCovarianceFertilityF1 = bootstrapWithTrace("coeffCovarianceFertilityF1", coeffCovarianceFertilityF1);
-            } else if (country.equals(Country.IT)) {
-                coeffCovariancePartnershipITU1 = bootstrapWithTrace("coeffCovariancePartnershipITU1", coeffCovariancePartnershipITU1);
-                coeffCovariancePartnershipITU2 = bootstrapWithTrace("coeffCovariancePartnershipITU2", coeffCovariancePartnershipITU2);
-                coeffCovarianceFertilityF1 = bootstrapWithTrace("coeffCovarianceFertilityF1", coeffCovarianceFertilityF1);
-            }
+            coeffCovariancePartnershipU1 = bootstrapWithTrace("coeffCovariancePartnershipU1", coeffCovariancePartnershipU1);
+            // coeffCovariancePartnershipU1b = RegressionUtils.bootstrap(coeffCovariancePartnershipU1b);
+            coeffCovariancePartnershipU2 = bootstrapWithTrace("coeffCovariancePartnershipU2", coeffCovariancePartnershipU2);
+            coeffCovarianceFertilityF1 = bootstrapWithTrace("coeffCovarianceFertilityF1", coeffCovarianceFertilityF1);
 
         }
 
@@ -1498,25 +1480,16 @@ public class Parameters {
         regEducationE2 = new GeneralisedOrderedRegression<>(RegressionType.GenOrderedLogit, EducationLevel.class, coeffCovarianceEducationE2);
 
         //Partnership
-        if (country.equals(Country.UK)) {
-            MultiKeyCoefficientMap coeffPartnershipU1Appended = appendCoefficientMaps(coeffCovariancePartnershipU1, partnershipTimeAdjustment, "Year");
-            // MultiKeyCoefficientMap coeffPartnershipU1bAppended = appendCoefficientMaps(coeffCovariancePartnershipU1b, partnershipTimeAdjustment, "Year");
-            MultiKeyCoefficientMap coeffPartnershipU2Appended = appendCoefficientMaps(coeffCovariancePartnershipU2, partnershipTimeAdjustment, "Year", true);
-            regPartnershipU1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1Appended);
-            // regPartnershipU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1bAppended);
-            regPartnershipU2 = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffPartnershipU2Appended);
-        } else if (country.equals(Country.IT)) {
-            regPartnershipITU1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipITU1);
-            regPartnershipITU2 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovariancePartnershipITU2);
-        }
+        MultiKeyCoefficientMap coeffPartnershipU1Appended = appendCoefficientMaps(coeffCovariancePartnershipU1, partnershipTimeAdjustment, "Year");
+        // MultiKeyCoefficientMap coeffPartnershipU1bAppended = appendCoefficientMaps(coeffCovariancePartnershipU1b, partnershipTimeAdjustment, "Year");
+        MultiKeyCoefficientMap coeffPartnershipU2Appended = appendCoefficientMaps(coeffCovariancePartnershipU2, partnershipTimeAdjustment, "Year", true);
+        regPartnershipU1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1Appended);
+        // regPartnershipU1b = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffPartnershipU1bAppended);
+        regPartnershipU2 = new BinomialRegression(RegressionType.Probit, ReversedIndicator.class, coeffPartnershipU2Appended);
 
         //Fertility
-        if (country.equals(Country.UK)) {
-            MultiKeyCoefficientMap coeffFertilityF1aAppended = appendCoefficientMaps(coeffCovarianceFertilityF1, fertilityTimeAdjustment, "Year");
-            regFertilityF1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1aAppended);
-        } else if (country.equals(Country.IT)) {
-            regFertilityF1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffCovarianceFertilityF1);
-        }
+        MultiKeyCoefficientMap coeffFertilityF1aAppended = appendCoefficientMaps(coeffCovarianceFertilityF1, fertilityTimeAdjustment, "Year");
+        regFertilityF1 = new BinomialRegression(RegressionType.Probit, Indicator.class, coeffFertilityF1aAppended);
 
         //Income
         regIncomeI1a = new BinomialRegression(RegressionType.Logit, Indicator.class, coeffCovarianceIncomeI1a);
@@ -1920,10 +1893,8 @@ public class Parameters {
 
     public static void setCountryRegions(Country country) {
         countryRegions = new LinkedHashSet<Region>();
-        for(Region demRgn : Region.values()) {			//TODO: restrict this to only regions in the simulated country
-            if(demRgn.toString().startsWith(country.toString())) {			//Only assess the relevant regions for the country
-                countryRegions.add(demRgn);				//Create a set of only relevant regions that we can use below TODO: This should be done in the Parameters class, once and for all!
-            }
+        for(Region demRgn : Region.values()) {
+            countryRegions.add(demRgn);
         }
     }
 
@@ -2038,8 +2009,6 @@ public class Parameters {
     public static BinomialRegression getRegPartnershipU1() {return regPartnershipU1;}
     // public static BinomialRegression getRegPartnershipU1b() {return regPartnershipU1b;}
     public static BinomialRegression getRegPartnershipU2() {return regPartnershipU2;}
-    public static BinomialRegression getRegPartnershipITU1() {return regPartnershipITU1;}
-    public static BinomialRegression getRegPartnershipITU2() {return regPartnershipITU2;}
 
     public static BinomialRegression getRegFertilityF1() {return regFertilityF1;}
 
