@@ -1567,42 +1567,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (demAge >= Parameters.MIN_AGE_COHABITATION) {
             // cohabitation possible
 
-            if (model.getCountry() == Country.UK) {
+            double prob;
+            if (partner == null) {
+                // partnership formation
 
-                double prob;
-                if (partner == null) {
-                    // partnership formation
+                double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
+                demBePartnerFlag = (cohabitInnov < prob);
+                if (demBePartnerFlag)
+                    model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
+            } else if (demMaleFlag == Gender.Female) {
+                // partnership dissolution
 
-                    double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
-                    demBePartnerFlag = (cohabitInnov < prob);
-                    if (demBePartnerFlag)
-                        model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
-                } else if (demMaleFlag == Gender.Female) {
-                    // partnership dissolution
-
-                    double score = Parameters.getRegPartnershipU2().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegPartnershipU2().getProbability(score - probitAdjustment);
-                    if (cohabitInnov < prob) {
-                        demLeavePartnerFlag = true;
-                    }
-                }
-            } else if (model.getCountry() == Country.IT) {
-
-                if (partner == null) {
-                    if ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student)) {
-
-                        double prob = Parameters.getRegPartnershipITU1().getProbability(this, Person.DoublesVariables.class);
-                        demBePartnerFlag = (cohabitInnov < prob);
-                        if (demBePartnerFlag)
-                            model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
-                    }
-                } else if (demMaleFlag == Gender.Female && ((labC4 == Les_c4.Student && eduLeftEduFlag) || !labC4.equals(Les_c4.Student))) {
-
-                    double prob = Parameters.getRegPartnershipITU2().getProbability(this, Person.DoublesVariables.class);
-                    if (cohabitInnov < prob) {
-                        demLeavePartnerFlag = true;
-                    }
+                double score = Parameters.getRegPartnershipU2().getScore(this, Person.DoublesVariables.class);
+                prob = Parameters.getRegPartnershipU2().getProbability(score - probitAdjustment);
+                if (cohabitInnov < prob) {
+                    demLeavePartnerFlag = true;
                 }
             }
         }
@@ -2724,8 +2704,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dnc_L1, 						//Lag(1) of number of children of all ages in the benefitUnit
         Dnc02_L1, 						//Lag(1) of number of children aged 0-2 in the benefitUnit
         Dnc017, 						//Number of children aged 0-17 in the benefitUnit
-        EduHighIT,
-        EduMediumIT,
         EmployedToUnemployed,
         Employmentsonflexiblefurlough,
         Employmentsonfullfurlough,
@@ -2749,21 +2727,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         GrossEarningsYearly,
         GrossLabourIncomeMonthly,
         InverseMillsRatio,
-        ITC,			//Italy
-        ITF,
-        ITG,
-        ITH,
-        ITI,
-        LactiveIT,
         L1_hourly_wage,
         L1_log_hourly_wage,
         Hourly_wage_L1,
         L1_log_hourly_wage_sq,
         Ld_children_2under,
         Ld_children_3under,
-        Ld_children_3underIT,
         Ld_children_4_12,
-        Ld_children_4_12IT,
         Lemployed,
         Lhw_L1,
         Lhw_10,                         // Used by financial distress process
@@ -2799,7 +2769,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Lnonwork,
         Lstudent,
         Lunion,
-        LunionIT,
         HrsReceivedFormalIHS_L1,
         HrsReceivedInformalIHS_L1,
         HrsProvidedInformalIHS_L1,
@@ -4504,22 +4473,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Yplgrs_dv_L3 -> {
                 return yEmpPersGrossMonthL3;
             }
-            case Ld_children_3underIT -> {
-                return model.getCountry().equals(Country.IT) ? benefitUnit.getIndicatorChildren03_lag1().ordinal() : 0.;
-            }
-            case Ld_children_4_12IT -> {
-                return model.getCountry().equals(Country.IT) ? benefitUnit.getIndicatorChildren412_lag1().ordinal() : 0.;
-            }
-            case LunionIT -> {
-                return (demStatusHhL1.equals(HouseholdStatus.Couple) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
-            }
-            case EduMediumIT -> {
-                return (eduHighestC4.equals(Education.Medium) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
-            }
-            case EduHighIT -> {
-                return (eduHighestC4.equals(Education.High) && (getRegion().toString().startsWith(Country.IT.toString()))) ? 1. : 0.;
-            }
-
             case Reached_Retirement_Age -> {
                 int retirementAge;
                 if (demMaleFlag.equals(Gender.Female)) {
@@ -4659,22 +4612,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case Deh_c3_Medium_Dag -> {
                 return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
-            }
-            //Italy
-            case ITC -> {
-                return (getRegion().equals(Region.ITC)) ? 1. : 0.;
-            }
-            case ITF -> {
-                return (getRegion().equals(Region.ITF)) ? 1. : 0.;
-            }
-            case ITG -> {
-                return (getRegion().equals(Region.ITG)) ? 1. : 0.;
-            }
-            case ITH -> {
-                return (getRegion().equals(Region.ITH)) ? 1. : 0.;
-            }
-            case ITI -> {
-                return (getRegion().equals(Region.ITI)) ? 1. : 0.;
             }
             //UK
             case UKC, UKC_Mixed, UKC_Formal, UKC_ -> {

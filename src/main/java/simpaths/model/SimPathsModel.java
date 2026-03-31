@@ -2169,12 +2169,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         LinkedHashMap<Gender, LinkedHashMap<Region, Set<Person>>> personsByGenderAndRegion;
         personsByGenderAndRegion = new LinkedHashMap<Gender, LinkedHashMap<Region, Set<Person>>>();
 
-        EnumSet<Region> regionEnumSet = null;
-        if (country.equals(Country.IT)) {
-            regionEnumSet = EnumSet.of(Region.ITC, Region.ITH, Region.ITI, Region.ITF, Region.ITG);
-        } else if (country.equals(Country.UK)) {
-            regionEnumSet = EnumSet.of(Region.UKC, Region.UKD, Region.UKE, Region.UKF, Region.UKG, Region.UKH, Region.UKI, Region.UKJ, Region.UKK, Region.UKL, Region.UKM, Region.UKN);
-        }
+        EnumSet<Region> regionEnumSet = EnumSet.of(Region.UKC, Region.UKD, Region.UKE, Region.UKF, Region.UKG, Region.UKH, Region.UKI, Region.UKJ, Region.UKK, Region.UKL, Region.UKM, Region.UKN);
 
         for (Gender gender : Gender.values()) {
             personsByGenderAndRegion.put(gender, new LinkedHashMap<Region, Set<Person>>());

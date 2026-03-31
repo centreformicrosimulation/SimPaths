@@ -118,11 +118,6 @@ public class Validator implements IDoubleSource {
         educationLevelLowByRegion_UKL,
         educationLevelLowByRegion_UKM,
         educationLevelLowByRegion_UKN,
-        educationLevelHighByRegion_ITC,
-        educationLevelHighByRegion_ITH,
-        educationLevelHighByRegion_ITI,
-        educationLevelHighByRegion_ITF,
-        educationLevelHighByRegion_ITG,
         educationLevelHighByRegion_UKC,
         educationLevelHighByRegion_UKD,
         educationLevelHighByRegion_UKE,
@@ -135,11 +130,6 @@ public class Validator implements IDoubleSource {
         educationLevelHighByRegion_UKL,
         educationLevelHighByRegion_UKM,
         educationLevelHighByRegion_UKN,
-        partneredShare_ITC,
-        partneredShare_ITH,
-        partneredShare_ITI,
-        partneredShare_ITF,
-        partneredShare_ITG,
         partneredShare_All,
         partneredShare_UKC,
         partneredShare_UKD,
@@ -634,31 +624,6 @@ public class Validator implements IDoubleSource {
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case educationLevelHighByRegion_ITC:
-                value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_ITC"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case educationLevelHighByRegion_ITH:
-                value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_ITH"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case educationLevelHighByRegion_ITI:
-                value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_ITI"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case educationLevelHighByRegion_ITF:
-                value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_ITF"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case educationLevelHighByRegion_ITG:
-                value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_ITG"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case educationLevelHighByRegion_UKC:
                 value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_UKC"));
                 if (value != null) {
@@ -716,31 +681,6 @@ public class Validator implements IDoubleSource {
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
             case educationLevelHighByRegion_UKN:
                 value = ((Number) Parameters.getValidationEducationLevelByRegion().getValue(model.getYear()-1, "educ_high_UKN"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case partneredShare_ITC:
-                value = ((Number) Parameters.getValidationPartneredShareByRegion().getValue(model.getYear()-1, "partnered_ITC"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case partneredShare_ITH:
-                value = ((Number) Parameters.getValidationPartneredShareByRegion().getValue(model.getYear()-1, "partnered_ITH"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case partneredShare_ITI:
-                value = ((Number) Parameters.getValidationPartneredShareByRegion().getValue(model.getYear()-1, "partnered_ITI"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case partneredShare_ITF:
-                value = ((Number) Parameters.getValidationPartneredShareByRegion().getValue(model.getYear()-1, "partnered_ITF"));
-                if (value != null) {
-                    return value.doubleValue();
-                } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap
-            case partneredShare_ITG:
-                value = ((Number) Parameters.getValidationPartneredShareByRegion().getValue(model.getYear()-1, "partnered_ITG"));
                 if (value != null) {
                     return value.doubleValue();
                 } else return Double.NaN; //If value missing, returning Double.NaN will plot a gap

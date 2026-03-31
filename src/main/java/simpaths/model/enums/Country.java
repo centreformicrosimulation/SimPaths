@@ -2,7 +2,6 @@ package simpaths.model.enums;
 
 public enum Country {
 	
-	IT("Italy", 9),			//Italy
 	UK("United Kingdom", 15);			//United Kingdom of Great Britain and Northern Ireland
 	
 	//EUROMOD country codes for all EU countries
