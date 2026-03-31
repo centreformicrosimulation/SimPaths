@@ -12,7 +12,7 @@ integrationTest: true
 collector_args:
     persistStatistics: true
     persistStatistics2: true
-    persistStatistics3: true
+    persistAlignmentAdjustmentFactors: true
     persistPersons: false
     persistBenefitUnits: false
     persistHouseholds: false

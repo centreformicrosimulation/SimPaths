@@ -4,6 +4,7 @@ package simpaths.model;
 // import Java packages
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.Transient;
@@ -329,6 +330,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private static String RunDatabasePath;
     private static String PersistDatabasePath;
     private static boolean PersistPopulation = false;
+    private static EntityManagerFactory emfStartingPopulationRun = null;
+    private static EntityManagerFactory emfStartingPopulationPersist = null;
 
 
 
@@ -3633,7 +3636,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     private Processed getProcessed(Country country, int startYear, int popSize, boolean ignoreTargetsAtPopulationLoad) {
 
         Processed processed = null;
-        Processed processed_return = null;
 
         EntityTransaction txn = null;
         try {
@@ -3641,7 +3643,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             // query database
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + getPersistDatabasePath() + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
+            if (emfStartingPopulationPersist == null)
+                emfStartingPopulationPersist = Persistence.createEntityManagerFactory("starting-population", propertyMap);
+            EntityManager em = emfStartingPopulationPersist.createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 //            String query = "SELECT DISTINCT processed FROM Processed processed LEFT JOIN FETCH processed.households households LEFT JOIN FETCH households.benefitUnits benefitUnits LEFT JOIN FETCH benefitUnits.members members WHERE processed.startYear = " + startYear + " AND processed.popSize = " + popSize + " AND processed.country = " + country + " AND processed.noTargets = " + ignoreTargetsAtPopulationLoad + " ORDER BY households.key.id";
@@ -3655,16 +3659,15 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 if (processedList.size()>1)
                     throw new RuntimeException("more than one relevant dataset returned from database");
                 processed = processedList.get(0);
+                // force-initialize lazy collections within the open session (triggers SUBSELECT batch loads)
                 processed.resetDependents();
 
-//                // Now fetch households for THIS specific Processed instance only
-                processed_return = em.createQuery(
+                em.createQuery(
                                 "SELECT p FROM Processed p LEFT JOIN FETCH p.households h WHERE p = :proc ORDER BY h.key.id",
                                 Processed.class)
                         .setParameter("proc", processed)
-                        .getSingleResult();
-
-                processed_return.resetDependents();
+                        .getSingleResult()
+                        .resetDependents();
             }
 
             // close database connection
@@ -3689,7 +3692,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + RunDatabasePath + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
+            if (emfStartingPopulationRun == null)
+                emfStartingPopulationRun = Persistence.createEntityManagerFactory("starting-population", propertyMap);
+            EntityManager em = emfStartingPopulationRun.createEntityManager();
             txn = em.getTransaction();
             txn.begin();
             String query = "SELECT households FROM Household households";
@@ -3697,6 +3702,13 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             log.info("Submitting SQL query: " + query);
             households = em.createQuery(query).getResultList();
             log.info("Query complete");
+
+            // force-initialize lazy collections within the open session (triggers SUBSELECT batch loads)
+            for (Household hh : households) {
+                for (BenefitUnit bu : hh.getBenefitUnits()) {
+                    bu.getMembers().size();
+                }
+            }
 
             // close database connection
             em.close();
@@ -3722,7 +3734,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             Map propertyMap = new HashMap();
             propertyMap.put("hibernate.connection.url", "jdbc:h2:file:" + getPersistDatabasePath() + ";TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0;AUTO_SERVER=TRUE");
-            EntityManager em = Persistence.createEntityManagerFactory("starting-population", propertyMap).createEntityManager();
+            if (emfStartingPopulationPersist == null)
+                emfStartingPopulationPersist = Persistence.createEntityManagerFactory("starting-population", propertyMap);
+            EntityManager em = emfStartingPopulationPersist.createEntityManager();
             txn = em.getTransaction();
             txn.begin();
 
