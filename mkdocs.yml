@@ -75,13 +75,13 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/simpaths/SimPaths
-      name: GITHUB
+      name: GitHub
     - icon: fontawesome/solid/globe
       link: https://www.microsimulation.ac.uk/
       name: CeMPA
     - icon: fontawesome/solid/scale-balanced
-      link: https://github.com/simpaths/SimPaths/blob/main/LICENSE
-      name: LICENSE
+      link: https://github.com/simpaths/SimPaths/blob/main/license.txt
+      name: License
 
 nav:
   - Home: index.md
