@@ -31,7 +31,7 @@ An alternative and more involved way to update the JAS-mine libraries is to manu
 
 ![JAS-mine build path](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-build-path.png)
 
-After [downloading](https://github.com/jasmineRepo) the JAS-mine libraries, copy these files to the 'libs' folder in the Eclipse project (create a 'libs' folder if there isn't one in the project). Then select both JAS-mine .jar files and right click, select 'Build Path / Add To Build Path':
+After [downloading the JAS-mine libraries from the JAS-mine download area](https://sourceforge.net/projects/jas-mine/files/Libraries/), copy these files to the 'libs' folder in the Eclipse project (create a 'libs' folder if there isn't one in the project). Then select both JAS-mine .jar files and right click, select 'Build Path / Add To Build Path':
 
 ![JAS-mine add build path](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-add-build-path.png)
 

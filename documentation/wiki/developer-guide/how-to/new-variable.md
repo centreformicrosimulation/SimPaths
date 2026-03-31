@@ -2,11 +2,11 @@
 
 # 1. An application using "Ethnicity"
 
-This page explains how to add a new variable to the SimPaths model. A similar approach can be used to add other variables. This example concerns the insertion of an additional variable, "Ethnicity", named `dot01`, defined in six categories, and whose issue is detailed [here](https://github.com/simpaths/SimPaths/issues/212). 
+This page explains how to add a new variable to the SimPaths model. A similar approach can be used to add other variables. This example concerns the insertion of an additional variable, "Ethnicity", named `dot01`, defined in six categories, and discussed in [SimPaths issue #212 on ethnicity](https://github.com/simpaths/SimPaths/issues/212).
 
 # 2. Update the input data
 
-Before starting, the user must ensure that they have the updated version of the data for the model, which shall include the variable(s) to be added to the code. If not, they should get the [UKHLS](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6914) (Understanding Society) and [WAS](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=7215) (Wealth and Assets Survey) data from the [UK Data Service](https://ukdataservice.ac.uk/) (DS) and generate the input data for the model using these datasets and the [do files from GitHub](https://github.com/simpaths/SimPaths/tree/main/input/InitialPopulations/compile).
+Before starting, the user must ensure that they have the updated version of the data for the model, which shall include the variable(s) to be added to the code. If not, they should get the [Understanding Society UK Household Longitudinal Study (UKHLS)](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6914) and the [Wealth and Assets Survey (WAS)](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=7215) from the [UK Data Service](https://ukdataservice.ac.uk/) and generate the input data for the model using the [InitialPopulations compile do-files on GitHub](https://github.com/simpaths/SimPaths/tree/main/input/InitialPopulations/compile).
 
 
 # 3. Load the `dot01` variable in SimPaths
@@ -46,7 +46,7 @@ Now that the variable has been added to the Person class, it should be provided 
 
 Once added, the Getter and Setter should look as in the image below, and they should be moved at the end of the file together with those of other variables:
 
-![image](../../jasmine-reference/collection-filters.md)
+_Screenshot omitted here: generated getter and setter methods for `dot01` in the `Person` class._
 
 After the variable is inserted with getters and setters, the [constructors](https://www.digitalocean.com/community/tutorials/constructor-in-java#constructor-overloading-in-java) in the Person class must be updated to include this new variable. For Ethnicity, there are two constructors at play. The first one, `public Person (Person originalPerson, long seed, SampleEntry sampleEntry) {...}`, is the one that is used to clone the person. The second one, `public Person(Gender gender, Person mother) {...}`, is the one for the new born, which takes as argument the gender and the mother and "creates" a child. As ethincity is assumed to be taken after the mother's, it will be sufficient to add a line `dot01 = mother.getDot01();`, where it is stated so (_i.e._, the person's ethnicity - `dot01` - is equal to the person's mother's one `mother.getDot01()`).
 <!-- When the initial populations are created, the user can select the number of observations. Hence, the simulation samples households with replacement using sample weights until the desired number is reached. This means that some households can be generated based on the existing ones in the initial survey data. To carry out this process, the model uses constructors, which are coded in the namesake section of the Person class. -->

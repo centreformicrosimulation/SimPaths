@@ -24,7 +24,7 @@ Validation procedures are currently executed in **Stata**. The corresponding do-
 
 You can access these files in one of three ways:
 
-1. **Clone the repository** – recommended for developers who want the full version history or plan to contribute changes. See Section Working in Github - Introduction.
+1. **Clone the repository** – recommended for developers who want the full version history or plan to contribute changes. See the [Working in GitHub guide](../developer-guide/working-in-github.md).
 
 2. **Download the repository as a ZIP file** – provides a snapshot of all files on the selected branch.  
    - In the GitHub interface, select the `develop` branch, click the green **Code** button, and choose **Download ZIP**.  
@@ -79,13 +79,13 @@ Once these steps have been completed, you can straightforwardly run the do-files
 
 ### 3.2 Validating the simulated output
 
-The do-files for validating the simulated output are contained in the subfolder *02_simulation_validation*.  
+The do-files for validating the simulated output are contained in the subfolder *02_simulated_output_validation*.  
 These should be run **after executing *SimPaths***, as they rely on a number of *.csv* files produced by the model.  
 
 Before running these scripts, complete the following preparatory steps:
 
 - **a. Obtain simulated output from *SimPaths***  
-  Ensure that the most recent simulated output is available. See [Section 2](https://github.com/simpaths/SimPaths/wiki/2.-Running-SimPaths) to run SimPaths and obtain the simulation outputs.  
+  Ensure that the most recent simulated output is available. See the [Running Your First Simulation page](../getting-started/first-simulation.md) or the [Multiple Runs page](../user-guide/multiple-runs.md) to run SimPaths and obtain the simulation outputs.  
 
 - **b. Set up the file structure**  
   Place the downloaded do-files in a **simulation validation** folder in a subfolder called *do_files*.  
@@ -114,7 +114,7 @@ Before running these scripts, complete the following preparatory steps:
 - **c. Deposit input data**  
   Place the simulated output *.csv* files titled `Person`, `BenefitUnit` and `Household` in the *data* subfolder.  
   You will also need the Understanding Society survey data to compare against the simulated output.  
-  For this purpoe, we currently use the following initial population files:  
+  For this purpose, we currently use the following initial population files:  
   - *ukhls_pooled_all_obs_01*  
   - *ukhls_pooled_all_obs_09*  
 

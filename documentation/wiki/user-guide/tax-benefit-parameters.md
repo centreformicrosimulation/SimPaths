@@ -39,11 +39,11 @@ In code, this file is loaded by `Parameters.calculateEUROMODpolicySchedule()`, w
 The most important rules are:
 
 - each policy start year must be unique
-- the policy system year must match the system year used when the donor file was produced
+- the policy system year should match the system year used when the donor file was produced
 - policies with no start year are ignored
-- at least one policy file must exist for the model's base price year, currently `2015`
+- at least one scheduled policy must have `Policy_System_Year` equal to the model's base price year, currently `2015`
 
-If no policy begins exactly in the simulation start year, SimPaths uses the earliest available policy as the prevailing regime.
+If no policy begins exactly in the year being evaluated, SimPaths uses the most recent policy whose start year is earlier than that year. If all policies start later, it falls back to the earliest available policy.
 
 ## 3. Runtime settings that affect tax-benefit use
 

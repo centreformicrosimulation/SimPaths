@@ -4,7 +4,7 @@
 
 If you use SimPaths or derived work, please cite:
 
-Bronka P, van de Ven J, Kopasker D, Katikireddi SV, Richiardi M (2025). [SimPaths: an open-source microsimulation model for life course analysis](https://microsimulation.pub/articles/00318). *International Journal of Microsimulation*, 18(1): 95-133.
+Bronka P, van de Ven J, Kopasker D, Katikireddi SV, Richiardi M (2025). [SimPaths: an open-source microsimulation model for life course analysis](https://microsimulation.pub/articles/00318). *International Journal of Microsimulation*, 18(1): 95-133. DOI: [10.34196/ijm.00318](https://doi.org/10.34196/ijm.00318).
 
 
 # 2 Further references

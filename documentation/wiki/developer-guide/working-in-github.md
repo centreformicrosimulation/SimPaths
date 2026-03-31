@@ -24,7 +24,7 @@ A fork is a copy of an entire repository (including its history) under a differe
 
 # 3. SimPaths GitHub Repository
 
-SimPaths code is stored in a public [GitHub repo](https://github.com/simpaths/SimPaths). The operative branches are `main`, which contains the most stable release, and `develop`, where modifications and updates are implemented. As outlined in the diagram below, to make changes in SimPaths, users are requested to: 1) fork the original repo under their GitHub account; 2) carry out all the modifications on a new branch originated from the `develop` branch of their forked repository; 3) commit and send a pull request to the maintainers.
+SimPaths code is stored in the public [SimPaths GitHub repository](https://github.com/simpaths/SimPaths). The operative branches are `main`, which contains the most stable release, and `develop`, where modifications and updates are implemented. As outlined in the diagram below, to make changes in SimPaths, users are requested to: 1) fork the original repository under their GitHub account; 2) carry out all the modifications on a new branch originated from the `develop` branch of their forked repository; 3) commit and send a pull request to the maintainers.
 
 ![image](https://www.dropbox.com/scl/fi/0dhv5z8rbcqfwi58khjgj/scheme.png?rlkey=dk735e2nrcz35pqltsxfkvmgm&raw=1)
 
@@ -32,19 +32,19 @@ These steps are detailed below.
 
 ## 3.1 Forking SimPaths Repo
 
-1. On the [SimPaths repo homepage](https://github.com/simpaths/SimPaths) (see below), click on the top-right button "Fork". When hovering over it, the message _Fork your own copy of simpaths/SimPaths_ will automatically appear. 
+1. On the [SimPaths GitHub repository homepage](https://github.com/simpaths/SimPaths) (see below), click on the top-right button "Fork". When hovering over it, the message _Fork your own copy of simpaths/SimPaths_ will automatically appear.
 
 ![image](https://www.dropbox.com/scl/fi/ql0ac9lpfc7olpttjidxv/Capture-d-cran-2025-07-16-15.54.25.png?rlkey=mlwykxxixgbxyvkihkoaw191l&st=ientbqmv&raw=1)
 
 2. Once clicked on "Fork," the following page will open. It is recommendable to give a distinguishable name to the repository (_e.g._, "SimPathsFork"). Regardless of the name, please ensure that the box _Copy the_ `main` _branch only_ is unticked (as in the image below). Then, click on the green button "Create fork".
 
-![image](../jasmine-reference/collection-filters.md)   
+_Screenshot omitted here: GitHub's **Create fork** page, where you can name the fork and leave **Copy the `main` branch only** unticked._
 
-After the fork is created, a page identical to the SimPaths repo homepage will open automatically. The only difference is that, instead of the white-and-purple SimPaths logo, there will be the user GitHub account icon/picture, with text below saying _forked from simpaths/SimPaths_. This confirms the creation of a copy of the entire SimPaths repo under the user GitHub account.
+After the fork is created, a page identical to the SimPaths GitHub repository homepage will open automatically. The only difference is that, instead of the white-and-purple SimPaths logo, there will be the user GitHub account icon/picture, with text below saying _forked from simpaths/SimPaths_. This confirms the creation of a copy of the entire SimPaths repository under the user GitHub account.
 
 3. At this point, the user is ready to clone the code by clicking on the green button "<> Code", and then on the icon with the two overlapping squares to the right of the url (see image below). When hovering over it, an automatic message _Copy url to clipboard_ will appear, which will turn automatically in _Copied!_, once clicked.
 
-![image](../jasmine-reference/regression-library.md)
+_Screenshot omitted here: GitHub's **Code** menu showing the repository URL and the copy-to-clipboard button._
 
 4. Now that the link is copied, the user is ready to open the cloned repository. This can be done either in the IDE (IntelliJ IDEA, in our case) or on GitHub Desktop. In both cases, expect a few-minute time for the repository to be cloned.
 
@@ -85,13 +85,13 @@ Now that the forked repository has been created ("SimPathsFork" in our case), th
 At the end of these four steps, the user will have their forked repository under their GitHub account.
 
 ## 3.2 Making Changes
-1. From the develop branch in the new forked repository, the user should create a new branch devoted to the modifications they wish to make. Again, this can be done either from GitHub Desktop or directly from the IDE (IntelliJ IDEA). In any case, the branch should be named according to our [naming convention](https://github.com/simpaths/SimPaths?tab=readme-ov-file#branch-naming-conventions). The first part of the name should indicate why that branch was created. For example, if the purpose is to fix a bug, this first part could be called "bug-fix". The following parts should get into the details of the broader objective of the branch indicated in the first part. Continuing with the same example, if the bug to fix is related to a specific class of the model, the second part of the name could be the name of the class. Every part of the name should be separated by a "/" symbol. Therefore, in our example, the branch would be called "bug-fix/class_name". While other details can be added as additional parts of the branch name (separated by the "/" symbol), we suggest to keep the branch names relatively short.
+1. From the develop branch in the new forked repository, the user should create a new branch devoted to the modifications they wish to make. Again, this can be done either from GitHub Desktop or directly from the IDE (IntelliJ IDEA). In any case, the branch should be named according to the [branch naming conventions in the Repository Guide](repository-guide.md#7-version-control). The first part of the name should indicate why that branch was created. For example, if the purpose is to fix a bug, this first part could be called "bug-fix". The following parts should get into the details of the broader objective of the branch indicated in the first part. Continuing with the same example, if the bug to fix is related to a specific class of the model, the second part of the name could be the name of the class. Every part of the name should be separated by a "/" symbol. Therefore, in our example, the branch would be called "bug-fix/class_name". While other details can be added as additional parts of the branch name (separated by the "/" symbol), we suggest to keep the branch names relatively short.
 **IntelliJ IDEA**
 In our forked project ("SimPathsFork" in our case), follow the exact same path illustrated to switch branch from `main` to `develop` (Section 1. "Forking SimPaths Repo"; point 4; second image). In this case, however, in the drop-down menu, select "+ New Branch...". In the small window that opens, rename the branch, make sure that the option "Checkout branch" is ticked, and then click on "Create". The user will land automatically on the new branch of the forked repository.
 **GitHub Desktop**
 On the GitHub Desktop homepage of the forked repository ("SimPathsFork" in our case), select "Current Branch" (second entry of the menu tab at the top) and then "New Branch". Ensure to _Create branch based on..._ "develop", as shown in the image below, and rename the branch properly (here, assuming to make a change that entails the addition of a new "ethnicity" variable, it is called "add-variable/ethnicity"). Then click the "Create Branch" blue button.  
 
-![image](../jasmine-reference/statistical-package.md)  
+_Screenshot omitted here: GitHub Desktop's **New Branch** dialog, with the branch created from `develop`._
 
 When opening the forked project on IntelliJ IDEA, it will be already set on the new `add-variable/ethnicity` branch.
 Whether it is directly via IntelliJ IDEA or through GitHub, at the end of this first step, the user will be set in the IDE on their new branch of their forked repository, which is the starting point to make any change or modification.
@@ -120,4 +120,3 @@ The last step is simply to add one or more reviewers in the "Reviewers" tab at t
 Following the procedure presented in this page, any user should be able to carry out modifications to the model without any risk of jeopardising it. It is worth noting that, while Steps 2 and 3 must be followed for any new change, once the forked repository is created, it remains available for future use (_i.e._, it is not necessary to go through Step 1 again).
 
 <a name="footnote-1">[1]</a> Committing changes only saves them locally; to "send" them to GitHub it is necessary to "push" changes.
-

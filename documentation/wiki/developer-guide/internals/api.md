@@ -1,16 +1,16 @@
 # SimPaths API
 
-SimPaths APIs are published [here](https://simpaths.org/javadoc/).
-
 # 1. Introduction
+
+This page explains how the SimPaths API documentation is generated and published from the source code.
 
 The SimPaths API documentation is generated using [Maven's Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/).
 
 Javadoc is a Java tool that automatically generates HTML documentation from [Javadoc comments](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html) embedded in the source code.  
 
-The documentation website is updated automatically whenever a commit is pushed to the `develop` branch of SimPaths. This process is handled via GitHub Actions using a [Javadoc-publisher workflow developed by MathieuSoysal](https://github.com/MathieuSoysal/Javadoc-publisher.yml). The workflow file is available [here](https://github.com/simpaths/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml).
+The documentation website is updated automatically whenever a commit is pushed to the `develop` branch of SimPaths. This process is handled via GitHub Actions using a [Javadoc-publisher workflow developed by MathieuSoysal](https://github.com/MathieuSoysal/Javadoc-publisher.yml). The workflow file is available in the [SimPaths publish-javadoc workflow](https://github.com/simpaths/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml).
 
-To update the API documentation, add or modify Javadoc comments in the source code following [this guide](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html), then push your changes to the `develop` branch.
+To update the API documentation, add or modify Javadoc comments in the source code following the [Oracle Javadoc guide](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html), then push your changes to the `develop` branch.
 
 # 2. Workflow Details
 
@@ -77,5 +77,4 @@ GitHub pages is combined with the GitHub Actions workflow to ensure that the doc
 - The `javadoc` branch contains the generated HTML API documentation.
 - GitHub Pages is configured to use this branch as the site’s content source.
 - Each time the GitHub Actions workflow updates the `javadoc` branch, GitHub Pages automatically refreshes the live site.
-
 

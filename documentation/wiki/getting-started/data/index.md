@@ -1,10 +1,10 @@
 # Input Data
 
-SimPaths uses three types of data as input: 
+SimPaths uses three types of data as input:
 
-1. The initial population to be evolved over time. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input/InitialPopulations/training)
-2. Donor populations used to impute the effects of tax and benefit policy. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training)
-3. Estimated parameters governing transition probabilities assumed by the model. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input)
+1. The [initial population training data](https://github.com/simpaths/SimPaths/tree/develop/input/InitialPopulations/training) used as the starting population to be evolved over time.
+2. The [donor population training data](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training) used to impute the effects of tax and benefit policy.
+3. The [SimPaths input parameter files](https://github.com/simpaths/SimPaths/tree/develop/input) that govern transition probabilities assumed by the model.
 
 Training data are provided for the first two of these data sets, while 'release' data are provided for the third data set.
 
@@ -17,7 +17,7 @@ Training data are provided for the initial population (1) and the donor populati
 
 In addition to training data, the model comes supplied with a set of Stata do files that have been written to extract input data from the UKHLS. These do files can be found in the model directory: `SimPaths/input/InitialPopulations/compile/`. 
 
-1. Obtain the most recent version of the UKHLS survey [UK data service](https://ukdataservice.ac.uk/) (SN6614, in STATA's tab format). Further to this, you need to obtain the most recent version of the Wealth and Assets Survey (WAS) (SN7215, in STATA's tab format).
+1. Obtain the most recent version of the UKHLS survey from the [UK Data Service](https://ukdataservice.ac.uk/) (SN6614, in STATA's tab format). Further to this, you need to obtain the most recent version of the Wealth and Assets Survey (WAS) (SN7215, in STATA's tab format).
 2. Use Stata to open file 00_master.do, and edit global variables at the top of the file, save and run.
 3. Copy the csv files generated following (2) to model directory: `SimPaths/input/InitialPopulations/`.
 4. Run SimPathsStart, and select option "Load new input data for starting populations" from the Start-up Options window.
@@ -32,4 +32,4 @@ SimPaths is designed to read in data describing tax-benefit payments generated b
 2. Obtain the most recently available **Pooled 3-year FRS datasets for regional analysis ('b' datasets)** of input data provided for UKMOD using the FRS/LCF-based input data request form as described on the CeMPA website.
 3. Run desired system years described by (1) UKMOD, using the (2) "b" series dataset - note that the same input data set should be used for all system years. System runs can be performed directly in UKMOD or calling UKMOD from STATA, R, or Python using the respective connectors.
 4. Copy the files generated following (3) to model directory: `SimPaths/input/EUROMODoutput/`. Please note that it is required to provide UKMOD output files which include the base price year used by SimPaths (currently 2015). If no UKMOD output file is provided for the base price year, the initial database setup will fail.
-5. Run SimPathsStart, and selection option "Load new input data for tax and benefit systems" from the Start-up Options window.
+5. Run SimPathsStart, and select the option "Load new input data for tax and benefit systems" from the Start-up Options window.
