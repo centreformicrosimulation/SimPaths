@@ -145,6 +145,7 @@ $RECYCLE.BIN/
 #Other files specific to the model
 /target/
 /output/
+/site/
 /classes/
 input/input.h2.db
 input/input.h2.db
