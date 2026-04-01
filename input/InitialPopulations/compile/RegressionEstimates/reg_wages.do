@@ -429,7 +429,7 @@ restore
 * Labelling 
 putexcel set "$dir_results/reg_employment_selection", sheet("W1fa-sel") modify 
 	
-local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+local var_list Les_c3_Student_L1 Les_c3_NotEmployed_L1 Dag Dag_sq Deh_c4_Na Deh_c4_Medium Deh_c4_Low Deh_c4_Na_Dag Deh_c4_Medium_Dag ///
 	Deh_c4_Low_Dag  Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other Constant 
@@ -1013,7 +1013,7 @@ restore
 * Labelling 
 putexcel set "$dir_results/reg_employment_selection", sheet("W1fb-sel") modify 
 	
-local var_list Dag Dag_sq Deh_c4_Medium Deh_c4_Low Deh_c4_Medium_Dag ///
+local var_list Dag Dag_sq Deh_c4_High Deh_c4_Medium Deh_c4_Low Deh_c4_Na Deh_c4_Medium_Dag ///
 	Deh_c4_Low_Dag Dehmf_c3_Medium Dehmf_c3_Low Dcpst_Partnered D_Children Dlltsd01 Dhe_pcs_L1 Dhe_mcs_L1  ///
 	UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN Y2020 Y2021 ///
 	Ethn_Asian Ethn_Black Ethn_Other  Constant 

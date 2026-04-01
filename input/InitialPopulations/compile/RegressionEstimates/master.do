@@ -49,7 +49,7 @@ set matsize 1000
 **************************************************************************************/
 
 * Working directory
-global dir_work "D:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\regression_estimates"
+global dir_work "/Users/ashleyburdett/Documents/SimPaths_UK/programs/regression_estimates"
 
 * Directory which contains do files
 global dir_do "${dir_work}/do"
@@ -64,13 +64,13 @@ global dir_raw_results "${dir_work}/raw_results"
 global dir_results "${dir_work}/results"
 
 * Pooled dataset for estimates  
-global estimation_sample "D:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\initial_populations\data\UKHLS_pooled_ipop.dta"
+global estimation_sample "/Users/ashleyburdett/Library/CloudStorage/Box-Box/CeMPA shared area/_SimPaths/_SimPathsUK/input_processing/initial_populations/data/ukhls_pooled_ipop.dta"
 
 * Pooled dataset with predicted wages after Heckman   
-global estimation_sample2 "D:\Dasha\ESSEX\_SimPaths\_SimPaths_UK\initial_populations\data\UKHLS_pooled_ipop2.dta"
+global estimation_sample2 "/Users/ashleyburdett/Library/CloudStorage/Box-Box/CeMPA shared area/_SimPaths/_SimPathsUK/input data preparation_Darias backup folder/regression_estimates/data/UKHLS_pooled_ipop2.dta"
 
 * Directory containing external input data 
-global dir_external_data "$dir_work/external_data"
+global dir_external_data "/Users/ashleyburdett/Library/CloudStorage/Box-Box/CeMPA shared area/_SimPaths/_SimPathsUK/input data preparation_Darias backup folder/regression_estimates/external_data"
 
 * Directory containing results of comparison of various weights   
 global weight_checks "${dir_work}/weight_checks"
@@ -91,8 +91,8 @@ global first_sim_year "2010"
 
 global last_sim_year "2025"
 
-* Globals used for all processes   
 
+* Globals used for all processes   
 global weight "dwt"
 
 global regions "UKC UKD UKE UKF UKG UKH UKJ UKK UKL UKM UKN" //UKI is London (reference)
@@ -219,13 +219,12 @@ global s3d_if_condition "provide_informal_care & Partnered & stm >= 15"					// I
 
 * Finanicial distress and health processes 
 * TO ADD 
-  
 
 
 /*******************************************************************************
 * ESTIMATION FILES
 *******************************************************************************/
-/**/
+
 do "${dir_do}/reg_education.do"
 
 do "${dir_do}/reg_leave_parental_home.do"

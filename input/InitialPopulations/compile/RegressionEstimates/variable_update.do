@@ -387,8 +387,8 @@ replace dage10prime = 1 if (dag>34 & dag<45)
 replace dage10prime = 2 if (dag>44 & dag<55)
 replace dage10prime = 3 if (dag>54 & dag<65)
 replace dage10prime = 4 if (dag>64)
-//table dage10prime, stat(min dag) stat(max dag)
-table dage10prime, c(min dag max dag)
+table dage10prime, stat(min dag) stat(max dag)
+//table dage10prime, c(min dag max dag)
 
 * - Categorical: 65-66, 67-68, 69-70, 71-72..., 85+
 gen dage2old = 0
@@ -396,8 +396,8 @@ forval ii = 1/10 {
 	replace dage2old = `ii' if (dag >= 65+2*(`ii'-1) & dag < 67+2*(`ii'-1))
 }
 replace dage2old = 11 if (dag >= 85)
-//table dage2old, stat(min dag) stat(max dag)
-table dage2old, c(min dag max dag)
+table dage2old, stat(min dag) stat(max dag)
+//table dage2old, c(min dag max dag)
 
 * Poor health flag
 gen poor_health = (dhe == 1)
@@ -412,7 +412,7 @@ foreach var of varlist formal_socare_hrs partner_socare_hrs daughter_socare_hrs 
 xtset idperson stm
 
 tab dage5, gen(Age_)
-//table dage5, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
+table dage5, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
 tabstat dag, by(dage5) stats(min max)
 
 drop Age_1 Age_2
@@ -432,8 +432,8 @@ cap rename Age_15 Age80to84
 cap rename Age_16 Age85plus
 
 tab dage10prime, gen(Age_)
-//table dage10prime, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-table dage10prime, c(min dag max dag)	
+table dage10prime, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
+//table dage10prime, c(min dag max dag)	
 drop Age_1
 rename Age_2 Age35to44
 rename Age_3 Age45to54
@@ -441,8 +441,8 @@ rename Age_4 Age55to64
 rename Age_5 Age65plus
 
 tab dage2old, gen(Age_)
-//table dage2old, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-table dage2old, c(min dag max dag)
+table dage2old, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
+//table dage2old, c(min dag max dag)
 drop Age_1	
 rename Age_2 Age65to66
 rename Age_3 Age67to68
