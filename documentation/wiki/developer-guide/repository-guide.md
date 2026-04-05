@@ -483,18 +483,6 @@ mvn test
 
 Or via IDE test runner.
 
-### 7. Version Control
-
-**Branch naming conventions**:
-- `feature/your-feature-name` — New features
-- `bugfix/issue-number-description` — Bug fixes
-- `docs/documentation-topic` — Documentation updates
-- `experimental/your-description` — Experimental work
-
-**Main branches**:
-- `main` — Stable release
-- `develop` — Development integration
-
 ---
 
 ## Code Navigation Tips
