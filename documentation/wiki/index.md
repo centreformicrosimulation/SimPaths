@@ -5,10 +5,12 @@ hide:
 ---
 
 <div class="hero" markdown>
-<div class="hero-layout">
-<div class="hero-copy">
+<div class="hero-title-row">
+  <h1 class="hero-title">SimPaths</h1>
+  <img src="assets/images/homepage-hero-logo.svg" alt="SimPaths logo showing people progressing across a rising path." class="hero-mark hero-mark--inline">
+</div>
 
-<h1 class="hero-title">SimPaths</h1>
+<div class="hero-title-rule"></div>
 
 SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
 
@@ -27,16 +29,7 @@ The broader SimPaths family spans **the UK and other European countries**.
   <a href="overview/" class="btn-secondary">Explore the Model</a>
   <a href="https://github.com/simpaths/SimPaths" class="btn-secondary">View on GitHub</a>
 </div>
-
 </div>
-
-<div class="hero-mark-wrap">
-  <img src="assets/images/homepage-hero-logo.svg" alt="SimPaths logo showing people progressing across a rising path." class="hero-mark">
-</div>
-</div>
-</div>
-
----
 
 <h2 class="section-heading">Explore SimPaths</h2>
 

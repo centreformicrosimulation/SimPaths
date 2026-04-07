@@ -503,7 +503,6 @@
    HOMEPAGE WIDTH CONSTRAINT
 ═══════════════════════════════════════════════ */
 
-.md-content[data-md-component="content"] .md-typeset .hero,
 .md-content[data-md-component="content"] .md-typeset .card-grid,
 .md-content[data-md-component="content"] .md-typeset .countries,
 .md-content[data-md-component="content"] .md-typeset .section-heading {
@@ -539,32 +538,39 @@
   overflow: visible;
 }
 
-.md-typeset .hero-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(15rem, 22rem);
-  gap: 1.4rem 2.25rem;
-  align-items: center;
-}
-
-.md-typeset .hero-copy > p {
+.md-typeset .hero > p {
   max-width: 39rem;
   text-align: left;
   hyphens: none;
   -webkit-hyphens: none;
 }
 
-.md-typeset .hero-mark-wrap {
-  justify-self: end;
-  align-self: center;
-  width: min(100%, 21.5rem);
-  margin-right: 0.25rem;
+.md-typeset .hero-title-row {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1rem;
+  max-width: 39rem;
+}
+
+.md-typeset .hero-title-rule {
+  max-width: 39rem;
+  height: 0.5px;
+  margin-top: 0.55rem;
+  margin-bottom: 1.2rem;
+  background: var(--sp-hairline);
 }
 
 .md-typeset .hero-mark {
   display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 10px 18px rgba(30, 40, 52, 0.08));
+  filter: drop-shadow(0 10px 16px rgba(30, 40, 52, 0.08));
+}
+
+.md-typeset .hero-mark--inline {
+  width: 8.6rem;
+  flex: 0 0 auto;
+  margin-bottom: 0.22rem;
 }
 
 /* ── Hero title — large Newsreader, the centrepiece ── */
@@ -574,7 +580,7 @@
   font-size: 3.4rem;
   font-weight: 450;
   letter-spacing: 0.06em;
-  margin-bottom: 0.15rem;
+  margin: 0;
   line-height: 1.1;
   border: none;
 }
@@ -583,18 +589,6 @@
 .md-typeset .headerlink {
   display: none !important;
 }
-
-/* ── Hairline under hero title ── */
-.md-typeset .hero .hero-title::after {
-  content: '';
-  display: block;
-  height: 0.5px;
-  margin-top: 0.6rem;
-  margin-bottom: 1.2rem;
-  background: var(--sp-hairline);
-}
-
-/* ── Hero body text ── */
 
 /* ── Hero CTA buttons — on paper background ── */
 .md-typeset .hero .hero-cta {
@@ -642,7 +636,6 @@
   transform: translateY(-1px);
 }
 
-/* ── Dark-mode hero ── */
 [data-md-color-scheme="slate"] .md-typeset .hero {
   background: none;
   color: rgba(250,249,245,0.92);
@@ -652,7 +645,7 @@
   color: #c8d8e8 !important;
 }
 
-[data-md-color-scheme="slate"] .md-typeset .hero .hero-title::after {
+[data-md-color-scheme="slate"] .md-typeset .hero-title-rule {
   background: linear-gradient(to right, rgba(195,198,213,0.25) 0%, rgba(195,198,213,0.25) 40%, transparent 100%);
 }
 
@@ -1062,16 +1055,19 @@
 
 /* ── Responsive ── */
 @media (max-width: 700px) {
-  .md-typeset .hero-layout {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    align-items: start;
+  .md-typeset .hero-title-row {
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
-  .md-typeset .hero-mark-wrap {
-    justify-self: center;
-    width: min(100%, 17rem);
-    margin: 0.1rem auto 0;
+  .md-typeset .hero-mark--inline {
+    width: 7.1rem;
+    margin-bottom: 0;
+  }
+
+  .md-typeset .hero .hero-title {
+    font-size: 2.45rem;
   }
 
   .md-typeset .card-grid--primary,
