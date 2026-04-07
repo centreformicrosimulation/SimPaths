@@ -503,6 +503,7 @@
    HOMEPAGE WIDTH CONSTRAINT
 ═══════════════════════════════════════════════ */
 
+.md-content[data-md-component="content"] .md-typeset .hero,
 .md-content[data-md-component="content"] .md-typeset .card-grid,
 .md-content[data-md-component="content"] .md-typeset .countries,
 .md-content[data-md-component="content"] .md-typeset .section-heading {

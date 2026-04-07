@@ -4,13 +4,67 @@ hide:
   - toc
 ---
 
-<div class="hero" markdown>
-<div class="hero-title-row">
-  <h1 class="hero-title">SimPaths</h1>
-  <img src="assets/images/homepage-hero-logo.svg" alt="SimPaths logo showing people progressing across a rising path." class="hero-mark hero-mark--inline">
+<style>
+  .simpaths-hero .simpaths-hero-title-row {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 0.95rem;
+    max-width: 39rem;
+  }
+
+  .simpaths-hero .simpaths-hero-title {
+    margin: 0 !important;
+  }
+
+  .simpaths-hero .simpaths-hero-title::after {
+    display: none !important;
+  }
+
+  .simpaths-hero .simpaths-hero-title-rule {
+    max-width: 39rem;
+    height: 0.5px;
+    margin-top: 0.55rem;
+    margin-bottom: 1.2rem;
+    background: var(--sp-hairline);
+  }
+
+  .simpaths-hero .simpaths-hero-logo-inline {
+    display: block;
+    width: clamp(5.75rem, 16vw, 7.8rem);
+    height: auto;
+    flex: 0 0 auto;
+    margin-bottom: 0.18rem;
+    filter: drop-shadow(0 10px 16px rgba(30, 40, 52, 0.08));
+  }
+
+  .simpaths-hero > p {
+    max-width: 39rem;
+    text-align: left;
+    hyphens: none;
+    -webkit-hyphens: none;
+  }
+
+  @media (max-width: 700px) {
+    .simpaths-hero .simpaths-hero-title-row {
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .simpaths-hero .simpaths-hero-logo-inline {
+      width: 7.1rem;
+      margin-bottom: 0;
+    }
+  }
+</style>
+
+<div class="hero simpaths-hero" markdown>
+<div class="simpaths-hero-title-row">
+  <h1 class="hero-title simpaths-hero-title">SimPaths</h1>
+  <img src="assets/images/homepage-hero-logo.svg?v=2" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-hero-logo-inline">
 </div>
 
-<div class="hero-title-rule"></div>
+<div class="simpaths-hero-title-rule"></div>
 
 SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
 
