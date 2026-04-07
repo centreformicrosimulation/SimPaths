@@ -7,11 +7,11 @@ hide:
 <style>
   .simpaths-home-hero {
     width: 100vw;
-    margin: 0 calc(50% - 50vw) 2.2rem;
-    padding: 1.7rem 1.2rem 1.85rem;
+    margin: -0.32rem calc(50% - 50vw) 2.2rem;
+    padding: 2rem 1.2rem 1.85rem;
     background:
       linear-gradient(90deg, rgba(255, 220, 226, 0.92) 0%, rgba(243, 223, 255, 0.9) 46%, rgba(217, 236, 255, 0.94) 100%);
-    border-top: 1px solid rgba(195, 198, 213, 0.46);
+    border-top: none;
     border-bottom: 1px solid rgba(195, 198, 213, 0.46);
   }
 
@@ -40,7 +40,7 @@ hide:
     margin: 0 !important;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(3.55rem, 6.8vw, 4.35rem) !important;
+    font-size: clamp(3.1rem, 6vw, 3.9rem) !important;
     font-weight: 500;
     letter-spacing: 0.01em;
     line-height: 0.94;
@@ -154,7 +154,8 @@ hide:
 
   @media (max-width: 700px) {
     .simpaths-home-hero {
-      padding: 1.55rem 1rem 1.7rem;
+      margin-top: -0.2rem;
+      padding: 1.75rem 1rem 1.7rem;
     }
 
     .simpaths-home-hero__logo {
@@ -162,7 +163,7 @@ hide:
     }
 
     .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
-      font-size: clamp(3.1rem, 10.5vw, 3.8rem) !important;
+      font-size: clamp(2.85rem, 9.8vw, 3.5rem) !important;
     }
 
     .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
