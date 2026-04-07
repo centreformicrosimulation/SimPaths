@@ -1,5 +1,6 @@
 ---
 hide:
+  - navigation
   - toc
 ---
 
@@ -39,10 +40,10 @@ hide:
     margin: 0 !important;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(5.8rem, 10.6vw, 7.2rem) !important;
+    font-size: clamp(4.55rem, 8.4vw, 5.45rem) !important;
     font-weight: 500;
     letter-spacing: 0.01em;
-    line-height: 0.9;
+    line-height: 0.94;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
     border-bottom: none !important;
@@ -161,7 +162,7 @@ hide:
     }
 
     .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
-      font-size: clamp(4.6rem, 13vw, 5.4rem) !important;
+      font-size: clamp(3.8rem, 12vw, 4.55rem) !important;
     }
 
     .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
