@@ -12,7 +12,6 @@ copyright: >-
 
 theme:
   name: material
-  logo: assets/images/header-logo-mark.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -42,6 +41,9 @@ theme:
 
 extra_css:
   - assets/css/extra.css
+
+extra_javascript:
+  - assets/javascripts/header-autohide.js
 
 plugins:
   - search:

@@ -67,7 +67,7 @@
   --sp-nav-pill-active: rgba(250,249,245,0.2);
   --sp-nav-pill-border: rgba(250,249,245,0.14);
   --sp-nav-pill-shadow: 0 10px 22px rgba(8,14,24,0.22);
-  --sp-header-surface:  linear-gradient(135deg, #272b3d 0%, #3a2f4f 46%, #283648 100%);
+  --sp-header-surface:  linear-gradient(135deg, #1f2536 0%, #342347 46%, #223346 100%);
   --sp-header-border:   rgba(250,249,245,0.09);
   --sp-header-shadow:   0 8px 24px rgba(10,14,24,0.28);
   --sp-header-text:     rgba(250,249,245,0.8);
@@ -126,7 +126,7 @@
   --sp-nav-pill-active:           rgba(250,249,245,0.14);
   --sp-nav-pill-border:           rgba(250,249,245,0.09);
   --sp-nav-pill-shadow:           0 10px 22px rgba(0,0,0,0.26);
-  --sp-header-surface:            linear-gradient(135deg, #191c2a 0%, #27213a 48%, #1b2638 100%);
+  --sp-header-surface:            linear-gradient(135deg, #171b28 0%, #281d39 48%, #172636 100%);
   --sp-header-border:             rgba(250,249,245,0.07);
   --sp-header-shadow:             0 8px 24px rgba(0,0,0,0.34);
   --sp-header-text:               rgba(250,249,245,0.78);
@@ -209,23 +209,7 @@
 }
 
 .md-header__button.md-logo {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  height: auto;
-  margin-right: 0.15rem;
-  padding: 0;
-  background: none;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-}
-
-.md-header__button.md-logo img,
-.md-header__button.md-logo svg {
-  width: auto;
-  height: 1rem;
+  display: none !important;
 }
 
 /* ── Header title — Newsreader ── */
@@ -241,6 +225,20 @@
   font-weight: 400 !important;
 }
 
+.md-header__title .md-header__topic:first-child .md-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.md-header__title .md-header__topic:first-child .md-ellipsis::before {
+  content: "";
+  width: 1.75rem;
+  height: 0.95rem;
+  flex: 0 0 1.75rem;
+  background: url("../images/header-logo-mark.svg") center / contain no-repeat;
+}
+
 /* ── Tab bar ── */
 .md-tabs {
   background: rgba(8,16,32,0.45) !important;
@@ -248,6 +246,18 @@
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(250,249,245,0.06);
   border-bottom: 1px solid rgba(250,249,245,0.04);
+  transition:
+    transform 0.24s cubic-bezier(0.8, 0, 0.6, 1),
+    opacity 0.18s ease,
+    margin-bottom 0.24s cubic-bezier(0.8, 0, 0.6, 1);
+  will-change: transform;
+}
+
+.md-tabs.sp-tabs-collapsed {
+  transform: translateY(calc(-100% - 1px));
+  opacity: 0;
+  margin-bottom: -3.2rem;
+  pointer-events: none;
 }
 
 .md-tabs .md-grid {
