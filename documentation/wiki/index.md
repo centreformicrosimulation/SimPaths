@@ -5,83 +5,174 @@ hide:
 ---
 
 <style>
-  .simpaths-hero .simpaths-hero-title-row {
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 0.95rem;
+  .simpaths-home-hero {
+    width: 100vw;
+    margin: 0 calc(50% - 50vw) 2.2rem;
+    padding: 2.45rem 1.2rem 2.35rem;
+    background:
+      linear-gradient(90deg, rgba(255, 220, 226, 0.92) 0%, rgba(243, 223, 255, 0.9) 46%, rgba(217, 236, 255, 0.94) 100%);
+    border-top: 1px solid rgba(195, 198, 213, 0.46);
+    border-bottom: 1px solid rgba(195, 198, 213, 0.46);
+  }
+
+  .simpaths-home-hero__inner {
     max-width: 39rem;
+    margin: 0 auto;
+    text-align: center;
   }
 
-  .simpaths-hero .simpaths-hero-title {
-    margin: 0 !important;
+  .simpaths-home-hero__logo {
+    display: block;
+    width: clamp(4.6rem, 10vw, 5.8rem);
+    height: auto;
+    margin: 0 auto 0.5rem;
+    filter: drop-shadow(0 8px 14px rgba(30, 40, 52, 0.08));
   }
 
-  .simpaths-hero .simpaths-hero-title::after {
+  .simpaths-home-hero__title {
+    margin: 0;
+    font-family: var(--sp-heading-font), Georgia, serif;
+    color: var(--sp-midnight);
+    font-size: clamp(2.6rem, 7vw, 3.45rem);
+    font-weight: 470;
+    letter-spacing: 0.02em;
+    line-height: 1.04;
+  }
+
+  .simpaths-home-hero__title::after {
     display: none !important;
   }
 
-  .simpaths-hero .simpaths-hero-title-rule {
-    max-width: 39rem;
-    height: 0.5px;
-    margin-top: 0.55rem;
-    margin-bottom: 1.2rem;
-    background: var(--sp-hairline);
+  .simpaths-home-hero__strap {
+    margin: 0.3rem 0 1.15rem;
+    color: rgba(42, 56, 72, 0.74);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
   }
 
-  .simpaths-hero .simpaths-hero-logo-inline {
-    display: block;
-    width: clamp(5.75rem, 16vw, 7.8rem);
-    height: auto;
-    flex: 0 0 auto;
-    margin-bottom: 0.18rem;
-    filter: drop-shadow(0 10px 16px rgba(30, 40, 52, 0.08));
-  }
-
-  .simpaths-hero > p {
-    max-width: 39rem;
-    text-align: left;
+  .simpaths-home-hero__copy {
+    margin: 0 auto;
+    max-width: 33rem;
+    color: #2f3844;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    text-align: center;
     hyphens: none;
     -webkit-hyphens: none;
   }
 
+  .simpaths-home-hero__copy + .simpaths-home-hero__copy {
+    margin-top: 0.45rem;
+  }
+
+  .simpaths-home-hero__copy strong {
+    color: var(--sp-midnight);
+  }
+
+  .simpaths-home-hero__countries {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.42rem;
+    margin: 1rem 0 0.95rem;
+  }
+
+  .simpaths-home-hero__country {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(250, 249, 245, 0.66);
+    color: #4a5463;
+    border: 1px solid rgba(195, 198, 213, 0.52);
+    border-radius: 4px;
+    padding: 0.18rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    backdrop-filter: blur(6px);
+  }
+
+  .simpaths-home-hero__cta {
+    display: flex;
+    justify-content: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    margin-top: 0.2rem;
+  }
+
+  .simpaths-home-hero__cta a {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    padding: 0.5rem 1.08rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    border-bottom: none !important;
+    transition: var(--sp-transition);
+  }
+
+  .simpaths-home-hero__cta .simpaths-home-hero__btn--primary {
+    background: var(--sp-midnight);
+    color: var(--sp-paper) !important;
+    box-shadow: 0 2px 8px rgba(42, 56, 72, 0.14);
+  }
+
+  .simpaths-home-hero__cta .simpaths-home-hero__btn--primary:hover {
+    background: var(--sp-midnight-deep);
+    transform: translateY(-1px);
+  }
+
+  .simpaths-home-hero__cta .simpaths-home-hero__btn--secondary {
+    background: rgba(250, 249, 245, 0.52);
+    color: var(--sp-midnight) !important;
+    border: 1px solid rgba(195, 198, 213, 0.9) !important;
+  }
+
+  .simpaths-home-hero__cta .simpaths-home-hero__btn--secondary:hover {
+    background: rgba(250, 249, 245, 0.82);
+    transform: translateY(-1px);
+  }
+
   @media (max-width: 700px) {
-    .simpaths-hero .simpaths-hero-title-row {
-      gap: 0.75rem;
-      align-items: center;
-      flex-wrap: wrap;
+    .simpaths-home-hero {
+      padding: 2rem 1rem 2.1rem;
     }
 
-    .simpaths-hero .simpaths-hero-logo-inline {
-      width: 7.1rem;
-      margin-bottom: 0;
+    .simpaths-home-hero__logo {
+      width: 4.9rem;
+    }
+
+    .simpaths-home-hero__copy {
+      font-size: 0.9rem;
     }
   }
 </style>
 
-<div class="hero simpaths-hero" markdown>
-<div class="simpaths-hero-title-row">
-  <h1 class="hero-title simpaths-hero-title">SimPaths</h1>
-  <img src="assets/images/homepage-hero-logo.svg?v=2" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-hero-logo-inline">
-</div>
+<div class="simpaths-home-hero">
+<div class="simpaths-home-hero__inner">
+  <img src="assets/images/homepage-hero-logo.svg?v=3" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-home-hero__logo">
+  <h1 class="simpaths-home-hero__title">SimPaths</h1>
+  <p class="simpaths-home-hero__strap">life course microsimulation</p>
 
-<div class="simpaths-hero-title-rule"></div>
+  <p class="simpaths-home-hero__copy">SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.</p>
 
-SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.
+  <p class="simpaths-home-hero__copy">The broader SimPaths family spans <strong>the UK and other European countries</strong>.</p>
 
-The broader SimPaths family spans **the UK and other European countries**.
+  <div class="simpaths-home-hero__countries">
+    <span class="simpaths-home-hero__country">🇬🇧 United Kingdom</span>
+    <span class="simpaths-home-hero__country">🇬🇷 Greece</span>
+    <span class="simpaths-home-hero__country">🇭🇺 Hungary</span>
+    <span class="simpaths-home-hero__country">🇮🇹 Italy</span>
+    <span class="simpaths-home-hero__country">🇵🇱 Poland</span>
+  </div>
 
-<div class="countries">
-  <span class="country-tag">🇬🇧 United Kingdom</span>
-  <span class="country-tag">🇬🇷 Greece</span>
-  <span class="country-tag">🇭🇺 Hungary</span>
-  <span class="country-tag">🇮🇹 Italy</span>
-  <span class="country-tag">🇵🇱 Poland</span>
-</div>
-
-<div class="hero-cta">
-  <a href="documentation/" class="btn-primary">Explore Documentation →</a>
-  <a href="overview/" class="btn-secondary">Explore the Model</a>
-  <a href="https://github.com/simpaths/SimPaths" class="btn-secondary">View on GitHub</a>
+  <div class="simpaths-home-hero__cta">
+    <a href="documentation/" class="simpaths-home-hero__btn--primary">Explore Documentation →</a>
+    <a href="overview/" class="simpaths-home-hero__btn--secondary">Explore the Model</a>
+    <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-hero__btn--secondary">View on GitHub</a>
+  </div>
 </div>
 </div>
 
