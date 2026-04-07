@@ -67,7 +67,7 @@
   --sp-nav-pill-active: rgba(250,249,245,0.2);
   --sp-nav-pill-border: rgba(250,249,245,0.14);
   --sp-nav-pill-shadow: 0 10px 22px rgba(8,14,24,0.22);
-  --sp-header-surface:  linear-gradient(135deg, #2f3348 0%, #34384e 46%, #2f3950 100%);
+  --sp-header-surface:  linear-gradient(135deg, #272b3d 0%, #3a2f4f 46%, #283648 100%);
   --sp-header-border:   rgba(250,249,245,0.09);
   --sp-header-shadow:   0 8px 24px rgba(10,14,24,0.28);
   --sp-header-text:     rgba(250,249,245,0.8);
@@ -126,7 +126,7 @@
   --sp-nav-pill-active:           rgba(250,249,245,0.14);
   --sp-nav-pill-border:           rgba(250,249,245,0.09);
   --sp-nav-pill-shadow:           0 10px 22px rgba(0,0,0,0.26);
-  --sp-header-surface:            linear-gradient(135deg, #1d2231 0%, #24283a 48%, #20283b 100%);
+  --sp-header-surface:            linear-gradient(135deg, #191c2a 0%, #27213a 48%, #1b2638 100%);
   --sp-header-border:             rgba(250,249,245,0.07);
   --sp-header-shadow:             0 8px 24px rgba(0,0,0,0.34);
   --sp-header-text:               rgba(250,249,245,0.78);
@@ -201,27 +201,20 @@
 ═══════════════════════════════════════════════ */
 
 .md-header {
-  position: relative;
-  overflow: visible;
   background: var(--sp-header-surface) !important;
   box-shadow: 0 1px 0 rgba(250,249,245,0.06), 0 4px 20px rgba(10,20,40,0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--sp-header-border);
   height: 3rem;
-}
-
-.md-header__inner {
-  min-height: 3rem;
 }
 
 .md-header__button.md-logo {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 1.5rem;
-  margin-right: 0.45rem;
+  width: auto;
+  height: auto;
+  margin-right: 0.15rem;
   padding: 0;
   background: none;
   border: none;
@@ -231,8 +224,8 @@
 
 .md-header__button.md-logo img,
 .md-header__button.md-logo svg {
-  width: 1.95rem;
-  height: auto;
+  width: auto;
+  height: 1rem;
 }
 
 /* ── Header title — Newsreader ── */
@@ -240,26 +233,12 @@
   font-family: var(--sp-heading-font) !important;
   font-size: 0.9rem !important;
   font-weight: 400 !important;
-  letter-spacing: 0.015em;
-  color: var(--sp-header-text-strong);
+  letter-spacing: 0.01em;
 }
 
 .md-header__title .md-header__topic {
   align-items: center;
   font-weight: 400 !important;
-}
-
-.md-header__title .md-header__topic:first-child {
-  text-shadow: none;
-}
-
-.md-header__title .md-header__topic + .md-header__topic,
-.md-header__button.md-icon {
-  color: var(--sp-header-text);
-}
-
-.md-header__button.md-icon:hover {
-  color: var(--sp-header-text-strong);
 }
 
 /* ── Tab bar ── */
