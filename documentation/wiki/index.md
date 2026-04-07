@@ -8,7 +8,7 @@ hide:
   .simpaths-home-hero {
     width: 100vw;
     margin: 0 calc(50% - 50vw) 2.2rem;
-    padding: 1.9rem 1.2rem 1.95rem;
+    padding: 1.7rem 1.2rem 1.85rem;
     background:
       linear-gradient(90deg, rgba(255, 220, 226, 0.92) 0%, rgba(243, 223, 255, 0.9) 46%, rgba(217, 236, 255, 0.94) 100%);
     border-top: 1px solid rgba(195, 198, 213, 0.46);
@@ -16,26 +16,34 @@ hide:
   }
 
   .simpaths-home-hero__inner {
-    max-width: 42rem;
+    max-width: 40rem;
     margin: 0 auto;
     text-align: center;
   }
 
+  .simpaths-home-hero__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 0.8rem;
+  }
+
   .simpaths-home-hero__logo {
     display: block;
-    width: clamp(5.25rem, 11vw, 6.8rem);
+    width: clamp(6.25rem, 12vw, 7.6rem);
     height: auto;
-    margin: 0 auto 0.22rem;
+    margin: 0 auto 0.08rem;
   }
 
   .simpaths-home-hero__title {
     margin: 0;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(3.25rem, 7vw, 4.15rem);
-    font-weight: 480;
-    letter-spacing: 0.02em;
-    line-height: 0.98;
+    font-size: clamp(3.9rem, 7.5vw, 4.95rem);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 0.94;
   }
 
   .simpaths-home-hero__title::after {
@@ -43,26 +51,29 @@ hide:
   }
 
   .simpaths-home-hero__strap {
-    margin: 0.12rem 0 0.95rem;
-    color: rgba(42, 56, 72, 0.8);
-    font-size: 0.98rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
+    margin: 0.18rem 0 0;
+    color: #1f2731;
+    font-size: 0.92rem;
+    font-weight: 520;
+    letter-spacing: 0.22em;
+    line-height: 1.2;
+    text-transform: uppercase;
   }
 
   .simpaths-home-hero__copy {
     margin: 0 auto;
-    max-width: 34.5rem;
+    max-width: 37rem;
     color: #2f3844;
-    font-size: 0.9rem;
-    line-height: 1.58;
+    font-size: 0.83rem;
+    line-height: 1.52;
     text-align: center;
     hyphens: none;
     -webkit-hyphens: none;
+    text-wrap: balance;
   }
 
   .simpaths-home-hero__copy + .simpaths-home-hero__copy {
-    margin-top: 0.38rem;
+    margin-top: 0.34rem;
   }
 
   .simpaths-home-hero__copy strong {
@@ -74,7 +85,7 @@ hide:
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.42rem;
-    margin: 0.9rem 0 0.88rem;
+    margin: 0.82rem 0 0.82rem;
   }
 
   .simpaths-home-hero__country {
@@ -85,8 +96,8 @@ hide:
     color: #4a5463;
     border: 1px solid rgba(195, 198, 213, 0.52);
     border-radius: 4px;
-    padding: 0.18rem 0.55rem;
-    font-size: 0.72rem;
+    padding: 0.16rem 0.5rem;
+    font-size: 0.68rem;
     font-weight: 500;
     backdrop-filter: blur(6px);
   }
@@ -103,8 +114,8 @@ hide:
     display: inline-flex;
     align-items: center;
     border-radius: 4px;
-    padding: 0.5rem 1.08rem;
-    font-size: 0.78rem;
+    padding: 0.46rem 0.98rem;
+    font-size: 0.74rem;
     font-weight: 600;
     text-decoration: none !important;
     border-bottom: none !important;
@@ -135,33 +146,36 @@ hide:
 
   @media (max-width: 700px) {
     .simpaths-home-hero {
-      padding: 1.75rem 1rem 1.9rem;
+      padding: 1.55rem 1rem 1.7rem;
     }
 
     .simpaths-home-hero__logo {
-      width: 5rem;
+      width: 5.8rem;
     }
 
     .simpaths-home-hero__title {
-      font-size: clamp(2.7rem, 11vw, 3.2rem);
+      font-size: clamp(3rem, 12vw, 3.6rem);
     }
 
     .simpaths-home-hero__strap {
-      font-size: 0.9rem;
-      letter-spacing: 0.03em;
+      font-size: 0.82rem;
+      letter-spacing: 0.15em;
     }
 
     .simpaths-home-hero__copy {
-      font-size: 0.88rem;
+      max-width: 32rem;
+      font-size: 0.8rem;
     }
   }
 </style>
 
 <div class="simpaths-home-hero">
 <div class="simpaths-home-hero__inner">
-  <img src="assets/images/homepage-hero-logo.svg?v=3" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-home-hero__logo">
-  <h1 class="simpaths-home-hero__title">SimPaths</h1>
-  <p class="simpaths-home-hero__strap">life course microsimulation</p>
+  <div class="simpaths-home-hero__brand">
+    <img src="assets/images/homepage-hero-logo.svg?v=3" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-home-hero__logo">
+    <h1 class="simpaths-home-hero__title">SimPaths</h1>
+    <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
+  </div>
 
   <p class="simpaths-home-hero__copy">SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.</p>
 
