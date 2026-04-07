@@ -31,7 +31,7 @@ hide:
 
   .simpaths-home-hero__logo {
     display: block;
-    width: clamp(6.25rem, 12vw, 7.6rem);
+    width: clamp(5.7rem, 10.6vw, 6.8rem);
     height: auto;
     margin: 0 auto 0.08rem;
   }
@@ -40,10 +40,10 @@ hide:
     margin: 0;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(4.9rem, 8.8vw, 6.05rem);
+    font-size: clamp(5.55rem, 10vw, 6.85rem);
     font-weight: 500;
     letter-spacing: 0.01em;
-    line-height: 0.94;
+    line-height: 0.9;
   }
 
   .simpaths-home-hero__title::after {
@@ -152,11 +152,11 @@ hide:
     }
 
     .simpaths-home-hero__logo {
-      width: 5.8rem;
+      width: 5.15rem;
     }
 
     .simpaths-home-hero__title {
-      font-size: clamp(3.9rem, 12vw, 4.55rem);
+      font-size: clamp(4.35rem, 13vw, 5.1rem);
     }
 
     .simpaths-home-hero__strap {

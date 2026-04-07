@@ -168,12 +168,24 @@
 ═══════════════════════════════════════════════ */
 
 .md-header {
-  background: linear-gradient(180deg, rgba(34, 47, 63, 0.96) 0%, rgba(39, 54, 70, 0.94) 100%) !important;
-  box-shadow: 0 1px 0 rgba(250,249,245,0.08), 0 10px 28px rgba(10,20,40,0.16);
+  background: linear-gradient(135deg, rgba(17, 27, 40, 0.97) 0%, rgba(30, 43, 58, 0.95) 52%, rgba(23, 35, 49, 0.97) 100%) !important;
+  box-shadow: 0 1px 0 rgba(250,249,245,0.06), 0 14px 32px rgba(10,20,40,0.28);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   height: 2.9rem;
   position: relative;
+  overflow: hidden;
+}
+
+.md-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% -40%, rgba(233, 161, 164, 0.18), transparent 38%),
+    radial-gradient(circle at 85% -55%, rgba(146, 192, 242, 0.18), transparent 42%);
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .md-header::after {
@@ -207,25 +219,27 @@
 
 /* ── Tab bar ── */
 .md-tabs {
-  background: rgba(26, 37, 50, 0.78) !important;
+  background: linear-gradient(180deg, rgba(14, 24, 36, 0.72) 0%, rgba(18, 29, 42, 0.82) 100%) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(250,249,245,0.04);
+  border-top: 1px solid rgba(250,249,245,0.05);
   border-bottom: 1px solid rgba(250,249,245,0.03);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
 .md-tabs__link {
   font-weight: 500;
   font-size: 0.74rem;
   letter-spacing: 0.025em;
-  opacity: 0.74;
-  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  opacity: 0.78;
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
 }
 
 .md-tabs__link:hover {
   opacity: 1;
   color: rgba(255,255,255,0.96) !important;
   transform: translateY(-1px);
+  text-shadow: 0 0 16px rgba(146, 192, 242, 0.16);
 }
 
 /* ── Tab underline ── */
@@ -253,6 +267,7 @@
 .md-tabs__item--active .md-tabs__link {
   opacity: 1;
   color: #fff !important;
+  text-shadow: 0 0 18px rgba(233, 161, 164, 0.16);
 }
 
 .md-tabs__item--active::after {
@@ -1332,17 +1347,17 @@
 
 .md-search__form {
   border-radius: 20px;
-  background: rgba(250,249,245,0.1) !important;
-  border: 1px solid rgba(250,249,245,0.12);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  background: linear-gradient(180deg, rgba(250,249,245,0.12) 0%, rgba(250,249,245,0.08) 100%) !important;
+  border: 1px solid rgba(250,249,245,0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px rgba(255,255,255,0.01);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .md-search__form:hover {
-  background: rgba(250,249,245,0.14) !important;
-  border-color: rgba(250,249,245,0.16);
+  background: linear-gradient(180deg, rgba(250,249,245,0.16) 0%, rgba(250,249,245,0.11) 100%) !important;
+  border-color: rgba(250,249,245,0.18);
 }
 .md-search__form:focus-within {
-  background: rgba(250,249,245,0.18) !important;
+  background: linear-gradient(180deg, rgba(250,249,245,0.18) 0%, rgba(250,249,245,0.13) 100%) !important;
   border-color: rgba(180,164,235,0.45);
   box-shadow: 0 0 0 3px rgba(180,164,235,0.11);
 }
