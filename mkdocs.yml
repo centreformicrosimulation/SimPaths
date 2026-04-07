@@ -12,6 +12,7 @@ copyright: >-
 
 theme:
   name: material
+  logo: assets/images/logo.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
