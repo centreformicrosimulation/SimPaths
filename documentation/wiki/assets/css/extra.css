@@ -51,6 +51,7 @@
   --sp-accent-bright:   #4fb3f0;
   --sp-gradient:        linear-gradient(135deg, #1e2c3a 0%, #2A3848 55%, #243444 100%);
   --sp-hero-gradient:   linear-gradient(135deg, #1a2636 0%, #2A3848 50%, #243444 100%);
+  --sp-soft-spectrum:   linear-gradient(90deg, #e9a1a4 0%, #c6a4ea 52%, #92c0f2 100%);
   --sp-hairline:        linear-gradient(to right, #C3C6D5 0%, #C3C6D5 40%, transparent 100%);
   --sp-card-shadow:     0 2px 12px rgba(42,56,72,0.08);
   --sp-transition:      all 0.2s ease;
@@ -167,11 +168,23 @@
 ═══════════════════════════════════════════════ */
 
 .md-header {
-  background: var(--sp-gradient) !important;
-  box-shadow: 0 1px 0 rgba(250,249,245,0.06), 0 4px 20px rgba(10,20,40,0.4);
+  background: linear-gradient(180deg, rgba(34, 47, 63, 0.96) 0%, rgba(39, 54, 70, 0.94) 100%) !important;
+  box-shadow: 0 1px 0 rgba(250,249,245,0.08), 0 10px 28px rgba(10,20,40,0.16);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  height: 3rem;
+  height: 2.9rem;
+  position: relative;
+}
+
+.md-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--sp-soft-spectrum);
+  opacity: 0.42;
 }
 
 /* ── Logo — hidden for clean typographic header ── */
@@ -182,7 +195,7 @@
 /* ── Header title — Newsreader ── */
 .md-header__title {
   font-family: var(--sp-heading-font) !important;
-  font-size: 0.92rem !important;
+  font-size: 0.9rem !important;
   font-weight: 400 !important;
   letter-spacing: 0.01em;
 }
@@ -194,23 +207,25 @@
 
 /* ── Tab bar ── */
 .md-tabs {
-  background: rgba(8,16,32,0.45) !important;
+  background: rgba(26, 37, 50, 0.78) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(250,249,245,0.06);
-  border-bottom: 1px solid rgba(250,249,245,0.04);
+  border-top: 1px solid rgba(250,249,245,0.04);
+  border-bottom: 1px solid rgba(250,249,245,0.03);
 }
 
 .md-tabs__link {
   font-weight: 500;
-  font-size: 0.76rem;
-  letter-spacing: 0.03em;
-  opacity: 0.65;
-  transition: opacity 0.2s ease, color 0.2s ease;
+  font-size: 0.74rem;
+  letter-spacing: 0.025em;
+  opacity: 0.74;
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .md-tabs__link:hover {
-  opacity: 0.95;
+  opacity: 1;
+  color: rgba(255,255,255,0.96) !important;
+  transform: translateY(-1px);
 }
 
 /* ── Tab underline ── */
@@ -243,7 +258,7 @@
 .md-tabs__item--active::after {
   width: 100%;
   left: 0;
-  background: linear-gradient(90deg, var(--sp-accent-bright, #4fb3f0), var(--sp-accent-light, #3b9ede));
+  background: var(--sp-soft-spectrum);
 }
 
 /* ═══════════════════════════════════════════════
@@ -1317,18 +1332,19 @@
 
 .md-search__form {
   border-radius: 20px;
-  background: rgba(250,249,245,0.08) !important;
-  border: 1px solid rgba(250,249,245,0.08);
+  background: rgba(250,249,245,0.1) !important;
+  border: 1px solid rgba(250,249,245,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .md-search__form:hover {
-  background: rgba(250,249,245,0.12) !important;
-  border-color: rgba(250,249,245,0.12);
+  background: rgba(250,249,245,0.14) !important;
+  border-color: rgba(250,249,245,0.16);
 }
 .md-search__form:focus-within {
-  background: rgba(250,249,245,0.16) !important;
-  border-color: rgba(79,179,240,0.3);
-  box-shadow: 0 0 0 3px rgba(79,179,240,0.08);
+  background: rgba(250,249,245,0.18) !important;
+  border-color: rgba(180,164,235,0.45);
+  box-shadow: 0 0 0 3px rgba(180,164,235,0.11);
 }
 
 /* ═══════════════════════════════════════════════
