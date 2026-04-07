@@ -168,34 +168,11 @@
 ═══════════════════════════════════════════════ */
 
 .md-header {
-  background: linear-gradient(135deg, rgba(17, 27, 40, 0.97) 0%, rgba(30, 43, 58, 0.95) 52%, rgba(23, 35, 49, 0.97) 100%) !important;
-  box-shadow: 0 1px 0 rgba(250,249,245,0.06), 0 14px 32px rgba(10,20,40,0.28);
+  background: var(--sp-gradient) !important;
+  box-shadow: 0 1px 0 rgba(250,249,245,0.06), 0 4px 20px rgba(10,20,40,0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  height: 2.9rem;
-  position: relative;
-}
-
-.md-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 18% -40%, rgba(233, 161, 164, 0.18), transparent 38%),
-    radial-gradient(circle at 85% -55%, rgba(146, 192, 242, 0.18), transparent 42%);
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-.md-header::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--sp-soft-spectrum);
-  opacity: 0.62;
+  height: 3rem;
 }
 
 /* ── Logo — hidden for clean typographic header ── */
@@ -218,58 +195,32 @@
 
 /* ── Tab bar ── */
 .md-tabs {
-  background: linear-gradient(180deg, rgba(14, 24, 36, 0.72) 0%, rgba(18, 29, 42, 0.82) 100%) !important;
+  background: rgba(8,16,32,0.45) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(250,249,245,0.05);
-  border-bottom: 1px solid rgba(250,249,245,0.03);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 10px 24px rgba(10,20,40,0.16);
-  min-height: 2rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.md-tabs::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(233, 161, 164, 0.12) 0%, rgba(198, 164, 234, 0.08) 45%, rgba(146, 192, 242, 0.12) 100%),
-    radial-gradient(circle at 14% 0%, rgba(233, 161, 164, 0.12), transparent 34%),
-    radial-gradient(circle at 86% 0%, rgba(146, 192, 242, 0.12), transparent 36%);
-  pointer-events: none;
-  opacity: 0.95;
+  border-top: 1px solid rgba(250,249,245,0.06);
+  border-bottom: 1px solid rgba(250,249,245,0.04);
 }
 
 .md-tabs .md-grid {
   display: flex;
   align-items: center;
-  position: relative;
-  z-index: 1;
 }
 
 .md-tabs__list {
   align-items: center;
-  min-height: 2rem;
 }
 
 .md-tabs__link {
   font-weight: 500;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   letter-spacing: 0.03em;
-  color: rgba(250,249,245,0.82) !important;
-  opacity: 0.92;
-  display: inline-flex;
-  align-items: center;
-  min-height: 2rem;
-  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
+  opacity: 0.65;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .md-tabs__link:hover {
-  opacity: 1;
-  color: rgba(255,255,255,0.96) !important;
-  transform: translateY(-1px);
-  text-shadow: 0 0 16px rgba(146, 192, 242, 0.16);
+  opacity: 0.95;
 }
 
 /* ── Tab underline ── */
@@ -297,13 +248,12 @@
 .md-tabs__item--active .md-tabs__link {
   opacity: 1;
   color: #fff !important;
-  text-shadow: 0 0 18px rgba(233, 161, 164, 0.16);
 }
 
 .md-tabs__item--active::after {
   width: 100%;
   left: 0;
-  background: var(--sp-soft-spectrum);
+  background: linear-gradient(90deg, var(--sp-accent-bright, #4fb3f0), var(--sp-accent-light, #3b9ede));
 }
 
 /* ═══════════════════════════════════════════════
