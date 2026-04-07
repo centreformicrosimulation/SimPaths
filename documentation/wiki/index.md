@@ -8,7 +8,7 @@ hide:
   .simpaths-home-hero {
     width: 100vw;
     margin: 0 calc(50% - 50vw) 2.2rem;
-    padding: 2.45rem 1.2rem 2.35rem;
+    padding: 1.9rem 1.2rem 1.95rem;
     background:
       linear-gradient(90deg, rgba(255, 220, 226, 0.92) 0%, rgba(243, 223, 255, 0.9) 46%, rgba(217, 236, 255, 0.94) 100%);
     border-top: 1px solid rgba(195, 198, 213, 0.46);
@@ -16,27 +16,26 @@ hide:
   }
 
   .simpaths-home-hero__inner {
-    max-width: 39rem;
+    max-width: 42rem;
     margin: 0 auto;
     text-align: center;
   }
 
   .simpaths-home-hero__logo {
     display: block;
-    width: clamp(4.6rem, 10vw, 5.8rem);
+    width: clamp(5.25rem, 11vw, 6.8rem);
     height: auto;
-    margin: 0 auto 0.5rem;
-    filter: drop-shadow(0 8px 14px rgba(30, 40, 52, 0.08));
+    margin: 0 auto 0.22rem;
   }
 
   .simpaths-home-hero__title {
     margin: 0;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(2.6rem, 7vw, 3.45rem);
-    font-weight: 470;
+    font-size: clamp(3.25rem, 7vw, 4.15rem);
+    font-weight: 480;
     letter-spacing: 0.02em;
-    line-height: 1.04;
+    line-height: 0.98;
   }
 
   .simpaths-home-hero__title::after {
@@ -44,27 +43,26 @@ hide:
   }
 
   .simpaths-home-hero__strap {
-    margin: 0.3rem 0 1.15rem;
-    color: rgba(42, 56, 72, 0.74);
-    font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: lowercase;
+    margin: 0.12rem 0 0.95rem;
+    color: rgba(42, 56, 72, 0.8);
+    font-size: 0.98rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
   }
 
   .simpaths-home-hero__copy {
     margin: 0 auto;
-    max-width: 33rem;
+    max-width: 34.5rem;
     color: #2f3844;
-    font-size: 0.92rem;
-    line-height: 1.65;
+    font-size: 0.9rem;
+    line-height: 1.58;
     text-align: center;
     hyphens: none;
     -webkit-hyphens: none;
   }
 
   .simpaths-home-hero__copy + .simpaths-home-hero__copy {
-    margin-top: 0.45rem;
+    margin-top: 0.38rem;
   }
 
   .simpaths-home-hero__copy strong {
@@ -76,7 +74,7 @@ hide:
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.42rem;
-    margin: 1rem 0 0.95rem;
+    margin: 0.9rem 0 0.88rem;
   }
 
   .simpaths-home-hero__country {
@@ -98,7 +96,7 @@ hide:
     justify-content: center;
     gap: 0.65rem;
     flex-wrap: wrap;
-    margin-top: 0.2rem;
+    margin-top: 0.12rem;
   }
 
   .simpaths-home-hero__cta a {
@@ -137,15 +135,24 @@ hide:
 
   @media (max-width: 700px) {
     .simpaths-home-hero {
-      padding: 2rem 1rem 2.1rem;
+      padding: 1.75rem 1rem 1.9rem;
     }
 
     .simpaths-home-hero__logo {
-      width: 4.9rem;
+      width: 5rem;
+    }
+
+    .simpaths-home-hero__title {
+      font-size: clamp(2.7rem, 11vw, 3.2rem);
+    }
+
+    .simpaths-home-hero__strap {
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
     }
 
     .simpaths-home-hero__copy {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
   }
 </style>
