@@ -1,0 +1,65 @@
+<svg viewBox="0 0 640 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="simpaths-people-gradient" x1="24" y1="250" x2="604" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F06A3D"/>
+      <stop offset="24%" stop-color="#D94A68"/>
+      <stop offset="45%" stop-color="#C43B8F"/>
+      <stop offset="66%" stop-color="#8643C8"/>
+      <stop offset="84%" stop-color="#5F6DDD"/>
+      <stop offset="100%" stop-color="#67B6E9"/>
+    </linearGradient>
+
+    <filter id="simpaths-people-shadow" x="0" y="0" width="640" height="280" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#2A3848" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#simpaths-people-shadow)">
+    <g fill="url(#simpaths-people-gradient)" stroke="#FBFAF6" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+      <g transform="translate(28 116) scale(0.82)">
+        <circle cx="44" cy="28" r="20"/>
+        <path d="M12 136V100C12 70 33 50 60 50C87 50 108 70 108 100V136"/>
+      </g>
+
+      <g transform="translate(118 78) scale(1.02)">
+        <circle cx="44" cy="28" r="21"/>
+        <path d="M10 142V100C10 67 33 46 60 46C87 46 110 67 110 100V142"/>
+      </g>
+
+      <g transform="translate(222 60) scale(1.07)">
+        <circle cx="44" cy="28" r="22"/>
+        <path d="M10 148V102C10 68 33 46 60 46C87 46 110 68 110 102V148"/>
+      </g>
+
+      <g transform="translate(335 42) scale(1.12)">
+        <circle cx="44" cy="28" r="23"/>
+        <path d="M10 154V104C10 68 33 46 60 46C87 46 110 68 110 104V154"/>
+      </g>
+
+      <g transform="translate(460 24) scale(1.18)">
+        <circle cx="44" cy="28" r="24"/>
+        <path d="M10 160V108C10 70 33 46 60 46C87 46 110 70 110 108V160"/>
+      </g>
+
+      <g transform="translate(560 12) scale(1.15)">
+        <circle cx="44" cy="28" r="24"/>
+        <path d="M10 160V108C10 70 33 46 60 46C87 46 110 70 110 108V160"/>
+      </g>
+    </g>
+
+    <path
+      d="M8 246C90 246 125 232 160 215C199 196 226 180 263 175C299 171 340 178 389 174C442 170 499 150 630 142"
+      stroke="#FBFAF6"
+      stroke-width="18"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M8 246C90 246 125 232 160 215C199 196 226 180 263 175C299 171 340 178 389 174C442 170 499 150 630 142"
+      stroke="#2A3848"
+      stroke-width="11"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>

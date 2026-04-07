@@ -22,7 +22,6 @@ theme:
       primary: custom
       accent: custom
   font: false
-  logo: assets/images/logo.svg
   features:
     - navigation.instant
     - navigation.instant.prefetch

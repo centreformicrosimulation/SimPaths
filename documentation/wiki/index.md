@@ -5,6 +5,8 @@ hide:
 ---
 
 <div class="hero" markdown>
+<div class="hero-layout">
+<div class="hero-copy">
 
 <h1 class="hero-title">SimPaths</h1>
 
@@ -26,6 +28,12 @@ The broader SimPaths family spans **the UK and other European countries**.
   <a href="https://github.com/simpaths/SimPaths" class="btn-secondary">View on GitHub</a>
 </div>
 
+</div>
+
+<div class="hero-mark-wrap">
+  <img src="assets/images/homepage-hero-logo.svg" alt="SimPaths logo showing people progressing across a rising path." class="hero-mark">
+</div>
+</div>
 </div>
 
 ---
