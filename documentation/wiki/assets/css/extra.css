@@ -194,9 +194,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 1px;
+  height: 2px;
   background: var(--sp-soft-spectrum);
-  opacity: 0.42;
+  opacity: 0.62;
 }
 
 /* ── Logo — hidden for clean typographic header ── */
@@ -253,7 +253,7 @@
   bottom: 0;
   left: 50%;
   width: 0;
-  height: 2px;
+  height: 2.5px;
   background: var(--sp-accent-bright, #4fb3f0);
   border-radius: 2px;
   transition: width 0.25s cubic-bezier(0.22,1,0.36,1), left 0.25s cubic-bezier(0.22,1,0.36,1);

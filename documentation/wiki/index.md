@@ -1,6 +1,5 @@
 ---
 hide:
-  - navigation
   - toc
 ---
 
@@ -36,28 +35,34 @@ hide:
     margin: 0 auto 0.08rem;
   }
 
-  .simpaths-home-hero__title {
-    margin: 0;
+  .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
+    margin: 0 !important;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(5.55rem, 10vw, 6.85rem);
+    font-size: clamp(5.8rem, 10.6vw, 7.2rem) !important;
     font-weight: 500;
     letter-spacing: 0.01em;
     line-height: 0.9;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    position: static;
   }
 
-  .simpaths-home-hero__title::after {
+  .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title::after {
     display: none !important;
   }
 
-  .simpaths-home-hero__strap {
-    margin: 0.18rem 0 0;
+  .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
+    margin: 0.18rem 0 0 !important;
     color: #1f2731;
-    font-size: 0.66rem;
+    font-size: 0.58rem;
     font-weight: 560;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     line-height: 1.2;
     text-transform: uppercase;
+    text-align: center !important;
+    padding-bottom: 0 !important;
   }
 
   .md-typeset .simpaths-home-hero p.simpaths-home-hero__copy {
@@ -155,13 +160,13 @@ hide:
       width: 5.15rem;
     }
 
-    .simpaths-home-hero__title {
-      font-size: clamp(4.35rem, 13vw, 5.1rem);
+    .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
+      font-size: clamp(4.6rem, 13vw, 5.4rem) !important;
     }
 
-    .simpaths-home-hero__strap {
-      font-size: 0.62rem;
-      letter-spacing: 0.11em;
+    .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
     }
 
     .md-typeset .simpaths-home-hero p.simpaths-home-hero__copy {
