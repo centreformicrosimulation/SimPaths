@@ -40,7 +40,7 @@ hide:
     margin: 0 !important;
     font-family: var(--sp-heading-font), Georgia, serif;
     color: var(--sp-midnight);
-    font-size: clamp(4.55rem, 8.4vw, 5.45rem) !important;
+    font-size: clamp(4.05rem, 7.8vw, 4.9rem) !important;
     font-weight: 500;
     letter-spacing: 0.01em;
     line-height: 0.94;
@@ -162,7 +162,7 @@ hide:
     }
 
     .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
-      font-size: clamp(3.8rem, 12vw, 4.55rem) !important;
+      font-size: clamp(3.45rem, 11vw, 4.1rem) !important;
     }
 
     .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {

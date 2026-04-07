@@ -174,7 +174,6 @@
   -webkit-backdrop-filter: blur(12px);
   height: 2.9rem;
   position: relative;
-  overflow: hidden;
 }
 
 .md-header::before {
