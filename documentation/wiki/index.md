@@ -179,6 +179,8 @@ hide:
 
   .simpaths-home-explore {
     margin: 0.36rem 0 2.35rem;
+    padding: 0.1rem 0 0.2rem;
+    background: #ffffff;
   }
 
   .simpaths-home-explore__intro {
@@ -313,13 +315,10 @@ hide:
   .md-typeset .simpaths-home-explore a.feature-card h3 {
     margin: 0 !important;
     font-family: var(--md-text-font) !important;
+    font-size: 1.12rem !important;
     font-weight: 700 !important;
     color: #223142 !important;
     line-height: 1.12;
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-    font-size: 1.22rem !important;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card p {
