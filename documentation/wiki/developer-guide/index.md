@@ -1,5 +1,190 @@
 # Developer Guide
 
+<style>
+  .md-typeset > p:first-of-type {
+    max-width: 44rem;
+    margin: -0.08rem 0 0.55rem;
+    font-size: 0.92rem;
+    line-height: 1.72;
+    color: var(--sp-midnight);
+    text-align: left;
+  }
+
+  .md-typeset img[alt="JAS-mine logo"] {
+    width: min(16.5rem, 44vw);
+    margin: 0.35rem 0 1rem;
+    opacity: 0.95;
+  }
+
+  .md-typeset > ul:first-of-type {
+    margin: 0.55rem 0 1.3rem;
+  }
+
+  .md-typeset details.dev-guide-panel,
+  .md-typeset details.dev-guide-focus {
+    overflow: hidden;
+  }
+
+  .md-typeset details.dev-guide-panel {
+    margin: 0.95rem 0 1rem;
+    border: 1px solid rgba(42,56,72,0.15);
+    border-left: 4px solid rgba(42,56,72,0.82);
+    border-radius: 8px !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,245,240,0.93) 100%);
+    box-shadow: 0 8px 22px rgba(24,32,44,0.04);
+  }
+
+  .md-typeset details.dev-guide-panel:hover {
+    border-color: rgba(42,56,72,0.22);
+  }
+
+  .md-typeset details.dev-guide-panel[open] {
+    border-color: rgba(42,56,72,0.2);
+    box-shadow: 0 12px 28px rgba(24,32,44,0.07);
+  }
+
+  .md-typeset details.dev-guide-panel > summary {
+    position: relative;
+    font-family: var(--md-text-font) !important;
+    font-size: 0.89rem;
+    font-weight: 700;
+    letter-spacing: 0.012em;
+    color: var(--sp-midnight);
+    background: linear-gradient(90deg, rgba(42,56,72,0.075) 0%, rgba(42,56,72,0.025) 100%) !important;
+    padding: 0.95rem 2.8rem 0.95rem 2.25rem;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+
+  .md-typeset details.dev-guide-panel > summary:hover {
+    background: linear-gradient(90deg, rgba(42,56,72,0.095) 0%, rgba(42,56,72,0.03) 100%) !important;
+  }
+
+  .md-typeset details.dev-guide-panel > summary::before {
+    background-color: var(--sp-midnight) !important;
+  }
+
+  .md-typeset details.dev-guide-panel > summary::after {
+    content: "";
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 2px solid rgba(42,56,72,0.42);
+    border-bottom: 2px solid rgba(42,56,72,0.42);
+    transform: translateY(-58%) rotate(-45deg);
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+
+  .md-typeset details.dev-guide-panel[open] > summary {
+    border-bottom: 1px solid rgba(42,56,72,0.08);
+    background: linear-gradient(90deg, rgba(96,56,71,0.08) 0%, rgba(42,56,72,0.035) 100%) !important;
+  }
+
+  .md-typeset details.dev-guide-panel[open] > summary::after {
+    transform: translateY(-68%) rotate(45deg);
+    border-color: rgba(117,0,3,0.56);
+  }
+
+  .md-typeset details.dev-guide-panel > :not(summary) {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .md-typeset details.dev-guide-panel p,
+  .md-typeset details.dev-guide-panel ul,
+  .md-typeset details.dev-guide-panel ol,
+  .md-typeset details.dev-guide-focus p,
+  .md-typeset details.dev-guide-focus ul,
+  .md-typeset details.dev-guide-focus ol {
+    text-align: left;
+    hyphens: none;
+    -webkit-hyphens: none;
+  }
+
+  .md-typeset details.dev-guide-panel > p:first-of-type,
+  .md-typeset details.dev-guide-panel > ul:first-of-type,
+  .md-typeset details.dev-guide-panel > ol:first-of-type,
+  .md-typeset details.dev-guide-panel > details:first-of-type {
+    margin-top: 0.9rem;
+  }
+
+  .md-typeset details.dev-guide-panel > p:last-child,
+  .md-typeset details.dev-guide-panel > ul:last-child,
+  .md-typeset details.dev-guide-panel > ol:last-child,
+  .md-typeset details.dev-guide-panel > details:last-child {
+    margin-bottom: 1rem;
+  }
+
+  .md-typeset details.dev-guide-focus {
+    margin: 1rem 0 0.45rem;
+    border: 1px solid rgba(117,0,3,0.13);
+    border-left: 3px solid rgba(117,0,3,0.62);
+    border-radius: 6px !important;
+    background: linear-gradient(180deg, rgba(255,252,252,0.98) 0%, rgba(250,245,246,0.95) 100%);
+    box-shadow: none;
+  }
+
+  .md-typeset details.dev-guide-focus > summary {
+    position: relative;
+    font-family: var(--md-text-font) !important;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sp-crimson);
+    background: linear-gradient(90deg, rgba(117,0,3,0.06) 0%, rgba(117,0,3,0.025) 100%) !important;
+    padding: 0.8rem 2.6rem 0.8rem 2.1rem;
+  }
+
+  .md-typeset details.dev-guide-focus > summary::before {
+    background-color: var(--sp-crimson) !important;
+  }
+
+  .md-typeset details.dev-guide-focus > summary::after {
+    content: "";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    width: 0.42rem;
+    height: 0.42rem;
+    border-right: 2px solid rgba(117,0,3,0.46);
+    border-bottom: 2px solid rgba(117,0,3,0.46);
+    transform: translateY(-58%) rotate(-45deg);
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+
+  .md-typeset details.dev-guide-focus[open] > summary::after {
+    transform: translateY(-68%) rotate(45deg);
+    border-color: rgba(117,0,3,0.72);
+  }
+
+  .md-typeset details.dev-guide-focus > :not(summary) {
+    margin-left: 0.95rem;
+    margin-right: 0.95rem;
+  }
+
+  .md-typeset details.dev-guide-focus > p:first-of-type,
+  .md-typeset details.dev-guide-focus > ul:first-of-type,
+  .md-typeset details.dev-guide-focus > ol:first-of-type {
+    margin-top: 0.85rem;
+  }
+
+  .md-typeset details.dev-guide-focus > p:last-child,
+  .md-typeset details.dev-guide-focus > ul:last-child,
+  .md-typeset details.dev-guide-focus > ol:last-child {
+    margin-bottom: 0.95rem;
+  }
+
+  @media (max-width: 44.9375em) {
+    .md-typeset details.dev-guide-panel > :not(summary),
+    .md-typeset details.dev-guide-focus > :not(summary) {
+      margin-left: 0.85rem;
+      margin-right: 0.85rem;
+    }
+  }
+</style>
+
 SimPaths is a Java project based on the JAS-mine simulation libraries.
 
 ![JAS-mine logo](https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png)
@@ -7,6 +192,7 @@ SimPaths is a Java project based on the JAS-mine simulation libraries.
 JAS-mine extends Java functionalities and provide an architectural template for dynamic microsimulation and agent-based models, aimed at improving the clarity and transparency of the model structure.
 
 New developers of SimPaths are strongly recommended to familiarise themselves with the JAS-mine architecture, and in particular:
+
 * [JAS-mine GitHub repository](https://github.com/jasmineRepo)
 * [JAS-mine core API](https://raw.githack.com/jasmineRepo/JAS-mine-core/master/microsim-core/doc/index.html)
 * [JAS-mine GUI API](https://raw.githack.com/jasmineRepo/JAS-mine-gui/master/microsim-gui/doc/index.html)
@@ -16,22 +202,22 @@ New developers of SimPaths are strongly recommended to familiarise themselves wi
 ***
 
 ## 1. Guiding principles
-<details markdown>
-  <summary><b>Clarity</b></summary>  
+<details class="dev-guide-panel" markdown="1">
+  <summary>Clarity</summary>  
 A clear distinction is made in JAS-mine between objects with a modelling content, which specify the structure of the simulation, and objects which perform useful but auxiliary tasks, from enumerating categorical variables to building graphical widgets, from creating filters for the collection of agents to computing aggregate statistics to be saved in the output database.
 
 JAS-mine extends the _Model-Observer_ paradigm introduced by the [Swarm](http://www.swarm.org/wiki/Main_Page) experience and introduces a new layer in simulation modelling, the _Collector_.
 
 * The **Model** deals mainly with specification issues, creating objects, relations between objects, and defining the order of events that take place in the simulation.
-* The **Collector **collects the data and compute the statistics both for use by the simulation objects and for post-mortem analysis of the model outcome, after the simulation has completed.
+* The **Collector** collects the data and compute the statistics both for use by the simulation objects and for post-mortem analysis of the model outcome, after the simulation has completed.
 * The **Observer** allows the user to inspect the simulation in real time and monitor some pre-defined outcome variables as the simulation unfolds.
 This three-layer methodological protocol allows for extensive re-use of code and facilitates model building, debugging and communication.
 
 Moreover, JAS-mine envisages **strict separation between the code and the data**, with all parameters and input tables stored either in an input database or in specific MS Excel files. The regression package provides tools for simulating outcomes from standard regression models (OLS, probit/logit, multinomial, ordered and generalised ordered models): in particular, there is no need to specify the variables that enter a regression model, as they are directly read from the data files. This greatly facilitates exploration of the parameter space, testing different econometric specifications, and scenario analysis.
 </details>
 
-<details markdown>
-  <summary><b>Transparency</b></summary>  
+<details class="dev-guide-panel" markdown="1">
+  <summary>Transparency</summary>  
 
 Transparent coding for transparent modelling is achieved by
 
@@ -45,8 +231,8 @@ Transparent coding for transparent modelling is achieved by
 ## 2. Architecture
 SimPaths shares with all JAS-mine projects some architectural choices.
 
-<details markdown>
-  <summary><b> Model-Collector-Observer</b></summary> 
+<details class="dev-guide-panel" markdown="1">
+  <summary>Model-Collector-Observer</summary> 
 
 The [Swarm protocol](https://www.swarm.org/wiki/Swarm_main_page) for agent-based platforms architecture recommends splitting the simulation into an internal *Model* and an external *Observer*. These two aspects of the artificial world should remain markedly separate.
 
@@ -66,15 +252,15 @@ JAS-mine allows multiple *Models* (and multiple *Collectors* and *Observers*) to
 </details>
 
 
-<details markdown>
-  <summary><b> The JAS-mine engine</b></summary> 
+<details class="dev-guide-panel" markdown="1">
+  <summary>The JAS-mine engine</summary> 
 
 The core of the JAS-mine toolkit is represented by the simulation engine. It is based on the standard discrete-event simulation paradigm, which allows to manage the time with high flexibility and multi-scale perspective.
 
 The JAS-mine engine is based on the scheduler, which handles all the events in the simulation. The scheduler is a “singleton” (in software engineering, the singleton pattern is a design pattern that restricts the instantiation of a class to one object), which means that all the agents in the simulation share the same scheduler. Events can be scheduled in advance (for instance once every simulation period) or dynamically, by the agents themselves (for instance, job termination is scheduled upon hiring). This allows to implement both continuous-time and discrete-time simulations.
 
-<details markdown>
-<summary><b>🔴 FOCUS: Time in simulation</b></summary>
+<details class="dev-guide-focus" markdown="1">
+<summary>Focus: Time in simulation</summary>
 
 The abstract representation of a continuous phenomenon in a simulation model requires that all events be presented in discrete terms.
 
@@ -89,15 +275,15 @@ The event list orders the events and the simulation is performed by extracting t
 
 </details>
 
-<details markdown>
-  <summary><b> Input-Output communication</b></summary> 
+<details class="dev-guide-panel" markdown="1">
+  <summary>Input-Output communication</summary> 
 
 Data management is a major factor to be weighed in for the creation of a simulation tool. Building on the vast number of software solutions available, JAS-mine allows the user to separate data representation and management from the implementation of processes and behavioral algorithms.
 
 One distinguishing feature of the platform lies in the integration with relational database management systems (RDBMS) through ad-hoc Java libraries. The management of input data persistence layers and simulation results in JAS-mine is performed using standard database management tools, and the platform takes care of the automatic translation of the relational model of the database into the object-oriented simulation framework thanks to an ORM layer.
 
-<details markdown>
-<summary><b>🔴 FOCUS: Object-Relational Mapping (ORM)</b></summary>
+<details class="dev-guide-focus" markdown="1">
+<summary>Focus: Object-Relational Mapping (ORM)</summary>
 
 The software paradigm that is best suited to represent and manipulate population data is object-oriented programming (OOP). On the other hand, input and output data (especially in complex projects) are best stored in a relational database. Unfortunately, database relational modelling is less intuitive than OOP and requires a specific language (SQL) to retrieve and modify data.
 
@@ -122,5 +308,3 @@ On the other hand, the power of modern RDBMS make it feasible to keep track of a
 
 Finally, keeping data analysis conceptually distinct from data production further enhances the brevity, transparency and clarity of the code.
 </details>
-
-
