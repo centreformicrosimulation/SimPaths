@@ -176,6 +176,161 @@ hide:
       font-size: 0.8rem;
     }
   }
+
+  .simpaths-home-explore {
+    margin: 0.2rem 0 2.15rem;
+  }
+
+  .md-typeset .simpaths-home-explore .section-heading {
+    margin-bottom: 0.9rem;
+  }
+
+  .md-typeset .simpaths-home-explore .section-heading::after {
+    background: linear-gradient(90deg, rgba(42, 56, 72, 0.12) 0%, rgba(195, 198, 213, 0.58) 30%, transparent 100%);
+  }
+
+  .md-typeset .simpaths-home-explore .card-grid {
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .md-typeset .simpaths-home-explore .card-grid--primary {
+    margin-bottom: 0;
+  }
+
+  .md-typeset .simpaths-home-explore .card-grid--secondary {
+    margin-top: 1rem;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card {
+    min-height: 12.2rem;
+    padding: 1.3rem 1.35rem 1.1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(42, 56, 72, 0.09);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 249, 245, 0.94) 100%);
+    box-shadow: 0 10px 24px rgba(24, 32, 44, 0.04);
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
+    min-height: 13rem;
+    padding: 1.45rem 1.45rem 1.15rem;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card::before,
+  .md-typeset .simpaths-home-explore a.feature-card::after {
+    content: none;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(42, 56, 72, 0.16);
+    box-shadow: 0 16px 34px rgba(24, 32, 44, 0.08);
+  }
+
+  .md-typeset .simpaths-home-explore .card-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 0.95rem;
+    border: 1px solid rgba(42, 56, 72, 0.08);
+    box-shadow: none;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card:hover .card-icon-wrap {
+    transform: none;
+  }
+
+  .md-typeset .simpaths-home-explore .card-icon-wrap svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .simpaths-home-explore .card-icon--overview {
+    background: rgba(42, 56, 72, 0.07);
+    color: #324354;
+  }
+
+  .simpaths-home-explore .card-icon--docs {
+    background: rgba(42, 86, 72, 0.07);
+    color: #315f54;
+  }
+
+  .simpaths-home-explore .card-icon--ref {
+    background: rgba(74, 84, 98, 0.08);
+    color: #495665;
+  }
+
+  .simpaths-home-explore .card-icon--research {
+    background: rgba(117, 0, 3, 0.07);
+    color: #8a3138;
+  }
+
+  .simpaths-home-explore .card-icon--funding {
+    background: rgba(122, 95, 32, 0.08);
+    color: #7a6233;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card h3 {
+    margin-bottom: 0.42rem !important;
+    color: #243244 !important;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
+    font-size: 1.18rem !important;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card p {
+    margin-bottom: 0;
+    color: rgba(42, 56, 72, 0.78);
+    font-size: 0.77rem;
+    line-height: 1.63;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
+    font-size: 0.81rem;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card .card-link {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 0.82rem;
+    border-top: 1px solid rgba(42, 56, 72, 0.08);
+    color: #243244;
+    font-size: 0.73rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    gap: 0.35rem;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card .card-link::after {
+    content: "→";
+    color: rgba(36, 50, 68, 0.72);
+    transform: translateX(0);
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card:hover .card-link {
+    gap: 0.35rem;
+    color: #1f2b3a;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card:hover .card-link::after {
+    transform: translateX(3px);
+    color: #1f2b3a;
+  }
+
+  @media (max-width: 760px) {
+    .md-typeset .simpaths-home-explore .card-grid,
+    .md-typeset .simpaths-home-explore .card-grid--primary {
+      grid-template-columns: 1fr;
+    }
+
+    .md-typeset .simpaths-home-explore a.feature-card,
+    .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
+      min-height: auto;
+    }
+  }
 </style>
 
 <div class="simpaths-home-hero">
@@ -206,6 +361,7 @@ hide:
 </div>
 </div>
 
+<section class="simpaths-home-explore">
 <h2 class="section-heading">Explore SimPaths</h2>
 
 <div class="card-grid card-grid--primary">
@@ -216,7 +372,7 @@ hide:
 </div>
 <h3>Model</h3>
 <p>Understand what SimPaths models, how it is parameterised, and which modules it includes.</p>
-<span class="card-link">Explore the model →</span>
+<span class="card-link">Explore the model</span>
 </a>
 
 <a href="documentation/" class="feature-card feature-card--primary">
@@ -225,7 +381,7 @@ hide:
 </div>
 <h3>Documentation</h3>
 <p>Find the paths for getting started, running simulations in practice, and navigating the developer-facing internals of SimPaths.</p>
-<span class="card-link">Open documentation →</span>
+<span class="card-link">Open documentation</span>
 </a>
 
 </div>
@@ -238,7 +394,7 @@ hide:
 </div>
 <h3>Validation</h3>
 <p>Validation procedures, alignment diagnostics, and comparison against external targets.</p>
-<span class="card-link">Validation →</span>
+<span class="card-link">Validation</span>
 </a>
 
 <a href="research/" class="feature-card">
@@ -247,7 +403,7 @@ hide:
 </div>
 <h3>Research</h3>
 <p>Published papers, working papers, and ongoing research using SimPaths.</p>
-<span class="card-link">Research →</span>
+<span class="card-link">Research</span>
 </a>
 
 <a href="funding/" class="feature-card">
@@ -256,10 +412,11 @@ hide:
 </div>
 <h3>Funding</h3>
 <p>See the grants and programmes that have supported the development and application of SimPaths.</p>
-<span class="card-link">Funding →</span>
+<span class="card-link">Funding</span>
 </a>
 
 </div>
+</section>
 
 ---
 
