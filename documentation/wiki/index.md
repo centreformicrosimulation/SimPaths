@@ -219,21 +219,22 @@ hide:
   .md-typeset .simpaths-home-explore a.feature-card {
     --card-accent: #2f5f7d;
     --card-accent-deep: #22384b;
-    --card-accent-soft: rgba(47, 95, 125, 0.13);
+    --card-accent-soft: rgba(47, 95, 125, 0.1);
     position: relative;
     display: flex;
     flex-direction: column;
     min-height: 13.6rem;
     padding: 1.42rem 1.45rem 1.28rem;
-    border-radius: 22px;
+    border-radius: 10px;
     overflow: hidden;
     border: 1px solid rgba(42, 56, 72, 0.12);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 249, 245, 0.98) 100%);
-    box-shadow: 0 16px 34px rgba(18, 24, 36, 0.08);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow:
+      inset 0 3px 0 0 var(--card-accent),
+      0 10px 24px rgba(18, 24, 36, 0.06);
     text-decoration: none !important;
     border-bottom: none !important;
     color: inherit !important;
-    isolation: isolate;
     transition:
       transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
@@ -241,81 +242,36 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
-    min-height: 14.8rem;
-    padding: 1.55rem 1.6rem 1.4rem;
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card::before {
-    content: "";
-    position: absolute;
-    top: -2.5rem;
-    right: -2rem;
-    width: 8.8rem;
-    height: 8.8rem;
-    border-radius: 999px;
-    background: radial-gradient(circle, var(--card-accent-soft) 0%, rgba(255, 255, 255, 0) 72%);
-    pointer-events: none;
-    transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--card-accent) 0%, rgba(255, 255, 255, 0) 100%);
-    pointer-events: none;
+    min-height: 14.4rem;
+    padding: 1.5rem 1.55rem 1.34rem;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: rgba(42, 56, 72, 0.18);
-    box-shadow: 0 22px 44px rgba(18, 24, 36, 0.12);
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card:hover::before {
-    transform: scale(1.08);
+    box-shadow:
+      inset 0 3px 0 0 var(--card-accent),
+      0 14px 30px rgba(18, 24, 36, 0.1);
   }
 
   .md-typeset .simpaths-home-explore .card-header {
     display: flex;
-    align-items: flex-start;
-    gap: 0.95rem;
-    margin-bottom: 0.95rem;
+    align-items: center;
+    gap: 0.82rem;
+    margin-bottom: 0.9rem;
   }
 
   .md-typeset .simpaths-home-explore .card-label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.18rem;
     min-width: 0;
   }
 
-  .md-typeset .simpaths-home-explore .card-kicker {
-    display: inline-block;
-    margin: 0;
-    color: var(--card-accent);
-    font-size: 0.62rem;
-    font-weight: 760;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-  }
-
   .md-typeset .simpaths-home-explore .card-icon-wrap {
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 8px;
     background: var(--card-accent-soft);
-    border: 1px solid rgba(255, 255, 255, 0.78);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    border: 1px solid rgba(42, 56, 72, 0.08);
     color: var(--card-accent-deep);
   }
 
@@ -361,10 +317,11 @@ hide:
   .md-typeset .simpaths-home-explore a.feature-card h3 {
     margin: 0 !important;
     color: #223142 !important;
+    line-height: 1.12;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-    font-size: 1.26rem !important;
+    font-size: 1.22rem !important;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card p {
@@ -419,19 +376,22 @@ hide:
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card {
-    background: linear-gradient(180deg, rgba(26, 40, 54, 0.96) 0%, rgba(21, 34, 46, 0.96) 100%);
+    background: rgba(23, 34, 46, 0.98);
     border-color: rgba(250, 249, 245, 0.08);
-    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+    box-shadow:
+      inset 0 3px 0 0 var(--card-accent),
+      0 16px 32px rgba(0, 0, 0, 0.24);
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card:hover {
     border-color: rgba(250, 249, 245, 0.16);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+    box-shadow:
+      inset 0 3px 0 0 var(--card-accent),
+      0 20px 38px rgba(0, 0, 0, 0.3);
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore .card-icon-wrap {
     border-color: rgba(250, 249, 245, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card h3 {
@@ -510,7 +470,6 @@ hide:
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
   </div>
   <div class="card-label">
-    <span class="card-kicker">Core model</span>
     <h3>Model</h3>
   </div>
 </div>
@@ -524,7 +483,6 @@ hide:
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
   </div>
   <div class="card-label">
-    <span class="card-kicker">Guides and setup</span>
     <h3>Documentation</h3>
   </div>
 </div>
@@ -542,7 +500,6 @@ hide:
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
   </div>
   <div class="card-label">
-    <span class="card-kicker">Diagnostics</span>
     <h3>Validation</h3>
   </div>
 </div>
@@ -556,7 +513,6 @@ hide:
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
   </div>
   <div class="card-label">
-    <span class="card-kicker">Publications</span>
     <h3>Research</h3>
   </div>
 </div>
@@ -570,7 +526,6 @@ hide:
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"/><path d="M5 10v8"/><path d="M9 10v8"/><path d="M15 10v8"/><path d="M19 10v8"/><path d="M2 18h20"/><path d="M12 2l10 5H2l10-5z"/></svg>
   </div>
   <div class="card-label">
-    <span class="card-kicker">Programme support</span>
     <h3>Funding</h3>
   </div>
 </div>
