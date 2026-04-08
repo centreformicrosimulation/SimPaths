@@ -224,7 +224,7 @@ hide:
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid rgba(42, 56, 72, 0.12);
-    background: rgba(255, 255, 255, 0.98);
+    background: #ffffff;
     box-shadow:
       inset 0 3px 0 0 var(--card-accent),
       0 10px 24px rgba(18, 24, 36, 0.06);
@@ -312,6 +312,8 @@ hide:
 
   .md-typeset .simpaths-home-explore a.feature-card h3 {
     margin: 0 !important;
+    font-family: var(--md-text-font) !important;
+    font-weight: 700 !important;
     color: #223142 !important;
     line-height: 1.12;
   }
@@ -467,19 +469,6 @@ hide:
 
 <div class="card-grid card-grid--primary">
 
-<a href="documentation/" class="feature-card feature-card--primary feature-card--documentation">
-<div class="card-header">
-  <div class="card-icon-wrap">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-  </div>
-  <div class="card-label">
-    <h3>Documentation</h3>
-  </div>
-</div>
-<p>Get from environment setup to first run, then move through user guides, developer internals, and the reference material that powers the model.</p>
-<span class="card-link">Open documentation</span>
-</a>
-
 <a href="overview/" class="feature-card feature-card--model">
 <div class="card-header">
   <div class="card-icon-wrap">
@@ -491,6 +480,19 @@ hide:
 </div>
 <p>Understand what SimPaths simulates, how the major components fit together, and how country-specific logic is organised across the framework.</p>
 <span class="card-link">Explore the model</span>
+</a>
+
+<a href="documentation/" class="feature-card feature-card--primary feature-card--documentation">
+<div class="card-header">
+  <div class="card-icon-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+  </div>
+  <div class="card-label">
+    <h3>Documentation</h3>
+  </div>
+</div>
+<p>Get from environment setup to first run, then move through user guides, developer internals, and the reference material that powers the model.</p>
+<span class="card-link">Open documentation</span>
 </a>
 
 </div>
