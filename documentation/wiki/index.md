@@ -193,14 +193,6 @@ hide:
     background: linear-gradient(90deg, rgba(42, 56, 72, 0.18) 0%, rgba(93, 129, 158, 0.24) 24%, transparent 100%);
   }
 
-  .md-typeset .simpaths-home-explore__lede {
-    max-width: 32rem;
-    margin: 0;
-    color: rgba(42, 56, 72, 0.7);
-    font-size: 0.8rem;
-    line-height: 1.58;
-  }
-
   .md-typeset .simpaths-home-explore .card-grid {
     display: grid;
     gap: 1.08rem;
@@ -208,12 +200,16 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore .card-grid--primary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-bottom: 1.08rem;
   }
 
   .md-typeset .simpaths-home-explore .card-grid--secondary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md-typeset .simpaths-home-explore .card-grid--primary .feature-card--documentation {
+    grid-column: span 2;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card {
@@ -242,8 +238,8 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
-    min-height: 14.4rem;
-    padding: 1.5rem 1.55rem 1.34rem;
+    min-height: 14.8rem;
+    padding: 1.56rem 1.62rem 1.4rem;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover {
@@ -303,9 +299,9 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore .feature-card--research {
-    --card-accent: #9d3b4b;
-    --card-accent-deep: #5b2a36;
-    --card-accent-soft: rgba(157, 59, 75, 0.14);
+    --card-accent: #4e6986;
+    --card-accent-deep: #30485e;
+    --card-accent-soft: rgba(78, 105, 134, 0.14);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--funding {
@@ -367,10 +363,6 @@ hide:
     color: var(--card-accent-deep);
   }
 
-  [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore__lede {
-    color: rgba(250, 249, 245, 0.72);
-  }
-
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore .section-heading::after {
     background: linear-gradient(90deg, rgba(92, 184, 240, 0.26) 0%, rgba(195, 198, 213, 0.32) 35%, transparent 100%);
   }
@@ -408,6 +400,14 @@ hide:
   }
 
   @media (max-width: 900px) {
+    .md-typeset .simpaths-home-explore .card-grid--primary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .md-typeset .simpaths-home-explore .card-grid--primary .feature-card--documentation {
+      grid-column: span 2;
+    }
+
     .md-typeset .simpaths-home-explore .card-grid--secondary {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -417,6 +417,10 @@ hide:
     .md-typeset .simpaths-home-explore .card-grid--primary,
     .md-typeset .simpaths-home-explore .card-grid--secondary {
       grid-template-columns: 1fr;
+    }
+
+    .md-typeset .simpaths-home-explore .card-grid--primary .feature-card--documentation {
+      grid-column: auto;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card,
@@ -458,24 +462,10 @@ hide:
 <div class="simpaths-home-explore__intro">
   <div>
     <h2 class="section-heading">Explore SimPaths</h2>
-    <p class="simpaths-home-explore__lede">Choose the part of the project you want to dive into first.</p>
   </div>
 </div>
 
 <div class="card-grid card-grid--primary">
-
-<a href="overview/" class="feature-card feature-card--primary feature-card--model">
-<div class="card-header">
-  <div class="card-icon-wrap">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-  </div>
-  <div class="card-label">
-    <h3>Model</h3>
-  </div>
-</div>
-<p>Understand what SimPaths simulates, how the major components fit together, and how country-specific logic is organised across the framework.</p>
-<span class="card-link">Explore the model</span>
-</a>
 
 <a href="documentation/" class="feature-card feature-card--primary feature-card--documentation">
 <div class="card-header">
@@ -488,6 +478,19 @@ hide:
 </div>
 <p>Get from environment setup to first run, then move through user guides, developer internals, and the reference material that powers the model.</p>
 <span class="card-link">Open documentation</span>
+</a>
+
+<a href="overview/" class="feature-card feature-card--model">
+<div class="card-header">
+  <div class="card-icon-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+  </div>
+  <div class="card-label">
+    <h3>Model</h3>
+  </div>
+</div>
+<p>Understand what SimPaths simulates, how the major components fit together, and how country-specific logic is organised across the framework.</p>
+<span class="card-link">Explore the model</span>
 </a>
 
 </div>
