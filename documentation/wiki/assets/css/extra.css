@@ -328,19 +328,7 @@
 
 .md-nav__link {
   font-size: 0.76rem;
-  border-radius: 0.58rem;
-  margin: 0 -0.35rem;
-  padding: 0.18rem 0.45rem;
-  transition: color 0.12s ease, background-color 0.18s ease;
-}
-
-.md-sidebar .md-nav__link:hover,
-.md-sidebar .md-nav__link:focus-visible {
-  background: var(--sp-sidebar-hover);
-}
-
-.md-sidebar .md-nav__item--active > .md-nav__link {
-  background: var(--sp-sidebar-active);
+  transition: color 0.12s ease;
 }
 
 /* ═══════════════════════════════════════════════
