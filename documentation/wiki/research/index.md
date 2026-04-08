@@ -1,3 +1,19 @@
+---
+hide:
+  - navigation
+  - toc
+---
+
+<style>
+  @media screen and (min-width: 76.25em) {
+    .md-main__inner.md-grid {
+      max-width: 78rem;
+    }
+  }
+</style>
+
+<div class="research-page">
+
 # Research
 
 <p class="page-intro">SimPaths underpins a growing body of methodological and applied work across life course analysis, income support, care, and health inequalities.</p>
@@ -70,5 +86,7 @@
   <p class="research-authors">Thomson RM, Kopasker D, Bronka P, Richiardi M, Khodygo V, Baxter AJ, Igelström E, Pearce A, Leyland AH, Katikireddi SV</p>
   <p class="research-summary">Shows how the model can be used to examine distributional health effects of ambitious income-support policies.</p>
 </a>
+
+</div>
 
 </div>
