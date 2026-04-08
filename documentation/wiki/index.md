@@ -178,66 +178,91 @@ hide:
   }
 
   .simpaths-home-explore {
-    margin: 0.2rem 0 2.15rem;
+    margin: 0.28rem 0 2.25rem;
   }
 
   .md-typeset .simpaths-home-explore .section-heading {
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.95rem;
   }
 
   .md-typeset .simpaths-home-explore .section-heading::after {
-    background: linear-gradient(90deg, rgba(42, 56, 72, 0.12) 0%, rgba(195, 198, 213, 0.58) 30%, transparent 100%);
+    background: linear-gradient(90deg, rgba(42, 56, 72, 0.16) 0%, rgba(195, 198, 213, 0.54) 28%, transparent 100%);
   }
 
   .md-typeset .simpaths-home-explore .card-grid {
-    gap: 1rem;
-    margin: 1rem 0;
+    gap: 1.05rem;
+    margin: 1.02rem 0;
   }
 
   .md-typeset .simpaths-home-explore .card-grid--primary {
-    margin-bottom: 0;
+    margin-bottom: 0.08rem;
   }
 
   .md-typeset .simpaths-home-explore .card-grid--secondary {
-    margin-top: 1rem;
+    margin-top: 1.05rem;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card {
-    min-height: 12.2rem;
-    padding: 1.3rem 1.35rem 1.1rem;
-    border-radius: 14px;
-    border: 1px solid rgba(42, 56, 72, 0.09);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 249, 245, 0.94) 100%);
-    box-shadow: 0 10px 24px rgba(24, 32, 44, 0.04);
+    --card-accent: #324354;
+    --card-accent-soft: rgba(50, 67, 84, 0.08);
+    min-height: 12.6rem;
+    padding: 1.35rem 1.38rem 1.18rem;
+    border-radius: 16px;
+    border: 1px solid rgba(42, 56, 72, 0.1);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(250, 249, 245, 0.97) 100%);
+    box-shadow: 0 12px 28px rgba(18, 24, 36, 0.05);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
-    min-height: 13rem;
-    padding: 1.45rem 1.45rem 1.15rem;
+    min-height: 13.35rem;
+    padding: 1.52rem 1.52rem 1.24rem;
   }
 
-  .md-typeset .simpaths-home-explore a.feature-card::before,
+  .md-typeset .simpaths-home-explore a.feature-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0) 36%),
+      radial-gradient(circle at top right, var(--card-accent-soft) 0%, rgba(255, 255, 255, 0) 45%);
+    pointer-events: none;
+  }
+
   .md-typeset .simpaths-home-explore a.feature-card::after {
-    content: none;
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4.4rem;
+    height: 3px;
+    background: linear-gradient(90deg, var(--card-accent) 0%, rgba(255, 255, 255, 0) 100%);
+    opacity: 0.86;
+    pointer-events: none;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
     border-color: rgba(42, 56, 72, 0.16);
-    box-shadow: 0 16px 34px rgba(24, 32, 44, 0.08);
+    box-shadow: 0 18px 38px rgba(18, 24, 36, 0.09);
   }
 
   .md-typeset .simpaths-home-explore .card-icon-wrap {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    margin-bottom: 0.95rem;
-    border: 1px solid rgba(42, 56, 72, 0.08);
-    box-shadow: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    margin-bottom: 0.88rem;
+    background: var(--card-accent-soft);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover .card-icon-wrap {
-    transform: none;
+    transform: translateY(-1px);
   }
 
   .md-typeset .simpaths-home-explore .card-icon-wrap svg {
@@ -245,45 +270,75 @@ hide:
     height: 18px;
   }
 
+  .md-typeset .simpaths-home-explore .card-kicker {
+    display: inline-block;
+    margin: 0 0 0.46rem;
+    font-size: 0.62rem;
+    font-weight: 760;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--card-accent);
+  }
+
   .simpaths-home-explore .card-icon--overview {
-    background: rgba(42, 56, 72, 0.07);
     color: #324354;
   }
 
   .simpaths-home-explore .card-icon--docs {
-    background: rgba(42, 86, 72, 0.07);
     color: #315f54;
   }
 
   .simpaths-home-explore .card-icon--ref {
-    background: rgba(74, 84, 98, 0.08);
     color: #495665;
   }
 
   .simpaths-home-explore .card-icon--research {
-    background: rgba(117, 0, 3, 0.07);
     color: #8a3138;
   }
 
   .simpaths-home-explore .card-icon--funding {
-    background: rgba(122, 95, 32, 0.08);
     color: #7a6233;
   }
 
+  .md-typeset .simpaths-home-explore .feature-card--model {
+    --card-accent: #324354;
+    --card-accent-soft: rgba(50, 67, 84, 0.08);
+  }
+
+  .md-typeset .simpaths-home-explore .feature-card--documentation {
+    --card-accent: #315f54;
+    --card-accent-soft: rgba(49, 95, 84, 0.08);
+  }
+
+  .md-typeset .simpaths-home-explore .feature-card--validation {
+    --card-accent: #495665;
+    --card-accent-soft: rgba(73, 86, 101, 0.08);
+  }
+
+  .md-typeset .simpaths-home-explore .feature-card--research {
+    --card-accent: #8a3138;
+    --card-accent-soft: rgba(138, 49, 56, 0.08);
+  }
+
+  .md-typeset .simpaths-home-explore .feature-card--funding {
+    --card-accent: #7a6233;
+    --card-accent-soft: rgba(122, 98, 51, 0.09);
+  }
+
   .md-typeset .simpaths-home-explore a.feature-card h3 {
-    margin-bottom: 0.42rem !important;
+    margin-bottom: 0.38rem !important;
     color: #243244 !important;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-    font-size: 1.18rem !important;
+    font-size: 1.2rem !important;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card p {
     margin-bottom: 0;
-    color: rgba(42, 56, 72, 0.78);
+    color: rgba(42, 56, 72, 0.76);
     font-size: 0.77rem;
-    line-height: 1.63;
+    line-height: 1.64;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
@@ -291,32 +346,51 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card .card-link {
-    width: 100%;
+    display: flex;
+    align-items: flex-end;
     justify-content: space-between;
+    width: 100%;
     margin-top: auto;
-    padding-top: 0.82rem;
+    padding-top: 0.9rem;
     border-top: 1px solid rgba(42, 56, 72, 0.08);
-    color: #243244;
-    font-size: 0.73rem;
-    font-weight: 650;
+    color: #223142;
+    font-size: 0.74rem;
+    font-weight: 680;
     letter-spacing: 0.01em;
-    gap: 0.35rem;
+    gap: 0.5rem;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card .card-link::before {
+    content: "Open section";
+    display: block;
+    margin-bottom: 0.14rem;
+    font-size: 0.56rem;
+    font-weight: 760;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(42, 56, 72, 0.48);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card .card-link::after {
-    content: "→";
-    color: rgba(36, 50, 68, 0.72);
+    content: "↗";
+    display: inline-grid;
+    place-items: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 999px;
+    background: rgba(42, 56, 72, 0.06);
+    color: var(--card-accent);
+    flex: 0 0 auto;
     transform: translateX(0);
-    transition: transform 0.18s ease, color 0.18s ease;
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card:hover .card-link {
-    gap: 0.35rem;
-    color: #1f2b3a;
+    transition: transform 0.18s ease, background 0.18s ease;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover .card-link::after {
-    transform: translateX(3px);
+    transform: translateX(3px) translateY(-1px);
+    background: var(--card-accent-soft);
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card:hover .card-link {
     color: #1f2b3a;
   }
 
@@ -366,19 +440,21 @@ hide:
 
 <div class="card-grid card-grid--primary">
 
-<a href="overview/" class="feature-card feature-card--primary">
+<a href="overview/" class="feature-card feature-card--primary feature-card--model">
 <div class="card-icon-wrap card-icon--overview">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
 </div>
+<span class="card-kicker">Core Model</span>
 <h3>Model</h3>
 <p>Understand what SimPaths models, how it is parameterised, and which modules it includes.</p>
 <span class="card-link">Explore the model</span>
 </a>
 
-<a href="documentation/" class="feature-card feature-card--primary">
+<a href="documentation/" class="feature-card feature-card--primary feature-card--documentation">
 <div class="card-icon-wrap card-icon--docs">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
 </div>
+<span class="card-kicker">Guides &amp; Setup</span>
 <h3>Documentation</h3>
 <p>Find the paths for getting started, running simulations in practice, and navigating the developer-facing internals of SimPaths.</p>
 <span class="card-link">Open documentation</span>
@@ -388,28 +464,31 @@ hide:
 
 <div class="card-grid card-grid--secondary">
 
-<a href="validation/" class="feature-card">
+<a href="validation/" class="feature-card feature-card--validation">
 <div class="card-icon-wrap card-icon--ref">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
 </div>
+<span class="card-kicker">Diagnostics</span>
 <h3>Validation</h3>
 <p>Validation procedures, alignment diagnostics, and comparison against external targets.</p>
 <span class="card-link">Validation</span>
 </a>
 
-<a href="research/" class="feature-card">
+<a href="research/" class="feature-card feature-card--research">
 <div class="card-icon-wrap card-icon--research">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
 </div>
+<span class="card-kicker">Publications</span>
 <h3>Research</h3>
 <p>Published papers, working papers, and ongoing research using SimPaths.</p>
 <span class="card-link">Research</span>
 </a>
 
-<a href="funding/" class="feature-card">
+<a href="funding/" class="feature-card feature-card--funding">
 <div class="card-icon-wrap card-icon--funding">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18"/><path d="M5 10v8"/><path d="M9 10v8"/><path d="M15 10v8"/><path d="M19 10v8"/><path d="M2 18h20"/><path d="M12 2l10 5H2l10-5z"/></svg>
 </div>
+<span class="card-kicker">Programme Support</span>
 <h3>Funding</h3>
 <p>See the grants and programmes that have supported the development and application of SimPaths.</p>
 <span class="card-link">Funding</span>
