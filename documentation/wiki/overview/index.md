@@ -1,39 +1,14 @@
 # Model
 
-<p class="page-intro">SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.</p>
+SimPaths is a family of models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. It builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries.
 
-<p class="page-intro page-intro--support">This documentation is specific to the UK model, although the broader SimPaths architecture is designed to support adaptation across countries through common structures, assumptions, and data conventions.</p>
+Although differences in the main structure with the [EU models](https://github.com/simpaths/SimPathsEU) are minimal, this documentation is specific to the UK model. Careful attention is paid to model validation, and sensitivity of projections to key assumptions.
 
-## Explore the model
+The modular nature of the SimPaths framework is designed to facilitate analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates, and alternative approaches for projecting labour/leisure and consumption/savings decisions.
 
-<div class="guide-grid">
+## Sections
 
-<a href="model-description.md" class="guide-card">
-  <p class="guide-card__eyebrow">Scope</p>
-  <h3>Model Description</h3>
-  <p>Start with the purpose of SimPaths, the questions it is designed to answer, and the overall structure of the life course model.</p>
-  <span class="guide-card__link">Read section →</span>
-</a>
-
-<a href="simulated-modules.md" class="guide-card">
-  <p class="guide-card__eyebrow">Behaviour</p>
-  <h3>Simulated Modules</h3>
-  <p>See which demographic, economic, and health processes are represented and how those modules fit together across the simulation.</p>
-  <span class="guide-card__link">Read section →</span>
-</a>
-
-<a href="parameterisation.md" class="guide-card">
-  <p class="guide-card__eyebrow">Calibration</p>
-  <h3>Model Parameterisation</h3>
-  <p>Understand how SimPaths translates estimates, assumptions, and policy settings into the parameters that drive each run.</p>
-  <span class="guide-card__link">Read section →</span>
-</a>
-
-<a href="how-to-cite.md" class="guide-card">
-  <p class="guide-card__eyebrow">Reference</p>
-  <h3>How to Cite</h3>
-  <p>Find the citation guidance and the key research references to use when SimPaths informs your analysis or publication.</p>
-  <span class="guide-card__link">Read section →</span>
-</a>
-
-</div>
+- [Model Description](model-description.md) — what SimPaths models and why
+- [Simulated Modules](simulated-modules.md) — the behavioural modules
+- [Model Parameterisation](parameterisation.md) — how parameters are specified
+- [How to Cite](how-to-cite.md) — citation guidance and published research
