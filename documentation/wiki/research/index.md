@@ -5,9 +5,22 @@ hide:
 ---
 
 <style>
+  .md-typeset .research-page {
+    max-width: 66rem;
+    margin: 0 auto 2rem;
+    padding: 0 0.9rem;
+  }
+
   @media screen and (min-width: 76.25em) {
-    .md-main__inner.md-grid {
-      max-width: 78rem;
+    .md-typeset .research-page {
+      max-width: 68rem;
+      padding: 0 1.2rem;
+    }
+  }
+
+  @media screen and (max-width: 44.9375em) {
+    .md-typeset .research-page {
+      padding: 0 0.4rem;
     }
   }
 </style>
