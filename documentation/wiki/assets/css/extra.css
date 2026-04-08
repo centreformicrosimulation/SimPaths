@@ -49,7 +49,7 @@
   --sp-accent:          #2478b5;
   --sp-accent-light:    #3b9ede;
   --sp-accent-bright:   #4fb3f0;
-  --sp-gradient:        linear-gradient(135deg, #21141f 0%, #311a2f 52%, #452746 100%);
+  --sp-gradient:        linear-gradient(135deg, #24141a 0%, #3b2029 52%, #53323b 100%);
   --sp-hero-gradient:   linear-gradient(135deg, #1a2636 0%, #2A3848 50%, #243444 100%);
   --sp-soft-spectrum:   linear-gradient(90deg, #e9a1a4 0%, #c6a4ea 52%, #92c0f2 100%);
   --sp-hairline:        linear-gradient(to right, #C3C6D5 0%, #C3C6D5 40%, transparent 100%);
@@ -101,7 +101,7 @@
 ═══════════════════════════════════════════════ */
 
 [data-md-color-scheme="slate"] {
-  --sp-gradient:        linear-gradient(135deg, #170d16 0%, #251223 50%, #351a34 100%);
+  --sp-gradient:        linear-gradient(135deg, #170c11 0%, #251118 50%, #381b25 100%);
   --md-default-bg-color:          #141e2a;
   --md-default-bg-color--light:   #1a2836;
   --md-default-bg-color--lighter: #223444;
@@ -205,10 +205,12 @@
 
 /* ── Header title — Newsreader ── */
 .md-header__title {
-  font-family: var(--sp-heading-font) !important;
-  font-size: 0.92rem !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.01em;
+  font-family: var(--md-text-font) !important;
+  font-size: 0.88rem !important;
+  font-weight: 560 !important;
+  letter-spacing: 0.004em;
+  height: 2.4rem;
+  line-height: 2.4rem;
 }
 
 .md-header__title .md-header__topic {
