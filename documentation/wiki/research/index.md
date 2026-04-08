@@ -25,9 +25,9 @@ hide:
   }
 </style>
 
-<div class="research-page">
-
 # Research
+
+<div class="research-page">
 
 <p class="page-intro">SimPaths underpins a growing body of methodological and applied work across life course analysis, income support, care, and health inequalities.</p>
 
@@ -41,7 +41,7 @@ hide:
   <p class="reference-paper__summary">Use this as the primary citation for the model and as the best high-level introduction to the SimPaths framework, scope, and design choices.</p>
 </section>
 
-## Further references
+<h2>Further references</h2>
 
 <div class="research-list">
 
