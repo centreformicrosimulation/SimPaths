@@ -179,8 +179,6 @@ hide:
 
   .simpaths-home-explore {
     margin: 0.36rem 0 2.35rem;
-    padding: 0.1rem 0 0.2rem;
-    background: #ffffff;
   }
 
   .simpaths-home-explore__intro {
