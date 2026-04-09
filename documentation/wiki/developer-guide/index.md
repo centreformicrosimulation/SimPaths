@@ -7,17 +7,11 @@ hide:
 
 <style>
   .md-typeset .dev-guide-intro {
-    display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(12rem, 15.5rem);
-    gap: 1.2rem;
-    align-items: center;
-    max-width: 56rem;
     margin: -0.08rem 0 1rem;
-    padding: 1rem 1.15rem;
-    border: 1px solid rgba(42,56,72,0.1);
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(246,248,251,0.96) 100%);
-    box-shadow: 0 10px 24px rgba(24,32,44,0.035);
+  }
+
+  .md-typeset .dev-guide-intro__copy {
+    max-width: 50rem;
   }
 
   .md-typeset .dev-guide-intro__copy p {
@@ -32,17 +26,13 @@ hide:
     margin-top: 0.55rem;
   }
 
-  .md-typeset .dev-guide-intro__visual {
-    display: flex;
-    flex-direction: column;
+  .md-typeset .dev-guide-intro__brand {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: 100%;
-    padding: 1rem 1.1rem;
-    border-radius: 12px;
-    background: rgba(42,56,72,0.035);
-    border: 1px solid rgba(42,56,72,0.08);
+    gap: 0.82rem;
+    margin: 0.9rem 0 0.2rem;
+    padding-top: 0.78rem;
+    border-top: 1px solid rgba(42,56,72,0.1);
   }
 
   .md-typeset .dev-guide-intro__eyebrow {
@@ -54,13 +44,13 @@ hide:
     color: rgba(42,56,72,0.55);
   }
 
-  .md-typeset .dev-guide-intro__visual img {
-    width: min(12rem, 100%);
+  .md-typeset .dev-guide-intro__brand img {
+    width: min(11.4rem, 100%);
     margin: 0;
     opacity: 0.96;
   }
 
-  .md-typeset > ul:first-of-type {
+  .md-typeset .dev-guide-page > ul:first-of-type {
     margin: 0.55rem 0 1.3rem;
   }
 
@@ -221,14 +211,9 @@ hide:
   }
 
   @media (max-width: 44.9375em) {
-    .md-typeset .dev-guide-intro {
-      grid-template-columns: 1fr;
-      gap: 0.85rem;
-      padding: 0.9rem 0.95rem;
-    }
-
-    .md-typeset .dev-guide-intro__visual {
-      padding: 0.9rem 1rem;
+    .md-typeset .dev-guide-intro__brand {
+      gap: 0.6rem;
+      flex-wrap: wrap;
     }
 
     .md-typeset details.dev-guide-panel > :not(summary),
@@ -239,14 +224,16 @@ hide:
   }
 </style>
 
+<div class="dev-guide-page" markdown="1">
+
 <div class="dev-guide-intro">
   <div class="dev-guide-intro__copy">
     <p>SimPaths is a Java project based on the JAS-mine simulation libraries.</p>
     <p>JAS-mine extends Java functionalities and provides an architectural template for dynamic microsimulation and agent-based models, aimed at improving the clarity and transparency of the model structure.</p>
-  </div>
-  <div class="dev-guide-intro__visual">
-    <p class="dev-guide-intro__eyebrow">Built On</p>
-    <img src="https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png" alt="JAS-mine logo">
+    <div class="dev-guide-intro__brand">
+      <p class="dev-guide-intro__eyebrow">Built on</p>
+      <img src="https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png" alt="JAS-mine logo">
+    </div>
   </div>
 </div>
 
@@ -367,3 +354,5 @@ On the other hand, the power of modern RDBMS make it feasible to keep track of a
 
 Finally, keeping data analysis conceptually distinct from data production further enhances the brevity, transparency and clarity of the code.
 </details>
+
+</div>

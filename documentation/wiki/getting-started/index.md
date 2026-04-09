@@ -3,6 +3,8 @@ hide:
   - toc
 ---
 
+<div class="page-shell--reading" markdown="1">
+
 # Getting Started
 
 This section walks you through everything needed to run SimPaths for the first time.
@@ -23,3 +25,5 @@ SimPaths is a Java project. Before running simulations you need:
 4. [Video Tutorials](video-tutorials.md) — guided walkthroughs
 
 If you are running multiple or scenario-based simulations, continue to the [User Guide](../user-guide/index.md) after completing these steps.
+
+</div>

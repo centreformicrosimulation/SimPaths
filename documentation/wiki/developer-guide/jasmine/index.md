@@ -3,6 +3,8 @@ hide:
   - toc
 ---
 
+<div class="page-shell--reading" markdown="1">
+
 # JAS-mine Architecture
 
 SimPaths is built on the [JAS-mine](https://www.microsimulation.ac.uk/jas-mine/) simulation libraries. Understanding the JAS-mine architecture is essential for developing or modifying SimPaths.
@@ -20,3 +22,5 @@ New developers are recommended to start with the following external resources:
 - [The Start Class](start-class.md) — the entry point of the simulation
 - [The MultiRun Class](multirun-class.md) — batch simulation runs
 - [Updating JAS-mine](updating-jasmine.md) — how to upgrade the JAS-mine dependency
+
+</div>

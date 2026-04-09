@@ -365,7 +365,8 @@
 }
 
 .md-typeset .page-intro,
-.md-typeset > h1 + p:not(.funding-lead) {
+.md-typeset > h1 + p:not(.funding-lead),
+.md-typeset .page-shell--reading > h1 + p:not(.funding-lead) {
   max-width: 49rem;
   margin: -0.1rem 0 1.15rem;
   color: var(--sp-midnight);
@@ -382,6 +383,11 @@
   color: var(--md-default-fg-color--light);
   font-size: 0.83rem;
   line-height: 1.68;
+}
+
+.md-typeset .page-shell--reading {
+  max-width: 52rem;
+  margin: 0 auto 2rem;
 }
 
 /* ── Headings — Newsreader ── */
@@ -443,7 +449,8 @@
 }
 
 [data-md-color-scheme="slate"] .md-typeset .page-intro,
-[data-md-color-scheme="slate"] .md-typeset > h1 + p:not(.funding-lead) {
+[data-md-color-scheme="slate"] .md-typeset > h1 + p:not(.funding-lead),
+[data-md-color-scheme="slate"] .md-typeset .page-shell--reading > h1 + p:not(.funding-lead) {
   color: #d7e3ef;
 }
 
