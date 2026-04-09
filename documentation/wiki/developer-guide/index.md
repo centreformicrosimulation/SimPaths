@@ -16,8 +16,8 @@ hide:
 
   .md-typeset .dev-guide-intro__copy p {
     margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.72;
+    font-size: 0.8rem;
+    line-height: 1.65;
     color: var(--sp-midnight);
     text-align: left;
   }
@@ -61,20 +61,20 @@ hide:
 
   .md-typeset details.dev-guide-panel {
     margin: 0.95rem 0 1rem;
-    border: 1px solid rgba(42,56,72,0.15);
-    border-left: 4px solid rgba(42,56,72,0.82);
+    border: 1px solid rgba(84, 174, 255, 0.24);
+    border-left: 4px solid #54aeff;
     border-radius: 8px !important;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(247,245,240,0.93) 100%);
-    box-shadow: 0 8px 22px rgba(24,32,44,0.04);
+    background: linear-gradient(180deg, rgba(221, 244, 255, 0.98) 0%, rgba(241, 248, 255, 0.96) 100%);
+    box-shadow: 0 8px 22px rgba(24,32,44,0.03);
   }
 
   .md-typeset details.dev-guide-panel:hover {
-    border-color: rgba(42,56,72,0.22);
+    border-color: rgba(84, 174, 255, 0.34);
   }
 
   .md-typeset details.dev-guide-panel[open] {
-    border-color: rgba(42,56,72,0.2);
-    box-shadow: 0 12px 28px rgba(24,32,44,0.07);
+    border-color: rgba(84, 174, 255, 0.36);
+    box-shadow: 0 10px 24px rgba(24,32,44,0.05);
   }
 
   .md-typeset details.dev-guide-panel > summary {
@@ -84,17 +84,17 @@ hide:
     font-weight: 700;
     letter-spacing: 0.012em;
     color: var(--sp-midnight);
-    background: linear-gradient(90deg, rgba(42,56,72,0.075) 0%, rgba(42,56,72,0.025) 100%) !important;
+    background: linear-gradient(90deg, rgba(221, 244, 255, 0.96) 0%, rgba(227, 242, 253, 0.88) 100%) !important;
     padding: 0.95rem 2.8rem 0.95rem 2.25rem;
     transition: background 0.18s ease, color 0.18s ease;
   }
 
   .md-typeset details.dev-guide-panel > summary:hover {
-    background: linear-gradient(90deg, rgba(42,56,72,0.095) 0%, rgba(42,56,72,0.03) 100%) !important;
+    background: linear-gradient(90deg, rgba(213, 237, 255, 0.98) 0%, rgba(222, 239, 253, 0.92) 100%) !important;
   }
 
   .md-typeset details.dev-guide-panel > summary::before {
-    background-color: var(--sp-midnight) !important;
+    background-color: #0969da !important;
   }
 
   .md-typeset details.dev-guide-panel > summary::after {
@@ -104,20 +104,20 @@ hide:
     top: 50%;
     width: 0.5rem;
     height: 0.5rem;
-    border-right: 2px solid rgba(42,56,72,0.42);
-    border-bottom: 2px solid rgba(42,56,72,0.42);
+    border-right: 2px solid rgba(9, 105, 218, 0.5);
+    border-bottom: 2px solid rgba(9, 105, 218, 0.5);
     transform: translateY(-58%) rotate(-45deg);
     transition: transform 0.18s ease, border-color 0.18s ease;
   }
 
   .md-typeset details.dev-guide-panel[open] > summary {
-    border-bottom: 1px solid rgba(42,56,72,0.08);
-    background: linear-gradient(90deg, rgba(96,56,71,0.08) 0%, rgba(42,56,72,0.035) 100%) !important;
+    border-bottom: 1px solid rgba(84, 174, 255, 0.2);
+    background: linear-gradient(90deg, rgba(207, 233, 255, 0.98) 0%, rgba(220, 238, 253, 0.92) 100%) !important;
   }
 
   .md-typeset details.dev-guide-panel[open] > summary::after {
     transform: translateY(-68%) rotate(45deg);
-    border-color: rgba(117,0,3,0.56);
+    border-color: rgba(9, 105, 218, 0.72);
   }
 
   .md-typeset details.dev-guide-panel > :not(summary) {
@@ -152,10 +152,10 @@ hide:
 
   .md-typeset details.dev-guide-focus {
     margin: 1rem 0 0.45rem;
-    border: 1px solid rgba(117,0,3,0.13);
-    border-left: 3px solid rgba(117,0,3,0.62);
+    border: 1px solid rgba(84, 174, 255, 0.24);
+    border-left: 3px solid #54aeff;
     border-radius: 6px !important;
-    background: linear-gradient(180deg, rgba(255,252,252,0.98) 0%, rgba(250,245,246,0.95) 100%);
+    background: linear-gradient(180deg, rgba(221, 244, 255, 0.96) 0%, rgba(241, 248, 255, 0.94) 100%);
     box-shadow: none;
   }
 
@@ -166,13 +166,13 @@ hide:
     font-weight: 750;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--sp-crimson);
-    background: linear-gradient(90deg, rgba(117,0,3,0.06) 0%, rgba(117,0,3,0.025) 100%) !important;
+    color: #0969da;
+    background: linear-gradient(90deg, rgba(221, 244, 255, 0.98) 0%, rgba(230, 242, 255, 0.9) 100%) !important;
     padding: 0.8rem 2.6rem 0.8rem 2.1rem;
   }
 
   .md-typeset details.dev-guide-focus > summary::before {
-    background-color: var(--sp-crimson) !important;
+    background-color: #0969da !important;
   }
 
   .md-typeset details.dev-guide-focus > summary::after {
@@ -182,15 +182,15 @@ hide:
     top: 50%;
     width: 0.42rem;
     height: 0.42rem;
-    border-right: 2px solid rgba(117,0,3,0.46);
-    border-bottom: 2px solid rgba(117,0,3,0.46);
+    border-right: 2px solid rgba(9, 105, 218, 0.5);
+    border-bottom: 2px solid rgba(9, 105, 218, 0.5);
     transform: translateY(-58%) rotate(-45deg);
     transition: transform 0.18s ease, border-color 0.18s ease;
   }
 
   .md-typeset details.dev-guide-focus[open] > summary::after {
     transform: translateY(-68%) rotate(45deg);
-    border-color: rgba(117,0,3,0.72);
+    border-color: rgba(9, 105, 218, 0.72);
   }
 
   .md-typeset details.dev-guide-focus > :not(summary) {

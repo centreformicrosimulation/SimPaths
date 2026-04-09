@@ -1426,7 +1426,7 @@
 .md-footer {
   background: var(--sp-paper);
   color: var(--sp-midnight);
-  border-top: 0.5px solid var(--sp-ghost);
+  border-top: none;
 }
 
 .md-footer-meta {
@@ -1592,7 +1592,7 @@
 /* ── Dark mode footer ── */
 [data-md-color-scheme="slate"] .md-footer {
   background: #141e2a;
-  border-top-color: rgba(195,198,213,0.1);
+  border-top: none;
 }
 
 [data-md-color-scheme="slate"] .md-copyright {
