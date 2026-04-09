@@ -192,7 +192,7 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore .section-heading::after {
-    background: linear-gradient(90deg, rgba(42, 56, 72, 0.14) 0%, rgba(42, 56, 72, 0.08) 30%, transparent 100%);
+    display: none !important;
   }
 
   .md-typeset .simpaths-home-explore .card-grid {
@@ -217,18 +217,19 @@ hide:
   .md-typeset .simpaths-home-explore a.feature-card {
     --card-accent: #3d5d82;
     --card-accent-soft: rgba(61, 93, 130, 0.12);
-    --card-border: rgba(42, 56, 72, 0.14);
+    --card-surface: #f6f9fc;
+    --card-border: rgba(42, 56, 72, 0.12);
     position: relative;
     display: grid;
     grid-template-rows: auto 1fr auto;
-    gap: 1rem;
-    min-height: 15rem;
-    padding: 1.72rem 1.68rem 1.56rem;
+    gap: 0.88rem;
+    min-height: 13.35rem;
+    padding: 1.48rem 1.44rem 1.32rem;
     border-radius: 9px;
     overflow: hidden;
     border: 1px solid var(--card-border);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(252, 249, 243, 0.94) 100%);
-    box-shadow: 0 12px 28px rgba(19, 27, 38, 0.05);
+    background: var(--card-surface);
+    box-shadow: 0 10px 22px rgba(19, 27, 38, 0.04);
     text-decoration: none !important;
     border-bottom: none !important;
     color: inherit !important;
@@ -239,16 +240,16 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
-    grid-template-columns: minmax(11.4rem, 0.95fr) minmax(0, 1.3fr);
+    grid-template-columns: minmax(10rem, 0.9fr) minmax(0, 1.12fr);
     grid-template-areas:
       "header copy"
       "header footer";
-    gap: 1.1rem 1.55rem;
-    min-height: 15rem;
-    padding: 1.86rem 1.9rem 1.76rem;
+    gap: 0.95rem 1.3rem;
+    min-height: 13.5rem;
+    padding: 1.58rem 1.62rem 1.44rem;
     background: linear-gradient(145deg, #1d2a37 0%, #26384a 100%);
     border-color: rgba(19, 27, 38, 0.26);
-    box-shadow: 0 18px 36px rgba(17, 25, 36, 0.16);
+    box-shadow: 0 16px 30px rgba(17, 25, 36, 0.14);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card::before,
@@ -258,21 +259,21 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(42, 56, 72, 0.22);
-    box-shadow: 0 18px 34px rgba(19, 27, 38, 0.09);
+    transform: translateY(-2px);
+    border-color: rgba(42, 56, 72, 0.18);
+    box-shadow: 0 14px 26px rgba(19, 27, 38, 0.07);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary:hover {
     border-color: rgba(19, 27, 38, 0.34);
-    box-shadow: 0 22px 40px rgba(17, 25, 36, 0.2);
+    box-shadow: 0 18px 34px rgba(17, 25, 36, 0.18);
   }
 
   .md-typeset .simpaths-home-explore .card-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.88rem;
     margin: 0;
   }
 
@@ -286,11 +287,11 @@ hide:
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
     margin-bottom: 0;
-    border-radius: 8px;
+    border-radius: 12px;
     background: var(--card-accent-soft);
     border: 1px solid rgba(42, 56, 72, 0.08);
     box-shadow: none;
@@ -302,13 +303,15 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore .card-icon-wrap svg {
-    width: 19px;
-    height: 19px;
+    width: 18px;
+    height: 18px;
   }
 
   .md-typeset .simpaths-home-explore .feature-card--model {
     --card-accent: #3d5d82;
     --card-accent-soft: rgba(61, 93, 130, 0.12);
+    --card-surface: #f2f7fc;
+    --card-border: rgba(61, 93, 130, 0.16);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--documentation {
@@ -319,39 +322,45 @@ hide:
   .md-typeset .simpaths-home-explore .feature-card--validation {
     --card-accent: #4a697b;
     --card-accent-soft: rgba(74, 105, 123, 0.12);
+    --card-surface: #f3f7fa;
+    --card-border: rgba(74, 105, 123, 0.16);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--research {
     --card-accent: #495b79;
     --card-accent-soft: rgba(73, 91, 121, 0.12);
+    --card-surface: #f4f6fb;
+    --card-border: rgba(73, 91, 121, 0.16);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--funding {
     --card-accent: #7a6645;
     --card-accent-soft: rgba(122, 102, 69, 0.12);
+    --card-surface: #faf6ee;
+    --card-border: rgba(122, 102, 69, 0.16);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card h3 {
     margin: 0 !important;
     font-family: var(--sp-heading-font), Georgia, serif !important;
-    font-size: 1.3rem !important;
+    font-size: 1.14rem !important;
     font-weight: 700 !important;
     color: #1e2c3a !important;
-    line-height: 0.98;
+    line-height: 1.02;
     letter-spacing: -0.015em;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-    font-size: 1.58rem !important;
+    font-size: 1.34rem !important;
     color: #ffffff !important;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card p {
     margin: 0;
     color: rgba(42, 56, 72, 0.76);
-    font-size: 0.85rem;
-    line-height: 1.66;
-    max-width: 30ch;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    max-width: 28ch;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
@@ -359,8 +368,8 @@ hide:
     align-self: start;
     max-width: none;
     color: rgba(250, 249, 245, 0.8);
-    font-size: 0.9rem;
-    line-height: 1.7;
+    font-size: 0.82rem;
+    line-height: 1.62;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card .card-link {
@@ -370,10 +379,10 @@ hide:
     width: 100%;
     gap: 0.5rem;
     margin-top: 0.1rem;
-    padding-top: 1rem;
+    padding-top: 0.84rem;
     border-top: 1px solid rgba(42, 56, 72, 0.1);
     color: var(--card-accent);
-    font-size: 0.79rem;
+    font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.015em;
     text-transform: none;
@@ -401,8 +410,8 @@ hide:
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 0.9rem;
-    padding-right: 1.35rem;
+    gap: 0.76rem;
+    padding-right: 1.1rem;
     border-right: 1px solid rgba(250, 249, 245, 0.14);
   }
 
@@ -412,9 +421,9 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap {
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
     background: rgba(250, 249, 245, 0.08);
     border-color: rgba(250, 249, 245, 0.14);
     color: rgba(250, 249, 245, 0.96);
@@ -432,18 +441,18 @@ hide:
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore .section-heading::after {
-    background: linear-gradient(90deg, rgba(195, 198, 213, 0.22) 0%, rgba(195, 198, 213, 0.1) 30%, transparent 100%);
+    display: none !important;
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card {
     background: linear-gradient(180deg, rgba(22, 32, 44, 0.96) 0%, rgba(18, 27, 38, 0.96) 100%);
     border-color: rgba(250, 249, 245, 0.08);
-    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card:hover {
     border-color: rgba(250, 249, 245, 0.16);
-    box-shadow: 0 22px 40px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
@@ -486,7 +495,7 @@ hide:
     }
 
     .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
-      grid-template-columns: minmax(10.6rem, 0.95fr) minmax(0, 1.15fr);
+      grid-template-columns: minmax(9.4rem, 0.9fr) minmax(0, 1.08fr);
     }
   }
 
@@ -506,8 +515,8 @@ hide:
     }
 
     .md-typeset .simpaths-home-explore a.feature-card {
-      padding: 1.48rem 1.38rem 1.3rem;
-      gap: 0.9rem;
+      padding: 1.34rem 1.28rem 1.18rem;
+      gap: 0.82rem;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
@@ -516,27 +525,27 @@ hide:
         "header"
         "copy"
         "footer";
-      gap: 0.95rem;
-      padding: 1.58rem 1.48rem 1.38rem;
+      gap: 0.88rem;
+      padding: 1.42rem 1.34rem 1.24rem;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-header {
-      gap: 0.82rem;
+      gap: 0.72rem;
       padding-right: 0;
       border-right: none;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card h3 {
-      font-size: 1.22rem !important;
+      font-size: 1.06rem !important;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-      font-size: 1.4rem !important;
+      font-size: 1.22rem !important;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card p {
       max-width: none;
-      font-size: 0.83rem;
+      font-size: 0.76rem;
     }
   }
 
@@ -681,7 +690,7 @@ hide:
     <h3>Model</h3>
   </div>
 </div>
-<p>Understand what SimPaths simulates, how the major components fit together, and how country-specific logic is organised across the framework.</p>
+<p>Understand what SimPaths simulates and how the major components fit together.</p>
 <span class="card-link">Explore the model</span>
 </a>
 
