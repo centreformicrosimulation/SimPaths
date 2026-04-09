@@ -2,7 +2,7 @@
 
 `multirun.jar` runs a sequence of simulations using `simpaths.experiment.SimPathsMultiRun`. It is the main route for repeated runs, sensitivity work, and batch execution on a server or in CI.
 
-## Before you start
+## 1. Before you start
 
 Make sure the project builds and the input database has been created at least once:
 
@@ -13,7 +13,7 @@ java -jar multirun.jar -DBSetup -config config/default.yml
 
 The setup step rebuilds `input/input.mv.db` from the initial-population files and the EUROMOD / UKMOD donor outputs. If you have already completed setup and none of those inputs have changed, you do not need to repeat it before every run.
 
-## Basic command
+## 2. Basic command
 
 For a standard headless batch run:
 
@@ -23,7 +23,7 @@ java -jar multirun.jar -config config/default.yml -g false --persist=root
 
 The configuration file is loaded first, and any command-line flags then override it.
 
-## What the configuration file controls
+## 3. What the configuration file controls
 
 The main configuration file is `config/default.yml`. The most useful top-level settings for multi-run work are:
 
@@ -40,7 +40,7 @@ The same file also exposes:
 - `collector_args`: output and persistence settings
 - `parameter_args`: input-directory and donor-data settings
 
-## Useful command-line options
+## 4. Useful command-line options
 
 The most important command-line flags are:
 
@@ -54,7 +54,7 @@ The most important command-line flags are:
 - `-f`: write console output and log output to `output/logs/`
 - `--persist=root|run|none`: control where processed population data are reused
 
-## Persistence options
+## 5. Persistence options
 
 `SimPathsMultiRun` supports three persistence modes:
 
@@ -64,7 +64,7 @@ The most important command-line flags are:
 
 `root` is the default and is usually the right choice for repeated runs over the same starting database. Use `run` when you want each batch to remain self-contained. Use `none` when you want to avoid writing processed population data at all.
 
-## Innovations across runs
+## 6. Innovations across runs
 
 Repeated runs do not have to be identical. In `innovation_args` you can enable changes between run 1, run 2, run 3, and so on.
 
@@ -76,7 +76,7 @@ The main options are:
 
 These are intended for uncertainty and sensitivity work. If you only want repeated stochastic runs, leaving `randomSeedInnov: true` is normally enough.
 
-## Output collection
+## 7. Output collection
 
 Output writing is controlled through `collector_args` in `config/default.yml`.
 
@@ -89,7 +89,7 @@ The main switches are:
 
 Record-level outputs can become very large, so they should only be enabled when needed.
 
-## A practical example
+## 8. A practical example
 
 This example runs three headless simulations from 2019 to 2022, starting from seed `606`, and keeps processed population data in the root folder:
 
@@ -104,7 +104,7 @@ java -jar multirun.jar \
   --persist=root
 ```
 
-## When to rebuild the database
+## 9. When to rebuild the database
 
 Run `-DBSetup` again before your batch if you have changed any of the following:
 
@@ -115,7 +115,7 @@ Run `-DBSetup` again before your batch if you have changed any of the following:
 
 If those inputs have not changed, a normal multi-run can start directly from the existing database.
 
-## Related pages
+## 10. Related pages
 
 - [Environment Setup](../getting-started/environment-setup.md)
 - [Single Runs](single-runs.md)

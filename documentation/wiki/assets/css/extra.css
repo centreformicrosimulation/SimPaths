@@ -342,9 +342,9 @@
   content: "On this Page";
   font-family: var(--md-text-font) !important;
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--sp-midnight);
   vertical-align: middle;
 }
@@ -434,6 +434,14 @@
   margin-bottom: 0.55rem;
   color: var(--sp-midnight);
   text-wrap: balance;
+}
+
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  scroll-margin-top: 6.5rem;
 }
 
 .md-typeset h3 {
