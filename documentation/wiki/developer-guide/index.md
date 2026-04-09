@@ -62,71 +62,77 @@ hide:
 
   .md-typeset details.dev-guide-panel {
     margin: 0.95rem 0 1rem;
-    border: 1px solid rgba(137, 186, 220, 0.46);
-    border-radius: 12px !important;
-    background: rgba(255,255,255,0.98);
-    box-shadow: 0 4px 14px rgba(24,32,44,0.025);
+    border: 1px solid rgba(42,56,72,0.1);
+    border-radius: 16px !important;
+    background: rgba(255,255,255,0.99);
+    box-shadow: 0 8px 22px rgba(24,32,44,0.03);
   }
 
   .md-typeset details.dev-guide-panel::before {
-    content: none;
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: #6095da;
+    pointer-events: none;
   }
 
   .md-typeset details.dev-guide-panel:hover {
-    border-color: rgba(113, 169, 209, 0.58);
+    border-color: rgba(42,56,72,0.15);
+    box-shadow: 0 12px 28px rgba(24,32,44,0.05);
   }
 
   .md-typeset details.dev-guide-panel[open] {
-    border-color: rgba(113, 169, 209, 0.64);
-    box-shadow: 0 6px 18px rgba(24,32,44,0.035);
+    border-color: rgba(42,56,72,0.16);
+    box-shadow: 0 14px 30px rgba(24,32,44,0.055);
   }
 
   .md-typeset details.dev-guide-panel > summary {
     position: relative;
     font-family: var(--sp-heading-font) !important;
-    font-size: 1.02rem;
+    font-size: 1.06rem;
     font-weight: 500;
     letter-spacing: 0.005em;
     color: var(--sp-midnight);
-    background: #ddf4ff !important;
-    padding: 1rem 2.9rem 1rem 2.3rem;
-    transition: background 0.18s ease, border-color 0.18s ease;
+    background: rgba(255,255,255,0.99) !important;
+    padding: 1.08rem 3.3rem 1.08rem 1.55rem;
+    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
   }
 
   .md-typeset details.dev-guide-panel > summary:hover {
-    background: #d4efff !important;
+    background: rgba(249,251,253,0.98) !important;
   }
 
   .md-typeset details.dev-guide-panel > summary::before {
-    background-color: #0969da !important;
+    background-color: #6095da !important;
   }
 
   .md-typeset details.dev-guide-panel > summary::after {
     content: "";
     position: absolute;
-    right: 1.1rem;
+    right: 1.3rem;
     top: 50%;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-right: 2px solid rgba(9, 105, 218, 0.5);
-    border-bottom: 2px solid rgba(9, 105, 218, 0.5);
+    width: 0.52rem;
+    height: 0.52rem;
+    border-right: 1.75px solid rgba(42,56,72,0.44);
+    border-bottom: 1.75px solid rgba(42,56,72,0.44);
     transform: translateY(-58%) rotate(-45deg);
     transition: transform 0.18s ease, border-color 0.18s ease;
   }
 
   .md-typeset details.dev-guide-panel[open] > summary {
-    border-bottom: 1px solid rgba(137, 186, 220, 0.42);
-    background: #d7efff !important;
+    border-bottom: 1px solid rgba(42,56,72,0.08);
+    background: rgba(252,253,255,0.99) !important;
   }
 
   .md-typeset details.dev-guide-panel[open] > summary::after {
     transform: translateY(-68%) rotate(45deg);
-    border-color: rgba(9, 105, 218, 0.72);
+    border-color: rgba(96,149,218,0.82);
   }
 
   .md-typeset details.dev-guide-panel > :not(summary) {
-    margin-left: 1.15rem;
-    margin-right: 1.15rem;
+    margin-left: 1.4rem;
+    margin-right: 1.4rem;
   }
 
   .md-typeset details.dev-guide-panel p,
@@ -144,26 +150,31 @@ hide:
   .md-typeset details.dev-guide-panel > ul:first-of-type,
   .md-typeset details.dev-guide-panel > ol:first-of-type,
   .md-typeset details.dev-guide-panel > details:first-of-type {
-    margin-top: 1rem;
+    margin-top: 1.1rem;
   }
 
   .md-typeset details.dev-guide-panel > p:last-child,
   .md-typeset details.dev-guide-panel > ul:last-child,
   .md-typeset details.dev-guide-panel > ol:last-child,
   .md-typeset details.dev-guide-panel > details:last-child {
-    margin-bottom: 1.05rem;
+    margin-bottom: 1.15rem;
   }
 
   .md-typeset details.dev-guide-focus {
     margin: 1rem 0 0.45rem;
-    border: 1px solid rgba(137, 186, 220, 0.34);
-    border-radius: 10px !important;
-    background: rgba(252,254,255,0.98);
+    border: 1px solid rgba(96,149,218,0.16);
+    border-radius: 12px !important;
+    background: rgba(249,252,255,0.98);
     box-shadow: none;
   }
 
   .md-typeset details.dev-guide-focus::before {
-    content: none;
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: rgba(96,149,218,0.72);
+    pointer-events: none;
   }
 
   .md-typeset details.dev-guide-focus > summary {
@@ -173,13 +184,14 @@ hide:
     font-weight: 750;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #0969da;
-    background: #eef8ff !important;
-    padding: 0.82rem 2.6rem 0.82rem 2.1rem;
+    color: #4f7db8;
+    background: rgba(249,252,255,0.98) !important;
+    padding: 0.88rem 2.6rem 0.88rem 1.35rem;
+    border-bottom: 1px solid rgba(96,149,218,0.1);
   }
 
   .md-typeset details.dev-guide-focus > summary::before {
-    background-color: #0969da !important;
+    background-color: #6095da !important;
   }
 
   .md-typeset details.dev-guide-focus > summary::after {
@@ -189,20 +201,20 @@ hide:
     top: 50%;
     width: 0.42rem;
     height: 0.42rem;
-    border-right: 2px solid rgba(9, 105, 218, 0.5);
-    border-bottom: 2px solid rgba(9, 105, 218, 0.5);
+    border-right: 1.75px solid rgba(42,56,72,0.42);
+    border-bottom: 1.75px solid rgba(42,56,72,0.42);
     transform: translateY(-58%) rotate(-45deg);
     transition: transform 0.18s ease, border-color 0.18s ease;
   }
 
   .md-typeset details.dev-guide-focus[open] > summary::after {
     transform: translateY(-68%) rotate(45deg);
-    border-color: rgba(9, 105, 218, 0.72);
+    border-color: rgba(96,149,218,0.82);
   }
 
   .md-typeset details.dev-guide-focus > :not(summary) {
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin-left: 1.15rem;
+    margin-right: 1.15rem;
   }
 
   .md-typeset details.dev-guide-focus > p:first-of-type,
@@ -225,8 +237,8 @@ hide:
 
     .md-typeset details.dev-guide-panel > :not(summary),
     .md-typeset details.dev-guide-focus > :not(summary) {
-      margin-left: 0.85rem;
-      margin-right: 0.85rem;
+      margin-left: 1rem;
+      margin-right: 1rem;
     }
   }
 </style>

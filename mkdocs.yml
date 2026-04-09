@@ -12,7 +12,7 @@ copyright: >-
 
 theme:
   name: material
-  favicon: assets/images/favicon.svg
+  favicon: assets/images/header-logo-mark.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
