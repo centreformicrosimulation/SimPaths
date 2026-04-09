@@ -218,7 +218,7 @@
   box-shadow: 0 1px 0 var(--sp-border-soft);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  height: 3.35rem;
+  height: 3.7rem;
 }
 
 .md-header__button.md-logo {
@@ -228,11 +228,11 @@
 /* ── Header title — Newsreader ── */
 .md-header__title {
   font-family: var(--md-text-font) !important;
-  font-size: 0.88rem !important;
-  font-weight: 560 !important;
+  font-size: 0.94rem !important;
+  font-weight: 600 !important;
   letter-spacing: 0.004em;
-  height: 2.78rem;
-  line-height: 2.78rem;
+  height: 3.08rem;
+  line-height: 3.08rem;
   color: var(--sp-midnight) !important;
 }
 
@@ -249,14 +249,14 @@
 .md-header__title .md-header__topic:first-child .md-ellipsis {
   display: inline-flex;
   align-items: center;
-  gap: 0.32rem;
+  gap: 0.42rem;
 }
 
 .md-header__title .md-header__topic:first-child .md-ellipsis::before {
   content: "";
-  width: 1.35rem;
-  height: 0.72rem;
-  flex: 0 0 1.35rem;
+  width: 1.85rem;
+  height: 0.98rem;
+  flex: 0 0 1.85rem;
   background: url("../images/header-logo-mark.svg") center / contain no-repeat;
 }
 
@@ -1599,20 +1599,32 @@
 ═══════════════════════════════════════════════ */
 
 .md-search__form {
-  border-radius: 20px;
-  background: linear-gradient(180deg, var(--sp-nav-pill) 0%, var(--sp-nav-pill-rest) 100%) !important;
-  border: 1px solid var(--sp-nav-pill-border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px rgba(255,255,255,0.01);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(42,56,72,0.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 1px 2px rgba(42,56,72,0.04);
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .md-search__form:hover {
-  background: linear-gradient(180deg, var(--sp-nav-pill-active) 0%, var(--sp-nav-pill) 100%) !important;
-  border-color: rgba(250,249,245,0.2);
+  background: rgba(255,255,255,0.98) !important;
+  border-color: rgba(42,56,72,0.24);
 }
 .md-search__form:focus-within {
-  background: linear-gradient(180deg, var(--sp-nav-pill-active) 0%, var(--sp-nav-pill) 100%) !important;
-  border-color: rgba(166,196,240,0.42);
-  box-shadow: 0 0 0 3px rgba(166,196,240,0.12);
+  background: #fff !important;
+  border-color: rgba(59,158,222,0.34);
+  box-shadow: 0 0 0 3px rgba(79,179,240,0.14);
+}
+
+.md-search__input,
+.md-search__input::placeholder {
+  color: rgba(42,56,72,0.74) !important;
+}
+
+.md-search__icon,
+.md-search__icon svg,
+.md-search__label {
+  color: rgba(42,56,72,0.6) !important;
+  fill: currentColor;
 }
 
 /* ═══════════════════════════════════════════════
