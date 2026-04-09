@@ -215,15 +215,15 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card {
-    --card-accent: #3d5d82;
-    --card-accent-soft: rgba(61, 93, 130, 0.12);
+    --card-accent: #64809c;
+    --card-accent-soft: rgba(100, 128, 156, 0.1);
     --card-surface: #f6f9fc;
-    --card-border: rgba(42, 56, 72, 0.12);
+    --card-border: rgba(90, 112, 138, 0.14);
     position: relative;
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 0.88rem;
-    min-height: 13.35rem;
+    min-height: 13.9rem;
     padding: 1.48rem 1.44rem 1.32rem;
     border-radius: 9px;
     overflow: hidden;
@@ -247,7 +247,7 @@ hide:
     gap: 0.95rem 1.3rem;
     min-height: 13.5rem;
     padding: 1.58rem 1.62rem 1.44rem;
-    background: linear-gradient(145deg, #1d2a37 0%, #26384a 100%);
+    background: linear-gradient(145deg, #203448 0%, #2c4560 100%);
     border-color: rgba(19, 27, 38, 0.26);
     box-shadow: 0 16px 30px rgba(17, 25, 36, 0.14);
   }
@@ -277,9 +277,21 @@ hide:
     margin: 0;
   }
 
+  .md-typeset .simpaths-home-explore a.feature-card:not(.feature-card--primary) .card-header {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.72rem;
+  }
+
   .md-typeset .simpaths-home-explore .card-label {
     min-width: 0;
     order: 1;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card:not(.feature-card--primary) .card-label,
+  .md-typeset .simpaths-home-explore a.feature-card:not(.feature-card--primary) .card-icon-wrap {
+    order: 0;
   }
 
   .md-typeset .simpaths-home-explore .card-icon-wrap {
@@ -308,10 +320,10 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore .feature-card--model {
-    --card-accent: #3d5d82;
-    --card-accent-soft: rgba(61, 93, 130, 0.12);
-    --card-surface: #f2f7fc;
-    --card-border: rgba(61, 93, 130, 0.16);
+    --card-accent: #4e7396;
+    --card-accent-soft: rgba(78, 115, 150, 0.1);
+    --card-surface: #eef5fb;
+    --card-border: rgba(78, 115, 150, 0.16);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--documentation {
@@ -320,24 +332,24 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore .feature-card--validation {
-    --card-accent: #4a697b;
-    --card-accent-soft: rgba(74, 105, 123, 0.12);
-    --card-surface: #f3f7fa;
-    --card-border: rgba(74, 105, 123, 0.16);
+    --card-accent: #5e7d98;
+    --card-accent-soft: rgba(94, 125, 152, 0.1);
+    --card-surface: #f2f7fb;
+    --card-border: rgba(94, 125, 152, 0.15);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--research {
-    --card-accent: #495b79;
-    --card-accent-soft: rgba(73, 91, 121, 0.12);
-    --card-surface: #f4f6fb;
-    --card-border: rgba(73, 91, 121, 0.16);
+    --card-accent: #6a7f9e;
+    --card-accent-soft: rgba(106, 127, 158, 0.1);
+    --card-surface: #f3f7fb;
+    --card-border: rgba(106, 127, 158, 0.15);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--funding {
-    --card-accent: #7a6645;
-    --card-accent-soft: rgba(122, 102, 69, 0.12);
-    --card-surface: #faf6ee;
-    --card-border: rgba(122, 102, 69, 0.16);
+    --card-accent: #7788a1;
+    --card-accent-soft: rgba(119, 136, 161, 0.1);
+    --card-surface: #f5f8fb;
+    --card-border: rgba(119, 136, 161, 0.15);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card h3 {
@@ -456,7 +468,7 @@ hide:
   }
 
   [data-md-color-scheme="slate"] .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
-    background: linear-gradient(145deg, #253546 0%, #304559 100%);
+    background: linear-gradient(145deg, #28405a 0%, #355271 100%);
     border-color: rgba(250, 249, 245, 0.12);
   }
 
