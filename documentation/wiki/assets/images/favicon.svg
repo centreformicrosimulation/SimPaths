@@ -1,0 +1,18 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="simpaths-favicon-trail" x1="18" y1="50" x2="46" y2="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7ECEF4"/>
+      <stop offset="0.58" stop-color="#BCE4FA"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="18" cy="50" r="8" fill="#7ECEF4"/>
+  <path
+    d="M18 50C18 57 46 57 46 41C46 25 18 32 18 16C18 3 46 3 46 12"
+    stroke="url(#simpaths-favicon-trail)"
+    stroke-linecap="round"
+    stroke-width="8"
+  />
+  <circle cx="46" cy="12" r="8" fill="#FFFFFF" stroke="#9CCDEC" stroke-width="2.5"/>
+</svg>

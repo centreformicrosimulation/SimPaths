@@ -12,6 +12,7 @@ copyright: >-
 
 theme:
   name: material
+  favicon: assets/images/favicon.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default

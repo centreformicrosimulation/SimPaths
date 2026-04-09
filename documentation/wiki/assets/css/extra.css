@@ -1530,6 +1530,10 @@
   min-height: 0 !important;
 }
 
+body:has(.simpaths-home-research-band) .md-footer__inner {
+  border-top: none;
+}
+
 .md-footer__link {
   color: var(--sp-midnight) !important;
   transition: all 0.2s ease;
