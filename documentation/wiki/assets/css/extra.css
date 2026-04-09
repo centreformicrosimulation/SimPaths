@@ -218,7 +218,7 @@
   box-shadow: 0 1px 0 var(--sp-nav-border), var(--sp-nav-shadow);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  height: 3rem;
+  height: 3.35rem;
 }
 
 .md-header__button.md-logo {
@@ -231,8 +231,8 @@
   font-size: 0.88rem !important;
   font-weight: 560 !important;
   letter-spacing: 0.004em;
-  height: 2.4rem;
-  line-height: 2.4rem;
+  height: 2.78rem;
+  line-height: 2.78rem;
 }
 
 .md-header__title .md-header__topic {
@@ -255,24 +255,23 @@
 
 /* ── Tab bar ── */
 .md-tabs {
-  background: var(--md-default-bg-color) !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-top: 1px solid var(--sp-border-soft);
-  border-bottom: 1px solid var(--sp-border-soft);
+  background: rgba(8,16,32,0.45) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(250,249,245,0.06);
+  border-bottom: 1px solid rgba(250,249,245,0.04);
 }
 
 .md-tabs__link {
   font-weight: 500;
   font-size: 0.76rem;
   letter-spacing: 0.03em;
-  color: var(--md-default-fg-color--light) !important;
-  opacity: 1;
-  transition: color 0.2s ease;
+  opacity: 0.65;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .md-tabs__link:hover {
-  color: var(--md-default-fg-color) !important;
+  opacity: 0.95;
 }
 
 /* ── Tab underline ── */
@@ -298,7 +297,8 @@
 }
 
 .md-tabs__item--active .md-tabs__link {
-  color: var(--md-default-fg-color) !important;
+  opacity: 1;
+  color: #fff !important;
 }
 
 .md-tabs__item--active::after {
