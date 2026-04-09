@@ -214,10 +214,10 @@
 ═══════════════════════════════════════════════ */
 
 .md-header {
-  background: var(--sp-nav-surface) !important;
-  box-shadow: 0 1px 0 var(--sp-nav-border), var(--sp-nav-shadow);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--md-default-bg-color) !important;
+  box-shadow: 0 1px 0 var(--sp-border-soft);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   height: 3.35rem;
 }
 
@@ -233,6 +233,13 @@
   letter-spacing: 0.004em;
   height: 2.78rem;
   line-height: 2.78rem;
+  color: var(--sp-midnight) !important;
+}
+
+.md-header__button,
+.md-header__topic,
+.md-header__ellipsis {
+  color: var(--sp-midnight) !important;
 }
 
 .md-header__title .md-header__topic {
