@@ -1627,6 +1627,23 @@
   fill: currentColor;
 }
 
+@media screen and (min-width: 60em) {
+  .md-skip[href="#user-guide"] ~ .md-container .md-sidebar--secondary[hidden],
+  .md-skip[href="#getting-started"] ~ .md-container .md-sidebar--secondary[hidden],
+  .md-skip[href="#jas-mine-architecture"] ~ .md-container .md-sidebar--secondary[hidden] {
+    display: block;
+    visibility: hidden;
+  }
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-skip[href="#user-guide"] ~ .md-container .md-sidebar--secondary[hidden] ~ .md-content > .md-content__inner,
+  .md-skip[href="#getting-started"] ~ .md-container .md-sidebar--secondary[hidden] ~ .md-content > .md-content__inner,
+  .md-skip[href="#jas-mine-architecture"] ~ .md-container .md-sidebar--secondary[hidden] ~ .md-content > .md-content__inner {
+    margin-right: 1.2rem;
+  }
+}
+
 /* ═══════════════════════════════════════════════
    BUTTONS
 ═══════════════════════════════════════════════ */

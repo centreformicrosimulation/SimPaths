@@ -45,7 +45,7 @@ hide:
   }
 
   .md-typeset .dev-guide-intro__brand img {
-    width: min(14rem, 100%);
+    width: min(16rem, 100%);
     margin: 0;
     opacity: 0.96;
   }
