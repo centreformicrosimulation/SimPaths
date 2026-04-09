@@ -3,8 +3,6 @@ hide:
   - toc
 ---
 
-<div class="page-shell--reading" markdown="1">
-
 # User Guide
 
 The user guide explains how SimPaths can be used to run simulations from the GUI (Graphical User Interface), set up multiple runs, and create scenarios by changing GUI parameters, input data, or tax-benefit settings.
@@ -16,5 +14,3 @@ The user guide explains how SimPaths can be used to run simulations from the GUI
 - [Graphical User Interface](gui.md) — work through the main controls and displays
 - [Modifying Tax-Benefit Settings](tax-benefit-parameters.md) — adjust policy-related inputs
 - [Uncertainty Analysis](uncertainty-analysis.md) — explore stochastic variation and sensitivity
-
-</div>

@@ -11,7 +11,7 @@ hide:
   }
 
   .md-typeset .dev-guide-intro__copy {
-    max-width: 50rem;
+    max-width: 52rem;
   }
 
   .md-typeset .dev-guide-intro__copy p {
@@ -29,7 +29,7 @@ hide:
   .md-typeset .dev-guide-intro__brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.82rem;
+    gap: 0.9rem;
     margin: 0.9rem 0 0.2rem;
     padding-top: 0.78rem;
     border-top: 1px solid rgba(42,56,72,0.1);
@@ -45,12 +45,12 @@ hide:
   }
 
   .md-typeset .dev-guide-intro__brand img {
-    width: min(11.4rem, 100%);
+    width: min(14rem, 100%);
     margin: 0;
     opacity: 0.96;
   }
 
-  .md-typeset .dev-guide-page > ul:first-of-type {
+  .md-typeset > ul:first-of-type {
     margin: 0.55rem 0 1.3rem;
   }
 
@@ -224,8 +224,6 @@ hide:
   }
 </style>
 
-<div class="dev-guide-page" markdown="1">
-
 <div class="dev-guide-intro">
   <div class="dev-guide-intro__copy">
     <p>SimPaths is a Java project based on the JAS-mine simulation libraries.</p>
@@ -354,5 +352,3 @@ On the other hand, the power of modern RDBMS make it feasible to keep track of a
 
 Finally, keeping data analysis conceptually distinct from data production further enhances the brevity, transparency and clarity of the code.
 </details>
-
-</div>
