@@ -255,11 +255,11 @@
 
 /* ── Tab bar ── */
 .md-tabs {
-  background: var(--sp-nav-surface-strong) !important;
+  background: rgba(8,16,32,0.45) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--sp-nav-border);
-  border-bottom: 1px solid rgba(250,249,245,0.06);
+  border-top: 1px solid rgba(250,249,245,0.06);
+  border-bottom: 1px solid rgba(250,249,245,0.04);
 }
 
 .md-tabs__link {
