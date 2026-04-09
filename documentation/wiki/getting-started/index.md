@@ -1,3 +1,8 @@
+---
+hide:
+  - toc
+---
+
 # Getting Started
 
 This section walks you through everything needed to run SimPaths for the first time.

@@ -1,3 +1,8 @@
+---
+hide:
+  - toc
+---
+
 # JAS-mine Architecture
 
 SimPaths is built on the [JAS-mine](https://www.microsimulation.ac.uk/jas-mine/) simulation libraries. Understanding the JAS-mine architecture is essential for developing or modifying SimPaths.

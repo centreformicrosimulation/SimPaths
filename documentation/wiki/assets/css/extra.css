@@ -2039,6 +2039,7 @@
 .md-typeset .research-page .page-intro,
 .md-typeset .research-page .page-intro--support {
   max-width: 52rem;
+  text-wrap: normal;
 }
 
 .md-typeset .research-page .page-intro {

@@ -1,3 +1,8 @@
+---
+hide:
+  - toc
+---
+
 # User Guide
 
 The user guide explains how SimPaths can be used to run simulations from the GUI (Graphical User Interface), set up multiple runs, and create scenarios by changing GUI parameters, input data, or tax-benefit settings.
