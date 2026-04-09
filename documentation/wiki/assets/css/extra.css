@@ -254,14 +254,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
+  letter-spacing: 0.02em;
 }
 
 .md-header__title .md-header__topic:first-child .md-ellipsis::before {
   content: "";
-  width: 1.85rem;
-  height: 0.98rem;
-  flex: 0 0 1.85rem;
-  background: url("../images/header-logo-mark.svg") center / contain no-repeat;
+  width: 2.04rem;
+  height: 1.02rem;
+  flex: 0 0 2.04rem;
+  background: url("../images/homepage-hero-logo.svg") center / contain no-repeat;
 }
 
 /* ── Tab bar ── */
