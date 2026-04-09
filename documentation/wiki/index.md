@@ -244,6 +244,12 @@ hide:
     padding: 1.56rem 1.62rem 1.4rem;
   }
 
+  .md-typeset .simpaths-home-explore a.feature-card::before,
+  .md-typeset .simpaths-home-explore a.feature-card::after {
+    content: none !important;
+    display: none !important;
+  }
+
   .md-typeset .simpaths-home-explore a.feature-card:hover {
     transform: translateY(-3px);
     border-color: rgba(42, 56, 72, 0.18);
@@ -315,10 +321,14 @@ hide:
   .md-typeset .simpaths-home-explore a.feature-card h3 {
     margin: 0 !important;
     font-family: var(--md-text-font) !important;
-    font-size: 1.12rem !important;
+    font-size: 1.06rem !important;
     font-weight: 700 !important;
     color: #223142 !important;
     line-height: 1.12;
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
+    font-size: 1.06rem !important;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card p {
