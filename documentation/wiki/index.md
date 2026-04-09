@@ -318,9 +318,9 @@ hide:
 
   .md-typeset .simpaths-home-explore a.feature-card h3 {
     margin: 0 !important;
-    font-family: var(--md-text-font) !important;
+    font-family: var(--sp-heading-font), Georgia, serif !important;
     font-size: 1.06rem !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     color: #223142 !important;
     line-height: 1.12;
   }
