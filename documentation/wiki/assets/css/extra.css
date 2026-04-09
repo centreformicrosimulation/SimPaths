@@ -3,6 +3,8 @@
    Scholarly palette · Newsreader headings · Inter body
 ═══════════════════════════════════════════════ */
 
+@import url("https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+Pro:wght@400;600;700&display=swap");
+
 /* ── Self-hosted fonts ── */
 @font-face {
   font-family: "Inter";
@@ -36,7 +38,9 @@
 :root {
   --md-text-font: "Inter";
   --md-code-font: "JetBrains Mono";
+  --sp-brand-font: "Libre Baskerville", Georgia, "Times New Roman", serif;
   --sp-heading-font: "Newsreader", Georgia, "Times New Roman", serif;
+  --sp-research-font: "Source Sans Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ── Manuscript Palette ── */
@@ -225,12 +229,12 @@
   display: none !important;
 }
 
-/* ── Header title — Newsreader ── */
+/* ── Header title ── */
 .md-header__title {
-  font-family: var(--md-text-font) !important;
-  font-size: 0.94rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.004em;
+  font-family: var(--sp-brand-font) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0;
   height: 3.08rem;
   line-height: 3.08rem;
   color: var(--sp-midnight) !important;
@@ -330,6 +334,21 @@
   box-shadow: none !important;
 }
 
+.md-nav--secondary .md-nav__title {
+  font-size: 0 !important;
+}
+
+.md-nav--secondary .md-nav__title::after {
+  content: "On this Page";
+  font-family: var(--md-text-font) !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sp-midnight);
+  vertical-align: middle;
+}
+
 .md-nav__item--active > .md-nav__link {
   font-weight: 500;
   color: var(--md-default-fg-color--light) !important;
@@ -364,8 +383,7 @@
   line-height: 1.65;
 }
 
-.md-typeset .page-intro,
-.md-typeset > h1 + p:not(.funding-lead) {
+.md-typeset .page-intro {
   max-width: 49rem;
   margin: -0.1rem 0 1.15rem;
   color: var(--sp-midnight);
@@ -442,8 +460,7 @@
   color: #c8d8e8;
 }
 
-[data-md-color-scheme="slate"] .md-typeset .page-intro,
-[data-md-color-scheme="slate"] .md-typeset > h1 + p:not(.funding-lead) {
+[data-md-color-scheme="slate"] .md-typeset .page-intro {
   color: #d7e3ef;
 }
 
@@ -1819,7 +1836,7 @@
 }
 
 .md-typeset .archive-link {
-  font-family: "Inter", var(--md-text-font) !important;
+  font-family: var(--sp-research-font) !important;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -1865,6 +1882,7 @@
 
 .md-typeset .reference-paper__kicker {
   margin: 0 0 0.35rem;
+  font-family: var(--sp-research-font) !important;
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -1874,15 +1892,21 @@
 
 .md-typeset .reference-paper h2 {
   margin: 0 0 0.28rem;
+  font-family: var(--sp-research-font) !important;
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.32;
 }
 
 .md-typeset .reference-paper h2 a {
+  font-family: inherit !important;
   color: inherit !important;
   border-bottom: none !important;
 }
 
 .md-typeset .reference-paper__meta {
   margin: 0 0 0.32rem;
+  font-family: var(--sp-research-font) !important;
   font-size: 0.71rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1894,6 +1918,7 @@
 .md-typeset .reference-paper__summary {
   margin: 0;
   max-width: 50rem;
+  font-family: var(--sp-research-font) !important;
   text-align: left;
   color: var(--md-default-fg-color--light);
 }
@@ -1938,7 +1963,7 @@
 }
 
 .md-typeset .research-label {
-  font-family: "Inter", var(--md-text-font) !important;
+  font-family: var(--sp-research-font) !important;
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -1946,17 +1971,19 @@
 }
 
 .md-typeset .research-journal {
+  font-family: var(--sp-research-font) !important;
   font-size: 0.6rem;
-  font-style: italic;
+  font-style: normal;
+  font-weight: 600;
   color: var(--sp-wine-soft);
 }
 
 /* Title */
 .md-typeset a.research-entry h3 {
-  font-family: var(--sp-heading-font) !important;
-  font-size: 1rem;
-  font-weight: 500;
-  font-style: italic;
+  font-family: var(--sp-research-font) !important;
+  font-size: 1.02rem;
+  font-weight: 700;
+  font-style: normal;
   color: var(--sp-midnight) !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -1982,6 +2009,7 @@
 
 /* Authors */
 .md-typeset .research-authors {
+  font-family: var(--sp-research-font) !important;
   font-size: 0.7rem;
   color: var(--md-default-fg-color--light);
   margin: 0.2rem 0 0 !important;
@@ -1990,6 +2018,7 @@
 }
 
 .md-typeset .research-summary {
+  font-family: var(--sp-research-font) !important;
   font-size: 0.75rem;
   color: var(--md-default-fg-color--light);
   margin: 0.35rem 0 0 !important;
@@ -2056,6 +2085,7 @@
 .md-typeset .research-page .page-intro,
 .md-typeset .research-page .page-intro--support {
   max-width: 58rem;
+  font-family: var(--sp-research-font) !important;
   text-wrap: normal;
 }
 

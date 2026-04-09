@@ -178,7 +178,8 @@ hide:
   }
 
   .simpaths-home-explore {
-    margin: 0.36rem 0 2.35rem;
+    margin: 0.36rem 0 0;
+    padding-bottom: 2.5rem;
   }
 
   .simpaths-home-explore__intro {
@@ -437,6 +438,32 @@ hide:
       min-height: auto;
     }
   }
+
+  .simpaths-home-research-band {
+    margin: 0 calc(50% - 50vw);
+    padding: 2.95rem 1.2rem 3.15rem;
+    background: rgba(255, 255, 255, 0.98);
+    border-top: 1px solid rgba(42, 56, 72, 0.08);
+  }
+
+  .md-typeset .simpaths-home-research-band .research-section {
+    max-width: 61rem;
+    margin: 0 auto;
+  }
+
+  .md-typeset .simpaths-home-research-band .research-header {
+    margin-bottom: 0.82rem;
+  }
+
+  .md-typeset .simpaths-home-research-band .research-list {
+    margin-top: 0.18rem;
+  }
+
+  @media (max-width: 700px) {
+    .simpaths-home-research-band {
+      padding: 2.35rem 1rem 2.5rem;
+    }
+  }
 </style>
 
 <div class="simpaths-home-hero">
@@ -548,8 +575,7 @@ hide:
 </div>
 </section>
 
----
-
+<section class="simpaths-home-research-band">
 <div class="research-section">
 <div class="research-header">
   <h2 class="section-heading">Recent Research Highlights</h2>
@@ -593,3 +619,4 @@ hide:
 
 </div>
 </div>
+</section>
