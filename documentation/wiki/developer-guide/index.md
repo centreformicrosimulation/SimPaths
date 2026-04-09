@@ -62,44 +62,39 @@ hide:
 
   .md-typeset details.dev-guide-panel {
     margin: 0.95rem 0 1rem;
-    border: 1px solid rgba(84, 174, 255, 0.18);
+    border: 1px solid rgba(137, 186, 220, 0.46);
     border-radius: 12px !important;
     background: rgba(255,255,255,0.98);
-    box-shadow: 0 10px 24px rgba(24,32,44,0.035);
+    box-shadow: 0 4px 14px rgba(24,32,44,0.025);
   }
 
   .md-typeset details.dev-guide-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 3px;
-    background: linear-gradient(90deg, rgba(84, 174, 255, 0.92) 0%, rgba(84, 174, 255, 0.55) 38%, rgba(84, 174, 255, 0.16) 100%);
-    pointer-events: none;
+    content: none;
   }
 
   .md-typeset details.dev-guide-panel:hover {
-    border-color: rgba(84, 174, 255, 0.26);
+    border-color: rgba(113, 169, 209, 0.58);
   }
 
   .md-typeset details.dev-guide-panel[open] {
-    border-color: rgba(84, 174, 255, 0.28);
-    box-shadow: 0 12px 28px rgba(24,32,44,0.05);
+    border-color: rgba(113, 169, 209, 0.64);
+    box-shadow: 0 6px 18px rgba(24,32,44,0.035);
   }
 
   .md-typeset details.dev-guide-panel > summary {
     position: relative;
     font-family: var(--sp-heading-font) !important;
-    font-size: 1rem;
+    font-size: 1.02rem;
     font-weight: 500;
     letter-spacing: 0.005em;
     color: var(--sp-midnight);
-    background: linear-gradient(180deg, rgba(221, 244, 255, 0.96) 0%, rgba(239, 247, 255, 0.94) 100%) !important;
+    background: #ddf4ff !important;
     padding: 1rem 2.9rem 1rem 2.3rem;
-    transition: background 0.18s ease, color 0.18s ease;
+    transition: background 0.18s ease, border-color 0.18s ease;
   }
 
   .md-typeset details.dev-guide-panel > summary:hover {
-    background: linear-gradient(180deg, rgba(215, 240, 255, 0.98) 0%, rgba(235, 245, 255, 0.96) 100%) !important;
+    background: #d4efff !important;
   }
 
   .md-typeset details.dev-guide-panel > summary::before {
@@ -120,8 +115,8 @@ hide:
   }
 
   .md-typeset details.dev-guide-panel[open] > summary {
-    border-bottom: 1px solid rgba(84, 174, 255, 0.16);
-    background: linear-gradient(180deg, rgba(211, 236, 255, 0.98) 0%, rgba(233, 243, 255, 0.95) 100%) !important;
+    border-bottom: 1px solid rgba(137, 186, 220, 0.42);
+    background: #d7efff !important;
   }
 
   .md-typeset details.dev-guide-panel[open] > summary::after {
@@ -161,19 +156,14 @@ hide:
 
   .md-typeset details.dev-guide-focus {
     margin: 1rem 0 0.45rem;
-    border: 1px solid rgba(84, 174, 255, 0.16);
+    border: 1px solid rgba(137, 186, 220, 0.34);
     border-radius: 10px !important;
-    background: rgba(255,255,255,0.96);
-    box-shadow: 0 6px 18px rgba(24,32,44,0.025);
+    background: rgba(252,254,255,0.98);
+    box-shadow: none;
   }
 
   .md-typeset details.dev-guide-focus::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 2px;
-    background: linear-gradient(90deg, rgba(84, 174, 255, 0.78) 0%, rgba(84, 174, 255, 0.3) 100%);
-    pointer-events: none;
+    content: none;
   }
 
   .md-typeset details.dev-guide-focus > summary {
@@ -184,7 +174,7 @@ hide:
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #0969da;
-    background: linear-gradient(180deg, rgba(224, 244, 255, 0.94) 0%, rgba(242, 248, 255, 0.96) 100%) !important;
+    background: #eef8ff !important;
     padding: 0.82rem 2.6rem 0.82rem 2.1rem;
   }
 
