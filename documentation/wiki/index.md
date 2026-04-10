@@ -244,7 +244,7 @@ hide:
     grid-template-columns: minmax(10rem, 0.9fr) minmax(0, 1.12fr);
     grid-template-areas:
       "header copy"
-      "header footer";
+      "footer footer";
     gap: 1.02rem 1.42rem;
     min-height: 13.8rem;
     padding: 1.68rem 1.74rem 1.54rem;
@@ -297,7 +297,6 @@ hide:
 
   .md-typeset .simpaths-home-explore .card-icon-wrap {
     order: 2;
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -308,28 +307,10 @@ hide:
     color: var(--card-accent);
     line-height: 1;
     transition: color 0.22s ease, transform 0.22s ease;
-    z-index: 0;
-  }
-
-  .md-typeset .simpaths-home-explore .card-icon-wrap::before {
-    content: "";
-    position: absolute;
-    inset: -0.35rem;
-    border-radius: 999px;
-    background: var(--card-accent-soft);
-    opacity: 0;
-    transform: scale(0.86);
-    transition: opacity 0.22s ease, transform 0.22s ease;
-    z-index: -1;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover .card-icon-wrap {
     transform: translateY(-1px);
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card:hover .card-icon-wrap::before {
-    opacity: 1;
-    transform: scale(1);
   }
 
   .md-typeset .simpaths-home-explore .card-icon-wrap svg {
@@ -439,12 +420,11 @@ hide:
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-header {
     grid-area: header;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.76rem;
-    padding-right: 1.18rem;
-    border-right: 1px solid rgba(250, 249, 245, 0.14);
+    padding-right: 0.92rem;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-label,
@@ -456,8 +436,9 @@ hide:
     color: rgba(250, 249, 245, 0.96);
   }
 
-  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap::before {
-    background: rgba(250, 249, 245, 0.08);
+  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
+    padding-left: 1.42rem;
+    border-left: 1px solid rgba(250, 249, 245, 0.14);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-link {
@@ -564,6 +545,11 @@ hide:
       gap: 0.74rem;
       padding-right: 0;
       border-right: none;
+    }
+
+    .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
+      padding-left: 0;
+      border-left: none;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card h3 {
@@ -728,7 +714,7 @@ hide:
 <a href="documentation/" class="feature-card feature-card--primary feature-card--documentation">
 <div class="card-header">
   <div class="card-icon-wrap">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
   </div>
   <div class="card-label">
     <h3>Documentation</h3>
