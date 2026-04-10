@@ -217,7 +217,7 @@ hide:
   .md-typeset .simpaths-home-explore a.feature-card {
     --card-accent: #3d5d82;
     --card-accent-soft: rgba(61, 93, 130, 0.12);
-    --card-surface: #f6f9fc;
+    --card-surface: #F2F6FF;
     --card-border: rgba(42, 56, 72, 0.12);
     position: relative;
     display: grid;
@@ -281,7 +281,7 @@ hide:
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 0.72rem;
+    gap: 0.58rem;
   }
 
   .md-typeset .simpaths-home-explore .card-label {
@@ -299,30 +299,27 @@ hide:
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
+    width: auto;
+    height: auto;
+    flex: 0 0 auto;
     margin-bottom: 0;
-    border-radius: 12px;
-    background: var(--card-accent-soft);
-    border: 1px solid rgba(42, 56, 72, 0.08);
-    box-shadow: none;
     color: var(--card-accent);
+    line-height: 1;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card:hover .card-icon-wrap {
-    transform: translateY(-1px);
+    transform: none;
   }
 
   .md-typeset .simpaths-home-explore .card-icon-wrap svg {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
   }
 
   .md-typeset .simpaths-home-explore .feature-card--model {
     --card-accent: #3d5d82;
     --card-accent-soft: rgba(61, 93, 130, 0.12);
-    --card-surface: #f2f7fc;
+    --card-surface: #F2F6FF;
     --card-border: rgba(61, 93, 130, 0.16);
   }
 
@@ -334,21 +331,21 @@ hide:
   .md-typeset .simpaths-home-explore .feature-card--validation {
     --card-accent: #4a697b;
     --card-accent-soft: rgba(74, 105, 123, 0.12);
-    --card-surface: #f3f7fa;
+    --card-surface: #F2F6FF;
     --card-border: rgba(74, 105, 123, 0.16);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--research {
     --card-accent: #495b79;
     --card-accent-soft: rgba(73, 91, 121, 0.12);
-    --card-surface: #f4f6fb;
+    --card-surface: #F2F6FF;
     --card-border: rgba(73, 91, 121, 0.16);
   }
 
   .md-typeset .simpaths-home-explore .feature-card--funding {
     --card-accent: #7a6645;
     --card-accent-soft: rgba(122, 102, 69, 0.12);
-    --card-surface: #faf6ee;
+    --card-surface: #F2F6FF;
     --card-border: rgba(122, 102, 69, 0.16);
   }
 
@@ -422,7 +419,7 @@ hide:
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: 0.76rem;
+    gap: 0.62rem;
     padding-right: 1.1rem;
     border-right: 1px solid rgba(250, 249, 245, 0.14);
   }
@@ -433,11 +430,6 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap {
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
-    background: rgba(250, 249, 245, 0.08);
-    border-color: rgba(250, 249, 245, 0.14);
     color: rgba(250, 249, 245, 0.96);
   }
 
