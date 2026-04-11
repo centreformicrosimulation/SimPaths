@@ -39,7 +39,7 @@ hide:
     width: clamp(6.2rem, 10.8vw, 7.35rem);
     height: auto;
     margin: 0 auto 0.68rem;
-    filter: brightness(0) invert(1) drop-shadow(0 16px 26px rgba(14, 22, 34, 0.22));
+    filter: drop-shadow(0 16px 26px rgba(14, 22, 34, 0.22));
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
@@ -47,8 +47,8 @@ hide:
     font-family: var(--sp-heading-font), Georgia, serif;
     color: #ffffff;
     font-size: clamp(2.42rem, 4.8vw, 3.35rem) !important;
-    font-weight: 600;
-    letter-spacing: -0.025em;
+    font-weight: 520;
+    letter-spacing: -0.018em;
     line-height: 0.92;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
