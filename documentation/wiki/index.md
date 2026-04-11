@@ -5,9 +5,13 @@ hide:
 ---
 
 <style>
+  .md-content:has(.simpaths-home-hero) .md-content__inner {
+    padding-top: 0;
+  }
+
   .simpaths-home-hero {
     width: 100vw;
-    margin: -0.18rem calc(50% - 50vw) 2.45rem;
+    margin: 0 calc(50% - 50vw) 2.45rem;
     padding: 2.48rem 1.2rem 2.48rem;
     background:
       radial-gradient(ellipse at 50% 12%, rgba(250, 249, 245, 0.14) 0%, rgba(250, 249, 245, 0.08) 18%, transparent 40%),
@@ -47,7 +51,7 @@ hide:
     font-family: var(--sp-heading-font), Georgia, serif;
     color: #ffffff;
     font-size: clamp(2.42rem, 4.8vw, 3.35rem) !important;
-    font-weight: 520;
+    font-weight: 460;
     letter-spacing: -0.018em;
     line-height: 0.92;
     padding-bottom: 0 !important;
@@ -163,7 +167,6 @@ hide:
 
   @media (max-width: 700px) {
     .simpaths-home-hero {
-      margin-top: -0.12rem;
       padding: 1.65rem 1rem 1.65rem;
     }
 
