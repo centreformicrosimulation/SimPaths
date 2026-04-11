@@ -188,7 +188,7 @@ hide:
 
   .md-typeset .simpaths-home-explore .section-heading {
     margin-bottom: 0.18rem;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 
   .md-typeset .simpaths-home-explore .section-heading::after {
@@ -585,7 +585,7 @@ hide:
 
   .md-typeset .simpaths-home-research-band .research-header .section-heading {
     margin-bottom: 0;
-    font-size: 1.42rem;
+    font-size: 1.52rem;
   }
 
   .md-typeset .simpaths-home-research-band .research-header .section-heading::after {
