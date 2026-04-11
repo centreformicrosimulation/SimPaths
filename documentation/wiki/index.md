@@ -188,7 +188,7 @@ hide:
 
   .md-typeset .simpaths-home-explore .section-heading {
     margin-bottom: 0.18rem;
-    font-size: 1.6rem;
+    font-size: 1.7rem;
   }
 
   .md-typeset .simpaths-home-explore .section-heading::after {
@@ -362,7 +362,7 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-    font-size: 1.52rem !important;
+    font-size: 1.22rem !important;
     color: #ffffff !important;
   }
 
@@ -379,7 +379,7 @@ hide:
     align-self: start;
     max-width: none;
     color: rgba(250, 249, 245, 0.8);
-    font-size: 0.8rem;
+    font-size: 0.77rem;
     line-height: 1.6;
   }
 
@@ -557,7 +557,7 @@ hide:
     }
 
     .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-      font-size: 1.22rem !important;
+      font-size: 1.06rem !important;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card p {
@@ -585,7 +585,7 @@ hide:
 
   .md-typeset .simpaths-home-research-band .research-header .section-heading {
     margin-bottom: 0;
-    font-size: 1.52rem;
+    font-size: 1.62rem;
   }
 
   .md-typeset .simpaths-home-research-band .research-header .section-heading::after {
@@ -720,7 +720,7 @@ hide:
     <h3>Documentation</h3>
   </div>
 </div>
-<p>Start here for setup, first run, developer guides, input data, and technical reference.</p>
+<p>Go from setup and your first run to user guides, developer internals, and the core reference material for the model.</p>
 <span class="card-link">Open documentation</span>
 </a>
 
