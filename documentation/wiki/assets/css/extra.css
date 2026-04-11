@@ -222,7 +222,11 @@
   box-shadow: 0 1px 0 var(--sp-border-soft);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  height: 3.7rem;
+  height: 4.65rem;
+}
+
+.md-header__inner {
+  min-height: 4.65rem;
 }
 
 .md-header__button.md-logo {
@@ -235,8 +239,10 @@
   font-size: 1rem !important;
   font-weight: 700 !important;
   letter-spacing: 0;
-  height: 3.08rem;
-  line-height: 3.08rem;
+  display: flex;
+  align-items: center;
+  height: 4.65rem;
+  line-height: 1;
   color: var(--sp-midnight) !important;
 }
 
@@ -247,21 +253,28 @@
 }
 
 .md-header__title .md-header__topic {
+  display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .md-header__title .md-header__topic:first-child .md-ellipsis {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.42rem;
-  letter-spacing: 0.02em;
+  justify-content: center;
+  gap: 0.2rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  overflow: visible;
+  white-space: normal;
 }
 
 .md-header__title .md-header__topic:first-child .md-ellipsis::before {
   content: "";
-  width: 2.04rem;
-  height: 1.02rem;
-  flex: 0 0 2.04rem;
+  width: 2.4rem;
+  height: 1.18rem;
+  flex: 0 0 1.18rem;
   background: url("../images/homepage-hero-logo.svg") center / contain no-repeat;
 }
 
