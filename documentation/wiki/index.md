@@ -84,10 +84,6 @@ hide:
     margin-top: 0.34rem;
   }
 
-  .simpaths-home-hero__copy strong {
-    color: var(--sp-midnight);
-  }
-
   .simpaths-home-hero__countries {
     display: flex;
     flex-wrap: wrap;
@@ -362,7 +358,7 @@ hide:
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-    font-size: 1.22rem !important;
+    font-size: 1.52rem !important;
     color: #ffffff !important;
   }
 
@@ -434,6 +430,11 @@ hide:
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap {
     color: rgba(250, 249, 245, 0.96);
+  }
+
+  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap svg {
+    width: 22px;
+    height: 22px;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
@@ -557,7 +558,7 @@ hide:
     }
 
     .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
-      font-size: 1.06rem !important;
+      font-size: 1.22rem !important;
     }
 
     .md-typeset .simpaths-home-explore a.feature-card p {
@@ -671,7 +672,7 @@ hide:
 
   <p class="simpaths-home-hero__copy">SimPaths is a family of open-source models for individual and household life course events, all sharing common components. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.</p>
 
-  <p class="simpaths-home-hero__copy">The broader SimPaths family spans <strong>the UK and other European countries</strong>.</p>
+  <p class="simpaths-home-hero__copy">The broader SimPaths family spans the UK and other European countries.</p>
 
   <div class="simpaths-home-hero__countries">
     <span class="simpaths-home-hero__country">🇬🇧 United Kingdom</span>
