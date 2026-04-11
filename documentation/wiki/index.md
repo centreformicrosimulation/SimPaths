@@ -43,10 +43,7 @@ hide:
     width: clamp(6.2rem, 10.8vw, 7.35rem);
     height: auto;
     margin: 0 auto 0.68rem;
-    filter:
-      drop-shadow(0 0 10px rgba(250, 249, 245, 0.26))
-      drop-shadow(0 0 22px rgba(96, 149, 218, 0.2))
-      drop-shadow(0 16px 26px rgba(14, 22, 34, 0.22));
+    filter: drop-shadow(0 16px 26px rgba(14, 22, 34, 0.22));
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
@@ -124,48 +121,6 @@ hide:
     font-size: 0.68rem;
     font-weight: 500;
     backdrop-filter: blur(6px);
-  }
-
-  .simpaths-home-hero__cta {
-    display: flex;
-    justify-content: center;
-    gap: 0.65rem;
-    flex-wrap: wrap;
-    margin-top: 0.12rem;
-  }
-
-  .simpaths-home-hero__cta a {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 4px;
-    padding: 0.46rem 0.98rem;
-    font-size: 0.74rem;
-    font-weight: 600;
-    text-decoration: none !important;
-    border-bottom: none !important;
-    transition: var(--sp-transition);
-  }
-
-  .simpaths-home-hero__cta .simpaths-home-hero__btn--primary {
-    background: rgba(250, 249, 245, 0.96);
-    color: var(--sp-midnight) !important;
-    box-shadow: 0 10px 22px rgba(14, 22, 34, 0.2);
-  }
-
-  .simpaths-home-hero__cta .simpaths-home-hero__btn--primary:hover {
-    background: #ffffff;
-    transform: translateY(-1px);
-  }
-
-  .simpaths-home-hero__cta .simpaths-home-hero__btn--secondary {
-    background: rgba(250, 249, 245, 0.08);
-    color: rgba(250, 249, 245, 0.92) !important;
-    border: 1px solid rgba(250, 249, 245, 0.28) !important;
-  }
-
-  .simpaths-home-hero__cta .simpaths-home-hero__btn--secondary:hover {
-    background: rgba(250, 249, 245, 0.16);
-    transform: translateY(-1px);
   }
 
   @media (max-width: 700px) {
@@ -692,11 +647,6 @@ hide:
     <span class="simpaths-home-hero__country">🇵🇱 Poland</span>
   </div>
 
-  <div class="simpaths-home-hero__cta">
-    <a href="documentation/" class="simpaths-home-hero__btn--primary">Explore Documentation →</a>
-    <a href="overview/" class="simpaths-home-hero__btn--secondary">Explore the Model</a>
-    <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-hero__btn--secondary">View on GitHub</a>
-  </div>
 </div>
 </div>
 
