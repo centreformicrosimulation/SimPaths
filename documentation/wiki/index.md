@@ -419,22 +419,13 @@ hide:
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    gap: 0.76rem;
+    gap: 0;
     padding-right: 0.92rem;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-label,
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap {
     order: 0;
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap {
-    color: rgba(250, 249, 245, 0.96);
-  }
-
-  .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary .card-icon-wrap svg {
-    width: 22px;
-    height: 22px;
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
@@ -714,9 +705,6 @@ hide:
 
 <a href="documentation/" class="feature-card feature-card--primary feature-card--documentation">
 <div class="card-header">
-  <div class="card-icon-wrap">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12"/><path d="M6 12h12"/><path d="M6 17h8"/></svg>
-  </div>
   <div class="card-label">
     <h3>Documentation</h3>
   </div>
