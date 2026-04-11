@@ -31,11 +31,28 @@ hide:
   }
 
   .simpaths-home-hero__brand {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0;
     margin-bottom: 1rem;
+    isolation: isolate;
+  }
+
+  .simpaths-home-hero__brand::before {
+    content: "";
+    position: absolute;
+    top: -1.4rem;
+    left: 50%;
+    width: min(22rem, 86vw);
+    height: 11.5rem;
+    border-radius: 999px;
+    background:
+      radial-gradient(ellipse at 50% 28%, rgba(250, 249, 245, 0.3) 0%, rgba(250, 249, 245, 0.16) 34%, transparent 72%);
+    transform: translateX(-50%);
+    z-index: -1;
+    pointer-events: none;
   }
 
   .simpaths-home-hero__logo {
@@ -48,12 +65,12 @@ hide:
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
     margin: 0 !important;
-    font-family: var(--sp-heading-font), Georgia, serif;
+    font-family: var(--sp-brand-font), Georgia, serif;
     color: #ffffff;
-    font-size: clamp(2.42rem, 4.8vw, 3.35rem) !important;
-    font-weight: 460;
-    letter-spacing: -0.018em;
-    line-height: 0.92;
+    font-size: clamp(2.18rem, 4.35vw, 3.02rem) !important;
+    font-weight: 400;
+    letter-spacing: -0.026em;
+    line-height: 0.98;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
     border-bottom: none !important;
