@@ -3,7 +3,7 @@
    Scholarly palette · Newsreader headings · Inter body
 ═══════════════════════════════════════════════ */
 
-@import url("https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Text&family=Libre+Baskerville:wght@400;700&display=swap");
 
 /* ── Self-hosted fonts ── */
 @font-face {
@@ -40,6 +40,7 @@
   --md-code-font: "JetBrains Mono";
   --sp-brand-font: "Libre Baskerville", Georgia, "Times New Roman", serif;
   --sp-heading-font: "Newsreader", Georgia, "Times New Roman", serif;
+  --sp-hero-title-font: "DM Serif Text", Georgia, "Times New Roman", serif;
   --sp-research-font: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -82,10 +83,7 @@
   --sp-nav-pill-active: rgba(250,249,245,0.2);
   --sp-nav-pill-border: rgba(250,249,245,0.16);
   --sp-nav-pill-shadow: 0 10px 22px rgba(7,19,27,0.2);
-  --sp-home-hero-bg:
-    linear-gradient(180deg, rgba(250,249,245,0.035) 0%, rgba(250,249,245,0.012) 42%, rgba(4,10,16,0.18) 100%),
-    linear-gradient(90deg, rgba(8,14,22,0.99) 0%, rgba(13,20,30,0.94) 48%, rgba(23,22,34,0.97) 100%),
-    linear-gradient(116deg, #080d13 0%, #111b27 52%, #241f2c 100%);
+  --sp-home-hero-bg: #000a2d;
   --sp-home-band-bg: #f0ede5;
   --sp-home-card-surface: #fffdf7;
   --sp-home-card-shadow: 0 1px 0 rgba(19,27,38,0.04), 0 18px 34px rgba(19,27,38,0.035);
@@ -2248,22 +2246,13 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   margin: 0 calc(50% - 50vw);
   padding: 2.65rem 1.2rem 2.72rem;
   background: var(--sp-home-hero-bg);
-  border-top: 1px solid rgba(250,249,245,0.08);
-  border-bottom: 1px solid rgba(250,249,245,0.1);
-  box-shadow:
-    inset 0 1px 0 rgba(250,249,245,0.08),
-    inset 0 -1px 0 rgba(4,10,16,0.52);
+  border-top: none;
+  border-bottom: none;
+  box-shadow: none;
 }
 
 .simpaths-home-hero::before {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  content: "";
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 6%, rgba(255,255,255,0.035), transparent 24rem),
-    linear-gradient(180deg, rgba(250,249,245,0.026), transparent 32%, rgba(4,10,16,0.16));
+  display: none;
 }
 
 .simpaths-home-hero__inner {
@@ -2297,11 +2286,11 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   padding-bottom: 0 !important;
   color: #fff;
   border-bottom: none !important;
-  font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-family: var(--sp-hero-title-font) !important;
   font-size: clamp(1.98rem, 3.95vw, 2.74rem) !important;
-  font-weight: 560;
-  line-height: 0.95;
-  letter-spacing: -0.032em;
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: 0.005em;
   text-shadow: 0 12px 28px rgba(0,0,0,0.3);
 }
 
