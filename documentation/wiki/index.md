@@ -117,7 +117,7 @@ hide:
     <span class="research-label">MENTAL HEALTH · 2025</span>
     <span class="research-journal">European Journal of Public Health</span>
   </div>
-  <h3>Tax reforms vs benefit enhancement to address mental health inequalities: a microsimulation study</h3>
+  <p class="research-title">Tax reforms vs benefit enhancement to address mental health inequalities: a microsimulation study</p>
   <p class="research-authors">Igelstrom E, Kopasker D, Richiardi MG, Katikireddi SV</p>
   <p class="research-summary">Compares alternative fiscal policy responses and their implications for mental health inequalities.</p>
   <span class="research-arrow">→</span>
@@ -128,7 +128,7 @@ hide:
     <span class="research-label">LIFE COURSE · 2025</span>
     <span class="research-journal">Journal of Economic Behavior &amp; Organization</span>
   </div>
-  <h3>Attenuation and reinforcement mechanisms over the life course</h3>
+  <p class="research-title">Attenuation and reinforcement mechanisms over the life course</p>
   <p class="research-authors">Richiardi M, Bronka P, van de Ven J</p>
   <p class="research-summary">Examines how early advantage and disadvantage can compound or soften across the life course.</p>
   <span class="research-arrow">→</span>
@@ -139,7 +139,7 @@ hide:
     <span class="research-label">HEALTH POLICY · 2024</span>
     <span class="research-journal">PLOS Medicine</span>
   </div>
-  <h3>Short-term impacts of Universal Basic Income on population mental health inequalities in the UK</h3>
+  <p class="research-title">Short-term impacts of Universal Basic Income on population mental health inequalities in the UK</p>
   <p class="research-authors">Thomson RM, Kopasker D, Bronka P, et al.</p>
   <p class="research-summary">Uses microsimulation to estimate how Universal Basic Income could affect mental health across the UK population.</p>
   <span class="research-arrow">→</span>

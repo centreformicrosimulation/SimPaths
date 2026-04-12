@@ -2274,7 +2274,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .simpaths-home-hero__logo {
   display: block;
-  width: clamp(6.2rem, 10.8vw, 7.35rem);
+  width: clamp(6rem, 10.4vw, 7.1rem);
   height: auto;
   margin: 0 auto 0.72rem;
   filter: saturate(1.16) brightness(1.08) contrast(1.06) drop-shadow(0 16px 26px rgba(14,22,34,0.24));
@@ -2782,11 +2782,19 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   line-height: 1.42;
 }
 
-.md-typeset .simpaths-home-research-band a.research-entry h3 {
+.md-typeset .simpaths-home-research-band .research-title {
   grid-column: 2;
   grid-row: 1;
-  font-size: 1.08rem;
-  line-height: 1.38;
+  margin: 0 !important;
+  color: var(--sp-midnight);
+  font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 0.88rem;
+  font-weight: 720;
+  line-height: 1.48;
+  text-align: left;
+  text-wrap: normal;
+  hyphens: none;
+  -webkit-hyphens: none;
 }
 
 .md-typeset .simpaths-home-research-band .research-authors {
@@ -2862,7 +2870,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   }
 
   .simpaths-home-hero__logo {
-    width: 5rem;
+    width: 4.85rem;
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
@@ -2962,13 +2970,13 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
     margin-top: 0;
   }
 
-  .md-typeset .simpaths-home-research-band a.research-entry h3,
+  .md-typeset .simpaths-home-research-band .research-title,
   .md-typeset .simpaths-home-research-band .research-authors,
   .md-typeset .simpaths-home-research-band .research-summary {
     grid-column: 1;
   }
 
-  .md-typeset .simpaths-home-research-band a.research-entry h3 {
+  .md-typeset .simpaths-home-research-band .research-title {
     grid-row: 2;
   }
 
