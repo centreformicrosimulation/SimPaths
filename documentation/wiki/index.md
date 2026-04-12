@@ -75,17 +75,17 @@ hide:
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
     margin: 0 !important;
-    font-family: var(--sp-brand-font), Georgia, serif;
+    font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: #ffffff;
-    font-size: clamp(2.08rem, 4.15vw, 2.92rem) !important;
-    font-weight: 500;
-    letter-spacing: -0.026em;
-    line-height: 0.98;
+    font-size: clamp(1.98rem, 3.95vw, 2.74rem) !important;
+    font-weight: 640;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
     border-bottom: none !important;
     position: relative;
-    text-shadow: 0 12px 28px rgba(14, 22, 34, 0.24);
+    text-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title::after {
