@@ -2274,7 +2274,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .simpaths-home-hero__logo {
   display: block;
-  width: clamp(6rem, 10.4vw, 7.1rem);
+  width: clamp(5.85rem, 10.1vw, 6.9rem);
   height: auto;
   margin: 0 auto 0.72rem;
   filter: saturate(1.16) brightness(1.08) contrast(1.06) drop-shadow(0 16px 26px rgba(14,22,34,0.24));
@@ -2870,7 +2870,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   }
 
   .simpaths-home-hero__logo {
-    width: 4.85rem;
+    width: 4.72rem;
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
