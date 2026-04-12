@@ -2759,31 +2759,22 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .md-typeset .simpaths-home-research-band a.research-entry:first-child {
   grid-column: 1;
   grid-row: 1 / span 3;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto;
+  align-content: end;
+  gap: 0.42rem;
   min-height: 24rem;
-  padding: 0;
+  padding: 2.15rem 2.25rem 2rem;
   color: #fff !important;
-  background: transparent;
-  border-top: none !important;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.md-typeset .simpaths-home-research-band a.research-entry:first-child::before {
-  display: block;
-  flex: 1 1 auto;
-  min-height: 14.8rem;
-  margin: 0 0 1.5rem;
-  content: "";
   background:
-    radial-gradient(circle at 30% 34%, rgba(213,222,196,0.36), transparent 8rem),
-    radial-gradient(circle at 72% 24%, rgba(143,163,137,0.22), transparent 7rem),
-    linear-gradient(135deg, rgba(250,249,245,0.08), transparent 45%),
-    linear-gradient(90deg, rgba(6,16,18,0.78), rgba(5,12,25,0.94));
-  border: 0.72rem solid rgba(255,255,255,0.98);
-  box-shadow: 0 24px 42px rgba(0,0,0,0.28);
+    linear-gradient(135deg, rgba(255,255,255,0.1), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0)),
+    rgba(255,255,255,0.055);
+  border-top: none !important;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 2px;
+  box-shadow: 0 22px 42px rgba(0,0,0,0.22);
 }
 
 .md-typeset .simpaths-home-research-band a.research-entry:hover {
@@ -2884,9 +2875,9 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .md-typeset .simpaths-home-research-band a.research-entry:first-child .research-arrow {
-  right: auto;
-  bottom: 0.1rem;
-  left: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
   width: 2.7rem;
   height: 1.45rem;
 }
@@ -3043,11 +3034,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
   .md-typeset .simpaths-home-research-band a.research-entry:first-child {
     min-height: auto;
-  }
-
-  .md-typeset .simpaths-home-research-band a.research-entry:first-child::before {
-    min-height: 11rem;
-    margin-bottom: 1.15rem;
+    padding: 1.4rem 1.35rem 1.25rem;
   }
 
   .md-typeset .simpaths-home-research-band .research-entry__meta {
