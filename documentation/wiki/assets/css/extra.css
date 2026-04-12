@@ -218,7 +218,14 @@
 ═══════════════════════════════════════════════ */
 
 .md-header {
-  background: var(--md-default-bg-color) !important;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--md-default-bg-color) 0,
+      var(--md-default-bg-color) 4.65rem,
+      transparent 4.65rem,
+      transparent 100%
+    ) !important;
   box-shadow: 0 1px 0 var(--sp-border-soft);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
