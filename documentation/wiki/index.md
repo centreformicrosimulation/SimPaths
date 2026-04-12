@@ -5,16 +5,8 @@ hide:
 ---
 
 <style>
-  .md-main__inner:has(.simpaths-home-hero) {
-    margin-top: 0;
-  }
-
   .md-content:has(.simpaths-home-hero) .md-content__inner {
     padding-top: 0;
-  }
-
-  .md-content:has(.simpaths-home-hero) .md-content__inner::before {
-    display: none;
   }
 
   .md-main:has(.simpaths-home-hero) .md-top {
@@ -662,7 +654,7 @@ hide:
 <div class="simpaths-home-hero">
 <div class="simpaths-home-hero__inner">
   <div class="simpaths-home-hero__brand">
-    <img src="assets/images/homepage-hero-logo.svg?v=3" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-home-hero__logo">
+    <img src="assets/images/homepage-hero-logo-dark.svg?v=1" alt="SimPaths logo showing people progressing across a rising path." class="simpaths-home-hero__logo">
     <h1 class="simpaths-home-hero__title">SimPaths</h1>
     <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
   </div>
