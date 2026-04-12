@@ -86,13 +86,14 @@
     linear-gradient(180deg, rgba(250,249,245,0.035) 0%, rgba(250,249,245,0.012) 42%, rgba(4,10,16,0.18) 100%),
     linear-gradient(90deg, rgba(8,14,22,0.99) 0%, rgba(13,20,30,0.94) 48%, rgba(23,22,34,0.97) 100%),
     linear-gradient(116deg, #080d13 0%, #111b27 52%, #241f2c 100%);
-  --sp-home-card-surface: #F2F6FF;
-  --sp-home-card-shadow: 0 12px 24px rgba(19,27,38,0.045);
-  --sp-home-card-shadow-hover: 0 18px 30px rgba(19,27,38,0.085);
-  --sp-home-ledger-bg: rgba(255,255,255,0.98);
+  --sp-home-band-bg: #f0ede5;
+  --sp-home-card-surface: #fffdf7;
+  --sp-home-card-shadow: 0 1px 0 rgba(19,27,38,0.04), 0 18px 34px rgba(19,27,38,0.035);
+  --sp-home-card-shadow-hover: 0 2px 0 rgba(19,27,38,0.05), 0 24px 44px rgba(19,27,38,0.075);
+  --sp-home-ledger-bg: #fffefb;
   --sp-home-meta: rgba(96,56,71,0.88);
   --sp-home-max: 61rem;
-  --sp-home-rule: rgba(42,56,72,0.1);
+  --sp-home-rule: rgba(42,56,72,0.14);
 }
 
 /* ═══════════════════════════════════════════════
@@ -2395,19 +2396,20 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   gap: 0;
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 1.05rem max(1.2rem, calc((100vw - var(--sp-home-max)) / 2));
+  padding: 0 max(1.2rem, calc((100vw - var(--sp-home-max)) / 2));
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.76), rgba(250,249,245,0.96)),
-    var(--sp-paper);
-  border-bottom: 1px solid var(--sp-home-rule);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)),
+    #121b25;
+  border-top: 1px solid rgba(250,249,245,0.1);
+  border-bottom: 1px solid rgba(4,10,16,0.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.055);
 }
 
 .md-typeset .simpaths-home-proof .proof-item {
   position: relative;
   min-width: 0;
-  padding: 0.1rem 1.05rem 0.08rem;
-  border-left: 1px solid var(--sp-home-rule);
+  padding: 1rem 1.08rem 0.95rem;
+  border-left: 1px solid rgba(250,249,245,0.1);
 }
 
 .md-typeset .simpaths-home-proof .proof-item:first-child {
@@ -2422,26 +2424,30 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .md-typeset .simpaths-home-proof .proof-label {
-  color: var(--sp-midnight-deep);
+  color: rgba(255,255,255,0.94);
   font-family: var(--md-text-font) !important;
-  font-size: 0.68rem;
-  font-weight: 720;
+  font-size: 0.66rem;
+  font-weight: 740;
   line-height: 1.25;
-  letter-spacing: 0.055em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .md-typeset .simpaths-home-proof .proof-copy {
-  margin-top: 0.22rem;
-  color: rgba(42,56,72,0.62);
-  font-size: 0.68rem;
-  line-height: 1.42;
+  margin-top: 0.26rem;
+  color: rgba(250,249,245,0.58);
+  font-size: 0.66rem;
+  line-height: 1.4;
 }
 
 .simpaths-home-explore {
-  max-width: var(--sp-home-max);
-  margin: 3.15rem auto 0;
-  padding-bottom: 3.7rem;
+  width: 100vw;
+  margin: 0 calc(50% - 50vw);
+  padding: 3.55rem max(1.2rem, calc((100vw - var(--sp-home-max)) / 2)) 4rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0) 16rem),
+    var(--sp-home-band-bg);
+  border-bottom: 1px solid rgba(42,56,72,0.08);
 }
 
 .simpaths-home-explore__intro {
@@ -2451,7 +2457,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .md-typeset .simpaths-home-explore .section-heading,
 .md-typeset .simpaths-home-research-band .section-heading {
-  font-size: 1.86rem;
+  font-size: 1.96rem;
   line-height: 1.08;
 }
 
@@ -2461,13 +2467,13 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .md-typeset .simpaths-home-explore .card-grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.05rem;
   margin: 0;
 }
 
 .md-typeset .simpaths-home-explore .card-grid--primary {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: 1rem;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 2.08fr);
+  margin-bottom: 1.05rem;
 }
 
 .md-typeset .simpaths-home-explore .card-grid--secondary {
@@ -2475,7 +2481,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .md-typeset .simpaths-home-explore .card-grid--primary .feature-card--documentation {
-  grid-column: span 2;
+  grid-column: auto;
 }
 
 .md-typeset .simpaths-home-explore a.feature-card {
@@ -2487,16 +2493,16 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 0.88rem;
-  min-height: 14.1rem;
-  padding: 1.48rem 1.46rem 1.3rem;
+  gap: 1rem;
+  min-height: 13.8rem;
+  padding: 1.46rem 1.5rem 1.28rem;
   overflow: hidden;
   color: inherit !important;
   text-decoration: none !important;
   background: var(--card-surface);
   border: 1px solid var(--card-border);
   border-bottom: none !important;
-  border-radius: 12px;
+  border-radius: 7px;
   box-shadow:
     inset 0 2px 0 var(--card-rule),
     var(--sp-home-card-shadow);
@@ -2526,11 +2532,14 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   grid-template-areas:
     "header copy"
     "footer footer";
-  gap: 1rem 1.35rem;
-  min-height: 14.1rem;
-  padding: 1.58rem 1.68rem 1.38rem;
-  background: linear-gradient(145deg, #1d2a37 0%, #26384a 100%);
-  border-color: rgba(19,27,38,0.28);
+  gap: 1rem 1.48rem;
+  min-height: 13.8rem;
+  padding: 1.54rem 1.7rem 1.34rem;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.055), transparent 34%),
+    linear-gradient(145deg, #17222e 0%, #223246 100%);
+  border-color: rgba(19,27,38,0.36);
+  border-radius: 7px;
   box-shadow:
     inset 0 2px 0 rgba(250,249,245,0.24),
     0 18px 32px rgba(17,25,36,0.15);
@@ -2540,7 +2549,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   border-color: rgba(19,27,38,0.36);
   box-shadow:
     inset 0 2px 0 rgba(250,249,245,0.3),
-    0 24px 40px rgba(17,25,36,0.2);
+    0 24px 46px rgba(17,25,36,0.24);
 }
 
 .md-typeset .simpaths-home-explore .card-header {
@@ -2595,8 +2604,8 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .md-typeset .simpaths-home-explore .card-icon-wrap svg {
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
 }
 
 .md-typeset .simpaths-home-explore .feature-card--model {
@@ -2635,23 +2644,23 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   margin: 0 !important;
   color: var(--sp-midnight-deep) !important;
   font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-  font-size: 1.08rem !important;
-  font-weight: 680 !important;
+  font-size: 1.12rem !important;
+  font-weight: 720 !important;
   line-height: 1.12;
   letter-spacing: -0.025em;
 }
 
 .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary h3 {
   color: #fff !important;
-  font-size: 1.08rem !important;
+  font-size: 1.12rem !important;
 }
 
 .md-typeset .simpaths-home-explore a.feature-card p {
   max-width: 30ch;
   margin: 0;
-  color: rgba(42,56,72,0.74);
-  font-size: 0.76rem;
-  line-height: 1.6;
+  color: rgba(42,56,72,0.69);
+  font-size: 0.74rem;
+  line-height: 1.66;
 }
 
 .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary p {
@@ -2659,8 +2668,8 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   align-self: start;
   max-width: none;
   padding-left: 1.35rem;
-  color: rgba(250,249,245,0.82);
-  font-size: 0.76rem;
+  color: rgba(250,249,245,0.78);
+  font-size: 0.74rem;
   line-height: 1.62;
   border-left: 1px solid rgba(250,249,245,0.14);
 }
@@ -2674,7 +2683,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   margin-top: 0.08rem;
   padding-top: 0.88rem;
   color: var(--card-accent);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 750;
   line-height: 1.2;
   letter-spacing: 0.055em;
@@ -2729,8 +2738,10 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .simpaths-home-research-band {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 3.65rem 1.2rem 3.75rem;
-  background: var(--sp-home-ledger-bg);
+  padding: 3.85rem 1.2rem 4rem;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,1), rgba(255,254,251,0.98)),
+    var(--sp-home-ledger-bg);
   border-top: none;
 }
 
@@ -2927,7 +2938,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   .md-typeset .simpaths-home-proof .proof-item:nth-child(4) {
     padding: 0.6rem 0;
     border-left: none;
-    border-top: 1px solid rgba(42,56,72,0.08);
+    border-top: 1px solid rgba(250,249,245,0.1);
   }
 
   .md-typeset .simpaths-home-proof .proof-item:first-child {
