@@ -222,7 +222,7 @@
   box-shadow: 0 1px 0 var(--sp-border-soft);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  height: 4.65rem;
+  min-height: 4.65rem;
 }
 
 .md-header__inner {
