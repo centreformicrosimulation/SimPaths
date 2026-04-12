@@ -113,10 +113,11 @@ hide:
   .md-typeset .simpaths-home-hero p.simpaths-home-hero__copy {
     margin: 0 auto;
     max-width: 42rem;
-    color: rgba(250, 249, 245, 0.82);
+    color: rgba(255, 255, 255, 0.93);
     font-size: 0.83rem;
     line-height: 1.52;
     text-align: center !important;
+    text-shadow: 0 1px 18px rgba(0, 0, 0, 0.28);
     word-spacing: normal;
     letter-spacing: normal;
     hyphens: none !important;
@@ -137,22 +138,39 @@ hide:
   }
 
   .simpaths-home-hero__country {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.34rem;
+    overflow: hidden;
     background:
-      linear-gradient(180deg, rgba(250, 249, 245, 0.24), rgba(250, 249, 245, 0.15));
-    color: rgba(250, 249, 245, 0.96);
-    border: 1px solid rgba(250, 249, 245, 0.36);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.07)),
+      rgba(10, 18, 29, 0.62);
+    color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 4px;
-    padding: 0.18rem 0.58rem;
-    font-size: 0.66rem;
-    font-weight: 560;
+    padding: 0.2rem 0.62rem;
+    font-size: 0.67rem;
+    font-weight: 640;
+    letter-spacing: 0.005em;
     box-shadow:
-      inset 0 1px 0 rgba(250, 249, 245, 0.28),
-      0 8px 18px rgba(4, 10, 16, 0.18);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(4, 10, 16, 0.24),
+      0 10px 22px rgba(4, 10, 16, 0.2);
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(14px) saturate(1.12);
+    -webkit-backdrop-filter: blur(14px) saturate(1.12);
+  }
+
+  .simpaths-home-hero__country::after {
+    position: absolute;
+    right: 0.38rem;
+    bottom: 0.18rem;
+    left: 0.38rem;
+    height: 1px;
+    content: "";
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+    opacity: 0.65;
   }
 
   @media (max-width: 700px) {
