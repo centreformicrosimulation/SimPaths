@@ -2284,14 +2284,14 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   position: relative;
   margin: 0 !important;
   padding-bottom: 0 !important;
-  color: #fff;
+  color: rgba(255,255,255,0.94);
   border-bottom: none !important;
   font-family: var(--sp-hero-title-font) !important;
-  font-size: clamp(1.9rem, 3.65vw, 2.56rem) !important;
+  font-size: clamp(1.84rem, 3.48vw, 2.44rem) !important;
   font-weight: 400;
-  line-height: 0.98;
-  letter-spacing: 0.018em;
-  text-shadow: 0 8px 20px rgba(0,0,0,0.22);
+  line-height: 1;
+  letter-spacing: 0.032em;
+  text-shadow: 0 5px 14px rgba(0,0,0,0.16);
 }
 
 .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title::after {
