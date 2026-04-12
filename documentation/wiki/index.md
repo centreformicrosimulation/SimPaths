@@ -107,7 +107,7 @@ hide:
 <div class="research-section">
 <div class="research-header">
   <h2 class="section-heading">Recent Research Highlights</h2>
-  <a href="research/" class="archive-link">ALL PUBLICATIONS →</a>
+  <a href="research/" class="archive-link">View all publications</a>
 </div>
 
 <div class="research-list">
