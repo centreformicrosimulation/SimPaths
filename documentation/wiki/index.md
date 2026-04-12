@@ -78,8 +78,8 @@ hide:
     font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
     color: #ffffff;
     font-size: clamp(1.98rem, 3.95vw, 2.74rem) !important;
-    font-weight: 640;
-    letter-spacing: -0.045em;
+    font-weight: 560;
+    letter-spacing: -0.032em;
     line-height: 0.95;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
