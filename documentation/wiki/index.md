@@ -14,20 +14,37 @@ hide:
   }
 
   .simpaths-home-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     width: 100vw;
     margin: 0 calc(50% - 50vw) 2.45rem;
     padding: 2.48rem 1.2rem 2.48rem;
     background:
-      radial-gradient(ellipse at 50% 12%, rgba(250, 249, 245, 0.14) 0%, rgba(250, 249, 245, 0.08) 18%, transparent 40%),
-      radial-gradient(circle at 28% 78%, rgba(210, 58, 95, 0.26) 0%, transparent 32%),
-      radial-gradient(circle at 74% 26%, rgba(96, 149, 218, 0.24) 0%, transparent 34%),
-      linear-gradient(116deg, #142a3c 0%, #283b5b 46%, #61324f 100%);
-    border-top: none;
-    border-bottom: none;
-    box-shadow: inset 0 -1px 0 rgba(250, 249, 245, 0.12);
+      linear-gradient(112deg, rgba(250, 249, 245, 0.07) 0%, rgba(250, 249, 245, 0.018) 18%, transparent 34%),
+      linear-gradient(90deg, rgba(8, 14, 22, 0.98) 0%, rgba(13, 20, 30, 0.92) 48%, rgba(23, 22, 34, 0.96) 100%),
+      linear-gradient(116deg, #080d13 0%, #111b27 52%, #241f2c 100%);
+    border-top: 1px solid rgba(250, 249, 245, 0.1);
+    border-bottom: 1px solid rgba(250, 249, 245, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(250, 249, 245, 0.1),
+      inset 0 -1px 0 rgba(4, 10, 16, 0.5);
+  }
+
+  .simpaths-home-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(103deg, transparent 0%, transparent 50%, rgba(250, 249, 245, 0.052) 51%, rgba(250, 249, 245, 0.018) 72%, transparent 73%),
+      linear-gradient(180deg, rgba(250, 249, 245, 0.045) 0%, transparent 30%, rgba(4, 10, 16, 0.18) 100%);
   }
 
   .simpaths-home-hero__inner {
+    position: relative;
+    z-index: 1;
     max-width: 43rem;
     margin: 0 auto;
     padding: 0.3rem 0;
