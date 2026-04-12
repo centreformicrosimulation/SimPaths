@@ -100,13 +100,16 @@ hide:
 
   .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
     margin: 0.58rem 0 0 !important;
-    color: rgba(250, 249, 245, 0.78);
+    color: rgba(255, 255, 255, 0.9);
     font-size: 0.62rem;
     font-weight: 650;
-    letter-spacing: 0.176em;
+    letter-spacing: 0.195em;
     line-height: 1.2;
     text-transform: uppercase;
     text-align: center !important;
+    text-shadow:
+      0 0 16px rgba(151, 190, 255, 0.22),
+      0 1px 10px rgba(0, 0, 0, 0.32);
     padding-bottom: 0 !important;
   }
 
