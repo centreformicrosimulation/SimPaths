@@ -29,7 +29,7 @@ hide:
     margin: 0 calc(50% - 50vw) 2.45rem;
     padding: 2.48rem 1.2rem 2.48rem;
     background:
-      linear-gradient(112deg, rgba(250, 249, 245, 0.07) 0%, rgba(250, 249, 245, 0.018) 18%, transparent 34%),
+      linear-gradient(180deg, rgba(250, 249, 245, 0.04), rgba(250, 249, 245, 0.012) 42%, rgba(4, 10, 16, 0.16)),
       linear-gradient(90deg, rgba(8, 14, 22, 0.98) 0%, rgba(13, 20, 30, 0.92) 48%, rgba(23, 22, 34, 0.96) 100%),
       linear-gradient(116deg, #080d13 0%, #111b27 52%, #241f2c 100%);
     border-top: 1px solid rgba(250, 249, 245, 0.1);
@@ -45,9 +45,7 @@ hide:
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background:
-      linear-gradient(103deg, transparent 0%, transparent 50%, rgba(250, 249, 245, 0.052) 51%, rgba(250, 249, 245, 0.018) 72%, transparent 73%),
-      linear-gradient(180deg, rgba(250, 249, 245, 0.045) 0%, transparent 30%, rgba(4, 10, 16, 0.18) 100%);
+    background: linear-gradient(180deg, rgba(250, 249, 245, 0.035) 0%, transparent 34%, rgba(4, 10, 16, 0.18) 100%);
   }
 
   .simpaths-home-hero__inner {
@@ -105,7 +103,7 @@ hide:
     color: rgba(250, 249, 245, 0.78);
     font-size: 0.62rem;
     font-weight: 650;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.176em;
     line-height: 1.2;
     text-transform: uppercase;
     text-align: center !important;
@@ -142,14 +140,19 @@ hide:
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    background: rgba(250, 249, 245, 0.1);
-    color: rgba(250, 249, 245, 0.86);
-    border: 1px solid rgba(250, 249, 245, 0.24);
+    background:
+      linear-gradient(180deg, rgba(250, 249, 245, 0.2), rgba(250, 249, 245, 0.075));
+    color: rgba(250, 249, 245, 0.92);
+    border: 1px solid rgba(250, 249, 245, 0.3);
     border-radius: 4px;
-    padding: 0.16rem 0.5rem;
-    font-size: 0.68rem;
-    font-weight: 500;
-    backdrop-filter: blur(6px);
+    padding: 0.18rem 0.58rem;
+    font-size: 0.66rem;
+    font-weight: 560;
+    box-shadow:
+      inset 0 1px 0 rgba(250, 249, 245, 0.22),
+      0 8px 20px rgba(4, 10, 16, 0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   @media (max-width: 700px) {
@@ -167,7 +170,7 @@ hide:
 
     .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
       font-size: 0.55rem;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.11em;
     }
 
     .md-typeset .simpaths-home-hero p.simpaths-home-hero__copy {

@@ -276,6 +276,7 @@
   height: 1.18rem;
   flex: 0 0 1.18rem;
   background: url("../images/homepage-hero-logo.svg") center / contain no-repeat;
+  filter: saturate(1.16) brightness(1.05) contrast(1.06) drop-shadow(0 5px 8px rgba(30, 40, 52, 0.12));
 }
 
 /* ── Tab bar ── */
