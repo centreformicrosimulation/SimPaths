@@ -5,8 +5,16 @@ hide:
 ---
 
 <style>
+  .md-main__inner:has(.simpaths-home-hero) {
+    margin-top: 0;
+  }
+
   .md-content:has(.simpaths-home-hero) .md-content__inner {
     padding-top: 0;
+  }
+
+  .md-content:has(.simpaths-home-hero) .md-content__inner::before {
+    display: none;
   }
 
   .md-main:has(.simpaths-home-hero) .md-top {
