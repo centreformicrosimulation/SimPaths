@@ -41,7 +41,7 @@ theme:
     - content.code.annotate
 
 extra_css:
-  - assets/css/extra.css?v=20260412-research-feature-clean
+  - assets/css/extra.css?v=20260412-blueprint-title
 
 plugins:
   - search:
