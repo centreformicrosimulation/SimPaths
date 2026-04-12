@@ -25,29 +25,6 @@ hide:
 </div>
 </div>
 
-<section class="simpaths-home-proof" aria-label="SimPaths credibility signals">
-  <div class="proof-item">
-    <span class="proof-label">Open-source</span>
-    <span class="proof-copy">Published model code</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-label">JAS-mine based</span>
-    <span class="proof-copy">Built on simulation libraries</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-label">Multi-country</span>
-    <span class="proof-copy">UK and European models</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-label">Validated</span>
-    <span class="proof-copy">Benchmarked outputs</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-label">Peer-reviewed</span>
-    <span class="proof-copy">Applied research use</span>
-  </div>
-</section>
-
 <section class="simpaths-home-explore">
 <div class="simpaths-home-explore__intro">
   <div>
