@@ -75,7 +75,7 @@ hide:
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
     margin: 0 !important;
-    font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
     color: #ffffff;
     font-size: clamp(1.98rem, 3.95vw, 2.74rem) !important;
     font-weight: 640;
