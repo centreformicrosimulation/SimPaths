@@ -1550,15 +1550,15 @@
   content: attr(title);
   font-family: "Inter", var(--md-text-font) !important;
   font-size: 0.6rem;
-  font-weight: 600;
+  font-weight: 720;
   letter-spacing: 0.15em;
-  color: var(--sp-ghost);
+  color: rgba(42,56,72,0.74);
   transition: color 0.15s ease;
   white-space: nowrap;
 }
 
 .md-social__link:hover::after {
-  color: var(--sp-midnight);
+  color: var(--sp-crimson);
 }
 
 /* ── Prev/Next navigation links ── */
@@ -1648,7 +1648,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 [data-md-color-scheme="slate"] .md-social__link::after {
-  color: rgba(195,198,213,0.3);
+  color: rgba(200,216,232,0.66);
 }
 
 [data-md-color-scheme="slate"] .md-social__link:hover::after {
