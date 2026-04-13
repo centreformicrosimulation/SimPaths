@@ -6160,7 +6160,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     private boolean checkHighestParentalEducationEquals(Education ee) {
         if (eduHighestFatherC4 !=null && eduHighestMotherC4 !=null) {
-            if (eduHighestFatherC4.getValue() > eduHighestMotherC4.getValue())
+            if (eduHighestFatherC4.getRank() > eduHighestMotherC4.getRank())
                 return ee.equals(eduHighestFatherC4);
             else
                 return ee.equals(eduHighestMotherC4);

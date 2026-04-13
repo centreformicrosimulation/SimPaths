@@ -3,10 +3,10 @@ package simpaths.model.enums;
 import microsim.statistics.regression.IntegerValuedEnum;
 
 public enum Education implements IntegerValuedEnum {
-	Low(0),
-	Medium(1),
-	High(2),
-	InEducation(3);
+	Low(3),
+	Medium(2),
+	High(1),
+	InEducation(0);
 
 	private final int value;
 	Education(int val) {value=val;}
