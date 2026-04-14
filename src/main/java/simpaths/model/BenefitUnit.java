@@ -9,6 +9,7 @@ import org.hibernate.annotations.Fetch;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
 import simpaths.model.annotations.Lag;
+import simpaths.model.annotations.NullInitialised;
 import simpaths.model.annotations.UpdateManager;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
@@ -61,10 +62,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Long statSeed;
 
     // unit specific variables
-    @Transient private States labStatesContObject;
-    private Double yInvestYear;
-    private Double yPensYear;
-    private Double xDiscretionaryYear;
+    @NullInitialised @Transient private States labStatesContObject;
+    @NullInitialised private Double yInvestYear;
+    @NullInitialised private Double yPensYear;
+    @NullInitialised private Double xDiscretionaryYear;
     @Column(name="wealthTotValue") private Double wealthTotValue;            // total net wealth (includes pensions assets and housing)
     @Column(name="wealthPensValue") private Double wealthPensValue;        // total private (personal and occupational) pensions
     @Column(name="wealthPrptyValue") private Double wealthPrptyValue;        // value of main home (gross of mortgage debt)
@@ -75,11 +76,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Integer yBenUCReceivedFlag;
     private Integer yBenLegacyReceivedFlag;
     private Double yDispEquivYear;
-    //@Lag(field = "yDispEquivYear") @Transient private Double yDispEquivYearL1;
     @Lag(getter = "getEquivalisedDisposableIncomeYearly") @Transient private Double yDispEquivYearL1;
     @Transient private Double yDiffDispEquivPrevYear;
     private Integer yPvrtyFlag;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
-    //@Lag(field = "yPvrtyFlag") @Transient private Integer yPvrtyFlagL1;
     @Lag(getter = "getAtRiskOfPoverty") @Transient private Integer yPvrtyFlagL1;
     @Lag(getter = "getIndicatorChildren0to3") @Transient private Indicator dem0to3L1;
     @Lag(getter = "getIndicatorChildren4to12") @Transient private Indicator dem4to12L1;                //Lag(1) of d_children_4_12;
@@ -92,12 +91,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Match demDbMatchTax;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
     @Enumerated(EnumType.STRING) private Ydses_c5 yHhQuintilesMonthC5;
-    //@Lag(field = "yHhQuintilesMonthC5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
     @Lag(getter = "getYdses_c5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
     @Transient private Double i_yNonBenHhGrossAsinh;
-    private Dhhtp_c4 dhhtp_c4;
-    //@Lag(field = "dhhtp_c4") @Transient private Dhhtp_c4 demCompHhC4L1;
-    @Lag(getter = "getDhhtp_c4") @Transient private Dhhtp_c4 demCompHhC4L1;
+    private Dhhtp_c4 demCompHhC4;
+    @Lag(getter = "getDemCompHhC4") @Transient private Dhhtp_c4 demCompHhC4L1;
     private String demCreatedByConstructor;
     @Column(name="wealthPrptyFlag") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
@@ -325,7 +322,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public enum Processes {
         Update,        //This updates the household fields, such as number of children of a certain age
-        UpdateOutputVariables,
         UpdateWealth,
         UpdateDemographics,
         CalculateChangeInEDI, //Calculate change in equivalised disposable income
@@ -344,14 +340,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 updateAttributes();
                 clearStates();
             }
-            case UpdateOutputVariables -> {
-                updateOutputVariables();
-            }
             case UpdateWealth -> {
                 updateWealth();
             }
             case UpdateDemographics -> {
-
+                updateDemographics();
             }
             case CalculateChangeInEDI -> {
                 calculateEquivalisedDisposableIncomeYearly(); //Update BU's EDI
@@ -384,7 +377,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (dem4to12L1 == null) dem4to12L1 = getIndicatorChildren(4,12);
         if (numberChildrenAll_lag1 == null) numberChildrenAll_lag1 = getNumberChildrenAll();
         if (numberChildren02_lag1 == null) numberChildren02_lag1 = getNumberChildren(0,2);
-        demCompHhC4L1 = getDhhtp_c4();
+        demCompHhC4L1 = getDemCompHhC4();
 
         // clean-up odd ends
         if (getYdses_c5() == null) {
@@ -413,8 +406,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     /*
 Contemporaneous values of dhhtp_c4 are required for validation. Update and output here.
  */
-    private void updateOutputVariables() {
-        dhhtp_c4 = getDhhtp_c4();
+    private void updateDemographics() {
+        demCompHhC4 = getDemCompHhC4();
     }
 
 
@@ -4296,7 +4289,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         i_yNonBenHhGrossAsinh = val;
     }
 
-    public Dhhtp_c4 getDhhtp_c4() {
+    public Dhhtp_c4 getDemCompHhC4() {
         if (getMale()!=null && getFemale()!=null) {
             if (getChildren().size()>0)
                 return Dhhtp_c4.CoupleChildren;

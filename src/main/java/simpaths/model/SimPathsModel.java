@@ -562,6 +562,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addEvent(this, Processes.FertilityAlignment);        //Align to fertility rates implied by projected population statistics.
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Fertility);
         yearlySchedule.addCollectionEvent(persons, Person.Processes.GiveBirth, false);        //Cannot use read-only collection schedule as newborn children cause concurrent modification exception.  Need to specify false in last argument of Collection event.
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateDemographics);
 
         // TIME USE MODULE
         // Social care
@@ -623,7 +624,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addEvent(this, Processes.CheckForImperfectTaxDBMatches);
         addEventToAllYears(tests, Tests.Processes.RunTests); //Run tests
         addCollectionEventToAllYears(persons, Person.Processes.UpdateOutputVariables); // Update idPartner, dhhtp_c4
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateOutputVariables); // Update dhhtp_c4
         addEventToAllYears(Processes.EndYear);
 
         // UPDATE YEAR
