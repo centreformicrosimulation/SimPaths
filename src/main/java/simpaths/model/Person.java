@@ -634,10 +634,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     //This method assign people to age groups used to define types in the SBAM matching procedure
     private void updateAgeGroup() {
-        if (demAge < 18) {
+        if (demAge < AGE_TO_BECOME_RESPONSIBLE) {
             demAgeGroup = 0;
             model.tmpPeopleAssigned++;
-        } else if(demAge >= 18 && demAge < 21) {
+        } else if(demAge >= AGE_TO_BECOME_RESPONSIBLE && demAge < 21) {
             demAgeGroup = 1;
             model.tmpPeopleAssigned++;
         } else if(demAge >= 21 && demAge < 24) {
@@ -962,7 +962,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public boolean considerRetirement() {
         boolean toRetire = false;
-        if (demAge >= Parameters.MIN_AGE_TO_RETIRE && !Les_c4.Retired.equals(labC4) && !Les_c4.Retired.equals(labC4L1)) {
+        if (demAge >= MIN_AGE_TO_RETIRE && !Les_c4.Retired.equals(labC4) && !Les_c4.Retired.equals(labC4L1)) {
             if (Parameters.enableIntertemporalOptimisations && DecisionParams.flagRetirement) {
                 if (Labour.ZERO.equals(labHrsWorkEnumWeekL1)) {
                     toRetire = true;
@@ -1001,7 +1001,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq1_dv/">scghq1_dv</a>
      */
     protected void healthMentalHM1Level() {
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
             double score = Parameters.getRegHealthHM1Level().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("HM1_L");
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(1));
@@ -1025,7 +1025,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthMentalHM2Level() {
 
         double dhmPrediction;
-        if (demAge >= 25 && demAge <= 64) {
+        if (demAge >= 25 && demAge < MIN_AGE_SOCIAL_CARE) {
             if (Gender.Male.equals(getDemMaleFlag())) {
                 dhmPrediction = Parameters.getRegHealthHM2LevelMales().getScore(this, Person.DoublesVariables.class);
                 healthWbScore0to36 = constrainDhmEstimate(dhmPrediction+ healthWbScore0to36);
@@ -1050,7 +1050,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      * @see <a href="https://www.understandingsociety.ac.uk/documentation/mainstage/variables/scghq2_dv/">scghq2_dv</a>
      */
     protected void healthMentalHM1Case() {
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
             Map<DhmGhq,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthHM1Case);
             MultiValEvent event = new MultiValEvent(probs, statInnovations.getDoubleDraw(36));
             healthPsyDstrss0to12 = Double.valueOf(event.eval().getValue());
@@ -1070,7 +1070,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthMentalHM2Case() {
         double dhmGhqPrediction;
-        if (demAge >= 25 && demAge <= 64) {
+        if (demAge >= 25 && demAge < MIN_AGE_SOCIAL_CARE) {
             if (Gender.Male.equals(getDemMaleFlag())) {
                 dhmGhqPrediction = Parameters.getRegHealthHM2CaseMales().getScore(this, Person.DoublesVariables.class);
                 healthPsyDstrss0to12 = constrainhealthPsyDstrssEstimate(dhmGhqPrediction+ healthPsyDstrss0to12);
@@ -1095,7 +1095,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthMCS1() {
 
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
             double mcsPrediction = Parameters.getRegHealthMCS1().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("DHE_MCS1");
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(33));
@@ -1117,7 +1117,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthMCS2() {
 
         double mcsPrediction;
-        if (demAge >= 25 && demAge <= 64) {
+        if (demAge >= 25 && demAge < MIN_AGE_SOCIAL_CARE) {
             if (Gender.Male.equals(getDemMaleFlag())) {
                 mcsPrediction = Parameters.getRegHealthMCS2Males().getScore(this, Person.DoublesVariables.class);
                 healthMentalMcs = constrainSF12Estimate(mcsPrediction + healthMentalMcs);
@@ -1142,7 +1142,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void healthPCS1() {
 
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
             double pcsPrediction = Parameters.getRegHealthPCS1().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("DHE_PCS1");
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(34));
@@ -1164,7 +1164,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthPCS2() {
 
         double pcsPrediction;
-        if (demAge >= 25 && demAge <= 64) {
+        if (demAge >= 25 && demAge < MIN_AGE_SOCIAL_CARE) {
             if (Gender.Male.equals(getDemMaleFlag())) {
                 pcsPrediction = Parameters.getRegHealthPCS2Males().getScore(this, Person.DoublesVariables.class);
                 healthPhysicalPcs = constrainSF12Estimate(pcsPrediction + healthPhysicalPcs);
@@ -1190,7 +1190,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void lifeSatisfaction1() {
 
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
             double dlsPrediction = Parameters.getRegLifeSatisfaction1().getScore(this, Person.DoublesVariables.class);
             double rmse = Parameters.getRMSEForRegression("DLS1");
             double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(35));
@@ -1212,7 +1212,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
      */
     protected void lifeSatisfaction2() {
 
-        if (demAge >= 25 && demAge <= 64) {
+        if (demAge >= 25 && demAge < MIN_AGE_SOCIAL_CARE) {
 
             double dlsPrediction;
             if (Gender.Male.equals(getDemMaleFlag())) {
@@ -1243,7 +1243,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     protected void healthEQ5D() {
 
         double eq5dPrediction;
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
 
             eq5dPrediction = Parameters.getRegEQ5D().getScore(this, Person.DoublesVariables.class);
             if (eq5dPrediction > 1) {
@@ -1331,7 +1331,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         double healthInnov1 = statInnovations.getDoubleDraw(3);
         double healthInnov2 = statInnovations.getDoubleDraw(4);
-        if (demAge >= 16) {
+        if (demAge >= MIN_AGE_TO_HAVE_INCOME) {
             Map<Dhe,Double> probs = ManagerRegressions.getProbabilities(this, RegressionName.HealthH1);
             MultiValEvent event = new MultiValEvent(probs, healthInnov1);
             healthSelfRated = (Dhe) event.eval();
@@ -1749,7 +1749,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (demGiveBirthFlag) {		//toGiveBirth is determined by fertility process
 
-            Gender babyGender = (statInnovations.getDoubleDraw(27) < Parameters.PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
+            Gender babyGender = (statInnovations.getDoubleDraw(27) < PROB_NEWBORN_IS_MALE) ? Gender.Male : Gender.Female;
 
             //Give birth to new person and add them to benefitUnit.
             Person child = new Person(babyGender, this);
@@ -2415,7 +2415,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return (isToBePartnered())? 1 : 0;
 
         case isPsychologicallyDistressed:
-            return (healthPsyDstrss0to12 >= 4)? 1 : 0;
+            return (healthPsyDstrss0to12 >= PSYCHOLOGICAL_DISTRESS_GHQ12_CASES_CUTOFF)? 1 : 0;
 
         case isNeedSocialCare:
             return (Indicator.True.equals(careNeedFlag)) ? 1 : 0;
@@ -3144,7 +3144,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (demAge >= 40 && demAge <= 44) ? 1. : 0.;
             }
             case Age45to49 -> {
-                return (demAge >= 45 && demAge <= 49) ? 1. : 0.;
+                return (demAge >= 45 && demAge <= MAX_AGE_MATERNITY) ? 1. : 0.;
             }
             case Age50to54 -> {
                 return (demAge >= 50 && demAge <= 54) ? 1. : 0.;
