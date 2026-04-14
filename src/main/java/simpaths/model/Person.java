@@ -16,6 +16,7 @@ import simpaths.data.MultiValEvent;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
 import simpaths.data.filters.FertileFilter;
+import simpaths.model.annotations.UpdateManager;
 import simpaths.model.decisions.Axis;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.enums.*;
@@ -64,13 +65,13 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private SampleExit demExitSample = SampleExit.NotYet;  //entry to sample via international immigration
 
     // person level variables
-    private int demAge; //Age
+    private Integer demAge; //Age
     @Column(name = "demAgeSq") private Integer demAgeSq; //Age squared
     private Dcpst demPartnerStatus;
     @Enumerated(EnumType.STRING) private Indicator demAdultChildFlag;
-    @Transient private boolean demIoFlag;         // true if a dummy person instantiated for IO decision solution
-    @Enumerated(EnumType.STRING) private Gender demMaleFlag;             // gender
-    @Enumerated(EnumType.STRING) private Education eduHighestC4;       //Education level (4 categories incl. in education)
+    @Transient private Boolean demIoFlag = false;                           // true if a dummy person instantiated for IO decision solution
+    @Enumerated(EnumType.STRING) private Gender demMaleFlag;                // gender
+    @Enumerated(EnumType.STRING) private Education eduHighestC4;            //Education level (4 categories incl. in education)
     @Transient private Education eduHighestC4L1;  //Lag(1) of education level
     @Enumerated(EnumType.STRING) private Education eduHighestMotherC4;      //Mother's education level
     @Enumerated(EnumType.STRING) private Education eduHighestFatherC4;      //Father's education level
@@ -304,7 +305,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yBenNonUCReceivedFlag = false;
         yBenUCReceivedFlag = false;
         yFinDstrssFlag = mother.getYFinDstrssFlag();
-        updateVariables(false);
+        updateAttributes(false);
     }
 
     // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
@@ -620,16 +621,104 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 labHrsWorkWeek = labHrsWorkEnumWeek.getValue();
             }
         }
-        yBenReceivedFlagL1 = yBenReceivedFlag;
-        labHrsWorkEnumWeekL1 = Labour.convertHoursToLabour(labHrsWorkWeekL1);
-        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag;
-        yBenUCReceivedFlagL1 = yBenUCReceivedFlag;
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
             updateAgeGroup();
         }
 
-        updateVariables(true);
+        demGiveBirthFlag = false;
+        demBePartnerFlag = false;
+        demLeavePartnerFlag = false;
+        eduLeaveSchoolFlag = false;
+        setSedex(Indicator.False); //This variable is False by default
+        // is set to true only when person leaves school in this specific year
+        // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
+        // no need to update eduSpellFlag as its value is persisted from the previous year
+
+        if (!Parameters.checkFinite(careHrsInformalWeek))
+            careHrsInformalWeek = 0.0;
+        if (demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            Person mother = benefitUnit.getFemale();
+            if (mother!=null)
+                idMother = mother.getId();
+            else
+                idMother = null;
+            Person father = benefitUnit.getMale();
+            if (father!=null)
+                idFather = father.getId();
+            else
+                idFather = null;
+        }
+
+        // Mental and Physical health status of the partner
+        if (this.getPartner() != null) {
+            this.setHealthMentalPartnerMcs(getPartner().getHealthMentalMcs());
+            this.setHealthPhysicalPartnerPcs(getPartner().getHealthPhysicalPcs());
+        }
+
+        //Lagged variables
+        yBenReceivedFlagL1 = yBenReceivedFlag;
+        labHrsWorkEnumWeekL1 = Labour.convertHoursToLabour(labHrsWorkWeekL1);
+        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag;
+        yBenUCReceivedFlagL1 = yBenUCReceivedFlag;
+        labC4L1 = labC4;
+        labC7CovidL1 = labC7Covid;
+        demStatusHhL1 = getHouseholdStatus();
+        healthSelfRatedL1 = healthSelfRated; //Update lag(1) of health
+        healthWbScore0to36L1 = healthWbScore0to36; //Update lag(1) of mental health
+        healthPsyDstrss0to12L1 = healthPsyDstrss0to12;
+        demLifeSatScore0to10L1 = demLifeSatScore0to10;
+        healthMentalMcsL1 = healthMentalMcs;
+        healthPhysicalPcsL1 = healthPhysicalPcs;
+        demPrptyFlagL1 = getBenefitUnit().isHousingOwned();
+        healthDsblLongtermFlagL1 = healthDsblLongtermFlag; //Update lag(1) of long-term sick or disabled status
+        careNeedFlagL1 = careNeedFlag;
+        careHrsFormalWeekL1 = careHrsFormalWeek;
+        careHrsInformalWeekL1 = careHrsInformalWeek;
+        careHrsProvidedWeekL1 = careHrsProvidedWeek;
+        careProvidedFlagL1 = careProvidedFlag;
+        labWageOfferLowFlagL1 = getLowWageOffer();
+        eduHighestC4L1 = eduHighestC4; //Update lag(1) of education level
+        eduSpellFlagL1 = eduSpellFlag ; //Update lag(1) of education level
+        yNonBenPersGrossMonthL1 = getyNonBenPersGrossMonth(); //Update lag(1) of gross personal non-benefit income
+        labHrsWorkEnumWeekL1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
+        yBenReceivedFlagL1 = yBenReceivedFlag; // Lag(1) of flag indicating if individual receives benefits
+        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag; // Lag(1) of flag indicating if individual receives non-UC benefits
+        yBenUCReceivedFlagL1 = yBenUCReceivedFlag; // Lag(1) of flag indicating if individual receives UC
+        labWageFullTimeHrlyL1 = labWageFullTimeHrly; // Lag(1) of potential hourly earnings
+
+        yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
+        yEmpPersGrossMonthL2 = getyEmpPersGrossMonth();
+        yEmpPersGrossMonthL3 = getyEmpPersGrossMonth();
+
+        yMiscPersGrossMonthL1 = getyMiscPersGrossMonth();
+        yMiscPersGrossMonthL2 = getyMiscPersGrossMonth();
+        yMiscPersGrossMonthL3 = getyMiscPersGrossMonth();
+
+        yCapitalPersMonthL1 = getyCapitalPersMonth();
+        yCapitalPersMonthL2 = getyCapitalPersMonth();
+
+        yPensPersGrossMonthL1 = getyPensPersGrossMonth();
+        yPensPersGrossMonthL2 = getyPensPersGrossMonth();
+
+        demPartnerStatusL2 = demPartnerStatusL1; // Updating of this lag must occur before parnters variables are updated
+
+        // partner variables
+        Person partner = getPartner();
+        if (partner!=null) {
+            eduHighestPartnerC4L1 = partner.eduHighestC4;
+            healthPartnerSelfRatedL1 = partner.healthSelfRated;
+            demAgePartnerDiffL1 = demAge - partner.demAge;
+            idPartnerL1 = partner.getId();
+        } else {
+            eduHighestPartnerC4L1 = null;
+            healthPartnerSelfRatedL1 = null;
+            demAgePartnerDiffL1 = null;
+            idPartnerL1 = null;
+        }
+        demPartnerStatusL1 = getDcpst();
+        yPersAndPartnerGrossDiffMonthL1 = getYnbcpdf_dv(); //Lag(1) of difference between own and partner's gross personal non-benefit income
+        labStatusPartnerAndOwnC4L1 = getLesdf_c4(); //Lag(1) of own and partner's activity status
     }
 
     //This method assign people to age groups used to define types in the SBAM matching procedure
@@ -720,7 +809,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 aging();
             }
             case Update -> {
-                updateVariables(false);
+                updateAttributes(false);
             }
             case UpdateOutputVariables ->  {
                 updateOutputVariables();
@@ -2084,7 +2173,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void updateVariables(boolean initialUpdate) {
+    
+    protected void updateAttributes(boolean initialUpdate) {
+
+        UpdateManager.applyAnnotations(this);
 
         //Reset flags to default values
 
@@ -5746,6 +5838,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getEquivalisedDisposableIncomeYearly() {
         return benefitUnit.getEquivalisedDisposableIncomeYearly();
     }
+
+    public double getDisposableIncomeMonthlyNoNull() { return benefitUnit.getDisposableIncomeMonthlyNoNull();}
 
     public double getDisposableIncomeMonthly() { return benefitUnit.getDisposableIncomeMonthly();}
 

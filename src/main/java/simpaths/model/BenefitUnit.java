@@ -71,10 +71,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Column(name="wealthPrptyValue") private Double wealthPrptyValue;        // value of main home (gross of mortgage debt)
     @Column(name="wealthMortgageDebtValue") private Double wealthMortgageDebtValue;          // value of outstanding mortgage debt
     private Double yDispMonth;
-    private Double yGrossMonth;
-    private Double yBenAmountMonth;
-    private Integer yBenUCReceivedFlag;
-    private Integer yBenLegacyReceivedFlag;
+    @NullInitialised private Double yGrossMonth;
+    @NullInitialised private Double yBenAmountMonth;
+    @NullInitialised private Integer yBenUCReceivedFlag;
+    @NullInitialised private Integer yBenLegacyReceivedFlag;
     private Double yDispEquivYear;
     @Lag(getter = "getEquivalisedDisposableIncomeYearly") @Transient private Double yDispEquivYearL1;
     @Transient private Double yDiffDispEquivPrevYear;
@@ -84,16 +84,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Lag(getter = "getIndicatorChildren4to12") @Transient private Indicator dem4to12L1;                //Lag(1) of d_children_4_12;
     @Lag(getter = "getNumberChildren0to2") @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
     @Lag(getter = "getNumberChildrenAll") @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
-    private Double xChildCareWeek;
-    private Double xCareWeek;
-    private Integer careProvidedFlag;
-    private Long idtaxDbDonor;
-    @Transient private Match demDbMatchTax;
+    @NullInitialised private Double xChildCareWeek;
+    @NullInitialised private Double xCareWeek;
+    @NullInitialised private Integer careProvidedFlag;
+    @NullInitialised private Long idtaxDbDonor;
+    @NullInitialised @Transient private Match demDbMatchTax;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
     @Enumerated(EnumType.STRING) private Ydses_c5 yHhQuintilesMonthC5;
     @Lag(getter = "getYdses_c5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
-    @Transient private Double i_yNonBenHhGrossAsinh;
-    private Dhhtp_c4 demCompHhC4;
+    @NullInitialised @Transient private Double i_yNonBenHhGrossAsinh;
+    @NullInitialised private Dhhtp_c4 demCompHhC4;
     @Lag(getter = "getDemCompHhC4") @Transient private Dhhtp_c4 demCompHhC4L1;
     private String demCreatedByConstructor;
     @Column(name="wealthPrptyFlag") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
@@ -104,33 +104,31 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Double labPersistValueLabourInnov;
     @Transient private Integer lastYear;
 
-    @Transient private Integer i_demYear;
-    @Transient private Occupancy i_demOccupancy;
-    @Transient private Education i_eduHighestC4;
-    @Transient private Integer i_labHrsWork1Week;
-    @Transient private Integer i_labHrsWork2Week;
+    @NullInitialised @Transient private Integer i_demYear;
+    @NullInitialised @Transient private Occupancy i_demOccupancy;
+    @NullInitialised @Transient private Education i_eduHighestC4;
+    @NullInitialised @Transient private Integer i_labHrsWork1Week;
+    @NullInitialised @Transient private Integer i_labHrsWork2Week;
 
     // ================= At Risk of Work cache to avoid unnecessary atRiskOfWork() calls =================
-    @Transient private Boolean cachedMaleAtRiskOfWork = null;
-    @Transient private Boolean cachedFemaleAtRiskOfWork = null;
+    @NullInitialised @Transient private Boolean cachedMaleAtRiskOfWork = null;
+    @NullInitialised @Transient private Boolean cachedFemaleAtRiskOfWork = null;
 
     // ================= Labour-choice cache for fast alignment =================
-    @Transient private Integer labourChoiceCacheYear = null;
+    @NullInitialised @Transient private Integer labourChoiceCacheYear = null;
 
     // cached discrete choice set
-    @Transient private LinkedHashSet<MultiKey<Labour>> cachedPossibleLabourCombinations = null;
+    @NullInitialised @Transient private LinkedHashSet<MultiKey<Labour>> cachedPossibleLabourCombinations = null;
 
     // cached tax/income outputs by labour pair
-    @Transient private MultiKeyMap<Labour, LabourEval> cachedEvalByLabourPairs =
-            MultiKeyMap.multiKeyMap(new LinkedMap<>());
+    @NullInitialised @Transient private MultiKeyMap<Labour, LabourEval> cachedEvalByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
     // cached utility regression scores by labour pair
-    @Transient private MultiKeyMap<Labour, Double> cachedUtilityScoreByLabourPairs =
-            MultiKeyMap.multiKeyMap(new LinkedMap<>());
+    @NullInitialised @Transient private MultiKeyMap<Labour, Double> cachedUtilityScoreByLabourPairs = MultiKeyMap.multiKeyMap(new LinkedMap<>());
 
     // score cache validity markers
-    @Transient private Integer labourScoreCacheYear = null;
-    @Transient private Object labourScoreCacheKey = null;
+    @NullInitialised @Transient private Integer labourScoreCacheYear = null;
+    @NullInitialised @Transient private Object labourScoreCacheKey = null;
 
     // helper – NOT persisted, no annotation needed
     private static class LabourEval {
@@ -338,7 +336,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         switch ((Processes) type) {
             case Update -> {
                 updateAttributes();
-                clearStates();
             }
             case UpdateWealth -> {
                 updateWealth();
@@ -4185,19 +4182,11 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
     public double getEquivalisedDisposableIncomeYearly() {
-        double val;
-        if (yDispEquivYear != null) {
-            val = yDispEquivYear;
-        } else {
-            val = -9999.99;
-        }
-        return val;
+        return Objects.requireNonNullElse(yDispEquivYear, -9999.99);
     }
 
     public int getAtRiskOfPoverty() {
-        if (yPvrtyFlag != null) {
-            return yPvrtyFlag;
-        } else return 0;
+        return Objects.requireNonNullElse(yPvrtyFlag, 0);
     }
 
     public Integer getAtRiskOfPoverty_lag1() {
@@ -4208,6 +4197,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         this.yPvrtyFlag = yPvrtyFlag;
     }
 
+    public Double getDisposableIncomeMonthlyNoNull() {
+        return Objects.requireNonNullElse(yDispMonth, 0.0);
+    }
     public Double getDisposableIncomeMonthly() {
         return yDispMonth;
     }
@@ -4221,7 +4213,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
     public Integer getReceivedUC() {
-        return (yBenUCReceivedFlag == null ? 0 : yBenUCReceivedFlag);
+        return Objects.requireNonNullElse(yBenUCReceivedFlag, 0);
     }
 
     public void setReceivedUC(Integer yBenUCReceivedFlag) {
@@ -4229,7 +4221,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
     public Integer getReceivedLegacyBenefits() {
-        return (yBenLegacyReceivedFlag == null ? 0 : yBenLegacyReceivedFlag);
+        return Objects.requireNonNullElse(yBenLegacyReceivedFlag, 0);
     }
 
     public void setReceivedLegacyBenefits(Integer yBenLegacyReceivedFlag) {
@@ -4277,6 +4269,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
     public Ydses_c5 getYdses_c5_lag1() {
         return yHhQuintilesMonthC5L1;
+    }
+
+    public double getTmpHHYpnbihs_dv_asinhNoNull() {
+        return Objects.requireNonNullElse(i_yNonBenHhGrossAsinh, 0.0);
     }
 
     public double getTmpHHYpnbihs_dv_asinh() {
@@ -4357,14 +4353,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return (yDispEquivYear != null && yDispEquivYearL1 != null && yDispEquivYear < yDispEquivYearL1);
     }
 
-    public void clearStates() {
-        if (labStatesContObject !=null) labStatesContObject = null;
-    }
-
     void setStates() {
 
         // reset states if necessary
-        if (labStatesContObject !=null) clearStates();
+        if (labStatesContObject !=null) labStatesContObject = null;
 
         // populate states object
         if ( Parameters.grids == null) {
