@@ -94,9 +94,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="careHrsInformal") private Double careHrsInformalWeek;
     private Boolean labWageOfferLowFlag;
     @Lag(getter="getLowWageOffer") @Transient private Boolean labWageOfferLowFlagL1;
-    @Transient private SocialCareReceipt careReceivedFlag;
-    @Transient private Boolean careFormalFlag;
-    @Transient private Boolean careFromInformalFlag;
+    @NullInitialised @Transient private SocialCareReceipt careReceivedFlag;
+    @NullInitialised @Transient private Boolean careFormalFlag;
+    @NullInitialised @Transient private Boolean careFromInformalFlag;
     @Column(name="careHrsProvidedWeek") private Double careHrsProvidedWeek;
     @Enumerated(EnumType.STRING) @Column(name="careProvidedFlag") private SocialCareProvision careProvidedFlag;
     @Lag(field="careProvidedFlag") @Transient private SocialCareProvision careProvidedFlagL1;
@@ -121,7 +121,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @NullInitialised @Transient private Boolean demGiveBirthFlag;
     @NullInitialised @Transient private Boolean eduLeaveSchoolFlag;
     @NullInitialised @Transient private Boolean demBePartnerFlag;
-    @Transient private Boolean demAlignPartnerProcess;
+    @NullInitialised @Transient private Boolean demAlignPartnerProcess;
     @NullInitialised @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Column(name="wgt") private Double wgt;
     @Column(name="healthPsyDstrss0to12") private Double healthPsyDstrss0to12; //Psychological distress GHQ-12 0-12 caseness score
@@ -141,12 +141,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="demLifeSatEQ5D") private Double demLifeSatEQ5D;
     @Column(name="yFinDstrssFlag") private Boolean yFinDstrssFlag;
     @Lag(field="yBenReceivedFlag") @Transient private Boolean yBenReceivedFlagL1; // Lag(1) of whether person receives benefits
-    @Transient private Boolean yBenReceivedFlag; // Does person receive benefits
+    @NullInitialised @Transient private Boolean yBenReceivedFlag; // Does person receive benefits
     @Column(name="yBenUCReceivedFlag") private Boolean yBenUCReceivedFlag; // Person receives UC
     @Lag(field="yBenUCReceivedFlag") @Transient private Boolean yBenUCReceivedFlagL1;
     @Column(name="yBenNonUCReceivedFlag") private Boolean yBenNonUCReceivedFlag;  // Person receives a benefit which is not UC
     @Lag(field="yBenNonUCReceivedFlag") @Transient private Boolean yBenNonUCReceivedFlagL1;
-    @Column(name="yLifeTime") private Double yLifeTime;                  // mean annual equivalised household disposable income by age
+    @NullInitialised @Column(name="yLifeTime") private Double yLifeTime;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labHrsWorkEnumWeek;			//Number of hours of labour supplied each week
     @Lag(getter="getLabourSupplyWeekly") @Transient private Labour labHrsWorkEnumWeekL1; // Lag(1) (previous year's value) of weekly labour supply
@@ -161,7 +161,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Column(name="labWageHrly") private Double labWageFullTimeHrly;		//Is hourly rate.  Initialised with value: ils_earns / (4.34 * lhw), where lhw is the weekly hours a person worked in EUROMOD input data
     @Lag(field="labWageFullTimeHrly") @Column(name="labWageFullTimeHrlyL1") private Double labWageFullTimeHrlyL1; // Lag(1) of potentialHourlyEarnings
     @Transient private Series.Double yDispEquivYear;
-    private Double xEquivYear;
+    @NullInitialised private Double xEquivYear;
     @Transient private Series.Double xEquivYearL1;
     private Integer demPartnerNYear; //Number of years in partnership
     @Transient private Integer demPartnerNYearL1; //Lag(1) of number of years in partnership
@@ -185,7 +185,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     //For matching process
     @Transient private Double demAgeDiffDesired;
     @Transient private Double yWageDesired;
-    @Transient private Integer demAgeGroup;
+    @NullInitialised @Transient private Integer demAgeGroup;
 
     //This is set to true at the point when individual leaves education and never reset. So if true, individual has not always been in continuous education.
     @Transient private Boolean eduLeftEduFlag;
