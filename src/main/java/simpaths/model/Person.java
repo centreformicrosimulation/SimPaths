@@ -191,36 +191,36 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Transient private Boolean eduLeftEduFlag;
 
     //This is set to true at the point when individual leaves partnership and never reset. So if true, individual has been / is in a partnership
-    @Transient private Boolean demLeftPartnerFlag;
-    @Transient private Integer labHrsWorkNewL1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
-    @Transient private Double covidYLabGrossL1;
+    @NullInitialised @Transient private Boolean demLeftPartnerFlag;
+    @NullInitialised @Transient private Integer labHrsWorkNewL1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
+    @NullInitialised @Transient private Double covidYLabGrossL1;
     @Transient private Indicator covidSEISSReceivedFlag = Indicator.False;
-    @Transient private Double covidYLabGross;
-    private Quintiles covidYLabGrossXt5;
-    @Transient private Double labWageRegressRandomCompoponentEmp;
-    @Transient private Double labWageRegressRandomCompoponentNotEmp;
+    @NullInitialised @Transient private Double covidYLabGross;
+    @NullInitialised private Quintiles covidYLabGrossXt5;
+    @NullInitialised @Transient private Double labWageRegressRandomCompoponentEmp;
+    @NullInitialised @Transient private Double labWageRegressRandomCompoponentNotEmp;
     @Transient private Map<Labour, Integer> personContinuousHoursLabourSupplyMap = new EnumMap<>(Labour.class);
 
     // local variables interact with regression models
-    @Transient private Integer i_demYear;
-    @Transient private Region i_demRgn;
-    @Transient private Dhhtp_c4 i_demCompHhC4L1;
-    @Transient private Ydses_c5 i_yHhQuintilesC5;
-    @Transient private Integer i_demNchildL1;
-    @Transient private Integer i_demNchild;
-    @Transient private Integer i_demNchild0to2L1;
-    @Transient private Integer i_demNchild0to17;
-    @Transient private Indicator i_demNChild0to2;
-    @Transient private Dcpst i_demPartnerStatus;
+    @NullInitialised @Transient private Integer i_demYear;
+    @NullInitialised @Transient private Region i_demRgn;
+    @NullInitialised @Transient private Dhhtp_c4 i_demCompHhC4L1;
+    @NullInitialised @Transient private Ydses_c5 i_yHhQuintilesC5;
+    @NullInitialised @Transient private Integer i_demNchildL1;
+    @NullInitialised @Transient private Integer i_demNchild;
+    @NullInitialised @Transient private Integer i_demNchild0to2L1;
+    @NullInitialised @Transient private Integer i_demNchild0to17;
+    @NullInitialised @Transient private Indicator i_demNChild0to2;
+    @NullInitialised @Transient private Dcpst i_demPartnerStatus;
 
     // innovations
     @Transient Innovations statInnovations;
 
     //TODO: Remove when no longer needed.  Used to calculate mean score of employment selection regression.
-    @Transient public static Double statMScore;
-    @Transient public static Double statFScore;
-    @Transient public static Double countMale;
-    @Transient public static Double countFemale;
+    @NullInitialised @Transient public static Double statMScore;
+    @NullInitialised @Transient public static Double statFScore;
+    @NullInitialised @Transient public static Double countMale;
+    @NullInitialised @Transient public static Double countFemale;
     @Transient public static Double statInverseMillsRatioMaxM = Double.MIN_VALUE;
     @Transient public static Double statInverseMillsRatioMinM = Double.MAX_VALUE;
     @Transient public static Double statInverseMillsRatioMaxF = Double.MIN_VALUE;
@@ -5485,15 +5485,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return yNonBenPersGrossMonthL1;
     }
 
-    public double getyMiscPersGrossMonth() {
+    public Double getyMiscPersGrossMonth() {
         return yMiscPersGrossMonth;
     }
 
-    public double getyCapitalPersMonth() {
+    public Double getyCapitalPersMonth() {
         return yCapitalPersMonth;
     }
 
-    public double getyPensPersGrossMonth() {
+    public Double getyPensPersGrossMonth() {
         return yPensPersGrossMonth;
     }
 
@@ -5503,7 +5503,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             throw new IllegalArgumentException("yptciihs_dv is not finite");
     }
 
-    public double getyMiscPersGrossMonthL1() {
+    public Double getyMiscPersGrossMonthL1() {
         return yMiscPersGrossMonthL1;
     }
 
