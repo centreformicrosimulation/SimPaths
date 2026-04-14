@@ -305,7 +305,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yBenNonUCReceivedFlag = false;
         yBenUCReceivedFlag = false;
         yFinDstrssFlag = mother.getYFinDstrssFlag();
-        updateAttributes(false);
+        updateAttributes();
     }
 
     // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
@@ -809,7 +809,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 aging();
             }
             case Update -> {
-                updateAttributes(false);
+                updateAttributes();
             }
             case UpdateOutputVariables ->  {
                 updateOutputVariables();
@@ -2173,8 +2173,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    
-    protected void updateAttributes(boolean initialUpdate) {
+
+    protected void updateAttributes() {
 
         UpdateManager.applyAnnotations(this);
 
@@ -2189,8 +2189,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
         // no need to update eduSpellFlag as its value is persisted from the previous year
 
-        if (initialUpdate && !Parameters.checkFinite(careHrsInformalWeek))
-            careHrsInformalWeek = 0.0;
         if (demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             Person mother = benefitUnit.getFemale();
             if (mother!=null)
@@ -2211,19 +2209,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         //Lagged variables
-        updateLaggedVariables(initialUpdate);
+        updateLaggedVariables();
 
         // generate year specific random draws
-        if (!initialUpdate) {
-            if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
-                healthDsblLongtermFlag = Indicator.False;
-                healthDsblLongtermFlagL1 = Indicator.False;
-            }
-            if (!Parameters.flagSocialCare) {
-                setAllSocialCareVariablesToFalse();
-            }
-            statInnovations.getNewDoubleDraws();
+        if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
+            healthDsblLongtermFlag = Indicator.False;
+            healthDsblLongtermFlagL1 = Indicator.False;
         }
+        if (!Parameters.flagSocialCare) {
+            setAllSocialCareVariablesToFalse();
+        }
+        statInnovations.getNewDoubleDraws();
     }
 
     private void updateOutputVariables() {
@@ -2231,7 +2227,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demPartnerStatus = getDcpst();
     }
 
-    private void updateLaggedVariables(boolean initialUpdate) {
+    private void updateLaggedVariables() {
 
         labC4L1 = labC4;
         labC7CovidL1 = labC7Covid;
@@ -2259,35 +2255,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yBenUCReceivedFlagL1 = yBenUCReceivedFlag; // Lag(1) of flag indicating if individual receives UC
         labWageFullTimeHrlyL1 = labWageFullTimeHrly; // Lag(1) of potential hourly earnings
 
-        if (initialUpdate) {
-            yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
-            yEmpPersGrossMonthL2 = getyEmpPersGrossMonth();
-            yEmpPersGrossMonthL3 = getyEmpPersGrossMonth();
+        yEmpPersGrossMonthL3 = yEmpPersGrossMonthL2; //Lag(3) of gross personal employment income
+        yEmpPersGrossMonthL2 = yEmpPersGrossMonthL1; //Lag(2) of gross personal employment income
+        yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
 
-            yMiscPersGrossMonthL1 = getyMiscPersGrossMonth();
-            yMiscPersGrossMonthL2 = getyMiscPersGrossMonth();
-            yMiscPersGrossMonthL3 = getyMiscPersGrossMonth();
+        yMiscPersGrossMonthL3 = yMiscPersGrossMonthL2; //Lag(3) of gross personal non-employment non-benefit income
+        yMiscPersGrossMonthL2 = yMiscPersGrossMonthL1; //Lag(2) of gross personal non-employment non-benefit income
+        yMiscPersGrossMonthL1 = getyMiscPersGrossMonth(); //Lag(1) of gross personal non-employment non-benefit income
 
-            yCapitalPersMonthL1 = getyCapitalPersMonth();
-            yCapitalPersMonthL2 = getyCapitalPersMonth();
+        yCapitalPersMonthL2 = yCapitalPersMonthL1;
+        yCapitalPersMonthL1 = getyCapitalPersMonth();
 
-            yPensPersGrossMonthL1 = getyPensPersGrossMonth();
-            yPensPersGrossMonthL2 = getyPensPersGrossMonth();
-        } else {
-            yEmpPersGrossMonthL3 = yEmpPersGrossMonthL2; //Lag(3) of gross personal employment income
-            yEmpPersGrossMonthL2 = yEmpPersGrossMonthL1; //Lag(2) of gross personal employment income
-            yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
-
-            yMiscPersGrossMonthL3 = yMiscPersGrossMonthL2; //Lag(3) of gross personal non-employment non-benefit income
-            yMiscPersGrossMonthL2 = yMiscPersGrossMonthL1; //Lag(2) of gross personal non-employment non-benefit income
-            yMiscPersGrossMonthL1 = getyMiscPersGrossMonth(); //Lag(1) of gross personal non-employment non-benefit income
-
-            yCapitalPersMonthL2 = yCapitalPersMonthL1;
-            yCapitalPersMonthL1 = getyCapitalPersMonth();
-
-            yPensPersGrossMonthL2 = yPensPersGrossMonthL1;
-            yPensPersGrossMonthL1 = getyPensPersGrossMonth();
-        }
+        yPensPersGrossMonthL2 = yPensPersGrossMonthL1;
+        yPensPersGrossMonthL1 = getyPensPersGrossMonth();
 
         demPartnerStatusL2 = demPartnerStatusL1; // Updating of this lag must occur before parnters variables are updated
 
