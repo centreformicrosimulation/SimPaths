@@ -470,7 +470,7 @@ public class SimPathsStart implements ExperimentBuilder {
 		String text = "<html><h2 style=\"text-align: center; font-size:120%;\">Select simulation start year</h2>";
 
 		// sizing for GUI
-		int height = 280, width = 600;
+		int height = 220, width = 600;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		if (screenSize.width < 850) {
 			width = (int) (screenSize.width * 0.95);

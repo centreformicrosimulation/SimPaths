@@ -8,6 +8,8 @@ import microsim.data.db.PanelEntityKey;
 import org.hibernate.annotations.Fetch;
 import simpaths.data.ManagerRegressions;
 import simpaths.data.MultiValEvent;
+import simpaths.model.annotations.Lag;
+import simpaths.model.annotations.UpdateManager;
 import simpaths.model.enums.*;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.LinkedMap;
@@ -73,14 +75,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     private Integer yBenUCReceivedFlag;
     private Integer yBenLegacyReceivedFlag;
     private Double yDispEquivYear;
-    @Transient private Double yDispEquivYearL1;
+    //@Lag(field = "yDispEquivYear") @Transient private Double yDispEquivYearL1;
+    @Lag(getter = "getEquivalisedDisposableIncomeYearly") @Transient private Double yDispEquivYearL1;
     @Transient private Double yDiffDispEquivPrevYear;
     private Integer yPvrtyFlag;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
-    @Transient private Integer yPvrtyFlagL1;
-    @Transient private Indicator i_demNChild0to2L1;                //Lag(1) of d_children_3under;
-    @Transient private Indicator dem4to12L1;                //Lag(1) of d_children_4_12;
-    @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
-    @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
+    //@Lag(field = "yPvrtyFlag") @Transient private Integer yPvrtyFlagL1;
+    @Lag(getter = "getAtRiskOfPoverty") @Transient private Integer yPvrtyFlagL1;
+    @Lag(getter = "getIndicatorChildren0to3") @Transient private Indicator dem0to3L1;
+    @Lag(getter = "getIndicatorChildren4to12") @Transient private Indicator dem4to12L1;                //Lag(1) of d_children_4_12;
+    @Lag(getter = "getNumberChildren0to2") @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
+    @Lag(getter = "getNumberChildrenAll") @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
     private Double xChildCareWeek;
     private Double xCareWeek;
     private Integer careProvidedFlag;
@@ -88,10 +92,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Transient private Match demDbMatchTax;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
     @Enumerated(EnumType.STRING) private Ydses_c5 yHhQuintilesMonthC5;
-    @Transient private Ydses_c5 yHhQuintilesC5L1;
+    //@Lag(field = "yHhQuintilesMonthC5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
+    @Lag(getter = "getYdses_c5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
     @Transient private Double i_yNonBenHhGrossAsinh;
     private Dhhtp_c4 dhhtp_c4;
-    @Transient private Dhhtp_c4 demCompHhC4L1;
+    //@Lag(field = "dhhtp_c4") @Transient private Dhhtp_c4 demCompHhC4L1;
+    @Lag(getter = "getDhhtp_c4") @Transient private Dhhtp_c4 demCompHhC4L1;
     private String demCreatedByConstructor;
     @Column(name="wealthPrptyFlag") private Boolean wealthPrptyFlag; // are any of the individuals in the benefit unit a homeowner? True / false
     @Transient ArrayList<Triple<Les_c7_covid, Double, Integer>> covid19MonthlyStateAndGrossIncomeAndWorkHoursTripleMale = new ArrayList<>();
@@ -199,7 +205,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
         this.numberChildrenAll_lag1 = 0;
         this.numberChildren02_lag1 = 0;
-        this.i_demNChild0to2L1 = Indicator.False;
+        this.dem0to3L1 = Indicator.False;
         this.dem4to12L1 = Indicator.False;
         this.xChildCareWeek = 0.0;
         this.xCareWeek = 0.0;
@@ -296,14 +302,14 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             );
         this.numberChildrenAll_lag1 = originalBenefitUnit.numberChildrenAll_lag1;
         this.numberChildren02_lag1 = originalBenefitUnit.numberChildren02_lag1;
-        this.i_demNChild0to2L1 = originalBenefitUnit.i_demNChild0to2L1;
+        this.dem0to3L1 = originalBenefitUnit.dem0to3L1;
         this.dem4to12L1 = originalBenefitUnit.dem4to12L1;
         this.xChildCareWeek = originalBenefitUnit.xChildCareWeek;
         this.xCareWeek = originalBenefitUnit.xCareWeek;
         this.careProvidedFlag = originalBenefitUnit.careProvidedFlag;
         this.region = originalBenefitUnit.region;
         this.yHhQuintilesMonthC5 = originalBenefitUnit.getYdses_c5();
-        this.yHhQuintilesC5L1 = originalBenefitUnit.yHhQuintilesC5L1;
+        this.yHhQuintilesMonthC5L1 = originalBenefitUnit.yHhQuintilesMonthC5L1;
         this.demCompHhC4L1 = originalBenefitUnit.demCompHhC4L1;
         this.wealthPrptyFlag = originalBenefitUnit.wealthPrptyFlag;
         demCreatedByConstructor = Objects.requireNonNullElse(originalBenefitUnit.demCreatedByConstructor,"CopyConstructor");
@@ -321,6 +327,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         Update,        //This updates the household fields, such as number of children of a certain age
         UpdateOutputVariables,
         UpdateWealth,
+        UpdateDemographics,
         CalculateChangeInEDI, //Calculate change in equivalised disposable income
         Homeownership,
         ReceivesBenefits,
@@ -342,6 +349,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case UpdateWealth -> {
                 updateWealth();
+            }
+            case UpdateDemographics -> {
+
             }
             case CalculateChangeInEDI -> {
                 calculateEquivalisedDisposableIncomeYearly(); //Update BU's EDI
@@ -370,7 +380,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         if (getNumberChildrenAll()==0)
             xChildCareWeek = 0.0;
         // Transient lagged values are not loaded from DB; initialize them for year-1 regressors.
-        if (i_demNChild0to2L1 == null) i_demNChild0to2L1 = getIndicatorChildren(0,3);
+        if (dem0to3L1 == null) dem0to3L1 = getIndicatorChildren(0,3);
         if (dem4to12L1 == null) dem4to12L1 = getIndicatorChildren(4,12);
         if (numberChildrenAll_lag1 == null) numberChildrenAll_lag1 = getNumberChildrenAll();
         if (numberChildren02_lag1 == null) numberChildren02_lag1 = getNumberChildren(0,2);
@@ -386,20 +396,11 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     protected void updateAttributes() {
 
+        UpdateManager.applyAnnotations(this);
+
         // unit specific variables
         if (getNumberChildrenAll()==0)
             xChildCareWeek = 0.0;
-
-        // lags
-        i_demNChild0to2L1 = getIndicatorChildren(0,3);
-        dem4to12L1 = getIndicatorChildren(4,12);
-        numberChildrenAll_lag1 = getNumberChildrenAll();
-        numberChildren02_lag1 = getNumberChildren(0,2);
-        demCompHhC4L1 = getDhhtp_c4();
-
-        yDispEquivYearL1 = getEquivalisedDisposableIncomeYearly();
-        yPvrtyFlagL1 = getAtRiskOfPoverty();
-        yHhQuintilesC5L1 = getYdses_c5();
 
         // random draws
         statInnovations.getNewDoubleDraws();
@@ -4147,6 +4148,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     public int getNumberChildren(int age) {
         return getNumberChildren(age, age);
     }
+    public Integer getNumberChildren0to2() {
+        return getNumberChildren(0, 2);
+    }
     public int getNumberChildren(int minAge, int maxAge) {
         int nChildren = 0;
         if (model==null) {
@@ -4163,21 +4167,26 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
     public Indicator getIndicatorChildren(int minAge, int maxAge) {
         Indicator flag = Indicator.False;
-        if (model==null) {
-            for (int aa=minAge; aa<=maxAge; aa++) {
-                if (getNumberChildrenByAge(aa) > 0) {
-                    flag = Indicator.True;
-                    break;
-                }
+        for (int aa=minAge; aa<=maxAge; aa++) {
+            if (getNumberChildrenByAge(aa) > 0) {
+                flag = Indicator.True;
+                break;
             }
         }
         return flag;
+    }
+    public Indicator getIndicatorChildren0to3() {
+
+        return getIndicatorChildren(0,3);
+    }
+    public Indicator getIndicatorChildren4to12() {
+        return getIndicatorChildren(4,12);
     }
     public Integer getNumberChildrenAll_lag1() {
         return numberChildrenAll_lag1;
     }
     public Integer getNumberChildren02_lag1() { return numberChildren02_lag1; }
-    public Indicator getIndicatorChildren03_lag1() { return i_demNChild0to2L1; }
+    public Indicator getIndicatorChildren03_lag1() { return dem0to3L1; }
     public Indicator getIndicatorChildren412_lag1() {
         return dem4to12L1;
     }
@@ -4274,7 +4283,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
     public Ydses_c5 getYdses_c5_lag1() {
-        return yHhQuintilesC5L1;
+        return yHhQuintilesMonthC5L1;
     }
 
     public double getTmpHHYpnbihs_dv_asinh() {

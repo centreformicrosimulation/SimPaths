@@ -862,6 +862,14 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         persistStatistics2 = val;
     }
 
+    public boolean isPersistAlignmentAdjustmentFactors() {
+        return persistAlignmentAdjustmentFactors;
+    }
+
+    public void setPersistAlignmentAdjustmentFactors(boolean val) {
+        persistAlignmentAdjustmentFactors = val;
+    }
+
     public void calculateAtRiskOfPoverty() {
         calculateEquivalisedHouseholdDisposableIncome();
     }
