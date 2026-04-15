@@ -1,0 +1,38 @@
+modules:
+  - id: union_matching
+    title: Union Matching
+    flowchart: documentation/flowcharts/modules/union_matching.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/model/UnionMatching.java
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/PartnershipAlignment.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - matching method selection changes
+      - candidate pool construction changes
+      - score formula changes
+      - admissibility rules change
+      - same-region/no-region fallback changes
+      - matched-pair state updates change
+
+  - id: inschool
+    title: InSchool
+    flowchart: documentation/flowcharts/modules/inschool.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/model/InSchoolAlignment.java
+      - src/main/java/simpaths/data/Parameters.java
+    wiki:
+      - documentation/wiki/developer-guide/how-to/code-logic-flowcharts.md
+    update_triggers:
+      - inSchool branch logic changes
+      - E1a/E1b regression calls change
+      - age thresholds change
+      - eduLeaveSchoolFlag handling changes
+      - InSchoolAlignment behavior changes
+      - leavingSchool handoff changes
