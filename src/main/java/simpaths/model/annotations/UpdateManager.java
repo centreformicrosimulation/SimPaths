@@ -9,7 +9,7 @@ import java.util.List;
  * Reflection-based processor that applies {@link Lag} and {@link NullInitialised} annotations
  * at the start of each simulation time interval.
  *
- * <h3>Processing order</h3>
+ * <h2>Processing order</h2>
  * <ol>
  *   <li><b>Read phase</b> — all {@link Lag}-annotated fields have their source values read
  *       (via field reference or getter) and cached <em>before</em> any writes occur.</li>
@@ -26,7 +26,7 @@ import java.util.List;
  *   L1 ← current
  * </pre>
  *
- * <h3>Typical usage in an entity's update method</h3>
+ * <h2>Typical usage in an entity's update method</h2>
  * <pre>{@code
  *   // In Person.updateLaggedVariables() or BenefitUnit.updateAttributes():
  *   UpdateManager.applyAnnotations(this);
