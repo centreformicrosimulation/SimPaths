@@ -505,8 +505,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addEventToAllYears(Processes.GarbageCollection);
         if (enableIntertemporalOptimisations)
             yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateWealth);
-        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.Update);
-        addCollectionEventToAllYears(persons, Person.Processes.Update);
+        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.Update);
+        yearlySchedule.addCollectionEvent(persons, Person.Processes.Update);
 
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Aging);
 

@@ -66,18 +66,18 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @NullInitialised private Double yInvestYear;
     @NullInitialised private Double yPensYear;
     @NullInitialised private Double xDiscretionaryYear;
-    @Column(name="wealthTotValue") private Double wealthTotValue;            // total net wealth (includes pensions assets and housing)
-    @Column(name="wealthPensValue") private Double wealthPensValue;        // total private (personal and occupational) pensions
-    @Column(name="wealthPrptyValue") private Double wealthPrptyValue;        // value of main home (gross of mortgage debt)
-    @Column(name="wealthMortgageDebtValue") private Double wealthMortgageDebtValue;          // value of outstanding mortgage debt
-    private Double yDispMonth;
+    @NullInitialised @Column(name="wealthTotValue") private Double wealthTotValue;            // total net wealth (includes pensions assets and housing)
+    @NullInitialised @Column(name="wealthPensValue") private Double wealthPensValue;        // total private (personal and occupational) pensions
+    @NullInitialised @Column(name="wealthPrptyValue") private Double wealthPrptyValue;        // value of main home (gross of mortgage debt)
+    @NullInitialised @Column(name="wealthMortgageDebtValue") private Double wealthMortgageDebtValue;          // value of outstanding mortgage debt
+    @NullInitialised private Double yDispMonth;
     @NullInitialised private Double yGrossMonth;
     @NullInitialised private Double yBenAmountMonth;
     @NullInitialised private Integer yBenUCReceivedFlag;
     @NullInitialised private Integer yBenLegacyReceivedFlag;
-    private Double yDispEquivYear;
+    @NullInitialised private Double yDispEquivYear;
     @Lag(getter = "getEquivalisedDisposableIncomeYearly") @Transient private Double yDispEquivYearL1;
-    @Transient private Double yDiffDispEquivPrevYear;
+    @NullInitialised @Transient private Double yDiffDispEquivPrevYear;
     private Integer yPvrtyFlag;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
     @Lag(getter = "getAtRiskOfPoverty") @Transient private Integer yPvrtyFlagL1;
     @Lag(getter = "getIndicatorChildren0to3") @Transient private Indicator dem0to3L1;
