@@ -185,6 +185,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private boolean alignEmployment = false; //Set to true to align employment share
 
+    @GUIparameter(description = "Yearly share of 18-24 not-employed persons moved to employment by intervention")
+    private Double youngNotEmployedToEmployedShare = 0.0;
+
     public boolean addRegressionStochasticComponent = true; //If set to true, and regression contains ResStanDev variable, will evaluate the regression score including stochastic part, and omits the stochastic component otherwise.
 
     public boolean fixRegressionStochasticComponent = false; // If true, only draw stochastic component once and use the same value throughout the simulation. Currently applies to wage equations.
@@ -579,6 +582,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateStates, false);
 
         yearlySchedule.addEvent(this, Processes.LabourMarketAndIncomeUpdate);
+        yearlySchedule.addEvent(this, Processes.ApplyYearlyIntervention);
 
         // Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
         yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
@@ -740,6 +744,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             pw.println(line);
             line = "alignEmployment: " + alignEmployment;
             pw.println(line);
+            line = "youngNotEmployedToEmployedShare: " + youngNotEmployedToEmployedShare;
+            pw.println(line);
             line = "saveImperfectTaxDBMatches: " + saveImperfectTaxDBMatches;
             pw.println(line);
             line = "enableIntertemporalOptimisations: " + enableIntertemporalOptimisations;
@@ -797,6 +803,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         EndYear,
         UnionMatching,
         LabourMarketAndIncomeUpdate,
+        ApplyYearlyIntervention,
         SocialCareMarketClearing,
 
         //Alignment Processes
@@ -906,6 +913,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 labourMarket.update(year);
                 if (commentsOn) log.info("Labour market update complete.");
             }
+            case ApplyYearlyIntervention -> {
+                applyYearlyIntervention();
+            }
             case Timer -> {
                 printElapsedTime();
             }
@@ -1014,6 +1024,44 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     throw new RuntimeException("inconsistent linkages between households and benefit units");
             }
         }
+    }
+
+    private void applyYearlyIntervention() {
+
+        if (youngNotEmployedToEmployedShare == null || youngNotEmployedToEmployedShare <= 0.0) {
+            return;
+        }
+
+        double effectiveShare = Math.min(1.0, youngNotEmployedToEmployedShare);
+        List<Person> eligiblePersons = new ArrayList<>();
+        for (Person person : persons) {
+            if (person.getDemAge() >= 18
+                    && person.getDemAge() <= 24
+                    && Les_c4.NotEmployed.equals(person.getLes_c4())) {
+                eligiblePersons.add(person);
+            }
+        }
+        if (eligiblePersons.isEmpty()) {
+            return;
+        }
+
+        int personsToMove = (int) Math.round(effectiveShare * eligiblePersons.size());
+        if (personsToMove <= 0) {
+            return;
+        }
+
+        Collections.shuffle(eligiblePersons, getYoungEmploymentInterventionRandom());
+        for (int ii = 0; ii < Math.min(personsToMove, eligiblePersons.size()); ii++) {
+            eligiblePersons.get(ii).setLes_c4(Les_c4.EmployedOrSelfEmployed);
+        }
+    }
+
+    private Random getYoungEmploymentInterventionRandom() {
+        if (popAlignInnov != null) {
+            return popAlignInnov;
+        }
+        long seed = (randomSeedIfFixed != null) ? randomSeedIfFixed + year : year;
+        return new Random(seed);
     }
 
     private void screenForImperfectTaxDbMatches() {
@@ -3327,6 +3375,14 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public boolean getProjectSocialCare() { return projectSocialCare; }
     public void setProjectSocialCare(boolean projectSocialCare) {
         this.projectSocialCare = projectSocialCare;
+    }
+
+    public Double getYoungNotEmployedToEmployedShare() {
+        return youngNotEmployedToEmployedShare;
+    }
+
+    public void setYoungNotEmployedToEmployedShare(Double youngNotEmployedToEmployedShare) {
+        this.youngNotEmployedToEmployedShare = youngNotEmployedToEmployedShare;
     }
 
     public boolean getEnableIntertemporalOptimisations() {
