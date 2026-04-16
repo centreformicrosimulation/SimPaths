@@ -135,6 +135,18 @@
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-gui</artifactId>
 			<version>4.2.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xmlParserAPIs</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Modern replacement for xmlParserAPIs -->
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>1.4.01</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.miglayout/miglayout -->
 		<dependency>

@@ -3,9 +3,9 @@ name: Deploy Documentation
 on:
   push:
     branches:
-      - main
+      - documentation
     paths:
-      - 'docs/**'
+      - 'documentation/wiki/**'
       - 'mkdocs.yml'
   workflow_dispatch:
 
@@ -33,8 +33,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install MkDocs and dependencies
-        run: |
-          pip install mkdocs-material
+        run: pip install "mkdocs>=1.6,<2.0" mkdocs-material
 
       - name: Build documentation site
         run: mkdocs build --strict

@@ -1,89 +1,177 @@
-# This file can be used to override defaults for multirun arguments.
-# Arguments of the SimPathsMultiRun object overridden by the command-line
+# SimPaths multi-run configuration file.
+# Uncomment and edit any field to override its default value.
+# CLI flags take final precedence over anything set here.
 
-maxNumberOfRuns: 1
-executeWithGui: false
-randomSeed: 606
-startYear: 2019
-endYear: 2022
-popSize: 50000
-# countryString: "United Kingdom"
-# integrationTest: false
+# ── Top-level run arguments ────────────────────────────────────────────────────
 
-# Arguments passed to the SimPathsModel
+maxNumberOfRuns: 1        # number of sequential simulation runs
+executeWithGui: false     # true = launch JAS-mine GUI; false = headless (required on servers/CI)
+randomSeed: 606           # seed for the first run; incremented automatically if randomSeedInnov is true
+startYear: 2019           # first year of simulation (must have matching input/donor data)
+endYear: 2022             # last year of simulation (inclusive)
+popSize: 50000            # simulated population size (larger = more accurate, slower)
+# countryString: "United Kingdom"   # "United Kingdom" or "Italy" (auto-detected from donor DB if omitted)
+# integrationTest: false            # true = write output to a fixed folder for comparison in CI tests
+
+
+# ── model_args: passed to SimPathsModel ───────────────────────────────────────
+# All keys map directly to @GUIparameter fields on SimPathsModel.
+# Values shown are the class defaults.
+
 model_args:
-#    maxAge: 130
-#    fixTimeTrend: true
-#    timeTrendStopsIn: 2017
-#    timeTrendStopsInMonetaryProcesses: 2017
-#    fixRandomSeed: true
-#    sIndexTimeWindow: 5
-#    sIndexAlpha: 2
-#    sIndexDelta: 0
-#    savingRate: 0
-#    initialisePotentialEarningsFromDatabase: true
-#    useWeights: false
-#    useSBAMMatching:
-#    projectMortality: true
-#    alignPopulation: true
-#    alignFertility: true
-#    alignEducation: false
-#    alignInSchool: false
-#    alignCohabitation: false
-#    labourMarketCovid19On: false
-#    projectFormalChildcare: true
-#    donorPoolAveraging: true
-#    alignEmployment: false
-#    projectSocialCare: false
-#    addRegressionStochasticComponent: true
-#    fixRegressionStochasticComponent: false
-#    flagSuppressChildcareCosts: false
-#    flagSuppressSocialCareCosts: false
-#    enableIntertemporalOptimisations: true
-#    flagDefaultToTimeSeriesAverages: true
-#    responsesToLowWageOffer: true
-#    responsesToPension: false
-#    saveImperfectTaxDBMatches: false
-#    useSavedBehaviour: false
-#    readGrid: "laptop serial"
-#    saveBehaviour: true
-#    employmentOptionsOfPrincipalWorker: 3
-#    employmentOptionsOfSecondaryWorker: 3
-#    responsesToEducation: true
-#    responsesToRetirement: false
-#    responsesToHealth: true
-#    responsesToDisability: false
-#    minAgeForPoorHealth: 50
-#    responsesToRegion: false
-#    ignoreTargetsAtPopulationLoad: false
 
-# Arguments that alter processing of the SimPathsMultiRun object
+  # --- Time trend controls ---
+#    maxAge: 130                              # maximum age kept in simulation; persons above this are removed
+#    fixTimeTrend: true                       # if true, freezes the time trend in regression equations
+#    timeTrendStopsIn: 2017                   # year at which the time trend is frozen (if fixTimeTrend: true)
+#    timeTrendStopsInMonetaryProcesses: 2017  # same freeze year applied to monetary/income regressions only
+
+  # --- Random number controls ---
+#    fixRandomSeed: true                      # if true, each run uses the same fixed seed (randomSeedIfFixed)
+
+  # --- Income security (S-Index) ---
+  # The S-Index is an economic (in)security index computed from a rolling window of
+  # equivalised consumption, discounted and weighted by a risk-aversion parameter.
+  # SIndex_p50 is reported in Statistics1.csv each year.
+#    sIndexTimeWindow: 5      # length of rolling window in years (default 5)
+#    sIndexAlpha: 2           # coefficient of relative risk aversion (higher = more sensitivity to drops)
+#    sIndexDelta: 0.98        # annual discount factor applied to past consumption observations
+
+  # --- Savings ---
+#    savingRate: 0.056        # fraction of equivalised disposable income saved (used when IO is disabled);
+                              # default is OECD average UK household saving rate 2000–2019
+
+  # --- Wage initialisation ---
+#    initialisePotentialEarningsFromDatabase: true  # initialise wage potential from donor DB rather than input CSV
+
+  # --- Population weighting ---
+#    useWeights: false        # if true, apply survey weights in alignment and statistics calculations
+
+  # --- Matching method ---
+#    useSBAMMatching:         # if true, use SBAM instead of standard union-matching algorithm
+
+  # --- Demographic projections ---
+#    projectMortality: true   # if false, disables stochastic mortality (population does not die)
+
+  # --- Alignment flags ---
+  # See model-concepts.md for a full explanation of what alignment does.
+#    alignPopulation: true        # align age-sex-region totals to official population projections
+#    alignFertility: true         # scale birth probabilities to match projected fertility rates
+#    alignEducation: false        # align completed education distribution to targets
+#    alignInSchool: false         # align school participation rate (age 16–29) to targets
+#    alignCohabitation: false     # align share of cohabiting individuals to targets
+#    alignEmployment: false       # align employment share to targets
+
+  # --- Labour market modules ---
+#    labourMarketCovid19On: false  # enable reduced-form month-by-month COVID-19 labour market module
+                                   # (applies to years 2020–2021 in the baseline parameterisation)
+
+  # --- Social care and childcare ---
+#    projectFormalChildcare: true          # simulate formal childcare costs
+#    projectSocialCare: false              # simulate social care receipt and provision module
+#    flagSuppressChildcareCosts: false     # if true, set formal childcare costs to zero (scenario use)
+#    flagSuppressSocialCareCosts: false    # if true, set social care costs to zero (scenario use)
+
+  # --- Tax-benefit imputation ---
+#    donorPoolAveraging: true    # if true, average disposable income over k nearest-neighbour donors
+                                 # rather than using the single closest donor; reduces imputation volatility
+
+  # --- Regression stochasticity ---
+#    addRegressionStochasticComponent: true   # include the residual draw in regression predictions
+#    fixRegressionStochasticComponent: false  # if true, draw the residual once and hold it fixed
+                                              # across years (currently applies to wage equations only)
+
+  # --- Time-series defaults ---
+#    flagDefaultToTimeSeriesAverages: false   # if true, use the sample average of time-series variables
+                                              # rather than the year-specific value when data is unavailable
+
+  # --- Intertemporal optimisation (IO) ---
+  # Enables backward-induction life-cycle solution for consumption and labour supply.
+  # Decision grids are pre-computed in year 0; agents look up optimal choices each year.
+  # Computationally intensive — disabled by default.
+#    enableIntertemporalOptimisations: true
+
+  # IO state-space: which characteristics agents respond to when choosing labour/consumption.
+  # Each flag adds a dimension to the grid and increases solve time.
+#    responsesToHealth: true          # include physical health in IO state space
+#    responsesToDisability: false     # include disability status in IO state space
+#    responsesToEducation: true       # include student and education level in IO state space
+#    responsesToPension: false        # include private pension wealth in IO state space
+#    responsesToRetirement: false     # include retirement state (and private pension) in IO state space
+#    responsesToLowWageOffer: true    # include unemployment/low-wage-offer risk in IO state space
+#    responsesToRegion: false         # include geographic region in IO state space
+#    minAgeForPoorHealth: 45          # minimum age from which less-than-perfect health enters state space
+
+  # IO employment options
+#    employmentOptionsOfPrincipalWorker: 3    # number of discrete hours options for the principal earner
+#    employmentOptionsOfSecondaryWorker: 3    # number of discrete hours options for the secondary earner
+
+  # IO grid persistence — save/reuse pre-computed grids across runs
+#    saveBehaviour: true              # save decision grids to output folder after solving
+#    useSavedBehaviour: false         # load grids from a previous run instead of recomputing
+#    readGrid: "test1"                # name of the run whose grids to load (must match a folder in output/)
+
+  # IO diagnostics
+#    saveImperfectTaxDBMatches: false  # log cases where tax-benefit donor matching falls back to a coarser regime
+
+  # --- Population load ---
+#    ignoreTargetsAtPopulationLoad: false  # if true, skip alignment-target checks when loading the initial population
+
+
+# ── innovation_args: parameter variation across sequential runs ────────────────
+# These flags control how parameters change between run 0, run 1, run 2, etc.
+# Useful for sensitivity analysis and uncertainty quantification.
+
 innovation_args:
-#    randomSeedInnov: false
-#    flagDatabaseSetup: false
-#    intertemporalElasticityInnov: false
-#    labourSupplyElasticityInnov: true
+#    randomSeedInnov: true                # if true, increment randomSeed by 1 for each successive run
+                                          # (default true — each run gets a distinct seed)
+#    flagDatabaseSetup: false             # if true, run database setup instead of simulation
+                                          # (equivalent to -DBSetup on the command line)
+#    intertemporalElasticityInnov: false  # if true, applies interest rate shocks across runs:
+                                          #   run 1: +0.0075 (higher return to saving)
+                                          #   run 2: -0.0075 (lower return to saving)
+                                          # requires maxNumberOfRuns >= 3 to see all variants
+#    labourSupplyElasticityInnov: false   # if true, applies disposable income shocks across runs:
+                                          #   run 1: +0.01 (higher net labour income)
+                                          #   run 2: -0.01 (lower net labour income)
+                                          # requires maxNumberOfRuns >= 3 to see all variants
+
+
+# ── collector_args: output collection and export ───────────────────────────────
+# Controls what SimPathsCollector writes to CSV / database each year.
+#
+# Output files:
+#   Statistics1.csv    — income distribution: Gini coefficients, income percentiles, median EDI, S-Index
+#   Statistics2.csv    — demographic validation: partnership rates, employment, health, disability by age/gender
+#   Statistics3.csv    — alignment diagnostics: simulated vs target rates and adjustment factors
+#   EmploymentStatistics.csv — labour market transitions and participation rates
+#   HealthStatistics.csv     — health measures (SF-12, GHQ-12, EQ-5D) by age/gender
 
 collector_args:
-#    calculateGiniCoefficients: false
-#    exportToDatabase: false
-#    exportToCSV: true
-#    persistStatistics: true
-#    persistStatistics2: true
-#    persistStatistics3: true
-#    persistPersons: false
-#    persistBenefitUnits: false
-#    persistHouseholds: false
-#    persistEmploymentStatistics: false
-#    dataDumpStartTime: 0L
-#    dataDumpTimePeriod: 1.0
+#    calculateGiniCoefficients: false   # compute Gini coefficients (also populates GUI charts); off by default for speed
+#    exportToDatabase: false            # write outputs to H2 database (in addition to or instead of CSV)
+#    exportToCSV: true                  # write outputs to CSV files under output/<run>/csv/
+#    persistStatistics: true            # write Statistics1.csv (income distribution)
+#    persistStatistics2: true           # write Statistics2.csv (demographic validation outputs)
+#    persistStatistics3: true           # write Statistics3.csv (alignment diagnostics)
+#    persistPersons: false              # write one row per person per year (large files)
+#    persistBenefitUnits: false         # write one row per benefit unit per year (large files)
+#    persistHouseholds: false           # write one row per household per year
+#    persistEmploymentStatistics: false # write EmploymentStatistics.csv
+#    dataDumpStartTime: 0L              # first year to write output (0 = startYear)
+#    dataDumpTimePeriod: 1.0            # output frequency in years (1.0 = every year)
+
+
+# ── parameter_args: file paths and global flags ───────────────────────────────
 
 parameter_args:
-#  input_directory: input
-#  input_directory_initial_populations: input/InitialPopulations
-#  euromod_output_directory: input/EUROMODoutput
-#  trainingFlag: false
-#  includeYears:
+#  input_directory: input                                         # path to input data folder
+#  input_directory_initial_populations: input/InitialPopulations  # path to initial population CSVs
+#  euromod_output_directory: input/EUROMODoutput                  # path to EUROMOD/UKMOD output files
+#  trainingFlag: false      # if true, use training data from input/…/training/ subfolders
+                            # (set automatically by test configs; do not set for research runs)
+#  includeYears:            # list of policy years for which EUROMOD donor data is available;
+                            # only these years will be included in the donor database
 #    - 2011
 #    - 2012
 #    - 2013
