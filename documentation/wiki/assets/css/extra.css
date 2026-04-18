@@ -670,6 +670,25 @@
   font-size: 0.78rem;
 }
 
+.md-typeset .module-equation {
+  margin: 1rem auto 1.15rem;
+  padding: 0.85rem 1rem;
+  max-width: 42rem;
+  text-align: center;
+  font-family: var(--sp-heading-font), Georgia, serif;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(250,249,245,0.92) 100%);
+  border: 1px solid var(--sp-border-soft);
+  border-radius: 14px;
+  box-shadow: var(--sp-shadow-soft);
+}
+
+.md-typeset .module-inline-equation {
+  font-family: var(--sp-heading-font), Georgia, serif;
+  white-space: nowrap;
+}
+
 .md-typeset table:not([class]) {
   border-radius: 14px;
   border: 1px solid var(--sp-border-soft);

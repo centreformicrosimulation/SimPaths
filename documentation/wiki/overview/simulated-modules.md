@@ -287,12 +287,14 @@ When wealth is not projected by the model, then the incidence of capital income 
 
 For individuals simulated to be in receipt of capital income, the amount of capital income is described by linear regression models that condition on gender, age, lagged health status, lagged gross employment income, lagged capital income, region, and year for individual in continuous education. Individuals not in continuous education are also distinguished by their level of education, lagged employment status, and lagged household composition.
 
-When wealth is explicitly projected by the model, then capital income is the product of net asset holdings and an assumed rate of return. The rate of return varies by year, and by the value of benefit unit net wealth, $w_{i,t}$, as described by:
+When wealth is explicitly projected by the model, then capital income is the product of net asset holdings and an assumed rate of return. The rate of return varies by year, and by the value of benefit unit net wealth, <span class="module-inline-equation">w<sub>i,t</sub></span>, as described by:
 
-$r_{i,t} = r_{a,t}$ if $w_{i,t} >= 0$ and  
-$r_{dl,t} + (r_{du,t} - r_{dl,t}) \phi_{i,t}$ otherwise
+<div class="module-equation">
+  <div>r<sub>i,t</sub> = r<sub>a,t</sub>, if w<sub>i,t</sub> &ge; 0</div>
+  <div>r<sub>i,t</sub> = r<sub>dl,t</sub> + (r<sub>du,t</sub> - r<sub>dl,t</sub>) &phi;<sub>i,t</sub>, otherwise</div>
+</div>
 
-where $i$ denotes the benefit unit and $t$ denotes time. $1 \ge \phi_{i,t} \ge 0$ denotes the (bounded) ratio of benefit unit debt to full-time potential earnings. Assuming $r_{du,t} \ge r_{dl,t}$ reflects a ‘soft constraint’ where interest rates increase with indebtedness.
+where <span class="module-inline-equation">i</span> denotes the benefit unit and <span class="module-inline-equation">t</span> denotes time. <span class="module-inline-equation">1 &ge; &phi;<sub>i,t</sub> &ge; 0</span> denotes the (bounded) ratio of benefit unit debt to full-time potential earnings. Assuming <span class="module-inline-equation">r<sub>du,t</sub> &ge; r<sub>dl,t</sub></span> reflects a ‘soft constraint’ where interest rates increase with indebtedness.
 
 
 ## 7. Labour income 
@@ -392,9 +394,11 @@ When expectation are explicit, the model evaluates solutions to the lifetime dec
 _Assets accumulation_  
 Net wealth is the key transition mechanism that balances intertemporal behavioural incentives when forward-looking expectations are treated explicitly by the model. In this case, dynamic evolution of wealth in most periods is described by the accounting identity:
 
-$w_{i,t} = w_{i,t-1} + y_{i,t} - c_{i,t} - \bar{c}_{i,t}$
+<div class="module-equation">
+  <div>w<sub>i,t</sub> = w<sub>i,t-1</sub> + y<sub>i,t</sub> - c<sub>i,t</sub> - c&#772;<sub>i,t</sub></div>
+</div>
 
-where $w_{i,t}$ denotes the net wealth of benefit unit $i$ in period $t$, $y_{i,t}$ disposable income, $c_{i,t}$ discretionary consumption, and $\bar{c_{i,t}}$ non-discretionary expenditure. The only departures from equation above are at the time of retirement if $w_{i,t} > 0$, when a fixed fraction of net wealth is converted into a fixed life annuity.
+where <span class="module-inline-equation">w<sub>i,t</sub></span> denotes the net wealth of benefit unit <span class="module-inline-equation">i</span> in period <span class="module-inline-equation">t</span>, <span class="module-inline-equation">y<sub>i,t</sub></span> disposable income, <span class="module-inline-equation">c<sub>i,t</sub></span> discretionary consumption, and <span class="module-inline-equation">c&#772;<sub>i,t</sub></span> non-discretionary expenditure. The only departures from the equation above are at the time of retirement if <span class="module-inline-equation">w<sub>i,t</sub> &gt; 0</span>, when a fixed fraction of net wealth is converted into a fixed life annuity.
 
 
 _Homeownership_  
