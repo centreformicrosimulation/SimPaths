@@ -22,7 +22,7 @@ The education module determines transitions into and out of student status. Stud
 
 <br>
 
-<img width="1000" height="650" alt="Education" src="../../figures/modules/education_module.png" />
+<img width="1000" height="650" alt="Education" src="/figures/modules/education_module.png" />
 
 _Student status_  
 
@@ -48,7 +48,7 @@ The health module projects an individual’s health status, comprising both self
 
 Physical health status is projected on a discrete 5-point scale, designed to reflect self-reported survey responses (between “poor” and “excellent” health). Physical health dynamics are based on an ordered probit, distinguishing those still in continuous education. For continuing full-time students, the ordered probit conditions on gender, age, lagged benefit unit income quintile, lagged physical health status, region, and year. The same variables are considered for individuals who have left continuous education, with the addition of education level, lagged employment status, and lagged benefit unit composition.
 
-<img width="600" height="600" alt="Health (self-rated)" src="../../figures/modules/health_module.png" />
+<img width="600" height="600" alt="Health (self-rated)" src="/figures/modules/health_module.png" />
 
 </details>
 
@@ -58,7 +58,7 @@ Physical health status is projected on a discrete 5-point scale, designed to ref
 
 Any individual aged 16 and above who is not in continuous education can become long-term sick or disabled. The probability of being long-term sick or disabled is described by a probit equation defined with respect to lagged disability status, prevailing and lagged physical health status, gender, age, education, income quintile, and lagged family demographics.
 
-<img width="700" height="650" alt="Disability" src="../../figures/modules/disability_module.png" />
+<img width="700" height="650" alt="Disability" src="/figures/modules/disability_module.png" />
 
 This Disability module is integrated in the `Person.health()` (Physical health) method in the current SimPaths model. 
 We split disability out for illustration purpose. 
@@ -72,14 +72,14 @@ We split disability out for illustration purpose.
 * Psychological distress 1 (baseline level and caseness)
 In each simulation cycle, a baseline level of psychological distress for individuals aged 16 and over is determined using the 12-item General Health Questionnaire (GHQ-12). Two indicators of psychological distress are computed: a Likert score, between 0 and 36, estimated using a linear regression model; and a dichotomous indicator of the presence of potentially clinically significant common mental disorders  is obtained using a logistic regression model. Both specifications are conditional on the lagged number of dependent children, lagged health status, lagged mental health, gender, age, level of education, household composition, region, and year.
 
-<img width="750" height="650" alt="Mental health (levels)" src="../../figures/modules/mental_health_levels_module.png" />\
+<img width="750" height="650" alt="Mental health (levels)" src="/figures/modules/mental_health_levels_module.png" />
 **Figure, psychological distress in levels**
 
 
 * Psychological distress 2 (impact of economic transitions and exposure to the Covid-19 pandemic)
 The baseline measures of the level and caseness of psychological distress described above are modified by the effects of economic transitions and non-economic exposure to the Covid-19 pandemic. Fixed effects regressions are used to estimate the direct impact of transitions from employment to non-employment, non-employment to employment, non-employment to long-term non-employment, non-poverty to poverty, poverty to non-poverty, and poverty to long-term poverty, as well as changes in growth rate of household income, a decrease in household income, and non-economic effect of the exposure to Covid-19 pandemic in years 2020 and 2021. The effects of economic transitions are estimated on pre-pandemic data to ensure validity in other periods. The non-economic effects of the pandemic are estimated using a multilevel mixed-effects generalized linear model. 
 
-<img width="650" height="650" alt="Mental health (cases)" src="../../figures/modules/mental_health_cases_module.png" />\
+<img width="650" height="650" alt="Mental health (cases)" src="/figures/modules/mental_health_cases_module.png" />
 **Figure, psychological distress in cases**
 
 </details>
@@ -97,7 +97,7 @@ Females in couples can give birth to a (single) child in each simulated year, as
 <details markdown>
 <summary><b> 4.1 Family composition module code structure </b></summary>
 <br>
-<img width="780" height="630" alt="Family composition module overview" src="../../figures/modules/family_composition_module.png" />
+<img width="780" height="630" alt="Family composition module overview" src="/figures/modules/family_composition_module.png" />
 
 This figure illustrates the timeline of the family composition module as defined by the `buildSchedule()` method in the SimPathsModel class. 
 Every year the model conducts union matching to form households and benefit unions. Specifically, the model executes:
@@ -144,7 +144,7 @@ Individuals who enter a partnership are matched using either a parametric or non
 
 The cohabitation method (in Person class) computes a group of persons to be considered in the union matching process (a map of personsToMatch).
 
-<img width="1000" height="700" alt="Partnership method" src="../../figures/modules/partnership_module.png" />
+<img width="1000" height="700" alt="Partnership method" src="/figures/modules/partnership_module.png" />
 
 
 
@@ -157,7 +157,7 @@ The cohabitation method (in Person class) computes a group of persons to be cons
 
 The `UnionMatching` class receives sets of unmatched males and females (passed as unmatched, constructed from personsToMatch) and forms new couples by creating benefit units and households via male.setupNewBenefitUnit(female, true). 
 
-<img width="1000" height="620" alt="UnionMatching" src="../../figures/modules/union_matching_module.png" />
+<img width="1000" height="620" alt="UnionMatching" src="/figures/modules/union_matching_module.png" />
 
 
 The key method, `evaluateGM()`, implements the global matching procedure as follows:
@@ -212,7 +212,7 @@ Females aged 18 to 44 can give birth to a child whenever they are identified in 
 
 <br>
 
-<img width="600" height="670" alt="fertility module" src="../../figures/modules/fertility_module.png" />
+<img width="600" height="670" alt="fertility module" src="/figures/modules/fertility_module.png" />
 
 _Alignment_
 The number of projected births is aligned to the number of newborns supplied by the official projections used for population alignment. The alignment procedure randomly samples fertile women and adjusts the outcome of the fertility process until the target number of newborns has been met. 
@@ -390,12 +390,12 @@ Although net wealth is not disaggregated in the model, the incidence of homeowne
 A secondary subjective-wellbeing process adjusts estimates obtained by the primary process to account for the effect of exposure to labour market transitions, such as moving in and out of employment and/or poverty. 
 Specifically, in the SimPaths model, method `Person.healthMentalHM2level()` corresponds to the Step 2 of such a mental health evaluation, as illustrated in the right half of the Figure 1 below:
 
-<img width="750" height="650" alt="Mental health (levels)" src="../../figures/modules/mental_health_levels_module.png" />\
+<img width="750" height="650" alt="Mental health (levels)" src="/figures/modules/mental_health_levels_module.png" />
 **Figure 1, psychological distress in levels**
 
 The first and second processes for mental health in cases are combined, as illustrated in Figure 2, where processes `HM2CasesFemales` and `HM2CasesMales` correspond to the second process. 
 
-<img width="650" height="650" alt="Mental health (cases)" src="../../figures/modules/mental_health_cases_module.png" />\
+<img width="650" height="650" alt="Mental health (cases)" src="/figures/modules/mental_health_cases_module.png" />
 **Figure 2, psychological distress in cases**
  
 
@@ -403,4 +403,3 @@ The first and second processes for mental health in cases are combined, as illus
 
 ## 11. Statistical display 
 At the end of each simulated year, SimPaths generates a series of year specific summary statistics. All of these statistics are saved for post-simulation analysis, with a subset of results also reported graphically as the simulation proceeds. 
-
