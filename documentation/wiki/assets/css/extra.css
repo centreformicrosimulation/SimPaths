@@ -652,6 +652,24 @@
    TABLES
 ═══════════════════════════════════════════════ */
 
+.md-typeset figure.module-diagram {
+  margin: 1.35rem auto;
+  text-align: center;
+}
+
+.md-typeset figure.module-diagram img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.md-typeset figure.module-diagram figcaption {
+  margin-top: 0.55rem;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.78rem;
+}
+
 .md-typeset table:not([class]) {
   border-radius: 14px;
   border: 1px solid var(--sp-border-soft);
