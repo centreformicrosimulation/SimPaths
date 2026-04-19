@@ -879,6 +879,7 @@ public class Parameters {
     public static boolean flagSuppressChildcareCosts;
     public static boolean flagSuppressSocialCareCosts;
     public static boolean donorPoolAveraging;
+    public static boolean taxDonorUpratingByWage;
     public static boolean lifetimeIncomeImpute;
 
     public static double realInterestRateInnov;
@@ -908,10 +909,11 @@ public class Parameters {
      */
     public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations,
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
-                                      boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
-                                      Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
-                                      double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
-                                      boolean flagSuppressSocialCareCosts1, boolean lifetimeIncomeImpute1) {
+                                      boolean taxDonorUpratingByWage1, boolean fixTimeTrend, boolean defaultToTimeSeriesAverages,
+                                      boolean taxDBMatches, Integer timeTrendStops, int startYearModel, int endYearModel,
+                                      double interestRateInnov1, double disposableIncomeFromLabourInnov1,
+                                      boolean flagSuppressChildcareCosts1, boolean flagSuppressSocialCareCosts1,
+                                      boolean lifetimeIncomeImpute1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -942,6 +944,7 @@ public class Parameters {
         flagSuppressChildcareCosts = flagSuppressChildcareCosts1;
         flagSuppressSocialCareCosts = flagSuppressSocialCareCosts1;
         donorPoolAveraging = donorPoolAveraging1;
+        taxDonorUpratingByWage = taxDonorUpratingByWage1;
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
         lifetimeIncomeImpute = lifetimeIncomeImpute1;

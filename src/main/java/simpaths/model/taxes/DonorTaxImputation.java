@@ -3,6 +3,7 @@ package simpaths.model.taxes;
 
 import microsim.engine.SimulationEngine;
 import org.apache.commons.lang3.tuple.Triple;
+import simpaths.model.enums.TimeSeriesVariable;
 import simpaths.model.enums.UpratingCase;
 
 import java.util.*;
@@ -210,7 +211,7 @@ public class DonorTaxImputation {
         double oi = keys.getOriginalIncomePerWeek();
         double si = keys.getSecondIncomePerWeek();
         double cc = keys.getChildcareCostPerWeek();
-        double[] targetVector = getMeasurementVector(keys.getPriceYear(), oi, flagSecondIncome, si, flagChildcareCost, cc);
+        double[] targetVector = getMeasurementVector(keys.getPriceYear(), systemYear, oi, flagSecondIncome, si, flagChildcareCost, cc);
         for (int increment=-1; increment<2; increment=increment+2) {
             // search backward and then forward through candidate list
 
@@ -425,12 +426,15 @@ public class DonorTaxImputation {
         throw new RuntimeException("attempt to evaluate index of unrecognised target feature");
     }
 
-    private double[] getMeasurementVector(int priceYear, double originalIncomePerWeek, boolean flagSecondIncome, double secondIncomePerWeek,
-                                          boolean flagChildcareCost, double childcareCostPerWeek) {
+    private double[] getMeasurementVector(int priceYear, int systemYear, double originalIncomePerWeek, boolean flagSecondIncome,
+                                          double secondIncomePerWeek, boolean flagChildcareCost, double childcareCostPerWeek) {
 
-        double oiAdj = Parameters.normaliseWeeklyIncome(priceYear, originalIncomePerWeek);
-        double siAdj = Parameters.normaliseWeeklyIncome(priceYear, secondIncomePerWeek);
-        double ccAdj = Parameters.normaliseWeeklyIncome(priceYear, childcareCostPerWeek);
+        double wageScale = Parameters.taxDonorUpratingByWage
+                ? Parameters.getTimeSeriesValue(systemYear, TimeSeriesVariable.WageGrowth)
+                : 1.0;
+        double oiAdj = Parameters.normaliseWeeklyIncome(priceYear, originalIncomePerWeek * wageScale);
+        double siAdj = Parameters.normaliseWeeklyIncome(priceYear, secondIncomePerWeek * wageScale);
+        double ccAdj = Parameters.normaliseWeeklyIncome(priceYear, childcareCostPerWeek * wageScale);
         if (!flagSecondIncome && !flagChildcareCost) {
             return new double[] {oiAdj};
         } else if (flagSecondIncome && !flagChildcareCost) {

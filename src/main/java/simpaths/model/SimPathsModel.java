@@ -204,6 +204,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "Average over donor pool when imputing transfer payments")
     public boolean donorPoolAveraging = true;
 
+    @GUIparameter(description = "Scale simulated income by real wage growth (instead of price growth) before tax donor matching")
+    public boolean taxDonorUpratingByWage = false;
+
     private int ordering = Parameters.MODEL_ORDERING;    //Used in Scheduling of model events.  Schedule model events at the same time as the collector and observer events, but a lower order, so will be fired before the collector and observer have updated.
 
     private Set<Person> persons;
@@ -380,9 +383,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // load model parameters
         Parameters.loadParameters(country, maxAge, enableIntertemporalOptimisations, projectFormalChildcare,
-                projectSocialCare, donorPoolAveraging, fixTimeTrend, flagDefaultToTimeSeriesAverages, saveImperfectTaxDBMatches,
-                timeTrendStopsIn, startYear, endYear, interestRateInnov, disposableIncomeFromLabourInnov, flagSuppressChildcareCosts,
-                flagSuppressSocialCareCosts, lifetimeIncomeImpute);
+                projectSocialCare, donorPoolAveraging, taxDonorUpratingByWage, fixTimeTrend, flagDefaultToTimeSeriesAverages,
+                saveImperfectTaxDBMatches, timeTrendStopsIn, startYear, endYear, interestRateInnov,
+                disposableIncomeFromLabourInnov, flagSuppressChildcareCosts, flagSuppressSocialCareCosts, lifetimeIncomeImpute);
         if (lifetimeIncomeGenerate) {
             ManagerProjectLifetimeIncomes.run(log, lifetimeIncomeStartBirthYear,
                     lifetimeIncomeEndBirthYear, lifetimeIncomeEndAge, lifetimeIncomeCohortSize, lifetimeIncomeWriteToCSV,
@@ -721,6 +724,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             line = "projectFormalChildcare: " + projectFormalChildcare;
             pw.println(line);
             line = "donorPoolAveraging: " + donorPoolAveraging;
+            pw.println(line);
+            line = "taxDonorUpratingByWage: " + taxDonorUpratingByWage;
             pw.println(line);
             line = "initialisePotentialEarningsFromDatabase: " + initialisePotentialEarningsFromDatabase;
             pw.println(line);
@@ -2928,6 +2933,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void setProjectFormalChildcare(boolean projectFormalChildcare) { this.projectFormalChildcare = projectFormalChildcare; }
     public boolean getDonorPoolAveraging() { return donorPoolAveraging; }
     public void setDonorPoolAveraging(boolean val) { donorPoolAveraging = val; }
+    public boolean getTaxDonorUpratingByWage() { return taxDonorUpratingByWage; }
+    public void setTaxDonorUpratingByWage(boolean val) { taxDonorUpratingByWage = val; }
 
     public Integer getPopSize() {
         return popSize;
