@@ -430,7 +430,7 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
         public void update() {
 
             //Ydses_c5
-            householdsGrossIncomesCS = new CrossSection.Double(model.getBenefitUnits(), BenefitUnit.class, "getTmpHHYpnbihs_dv_asinh", true); //Populate CS
+            householdsGrossIncomesCS = new CrossSection.Double(model.getBenefitUnits(), BenefitUnit.class, "getTmpHHYpnbihs_dv_asinhNoNull", true); //Populate CS
 
             percentileFunctionHouseholdsGrossIncomes = new PercentileArrayFunction(householdsGrossIncomesCS); //Get p50
             percentileFunctionHouseholdsGrossIncomes.updateSource();
@@ -860,6 +860,14 @@ public class SimPathsCollector extends AbstractSimulationCollectorManager implem
 
     public void setPersistStatistics2(boolean val) {
         persistStatistics2 = val;
+    }
+
+    public boolean isPersistAlignmentAdjustmentFactors() {
+        return persistAlignmentAdjustmentFactors;
+    }
+
+    public void setPersistAlignmentAdjustmentFactors(boolean val) {
+        persistAlignmentAdjustmentFactors = val;
     }
 
     public void calculateAtRiskOfPoverty() {

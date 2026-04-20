@@ -1527,10 +1527,10 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 					}
 					for (Gender gender : Gender.values()) {
 						GenderEducationWorkingCSfilter genderEducationWorkingFilter = new GenderEducationWorkingCSfilter(gender, edu);
-						Weighted_CrossSection.Double DispIncWorkingCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDisposableIncomeMonthly", true); // Note: these are nominal values for each simulated year
+						Weighted_CrossSection.Double DispIncWorkingCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDisposableIncomeMonthlyNoNull", true); // Note: these are nominal values for each simulated year
 						DispIncWorkingCS.setFilter(genderEducationWorkingFilter);
 						GenderEducationCSfilter genderEducationCSfilter = new GenderEducationCSfilter(gender, edu);
-						Weighted_CrossSection.Double DispIncAllCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDisposableIncomeMonthly", true); // Note: these are nominal values for each simulated year
+						Weighted_CrossSection.Double DispIncAllCS = new Weighted_CrossSection.Double(model.getPersons(), Person.class, "getDisposableIncomeMonthlyNoNull", true); // Note: these are nominal values for each simulated year
 						DispIncAllCS.setFilter(genderEducationCSfilter);
 						DispIncByGenderAndEducationPlotter.addSeries("Workers (" + gender.toString() + ", " + edu.toString() + ")", new Weighted_MeanArrayFunction(DispIncWorkingCS), null, colorArrayList.get(colorCounter), false);
 						colorCounter++;

@@ -16,6 +16,9 @@ import simpaths.data.MultiValEvent;
 import simpaths.data.Parameters;
 import simpaths.data.RegressionName;
 import simpaths.data.filters.FertileFilter;
+import simpaths.model.annotations.Lag;
+import simpaths.model.annotations.NullInitialised;
+import simpaths.model.annotations.UpdateManager;
 import simpaths.model.decisions.Axis;
 import simpaths.model.decisions.DecisionParams;
 import simpaths.model.enums.*;
@@ -64,89 +67,89 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Enumerated(EnumType.STRING) private SampleExit demExitSample = SampleExit.NotYet;  //entry to sample via international immigration
 
     // person level variables
-    private int demAge; //Age
+    private Integer demAge; //Age
     @Column(name = "demAgeSq") private Integer demAgeSq; //Age squared
     private Dcpst demPartnerStatus;
     @Enumerated(EnumType.STRING) private Indicator demAdultChildFlag;
-    @Transient private boolean demIoFlag;         // true if a dummy person instantiated for IO decision solution
-    @Enumerated(EnumType.STRING) private Gender demMaleFlag;             // gender
-    @Enumerated(EnumType.STRING) private Education eduHighestC4;       //Education level (4 categories incl. in education)
-    @Transient private Education eduHighestC4L1;  //Lag(1) of education level
+    @Transient private Boolean demIoFlag = false;                           // true if a dummy person instantiated for IO decision solution
+    @Enumerated(EnumType.STRING) private Gender demMaleFlag;                // gender
+    @Enumerated(EnumType.STRING) private Education eduHighestC4;            //Education level (4 categories incl. in education)
+    @Lag(field="eduHighestC4") @Transient private Education eduHighestC4L1;  //Lag(1) of education level
     @Enumerated(EnumType.STRING) private Education eduHighestMotherC4;      //Mother's education level
     @Enumerated(EnumType.STRING) private Education eduHighestFatherC4;      //Father's education level
     @Enumerated(EnumType.STRING) private Ethnicity demEthnC6;          //Ethnicity
     @Enumerated(EnumType.STRING) private Indicator eduSpellFlag;          // in continuous education
-    @Enumerated(EnumType.STRING) private Indicator eduSpellFlagL1;          // in continuous education
+    @Lag(field="eduSpellFlag") @Enumerated(EnumType.STRING) private Indicator eduSpellFlagL1;          // in continuous education
     @Enumerated(EnumType.STRING) private Indicator eduReturnFlag;          // return to education
     @Enumerated(EnumType.STRING) private Les_c4 labC4;      //Activity (employment) status
     @Enumerated(EnumType.STRING) private Les_c7_covid labC7Covid; //Activity (employment) status used in the Covid-19 models
-    @Transient private Les_c4 labC4L1;		//Lag(1) of activity_status
-    @Transient private Les_c7_covid labC7CovidL1;     //Lag(1) of 7-category activity status
+    @Lag(field="labC4") @Transient private Les_c4 labC4L1;		//Lag(1) of activity_status
+    @Lag(field="labC7Covid") @Transient private Les_c7_covid labC7CovidL1;     //Lag(1) of 7-category activity status
     @Column(name="labWorkHist") private Integer labEmpNyear;                  //Work history in months (number of months in employment) (Note: this is monthly in EM, but simulation updates annually so increment by 12 months).
     @Enumerated(EnumType.STRING) private Indicator healthDsblLongtermFlag;	//Long-term sick or disabled if = 1
-    @Transient private Indicator healthDsblLongtermFlagL1; //Lag(1) of long-term sick or disabled
+    @Lag(field="healthDsblLongtermFlag") @Transient private Indicator healthDsblLongtermFlagL1; //Lag(1) of long-term sick or disabled
     @Enumerated(EnumType.STRING) @Column(name="careNeedFlag") private Indicator careNeedFlag;
     @Column(name="careHrsFormal") private Double careHrsFormalWeek;
     @Column(name="careFormalX") private Double careFormalX;
     @Column(name="careHrsInformal") private Double careHrsInformalWeek;
     private Boolean labWageOfferLowFlag;
-    @Transient private Boolean labWageOfferLowFlagL1;
-    @Transient private SocialCareReceipt careReceivedFlag;
-    @Transient private Boolean careFormalFlag;
-    @Transient private Boolean careFromInformalFlag;
+    @Lag(getter="getLowWageOffer") @Transient private Boolean labWageOfferLowFlagL1;
+    @NullInitialised @Transient private SocialCareReceipt careReceivedFlag;
+    @NullInitialised @Transient private Boolean careFormalFlag;
+    @NullInitialised @Transient private Boolean careFromInformalFlag;
     @Column(name="careHrsProvidedWeek") private Double careHrsProvidedWeek;
     @Enumerated(EnumType.STRING) @Column(name="careProvidedFlag") private SocialCareProvision careProvidedFlag;
-    @Transient private SocialCareProvision careProvidedFlagL1;
-    @Transient private Indicator careNeedFlagL1;
-    @Transient private Double careHrsFormalWeekL1;
-    @Transient private Double careHrsInformalWeekL1;
-    @Transient private Double careHrsProvidedWeekL1;
-    @Transient private Boolean demPrptyFlagL1;
+    @Lag(field="careProvidedFlag") @Transient private SocialCareProvision careProvidedFlagL1;
+    @Lag(field="careNeedFlag") @Transient private Indicator careNeedFlagL1;
+    @Lag(field="careHrsFormalWeek") @Transient private Double careHrsFormalWeekL1;
+    @Lag(field="careHrsProvidedWeek") @Transient private Double careHrsProvidedWeekL1;
+    @Lag(field="careHrsInformalWeek") @Transient private Double careHrsInformalWeekL1;
+    @Lag(getter="isHousingOwned") @Transient private Boolean demPrptyFlagL1;
 
     // partner lags
-    @Transient private Dcpst demPartnerStatusL1;            // lag partnership status
-    @Transient private Dcpst demPartnerStatusL2;            // lag (2) partnership status
-    @Transient private Education eduHighestPartnerC4L1;     //Lag(1) of partner's education
-    @Transient private Dhe healthPartnerSelfRatedL1;
-    @Transient private Lesdf_c4 labStatusPartnerAndOwnC4L1;      //Lag(1) of own and partner's activity status
-    @Transient private Long idPartnerL1;
-    @Transient private HouseholdStatus demStatusHhL1;		//Lag(1) of household_status
-    @Transient private Integer demAgePartnerDiffL1;        //Lag(1) of difference between ages of partners in union
-    @Transient private Double yPersAndPartnerGrossDiffMonthL1;      //Lag(1) of difference between own and partner's gross personal non-benefit income
+    @Lag(field="demPartnerStatusL1") @Transient private Dcpst demPartnerStatusL2;            // lag (2) partnership status
+    @Lag(getter="getDcpst") @Transient private Dcpst demPartnerStatusL1;            // lag partnership status
+    @Lag(getter="getEduHighestPartner") @Transient private Education eduHighestPartnerC4L1;     //Lag(1) of partner's education
+    @Lag(getter="getHealthPartner") @Transient private Dhe healthPartnerSelfRatedL1;
+    @Lag(getter="getLesdf_c4") @Transient private Lesdf_c4 labStatusPartnerAndOwnC4L1;      //Lag(1) of own and partner's activity status
+    @Lag(getter="getIdPartner") @Transient private Long idPartnerL1;
+    @Lag(getter="getHouseholdStatus") @Transient private HouseholdStatus demStatusHhL1;		//Lag(1) of household_status
+    @Lag(getter="getAgeDifferencePartner") @Transient private Integer demAgePartnerDiffL1;        //Lag(1) of difference between ages of partners in union
+    @Lag(getter="getYnbcpdf_dv") @Transient private Double yPersAndPartnerGrossDiffMonthL1;      //Lag(1) of difference between own and partner's gross personal non-benefit income
 
     @Enumerated(EnumType.STRING) private Indicator eduExitSampleFlag;    // year left education
-    @Transient private Boolean demGiveBirthFlag;
-    @Transient private Boolean eduLeaveSchoolFlag;
-    @Transient private Boolean demBePartnerFlag;
-    @Transient private Boolean demAlignPartnerProcess;
-    @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
+    @NullInitialised @Transient private Boolean demGiveBirthFlag;
+    @NullInitialised @Transient private Boolean eduLeaveSchoolFlag;
+    @NullInitialised @Transient private Boolean demBePartnerFlag;
+    @NullInitialised @Transient private Boolean demAlignPartnerProcess;
+    @NullInitialised @Transient private Boolean demLeavePartnerFlag; // Used in partnership alignment process. Indicates that this person has found partner in a test run of union matching.
     @Column(name="wgt") private Double wgt;
     @Column(name="healthPsyDstrss0to12") private Double healthPsyDstrss0to12; //Psychological distress GHQ-12 0-12 caseness score
-    @Transient private Double healthPsyDstrss0to12L1;
-    @Transient private Dhe healthSelfRatedL1;
+    @Lag(field="healthPsyDstrss0to12") @Transient private Double healthPsyDstrss0to12L1;
+    @Lag(field="healthSelfRated") @Transient private Dhe healthSelfRatedL1;
     @Enumerated(EnumType.STRING) private Dhe healthSelfRated;
     private Double healthWbScore0to36; //Psychological distress GHQ-12 Likert scale
-    @Transient private Double healthWbScore0to36L1; //Lag(1) of dhm
+    @Lag(field="healthWbScore0to36") @Transient private Double healthWbScore0to36L1; //Lag(1) of dhm
     private Double healthMentalMcs;  //mental well-being: SF12 mental component summary score
-    @Transient private Double healthMentalMcsL1;  //mental well-being: SF12 mental component summary score lag 1
+    @Lag(field="healthMentalMcs") @Transient private Double healthMentalMcsL1;  //mental well-being: SF12 mental component summary score lag 1
     private Double healthPhysicalPcs;  //physical well-being: SF12 physical component summary score
-    @Transient private Double healthPhysicalPcsL1;  //physical well-being: SF12 physical component summary score lag 1
+    @Lag(field="healthPhysicalPcs") @Transient private Double healthPhysicalPcsL1;  //physical well-being: SF12 physical component summary score lag 1
     private Double healthMentalPartnerMcs; //mental well-being: SF12 mental component summary score (partner)
     private Double healthPhysicalPartnerPcs; //physical well-being: SF12 physical component summary score (partner)
     private Double demLifeSatScore0to10;      //life satisfaction - score 0-10
-    @Transient private Double demLifeSatScore0to10L1;      //life satisfaction - score 0-10 lag 1
+    @Lag(field="demLifeSatScore0to10") @Transient private Double demLifeSatScore0to10L1;      //life satisfaction - score 0-10 lag 1
     @Column(name="demLifeSatEQ5D") private Double demLifeSatEQ5D;
     @Column(name="yFinDstrssFlag") private Boolean yFinDstrssFlag;
-    @Transient private Boolean yBenReceivedFlagL1; // Lag(1) of whether person receives benefits
-    @Transient private Boolean yBenReceivedFlag; // Does person receive benefits
+    @Lag(field="yBenReceivedFlag") @Transient private Boolean yBenReceivedFlagL1; // Lag(1) of whether person receives benefits
+    @NullInitialised @Transient private Boolean yBenReceivedFlag; // Does person receive benefits
     @Column(name="yBenUCReceivedFlag") private Boolean yBenUCReceivedFlag; // Person receives UC
-    @Transient private Boolean yBenUCReceivedFlagL1;
+    @Lag(field="yBenUCReceivedFlag") @Transient private Boolean yBenUCReceivedFlagL1;
     @Column(name="yBenNonUCReceivedFlag") private Boolean yBenNonUCReceivedFlag;  // Person receives a benefit which is not UC
-    @Transient private Boolean yBenNonUCReceivedFlagL1;
-    @Column(name="yLifeTime") private Double yLifeTime;                  // mean annual equivalised household disposable income by age
+    @Lag(field="yBenNonUCReceivedFlag") @Transient private Boolean yBenNonUCReceivedFlagL1;
+    @NullInitialised @Column(name="yLifeTime") private Double yLifeTime;                  // mean annual equivalised household disposable income by age
 
     @Enumerated(EnumType.STRING) private Labour labHrsWorkEnumWeek;			//Number of hours of labour supplied each week
-    @Transient private Labour labHrsWorkEnumWeekL1; // Lag(1) (previous year's value) of weekly labour supply
+    @Lag(getter="getLabourSupplyWeekly") @Transient private Labour labHrsWorkEnumWeekL1; // Lag(1) (previous year's value) of weekly labour supply
     @Column(name = "HOURS_WORKED_WEEKLY") private Integer labHrsWorkWeek;
     private Integer labHrsWorkWeekL1; // Lag(1) of hours worked weekly - use to initialise labour supply weekly_L1 (TODO)
 
@@ -156,68 +159,68 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 //	is a separate process in the simulation, and it is computed for every adult
 //	individual in the simulated population, in each simulated period.
     @Column(name="labWageHrly") private Double labWageFullTimeHrly;		//Is hourly rate.  Initialised with value: ils_earns / (4.34 * lhw), where lhw is the weekly hours a person worked in EUROMOD input data
-    @Column(name="labWageFullTimeHrlyL1") private Double labWageFullTimeHrlyL1; // Lag(1) of potentialHourlyEarnings
+    @Lag(field="labWageFullTimeHrly") @Column(name="labWageFullTimeHrlyL1") private Double labWageFullTimeHrlyL1; // Lag(1) of potentialHourlyEarnings
     @Transient private Series.Double yDispEquivYear;
-    private Double xEquivYear;
+    @NullInitialised private Double xEquivYear;
     @Transient private Series.Double xEquivYearL1;
     private Integer demPartnerNYear; //Number of years in partnership
     @Transient private Integer demPartnerNYearL1; //Lag(1) of number of years in partnership
     private Double yNonBenPersGrossMonth; // asinh of personal non-benefit income per month
-    @Transient private Double yNonBenPersGrossMonthL1; //Lag(1) of gross personal non-benefit income
+    @Lag(getter="getyNonBenPersGrossMonth") @Transient private Double yNonBenPersGrossMonthL1; //Lag(1) of gross personal non-benefit income
     private Double yMiscPersGrossMonth; // asinh of non-employment non-benefit income per month (capital and pension)
     private Double yCapitalPersMonth; // asinh of capital income per month
     private Double yPensPersGrossMonth; // asinh of pension income per month
-    @Transient private Double yCapitalPersMonthL1; //Lag(1) of ypncp
-    @Transient private Double yCapitalPersMonthL2; //Lag(2) of capital income
-    @Transient private Double yPensPersGrossMonthL1; //Lag(1) of pension income
-    @Transient private Double yPensPersGrossMonthL2; //Lag(2) of pension income
-    @Transient private Double yMiscPersGrossMonthL1; //Lag(1) of gross personal non-benefit non-employment income
-    @Transient private Double yMiscPersGrossMonthL2; //Lag(2) of gross personal non-benefit non-employment income
-    @Transient private Double yMiscPersGrossMonthL3; //Lag(3) of gross personal non-benefit non-employment income
+    @Lag(field="yCapitalPersMonthL1") @Transient private Double yCapitalPersMonthL2; //Lag(2) of capital income
+    @Lag(getter="getyCapitalPersMonth") @Transient private Double yCapitalPersMonthL1; //Lag(1) of ypncp
+    @Lag(field="yPensPersGrossMonthL1") @Transient private Double yPensPersGrossMonthL2; //Lag(2) of pension income
+    @Lag(getter="getyPensPersGrossMonth") @Transient private Double yPensPersGrossMonthL1; //Lag(1) of pension income
+    @Lag(field="yMiscPersGrossMonthL2") @Transient private Double yMiscPersGrossMonthL3; //Lag(3) of gross personal non-benefit non-employment income
+    @Lag(field="yMiscPersGrossMonthL1") @Transient private Double yMiscPersGrossMonthL2; //Lag(2) of gross personal non-benefit non-employment income
+    @Lag(getter="getyMiscPersGrossMonth") @Transient private Double yMiscPersGrossMonthL1; //Lag(1) of gross personal non-benefit non-employment income
     private Double yEmpPersGrossMonth;       // asinh transform of personal labour income per month
-    @Transient private Double yEmpPersGrossMonthL1; //Lag(1) of gross personal employment income
-    @Transient private Double yEmpPersGrossMonthL2; //Lag(2) of gross personal employment income
-    @Transient private Double yEmpPersGrossMonthL3; //Lag(3) of gross personal employment income
+    @Lag(field="yEmpPersGrossMonthL2") @Transient private Double yEmpPersGrossMonthL3; //Lag(3) of gross personal employment income
+    @Lag(field="yEmpPersGrossMonthL1") @Transient private Double yEmpPersGrossMonthL2; //Lag(2) of gross personal employment income
+    @Lag(getter="getyEmpPersGrossMonth") @Transient private Double yEmpPersGrossMonthL1; //Lag(1) of gross personal employment income
 
     //For matching process
     @Transient private Double demAgeDiffDesired;
     @Transient private Double yWageDesired;
-    @Transient private Integer demAgeGroup;
+    @NullInitialised @Transient private Integer demAgeGroup;
 
     //This is set to true at the point when individual leaves education and never reset. So if true, individual has not always been in continuous education.
     @Transient private Boolean eduLeftEduFlag;
 
     //This is set to true at the point when individual leaves partnership and never reset. So if true, individual has been / is in a partnership
-    @Transient private Boolean demLeftPartnerFlag;
-    @Transient private Integer labHrsWorkNewL1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
-    @Transient private Double covidYLabGrossL1;
+    @NullInitialised @Transient private Boolean demLeftPartnerFlag;
+    @NullInitialised @Transient private Integer labHrsWorkNewL1; // Define a variable to keep previous month's value of work hours to be used in the Covid-19 module
+    @NullInitialised @Transient private Double covidYLabGrossL1;
     @Transient private Indicator covidSEISSReceivedFlag = Indicator.False;
-    @Transient private Double covidYLabGross;
-    private Quintiles covidYLabGrossXt5;
-    @Transient private Double labWageRegressRandomCompoponentEmp;
-    @Transient private Double labWageRegressRandomCompoponentNotEmp;
+    @NullInitialised @Transient private Double covidYLabGross;
+    @NullInitialised private Quintiles covidYLabGrossXt5;
+    @NullInitialised @Transient private Double labWageRegressRandomCompoponentEmp;
+    @NullInitialised @Transient private Double labWageRegressRandomCompoponentNotEmp;
     @Transient private Map<Labour, Integer> personContinuousHoursLabourSupplyMap = new EnumMap<>(Labour.class);
 
     // local variables interact with regression models
-    @Transient private Integer i_demYear;
-    @Transient private Region i_demRgn;
-    @Transient private Dhhtp_c4 i_demCompHhC4L1;
-    @Transient private Ydses_c5 i_yHhQuintilesC5;
-    @Transient private Integer i_demNchildL1;
-    @Transient private Integer i_demNchild;
-    @Transient private Integer i_demNchild0to2L1;
-    @Transient private Integer i_demNchild0to17;
-    @Transient private Indicator i_demNChild0to2;
-    @Transient private Dcpst i_demPartnerStatus;
+    @NullInitialised @Transient private Integer i_demYear;
+    @NullInitialised @Transient private Region i_demRgn;
+    @NullInitialised @Transient private Dhhtp_c4 i_demCompHhC4L1;
+    @NullInitialised @Transient private Ydses_c5 i_yHhQuintilesC5;
+    @NullInitialised @Transient private Integer i_demNchildL1;
+    @NullInitialised @Transient private Integer i_demNchild;
+    @NullInitialised @Transient private Integer i_demNchild0to2L1;
+    @NullInitialised @Transient private Integer i_demNchild0to17;
+    @NullInitialised @Transient private Indicator i_demNChild0to2;
+    @NullInitialised @Transient private Dcpst i_demPartnerStatus;
 
     // innovations
     @Transient Innovations statInnovations;
 
     //TODO: Remove when no longer needed.  Used to calculate mean score of employment selection regression.
-    @Transient public static Double statMScore;
-    @Transient public static Double statFScore;
-    @Transient public static Double countMale;
-    @Transient public static Double countFemale;
+    @NullInitialised @Transient public static Double statMScore;
+    @NullInitialised @Transient public static Double statFScore;
+    @NullInitialised @Transient public static Double countMale;
+    @NullInitialised @Transient public static Double countFemale;
     @Transient public static Double statInverseMillsRatioMaxM = Double.MIN_VALUE;
     @Transient public static Double statInverseMillsRatioMinM = Double.MAX_VALUE;
     @Transient public static Double statInverseMillsRatioMaxF = Double.MIN_VALUE;
@@ -304,7 +307,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yBenNonUCReceivedFlag = false;
         yBenUCReceivedFlag = false;
         yFinDstrssFlag = mother.getYFinDstrssFlag();
-        updateVariables(false);
+        updateAttributes();
     }
 
     // a "copy constructor" for persons: used by the cloneBenefitUnit method of the SimPathsModel object
@@ -620,16 +623,104 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 labHrsWorkWeek = labHrsWorkEnumWeek.getValue();
             }
         }
-        yBenReceivedFlagL1 = yBenReceivedFlag;
-        labHrsWorkEnumWeekL1 = Labour.convertHoursToLabour(labHrsWorkWeekL1);
-        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag;
-        yBenUCReceivedFlagL1 = yBenUCReceivedFlag;
 
         if(UnionMatchingMethod.SBAM.equals(model.getUnionMatchingMethod())) {
             updateAgeGroup();
         }
 
-        updateVariables(true);
+        demGiveBirthFlag = false;
+        demBePartnerFlag = false;
+        demLeavePartnerFlag = false;
+        eduLeaveSchoolFlag = false;
+        setSedex(Indicator.False); //This variable is False by default
+        // is set to true only when person leaves school in this specific year
+        // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
+        // no need to update eduSpellFlag as its value is persisted from the previous year
+
+        if (!Parameters.checkFinite(careHrsInformalWeek))
+            careHrsInformalWeek = 0.0;
+        if (demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            Person mother = benefitUnit.getFemale();
+            if (mother!=null)
+                idMother = mother.getId();
+            else
+                idMother = null;
+            Person father = benefitUnit.getMale();
+            if (father!=null)
+                idFather = father.getId();
+            else
+                idFather = null;
+        }
+
+        // Mental and Physical health status of the partner
+        if (this.getPartner() != null) {
+            this.setHealthMentalPartnerMcs(getPartner().getHealthMentalMcs());
+            this.setHealthPhysicalPartnerPcs(getPartner().getHealthPhysicalPcs());
+        }
+
+        //Lagged variables
+        yBenReceivedFlagL1 = yBenReceivedFlag;
+        labHrsWorkEnumWeekL1 = Labour.convertHoursToLabour(labHrsWorkWeekL1);
+        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag;
+        yBenUCReceivedFlagL1 = yBenUCReceivedFlag;
+        labC4L1 = labC4;
+        labC7CovidL1 = labC7Covid;
+        demStatusHhL1 = getHouseholdStatus();
+        healthSelfRatedL1 = healthSelfRated; //Update lag(1) of health
+        healthWbScore0to36L1 = healthWbScore0to36; //Update lag(1) of mental health
+        healthPsyDstrss0to12L1 = healthPsyDstrss0to12;
+        demLifeSatScore0to10L1 = demLifeSatScore0to10;
+        healthMentalMcsL1 = healthMentalMcs;
+        healthPhysicalPcsL1 = healthPhysicalPcs;
+        demPrptyFlagL1 = getBenefitUnit().isHousingOwned();
+        healthDsblLongtermFlagL1 = healthDsblLongtermFlag; //Update lag(1) of long-term sick or disabled status
+        careNeedFlagL1 = careNeedFlag;
+        careHrsFormalWeekL1 = careHrsFormalWeek;
+        careHrsInformalWeekL1 = careHrsInformalWeek;
+        careHrsProvidedWeekL1 = careHrsProvidedWeek;
+        careProvidedFlagL1 = careProvidedFlag;
+        labWageOfferLowFlagL1 = getLowWageOffer();
+        eduHighestC4L1 = eduHighestC4; //Update lag(1) of education level
+        eduSpellFlagL1 = eduSpellFlag ; //Update lag(1) of education level
+        yNonBenPersGrossMonthL1 = getyNonBenPersGrossMonth(); //Update lag(1) of gross personal non-benefit income
+        labHrsWorkEnumWeekL1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
+        yBenReceivedFlagL1 = yBenReceivedFlag; // Lag(1) of flag indicating if individual receives benefits
+        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag; // Lag(1) of flag indicating if individual receives non-UC benefits
+        yBenUCReceivedFlagL1 = yBenUCReceivedFlag; // Lag(1) of flag indicating if individual receives UC
+        labWageFullTimeHrlyL1 = labWageFullTimeHrly; // Lag(1) of potential hourly earnings
+
+        yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
+        yEmpPersGrossMonthL2 = getyEmpPersGrossMonth();
+        yEmpPersGrossMonthL3 = getyEmpPersGrossMonth();
+
+        yMiscPersGrossMonthL1 = getyMiscPersGrossMonth();
+        yMiscPersGrossMonthL2 = getyMiscPersGrossMonth();
+        yMiscPersGrossMonthL3 = getyMiscPersGrossMonth();
+
+        yCapitalPersMonthL1 = getyCapitalPersMonth();
+        yCapitalPersMonthL2 = getyCapitalPersMonth();
+
+        yPensPersGrossMonthL1 = getyPensPersGrossMonth();
+        yPensPersGrossMonthL2 = getyPensPersGrossMonth();
+
+        demPartnerStatusL2 = demPartnerStatusL1; // Updating of this lag must occur before parnters variables are updated
+
+        // partner variables
+        Person partner = getPartner();
+        if (partner!=null) {
+            eduHighestPartnerC4L1 = partner.eduHighestC4;
+            healthPartnerSelfRatedL1 = partner.healthSelfRated;
+            demAgePartnerDiffL1 = demAge - partner.demAge;
+            idPartnerL1 = partner.getId();
+        } else {
+            eduHighestPartnerC4L1 = null;
+            healthPartnerSelfRatedL1 = null;
+            demAgePartnerDiffL1 = null;
+            idPartnerL1 = null;
+        }
+        demPartnerStatusL1 = getDcpst();
+        yPersAndPartnerGrossDiffMonthL1 = getYnbcpdf_dv(); //Lag(1) of difference between own and partner's gross personal non-benefit income
+        labStatusPartnerAndOwnC4L1 = getLesdf_c4(); //Lag(1) of own and partner's activity status
     }
 
     //This method assign people to age groups used to define types in the SBAM matching procedure
@@ -720,7 +811,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 aging();
             }
             case Update -> {
-                updateVariables(false);
+                updateAttributes();
             }
             case UpdateOutputVariables ->  {
                 updateOutputVariables();
@@ -2084,22 +2175,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    protected void updateVariables(boolean initialUpdate) {
+
+    protected void updateAttributes() {
+
+        UpdateManager.applyAnnotations(this);
 
         //Reset flags to default values
 
-        demGiveBirthFlag = false;
-        demBePartnerFlag = false;
-        demLeavePartnerFlag = false;
-        eduLeaveSchoolFlag = false;
         setSedex(Indicator.False); //This variable is False by default
                                     // is set to true only when person leaves school in this specific year
         // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
         // no need to update eduSpellFlag as its value is persisted from the previous year
 
-        if (initialUpdate && !Parameters.checkFinite(careHrsInformalWeek))
-            careHrsInformalWeek = 0.0;
-        if (demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+        if (demAge < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             Person mother = benefitUnit.getFemale();
             if (mother!=null)
                 idMother = mother.getId();
@@ -2118,103 +2206,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             this.setHealthPhysicalPartnerPcs(getPartner().getHealthPhysicalPcs());
         }
 
-        //Lagged variables
-        updateLaggedVariables(initialUpdate);
-
         // generate year specific random draws
-        if (!initialUpdate) {
-            if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
-                healthDsblLongtermFlag = Indicator.False;
-                healthDsblLongtermFlagL1 = Indicator.False;
-            }
-            if (!Parameters.flagSocialCare) {
-                setAllSocialCareVariablesToFalse();
-            }
-            statInnovations.getNewDoubleDraws();
+        if (Parameters.enableIntertemporalOptimisations && !DecisionParams.flagDisability) {
+            healthDsblLongtermFlag = Indicator.False;
+            healthDsblLongtermFlagL1 = Indicator.False;
         }
+        if (!Parameters.flagSocialCare) {
+            setAllSocialCareVariablesToFalse();
+        }
+        statInnovations.getNewDoubleDraws();
     }
 
     private void updateOutputVariables() {
         idPartner = getPartnerID();
         demPartnerStatus = getDcpst();
-    }
-
-    private void updateLaggedVariables(boolean initialUpdate) {
-
-        labC4L1 = labC4;
-        labC7CovidL1 = labC7Covid;
-        demStatusHhL1 = getHouseholdStatus();
-        healthSelfRatedL1 = healthSelfRated; //Update lag(1) of health
-        healthWbScore0to36L1 = healthWbScore0to36; //Update lag(1) of mental health
-        healthPsyDstrss0to12L1 = healthPsyDstrss0to12;
-        demLifeSatScore0to10L1 = demLifeSatScore0to10;
-        healthMentalMcsL1 = healthMentalMcs;
-        healthPhysicalPcsL1 = healthPhysicalPcs;
-        demPrptyFlagL1 = getBenefitUnit().isHousingOwned();
-        healthDsblLongtermFlagL1 = healthDsblLongtermFlag; //Update lag(1) of long-term sick or disabled status
-        careNeedFlagL1 = careNeedFlag;
-        careHrsFormalWeekL1 = careHrsFormalWeek;
-        careHrsInformalWeekL1 = careHrsInformalWeek;
-        careHrsProvidedWeekL1 = careHrsProvidedWeek;
-        careProvidedFlagL1 = careProvidedFlag;
-        labWageOfferLowFlagL1 = getLowWageOffer();
-        eduHighestC4L1 = eduHighestC4; //Update lag(1) of education level
-        eduSpellFlagL1 = eduSpellFlag ; //Update lag(1) of education level
-        yNonBenPersGrossMonthL1 = getyNonBenPersGrossMonth(); //Update lag(1) of gross personal non-benefit income
-        labHrsWorkEnumWeekL1 = getLabourSupplyWeekly(); // Lag(1) of labour supply
-        yBenReceivedFlagL1 = yBenReceivedFlag; // Lag(1) of flag indicating if individual receives benefits
-        yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlag; // Lag(1) of flag indicating if individual receives non-UC benefits
-        yBenUCReceivedFlagL1 = yBenUCReceivedFlag; // Lag(1) of flag indicating if individual receives UC
-        labWageFullTimeHrlyL1 = labWageFullTimeHrly; // Lag(1) of potential hourly earnings
-
-        if (initialUpdate) {
-            yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
-            yEmpPersGrossMonthL2 = getyEmpPersGrossMonth();
-            yEmpPersGrossMonthL3 = getyEmpPersGrossMonth();
-
-            yMiscPersGrossMonthL1 = getyMiscPersGrossMonth();
-            yMiscPersGrossMonthL2 = getyMiscPersGrossMonth();
-            yMiscPersGrossMonthL3 = getyMiscPersGrossMonth();
-
-            yCapitalPersMonthL1 = getyCapitalPersMonth();
-            yCapitalPersMonthL2 = getyCapitalPersMonth();
-
-            yPensPersGrossMonthL1 = getyPensPersGrossMonth();
-            yPensPersGrossMonthL2 = getyPensPersGrossMonth();
-        } else {
-            yEmpPersGrossMonthL3 = yEmpPersGrossMonthL2; //Lag(3) of gross personal employment income
-            yEmpPersGrossMonthL2 = yEmpPersGrossMonthL1; //Lag(2) of gross personal employment income
-            yEmpPersGrossMonthL1 = getyEmpPersGrossMonth(); //Lag(1) of gross personal employment income
-
-            yMiscPersGrossMonthL3 = yMiscPersGrossMonthL2; //Lag(3) of gross personal non-employment non-benefit income
-            yMiscPersGrossMonthL2 = yMiscPersGrossMonthL1; //Lag(2) of gross personal non-employment non-benefit income
-            yMiscPersGrossMonthL1 = getyMiscPersGrossMonth(); //Lag(1) of gross personal non-employment non-benefit income
-
-            yCapitalPersMonthL2 = yCapitalPersMonthL1;
-            yCapitalPersMonthL1 = getyCapitalPersMonth();
-
-            yPensPersGrossMonthL2 = yPensPersGrossMonthL1;
-            yPensPersGrossMonthL1 = getyPensPersGrossMonth();
-        }
-
-        demPartnerStatusL2 = demPartnerStatusL1; // Updating of this lag must occur before parnters variables are updated
-
-        // partner variables
-        Person partner = getPartner();
-        if (partner!=null) {
-            eduHighestPartnerC4L1 = partner.eduHighestC4;
-            healthPartnerSelfRatedL1 = partner.healthSelfRated;
-            demAgePartnerDiffL1 = demAge - partner.demAge;
-            idPartnerL1 = partner.getId();
-        } else {
-            eduHighestPartnerC4L1 = null;
-            healthPartnerSelfRatedL1 = null;
-            demAgePartnerDiffL1 = null;
-            idPartnerL1 = null;
-        }
-        demPartnerStatusL1 = getDcpst();
-        yPersAndPartnerGrossDiffMonthL1 = getYnbcpdf_dv(); //Lag(1) of difference between own and partner's gross personal non-benefit income
-        labStatusPartnerAndOwnC4L1 = getLesdf_c4(); //Lag(1) of own and partner's activity status
     }
 
     // used when children leave home
@@ -5059,7 +5064,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     }
 
     public boolean isToLeaveSchool() {
-        return eduLeaveSchoolFlag;
+        return Objects.requireNonNullElse(eduLeaveSchoolFlag,false);
     }
 
     public void setToLeaveSchool(boolean eduLeaveSchoolFlag) {
@@ -5480,15 +5485,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return yNonBenPersGrossMonthL1;
     }
 
-    public double getyMiscPersGrossMonth() {
+    public Double getyMiscPersGrossMonth() {
         return yMiscPersGrossMonth;
     }
 
-    public double getyCapitalPersMonth() {
+    public Double getyCapitalPersMonth() {
         return yCapitalPersMonth;
     }
 
-    public double getyPensPersGrossMonth() {
+    public Double getyPensPersGrossMonth() {
         return yPensPersGrossMonth;
     }
 
@@ -5498,7 +5503,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             throw new IllegalArgumentException("yptciihs_dv is not finite");
     }
 
-    public double getyMiscPersGrossMonthL1() {
+    public Double getyMiscPersGrossMonthL1() {
         return yMiscPersGrossMonthL1;
     }
 
@@ -5746,6 +5751,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public double getEquivalisedDisposableIncomeYearly() {
         return benefitUnit.getEquivalisedDisposableIncomeYearly();
     }
+
+    public double getDisposableIncomeMonthlyNoNull() { return benefitUnit.getDisposableIncomeMonthlyNoNull();}
 
     public double getDisposableIncomeMonthly() { return benefitUnit.getDisposableIncomeMonthly();}
 
@@ -6356,5 +6363,45 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public Integer getLiwwh() {
         return labEmpNyear;
+    }
+
+    public boolean isHousingOwned() {
+        return getBenefitUnit().isHousingOwned();
+    }
+
+    public Education getEduHighestPartner() {
+        Person partner = getPartner();
+        if (partner==null) {
+            return null;
+        } else {
+            return partner.eduHighestC4;
+        }
+    }
+
+    public Dhe getHealthPartner() {
+        Person partner = getPartner();
+        if (partner==null) {
+            return null;
+        } else {
+            return partner.healthSelfRated;
+        }
+    }
+
+    public Integer getAgeDifferencePartner() {
+        Person partner = getPartner();
+        if (partner==null) {
+            return null;
+        } else {
+            return demAge - partner.demAge;
+        }
+    }
+
+    public Long getIdPartner() {
+        Person partner = getPartner();
+        if (partner==null) {
+            return null;
+        } else {
+            return partner.getId();
+        }
     }
 }

@@ -644,13 +644,13 @@ public class Statistics2 {
 
                 invInc[ii] += person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0 / es;
                 penInc[ii] += person.getBenefitUnit().getPensionIncomeAnnual() / 12.0 / es;
-                disInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthly() / es;
+                disInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthlyNoNull() / es;
                 if (person.getBenefitUnit().getInvestmentIncomeAnnual()<0.0) {
                     invLosses[ii] += person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0 / es;
-                    grossDisInc[ii] += (person.getBenefitUnit().getDisposableIncomeMonthly() -
+                    grossDisInc[ii] += (person.getBenefitUnit().getDisposableIncomeMonthlyNoNull() -
                             person.getBenefitUnit().getInvestmentIncomeAnnual() / 12.0) / es;
                 } else {
-                    grossDisInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthly() / es;
+                    grossDisInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthlyNoNull() / es;
                 }
                 double expenditurePerMonth = person.getBenefitUnit().getDiscretionaryConsumptionPerYear(false) / 12.0 +
                         person.getBenefitUnit().getChildcareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH +

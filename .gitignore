@@ -246,3 +246,5 @@ input/EUROMODoutput/baseline/*
 
 # IntelliJ
 .idea/
+
+input/InitialPopulations/original/*

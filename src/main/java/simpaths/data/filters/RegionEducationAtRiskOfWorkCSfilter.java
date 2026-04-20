@@ -3,6 +3,7 @@ package simpaths.data.filters;
 import microsim.statistics.ICollectionFilter;
 import simpaths.model.Person;
 import simpaths.model.enums.Education;
+import simpaths.model.enums.Les_c4;
 import simpaths.model.enums.Region;
 
 public class RegionEducationAtRiskOfWorkCSfilter implements ICollectionFilter{
@@ -19,7 +20,11 @@ public class RegionEducationAtRiskOfWorkCSfilter implements ICollectionFilter{
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getRegion().equals(demRgn) && person.getDeh_c4().equals(education) && person.atRiskOfWork());
+			if (person.getDeh_c4()==null) {
+				return false;
+			} else {
+				return (person.getRegion().equals(demRgn) && person.getDeh_c4().equals(education) && person.atRiskOfWork());
+			}
 		}
 		else throw new IllegalArgumentException("Object passed to RegionEducationCSfilter must be of type Person!");
 	}			
