@@ -468,8 +468,7 @@ public class Expectations {
 
             double probFormalChildCare = Parameters.getRegChildcareC1a().getProbability(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
             double logChildcareCostScore = Parameters.getRegChildcareC1b().getScore(benefitUnitProxyThisPeriod, BenefitUnit.Regressors.class);
-            double logChildcareRSME = ManagerRegressions.getRmse(RegressionName.ChildcareC1b);
-            childcareCostWeekly = Math.exp(logChildcareCostScore + logChildcareRSME*logChildcareRSME/2.0) * probFormalChildCare;
+            childcareCostWeekly = Math.exp(logChildcareCostScore) * probFormalChildCare;
         }
         return childcareCostWeekly;
     }
