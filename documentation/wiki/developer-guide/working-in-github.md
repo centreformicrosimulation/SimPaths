@@ -1,6 +1,6 @@
 # Working in GitHub
 
-# 1. Introduction 
+## 1. Introduction 
 
 In this page, the various steps that are necessary to make changes to SimPaths and for them to be correctly implemented in the code and committed via GitHub (_i.e._, made available to other users) are explained.
 
@@ -15,14 +15,14 @@ As an IDE, this guide uses [IntelliJ IDEA](https://www.jetbrains.com/idea/) (fre
 Please ensure that your GitHub account is active and already connected to the chosen IDE (and GitHub Desktop, if you wish to use it).
 
 
-# 2. Branches and Forks in GitHub Repositories
+## 2. Branches and Forks in GitHub Repositories
 
 A GitHub repository (repo) is characterised by _branches_ and _forks_. While they are both tools for parallel work and development, they operationally differ.
 A branch is a parallel version of the code within the same repository. To integrate changes made in a branch into another, it suffices to merge it back into the original branch via a pull request (PR) or direct merge.
 A fork is a copy of an entire repository (including its history) under a different GitHub account. It creates a completely separate project, where changes can be made without affecting the original repo. To integrate these changes into the original repository, a PR is submitted to the repo owners/maintainers. Once the PR is approved, the changes are merged into the target branch of the original repo.
 
 
-# 3. SimPaths GitHub Repository
+## 3. SimPaths GitHub Repository
 
 SimPaths code is stored in the public [SimPaths GitHub repository](https://github.com/simpaths/SimPaths). The operative branches are `main`, which contains the most stable release, and `develop`, where modifications and updates are implemented. As outlined in the diagram below, to make changes in SimPaths, users are requested to: 1) fork the original repository under their GitHub account; 2) carry out all the modifications on a new branch originated from the `develop` branch of their forked repository; 3) commit and send a pull request to the maintainers.
 
@@ -30,7 +30,7 @@ SimPaths code is stored in the public [SimPaths GitHub repository](https://githu
 
 These steps are detailed below.
 
-## 3.1 Forking SimPaths Repo
+### 3.1 Forking SimPaths Repo
 
 1. On the [SimPaths GitHub repository homepage](https://github.com/simpaths/SimPaths) (see below), click on the top-right button "Fork". When hovering over it, the message _Fork your own copy of simpaths/SimPaths_ will automatically appear.
 
@@ -84,7 +84,7 @@ Now that the forked repository has been created ("SimPathsFork" in our case), th
 
 At the end of these four steps, the user will have their forked repository under their GitHub account.
 
-## 3.2 Making Changes
+### 3.2 Making Changes
 1. From the develop branch in the new forked repository, the user should create a new branch devoted to the modifications they wish to make. Again, this can be done either from GitHub Desktop or directly from the IDE (IntelliJ IDEA). In any case, the branch should be named according to the [branch naming conventions in the Repository Guide](repository-guide.md#7-version-control). The first part of the name should indicate why that branch was created. For example, if the purpose is to fix a bug, this first part could be called "bug-fix". The following parts should get into the details of the broader objective of the branch indicated in the first part. Continuing with the same example, if the bug to fix is related to a specific class of the model, the second part of the name could be the name of the class. Every part of the name should be separated by a "/" symbol. Therefore, in our example, the branch would be called "bug-fix/class_name". While other details can be added as additional parts of the branch name (separated by the "/" symbol), we suggest to keep the branch names relatively short.
 **IntelliJ IDEA**
 In our forked project ("SimPathsFork" in our case), follow the exact same path illustrated to switch branch from `main` to `develop` (Section 1. "Forking SimPaths Repo"; point 4; second image). In this case, however, in the drop-down menu, select "+ New Branch...". In the small window that opens, rename the branch, make sure that the option "Checkout branch" is ticked, and then click on "Create". The user will land automatically on the new branch of the forked repository.
@@ -98,7 +98,7 @@ Whether it is directly via IntelliJ IDEA or through GitHub, at the end of this f
 
 2. At this point, the user is free to make the desired changes. When they are done, it is of paramount importance that the model is tested after the editing. If the model compiles and runs correctly without error messages, the user can proceed to the next and final step. 
 
-## 3.3 Committing Changes  
+### 3.3 Committing Changes  
 Once all the modifications have been implemented and the model has been tested to function correctly, the updated version of the model can be made available to everyone. This is done via a two-step procedure. First, the changes must be committed, _i.e._, "sent" and fully integrated into the corresponding branch.[1](#footnote-1) After the commit, the newly published branch will contain all these modifications. Second, the branch must be merged, via a pull request, with the `develop` branch of the public repo simpaths/SimPaths, so that everyone may access the updated version of the model. 
 As in the previous points, this can be done either from GitHub Desktop or directly from the IDE (IntelliJ IDEA). For the sake of simplicity, in this case, only the procedure using GitHub Desktop is presented.
 
@@ -115,7 +115,7 @@ In the left column, all the modifications that have been made are listed. If we 
 On the left-hand side, the base repository should always be set to simpaths/SimPaths, and the branch on `develop`. On the right-hand side, the user should select their forked repository and the branch where they made all the changes. At this point, the changes will automatically appear underneath and the user will be able to click on the green button on the right "Create pull request". In the window that opens, the title and description will be precompiled from the commit. If they are already self-explanatory, the user can simply click again on the green button on the right "Create pull request" to complete the operation. At this point, an automatic system of tests will be launched to run the model on the server and double-check it works, but no actions are required by the user.
 The last step is simply to add one or more reviewers in the "Reviewers" tab at the top right of the page. The reviewer(s) will receive a notification and can review the changes committed before merging them into the simpaths/SimPaths repository.
 
-# 4. Further changes
+## 4. Further changes
 
 Following the procedure presented in this page, any user should be able to carry out modifications to the model without any risk of jeopardising it. It is worth noting that, while Steps 2 and 3 must be followed for any new change, once the forked repository is created, it remains available for future use (_i.e._, it is not necessary to go through Step 1 again).
 
