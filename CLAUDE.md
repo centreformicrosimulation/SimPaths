@@ -105,3 +105,17 @@ Output is written to `output/<run-timestamp>/csv/` by `SimPathsCollector`. Key f
 ### Integration tests
 
 `RunSimPathsIntegrationTest` runs the full simulation end-to-end using the built JARs and compares CSV output against reference files in `src/test/java/simpaths/integrationtest/expected/`. If a substantive change shifts the output, update the expected files and commit them.
+
+## Domain Knowledge
+
+This section records design principles and non-obvious rationale accumulated through development. Update it as new insights emerge.
+
+### Price levels: SimPaths vs. the tax donor database
+
+All SimPaths financial variables are stored in **real 2015 prices** (`BASE_PRICE_YEAR`). The tax donor database, however, is denominated in **nominal prices of the respective policy year**.
+
+Tax donor matching therefore requires a two-step price bridge:
+1. Inflate SimPaths income to policy-year prices before matching.
+2. Deflate the imputed financial values from the matched donor record back to 2015 prices.
+
+The default uprating series is `TimeSeriesVariable.Inflation`, sourced from the `UK_inflation` worksheet in `input/time_series_factor.xlsx`. An alternative option (added 2026-04) allows wage growth to be used instead of price growth for the initial matching step, controlled via a config flag.
