@@ -2416,7 +2416,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .simpaths-home-intro-band {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 2.2rem 1.2rem 2.3rem;
+  padding: 2.6rem 1.2rem 2.85rem;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.985) 0%, rgba(255,253,249,0.985) 100%);
   border-top: 1px solid rgba(42,56,72,0.06);
@@ -2424,31 +2424,42 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .simpaths-home-intro-band__inner {
-  max-width: var(--sp-home-max);
+  max-width: 66rem;
   margin: 0 auto;
 }
 
 .md-typeset .simpaths-home-intro-band__eyebrow {
-  margin: 0 0 0.55rem;
-  color: rgba(42,56,72,0.74);
-  font-size: 0.63rem;
-  font-weight: 750;
-  letter-spacing: 0.13em;
-  line-height: 1.2;
-  text-transform: uppercase;
+  margin: 0 0 0.9rem;
+  color: var(--sp-midnight-deep);
+  font-family: var(--sp-heading-font), Georgia, serif;
+  font-size: 1.42rem;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  line-height: 1.08;
+}
+
+.md-typeset .simpaths-home-intro-band__eyebrow::after {
+  display: block;
+  width: 3rem;
+  height: 2px;
+  margin-top: 0.45rem;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(61,93,130,0.9), rgba(61,93,130,0.16));
 }
 
 .md-typeset .simpaths-home-intro-band__lede,
 .md-typeset .simpaths-home-intro-band__body {
   margin: 0;
   color: rgba(42,56,72,0.8);
-  font-size: 0.79rem;
-  line-height: 1.72;
+  font-size: 0.82rem;
+  line-height: 1.82;
+  max-width: 62rem;
 }
 
 .md-typeset .simpaths-home-intro-band__body,
 .md-typeset .simpaths-home-intro-band__highlights {
-  margin-top: 0.9rem;
+  margin-top: 1.05rem;
 }
 
 .md-typeset .simpaths-home-intro-band__lede {
@@ -2458,7 +2469,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .md-typeset .simpaths-home-intro-band__highlights {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.72rem 1.5rem;
+  gap: 0.92rem 1.85rem;
   padding-left: 0;
   list-style: none;
 }
@@ -2468,8 +2479,8 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   margin: 0;
   padding-left: 1rem;
   color: rgba(42,56,72,0.78);
-  font-size: 0.73rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.72;
 }
 
 .md-typeset .simpaths-home-intro-band__highlights li::before {
@@ -2488,7 +2499,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
-  margin-top: 1.1rem;
+  margin-top: 1.35rem;
   color: var(--sp-accent);
   font-size: 0.7rem;
   font-weight: 700;
@@ -3000,16 +3011,21 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   }
 
   .simpaths-home-intro-band {
-    padding: 1.65rem 1rem 1.75rem;
+    padding: 1.9rem 1rem 2rem;
   }
 
   .md-typeset .simpaths-home-intro-band__lede,
   .md-typeset .simpaths-home-intro-band__body {
-    font-size: 0.78rem;
+    font-size: 0.79rem;
+    line-height: 1.74;
   }
 
   .md-typeset .simpaths-home-intro-band__highlights li {
     font-size: 0.75rem;
+  }
+
+  .md-typeset .simpaths-home-intro-band__eyebrow {
+    font-size: 1.24rem;
   }
 
   .md-typeset .simpaths-home-explore .card-grid--primary,
