@@ -2468,9 +2468,10 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .md-typeset .simpaths-home-intro-band__highlights {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.92rem 1.85rem;
+  grid-template-columns: 1fr;
+  gap: 0.72rem;
   padding-left: 0;
+  max-width: 62rem;
   list-style: none;
 }
 
@@ -2481,6 +2482,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   color: rgba(42,56,72,0.78);
   font-size: 0.75rem;
   line-height: 1.72;
+  overflow-wrap: anywhere;
 }
 
 .md-typeset .simpaths-home-intro-band__highlights li::before {
