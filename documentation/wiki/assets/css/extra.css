@@ -2416,7 +2416,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .simpaths-home-intro-band {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 3.4rem 1.2rem 3rem;
+  padding: 4.35rem 1.2rem 3rem;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.985) 0%, rgba(255,253,249,0.985) 100%);
 }
@@ -3004,7 +3004,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   }
 
   .simpaths-home-intro-band {
-    padding: 2.35rem 1rem 2.1rem;
+    padding: 2.9rem 1rem 2.15rem;
   }
 
   .md-typeset .simpaths-home-intro-band__lede,
