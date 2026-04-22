@@ -1,4 +1,146 @@
 modules:
+  - id: household_composition
+    title: Household Composition
+    flowchart: documentation/flowcharts/modules/household_composition.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/PartnershipAlignment.java
+      - src/main/java/simpaths/model/FertilityAlignment.java
+      - src/main/java/simpaths/model/UnionMatching.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - household composition event order changes
+      - cohabitation alignment timing or adjustment logic changes
+      - personsToMatch clearing or candidate-pool construction changes
+      - cohabitation formation or dissolution flag handling changes
+      - partnership dissolution state updates change
+      - union matching method selection or high-level matching sequence changes
+      - fertility alignment timing or adjustment logic changes
+      - fertility flag handling or newborn creation logic changes
+
+  - id: cohabitation
+    title: Cohabitation UK Case
+    flowchart: documentation/flowcharts/modules/cohabitation.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/model/PartnershipAlignment.java
+      - src/main/java/simpaths/data/Parameters.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - UK cohabitation method branch logic changes
+      - partnership adjustment source or alignment trial behavior changes
+      - cohabitation age eligibility changes
+      - UK partnership regression use changes
+      - formation or dissolution flag handling changes
+      - personsToMatch candidate-pool updates change
+      - PartnershipAlignment evaluate behavior changes
+
+  - id: full_time_hourly_earnings
+    title: Full-Time Hourly Earnings
+    flowchart: documentation/flowcharts/modules/full_time_hourly_earnings.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/data/Parameters.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - UpdatePotentialHourlyEarnings schedule changes
+      - updateFullTimeHourlyEarnings branch logic changes
+      - wage age eligibility changes
+      - lagged employment wage branch selection changes
+      - gender-specific wage regression or RMSE keys change
+      - stochastic wage component caching changes
+      - fixRegressionStochasticComponent handling changes
+      - hourly wage min or max bounds change
+      - labWageFullTimeHrly update responsibility changes
+
+  - id: fertility_give_birth
+    title: Fertility and GiveBirth
+    flowchart: documentation/flowcharts/modules/fertility_give_birth.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/model/FertilityAlignment.java
+      - src/main/java/simpaths/data/filters/FertileFilter.java
+      - src/main/java/simpaths/data/Parameters.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - FertilityAlignment Fertility or GiveBirth schedule changes
+      - fertility alignment adjustment handling changes
+      - FertileFilter eligibility changes
+      - fertility country branch logic changes
+      - F1 fertility regression or random stream handling changes
+      - demGiveBirthFlag set reset or consumption changes
+      - newborn sex assignment changes
+      - child creation or benefit-unit membership updates change
+
+  - id: health_long_term_sick
+    title: Health and Long-Term Sick
+    flowchart: documentation/flowcharts/modules/health_long_term_sick.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/data/Parameters.java
+      - src/main/java/simpaths/data/ManagerRegressions.java
+      - src/main/java/simpaths/model/decisions/DecisionParams.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - Person health method branch logic changes
+      - HealthH1 regression or probability-event handling changes
+      - HealthH2 regression or disability flag handling changes
+      - age eligibility for health or long-term sick updates changes
+      - ded or continuous-education gate for H2 changes
+      - intertemporal optimisation or DecisionParams disability handling changes
+      - healthSelfRated or healthDsblLongtermFlag state updates change
+      - schedule order around Person.Processes.Health changes
+
+  - id: health_mental_hm1_hm2_cases
+    title: Health Mental HM1 and HM2 Cases
+    flowchart: documentation/flowcharts/modules/health_mental_hm1_hm2_cases.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/data/Parameters.java
+      - src/main/java/simpaths/data/ManagerRegressions.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - HealthMentalHM1Case or HealthMentalHM2Case schedule changes
+      - HM1 case or HM2 case age eligibility changes
+      - HM2 case gender-specific regression handling changes
+      - healthPsyDstrss0to12 update or constraint logic changes
+      - HealthMentalHM1HM2Cases legacy enum handling changes
+
+  - id: health_mental_hm1_hm2_level
+    title: Health Mental HM1 and HM2 Level
+    flowchart: documentation/flowcharts/modules/health_mental_hm1_hm2_level.md
+    status: active
+    code:
+      - src/main/java/simpaths/model/Person.java
+      - src/main/java/simpaths/model/SimPathsModel.java
+      - src/main/java/simpaths/data/Parameters.java
+    wiki:
+      - documentation/wiki/overview/simulated-modules.md
+    update_triggers:
+      - HealthMentalHM1 or HealthMentalHM2 schedule changes
+      - HM1 level or HM2 level age eligibility changes
+      - HM1 level regression RMSE or random stream handling changes
+      - HM2 level gender-specific regression handling changes
+      - healthWbScore0to36 update or constraint logic changes
+
   - id: union_matching
     title: Union Matching
     flowchart: documentation/flowcharts/modules/union_matching.md

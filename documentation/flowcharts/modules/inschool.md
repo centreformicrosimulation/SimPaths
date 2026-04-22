@@ -114,37 +114,34 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 
 ```mermaid
 flowchart TD
-    A["Person.Processes.InSchool"] --> B["inSchool()"]
-    B --> C["Get probit adjustment from model"]
-    C --> D["inSchool(probitAdjustment)"]
-    D --> E["Reset eduLeaveSchoolFlag = false"]
-    E --> F["Draw education innovation<br/>statInnovations[24]"]
-    F --> G{"Was person a student last year?<br/>labC4L1 == Student"}
+    A["Yearly education-status step"] --> B{"Ordinary run or alignment trial?"}
+    B -- Ordinary yearly run --> C["Use stored in-school adjustment<br/>(0 if alignment is off)"]
+    B -- Optional alignment trial --> D["Use trial adjustment<br/>from root search"]
+    C --> E["Evaluate each person's<br/>student status"]
+    D --> E
 
-    G -- Yes --> H{"Age >= minimum leaving age?"}
-    H -- No --> I["Remain in school<br/>return true"]
+    E --> F["Reset leave-school flag"]
+    F --> G["Draw education innovation"]
+    G --> H{"Was person a student<br/>last year?"}
 
-    H -- Yes --> J{"Age <= maximum continuous-education age?"}
-    J -- No --> K["Force leaving education<br/>eduLeaveSchoolFlag = true<br/>return false"]
+    H -- Yes --> I{"Below minimum<br/>leaving age?"}
+    I -- Yes --> J["Remain in school"]
+    I -- No --> K{"Within continuous<br/>education age range?"}
+    K -- Yes --> M["Apply E1a:<br/>probability of remaining<br/>in education"]
+    K -- No --> L["Flag to leave education"]
+    M --> N{"Innovation below<br/>E1a probability?"}
+    N -- Yes --> O["Remain student"]
+    N -- No --> L
 
-    J -- Yes --> L["Process E1a<br/>score = regEducationE1a<br/>prob = probability(score + adjustment)"]
-    L --> M{"innovation < prob?"}
-    M -- Yes --> N["Remain student<br/>set labC4 = Student<br/>return true"]
-    M -- No --> O["Leave education<br/>eduLeaveSchoolFlag = true<br/>return false"]
+    H -- No --> P{"Retired last year?"}
+    P -- Yes --> Q["Remain non-student"]
+    P -- No --> R["Apply E1b:<br/>probability of entering or<br/>re-entering education"]
+    R --> S{"Innovation below<br/>E1b probability?"}
+    S -- Yes --> T["Enter or re-enter education; <br/>set student status; <br/>set return-to-education flag"]
+    S -- No --> U["Remain non-student"]
 
-    G -- No --> P{"Was person retired last year?<br/>labC4L1 == Retired"}
-    P -- Yes --> Q["Remain non-student<br/>return false"]
-
-    P -- No --> R["Process E1b<br/>score = regEducationE1b<br/>prob = probability(score + adjustment)"]
-    R --> S{"innovation < prob?"}
-    S -- Yes --> T["Enter or re-enter education<br/>set labC4 = Student<br/>set der = True<br/>set ded = False<br/>return true"]
-    S -- No --> U["Remain non-student<br/>return false"]
-
-    K -. "flag consumed later" .-> V["Person.Processes.LeavingSchool"]
-    O -. "flag consumed later" .-> V
-    V --> W{"eduLeaveSchoolFlag?"}
-    W -- Yes --> X["setEducationLevel()<br/>set sedex = True<br/>set ded = False<br/>set der = False<br/>set eduLeftEduFlag = true<br/>set labC4 = NotEmployed<br/>reset eduLeaveSchoolFlag"]
-    W -- No --> Y["No leaving-school update"]
+    L -. "handled later in schedule" .-> V["LeavingSchool process"]
+    V --> W["LeavingSchool updates:<br/>assign education level; <br/>mark left education; <br/>remove student status; <br/>reset leave-school flag"]
 ```
 
 ## Alignment Context
