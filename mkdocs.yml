@@ -41,7 +41,7 @@ theme:
     - content.code.annotate
 
 extra_css:
-  - assets/css/extra.css?v=20260412-hero-logo-smaller
+  - assets/css/extra.css?v=20260422-home-intro-access
 
 plugins:
   - search:
@@ -147,6 +147,8 @@ nav:
               - Querying the Database: jasmine-reference/querying-database.md
               - Links and Resources: jasmine-reference/links.md
               - Enums: jasmine-reference/enums.md
+
+  - Access: https://github.com/simpaths/SimPaths
 
   - Validation:
       - validation/index.md
