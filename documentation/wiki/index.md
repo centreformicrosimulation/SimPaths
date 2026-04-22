@@ -25,29 +25,23 @@ hide:
 </div>
 </div>
 
-<section class="simpaths-home-explore">
-<div class="simpaths-home-brief">
-  <div class="simpaths-home-brief__grid">
-    <div class="simpaths-home-brief__copy">
-      <p class="simpaths-home-brief__eyebrow">Open-Source Life Course Framework</p>
-      <h2 class="simpaths-home-brief__title">A flexible framework for rich life-course microsimulation</h2>
-      <p class="simpaths-home-brief__lede">SimPaths is an open-source framework for modelling individual and household life course events. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. Its modular design supports analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates, and alternative approaches for projecting labour and leisure as well as consumption and savings decisions.</p>
-      <p>SimPaths builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy, and Poland, and are under development for Germany, Spain, and Sweden. All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
-    </div>
-
-    <div class="simpaths-home-brief__highlights">
-      <p class="simpaths-home-brief__support">The framework incorporates state-of-the-art features that are rarely combined in dynamic models:</p>
-      <ul class="simpaths-home-brief__list">
-        <li><strong>Linked life-course domains.</strong> SimPaths generates data for education, work, income and wealth, family life, and health, explicitly modelling the dynamic feedback effects between them.</li>
-        <li><strong>Integrated tax-benefit analysis.</strong> SimPaths is linked to an underlying tax-benefit model, providing a realistic description of the impact of taxes and benefits at both the individual and population level.</li>
-        <li><strong>Rich behavioural modelling.</strong> SimPaths features behavioural models over the principal economic margins of decision making, where projected choices depend on individual characteristics and fiscal incentives acting through future expectations.</li>
-        <li><strong>Modular architecture.</strong> The model is written in Java using the JAS-mine suite of simulation libraries and is structured so alternative behavioural methods can be switched in for sensitivity and robustness analysis.</li>
-        <li><strong>Cross-country adaptability.</strong> By decoupling the dynamic structure from the tax-benefit model and relying on standardised sources such as EU-SILC, SimPaths is built to travel across countries more easily.</li>
-      </ul>
-    </div>
-  </div>
+<section class="simpaths-home-intro-band">
+<div class="simpaths-home-intro-band__inner">
+  <p class="simpaths-home-intro-band__eyebrow">Open-source framework</p>
+  <p class="simpaths-home-intro-band__lede">SimPaths is an open-source framework for modelling individual and household life course events. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. The modular nature of SimPaths facilitates analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates, and alternative approaches for projecting labour and leisure as well as consumption and savings decisions.</p>
+  <p class="simpaths-home-intro-band__body">SimPaths builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy, and Poland, and are under development for Germany, Spain, and Sweden. All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
+  <ul class="simpaths-home-intro-band__highlights">
+    <li>SimPaths generates data for education, work, income and wealth, family life, and health, explicitly modelling the dynamic feedback effects between them.</li>
+    <li>SimPaths is linked to an underlying tax-benefit model, providing a realistic description of the impact of taxes and benefits at both the individual and population level.</li>
+    <li>SimPaths features behavioural models over the principal economic margins of decision making, where projected choices depend on individual characteristics and fiscal incentives acting through future expectations.</li>
+    <li>From an architectural perspective, SimPaths is built following a highly modular approach in Java using the JAS-mine suite of simulation libraries.</li>
+    <li>SimPaths is built with an eye to adaptation across countries, helped by decoupling the dynamic structure from the tax-benefit model and drawing on standardised sources such as EU-SILC.</li>
+  </ul>
+  <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-intro-band__access">Access the code on GitHub</a>
 </div>
+</section>
 
+<section class="simpaths-home-explore">
 <div class="simpaths-home-explore__intro">
   <div>
     <h2 class="section-heading">Explore SimPaths</h2>
