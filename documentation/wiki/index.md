@@ -27,7 +27,7 @@ hide:
 
 <section class="simpaths-home-intro-band">
 <div class="simpaths-home-intro-band__inner">
-  <p class="simpaths-home-intro-band__eyebrow">About SimPaths</p>
+  <h2 class="section-heading simpaths-home-intro-band__heading">About SimPaths</h2>
   <p class="simpaths-home-intro-band__lede">SimPaths is an open-source framework for modelling individual and household life course events. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. The modular nature of SimPaths facilitates analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates, and alternative approaches for projecting labour and leisure as well as consumption and savings decisions. SimPaths builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy, and Poland, and are under development for Germany, Spain, and Sweden.</p>
   <p class="simpaths-home-intro-band__body">All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
   <p class="simpaths-home-intro-band__body simpaths-home-intro-band__body--bridge">The framework incorporates many state-of-the-art features which are rarely combined in dynamic models:</p>
