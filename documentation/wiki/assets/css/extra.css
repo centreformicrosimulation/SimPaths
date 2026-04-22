@@ -2416,11 +2416,9 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .simpaths-home-intro-band {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 2.6rem 1.2rem 2.85rem;
+  padding: 3.4rem 1.2rem 3rem;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.985) 0%, rgba(255,253,249,0.985) 100%);
-  border-top: 1px solid rgba(42,56,72,0.06);
-  border-bottom: 1px solid rgba(42,56,72,0.08);
 }
 
 .simpaths-home-intro-band__inner {
@@ -3002,7 +3000,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   }
 
   .simpaths-home-intro-band {
-    padding: 1.9rem 1rem 2rem;
+    padding: 2.35rem 1rem 2.1rem;
   }
 
   .md-typeset .simpaths-home-intro-band__lede,
