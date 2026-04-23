@@ -2518,6 +2518,14 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   margin-bottom: 1.65rem;
 }
 
+.md-typeset .simpaths-home-explore .card-grid--primary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.md-typeset .simpaths-home-explore .card-grid--primary .feature-card--documentation {
+  grid-column: span 2;
+}
+
 .md-typeset .simpaths-home-explore__intro .section-heading::after {
   display: none !important;
 }
