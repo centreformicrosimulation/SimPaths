@@ -2520,6 +2520,15 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   display: none !important;
 }
 
+.md-container .md-top {
+  display: none !important;
+}
+
+body:has(.md-tabs__list > .md-tabs__item:nth-child(2).md-tabs__item--active) .md-container .md-top,
+body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md-container .md-top {
+  display: inline-flex !important;
+}
+
 .md-typeset .simpaths-home-explore a.feature-card {
   --card-accent: #3d5d82;
   --card-border: rgba(42,56,72,0.12);
