@@ -12,8 +12,6 @@ hide:
     <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
   </div>
 
-  <p class="simpaths-home-hero__copy">SimPaths is a family of open-source models for individual and household life course events, designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances.</p>
-
   <div class="simpaths-home-hero__countries">
     <span class="simpaths-home-hero__country">🇬🇧 United Kingdom</span>
     <span class="simpaths-home-hero__country">🇬🇷 Greece</span>

@@ -2306,7 +2306,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   flex-direction: column;
   align-items: center;
   gap: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .simpaths-home-hero__logo {
@@ -2321,14 +2321,14 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   position: relative;
   margin: 0 !important;
   padding-bottom: 0 !important;
-  color: rgba(255,255,255,0.94);
+  color: rgba(255,255,255,0.92);
   border-bottom: none !important;
   font-family: var(--sp-hero-title-font) !important;
-  font-size: clamp(1.84rem, 3.48vw, 2.44rem) !important;
+  font-size: clamp(1.76rem, 3.3vw, 2.3rem) !important;
   font-weight: 400;
   line-height: 1;
   letter-spacing: 0.032em;
-  text-shadow: 0 5px 14px rgba(0,0,0,0.16);
+  text-shadow: 0 3px 10px rgba(0,0,0,0.11);
 }
 
 .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title::after {
@@ -2356,27 +2356,12 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   text-transform: uppercase;
 }
 
-.md-typeset .simpaths-home-hero p.simpaths-home-hero__copy {
-  max-width: 42rem;
-  margin: 0 auto;
-  color: rgba(255,255,255,0.94);
-  font-size: 0.83rem;
-  line-height: 1.52;
-  text-align: center !important;
-  text-shadow: 0 1px 18px rgba(0,0,0,0.28);
-  hyphens: none !important;
-  -webkit-hyphens: none !important;
-  text-wrap: unset;
-  word-spacing: normal;
-  letter-spacing: normal;
-}
-
 .simpaths-home-hero__countries {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.58rem 0.72rem;
-  margin: 1.06rem 0 0;
+  margin: 0.92rem 0 0;
 }
 
 .simpaths-home-hero__country {
@@ -2438,9 +2423,9 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .md-typeset .simpaths-home-intro-band__lede,
 .md-typeset .simpaths-home-intro-band__body {
   margin: 0;
-  color: rgba(42,56,72,0.8);
-  font-size: 0.82rem;
-  line-height: 1.82;
+  color: rgba(28,40,57,0.9);
+  font-size: 0.835rem;
+  line-height: 1.78;
   max-width: var(--sp-home-max);
 }
 
@@ -2450,7 +2435,12 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .md-typeset .simpaths-home-intro-band__lede {
-  color: rgba(42,56,72,0.88);
+  color: rgba(22,33,49,0.96);
+}
+
+.md-typeset .simpaths-home-intro-band__body--bridge {
+  color: rgba(22,33,49,0.94);
+  font-weight: 520;
 }
 
 .md-typeset .simpaths-home-intro-band__highlights {
@@ -2466,9 +2456,9 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   position: relative;
   margin: 0;
   padding-left: 1rem;
-  color: rgba(42,56,72,0.78);
-  font-size: 0.75rem;
-  line-height: 1.72;
+  color: rgba(28,40,57,0.88);
+  font-size: 0.765rem;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 
@@ -2998,7 +2988,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
-    font-size: clamp(1.86rem, 6.7vw, 2.25rem) !important;
+    font-size: clamp(1.8rem, 6.3vw, 2.12rem) !important;
   }
 
   .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
@@ -3017,12 +3007,12 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
   .md-typeset .simpaths-home-intro-band__lede,
   .md-typeset .simpaths-home-intro-band__body {
-    font-size: 0.79rem;
-    line-height: 1.74;
+    font-size: 0.8rem;
+    line-height: 1.72;
   }
 
   .md-typeset .simpaths-home-intro-band__highlights li {
-    font-size: 0.75rem;
+    font-size: 0.76rem;
   }
 
   .md-typeset .simpaths-home-explore .card-grid--primary,
