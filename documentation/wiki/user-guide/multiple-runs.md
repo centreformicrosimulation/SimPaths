@@ -8,7 +8,7 @@ Make sure the project builds and the input database has been created at least on
 
 ```bash
 mvn clean package
-java -jar multirun.jar -DBSetup -config config/default.yml
+java -jar multirun.jar -DBSetup 
 ```
 
 The setup step rebuilds `input/input.mv.db` from the initial-population files and the EUROMOD / UKMOD donor outputs. If you have already completed setup and none of those inputs have changed, you do not need to repeat it before every run.
@@ -18,7 +18,7 @@ The setup step rebuilds `input/input.mv.db` from the initial-population files an
 For a standard headless batch run:
 
 ```bash
-java -jar multirun.jar -config config/default.yml -g false --persist=root
+java -Xmx8g -jar multirun.jar
 ```
 
 The configuration file is loaded first, and any command-line flags then override it.
@@ -78,7 +78,7 @@ These are intended for uncertainty and sensitivity work. If you only want repeat
 
 ## 7. Output collection
 
-Output writing is controlled through `collector_args` in `config/default.yml`.
+Output writing is controlled through `collector_args` in `default.yml`.
 
 The main switches are:
 
@@ -95,7 +95,6 @@ This example runs three headless simulations from 2019 to 2022, starting from se
 
 ```bash
 java -jar multirun.jar \
-  -config config/default.yml \
   -n 3 \
   -r 606 \
   -s 2019 \
