@@ -97,11 +97,16 @@ Flow and layout rules:
 
 - Use solid arrows for control or schedule order.
 - Use dotted arrows for state/data dependencies and downstream handoffs.
+- Prefer dotted arrows only for substantive state handoffs or dependencies. Do not draw dotted arrows merely to indicate the absence of a special handoff.
+- Do not use a dependency arrow just because one scheduled step happens before another. If the relationship is only temporal, show schedule order and say explicitly when the downstream algorithm reads a narrower state object such as a flag, pool, or cache.
+- When a state mutation matters only to a later stage, draw the dependency to that later stage directly rather than routing it through an intermediate scheduled step that does not actually read it.
+- If a downstream step reads a derived object such as a flag, pool, or cache rather than broad shared state, show that narrower dependency explicitly.
 - Use state nodes for objects written by one process and read or updated later.
 - Use input nodes for important inputs not produced inside the diagrammed block.
+- When an alignment or calibration stage is conditional in practice, label it as optional schedule context or show the enable/disable decision instead of implying it always executes as core logic.
 - If Mermaid arrows cross, first try reordering sibling branch declarations before changing the diagram.
 - Declare the branch that should appear first in the rendered diagram first in the Mermaid source.
-- Consolidate several upstream contributions with nodes such as `Current family state` or `Current labour-market state` to avoid implying that a later process uses only the immediately previous output.
+- Consolidate several upstream contributions with nodes such as `Current family state` or `Current labour-market state` only when the downstream process truly reads that broader shared state.
 - Be faithful to the code, but arrange the diagram for human understanding.
 
 Example:

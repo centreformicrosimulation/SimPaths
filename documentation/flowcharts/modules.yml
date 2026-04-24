@@ -1,15 +1,30 @@
+manifest_version: 2
+
+defaults:
+  status: active
+  review_state: up_to_date
+  update_mode: assisted
+  last_verified_commit: null
+  last_trigger_commit: null
+
 modules:
   - id: household_composition
     title: Household Composition
-    flowchart: documentation/flowcharts/modules/household_composition.md
     status: active
-    code:
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/PartnershipAlignment.java
-      - src/main/java/simpaths/model/FertilityAlignment.java
-      - src/main/java/simpaths/model/UnionMatching.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/household_composition.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/PartnershipAlignment.java
+        - src/main/java/simpaths/model/FertilityAlignment.java
+        - src/main/java/simpaths/model/UnionMatching.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - household composition event order changes
@@ -23,14 +38,20 @@ modules:
 
   - id: cohabitation
     title: Cohabitation UK Case
-    flowchart: documentation/flowcharts/modules/cohabitation.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/model/PartnershipAlignment.java
-      - src/main/java/simpaths/data/Parameters.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/cohabitation.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/model/PartnershipAlignment.java
+        - src/main/java/simpaths/data/Parameters.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - UK cohabitation method branch logic changes
@@ -43,13 +64,19 @@ modules:
 
   - id: full_time_hourly_earnings
     title: Full-Time Hourly Earnings
-    flowchart: documentation/flowcharts/modules/full_time_hourly_earnings.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/data/Parameters.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/full_time_hourly_earnings.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/data/Parameters.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - UpdatePotentialHourlyEarnings schedule changes
@@ -64,15 +91,21 @@ modules:
 
   - id: fertility_give_birth
     title: Fertility and GiveBirth
-    flowchart: documentation/flowcharts/modules/fertility_give_birth.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/model/FertilityAlignment.java
-      - src/main/java/simpaths/data/filters/FertileFilter.java
-      - src/main/java/simpaths/data/Parameters.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/fertility_give_birth.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/model/FertilityAlignment.java
+        - src/main/java/simpaths/data/filters/FertileFilter.java
+        - src/main/java/simpaths/data/Parameters.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - FertilityAlignment Fertility or GiveBirth schedule changes
@@ -86,15 +119,21 @@ modules:
 
   - id: health_long_term_sick
     title: Health and Long-Term Sick
-    flowchart: documentation/flowcharts/modules/health_long_term_sick.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/data/Parameters.java
-      - src/main/java/simpaths/data/ManagerRegressions.java
-      - src/main/java/simpaths/model/decisions/DecisionParams.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/health_long_term_sick.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/data/Parameters.java
+        - src/main/java/simpaths/data/ManagerRegressions.java
+        - src/main/java/simpaths/model/decisions/DecisionParams.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - Person health method branch logic changes
@@ -108,14 +147,20 @@ modules:
 
   - id: health_mental_hm1_hm2_cases
     title: Health Mental HM1 and HM2 Cases
-    flowchart: documentation/flowcharts/modules/health_mental_hm1_hm2_cases.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/data/Parameters.java
-      - src/main/java/simpaths/data/ManagerRegressions.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_cases.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/data/Parameters.java
+        - src/main/java/simpaths/data/ManagerRegressions.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - HealthMentalHM1Case or HealthMentalHM2Case schedule changes
@@ -126,13 +171,19 @@ modules:
 
   - id: health_mental_hm1_hm2_level
     title: Health Mental HM1 and HM2 Level
-    flowchart: documentation/flowcharts/modules/health_mental_hm1_hm2_level.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/data/Parameters.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_level.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/data/Parameters.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - HealthMentalHM1 or HealthMentalHM2 schedule changes
@@ -143,14 +194,20 @@ modules:
 
   - id: union_matching
     title: Union Matching
-    flowchart: documentation/flowcharts/modules/union_matching.md
     status: active
-    code:
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/model/UnionMatching.java
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/PartnershipAlignment.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/union_matching.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/model/UnionMatching.java
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/PartnershipAlignment.java
+    wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
       - matching method selection changes
@@ -162,14 +219,20 @@ modules:
 
   - id: inschool
     title: InSchool
-    flowchart: documentation/flowcharts/modules/inschool.md
     status: active
-    code:
-      - src/main/java/simpaths/model/Person.java
-      - src/main/java/simpaths/model/SimPathsModel.java
-      - src/main/java/simpaths/model/InSchoolAlignment.java
-      - src/main/java/simpaths/data/Parameters.java
-    wiki:
+    review_state: up_to_date
+    update_mode: assisted
+    last_verified_commit: null
+    last_trigger_commit: null
+    flowchart:
+      source_md: documentation/flowcharts/modules/inschool.md
+    code_refs:
+      files:
+        - src/main/java/simpaths/model/Person.java
+        - src/main/java/simpaths/model/SimPathsModel.java
+        - src/main/java/simpaths/model/InSchoolAlignment.java
+        - src/main/java/simpaths/data/Parameters.java
+    wiki_links:
       - documentation/wiki/developer-guide/how-to/code-logic-flowcharts.md
     update_triggers:
       - inSchool branch logic changes
