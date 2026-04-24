@@ -2311,7 +2311,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .simpaths-home-hero__logo {
   display: block;
-  width: clamp(5.85rem, 10.1vw, 6.9rem);
+  width: clamp(5.45rem, 9.45vw, 6.35rem);
   height: auto;
   margin: 0 auto 0.72rem;
   filter: saturate(1.16) brightness(1.08) contrast(1.06) drop-shadow(0 16px 26px rgba(14,22,34,0.24));
@@ -2361,7 +2361,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.58rem 0.72rem;
-  margin: 1.16rem 0 0;
+  margin: 1.42rem 0 0;
 }
 
 .simpaths-home-hero__country {
@@ -2392,7 +2392,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
   padding: 3.55rem max(1.2rem, calc((100vw - var(--sp-home-max)) / 2)) 4rem;
-  background: linear-gradient(180deg, #f6f2e8 0%, #f0ede5 100%);
+  background: #f1ede4;
   border-bottom: none;
 }
 
@@ -2400,7 +2400,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
   padding: 4.35rem 1.2rem 3rem;
-  background: linear-gradient(180deg, #fffefb 0%, #fdfaf4 100%);
+  background: #fdfaf4;
 }
 
 .simpaths-home-intro-band__inner {
@@ -2990,7 +2990,7 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
   }
 
   .simpaths-home-hero__logo {
-    width: 4.72rem;
+    width: 4.35rem;
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
