@@ -2361,7 +2361,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.58rem 0.72rem;
-  margin: 0.92rem 0 0;
+  margin: 1.16rem 0 0;
 }
 
 .simpaths-home-hero__country {
@@ -2392,9 +2392,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
   padding: 3.55rem max(1.2rem, calc((100vw - var(--sp-home-max)) / 2)) 4rem;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0) 16rem),
-    var(--sp-home-band-bg);
+  background: linear-gradient(180deg, #f6f2e8 0%, #f0ede5 100%);
   border-bottom: none;
 }
 
@@ -2402,8 +2400,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
   padding: 4.35rem 1.2rem 3rem;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.985) 0%, rgba(255,253,249,0.985) 100%);
+  background: linear-gradient(180deg, #fffefb 0%, #fdfaf4 100%);
 }
 
 .simpaths-home-intro-band__inner {
