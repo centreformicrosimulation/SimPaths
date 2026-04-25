@@ -2311,9 +2311,9 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .simpaths-home-hero__logo {
   display: block;
-  width: clamp(5.45rem, 9.45vw, 6.35rem);
+  width: clamp(5.25rem, 9.1vw, 6.12rem);
   height: auto;
-  margin: 0 auto 0.72rem;
+  margin: 0 auto 0.62rem;
   filter: saturate(1.16) brightness(1.08) contrast(1.06) drop-shadow(0 16px 26px rgba(14,22,34,0.24));
 }
 
@@ -2990,7 +2990,7 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
   }
 
   .simpaths-home-hero__logo {
-    width: 4.35rem;
+    width: 4.2rem;
   }
 
   .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
