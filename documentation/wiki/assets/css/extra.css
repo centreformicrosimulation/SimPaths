@@ -300,6 +300,13 @@ body:has(.simpaths-home-hero) .md-header__title .md-header__topic:first-child {
   display: flex !important;
 }
 
+body:has(.simpaths-home-hero) .md-header__title--active .md-header__topic:first-child {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  z-index: 0 !important;
+}
+
 body:has(.simpaths-home-hero) .md-header__title [data-md-component="header-topic"] {
   display: none !important;
 }
