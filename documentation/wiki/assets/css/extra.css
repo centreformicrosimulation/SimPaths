@@ -296,6 +296,14 @@
   filter: saturate(1.16) brightness(1.05) contrast(1.06) drop-shadow(0 5px 8px rgba(30, 40, 52, 0.12));
 }
 
+body:has(.simpaths-home-hero) .md-header__title .md-header__topic:first-child {
+  display: flex !important;
+}
+
+body:has(.simpaths-home-hero) .md-header__title [data-md-component="header-topic"] {
+  display: none !important;
+}
+
 /* ── Tab bar ── */
 .md-tabs {
   background: rgba(8,16,32,0.45) !important;
