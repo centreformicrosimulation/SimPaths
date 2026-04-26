@@ -2455,33 +2455,33 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 
 .md-typeset .simpaths-home-intro-band__highlights {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.58rem 1.55rem;
+  grid-template-columns: 1fr;
+  gap: 0.74rem;
   padding-left: 0;
   max-width: var(--sp-home-max);
   list-style: none;
 }
 
 .md-typeset .simpaths-home-intro-band__highlights li {
-  position: relative;
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 0.25fr) minmax(0, 1fr);
+  gap: 1.15rem;
+  align-items: baseline;
   margin: 0;
-  padding: 0 0 0 1rem;
+  padding: 0;
   color: rgba(28,40,57,0.84);
   font-size: 0.755rem;
   line-height: 1.66;
   overflow-wrap: anywhere;
 }
 
-.md-typeset .simpaths-home-intro-band__highlights li::before {
-  content: "";
-  position: absolute;
-  top: 0.58rem;
-  left: 0;
-  width: 0.28rem;
-  height: 0.28rem;
-  border-radius: 999px;
-  background: rgba(61,93,130,0.58);
-  box-shadow: 0 0 0 2px rgba(61,93,130,0.045);
+.md-typeset .simpaths-home-intro-band__highlight-label {
+  color: rgba(61,93,130,0.9);
+  font-size: 0.57rem;
+  font-weight: 760;
+  line-height: 1.28;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 .md-typeset .simpaths-home-intro-band__access {
@@ -3056,6 +3056,8 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
   }
 
   .md-typeset .simpaths-home-intro-band__highlights li {
+    grid-template-columns: 1fr;
+    gap: 0.18rem;
     font-size: 0.76rem;
   }
 

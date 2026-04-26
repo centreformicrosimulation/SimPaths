@@ -30,11 +30,11 @@ hide:
   <p class="simpaths-home-intro-band__body">All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
   <p class="simpaths-home-intro-band__body simpaths-home-intro-band__body--bridge">The framework incorporates many state-of-the-art features which are rarely combined in dynamic models:</p>
   <ul class="simpaths-home-intro-band__highlights">
-    <li>SimPaths generates data for education, work, income and wealth, family life, and health, explicitly modelling the dynamic feedback effects between them.</li>
-    <li>SimPaths is linked to an underlying tax-benefit model, providing a realistic description of the impact of taxes and benefits at both the individual and population level.</li>
-    <li>SimPaths features behavioural models over the principal economic margins of decision making, where projected choices depend on individual characteristics and fiscal incentives acting through future expectations.</li>
-    <li>From an architectural perspective, SimPaths is built following a highly modular approach in Java using the JAS-mine suite of simulation libraries.</li>
-    <li>SimPaths is built with an eye to adaptation across countries, helped by decoupling the dynamic structure from the tax-benefit model and drawing on standardised sources such as EU-SILC.</li>
+    <li><span class="simpaths-home-intro-band__highlight-label">Life-course domains</span><span>SimPaths generates data for education, work, income and wealth, family life, and health, explicitly modelling the dynamic feedback effects between them.</span></li>
+    <li><span class="simpaths-home-intro-band__highlight-label">Tax-benefit link</span><span>SimPaths is linked to an underlying tax-benefit model, providing a realistic description of the impact of taxes and benefits at both the individual and population level.</span></li>
+    <li><span class="simpaths-home-intro-band__highlight-label">Behavioural models</span><span>SimPaths features behavioural models over the principal economic margins of decision making, where projected choices depend on individual characteristics and fiscal incentives acting through future expectations.</span></li>
+    <li><span class="simpaths-home-intro-band__highlight-label">Modular architecture</span><span>From an architectural perspective, SimPaths is built following a highly modular approach in Java using the JAS-mine suite of simulation libraries.</span></li>
+    <li><span class="simpaths-home-intro-band__highlight-label">Country adaptation</span><span>SimPaths is built with an eye to adaptation across countries, helped by decoupling the dynamic structure from the tax-benefit model and drawing on standardised sources such as EU-SILC.</span></li>
   </ul>
   <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-intro-band__access">Access the code on GitHub</a>
 </div>
