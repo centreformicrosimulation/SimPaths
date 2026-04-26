@@ -2433,7 +2433,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .md-typeset .simpaths-home-intro-band__lede,
 .md-typeset .simpaths-home-intro-band__body {
   margin: 0;
-  max-width: 55rem;
+  max-width: var(--sp-home-max);
   color: rgba(28,40,57,0.92);
   font-size: 0.84rem;
   line-height: 1.72;
@@ -2458,7 +2458,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.72rem 1.35rem;
   padding-left: 0;
-  max-width: 55rem;
+  max-width: var(--sp-home-max);
   list-style: none;
 }
 
@@ -2860,22 +2860,45 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
 }
 
 .md-typeset .simpaths-home-research-band a.research-entry {
+  position: relative;
   grid-template-columns: minmax(6.8rem, 0.2fr) minmax(0, 1fr) auto;
   grid-template-rows: auto auto auto;
   gap: 0 1.72rem;
-  padding: 1.34rem 0 1.36rem;
+  margin: 0 -0.62rem;
+  padding: 1.34rem 0.62rem 1.36rem;
   border-top: 1px solid rgba(42,56,72,0.105) !important;
   border-bottom: none !important;
-  transition: transform 0.18s ease;
+  border-radius: 6px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .md-typeset .simpaths-home-research-band a.research-entry:first-child {
   border-top: 1px solid rgba(42,56,72,0.16) !important;
 }
 
+.md-typeset .simpaths-home-research-band a.research-entry::before {
+  position: absolute;
+  top: 1.05rem;
+  bottom: 1.05rem;
+  left: 0;
+  width: 2px;
+  content: "";
+  background: transparent;
+  border-radius: 999px;
+  transition: background-color 0.18s ease, opacity 0.18s ease;
+}
+
 .md-typeset .simpaths-home-research-band a.research-entry:hover {
-  padding-left: 0;
-  transform: none;
+  background: rgba(61,93,130,0.035);
+  border-top-color: rgba(61,93,130,0.18) !important;
+  box-shadow: 0 8px 22px rgba(17,25,36,0.035);
+}
+
+.md-typeset .simpaths-home-research-band a.research-entry:hover::before {
+  background: rgba(61,93,130,0.52);
 }
 
 .md-typeset .simpaths-home-research-band .research-entry__meta {
@@ -2914,6 +2937,11 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
   text-wrap: pretty;
   hyphens: none;
   -webkit-hyphens: none;
+  transition: color 0.18s ease;
+}
+
+.md-typeset .simpaths-home-research-band a.research-entry:hover .research-title {
+  color: #284867;
 }
 
 .md-typeset .simpaths-home-research-band .research-authors {
