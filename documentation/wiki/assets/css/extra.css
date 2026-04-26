@@ -313,11 +313,14 @@ body:has(.simpaths-home-hero) .md-header__title [data-md-component="header-topic
 
 /* ── Tab bar ── */
 .md-tabs {
-  background: rgba(8,16,32,0.45) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(250,249,245,0.06);
-  border-bottom: 1px solid rgba(250,249,245,0.04);
+  background:
+    radial-gradient(circle at 35% 0%, rgba(106,141,188,0.2), transparent 34%),
+    linear-gradient(90deg, #081225 0%, #101a2c 48%, #13283a 100%) !important;
+  border-top: 1px solid rgba(250,249,245,0.08);
+  border-bottom: 1px solid rgba(8,16,32,0.5);
+  box-shadow: 0 10px 22px rgba(8,16,32,0.16);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .md-tabs__link {
