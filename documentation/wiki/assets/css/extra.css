@@ -2456,7 +2456,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .md-typeset .simpaths-home-intro-band__highlights {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.72rem 1.35rem;
+  gap: 0.58rem 1.55rem;
   padding-left: 0;
   max-width: var(--sp-home-max);
   list-style: none;
@@ -2465,24 +2465,23 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 .md-typeset .simpaths-home-intro-band__highlights li {
   position: relative;
   margin: 0;
-  padding: 0.72rem 0 0 1rem;
+  padding: 0 0 0 1rem;
   color: rgba(28,40,57,0.84);
-  font-size: 0.735rem;
-  line-height: 1.6;
-  border-top: 1px solid rgba(61,93,130,0.13);
+  font-size: 0.755rem;
+  line-height: 1.66;
   overflow-wrap: anywhere;
 }
 
 .md-typeset .simpaths-home-intro-band__highlights li::before {
   content: "";
   position: absolute;
-  top: 1.1rem;
+  top: 0.58rem;
   left: 0;
-  width: 0.32rem;
-  height: 0.32rem;
+  width: 0.28rem;
+  height: 0.28rem;
   border-radius: 999px;
-  background: rgba(61,93,130,0.72);
-  box-shadow: 0 0 0 3px rgba(61,93,130,0.055);
+  background: rgba(61,93,130,0.58);
+  box-shadow: 0 0 0 2px rgba(61,93,130,0.045);
 }
 
 .md-typeset .simpaths-home-intro-band__access {
