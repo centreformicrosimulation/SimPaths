@@ -1625,13 +1625,7 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
 }
 
 .md-footer__link .md-footer__direction {
-  font-family: "Inter", var(--md-text-font) !important;
-  font-size: 0.55rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--sp-crimson);
-  opacity: 1;
+  display: none;
 }
 
 .md-footer__link .md-ellipsis {
