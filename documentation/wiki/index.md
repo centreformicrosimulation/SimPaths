@@ -12,7 +12,7 @@ hide:
     <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
   </div>
 
-  <div class="simpaths-home-hero__countries">
+  <div class="simpaths-home-hero__countries" aria-label="Country models">
     <span class="simpaths-home-hero__country">🇬🇧 United Kingdom</span>
     <span class="simpaths-home-hero__country">🇬🇷 Greece</span>
     <span class="simpaths-home-hero__country">🇭🇺 Hungary</span>
