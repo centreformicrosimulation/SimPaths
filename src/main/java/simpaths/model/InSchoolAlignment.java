@@ -75,14 +75,16 @@ public class InSchoolAlignment implements IEvaluation {
         // Counts aligned students within education age range: 16-29 (range is defined in Model)
         long numStudents = model.getPersons().stream()
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
-                        && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
+                        // && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
+                        && person.getDemAge() <= 29
                         && !person.isToLeaveSchool()
                         && Les_c4.Student.equals(person.getLes_c4())) // count aligned student group only
                 .count();
         // Counts individuals within education age range: 16-29 (range is defined in Model)
         long numPeople = model.getPersons().stream()
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
-                        && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
+                        // && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
+                        && person.getDemAge() <= 29
                         && person.getLes_c4() != null)
                 .count();
 
