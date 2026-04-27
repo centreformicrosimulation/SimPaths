@@ -16,7 +16,7 @@ flowchart TD
     J["Pool unmatched males and females across regions<br/>(remove matching by region)"] --> B
 
     B --> C["For each admissible pair:<br/>compute matching score"]
-    S["|actual earnings gap - female desired earnings gap|<br/>+<br/>|actual age gap - male desired age gap|"] --> C
+    S["(actual earnings gap - female desired earnings gap)^2<br/>+<br/>(actual age gap - male desired age gap)^2"] --> C
 
     C --> D["Sort candidate pairs by ascending score"]
     D --> E["Scan sorted pairs from top to bottom"]
@@ -108,7 +108,7 @@ Compact version:
 - `compute matching score`
 
 More explicit version:
-- `|actual age gap - male desired age gap| + |actual earnings gap - female desired earnings gap|`
+- `(actual age gap - male desired age gap)^2 + (actual earnings gap - female desired earnings gap)^2`
 
 If the score formula changes in code, update only the score box and keep the rest of the pair-based structure unless the algorithm itself changes.
 

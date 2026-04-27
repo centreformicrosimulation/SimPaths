@@ -14,7 +14,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: 59dc4765c
+    last_trigger_commit: ddeebfa91
     flowchart:
       source_md: documentation/flowcharts/modules/household_composition.md
     code_refs:
@@ -197,8 +197,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: d23b5773c
-    last_trigger_commit: 59dc4765c
+    last_verified_commit: ddeebfa91
+    last_trigger_commit: ddeebfa91
     flowchart:
       source_md: documentation/flowcharts/modules/union_matching.md
     code_refs:
