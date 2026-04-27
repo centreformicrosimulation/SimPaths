@@ -75,11 +75,11 @@ model_args:
   # --- Tax-benefit imputation ---
 #    donorPoolAveraging: true    # if true, average disposable income over k nearest-neighbour donors
                                  # rather than using the single closest donor; reduces imputation volatility
-#    taxDonorUpratingByWage: false  # if true, scale simulated income by real wage growth (WageGrowth index)
-                                    # before matching to the tax donor database, instead of price growth only.
-                                    # Compounding WageGrowth with Inflation gives the nominal wage adjustment
-                                    # used for matching. Imputed financial flows are always deflated back to
-                                    # BASE_PRICE_YEAR (2015) using Inflation only, regardless of this setting.
+#    taxDonorUpratingByWage: false  # if true, scale simulated income by nominal wage growth (compound of
+                                    # WageGrowth and Inflation indices). before matching to the tax donor
+                                    # database, instead of price growth only. Imputed financial flows are
+                                    # always deflated back to BASE_PRICE_YEAR (2015) using Inflation only,
+                                    # regardless of this setting.
 
   # --- Regression stochasticity ---
 #    addRegressionStochasticComponent: true   # include the residual draw in regression predictions

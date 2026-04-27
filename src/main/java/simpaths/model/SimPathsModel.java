@@ -204,7 +204,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     @GUIparameter(description = "Average over donor pool when imputing transfer payments")
     public boolean donorPoolAveraging = true;
 
-    @GUIparameter(description = "Scale simulated income by real wage growth (instead of price growth) before tax donor matching")
+    @GUIparameter(description = "Scale simulated income by nominal wage growth (instead of price growth) before tax donor matching")
     public boolean taxDonorUpratingByWage = false;
 
     private int ordering = Parameters.MODEL_ORDERING;    //Used in Scheduling of model events.  Schedule model events at the same time as the collector and observer events, but a lower order, so will be fired before the collector and observer have updated.
