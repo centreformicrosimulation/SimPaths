@@ -19,6 +19,8 @@ Default behavior:
 
 If the inspected commit has no matched flowchart module candidates, the wrapper prints a no-review-needed message and does not rewrite the prompt file.
 
+Generated prompt files are ignored by Git by default. Commit `documentation\flowcharts\flowchart_review_prompt.md` only if you intentionally want to preserve a specific review prompt.
+
 To mechanically flag matched modules in `modules.yml` at the same time:
 
 ```powershell
@@ -63,6 +65,18 @@ To remove the local hook:
 
 ```powershell
 D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Uninstall
+```
+
+To test the hook workflow without making a commit:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Test-FlowchartReviewHook.ps1
+```
+
+To test against a specific commit and include manifest flagging:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Test-FlowchartReviewHook.ps1 -Rev a38f4c902 -UpdateManifest
 ```
 
 ## Python Prompt Wrapper

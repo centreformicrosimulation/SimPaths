@@ -63,6 +63,13 @@ def priority_line(module: dict[str, Any]) -> str:
     return f"{module['id']} ({module['title']}): {method_text} -> {flowchart}"
 
 
+def review_focus(priority_modules: List[dict[str, Any]], matched_modules: List[dict[str, Any]]) -> str:
+    modules = priority_modules if priority_modules else matched_modules
+    if not modules:
+        return "none"
+    return ", ".join(module["id"] for module in modules)
+
+
 def format_manifest_updates(payload: dict[str, Any]) -> str:
     updates = payload.get("manifest_updates")
     skips = payload.get("manifest_skips")
@@ -93,6 +100,8 @@ def build_prompt(payload: dict[str, Any]) -> str:
     prompt = f"""Use the `flowchart-update` skill.
 
 Review committed SimPaths code change `{payload.get("commit") or payload.get("revision")}`.
+
+Review focus: {review_focus(priority_modules, matched_modules)}
 
 ## Detector Result
 

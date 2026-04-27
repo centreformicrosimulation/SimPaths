@@ -244,5 +244,8 @@ input/EUROMODoutput/baseline/*
 .DS_Store
 **/.DS_Store
 
+# Generated flowchart review prompt
+/documentation/flowcharts/flowchart_review_prompt.md
+
 # IntelliJ
 .idea/

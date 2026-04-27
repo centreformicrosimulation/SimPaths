@@ -24,7 +24,8 @@ documentation/flowcharts/flowchart_review_prompt.md
 6. Review the Codex output and commit any resulting documentation changes:
    - affected files under `documentation/flowcharts/modules/`
    - `documentation/flowcharts/modules.yml`
-   - optionally `documentation/flowcharts/flowchart_review_prompt.md` if you want to preserve the exact handoff prompt
+
+The generated prompt file is ignored by Git by default. Commit it only if you intentionally want to preserve the exact handoff prompt for an audit trail.
 
 If the commit has no matched code files or no matched flowchart modules, the script prints a no-review-needed message and does not rewrite the prompt file.
 
@@ -74,7 +75,7 @@ The installer derives the repository root from its own location, so it installs 
 For a relevant code commit, the hook may leave working-tree changes after the commit:
 
 - `documentation/flowcharts/modules.yml`
-- `documentation/flowcharts/flowchart_review_prompt.md`
+- `documentation/flowcharts/flowchart_review_prompt.md` as an ignored generated file
 
 This is expected. The hook runs after the commit has already been created, so those generated changes are not part of the code commit. Review them, send the prompt to Codex if needed, and commit the documentation review output separately.
 
@@ -105,3 +106,9 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview
 ```
 
 Use the Python scripts directly only for advanced cases such as alternate manifests, custom output paths, JSON detector output, or debugging the detector.
+
+Test the hook workflow without creating a commit:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Test-FlowchartReviewHook.ps1
+```
