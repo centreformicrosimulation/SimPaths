@@ -81,6 +81,28 @@ D:\python\python.exe .codex/skills/flowchart-update/scripts/detect_flowchart_rev
 
 `--update-manifest` only changes matched modules whose current `review_state` is `up_to_date` or `candidate_for_review`. It sets `review_state: candidate_for_review` and updates `last_trigger_commit` to the trigger commit. It uses file-level matches, not only priority matches. It refuses commit ranges and leaves `needs_update` or `updated_unverified` modules unchanged, because those states need explicit review. If a module is already `up_to_date` with `last_trigger_commit` equal to the trigger commit, the detector treats that module as already reviewed for that trigger and skips it.
 
+## Review Prompt Wrapper
+
+A Level 3A wrapper is available at:
+
+```text
+.codex/skills/flowchart-update/scripts/prepare_flowchart_review.py
+```
+
+It runs the detector in JSON mode and formats a Codex-ready review prompt. It can print the prompt to the terminal:
+
+```powershell
+D:\python\python.exe .codex/skills/flowchart-update/scripts/prepare_flowchart_review.py --repo-root D:\CeMPA\SimPaths --rev HEAD --update-manifest
+```
+
+Or write it to a Markdown file:
+
+```powershell
+D:\python\python.exe .codex/skills/flowchart-update/scripts/prepare_flowchart_review.py --repo-root D:\CeMPA\SimPaths --rev HEAD --update-manifest --out flowchart_review_prompt.md
+```
+
+The wrapper does not review code or edit flowchart Markdown. It only prepares the handoff prompt for Codex or a human reviewer.
+
 ## Review State Meanings
 
 The `review_state` field is intended to track where a module stands in the documentation-review workflow.
