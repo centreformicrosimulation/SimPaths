@@ -12,14 +12,6 @@ hide:
     <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
   </div>
 
-  <div class="simpaths-home-hero__countries" aria-label="Country models">
-    <span class="simpaths-home-hero__country">🇬🇧 United Kingdom</span>
-    <span class="simpaths-home-hero__country">🇬🇷 Greece</span>
-    <span class="simpaths-home-hero__country">🇭🇺 Hungary</span>
-    <span class="simpaths-home-hero__country">🇮🇹 Italy</span>
-    <span class="simpaths-home-hero__country">🇵🇱 Poland</span>
-  </div>
-
 </div>
 </div>
 
@@ -43,7 +35,7 @@ hide:
       </article>
       <article>
         <span>03</span>
-        <h3>Behavioural response</h3>
+        <h3>Behavioural responses</h3>
         <p>Time-use and savings choices respond to characteristics, fiscal incentives, and future expectations.</p>
       </article>
       <article>
@@ -54,7 +46,7 @@ hide:
       <article>
         <span>05</span>
         <h3>Country adaptation</h3>
-        <p>Model dynamics are decoupled from tax-benefit systems and use standardised data sources such as EU-SILC.</p>
+        <p>Model dynamics are decoupled from tax-benefit systems, making the framework easier to adapt across country settings.</p>
       </article>
     </div>
     <div class="simpaths-capability-combination__brace" aria-hidden="true"></div>
