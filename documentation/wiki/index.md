@@ -29,13 +29,40 @@ hide:
   <p class="simpaths-home-intro-band__lede">SimPaths is an open-source framework for modelling individual and household life course events. The framework is designed to project life histories through time, building up a detailed picture of career paths, family (inter)relations, health, and financial circumstances. The modular nature of SimPaths facilitates analysis of alternative assumptions concerning the tax and benefit system, sensitivity to parameter estimates, and alternative approaches for projecting labour and leisure as well as consumption and savings decisions. SimPaths builds upon standardised assumptions and data sources, which facilitates adaptation to alternative countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy, and Poland, and are under development for Germany, Spain, and Sweden.</p>
   <p class="simpaths-home-intro-band__body">All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
   <p class="simpaths-home-intro-band__body simpaths-home-intro-band__body--bridge">The framework incorporates many state-of-the-art features which are rarely combined in dynamic models:</p>
-  <ul class="simpaths-home-intro-band__highlights">
-    <li><span class="simpaths-home-intro-band__highlight-label">Life-course domains</span><span>SimPaths generates data for education, work, income and wealth, family life, and health, explicitly modelling the dynamic feedback effects between them.</span></li>
-    <li><span class="simpaths-home-intro-band__highlight-label">Tax-benefit link</span><span>SimPaths is linked to an underlying tax-benefit model, providing a realistic description of the impact of taxes and benefits at both the individual and population level.</span></li>
-    <li><span class="simpaths-home-intro-band__highlight-label">Behavioural models</span><span>SimPaths features behavioural models over the principal economic margins of decision making, where projected choices depend on individual characteristics and fiscal incentives acting through future expectations.</span></li>
-    <li><span class="simpaths-home-intro-band__highlight-label">Modular architecture</span><span>From an architectural perspective, SimPaths is built following a highly modular approach in Java using the JAS-mine suite of simulation libraries.</span></li>
-    <li><span class="simpaths-home-intro-band__highlight-label">Country adaptation</span><span>SimPaths is built with an eye to adaptation across countries, helped by decoupling the dynamic structure from the tax-benefit model and drawing on standardised sources such as EU-SILC.</span></li>
-  </ul>
+  <div class="simpaths-capability-combination" aria-label="State-of-the-art capabilities combined in SimPaths">
+    <div class="simpaths-capability-combination__features">
+      <article>
+        <span>01</span>
+        <h3>Life-course feedback</h3>
+        <p>Education, work, income and wealth, family life, and health evolve together rather than as isolated outputs.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Policy realism</h3>
+        <p>An underlying tax-benefit model links individual outcomes to population-level policy effects.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Behavioural response</h3>
+        <p>Time-use and savings choices respond to characteristics, fiscal incentives, and future expectations.</p>
+      </article>
+      <article>
+        <span>04</span>
+        <h3>Modular design</h3>
+        <p>Java and JAS-mine provide a modular architecture for switching assumptions and projection methods.</p>
+      </article>
+      <article>
+        <span>05</span>
+        <h3>Country adaptation</h3>
+        <p>Model dynamics are decoupled from tax-benefit systems and use standardised data sources such as EU-SILC.</p>
+      </article>
+    </div>
+    <div class="simpaths-capability-combination__brace" aria-hidden="true"></div>
+    <div class="simpaths-capability-combination__result">
+      <span>combined in one framework</span>
+      <strong>SimPaths</strong>
+    </div>
+  </div>
   <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-intro-band__access">Access the code on GitHub</a>
 </div>
 </section>

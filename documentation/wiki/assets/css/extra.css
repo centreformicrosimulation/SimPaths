@@ -2431,10 +2431,12 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   color: rgba(28,40,57,0.92);
   font-size: 0.84rem;
   line-height: 1.72;
+  text-align: left;
+  hyphens: none;
+  -webkit-hyphens: none;
 }
 
-.md-typeset .simpaths-home-intro-band__body,
-.md-typeset .simpaths-home-intro-band__highlights {
+.md-typeset .simpaths-home-intro-band__body {
   margin-top: 1.18rem;
 }
 
@@ -2447,35 +2449,141 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   font-weight: 520;
 }
 
-.md-typeset .simpaths-home-intro-band__highlights {
+.md-typeset .simpaths-capability-combination {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.74rem;
-  padding-left: 0;
-  max-width: var(--sp-home-max);
-  list-style: none;
-}
-
-.md-typeset .simpaths-home-intro-band__highlights li {
-  display: grid;
-  grid-template-columns: minmax(8.5rem, 0.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 1.9rem minmax(12rem, 0.28fr);
   gap: 1.15rem;
-  align-items: baseline;
-  margin: 0;
-  padding: 0;
-  color: rgba(28,40,57,0.84);
-  font-size: 0.755rem;
-  line-height: 1.66;
-  overflow-wrap: anywhere;
+  align-items: stretch;
+  max-width: var(--sp-home-max);
+  margin-top: 1.28rem;
 }
 
-.md-typeset .simpaths-home-intro-band__highlight-label {
+.md-typeset .simpaths-capability-combination__features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "capability-one capability-two"
+    "capability-three capability-four"
+    "capability-five capability-five";
+  gap: 0.92rem 1.5rem;
+}
+
+.md-typeset .simpaths-capability-combination__features article {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.36rem minmax(0, 1fr);
+  gap: 0 0.7rem;
+  min-width: 0;
+  padding: 0.1rem 0 0;
+}
+
+.md-typeset .simpaths-capability-combination__features article:nth-child(1) {
+  grid-area: capability-one;
+}
+
+.md-typeset .simpaths-capability-combination__features article:nth-child(2) {
+  grid-area: capability-two;
+}
+
+.md-typeset .simpaths-capability-combination__features article:nth-child(3) {
+  grid-area: capability-three;
+}
+
+.md-typeset .simpaths-capability-combination__features article:nth-child(4) {
+  grid-area: capability-four;
+}
+
+.md-typeset .simpaths-capability-combination__features article:nth-child(5) {
+  grid-area: capability-five;
+}
+
+.md-typeset .simpaths-capability-combination__features article:nth-child(5) p {
+  max-width: 36rem;
+}
+
+.md-typeset .simpaths-capability-combination__features span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 1.18rem;
+  height: 1.18rem;
   color: rgba(61,93,130,0.9);
-  font-size: 0.57rem;
+  font-size: 0.48rem;
+  font-weight: 780;
+  line-height: 1;
+  background: #fffefa;
+  border: 1px solid rgba(61,93,130,0.32);
+  border-radius: 999px;
+}
+
+.md-typeset .simpaths-capability-combination__features h3 {
+  grid-column: 2;
+  margin: 0 0 0.34rem !important;
+  color: rgba(22,33,49,0.96) !important;
+  font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 760 !important;
+  line-height: 1.18;
+  letter-spacing: 0.01em;
+}
+
+.md-typeset .simpaths-capability-combination__features p {
+  grid-column: 2;
+  margin: 0;
+  color: rgba(28,40,57,0.76);
+  font-size: 0.68rem;
+  line-height: 1.52;
+  text-align: left;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.md-typeset .simpaths-capability-combination__brace {
+  align-self: stretch;
+  position: relative;
+  width: 1.65rem;
+}
+
+.md-typeset .simpaths-capability-combination__brace::before {
+  position: absolute;
+  top: 0.48rem;
+  right: 0;
+  bottom: 0.48rem;
+  width: 1.55rem;
+  content: "";
+  border-top: 1.5px solid rgba(61,93,130,0.3);
+  border-right: 1.5px solid rgba(61,93,130,0.3);
+  border-bottom: 1.5px solid rgba(61,93,130,0.3);
+  border-radius: 0 1.7rem 1.7rem 0;
+}
+
+.md-typeset .simpaths-capability-combination__result {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  min-height: 9rem;
+  padding-left: 0.15rem;
+  border-left: 0;
+}
+
+.md-typeset .simpaths-capability-combination__result span {
+  color: rgba(61,93,130,0.86);
+  font-size: 0.56rem;
   font-weight: 760;
-  line-height: 1.28;
-  letter-spacing: 0.13em;
+  line-height: 1.22;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.md-typeset .simpaths-capability-combination__result strong {
+  margin-top: 0.42rem;
+  color: rgba(22,33,49,0.96);
+  font-family: var(--sp-heading-font), Georgia, "Times New Roman", serif;
+  font-size: clamp(1.54rem, 3vw, 2.14rem);
+  font-weight: 520;
+  line-height: 1;
 }
 
 .md-typeset .simpaths-home-intro-band__access {
@@ -3007,8 +3115,28 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .md-typeset .simpaths-home-intro-band__highlights {
+  .md-typeset .simpaths-capability-combination {
     grid-template-columns: 1fr;
+    gap: 0.82rem;
+  }
+
+  .md-typeset .simpaths-capability-combination__features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md-typeset .simpaths-capability-combination__features article:nth-child(5) {
+    max-width: 100%;
+  }
+
+  .md-typeset .simpaths-capability-combination__brace {
+    display: none;
+  }
+
+  .md-typeset .simpaths-capability-combination__result {
+    min-height: auto;
+    padding: 0.88rem 0 0;
+    border-left: 0;
+    border-top: 1px solid rgba(61,93,130,0.18);
   }
 
   .md-typeset .simpaths-home-explore a.feature-card.feature-card--primary {
@@ -3049,10 +3177,28 @@ body:has(.md-tabs__list > .md-tabs__item:nth-child(3).md-tabs__item--active) .md
     line-height: 1.72;
   }
 
-  .md-typeset .simpaths-home-intro-band__highlights li {
+  .md-typeset .simpaths-capability-combination {
+    margin-top: 1.08rem;
+  }
+
+  .md-typeset .simpaths-capability-combination__features {
     grid-template-columns: 1fr;
-    gap: 0.18rem;
-    font-size: 0.76rem;
+    grid-template-areas:
+      "capability-one"
+      "capability-two"
+      "capability-three"
+      "capability-four"
+      "capability-five";
+    gap: 0.82rem;
+  }
+
+  .md-typeset .simpaths-capability-combination__features article {
+    padding-top: 0;
+    padding-left: 0;
+  }
+
+  .md-typeset .simpaths-capability-combination__features p {
+    font-size: 0.74rem;
   }
 
   .md-typeset .simpaths-home-explore .card-grid--primary,
