@@ -15,6 +15,7 @@ documentation/wiki/developer-guide/how-to/code-logic-flowcharts.md
 | `AGENTS.md` | Short routing instructions for agents working on flowcharts. |
 | `documentation/wiki/developer-guide/how-to/code-logic-flowcharts.md` | Main human-facing workflow and style guide. |
 | `documentation/flowcharts/README.md` | This folder index. |
+| `documentation/flowcharts/automation.md` | Assisted automation workflow for generating review prompts after committed code changes. |
 | `documentation/flowcharts/modules.yml` | Manifest linking flowcharts to code files, wiki links, update triggers, and review-tracking metadata. |
 | `documentation/flowcharts/modules/*.md` | Editable flowchart source files. |
 | `documentation/wiki/figures/modules/` | Optional rendered SVG/PNG exports. Markdown remains the source of truth. |
