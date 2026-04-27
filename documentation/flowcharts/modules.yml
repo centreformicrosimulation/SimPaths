@@ -222,8 +222,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: null
-    last_trigger_commit: null
+    last_verified_commit: 7eb2dc399
+    last_trigger_commit: 7eb2dc399
     flowchart:
       source_md: documentation/flowcharts/modules/inschool.md
     code_refs:

@@ -39,14 +39,16 @@ If a committed change touches one or more files listed in `code_refs.files`, the
 ## Review Workflow
 
 1. Identify the relevant commit range or committed change set.
-2. List changed files from Git.
+2. List changed files from Git. Prefer `.codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py` for the first-pass file-to-module matching step when available.
 3. Match changed files against `modules.yml` using `code_refs.files`.
-4. For each matched module, set or treat the module as `candidate_for_review`.
+4. For each matched module, set or treat the module as `candidate_for_review`. The detector's `--update-manifest` mode may be used for the mechanical `up_to_date` to `candidate_for_review` transition for a single trigger commit, but it must not be treated as a content review.
 5. Inspect the committed diff and current source code to decide whether documented logic changed.
 6. Update the module Markdown only when the change affects documented logic, schedule context, state dependencies, key branches, notes, or traceability metadata.
 7. Update `modules.yml` if `review_state`, code references, wiki links, trigger descriptions, or flowchart paths changed.
 8. If the Markdown is edited but not yet fully re-checked, use `updated_unverified`.
 9. Use `up_to_date` only after explicit review confirms the documentation matches the committed code.
+
+When the documented process has an alignment, calibration, or root-search stage, explicitly check whether the committed code change also affects that secondary stage, even if the main flowchart structure appears unchanged.
 
 ## What Counts As A Real Documentation Change
 
@@ -59,6 +61,7 @@ Treat these as likely reasons to update the flowchart `.md`:
 - state mutations changed;
 - handoff objects such as flags, pools, caches, or lists changed;
 - stochastic decision handling changed in a way documented in notes or glossary;
+- alignment, calibration, root-search, or target-counting logic changed, or a main-process change also affects an alignment or calibration section that reuses the same method, thresholds, flags, or sample definition;
 - debugging assumptions in the module notes became stale;
 - source-file dependencies or wiki links became outdated.
 
@@ -91,6 +94,8 @@ These edits are usually safe when clearly justified by the code and manifest:
 - update wiki links and flowchart paths;
 - update traceability notes that simply reflect changed class or method names.
 
+When using the detector's `--update-manifest` option, keep the scope narrower than the general safe-edit list: it should only flag matched modules as `candidate_for_review` and update `last_trigger_commit`. Do not use that option to mark modules `up_to_date`, `needs_update`, or `updated_unverified`.
+
 ## Edits Requiring Careful Review
 
 These edits should be made cautiously and only after reading the code and the current module Markdown:
@@ -99,6 +104,7 @@ These edits should be made cautiously and only after reading the code and the cu
 - control-flow arrows;
 - dependency arrows and state nodes;
 - schedule context wording;
+- alignment or calibration sections, including target definitions and trial-adjustment logic;
 - state inputs and state changes sections;
 - debugging notes;
 - any claim about what a downstream stage reads or writes.

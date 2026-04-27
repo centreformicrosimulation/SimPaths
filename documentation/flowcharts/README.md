@@ -54,6 +54,32 @@ Each module entry currently contains:
 
 The manifest is intended to support assisted automation. It should help identify which flowcharts need review after committed code changes, but it does not imply that Mermaid diagrams should be rewritten automatically in all cases.
 
+## Detection Script
+
+A small first-pass detector is available at:
+
+```text
+.codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py
+```
+
+The detector reads committed changed files from Git, matches them against `modules.yml` using `code_refs.files`, and reports candidate modules for review. It does not decide which matched module is directly affected, and it does not rewrite flowchart documentation.
+
+Typical usage from the repo root:
+
+```powershell
+D:\python\python.exe .codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py --repo-root D:\CeMPA\SimPaths --rev HEAD --code-only
+```
+
+Use `--code-only` for the normal workflow so that documentation-file changes in the same commit do not trigger extra matches.
+
+To opt in to the mechanical manifest-flagging step for a single commit:
+
+```powershell
+D:\python\python.exe .codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py --repo-root D:\CeMPA\SimPaths --rev HEAD --code-only --update-manifest
+```
+
+`--update-manifest` only changes matched modules whose current `review_state` is `up_to_date` or `candidate_for_review`. It sets `review_state: candidate_for_review` and updates `last_trigger_commit` to the trigger commit. It refuses commit ranges and leaves `needs_update` or `updated_unverified` modules unchanged, because those states need explicit review.
+
 ## Review State Meanings
 
 The `review_state` field is intended to track where a module stands in the documentation-review workflow.
