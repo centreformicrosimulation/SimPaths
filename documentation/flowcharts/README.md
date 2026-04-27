@@ -147,7 +147,7 @@ Use:
 
 Tasks:
 1. Compare changed code files with modules.yml.
-2. Identify affected flowcharts using `code_refs.files`.
+2. Identify affected flowcharts using `code_refs.files`; use `code_refs.methods` priority matches when present to focus review.
 3. Use committed changes as the review trigger and decide whether documented logic actually changed.
 4. Update affected module Markdown files only if the committed code change alters documented logic, schedule context, state dependencies, notes, or traceability metadata.
 5. Update modules.yml if review state, code dependencies, wiki links, trigger descriptions, or flowchart paths changed.

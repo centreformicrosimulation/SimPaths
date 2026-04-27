@@ -24,6 +24,24 @@ modules:
         - src/main/java/simpaths/model/PartnershipAlignment.java
         - src/main/java/simpaths/model/FertilityAlignment.java
         - src/main/java/simpaths/model/UnionMatching.java
+      methods:
+        - SimPathsModel.buildSchedule
+        - SimPathsModel.partnershipAlignment
+        - SimPathsModel.unionMatching
+        - SimPathsModel.unionMatchingNoRegion
+        - SimPathsModel.unionMatchingSBAM
+        - SimPathsModel.fertilityAlignment
+        - Person.updateFullTimeHourlyEarnings
+        - Person.cohabitation
+        - Person.partnershipDissolution
+        - Person.fertility
+        - Person.giveBirth
+        - PartnershipAlignment.evaluate
+        - FertilityAlignment.evaluate
+        - UnionMatching.evaluate
+        - UnionMatching.evaluateGM
+        - UnionMatching.localGetValue
+        - UnionMatching.localMatch
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -51,6 +69,16 @@ modules:
         - src/main/java/simpaths/model/SimPathsModel.java
         - src/main/java/simpaths/model/PartnershipAlignment.java
         - src/main/java/simpaths/data/Parameters.java
+      methods:
+        - Person.cohabitation
+        - Person.partnershipDissolution
+        - SimPathsModel.buildSchedule
+        - SimPathsModel.partnershipAlignment
+        - SimPathsModel.clearPersonsToMatch
+        - SimPathsModel.getPartnershipAdjustment
+        - PartnershipAlignment.evaluate
+        - Parameters.getRegPartnershipU1
+        - Parameters.getRegPartnershipU2
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -76,6 +104,17 @@ modules:
         - src/main/java/simpaths/model/Person.java
         - src/main/java/simpaths/model/SimPathsModel.java
         - src/main/java/simpaths/data/Parameters.java
+      methods:
+        - Person.updateFullTimeHourlyEarnings
+        - Person.initialisePotentialHourlyEarnings
+        - Person.setLabWageFullTimeHrly
+        - Person.updateLaggedVariables
+        - SimPathsModel.buildSchedule
+        - Parameters.getRegWagesMalesE
+        - Parameters.getRegWagesMalesNE
+        - Parameters.getRegWagesFemalesE
+        - Parameters.getRegWagesFemalesNE
+        - Parameters.getRMSEForRegression
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -105,6 +144,18 @@ modules:
         - src/main/java/simpaths/model/FertilityAlignment.java
         - src/main/java/simpaths/data/filters/FertileFilter.java
         - src/main/java/simpaths/data/Parameters.java
+      methods:
+        - Person.fertility
+        - Person.giveBirth
+        - Person.isToGiveBirth
+        - Person.setToGiveBirth
+        - SimPathsModel.buildSchedule
+        - SimPathsModel.fertilityAlignment
+        - SimPathsModel.getFertilityAdjustment
+        - FertilityAlignment.evaluate
+        - FertilityAlignment.evalFertilityRate
+        - FertileFilter.evaluate
+        - Parameters.getRegFertilityF1
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -133,6 +184,14 @@ modules:
         - src/main/java/simpaths/data/Parameters.java
         - src/main/java/simpaths/data/ManagerRegressions.java
         - src/main/java/simpaths/model/decisions/DecisionParams.java
+      methods:
+        - Person.health
+        - Person.updateLaggedVariables
+        - Person.getDhe
+        - Person.getDlltsd
+        - SimPathsModel.buildSchedule
+        - Parameters.getRegHealthH2
+        - ManagerRegressions.getProbabilities
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -160,6 +219,15 @@ modules:
         - src/main/java/simpaths/model/SimPathsModel.java
         - src/main/java/simpaths/data/Parameters.java
         - src/main/java/simpaths/data/ManagerRegressions.java
+      methods:
+        - Person.healthMentalHM1Case
+        - Person.healthMentalHM2Case
+        - Person.constrainhealthPsyDstrssEstimate
+        - SimPathsModel.buildSchedule
+        - Parameters.getRegHealthHM1Case
+        - Parameters.getRegHealthHM2CaseMales
+        - Parameters.getRegHealthHM2CaseFemales
+        - ManagerRegressions.getProbabilities
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -183,6 +251,15 @@ modules:
         - src/main/java/simpaths/model/Person.java
         - src/main/java/simpaths/model/SimPathsModel.java
         - src/main/java/simpaths/data/Parameters.java
+      methods:
+        - Person.healthMentalHM1Level
+        - Person.healthMentalHM2Level
+        - Person.constrainDhmEstimate
+        - SimPathsModel.buildSchedule
+        - Parameters.getRegHealthHM1Level
+        - Parameters.getRegHealthHM2LevelMales
+        - Parameters.getRegHealthHM2LevelFemales
+        - Parameters.getRMSEForRegression
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:

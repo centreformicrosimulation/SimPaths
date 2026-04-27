@@ -32,7 +32,7 @@ The editable Markdown file is the source of truth. Every flowchart should have a
 documentation/flowcharts/modules.yml
 ```
 
-The manifest records flowchart path, related code files, wiki links, and update triggers.
+The manifest records flowchart path, related code files, optional method-level review hints, wiki links, and update triggers.
 
 # 3. Module File Structure
 
