@@ -34,7 +34,7 @@ The `cohabitation()` process determines:
   - `PartnershipAlignment.evaluate(double[] args)`
 - `src/main/java/simpaths/data/Parameters.java`
   - `MIN_AGE_COHABITATION`
-  - `getRegPartnershipU1a()`
+  - `getRegPartnershipU1()`
   - `getRegPartnershipU2()`
 
 ## Schedule Context
@@ -56,7 +56,7 @@ In the household composition block, the relevant order is:
 - `demMaleFlag`: gender flag. Dissolution is evaluated for partnered females only.
 - `probitAdjustment`: partnership alignment adjustment used in the UK branch.
 - `statInnovations.getDoubleDraw(25)`: stochastic draw for formation or dissolution.
-- partnership regressions: UK `U1a` and `U2`.
+- partnership regressions: UK `U1` and `U2`.
 - `model.getPersonsToMatch()`: gender/region candidate pools for later union matching.
 
 ## State Changes
@@ -89,9 +89,9 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 | `demLeavePartnerFlag` | Transient flag indicating that a partnered female was selected for partnership dissolution. It is consumed by `partnershipDissolution()`. |
 | `demAlignPartnerProcess` | Alignment/test-partner flag reset here. Test matching can set related alignment state later. |
 | `personsToMatch` | Gender/region candidate pools populated here and consumed by union matching. |
-| `probitAdjustment` | Partnership alignment adjustment. In the UK branch it is added to U1a formation scores and subtracted from U2 dissolution scores. |
+| `probitAdjustment` | Partnership alignment adjustment. In the UK branch it is added to U1 formation scores and subtracted from U2 dissolution scores. |
 | `cohabitInnov` | Stochastic draw from `statInnovations.getDoubleDraw(25)`. A positive outcome occurs when the draw is below the relevant probability. |
-| `U1a` | UK regression for partnership formation among unpartnered persons. |
+| `U1` | UK regression for partnership formation among unpartnered persons. |
 | `U2` | UK regression for partnership dissolution among partnered females. |
 
 ## Key Branches
@@ -115,8 +115,8 @@ flowchart TD
     E --> F{"Age >= minimum<br/>cohabitation age?"}
     F -- No --> Z["Not eligible for<br/>cohabitation decision"]
     F -- Yes --> H{"Has current partner?"}
-    H -- No --> I["Apply UK U1a:<br/>probability of partnership formation"]
-    I --> J{"Innovation below<br/>U1a probability?"}
+    H -- No --> I["Apply UK U1:<br/>probability of partnership formation"]
+    I --> J{"Innovation below<br/>U1 probability?"}
     J -- Yes --> K["Formation flag:<br/>set demBePartnerFlag = true; <br/>add person to personsToMatch"]
     J -- No --> L["Remain unpartnered;<br/>not added to personsToMatch"]
     H -- Yes --> M{"Female?"}
