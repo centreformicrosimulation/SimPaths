@@ -103,7 +103,7 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 | `demGiveBirthFlag` | Person-level flag indicating selection to give birth later in the schedule. |
 | `alignCohabitation` | Model switch controlling whether partnership alignment adjusts cohabitation probabilities. |
 | `alignFertility` | Model switch controlling whether fertility alignment adjusts birth probabilities. |
-| `unionMatchingMethod` | Model setting selecting SBAM or parametric matching. The ParametricNoRegion branch currently runs the same single parametric round because the no-region fallback call is commented out. |
+| `unionMatchingMethod` | Model setting selecting SBAM, parametric, or parametric-with-no-region fallback matching. |
 | `partnershipAdjustment` | Adjustment used in partnership formation/dissolution probability calculations. |
 | `fertilityAdjustment` | Adjustment used in fertility probability calculations. |
 | `alignmentRun` | Boolean used by matching routines to distinguish real household updates from alignment/test matching. |
@@ -113,7 +113,7 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 - Partnership alignment enabled versus skipped.
 - Country-specific cohabitation logic in `Person.cohabitation()`.
 - Partnership formation versus dissolution paths.
-- Union matching method: SBAM, Parametric, or ParametricNoRegion. In the current scheduled path, ParametricNoRegion does not run an additional no-region fallback round.
+- Union matching method: SBAM, Parametric, or ParametricNoRegion.
 - Fertility alignment enabled versus skipped.
 - Fertile versus non-fertile persons.
 - Give-birth flag true versus false.
@@ -145,7 +145,7 @@ flowchart TD
     K0[/Matching preferences:<br/>desired age differential; <br/>desired wage differential/] -. "used in matching score" .-> K
     K -- SBAM --> L["Run SBAM matching"]
     K -- Parametric --> M["Run parametric matching<br/>within region"]
-    K -- ParametricNoRegion --> N["Run parametric matching<br/>within region<br/>(no-region fallback inactive)"]
+    K -- ParametricNoRegion --> N["Run parametric matching<br/>within region; <br/>then match remaining candidates nationally"]
 
     L --> O["New unions formed"]
     M --> O

@@ -1,11 +1,11 @@
 Use the `flowchart-update` skill.
 
-Review committed SimPaths code change `e08fbbf46`.
+Review committed SimPaths code change `a38f4c902`.
 
 ## Detector Result
 
 Revision: `HEAD`
-Commit: `e08fbbf46`
+Commit: `a38f4c902`
 
 Changed code files:
 - src/main/java/simpaths/model/SimPathsModel.java
@@ -27,20 +27,20 @@ File-level candidate modules:
 ## Manifest Flagging
 
 Manifest updates: 9
-- household_composition: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- cohabitation: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- full_time_hourly_earnings: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- fertility_give_birth: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- health_long_term_sick: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- health_mental_hm1_hm2_cases: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- health_mental_hm1_hm2_level: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- union_matching: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
-- inschool: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- household_composition: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- cohabitation: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- full_time_hourly_earnings: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- fertility_give_birth: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- health_long_term_sick: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- health_mental_hm1_hm2_cases: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- health_mental_hm1_hm2_level: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- union_matching: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
+- inschool: up_to_date -> candidate_for_review; last_trigger_commit e08fbbf46 -> a38f4c902
 Manifest skips: 0
 
 ## Tasks
 
-1. Inspect the committed code diff for `e08fbbf46`.
+1. Inspect the committed code diff for `a38f4c902`.
 2. Review priority modules first.
 3. Treat non-priority file-level matches as candidates, not confirmed documentation changes.
 4. Update flowchart Markdown only where documented logic, schedule context, state dependencies, notes, or traceability metadata changed.
