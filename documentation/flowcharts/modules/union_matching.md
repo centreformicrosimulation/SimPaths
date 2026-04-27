@@ -13,7 +13,6 @@ This document combines:
 ```mermaid
 flowchart TD
     A["Male and female candidate pools for matching"] --> B["Generate all admissible male-female candidate pairs"]
-    J["Pool unmatched males and females across regions<br/>(remove matching by region)"] --> B
 
     B --> C["For each admissible pair:<br/>compute matching score"]
     S["(actual earnings gap - female desired earnings gap)^2<br/>+<br/>(actual age gap - male desired age gap)^2"] --> C
@@ -34,9 +33,7 @@ flowchart TD
     M -- No --> E
     M -- Yes --> N{"Unmatched persons remain?"}
     N -- No --> O["End: remaining individuals stay unmatched"]
-    N -- Yes --> P{"Matching by region?"}
-    P -- No --> O
-    P -- Yes --> J
+    N -- Yes --> O
 ```
 
 ## Notes
@@ -44,7 +41,7 @@ flowchart TD
 - The logic is pair-based, not woman-by-woman.
 - `GlobalMatching` sorts all admissible male-female pairs by score, then scans that global list from best to worst.
 - A pair is matched only if both members are still unmatched at that point in the scan.
-- If same-region matching leaves unmatched persons, the model runs a second round with region relaxed.
+- In the current scheduled `UnionMatching` event, unmatched persons remain unmatched after the single matching round. The no-region helper still exists in code, but the scheduled no-region fallback call is commented out.
 
 ---
 
@@ -84,7 +81,7 @@ At present, the flowchart should reflect the following high-level steps:
 7. Remove matched male and female from further consideration.
 8. Otherwise, skip the pair.
 9. Continue until all candidate pairs are scanned.
-10. If same-region matching leaves unmatched persons, pool unmatched males and females across regions and repeat the matching process.
+10. Leave any remaining unmatched candidates unmatched after the single matching round.
 
 ## How to express admissibility
 
@@ -96,9 +93,7 @@ If needed, admissibility can be described in a note rather than inside the main 
 - earnings mismatch bound
 - wrong sex combination for the current matching pool
 
-Region should normally be treated as a **pool construction issue**, not a pair-admissibility issue inside the scoring box:
-- first round: same-region pools
-- second round: pooled across regions
+Region should normally be treated as a **pool construction issue**, not a pair-admissibility issue inside the scoring box. In the current scheduled path, the no-region fallback round is not active.
 
 ## How to express the score
 
@@ -159,7 +154,6 @@ Preferred labels:
 - `Remove matched male and female from unmatched sets`
 - `Skip pair`
 - `Continue scanning remaining candidate pairs`
-- `Pool unmatched males and females across regions`
 
 Avoid labels such as:
 - `For each woman, find best match`
@@ -183,14 +177,14 @@ When updating the diagram in future:
    - admissibility rules
    - score formula
    - matching algorithm
-   - same-region versus all-region fallback structure
+   - whether the scheduled path includes any same-region versus all-region fallback
 
 3. Update the Mermaid source before redrawing the figure manually.
 
 4. Regenerate the rendered flowchart and check that:
    - it remains pair-based unless the code no longer is
    - the skip/match branching is correct
-   - the fallback no-region round is still represented if present
+   - the fallback no-region round is represented only if it is active in the scheduled path
 
 5. If unsure, prefer a simpler diagram plus notes rather than adding too much low-level code detail to the main figure.
 

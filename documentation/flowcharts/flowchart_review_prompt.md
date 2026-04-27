@@ -1,18 +1,17 @@
 Use the `flowchart-update` skill.
 
-Review committed SimPaths code change `4f9935ce8`.
+Review committed SimPaths code change `e08fbbf46`.
 
 ## Detector Result
 
-Revision: `4f9935ce8`
-Commit: `4f9935ce8`
+Revision: `HEAD`
+Commit: `e08fbbf46`
 
 Changed code files:
-- src/main/java/simpaths/model/Person.java
+- src/main/java/simpaths/model/SimPathsModel.java
 
 Priority modules:
-- household_composition (Household Composition): Person.cohabitation -> documentation/flowcharts/modules/household_composition.md
-- cohabitation (Cohabitation UK Case): Person.cohabitation -> documentation/flowcharts/modules/cohabitation.md
+- none
 
 File-level candidate modules:
 - household_composition (Household Composition) -> documentation/flowcharts/modules/household_composition.md [state: up_to_date]
@@ -27,11 +26,21 @@ File-level candidate modules:
 
 ## Manifest Flagging
 
-The detector was run in read-only mode; manifest flagging was not requested.
+Manifest updates: 9
+- household_composition: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- cohabitation: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- full_time_hourly_earnings: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- fertility_give_birth: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- health_long_term_sick: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- health_mental_hm1_hm2_cases: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- health_mental_hm1_hm2_level: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- union_matching: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+- inschool: up_to_date -> candidate_for_review; last_trigger_commit 4f9935ce8 -> e08fbbf46
+Manifest skips: 0
 
 ## Tasks
 
-1. Inspect the committed code diff for `4f9935ce8`.
+1. Inspect the committed code diff for `e08fbbf46`.
 2. Review priority modules first.
 3. Treat non-priority file-level matches as candidates, not confirmed documentation changes.
 4. Update flowchart Markdown only where documented logic, schedule context, state dependencies, notes, or traceability metadata changed.
