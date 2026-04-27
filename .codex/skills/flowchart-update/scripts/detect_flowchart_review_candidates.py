@@ -345,16 +345,13 @@ def update_manifest_review_flags(manifest: Path, matches: List[dict], trigger_co
     The edit is intentionally narrow:
     - set review_state to candidate_for_review only for safe states;
     - set last_trigger_commit to the trigger commit for those same modules;
-    - skip up_to_date modules already reviewed for the same trigger commit;
+    - skip modules already recorded for the same trigger commit;
     - leave needs_update and updated_unverified untouched.
     """
     match_by_id = {
         match["id"]: match
         for match in matches
-        if not (
-            match["review_state"] == "up_to_date"
-            and match["last_trigger_commit"] == trigger_commit
-        )
+        if match["last_trigger_commit"] != trigger_commit
     }
     updates: List[dict] = []
 
@@ -407,8 +404,11 @@ def build_manifest_skips(matches: List[dict], updated_ids: set[str], trigger_com
     for match in matches:
         if match["id"] in updated_ids:
             continue
-        if match["review_state"] == "up_to_date" and match["last_trigger_commit"] == trigger_commit:
-            reason = "module is already up_to_date for this trigger commit"
+        if match["last_trigger_commit"] == trigger_commit:
+            if match["review_state"] == "up_to_date":
+                reason = "module is already up_to_date for this trigger commit"
+            else:
+                reason = "module is already flagged for this trigger commit"
         else:
             reason = "review_state is not safe for automatic candidate flagging"
         skips.append(
