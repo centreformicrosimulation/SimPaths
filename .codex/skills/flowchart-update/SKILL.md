@@ -94,7 +94,7 @@ These edits are usually safe when clearly justified by the code and manifest:
 - update wiki links and flowchart paths;
 - update traceability notes that simply reflect changed class or method names.
 
-When using the detector's `--update-manifest` option, keep the scope narrower than the general safe-edit list: it should only flag matched modules as `candidate_for_review` and update `last_trigger_commit`. Do not use that option to mark modules `up_to_date`, `needs_update`, or `updated_unverified`.
+When using the detector's `--update-manifest` option, keep the scope narrower than the general safe-edit list: it should only flag matched modules as `candidate_for_review` and update `last_trigger_commit`. Do not use that option to mark modules `up_to_date`, `needs_update`, or `updated_unverified`. If a module is already `up_to_date` with `last_trigger_commit` equal to the trigger commit, treat it as already reviewed for that trigger rather than reopening it.
 
 ## Edits Requiring Careful Review
 

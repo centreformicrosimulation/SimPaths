@@ -203,9 +203,17 @@ def update_manifest_review_flags(manifest: Path, matches: List[dict], trigger_co
     The edit is intentionally narrow:
     - set review_state to candidate_for_review only for safe states;
     - set last_trigger_commit to the trigger commit for those same modules;
+    - skip up_to_date modules already reviewed for the same trigger commit;
     - leave needs_update and updated_unverified untouched.
     """
-    match_by_id = {match["id"]: match for match in matches}
+    match_by_id = {
+        match["id"]: match
+        for match in matches
+        if not (
+            match["review_state"] == "up_to_date"
+            and match["last_trigger_commit"] == trigger_commit
+        )
+    }
     updates: List[dict] = []
 
     lines = manifest.read_text(encoding="utf-8").splitlines(keepends=True)
@@ -252,16 +260,20 @@ def update_manifest_review_flags(manifest: Path, matches: List[dict], trigger_co
     return updates
 
 
-def build_manifest_skips(matches: List[dict], updated_ids: set[str]) -> List[dict]:
+def build_manifest_skips(matches: List[dict], updated_ids: set[str], trigger_commit: str) -> List[dict]:
     skips = []
     for match in matches:
         if match["id"] in updated_ids:
             continue
+        if match["review_state"] == "up_to_date" and match["last_trigger_commit"] == trigger_commit:
+            reason = "module is already up_to_date for this trigger commit"
+        else:
+            reason = "review_state is not safe for automatic candidate flagging"
         skips.append(
             {
                 "id": match["id"],
                 "review_state": match["review_state"],
-                "reason": "review_state is not safe for automatic candidate flagging",
+                "reason": reason,
             }
         )
     return skips
@@ -378,7 +390,7 @@ def main() -> int:
             print("--update-manifest could not resolve a trigger commit.", file=sys.stderr)
             return 2
         manifest_updates = update_manifest_review_flags(manifest, matches, commit_hash)
-        manifest_skips = build_manifest_skips(matches, {update["id"] for update in manifest_updates})
+        manifest_skips = build_manifest_skips(matches, {update["id"] for update in manifest_updates}, commit_hash)
 
     payload = {
         "revision": args.rev,

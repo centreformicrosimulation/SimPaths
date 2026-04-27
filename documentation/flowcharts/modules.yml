@@ -14,7 +14,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/household_composition.md
     code_refs:
@@ -42,7 +42,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/cohabitation.md
     code_refs:
@@ -68,7 +68,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/full_time_hourly_earnings.md
     code_refs:
@@ -95,7 +95,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/fertility_give_birth.md
     code_refs:
@@ -123,7 +123,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/health_long_term_sick.md
     code_refs:
@@ -151,7 +151,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_cases.md
     code_refs:
@@ -175,7 +175,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: null
-    last_trigger_commit: null
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_level.md
     code_refs:
@@ -198,7 +198,7 @@ modules:
     review_state: up_to_date
     update_mode: assisted
     last_verified_commit: d23b5773c
-    last_trigger_commit: d23b5773c
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/union_matching.md
     code_refs:
@@ -222,8 +222,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 7eb2dc399
-    last_trigger_commit: 7eb2dc399
+    last_verified_commit: 59dc4765c
+    last_trigger_commit: 59dc4765c
     flowchart:
       source_md: documentation/flowcharts/modules/inschool.md
     code_refs:

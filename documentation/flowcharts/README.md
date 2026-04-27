@@ -78,7 +78,7 @@ To opt in to the mechanical manifest-flagging step for a single commit:
 D:\python\python.exe .codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py --repo-root D:\CeMPA\SimPaths --rev HEAD --code-only --update-manifest
 ```
 
-`--update-manifest` only changes matched modules whose current `review_state` is `up_to_date` or `candidate_for_review`. It sets `review_state: candidate_for_review` and updates `last_trigger_commit` to the trigger commit. It refuses commit ranges and leaves `needs_update` or `updated_unverified` modules unchanged, because those states need explicit review.
+`--update-manifest` only changes matched modules whose current `review_state` is `up_to_date` or `candidate_for_review`. It sets `review_state: candidate_for_review` and updates `last_trigger_commit` to the trigger commit. It refuses commit ranges and leaves `needs_update` or `updated_unverified` modules unchanged, because those states need explicit review. If a module is already `up_to_date` with `last_trigger_commit` equal to the trigger commit, the detector treats that module as already reviewed for that trigger and skips it.
 
 ## Review State Meanings
 
