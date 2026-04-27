@@ -53,7 +53,7 @@ This matters because `inSchool()` mainly sets student status and the transient `
 - `labC4`: current labour/economic status, updated when a person remains or becomes a student.
 - `demAge`: current age.
 - `probitAdjustment`: alignment adjustment added to the education regression score.
-- `statInnovations.getDoubleDraw(20)`: stochastic draw for the education decision.
+- `statInnovations.getDoubleDraw(24)`: stochastic draw for the education decision.
 - `Parameters.getRegEducationE1a()`: regression for lagged students deciding whether to remain in education.
 - `Parameters.getRegEducationE1b()`: regression for non-students deciding whether to enter or re-enter education.
 - `Parameters.MIN_AGE_TO_LEAVE_EDUCATION`: minimum age at which lagged students may leave education.
@@ -95,7 +95,7 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 | `sedex` / `eduExitSampleFlag` | Indicator related to the year/person leaving education. The `sedex` accessor maps to the Java field `eduExitSampleFlag`. |
 | `eduLeftEduFlag` | Persistent flag indicating that the person has left education. Once set to true in `leavingSchool()`, it is not reset. |
 | `probitAdjustment` | Alignment adjustment added to the E1a/E1b regression score before converting the score to a probability. |
-| `labourInnov` | Stochastic draw from `statInnovations.getDoubleDraw(20)`. The person is assigned the positive education outcome when this draw is below the relevant probability. |
+| `labourInnov` | Stochastic draw from `statInnovations.getDoubleDraw(24)`. The person is assigned the positive education outcome when this draw is below the relevant probability. |
 | `E1a` | Education regression process for lagged students deciding whether to remain in continuous education. |
 | `E1b` | Education regression process for lagged non-students deciding whether to enter or re-enter education. |
 | `E2` | Education-level assignment process applied later by `setEducationLevel()` when a person leaves school. |
