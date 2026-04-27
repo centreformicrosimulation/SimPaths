@@ -33,7 +33,7 @@ The `inSchool()` process updates student status decisions before education-level
 - `src/main/java/simpaths/data/Parameters.java`
   - `MIN_AGE_TO_LEAVE_EDUCATION`
   - `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`
-  - `getRegEducationE2()`
+  - `getRegEducationE1a()`
   - `getRegEducationE1b()`
 
 ## Schedule Context
@@ -54,7 +54,7 @@ This matters because `inSchool()` mainly sets student status and the transient `
 - `demAge`: current age.
 - `probitAdjustment`: alignment adjustment added to the education regression score.
 - `statInnovations.getDoubleDraw(24)`: stochastic draw for the education decision.
-- `Parameters.getRegEducationE2()`: regression currently used for lagged students deciding whether to remain in education.
+- `Parameters.getRegEducationE1a()`: regression for lagged students deciding whether to remain in education.
 - `Parameters.getRegEducationE1b()`: regression for non-students deciding whether to enter or re-enter education.
 - `Parameters.MIN_AGE_TO_LEAVE_EDUCATION`: minimum age at which lagged students may leave education.
 - `Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`: maximum age for continuous education under the E1a branch.
@@ -94,11 +94,11 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 | `der` / `eduReturnFlag` | Indicator for returning to education. The `der` accessor maps to the Java field `eduReturnFlag`. |
 | `sedex` / `eduExitSampleFlag` | Indicator related to the year/person leaving education. The `sedex` accessor maps to the Java field `eduExitSampleFlag`. |
 | `eduLeftEduFlag` | Persistent flag indicating that the person has left education. Once set to true in `leavingSchool()`, it is not reset. |
-| `probitAdjustment` | Alignment adjustment added to the active education regression score before converting the score to a probability. |
+| `probitAdjustment` | Alignment adjustment added to the E1a/E1b regression score before converting the score to a probability. |
 | `labourInnov` | Stochastic draw from `statInnovations.getDoubleDraw(24)`. The person is assigned the positive education outcome when this draw is below the relevant probability. |
-| `E2` in `inSchool()` | Education regression currently used in the lagged-student branch to decide whether the person remains in continuous education. This is distinct from the later education-level assignment role of process E2. |
+| `E1a` | Education regression process for lagged students deciding whether to remain in continuous education. |
 | `E1b` | Education regression process for lagged non-students deciding whether to enter or re-enter education. |
-| `E2` in `leavingSchool()` | Education-level assignment process applied later by `setEducationLevel()` when a person leaves school. |
+| `E2` | Education-level assignment process applied later by `setEducationLevel()` when a person leaves school. |
 
 ## Key Branches
 
@@ -127,9 +127,9 @@ flowchart TD
     H -- Yes --> I{"Below minimum<br/>leaving age?"}
     I -- Yes --> J["Remain in school"]
     I -- No --> K{"Within continuous<br/>education age range?"}
-    K -- Yes --> M["Apply current lagged-student regression:<br/>E2 probability of remaining<br/>in education"]
+    K -- Yes --> M["Apply E1a:<br/>probability of remaining<br/>in education"]
     K -- No --> L["Flag to leave education"]
-    M --> N{"Innovation below<br/>E2 probability?"}
+    M --> N{"Innovation below<br/>E1a probability?"}
     N -- Yes --> O["Remain student"]
     N -- No --> L
 
@@ -171,7 +171,7 @@ The alignment target counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` a
 When updating this flowchart, first check whether any of the following changed:
 
 - the branching variable changed from `labC4L1` to `labC4` or another status field;
-- the lagged-student or E1b regression calls changed;
+- the E1a or E1b regression calls changed;
 - the age thresholds changed;
 - `eduLeaveSchoolFlag` is set or consumed differently;
 - `InSchoolAlignment.evaluate()` no longer reuses `Person.inSchool(double)`;
