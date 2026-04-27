@@ -207,6 +207,14 @@ modules:
         - src/main/java/simpaths/model/UnionMatching.java
         - src/main/java/simpaths/model/Person.java
         - src/main/java/simpaths/model/PartnershipAlignment.java
+      methods:
+        - SimPathsModel.unionMatching
+        - SimPathsModel.unionMatchingNoRegion
+        - SimPathsModel.unionMatchingSBAM
+        - UnionMatching.evaluate
+        - UnionMatching.evaluateGM
+        - UnionMatching.localGetValue
+        - UnionMatching.localMatch
     wiki_links:
       - documentation/wiki/overview/simulated-modules.md
     update_triggers:
@@ -232,6 +240,14 @@ modules:
         - src/main/java/simpaths/model/SimPathsModel.java
         - src/main/java/simpaths/model/InSchoolAlignment.java
         - src/main/java/simpaths/data/Parameters.java
+      methods:
+        - Person.inSchool
+        - Person.leavingSchool
+        - Person.setEducationLevel
+        - SimPathsModel.inSchoolAlignment
+        - SimPathsModel.getInSchoolAdjustment
+        - InSchoolAlignment.evaluate
+        - InSchoolAlignment.evalStudentShare
     wiki_links:
       - documentation/wiki/developer-guide/how-to/code-logic-flowcharts.md
     update_triggers:

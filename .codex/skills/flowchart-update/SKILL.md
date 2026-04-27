@@ -40,8 +40,8 @@ If a committed change touches one or more files listed in `code_refs.files`, the
 
 1. Identify the relevant commit range or committed change set.
 2. List changed files from Git. Prefer `.codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py` for the first-pass file-to-module matching step when available.
-3. Match changed files against `modules.yml` using `code_refs.files`.
-4. For each matched module, set or treat the module as `candidate_for_review`. The detector's `--update-manifest` mode may be used for the mechanical `up_to_date` to `candidate_for_review` transition for a single trigger commit, but it must not be treated as a content review.
+3. Match changed files against `modules.yml` using `code_refs.files`. Treat optional `code_refs.methods` matches as prioritisation hints for review, not as replacements for file-level matching.
+4. For each file-matched module, set or treat the module as `candidate_for_review`. The detector's `--update-manifest` mode may be used for the mechanical `up_to_date` to `candidate_for_review` transition for a single trigger commit, but it must not be treated as a content review.
 5. Inspect the committed diff and current source code to decide whether documented logic changed.
 6. Update the module Markdown only when the change affects documented logic, schedule context, state dependencies, key branches, notes, or traceability metadata.
 7. Update `modules.yml` if `review_state`, code references, wiki links, trigger descriptions, or flowchart paths changed.

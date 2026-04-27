@@ -49,6 +49,7 @@ Each module entry currently contains:
 - `last_trigger_commit`: latest commit that flagged the module for review. This is `null` until explicitly populated.
 - `flowchart.source_md`: source Markdown file for the module flowchart.
 - `code_refs.files`: source-code files whose committed changes may trigger review.
+- `code_refs.methods`: optional method-level hints used to prioritise matched modules during review. These hints do not replace file-level matching.
 - `wiki_links`: related wiki or guide pages.
 - `update_triggers`: plain-language descriptions of code changes likely to require documentation review.
 
@@ -62,7 +63,7 @@ A small first-pass detector is available at:
 .codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py
 ```
 
-The detector reads committed changed files from Git, matches them against `modules.yml` using `code_refs.files`, and reports candidate modules for review. It does not decide which matched module is directly affected, and it does not rewrite flowchart documentation.
+The detector reads committed changed files from Git, matches them against `modules.yml` using `code_refs.files`, and reports candidate modules for review. When optional `code_refs.methods` hints are present, it also maps changed Java lines to enclosing methods and reports priority matches. Priority matches are review aids only: the detector still treats all file-level matches as candidates, and it does not rewrite flowchart documentation.
 
 Typical usage from the repo root:
 
@@ -78,7 +79,7 @@ To opt in to the mechanical manifest-flagging step for a single commit:
 D:\python\python.exe .codex/skills/flowchart-update/scripts/detect_flowchart_review_candidates.py --repo-root D:\CeMPA\SimPaths --rev HEAD --code-only --update-manifest
 ```
 
-`--update-manifest` only changes matched modules whose current `review_state` is `up_to_date` or `candidate_for_review`. It sets `review_state: candidate_for_review` and updates `last_trigger_commit` to the trigger commit. It refuses commit ranges and leaves `needs_update` or `updated_unverified` modules unchanged, because those states need explicit review. If a module is already `up_to_date` with `last_trigger_commit` equal to the trigger commit, the detector treats that module as already reviewed for that trigger and skips it.
+`--update-manifest` only changes matched modules whose current `review_state` is `up_to_date` or `candidate_for_review`. It sets `review_state: candidate_for_review` and updates `last_trigger_commit` to the trigger commit. It uses file-level matches, not only priority matches. It refuses commit ranges and leaves `needs_update` or `updated_unverified` modules unchanged, because those states need explicit review. If a module is already `up_to_date` with `last_trigger_commit` equal to the trigger commit, the detector treats that module as already reviewed for that trigger and skips it.
 
 ## Review State Meanings
 

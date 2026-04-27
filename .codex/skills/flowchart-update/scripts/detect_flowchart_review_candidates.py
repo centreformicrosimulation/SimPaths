@@ -7,7 +7,8 @@ This script is intentionally conservative. By default it is read-only and only:
 1. reads changed files from Git for a commit or commit range;
 2. reads documentation/flowcharts/modules.yml;
 3. matches changed files against modules[].code_refs.files;
-4. prints candidate modules for review.
+4. optionally prioritizes matched modules using modules[].code_refs.methods;
+5. prints candidate modules for review.
 
 With --update-manifest, it performs the mechanical Level 2 workflow transition:
 matched modules in up_to_date or candidate_for_review are marked as
@@ -22,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -41,6 +43,7 @@ class ModuleEntry:
     last_trigger_commit: Optional[str] = None
     flowchart_source_md: Optional[str] = None
     code_files: List[str] = field(default_factory=list)
+    code_methods: List[str] = field(default_factory=list)
 
 
 def parse_modules_yml(path: Path) -> List[ModuleEntry]:
@@ -54,6 +57,7 @@ def parse_modules_yml(path: Path) -> List[ModuleEntry]:
     in_modules = False
     in_code_refs = False
     in_code_files = False
+    in_code_methods = False
     in_flowchart = False
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -67,6 +71,7 @@ def parse_modules_yml(path: Path) -> List[ModuleEntry]:
             in_modules = True
             in_code_refs = False
             in_code_files = False
+            in_code_methods = False
             in_flowchart = False
             continue
 
@@ -79,6 +84,7 @@ def parse_modules_yml(path: Path) -> List[ModuleEntry]:
             current = ModuleEntry(id=line.split(":", 1)[1].strip())
             in_code_refs = False
             in_code_files = False
+            in_code_methods = False
             in_flowchart = False
             continue
 
@@ -102,16 +108,19 @@ def parse_modules_yml(path: Path) -> List[ModuleEntry]:
             in_flowchart = True
             in_code_refs = False
             in_code_files = False
+            in_code_methods = False
             continue
         if indent == 4 and line == "code_refs:":
             in_code_refs = True
             in_code_files = False
+            in_code_methods = False
             in_flowchart = False
             continue
         if indent == 4 and not line.startswith(("flowchart:", "code_refs:")):
             in_flowchart = False
             in_code_refs = False
             in_code_files = False
+            in_code_methods = False
 
         if in_flowchart and indent == 6 and line.startswith("source_md:"):
             current.flowchart_source_md = line.split(":", 1)[1].strip()
@@ -119,6 +128,12 @@ def parse_modules_yml(path: Path) -> List[ModuleEntry]:
 
         if in_code_refs and indent == 6 and line == "files:":
             in_code_files = True
+            in_code_methods = False
+            continue
+
+        if in_code_refs and indent == 6 and line == "methods:":
+            in_code_methods = True
+            in_code_files = False
             continue
 
         if in_code_files:
@@ -127,6 +142,13 @@ def parse_modules_yml(path: Path) -> List[ModuleEntry]:
                 continue
             if indent <= 6:
                 in_code_files = False
+
+        if in_code_methods:
+            if indent == 8 and line.startswith("- "):
+                current.code_methods.append(line[2:].strip())
+                continue
+            if indent <= 6:
+                in_code_methods = False
 
     if current is not None:
         modules.append(current)
@@ -159,6 +181,108 @@ def changed_files_for_revision(repo_root: Path, revspec: str) -> List[str]:
     return [line.strip() for line in out.splitlines() if line.strip()]
 
 
+def diff_for_revision(repo_root: Path, revspec: str, unified: int = 0) -> str:
+    if ".." in revspec:
+        return run_git(repo_root, ["diff", f"--unified={unified}", revspec])
+    return run_git(repo_root, ["show", "--pretty=format:", f"--unified={unified}", revspec])
+
+
+def changed_line_numbers_by_file(diff_text: str) -> dict[str, set[int]]:
+    changed_lines: dict[str, set[int]] = {}
+    current_path: Optional[str] = None
+    new_line: Optional[int] = None
+
+    hunk_header = re.compile(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
+
+    for line in diff_text.splitlines():
+        if line.startswith("diff --git "):
+            parts = line.split()
+            current_path = None
+            new_line = None
+            if len(parts) >= 4 and parts[3].startswith("b/"):
+                current_path = parts[3][2:]
+                changed_lines.setdefault(current_path, set())
+            continue
+
+        if current_path is None:
+            continue
+
+        match = hunk_header.match(line)
+        if match:
+            new_line = int(match.group(1))
+            continue
+
+        if new_line is None:
+            continue
+
+        if line.startswith("+") and not line.startswith("+++"):
+            changed_lines[current_path].add(new_line)
+            new_line += 1
+        elif line.startswith("-") and not line.startswith("---"):
+            continue
+        elif not line.startswith("\\"):
+            new_line += 1
+
+    return changed_lines
+
+
+def java_method_ranges(source_path: Path) -> list[tuple[str, int, int]]:
+    if not source_path.exists():
+        return []
+
+    method_pattern = re.compile(
+        r"\b(?:public|protected|private)\s+"
+        r"(?:static\s+)?(?:final\s+)?(?:synchronized\s+)?"
+        r"[\w<>\[\], ?]+\s+(\w+)\s*\("
+    )
+    excluded_names = {"if", "for", "while", "switch", "catch"}
+
+    ranges: list[tuple[str, int, int]] = []
+    lines = source_path.read_text(encoding="utf-8").splitlines()
+    current_name: Optional[str] = None
+    current_start: Optional[int] = None
+    brace_depth = 0
+    waiting_for_open_brace = False
+
+    for lineno, line in enumerate(lines, start=1):
+        if current_name is None:
+            match = method_pattern.search(line)
+            if match and match.group(1) not in excluded_names:
+                current_name = match.group(1)
+                current_start = lineno
+                brace_depth = 0
+                waiting_for_open_brace = True
+
+        if current_name is not None:
+            brace_depth += line.count("{") - line.count("}")
+            if "{" in line:
+                waiting_for_open_brace = False
+            if not waiting_for_open_brace and brace_depth <= 0 and current_start is not None:
+                ranges.append((current_name, current_start, lineno))
+                current_name = None
+                current_start = None
+                brace_depth = 0
+                waiting_for_open_brace = False
+
+    return ranges
+
+
+def changed_methods_for_file(repo_root: Path, path: str, changed_lines: set[int]) -> set[str]:
+    if not changed_lines:
+        return set()
+
+    source_path = repo_root / path
+    methods = set()
+    class_name = source_path.stem
+
+    for method_name, start, end in java_method_ranges(source_path):
+        if any(start <= line <= end for line in changed_lines):
+            methods.add(method_name)
+            methods.add(f"{class_name}.{method_name}")
+
+    return methods
+
+
 def filter_code_files(paths: List[str]) -> List[str]:
     """
     Keep only source-code paths for code-triggered review detection.
@@ -176,12 +300,27 @@ def get_commit_hash(repo_root: Path, revspec: str) -> Optional[str]:
     return run_git(repo_root, ["rev-parse", "--short", revspec]).strip()
 
 
-def build_matches(modules: List[ModuleEntry], changed_files: List[str]) -> List[dict]:
+def matched_methods_for_module(module: ModuleEntry, matched_files: List[str], changed_methods_by_file: dict[str, set[str]]) -> List[str]:
+    changed_methods = set()
+    for path in matched_files:
+        changed_methods.update(changed_methods_by_file.get(path, set()))
+    matched_methods = []
+    for method_hint in module.code_methods:
+        simple_name = method_hint.rsplit(".", 1)[-1]
+        if method_hint in changed_methods or simple_name in changed_methods:
+            matched_methods.append(method_hint)
+    return matched_methods
+
+
+def build_matches(modules: List[ModuleEntry], changed_files: List[str], changed_methods_by_file: Optional[dict[str, set[str]]] = None) -> List[dict]:
+    if changed_methods_by_file is None:
+        changed_methods_by_file = {}
     changed_set = set(changed_files)
     matches = []
     for module in modules:
         matched_files = [path for path in module.code_files if path in changed_set]
         if matched_files:
+            matched_methods = matched_methods_for_module(module, matched_files, changed_methods_by_file)
             matches.append(
                 {
                     "id": module.id,
@@ -191,6 +330,9 @@ def build_matches(modules: List[ModuleEntry], changed_files: List[str]) -> List[
                     "last_trigger_commit": module.last_trigger_commit,
                     "flowchart_source_md": module.flowchart_source_md,
                     "matched_files": matched_files,
+                    "method_hints": module.code_methods,
+                    "matched_methods": matched_methods,
+                    "priority": bool(matched_methods),
                 }
             )
     return matches
@@ -303,6 +445,17 @@ def print_text_report(
         print("  matched_files:")
         for path in match["matched_files"]:
             print(f"    - {path}")
+        if match["matched_methods"]:
+            print("  matched_methods:")
+            for method in match["matched_methods"]:
+                print(f"    - {method}")
+
+    priority_matches = [match for match in matches if match["priority"]]
+    if priority_matches:
+        print()
+        print(f"Priority matches: {len(priority_matches)}")
+        for match in priority_matches:
+            print(f"- {match['id']}: {', '.join(match['matched_methods'])}")
 
     if manifest_updates is not None:
         print()
@@ -378,11 +531,16 @@ def main() -> int:
         if args.code_only:
             changed_files = filter_code_files(changed_files)
         commit_hash = get_commit_hash(repo_root, args.rev)
+        changed_lines_by_file = changed_line_numbers_by_file(diff_for_revision(repo_root, args.rev))
+        changed_methods_by_file = {
+            path: changed_methods_for_file(repo_root, path, changed_lines)
+            for path, changed_lines in changed_lines_by_file.items()
+        }
     except subprocess.CalledProcessError as exc:
         print(exc.stderr or str(exc), file=sys.stderr)
         return exc.returncode or 1
 
-    matches = build_matches(modules, changed_files)
+    matches = build_matches(modules, changed_files, changed_methods_by_file)
     manifest_updates: Optional[List[dict]] = None
     manifest_skips: Optional[List[dict]] = None
     if args.update_manifest:
@@ -397,6 +555,7 @@ def main() -> int:
         "commit": commit_hash,
         "changed_files": changed_files,
         "matched_modules": matches,
+        "priority_modules": [match for match in matches if match["priority"]],
     }
     if manifest_updates is not None:
         payload["manifest_updates"] = manifest_updates
