@@ -130,6 +130,10 @@ Do not update flowcharts for formatting-only, comment-only, or implementation-on
     return prompt.rstrip() + "\n"
 
 
+def has_review_candidates(payload: dict[str, Any]) -> bool:
+    return bool(payload.get("matched_modules"))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Prepare a Codex-ready flowchart review prompt.")
     parser.add_argument(
@@ -184,6 +188,21 @@ def main() -> int:
     except json.JSONDecodeError as exc:
         print(f"Detector did not return valid JSON: {exc}", file=sys.stderr)
         return 1
+
+    if not has_review_candidates(payload):
+        changed_files = payload.get("changed_files") or []
+        commit = payload.get("commit") or payload.get("revision")
+        if changed_files:
+            print(
+                f"No flowchart module candidates found for {commit}; "
+                "no review prompt written."
+            )
+        else:
+            print(
+                f"No committed code files found for {commit}; "
+                "no flowchart review prompt written."
+            )
+        return 0
 
     prompt = build_prompt(payload)
 

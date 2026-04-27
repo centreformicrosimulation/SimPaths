@@ -17,6 +17,8 @@ Default behavior:
 - writes the review prompt to `documentation\flowcharts\flowchart_review_prompt.md`;
 - runs in read-only mode, so `modules.yml` is not changed.
 
+If the inspected commit has no matched flowchart module candidates, the wrapper prints a no-review-needed message and does not rewrite the prompt file.
+
 To mechanically flag matched modules in `modules.yml` at the same time:
 
 ```powershell
@@ -38,6 +40,30 @@ Useful wrapper parameters:
 - `-UpdateManifest`: mechanically set matched modules to `candidate_for_review` and update `last_trigger_commit`.
 
 The wrapper intentionally exposes only these routine options. Use the Python scripts directly for advanced cases such as alternate manifests, custom output paths, or JSON detector output.
+
+## Optional Post-Commit Automation
+
+To run the wrapper automatically after each commit, install the local Git hook:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1
+```
+
+The hook runs:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview.ps1 -UpdateManifest
+```
+
+If the new commit has matched flowchart module candidates, the hook updates `documentation\flowcharts\modules.yml` and writes `documentation\flowcharts\flowchart_review_prompt.md`. These are working-tree changes made after the commit, so review and commit them separately if they are correct.
+
+If the new commit is documentation-only or otherwise has no matched candidates, the hook prints a no-review-needed message and does not rewrite the prompt file.
+
+To remove the local hook:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Uninstall
+```
 
 ## Python Prompt Wrapper
 

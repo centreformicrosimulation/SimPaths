@@ -35,17 +35,23 @@ if ($UpdateManifest) {
     $ArgsList += "--update-manifest"
 }
 
-& $Python @ArgsList
+$Output = & $Python @ArgsList 2>&1
 if ($LASTEXITCODE -ne 0) {
+    $Output | ForEach-Object { Write-Host $_ }
     exit $LASTEXITCODE
 }
 
-Write-Host ""
-Write-Host "Next step:"
-Write-Host "  Open $OutPath"
-Write-Host "  Send its contents to Codex in a new flowchart review task."
-if (-not $UpdateManifest) {
+$Output | ForEach-Object { Write-Host $_ }
+
+$PromptWritten = $Output -match "^Wrote flowchart review prompt to "
+if ($PromptWritten) {
     Write-Host ""
-    Write-Host "Manifest note:"
-    Write-Host "  This run was read-only. Add -UpdateManifest to mechanically flag matched modules."
+    Write-Host "Next step:"
+    Write-Host "  Open $OutPath"
+    Write-Host "  Send its contents to Codex in a new flowchart review task."
+    if (-not $UpdateManifest) {
+        Write-Host ""
+        Write-Host "Manifest note:"
+        Write-Host "  This run was read-only. Add -UpdateManifest to mechanically flag matched modules."
+    }
 }

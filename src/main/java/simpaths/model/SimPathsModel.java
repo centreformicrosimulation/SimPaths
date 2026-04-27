@@ -870,7 +870,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     unionMatching(false);
                 } else {
                     unionMatching(false);
-                    unionMatchingNoRegion(false); //Run matching again relaxing regions this time
+                    //unionMatchingNoRegion(false); //Run matching again relaxing regions this time
                 }
                 if (commentsOn) log.info("Union matching complete.");
             }

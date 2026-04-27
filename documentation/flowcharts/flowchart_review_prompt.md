@@ -4,7 +4,7 @@ Review committed SimPaths code change `4f9935ce8`.
 
 ## Detector Result
 
-Revision: `HEAD`
+Revision: `4f9935ce8`
 Commit: `4f9935ce8`
 
 Changed code files:
@@ -27,17 +27,7 @@ File-level candidate modules:
 
 ## Manifest Flagging
 
-Manifest updates: 9
-- household_composition: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- cohabitation: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- full_time_hourly_earnings: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- fertility_give_birth: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- health_long_term_sick: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- health_mental_hm1_hm2_cases: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- health_mental_hm1_hm2_level: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- union_matching: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-- inschool: up_to_date -> candidate_for_review; last_trigger_commit e58d12f37 -> 4f9935ce8
-Manifest skips: 0
+The detector was run in read-only mode; manifest flagging was not requested.
 
 ## Tasks
 
