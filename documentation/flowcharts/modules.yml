@@ -222,8 +222,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 59dc4765c
-    last_trigger_commit: 59dc4765c
+    last_verified_commit: 4caf54963
+    last_trigger_commit: 4caf54963
     flowchart:
       source_md: documentation/flowcharts/modules/inschool.md
     code_refs:

@@ -154,7 +154,7 @@ For each trial adjustment value, it:
 2. calls `person.inSchool(args[0])`;
 3. calculates the difference between the target student share and the simulated student share.
 
-The alignment target counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` and `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`, excluding people flagged to leave school.
+The alignment target currently counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` and the hard-coded upper threshold 29, excluding people flagged to leave school. This matches the current value of `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`, but the alignment code uses the literal threshold in `InSchoolAlignment.evalStudentShare()`.
 
 ## Notes for Debugging
 
@@ -163,7 +163,7 @@ The alignment target counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` a
 - `eduLeaveSchoolFlag` is transient and is reset at the start of `inSchool()` and again after `leavingSchool()` completes.
 - A lagged student above `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION` is forced to leave education.
 - A lagged retired person is not allowed to become a student through this method.
-- In the active E1b branch, the code does not impose an explicit age upper bound before evaluating entry or re-entry into education. The aggregate alignment count is narrower because it counts the target student share only within the education age range.
+- In the active E1b branch, the code does not impose an explicit age upper bound before evaluating entry or re-entry into education. The aggregate alignment count is narrower because it counts the target student share only within the alignment age range, currently capped with the literal value 29.
 - If student counts look wrong, inspect the order of `InSchool`, `InSchoolAlignment`, and `LeavingSchool` in the yearly schedule before changing the method logic.
 
 ## Flowchart Maintenance Guidance
