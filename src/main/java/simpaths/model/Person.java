@@ -1637,7 +1637,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         eduLeaveSchoolFlag = false;
 
         // Innovation for education decisions
-        double labourInnov = statInnovations.getDoubleDraw(20); // getDoubleDraw(24)
+        double labourInnov = statInnovations.getDoubleDraw(24); 
 
         // Initial case (laggedStudent): In the previous period, was the individual a student?
         // Yes
