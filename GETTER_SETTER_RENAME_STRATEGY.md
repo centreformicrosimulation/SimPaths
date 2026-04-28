@@ -41,7 +41,11 @@ Avoid global text replacement across the repository. Some old names may also be 
 | `Person` health fields | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | No compatibility wrappers retained. Old `Person` method references removed from Java source and reflective getter strings. Non-`Person` `States` and tax donor `getDlltsd()` APIs were intentionally retained. |
 | `Person` income fields | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | No compatibility wrappers retained. Old income method references removed from Java source, tests, XML/properties, and reflective getter strings. |
 | `Person` demographic fields | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | No compatibility wrappers retained. Old `Person` demographic method references removed from Java source and reflective getter strings. Non-`Person` `States.getDcpst()` API was intentionally retained. |
-| Remaining `Person` education/social-care flags | Planned | Not run | Candidate method list below. |
+| Remaining `Person` education/social-care flags | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Strict field-name rule used for social-care methods. No compatibility wrappers retained. Old method references removed from Java source, tests, XML, and properties. |
+| `BenefitUnit` local proxy state | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Preserved `Local` suffix. `Person.setYearLocal(...)` intentionally retained outside this batch. |
+| `BenefitUnit` children and poverty lags | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | `BenefitUnit` poverty API renamed to `yPvrtyFlag` field style. `Person.getAtRiskOfPoverty()` intentionally retained as a person-level derived API. |
+| `BenefitUnit` household income and quintile fields | Completed | `mvn test -DskipTests` passed on 2026-04-28; focused tests deferred under optimized workflow | Reflective collector string updated. Statistics percentile methods such as `getYdses_p20()` intentionally retained. |
+| `BenefitUnit` wealth and costs | Completed | `mvn test -DskipTests` passed on 2026-04-28; focused tests deferred under optimized workflow | Renamed only `BenefitUnit` APIs and direct `BenefitUnit` call sites. Similar `Person`, `Parameters`, decision-grid, and tax-key APIs intentionally retained. |
 
 ## Naming Convention
 
@@ -219,11 +223,13 @@ Intentional retained names:
 
 - `States.getDcpst()` remains unchanged because it is a decision-state API, not a `Person` accessor.
 
-## Planned: Remaining Person Education And Social-Care Flags
+## Completed: Remaining Person Education And Social-Care Flags
 
-Candidate remaining `Person` accessors that still use survey-code-like names or do not yet match backing fields.
+Completed remaining `Person` accessor renames that still used survey-code-like names or did not yet match backing fields. Social-care methods used the strict field-name rule for consistency.
 
-| Current method | New method | Backing field |
+Completed renames:
+
+| Old method | New method | Backing field |
 | --- | --- | --- |
 | `getDer()` | `getEduReturnFlag()` | `eduReturnFlag` |
 | `setDer(...)` | `setEduReturnFlag(...)` | `eduReturnFlag` |
@@ -236,7 +242,150 @@ Candidate remaining `Person` accessors that still use survey-code-like names or 
 | `setCareHoursFromFormalWeekly_lag1(...)` | `setCareHrsFormalWeekL1(...)` | `careHrsFormalWeekL1` |
 | `setSocialCareProvision_lag1(...)` | `setCareProvidedFlagL1(...)` | `careProvidedFlagL1` |
 
-Before starting this batch, check whether social-care method names should use the `care...` field names exactly or retain the more descriptive `SocialCare...` terms for readability.
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Focused test command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused test result: passed, 29 tests run
+- Remaining old method references in Java source/tests/XML/properties: none
+- Compatibility wrappers: none retained
+
+## Planned: BenefitUnit Accessors
+
+Next broad area from the original batch order. Before starting, inspect `src/main/java/simpaths/model/BenefitUnit.java` and create a small first batch rather than renaming every accessor at once.
+
+Inspection notes:
+
+- `BenefitUnit` has many computed/domain accessors that already read naturally and should not be renamed just because they do not map one-to-one to a field. Examples: `getWeight()`, `getChildren()`, `getOccupancy()`, `getCoupleBoolean()`, `getRefPersonForDecisions()`, and regression helper methods.
+- Prioritise methods that expose a backing field but still use survey-code names, inconsistent lag suffixes, or temporary/proxy names.
+- Preserve `Local` where it marks proxy/regression-state setters backed by transient `i_...` fields.
+- Update `@Lag(getter=...)` strings in the same batch as the getter rename.
+
+### Completed: BenefitUnit Local Proxy State
+
+These are used by `Expectations` to initialise proxy objects for decision/regression evaluation. Keep the `Local` suffix because it distinguishes proxy state from persisted simulation state.
+
+Completed renames:
+
+| Old method | New method | Backing field |
+| --- | --- | --- |
+| `setDeh_c4Local(...)` | `setEduHighestC4Local(...)` | `i_eduHighestC4` |
+| `setOccupancyLocal(...)` | `setDemOccupancyLocal(...)` | `i_demOccupancy` |
+| `setLabourHoursWeekly1Local(...)` | `setLabHrsWork1WeekLocal(...)` | `i_labHrsWork1Week` |
+| `setLabourHoursWeekly2Local(...)` | `setLabHrsWork2WeekLocal(...)` | `i_labHrsWork2Week` |
+| `setYearLocal(...)` | `setDemYearLocal(...)` | `i_demYear` |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Focused test command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused test result: passed, 29 tests run
+- Remaining old `BenefitUnit` local proxy method references in Java source/tests/XML/properties: none
+
+Intentional retained names:
+
+- `Person.setYearLocal(...)` remains unchanged because this batch only covered `BenefitUnit`.
+
+### Completed: BenefitUnit Children And Poverty Lags
+
+These methods exposed lag fields but used `_lag1` names or compact child-age names. They were renamed to backing-field style.
+
+Completed renames:
+
+| Old method | New method | Backing field |
+| --- | --- | --- |
+| `getNumberChildrenAll_lag1()` | `getNumberChildrenAllL1()` | `numberChildrenAll_lag1` |
+| `getNumberChildren02_lag1()` | `getNumberChildren02L1()` | `numberChildren02_lag1` |
+| `getIndicatorChildren03_lag1()` | `getDem0to3L1()` | `dem0to3L1` |
+| `getIndicatorChildren412_lag1()` | `getDem4to12L1()` | `dem4to12L1` |
+| `getAtRiskOfPoverty_lag1()` | `getYPvrtyFlagL1()` | `yPvrtyFlagL1` |
+| `getAtRiskOfPoverty()` | `getYPvrtyFlag()` | `yPvrtyFlag`; updated `@Lag(getter = "getYPvrtyFlag")`. |
+| `setAtRiskOfPoverty(...)` | `setYPvrtyFlag(...)` | `yPvrtyFlag` |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Focused test command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused test result: passed, 29 tests run
+- Remaining old `BenefitUnit` children/poverty method references in Java source/tests/XML/properties: none
+- Compatibility wrappers: none retained
+
+Intentional retained names:
+
+- `Person.getAtRiskOfPoverty()` remains unchanged because it is a person-level derived API that delegates to `benefitUnit.getYPvrtyFlag()`.
+- `Person.class, "getAtRiskOfPoverty"` reflective strings in poverty plot setup remain unchanged because they target the retained `Person` method, not `BenefitUnit`.
+
+### Completed: BenefitUnit Household Income And Quintile Fields
+
+These were mostly survey-code-like names or temporary names around household income/quintiles.
+
+Completed renames:
+
+| Old method | New method | Backing field |
+| --- | --- | --- |
+| `getYdses_c5()` | `getYHhQuintilesMonthC5()` | `yHhQuintilesMonthC5` |
+| `getYdses_c5_lag1()` | `getYHhQuintilesMonthC5L1()` | `yHhQuintilesMonthC5L1` |
+| `getTmpHHYpnbihs_dv_asinhNoNull()` | `getIYNonBenHhGrossAsinhNoNull()` | `i_yNonBenHhGrossAsinh` |
+| `getTmpHHYpnbihs_dv_asinh()` | `getIYNonBenHhGrossAsinh()` | `i_yNonBenHhGrossAsinh` |
+| `setTmpHHYpnbihs_dv_asinh(...)` | `setIYNonBenHhGrossAsinh(...)` | `i_yNonBenHhGrossAsinh` |
+
+Related private helper renames:
+
+- `Person.getYdses_c5_lag1()` -> `Person.getYHhQuintilesMonthC5L1()`
+- `Person.getYdses_c5_current()` -> `Person.getYHhQuintilesMonthC5Current()`
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Focused tests: deferred under the optimized workflow; run after the next related batch or before review
+- Remaining old household income/quintile method references in Java source/tests/XML/properties: none
+- Compatibility wrappers: none retained
+
+Intentional retained names:
+
+- Statistics percentile methods such as `getYdses_p20()` remain unchanged because they are not `BenefitUnit` field accessors in this batch.
+
+### Completed: BenefitUnit Wealth And Costs
+
+These names were domain-readable but did not match backing fields. They were renamed using the strict field-name rule for consistency with the rest of this branch.
+
+Completed renames:
+
+| Old method | New method | Backing field |
+| --- | --- | --- |
+| `getLiquidWealth(...)` | `getWealthTotValue(...)` | `wealthTotValue` |
+| `getPensionWealth(...)` | `getWealthPensValue(...)` | `wealthPensValue` |
+| `setPensionWealth(...)` | `setWealthPensValue(...)` | `wealthPensValue` |
+| `getHousingWealth(...)` | `getWealthPrptyValue(...)` | `wealthPrptyValue` |
+| `setHousingWealth(...)` | `setWealthPrptyValue(...)` | `wealthPrptyValue` |
+| `getChildcareCostPerWeek(...)` | `getXChildCareWeek(...)` | `xChildCareWeek` |
+| `getSocialCareCostPerWeek(...)` | `getXCareWeek(...)` | `xCareWeek` |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Focused tests: deferred under the optimized workflow; run before review
+- Compatibility wrappers: none retained
+
+Intentional retained names:
+
+- `Person.getLiquidWealth()` remains unchanged because it is a person-level wealth accessor.
+- `Parameters.getLiquidWealthDiscount(...)`, `Parameters.getPensionWealthDiscount(...)`, and `Parameters.getHousingWealthDiscount(...)` remain unchanged because they are parameter APIs, not `BenefitUnit` getters.
+- Decision-grid wealth APIs such as `States.getLiquidWealth()` and `WriteGridsBean.getLiquidWealth()` remain unchanged.
+- Tax-key methods such as `DonorKeys.getChildcareCostPerWeek()` and `KeyFunction.getChildcareCostPerWeek()` remain unchanged because they are outside the `BenefitUnit` model batch.
+
+### Do Not Rename In Initial BenefitUnit Pass
+
+- `getRegion()` / `setRegion(...)`: already direct and widely used across `Person`, filters, matching, and migration logic.
+- `getOccupancy()`: computed domain value, not a direct getter for `i_demOccupancy`.
+- `getDemCompHhC4()`: computed household composition matching the existing field and `@Lag` usage.
+- Regression enum values such as `MaleLeisure_MaleDeh_c3_Low`: these are model variable IDs, not getter/setter APIs.
+- Non-`BenefitUnit` similarly named methods, especially decision-state APIs.
 
 ## Suggested Batch Order
 

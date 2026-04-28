@@ -79,7 +79,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Lag(getter = "getEquivalisedDisposableIncomeYearly") @Transient private Double yDispEquivYearL1;
     @NullInitialised @Transient private Double yDiffDispEquivPrevYear;
     private Integer yPvrtyFlag;        //1 if at risk of poverty, defined by an equivalisedDisposableIncomeYearly < 60% of median household's
-    @Lag(getter = "getAtRiskOfPoverty") @Transient private Integer yPvrtyFlagL1;
+    @Lag(getter = "getYPvrtyFlag") @Transient private Integer yPvrtyFlagL1;
     @Lag(getter = "getIndicatorChildren0to3") @Transient private Indicator dem0to3L1;
     @Lag(getter = "getIndicatorChildren4to12") @Transient private Indicator dem4to12L1;                //Lag(1) of d_children_4_12;
     @Lag(getter = "getNumberChildren0to2") @Transient private Integer numberChildren02_lag1; //Lag(1) of the number of children aged 0-2 in the household
@@ -91,7 +91,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @NullInitialised @Transient private Match demDbMatchTax;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
     @Enumerated(EnumType.STRING) private Ydses_c5 yHhQuintilesMonthC5;
-    @Lag(getter = "getYdses_c5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
+    @Lag(getter = "getYHhQuintilesMonthC5") @Transient private Ydses_c5 yHhQuintilesMonthC5L1;
     @NullInitialised @Transient private Double i_yNonBenHhGrossAsinh;
     @NullInitialised private Dhhtp_c4 demCompHhC4;
     @Lag(getter = "getDemCompHhC4") @Transient private Dhhtp_c4 demCompHhC4L1;
@@ -292,8 +292,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             initialiseLiquidWealth(
                     originalBenefitUnit.getRefPersonForDecisions().getDemAge(),
                     originalBenefitUnit.getWealthTotValue(),
-                    originalBenefitUnit.getPensionWealth(false),
-                    originalBenefitUnit.getHousingWealth(false)
+                    originalBenefitUnit.getWealthPensValue(false),
+                    originalBenefitUnit.getWealthPrptyValue(false)
             );
         this.numberChildrenAll_lag1 = originalBenefitUnit.numberChildrenAll_lag1;
         this.numberChildren02_lag1 = originalBenefitUnit.numberChildren02_lag1;
@@ -303,7 +303,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.xCareWeek = originalBenefitUnit.xCareWeek;
         this.careProvidedFlag = originalBenefitUnit.careProvidedFlag;
         this.region = originalBenefitUnit.region;
-        this.yHhQuintilesMonthC5 = originalBenefitUnit.getYdses_c5();
+        this.yHhQuintilesMonthC5 = originalBenefitUnit.getYHhQuintilesMonthC5();
         this.yHhQuintilesMonthC5L1 = originalBenefitUnit.yHhQuintilesMonthC5L1;
         this.demCompHhC4L1 = originalBenefitUnit.demCompHhC4L1;
         this.wealthPrptyFlag = originalBenefitUnit.wealthPrptyFlag;
@@ -377,7 +377,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         demCompHhC4L1 = getDemCompHhC4();
 
         // clean-up odd ends
-        if (getYdses_c5() == null) {
+        if (getYHhQuintilesMonthC5() == null) {
             yHhQuintilesMonthC5 = Ydses_c5.Q3;
         }
         if (region == null)
@@ -606,7 +606,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDemAge(), getIntValue(Regressors.NumberMembersOver17),
                 getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017),
                 hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvidedFlag, originalIncomePerMonth, secondIncomePerMonth,
-                childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
+                childcareCostPerMonth, socialCareCostPerMonth, getWealthTotValue(Parameters.enableIntertemporalOptimisations), taxInnov);
 
         return evaluatedTransfers;
     }
@@ -1886,17 +1886,17 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
             // benefit unit income is the sum of male and female non-benefit income
             double tmpHHYpnbihs_dv = (ypnbihsMaleMonthly + ypnbihsFemaleMonthly) / equivalisedWeight; //Equivalised
-            setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
+            setIYNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
             //Based on the percentiles calculated by the collector, assign household to one of the quintiles of (equivalised) income distribution
             if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
-                if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p20()) {
+                if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p40()) {
+                } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p60()) {
+                } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p80()) {
+                } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q4;
                 } else {
                     yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -1914,16 +1914,16 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                 //BenefitUnit income is the male non-benefit income
                 double tmpHHYpnbihs_dv = ypnbihsMaleMonthly / equivalisedWeight; //Equivalised
-                setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
+                setIYNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
-                    if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p20()) {
+                    if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                    } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p40()) {
+                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                    } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p60()) {
+                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                    } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p80()) {
+                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
                         yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -1944,17 +1944,17 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                 //BenefitUnit income is the female non-benefit income
                 double tmpHHYpnbihs_dv = ypnbihsFemaleMonthly / equivalisedWeight; //Equivalised
-                setTmpHHYpnbihs_dv_asinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
+                setIYNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
 
-                    if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p20()) {
+                    if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                    } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p40()) {
+                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                    } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p60()) {
+                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                    } else if(getTmpHHYpnbihs_dv_asinh() <= collector.getStats().getYdses_p80()) {
+                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
                         yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -4001,10 +4001,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
     public double getWealthTotValue() {
-        return getLiquidWealth(true);
+        return getWealthTotValue(true);
     }
 
-    public double getLiquidWealth(boolean throwError) {
+    public double getWealthTotValue(boolean throwError) {
         if (!Parameters.checkFinite(wealthTotValue)) {
             if (throwError)
                 throw new RuntimeException("Call to get benefit unit liquid wealth before it is initialised.");
@@ -4014,15 +4014,15 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return wealthTotValue;
     }
 
-    public void setWealthTotValue(Double liquidWealth) {
-        this.wealthTotValue = liquidWealth;
+    public void setWealthTotValue(Double wealthTotValue) {
+        this.wealthTotValue = wealthTotValue;
     }
 
-    public double getPensionWealth() {
-        return getPensionWealth(true);
+    public double getWealthPensValue() {
+        return getWealthPensValue(true);
     }
 
-    public double getPensionWealth(boolean throwError) {
+    public double getWealthPensValue(boolean throwError) {
         if (!Parameters.checkFinite(wealthPensValue)) {
             if (throwError)
                 throw new RuntimeException("Call to get benefit unit pension wealth before it is initialised.");
@@ -4032,15 +4032,15 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return wealthPensValue;
     }
 
-    public void setPensionWealth(Double wealthPensValue) {
+    public void setWealthPensValue(Double wealthPensValue) {
         this.wealthPensValue = wealthPensValue;
     }
 
-    public double getHousingWealth() {
-        return getHousingWealth(true);
+    public double getWealthPrptyValue() {
+        return getWealthPrptyValue(true);
     }
 
-    public double getHousingWealth(boolean throwError) {
+    public double getWealthPrptyValue(boolean throwError) {
         if (!Parameters.checkFinite(wealthPrptyValue)) {
             if (throwError)
                 throw new RuntimeException("Call to get benefit unit housing wealth before it is initialised.");
@@ -4050,14 +4050,14 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return wealthPrptyValue;
     }
 
-    public void setHousingWealth(Double wealth) {
-        wealthPrptyValue = wealth;
+    public void setWealthPrptyValue(Double wealthPrptyValue) {
+        this.wealthPrptyValue = wealthPrptyValue;
     }
 
-    public double getChildcareCostPerWeek() {
-        return getChildcareCostPerWeek(true);
+    public double getXChildCareWeek() {
+        return getXChildCareWeek(true);
     }
-    public double getChildcareCostPerWeek(boolean throwError) {
+    public double getXChildCareWeek(boolean throwError) {
         if (!Parameters.checkFinite(xChildCareWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit childcare cost before it is initialised.");
@@ -4068,10 +4068,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return xChildCareWeek;
     }
 
-    public double getSocialCareCostPerWeek() {
-        return getSocialCareCostPerWeek(true);
+    public double getXCareWeek() {
+        return getXCareWeek(true);
     }
-    public double getSocialCareCostPerWeek(boolean throwError) {
+    public double getXCareWeek(boolean throwError) {
         if (!Parameters.checkFinite(xCareWeek)) {
             if (throwError) {
                 throw new RuntimeException("Call to get benefit unit social care cost before it is initialised.");
@@ -4172,12 +4172,12 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     public Indicator getIndicatorChildren4to12() {
         return getIndicatorChildren(4,12);
     }
-    public Integer getNumberChildrenAll_lag1() {
+    public Integer getNumberChildrenAllL1() {
         return numberChildrenAll_lag1;
     }
-    public Integer getNumberChildren02_lag1() { return numberChildren02_lag1; }
-    public Indicator getIndicatorChildren03_lag1() { return dem0to3L1; }
-    public Indicator getIndicatorChildren412_lag1() {
+    public Integer getNumberChildren02L1() { return numberChildren02_lag1; }
+    public Indicator getDem0to3L1() { return dem0to3L1; }
+    public Indicator getDem4to12L1() {
         return dem4to12L1;
     }
 
@@ -4185,15 +4185,15 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return Objects.requireNonNullElse(yDispEquivYear, -9999.99);
     }
 
-    public int getAtRiskOfPoverty() {
+    public int getYPvrtyFlag() {
         return Objects.requireNonNullElse(yPvrtyFlag, 0);
     }
 
-    public Integer getAtRiskOfPoverty_lag1() {
+    public Integer getYPvrtyFlagL1() {
         return yPvrtyFlagL1;
     }
 
-    public void setAtRiskOfPoverty(Integer yPvrtyFlag) {
+    public void setYPvrtyFlag(Integer yPvrtyFlag) {
         this.yPvrtyFlag = yPvrtyFlag;
     }
 
@@ -4229,7 +4229,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
 
-    public void setOccupancyLocal(Occupancy occupancy) {
+    public void setDemOccupancyLocal(Occupancy occupancy) {
         i_demOccupancy = occupancy;
     }
 
@@ -4263,25 +4263,25 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return key.getId();
     }
 
-    public Ydses_c5 getYdses_c5() {
+    public Ydses_c5 getYHhQuintilesMonthC5() {
         return yHhQuintilesMonthC5;
     }
 
-    public Ydses_c5 getYdses_c5_lag1() {
+    public Ydses_c5 getYHhQuintilesMonthC5L1() {
         return yHhQuintilesMonthC5L1;
     }
 
-    public double getTmpHHYpnbihs_dv_asinhNoNull() {
+    public double getIYNonBenHhGrossAsinhNoNull() {
         return Objects.requireNonNullElse(i_yNonBenHhGrossAsinh, 0.0);
     }
 
-    public double getTmpHHYpnbihs_dv_asinh() {
+    public double getIYNonBenHhGrossAsinh() {
         if (i_yNonBenHhGrossAsinh ==null)
             throw new RuntimeException("tmpHHYpnbihs_dv_asinh accessed before initialised");
         return i_yNonBenHhGrossAsinh;
     }
 
-    public void setTmpHHYpnbihs_dv_asinh(double val) {
+    public void setIYNonBenHhGrossAsinh(double val) {
         i_yNonBenHhGrossAsinh = val;
     }
 
@@ -4389,9 +4389,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 ref = male;
             } else if (female.getHealthDsblLongtermFlag() == Indicator.True) {
                 ref = female;
-            } else if (Indicator.True.equals(male.getNeedSocialCare())) {
+            } else if (Indicator.True.equals(male.getCareNeedFlag())) {
                 ref = male;
-            } else if (Indicator.True.equals(female.getNeedSocialCare())) {
+            } else if (Indicator.True.equals(female.getCareNeedFlag())) {
                 ref = female;
             } else if (male.getLabC4()==Les_c4.Retired && female.getLabC4()==Les_c4.Retired) {
                 if (male.getDemAge() >= female.getDemAge()) {
@@ -4606,10 +4606,10 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     private double getNonDiscretionaryConsumptionPerYear() {
         double nonDiscretionaryConsumptionPerYear = 0.0;
         if (Parameters.flagFormalChildcare) {
-            nonDiscretionaryConsumptionPerYear += getChildcareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
+            nonDiscretionaryConsumptionPerYear += getXChildCareWeek() * Parameters.WEEKS_PER_YEAR;
         }
         if (Parameters.flagSocialCare) {
-            nonDiscretionaryConsumptionPerYear += getSocialCareCostPerWeek() * Parameters.WEEKS_PER_YEAR;
+            nonDiscretionaryConsumptionPerYear += getXCareWeek() * Parameters.WEEKS_PER_YEAR;
         }
         return nonDiscretionaryConsumptionPerYear;
     }
@@ -4667,7 +4667,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(1));
                 xChildCareWeek = Math.exp(score + rmse * gauss);
                 double costCap = childCareCostCapWeekly();
-                if (costCap > 0.0 && costCap < getChildcareCostPerWeek()) {
+                if (costCap > 0.0 && costCap < getXChildCareWeek()) {
                     xChildCareWeek = costCap;
                 }
             }
@@ -4691,7 +4691,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         }
     }
 
-    public void setDeh_c4Local(Education edu) {
+    public void setEduHighestC4Local(Education edu) {
         i_eduHighestC4 = edu;
     }
 
@@ -4724,11 +4724,11 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return max;
     }
 
-    public void setLabourHoursWeekly1Local(Integer hours) {
+    public void setLabHrsWork1WeekLocal(Integer hours) {
         i_labHrsWork1Week = hours;
     }
 
-    public void setLabourHoursWeekly2Local(Integer hours) {
+    public void setLabHrsWork2WeekLocal(Integer hours) {
         i_labHrsWork2Week = hours;
     }
 
@@ -4827,7 +4827,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return cap;
     }
 
-    public void setYearLocal(Integer year) {
+    public void setDemYearLocal(Integer year) {
         i_demYear = year;
     }
 

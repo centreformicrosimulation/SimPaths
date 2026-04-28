@@ -653,8 +653,8 @@ public class Statistics2 {
                     grossDisInc[ii] += person.getBenefitUnit().getDisposableIncomeMonthlyNoNull() / es;
                 }
                 double expenditurePerMonth = person.getBenefitUnit().getDiscretionaryConsumptionPerYear(false) / 12.0 +
-                        person.getBenefitUnit().getChildcareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH +
-                        person.getBenefitUnit().getSocialCareCostPerWeek(false) * Parameters.WEEKS_PER_MONTH;
+                        person.getBenefitUnit().getXChildCareWeek(false) * Parameters.WEEKS_PER_MONTH +
+                        person.getBenefitUnit().getXCareWeek(false) * Parameters.WEEKS_PER_MONTH;
                 if (expenditurePerMonth > 0.0) {
                     expenditurePerMonth /= es;
                     expen[ii] += Math.log(expenditurePerMonth);
@@ -672,7 +672,7 @@ public class Statistics2 {
                         ctlNG += expenditurePerMonth / Parameters.WEEKS_PER_MONTH / person.getLeisureHoursPerWeek();
                     }
                 }
-                wealth[ii] += person.getBenefitUnit().getLiquidWealth(false) / es;
+                wealth[ii] += person.getBenefitUnit().getWealthTotValue(false) / es;
                 popula[ii] += 1.0;
             }
         }

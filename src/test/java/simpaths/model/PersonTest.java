@@ -625,7 +625,7 @@ public class PersonTest {
                 assertTrue(testPerson.inSchool());
                 assertEquals(Les_c4.Student, testPerson.getLabC4());
                 assertEquals(Indicator.False, testPerson.getEduSpellFlag());
-                assertEquals(Indicator.True, testPerson.getDer());
+                assertEquals(Indicator.True, testPerson.getEduReturnFlag());
             }
 
             @Test
@@ -652,7 +652,7 @@ public class PersonTest {
             @DisplayName("OUTCOME F (First Spell): Adopts New Level (Low -> High)")
             void firstSpellAdoptsNewLevel() {
                 testPerson.setEduHighestC4(Education.Low);
-                testPerson.setDer(Indicator.False);
+                testPerson.setEduReturnFlag(Indicator.False);
 
                 setupEducationLevelRegressionMock(0.9); // -> High
 
@@ -665,7 +665,7 @@ public class PersonTest {
             @DisplayName("OUTCOME F (Return Spell Improvement): Adopts New, Higher Level")
             void returnSpellAdoptsHigherLevel() {
                 testPerson.setEduHighestC4(Education.Low);
-                testPerson.setDer(Indicator.True);
+                testPerson.setEduReturnFlag(Indicator.True);
 
                 setupEducationLevelRegressionMock(0.5); // -> Medium
 
@@ -678,7 +678,7 @@ public class PersonTest {
             @DisplayName("OUTCOME G (Return Spell Downgrade): Retains Current Level")
             void returnSpellRetainsCurrentLevelOnDowngrade() {
                 testPerson.setEduHighestC4(Education.Medium);
-                testPerson.setDer(Indicator.True);
+                testPerson.setEduReturnFlag(Indicator.True);
 
                 setupEducationLevelRegressionMock(0.2); // -> Low
 
@@ -691,7 +691,7 @@ public class PersonTest {
             @DisplayName("OUTCOME G (Return Spell Same Level): Retains Current Level")
             void returnSpellRetainsCurrentLevelOnSameLevel() {
                 testPerson.setEduHighestC4(Education.Medium);
-                testPerson.setDer(Indicator.True);
+                testPerson.setEduReturnFlag(Indicator.True);
 
                 setupEducationLevelRegressionMock(0.5); // -> Medium
 
@@ -709,7 +709,7 @@ public class PersonTest {
                 testPerson.setDemAge(20);
                 testPerson.setEduHighestC4(Education.Low);
                 testPerson.setEduSpellFlag(Indicator.True);
-                testPerson.setDer(Indicator.False);
+                testPerson.setEduReturnFlag(Indicator.False);
                 testPerson.setLabC4(Les_c4.Student);
                 testPerson.setLabC4L1(Les_c4.Student);
 
@@ -719,11 +719,11 @@ public class PersonTest {
 
                 assertFalse(testPerson.isToLeaveSchool());
                 assertEquals(Indicator.False, testPerson.getEduSpellFlag());
-                assertEquals(Indicator.False, testPerson.getDer());
+                assertEquals(Indicator.False, testPerson.getEduReturnFlag());
                 assertTrue(testPerson.isLeftEducation());
                 assertEquals(Les_c4.NotEmployed, testPerson.getLabC4());
                 assertEquals(Education.Medium, testPerson.getEduHighestC4());
-                assertEquals(Indicator.True, testPerson.getSedex());
+                assertEquals(Indicator.True, testPerson.getEduExitSampleFlag());
             }
 
             @Test

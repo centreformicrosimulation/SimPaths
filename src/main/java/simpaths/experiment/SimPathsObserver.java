@@ -1424,7 +1424,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			    for(Region region: Parameters.getCountryRegions()) {
 			    	//Households
 					ValidHouseholdIncomeRegionalCSfilter validHouseholdIncomeRegionalFilter = new ValidHouseholdIncomeRegionalCSfilter(region);				
-					Weighted_CrossSection.Integer validHousesAtRiskOfPovertyRegionCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getAtRiskOfPoverty", true);
+					Weighted_CrossSection.Integer validHousesAtRiskOfPovertyRegionCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getYPvrtyFlag", true);
 					validHousesAtRiskOfPovertyRegionCS.setFilter(validHouseholdIncomeRegionalFilter);
 					housePovertyPlotter.addSeries(region.getName(), new Weighted_MeanArrayFunction(validHousesAtRiskOfPovertyRegionCS));
 					
@@ -1436,7 +1436,7 @@ public class SimPathsObserver extends AbstractSimulationObserverManager implemen
 			    }
 			    //Households
 			    ValidHouseholdIncomeCSfilter validHouseholdIncomeFilter = new ValidHouseholdIncomeCSfilter();
-			    Weighted_CrossSection.Integer validHousesAtRiskOfPovertyCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getAtRiskOfPoverty", true);
+			    Weighted_CrossSection.Integer validHousesAtRiskOfPovertyCS = new Weighted_CrossSection.Integer(model.getBenefitUnits(), BenefitUnit.class, "getYPvrtyFlag", true);
 			    validHousesAtRiskOfPovertyCS.setFilter(validHouseholdIncomeFilter);
 			    housePovertyPlotter.addSeries("national", new Weighted_MeanArrayFunction(validHousesAtRiskOfPovertyCS));		    
 				updateChartSet.add(housePovertyPlotter);			//Add to set to be updated in buildSchedule method
