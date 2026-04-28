@@ -268,8 +268,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         switch (sampleEntry) {
             case ProcessedInputData -> {
                 key.setId(originalBenefitUnit.getId());
-                idBuOriginal = originalBenefitUnit.getIdOriginalBU();
-                idHhOriginal = originalBenefitUnit.getIdOriginalHH();
+                idBuOriginal = originalBenefitUnit.getIdBuOriginal();
+                idHhOriginal = originalBenefitUnit.getIdHhOriginal();
             }
             default -> {
                 idBuOriginal = originalBenefitUnit.getId();
@@ -1886,17 +1886,17 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
             // benefit unit income is the sum of male and female non-benefit income
             double tmpHHYpnbihs_dv = (ypnbihsMaleMonthly + ypnbihsFemaleMonthly) / equivalisedWeight; //Equivalised
-            setIYNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
+            setI_yNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
             //Based on the percentiles calculated by the collector, assign household to one of the quintiles of (equivalised) income distribution
             if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
-                if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
+                if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
+                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
+                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
+                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q4;
                 } else {
                     yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -1914,16 +1914,16 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                 //BenefitUnit income is the male non-benefit income
                 double tmpHHYpnbihs_dv = ypnbihsMaleMonthly / equivalisedWeight; //Equivalised
-                setIYNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
+                setI_yNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
-                    if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
+                    if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
                         yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -1944,17 +1944,17 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                 //BenefitUnit income is the female non-benefit income
                 double tmpHHYpnbihs_dv = ypnbihsFemaleMonthly / equivalisedWeight; //Equivalised
-                setIYNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
+                setI_yNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
 
-                    if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
+                    if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                    } else if(getIYNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
                         yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -4229,7 +4229,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
     }
 
 
-    public void setDemOccupancyLocal(Occupancy occupancy) {
+    public void setI_demOccupancy(Occupancy occupancy) {
         i_demOccupancy = occupancy;
     }
 
@@ -4271,17 +4271,17 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return yHhQuintilesMonthC5L1;
     }
 
-    public double getIYNonBenHhGrossAsinhNoNull() {
+    public double getI_yNonBenHhGrossAsinhNoNull() {
         return Objects.requireNonNullElse(i_yNonBenHhGrossAsinh, 0.0);
     }
 
-    public double getIYNonBenHhGrossAsinh() {
+    public double getI_yNonBenHhGrossAsinh() {
         if (i_yNonBenHhGrossAsinh ==null)
             throw new RuntimeException("tmpHHYpnbihs_dv_asinh accessed before initialised");
         return i_yNonBenHhGrossAsinh;
     }
 
-    public void setIYNonBenHhGrossAsinh(double val) {
+    public void setI_yNonBenHhGrossAsinh(double val) {
         i_yNonBenHhGrossAsinh = val;
     }
 
@@ -4691,7 +4691,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         }
     }
 
-    public void setEduHighestC4Local(Education edu) {
+    public void setI_eduHighestC4(Education edu) {
         i_eduHighestC4 = edu;
     }
 
@@ -4724,11 +4724,11 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return max;
     }
 
-    public void setLabHrsWork1WeekLocal(Integer hours) {
+    public void setI_labHrsWork1Week(Integer hours) {
         i_labHrsWork1Week = hours;
     }
 
-    public void setLabHrsWork2WeekLocal(Integer hours) {
+    public void setI_labHrsWork2Week(Integer hours) {
         i_labHrsWork2Week = hours;
     }
 
@@ -4827,7 +4827,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         return cap;
     }
 
-    public void setDemYearLocal(Integer year) {
+    public void setI_demYear(Integer year) {
         i_demYear = year;
     }
 
@@ -4854,9 +4854,9 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
     public long getSeed(){return (statSeed !=null) ? statSeed : 0L;}
 
-    public long getIdOriginalBU() {return idBuOriginal;}
+    public long getIdBuOriginal() {return idBuOriginal;}
 
-    public long getIdOriginalHH() {return idHhOriginal;}
+    public long getIdHhOriginal() {return idHhOriginal;}
 
     public Person getFemale() {
         for (Person member : members) {

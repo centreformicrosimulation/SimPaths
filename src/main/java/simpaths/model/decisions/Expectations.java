@@ -98,9 +98,9 @@ public class Expectations {
 
         // proxy to evaluate regression projections for current period
         benefitUnitProxyThisPeriod = new BenefitUnit(true);
-        benefitUnitProxyThisPeriod.setDemYearLocal(currentStates.getYear());
-        benefitUnitProxyThisPeriod.setDemOccupancyLocal(currentStates.getOccupancyCode());
-        benefitUnitProxyThisPeriod.setEduHighestC4Local(currentStates.getEducationCode());
+        benefitUnitProxyThisPeriod.setI_demYear(currentStates.getYear());
+        benefitUnitProxyThisPeriod.setI_demOccupancy(currentStates.getOccupancyCode());
+        benefitUnitProxyThisPeriod.setI_eduHighestC4(currentStates.getEducationCode());
         benefitUnitProxyThisPeriod.setRegion(currentStates.getRegionCode());
     }
 
@@ -329,11 +329,11 @@ public class Expectations {
         }
 
         // non-discretionary expenditure
-        benefitUnitProxyThisPeriod.setLabHrsWork1WeekLocal(labourHours1Weekly);
+        benefitUnitProxyThisPeriod.setI_labHrsWork1Week(labourHours1Weekly);
         if (cohabitation) {
-            benefitUnitProxyThisPeriod.setLabHrsWork2WeekLocal(labourHours2Weekly);
+            benefitUnitProxyThisPeriod.setI_labHrsWork2Week(labourHours2Weekly);
         } else {
-            benefitUnitProxyThisPeriod.setLabHrsWork2WeekLocal(null);
+            benefitUnitProxyThisPeriod.setI_labHrsWork2Week(null);
         }
         double childcareCostAnnual = evalChildcareCostWeekly() * Parameters.WEEKS_PER_YEAR;
         double socialCareCostAnnual = evalSocialCareCostWeekly() * Parameters.WEEKS_PER_YEAR;

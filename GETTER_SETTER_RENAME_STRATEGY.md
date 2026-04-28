@@ -42,10 +42,14 @@ Avoid global text replacement across the repository. Some old names may also be 
 | `Person` income fields | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | No compatibility wrappers retained. Old income method references removed from Java source, tests, XML/properties, and reflective getter strings. |
 | `Person` demographic fields | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | No compatibility wrappers retained. Old `Person` demographic method references removed from Java source and reflective getter strings. Non-`Person` `States.getDcpst()` API was intentionally retained. |
 | Remaining `Person` education/social-care flags | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Strict field-name rule used for social-care methods. No compatibility wrappers retained. Old method references removed from Java source, tests, XML, and properties. |
-| `BenefitUnit` local proxy state | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Preserved `Local` suffix. `Person.setYearLocal(...)` intentionally retained outside this batch. |
+| `BenefitUnit` local proxy state | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Updated to preserve the `I_` prefix for methods setting `i_...` fields. `Person.setYearLocal(...)` intentionally retained outside this batch. |
 | `BenefitUnit` children and poverty lags | Completed | `mvn test -DskipTests` and `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | `BenefitUnit` poverty API renamed to `yPvrtyFlag` field style. `Person.getAtRiskOfPoverty()` intentionally retained as a person-level derived API. |
-| `BenefitUnit` household income and quintile fields | Completed | `mvn test -DskipTests` passed on 2026-04-28; focused tests deferred under optimized workflow | Reflective collector string updated. Statistics percentile methods such as `getYdses_p20()` intentionally retained. |
-| `BenefitUnit` wealth and costs | Completed | `mvn test -DskipTests` passed on 2026-04-28; focused tests deferred under optimized workflow | Renamed only `BenefitUnit` APIs and direct `BenefitUnit` call sites. Similar `Person`, `Parameters`, decision-grid, and tax-key APIs intentionally retained. |
+| `BenefitUnit` household income and quintile fields | Completed | `mvn test -DskipTests` and checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Reflective collector string updated. Statistics percentile methods such as `getYdses_p20()` intentionally retained. |
+| `BenefitUnit` wealth and costs | Completed | `mvn test -DskipTests` and checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Renamed only `BenefitUnit` APIs and direct `BenefitUnit` call sites. Similar `Person`, `Parameters`, decision-grid, and tax-key APIs intentionally retained. |
+| `Household` original ID accessor | Completed | `mvn test -DskipTests` passed on 2026-04-28 | Renamed `getIdOriginalHH()` to `getIdHhOriginal()`. |
+| Original household ID accessors | Completed | `mvn test -DskipTests` and local checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Renamed `Person` and `BenefitUnit` `getIdOriginalHH()` to `getIdHhOriginal()`. |
+| Original person/benefit-unit ID accessors | Completed | `mvn test -DskipTests` and local checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Renamed `getIdOriginalPerson()` and `getIdOriginalBU()` to match `idPersOriginal` and `idBuOriginal`. |
+| `i_` accessor naming correction | Completed | `mvn test -DskipTests` passed on 2026-04-28 | Corrected completed `BenefitUnit` `i_...` accessors to keep `I_`, including `getI_yNonBenHhGrossAsinh...` and local proxy setters. |
 
 ## Naming Convention
 
@@ -55,6 +59,8 @@ Use standard JavaBean-style accessor names:
 - Boolean fields may use either the existing project convention or `isFieldName()` if already established locally.
 - Lag fields should preserve the field suffix:
   - `eduHighestC4L1` -> `getEduHighestC4L1()` / `setEduHighestC4L1(...)`
+- Fields whose names begin with `i_` should keep the `I_` prefix in accessor names:
+  - `i_yNonBenHhGrossAsinh` -> `getI_yNonBenHhGrossAsinh()` / `setI_yNonBenHhGrossAsinh(...)`
 - Local/transient helper accessors should keep meaningful qualifiers:
   - `setRegionLocal(...)` can remain distinct from `setRegion(...)` where both have different behavior.
 
@@ -251,30 +257,39 @@ Validation:
 - Remaining old method references in Java source/tests/XML/properties: none
 - Compatibility wrappers: none retained
 
-## Planned: BenefitUnit Accessors
+## Completed: BenefitUnit Accessors
 
-Next broad area from the original batch order. Before starting, inspect `src/main/java/simpaths/model/BenefitUnit.java` and create a small first batch rather than renaming every accessor at once.
+Completed broad `BenefitUnit` accessor pass in small controlled batches rather than renaming every accessor at once.
 
 Inspection notes:
 
 - `BenefitUnit` has many computed/domain accessors that already read naturally and should not be renamed just because they do not map one-to-one to a field. Examples: `getWeight()`, `getChildren()`, `getOccupancy()`, `getCoupleBoolean()`, `getRefPersonForDecisions()`, and regression helper methods.
 - Prioritise methods that expose a backing field but still use survey-code names, inconsistent lag suffixes, or temporary/proxy names.
-- Preserve `Local` where it marks proxy/regression-state setters backed by transient `i_...` fields.
+- For proxy/regression-state setters backed by transient `i_...` fields, prefer the strict `I_...` field-name form.
 - Update `@Lag(getter=...)` strings in the same batch as the getter rename.
+
+Completion checkpoint:
+
+- Completed batches: local proxy state; children and poverty lags; household income and quintile fields; wealth and costs.
+- Compile validation: `mvn test -DskipTests` passed after each `BenefitUnit` batch.
+- Focused checkpoint command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused checkpoint result: passed on 2026-04-28, 29 tests run, 0 failures, 0 errors, 0 skipped.
+- Compatibility wrappers: none retained for the renamed `BenefitUnit` APIs.
+- Deliberately retained APIs: computed/domain `BenefitUnit` methods such as `getRegion()`, `getOccupancy()`, `getDemCompHhC4()`, and non-`BenefitUnit` similarly named APIs documented below.
 
 ### Completed: BenefitUnit Local Proxy State
 
-These are used by `Expectations` to initialise proxy objects for decision/regression evaluation. Keep the `Local` suffix because it distinguishes proxy state from persisted simulation state.
+These are used by `Expectations` to initialise proxy objects for decision/regression evaluation. The final names keep the `I_` prefix because the backing fields begin with `i_`.
 
 Completed renames:
 
 | Old method | New method | Backing field |
 | --- | --- | --- |
-| `setDeh_c4Local(...)` | `setEduHighestC4Local(...)` | `i_eduHighestC4` |
-| `setOccupancyLocal(...)` | `setDemOccupancyLocal(...)` | `i_demOccupancy` |
-| `setLabourHoursWeekly1Local(...)` | `setLabHrsWork1WeekLocal(...)` | `i_labHrsWork1Week` |
-| `setLabourHoursWeekly2Local(...)` | `setLabHrsWork2WeekLocal(...)` | `i_labHrsWork2Week` |
-| `setYearLocal(...)` | `setDemYearLocal(...)` | `i_demYear` |
+| `setDeh_c4Local(...)` | `setI_eduHighestC4(...)` | `i_eduHighestC4` |
+| `setOccupancyLocal(...)` | `setI_demOccupancy(...)` | `i_demOccupancy` |
+| `setLabourHoursWeekly1Local(...)` | `setI_labHrsWork1Week(...)` | `i_labHrsWork1Week` |
+| `setLabourHoursWeekly2Local(...)` | `setI_labHrsWork2Week(...)` | `i_labHrsWork2Week` |
+| `setYearLocal(...)` | `setI_demYear(...)` | `i_demYear` |
 
 Validation:
 
@@ -286,7 +301,7 @@ Validation:
 
 Intentional retained names:
 
-- `Person.setYearLocal(...)` remains unchanged because this batch only covered `BenefitUnit`.
+- `Person` proxy setters backed by `i_...` fields are handled separately in the planned `Person Local Proxy Setters` batch.
 
 ### Completed: BenefitUnit Children And Poverty Lags
 
@@ -328,9 +343,9 @@ Completed renames:
 | --- | --- | --- |
 | `getYdses_c5()` | `getYHhQuintilesMonthC5()` | `yHhQuintilesMonthC5` |
 | `getYdses_c5_lag1()` | `getYHhQuintilesMonthC5L1()` | `yHhQuintilesMonthC5L1` |
-| `getTmpHHYpnbihs_dv_asinhNoNull()` | `getIYNonBenHhGrossAsinhNoNull()` | `i_yNonBenHhGrossAsinh` |
-| `getTmpHHYpnbihs_dv_asinh()` | `getIYNonBenHhGrossAsinh()` | `i_yNonBenHhGrossAsinh` |
-| `setTmpHHYpnbihs_dv_asinh(...)` | `setIYNonBenHhGrossAsinh(...)` | `i_yNonBenHhGrossAsinh` |
+| `getTmpHHYpnbihs_dv_asinhNoNull()` | `getI_yNonBenHhGrossAsinhNoNull()` | `i_yNonBenHhGrossAsinh` |
+| `getTmpHHYpnbihs_dv_asinh()` | `getI_yNonBenHhGrossAsinh()` | `i_yNonBenHhGrossAsinh` |
+| `setTmpHHYpnbihs_dv_asinh(...)` | `setI_yNonBenHhGrossAsinh(...)` | `i_yNonBenHhGrossAsinh` |
 
 Related private helper renames:
 
@@ -341,7 +356,8 @@ Validation:
 
 - Compile command: `mvn test -DskipTests`
 - Result: passed
-- Focused tests: deferred under the optimized workflow; run after the next related batch or before review
+- Focused checkpoint command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused checkpoint result: passed on 2026-04-28, 29 tests run
 - Remaining old household income/quintile method references in Java source/tests/XML/properties: none
 - Compatibility wrappers: none retained
 
@@ -369,7 +385,8 @@ Validation:
 
 - Compile command: `mvn test -DskipTests`
 - Result: passed
-- Focused tests: deferred under the optimized workflow; run before review
+- Focused checkpoint command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused checkpoint result: passed on 2026-04-28, 29 tests run
 - Compatibility wrappers: none retained
 
 Intentional retained names:
@@ -386,6 +403,155 @@ Intentional retained names:
 - `getDemCompHhC4()`: computed household composition matching the existing field and `@Lag` usage.
 - Regression enum values such as `MaleLeisure_MaleDeh_c3_Low`: these are model variable IDs, not getter/setter APIs.
 - Non-`BenefitUnit` similarly named methods, especially decision-state APIs.
+
+## Completed: Household Accessors
+
+Inspection of `src/main/java/simpaths/model/Household.java` found one clear accessor mismatch. The class is small, and most accessors are either computed/domain APIs or framework identifiers.
+
+### Completed: Household Original ID Accessor
+
+Completed rename:
+
+| Old method | New method | Backing field |
+| --- | --- | --- |
+| `getIdOriginalHH()` | `getIdHhOriginal()` | `idHhOriginal` |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Remaining `Household.getIdOriginalHH()` references in Java source/tests/XML/properties: none
+- Compatibility wrappers: none retained
+
+Do not rename in this pass:
+
+- `getId()` returns the simulation/panel key ID, not `idHhOriginal`.
+- `getBenefitUnits()` matches the `benefitUnits` collection.
+- `setProcessed(...)` sets `processed` and also updates `key.workingId`; the current name is appropriate for the backing relationship.
+- `setHouseholdIdCounter(...)` is a static counter API, not an instance-field accessor.
+- `getWeight()`, `setWeight(...)`, and `getEquivalisedDisposableIncomeYearly()` are computed/domain APIs.
+
+## Completed: Original Household ID Accessors
+
+After completing `Household`, the same field-name mismatch remained in nearby model classes. This batch was coherent, low-risk, and limited to copy-constructor/internal call sites.
+
+Completed renames:
+
+| Old method | New method | Backing field | Class |
+| --- | --- | --- | --- |
+| `getIdOriginalHH()` | `getIdHhOriginal()` | `idHhOriginal` | `Person` |
+| `getIdOriginalHH()` | `getIdHhOriginal()` | `idHhOriginal` | `BenefitUnit` |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Local focused checkpoint command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Local focused checkpoint result: passed on 2026-04-28 at 14:58:36, 29 tests run, 0 failures, 0 errors, 0 skipped
+- Remaining `getIdOriginalHH()` references in Java source/tests/XML/properties: none
+- Compatibility wrappers: none retained
+
+## Completed: Original Person And Benefit-Unit ID Accessors
+
+Completed remaining original-ID accessors in `Person` and `BenefitUnit`. They had direct backing-field mismatches and limited constructor call sites.
+
+Completed renames:
+
+| Old method | New method | Backing field | Class |
+| --- | --- | --- | --- |
+| `getIdOriginalPerson()` | `getIdPersOriginal()` | `idPersOriginal` | `Person` |
+| `getIdOriginalBU()` | `getIdBuOriginal()` | `idBuOriginal` | `Person` |
+| `getIdOriginalBU()` | `getIdBuOriginal()` | `idBuOriginal` | `BenefitUnit` |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Local focused checkpoint command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Local focused checkpoint result: passed on 2026-04-28 at 14:58:36, 29 tests run, 0 failures, 0 errors, 0 skipped
+- Remaining old original person/benefit-unit ID method references in Java source/tests/XML/properties: none
+- Compatibility wrappers: none retained
+
+## Completed: ID Accessor Checkpoint
+
+The ID accessor batches for `Household`, `Person`, and `BenefitUnit` have a shared focused validation checkpoint.
+
+- Scope: `Household.getIdHhOriginal()`, `Person.getIdHhOriginal()`, `BenefitUnit.getIdHhOriginal()`, `Person.getIdPersOriginal()`, `Person.getIdBuOriginal()`, and `BenefitUnit.getIdBuOriginal()`.
+- Local focused checkpoint command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Local focused checkpoint result: passed on 2026-04-28 at 14:58:36, 29 tests run, 0 failures, 0 errors, 0 skipped
+- Maven result: `BUILD SUCCESS`
+
+## Planned: Remaining Person Underscore-Style Accessors
+
+Inspection of `src/main/java/simpaths/model/Person.java` found remaining public accessors with underscores. Split them into direct field-backed renames and computed helper APIs. Direct field-backed methods can continue through the normal branch workflow. Computed helpers are labelled "to be determined" because they do not have a clear one-to-one backing-field rename.
+
+### Planned: Person Direct Field-Backed Residuals
+
+These have clear backing fields and can be renamed under the strict field-name rule.
+
+| Current method | New method | Backing field |
+| --- | --- | --- |
+| `getHousehold_status_lag()` | `getDemStatusHhL1()` | `demStatusHhL1` |
+| `setNewWorkHours_lag1(...)` | `setLabHrsWorkNewL1(...)` | `labHrsWorkNewL1` |
+
+Expected call-site area:
+
+- `BenefitUnit` Covid/labour-supply code.
+- Internal `Person` regressor switch.
+
+### Planned: Person Benefit Receipt Lag Flags
+
+| Current method | New method | Backing field |
+| --- | --- | --- |
+| `setReceivesBenefitsFlag_L1(...)` | `setYBenReceivedFlagL1(...)` | `yBenReceivedFlagL1` |
+| `setReceivesBenefitsFlagUC_L1(...)` | `setYBenUCReceivedFlagL1(...)` | `yBenUCReceivedFlagL1` |
+| `setReceivesBenefitsFlagNonUC_L1(...)` | `setYBenNonUCReceivedFlagL1(...)` | `yBenNonUCReceivedFlagL1` |
+
+Excluded from this batch:
+
+- Boolean `is...` methods such as `isReceivesBenefitsFlag_L1()`, `isReceivesBenefitsFlagUC_L1()`, and `isReceivesBenefitsFlagNonUC_L1()` are excluded because the current branch scope is getter/setter method names, not boolean predicate APIs.
+
+### Planned: Person Local Proxy Setters
+
+These are used by decision expectation proxy objects. Under the strict `i_` rule, methods for fields beginning with `i_` should keep the `I_` prefix.
+
+| Current method | New method | Backing field |
+| --- | --- | --- |
+| `setRegionLocal(...)` | `setI_demRgn(...)` | `i_demRgn` |
+| `setDemPartnerStatusLocal(...)` | `setI_demPartnerStatus(...)` | `i_demPartnerStatus` |
+| `setYearLocal(...)` | `setI_demYear(...)` | `i_demYear` |
+| `setNumberChildren017Local(...)` | `setI_demNchild0to17(...)` | `i_demNchild0to17` |
+| `setIndicatorChildren02Local(...)` | `setI_demNChild0to2(...)` | `i_demNChild0to2` |
+| `setNumberChildrenAllLocal(...)` | `setI_demNchild(...)` | `i_demNchild` |
+| `setI_yHhQuintilesC5(...)` | no rename needed | `i_yHhQuintilesC5` |
+| `setI_demCompHhC4L1(...)` | no rename needed | `i_demCompHhC4L1` |
+| `setNumberChildrenAllLocal_lag1(...)` | `setI_demNchildL1(...)` | `i_demNchildL1` |
+| `setNumberChildren02Local_lag1(...)` | `setI_demNchild0to2L1(...)` | `i_demNchild0to2L1` |
+
+Expected call-site area:
+
+- `Expectations`.
+- `ExpectationsFactory`.
+
+### To Be Determined: Person Computed Helper APIs
+
+These methods do not directly expose a backing field or they add fallback/defaulting/domain logic. Do not rename them until the team agrees a naming rule for computed helper methods.
+
+| Current method | Reason to defer |
+| --- | --- |
+| `getEmployed_Lag1()` | computed indicator from `labC4L1`, not a direct `employedL1` field |
+| `getNonwork_Lag1()` | computed indicator from `labC4L1`, not a direct `nonworkL1` field |
+| `getCovidModuleGrossLabourIncome_Baseline()` | returns `covidYLabGross` with defaulting; no `covidYLabGrossBaseline` backing field |
+| `setCovidModuleGrossLabourIncome_Baseline(...)` | sets `covidYLabGross`, but the "Baseline" method name is domain-specific |
+| `getHoursFormalSocialCare_L1()` | returns `careHrsFormalWeekL1` with zero floor/defaulting |
+| `getHoursInformalSocialCare_L1()` | returns `careHrsInformalWeekL1` with zero floor/defaulting |
+| `getTotalHoursSocialCare_L1()` | computed formal + informal lag hours |
+| `getCareHoursFromParent_L1()` | computed helper, currently zero |
+| `getCareHoursFromPartner_L1()` | computed from partner status and informal lag hours |
+| `getCareHoursFromDaughter_L1()` | computed helper, currently zero |
+| `getCareHoursFromSon_L1()` | computed helper, currently zero |
+| `getCareHoursFromOther_L1()` | computed from partner status and informal lag hours |
+| `getYnbcpdf_dv()` | computed current difference between own and partner non-benefit gross personal income; used as a `@Lag` source |
 
 ## Suggested Batch Order
 

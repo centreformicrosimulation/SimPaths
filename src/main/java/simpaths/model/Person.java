@@ -318,9 +318,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         switch (demEnterSample) {
             case ProcessedInputData -> {
                 key.setId(originalPerson.getId());
-                idPersOriginal = originalPerson.getIdOriginalPerson();
-                idBuOriginal = originalPerson.getIdOriginalBU();
-                idHhOriginal = originalPerson.getIdOriginalHH();
+                idPersOriginal = originalPerson.getIdPersOriginal();
+                idBuOriginal = originalPerson.getIdBuOriginal();
+                idHhOriginal = originalPerson.getIdHhOriginal();
             }
             default -> {
                 idPersOriginal = originalPerson.key.getId();
@@ -5375,15 +5375,15 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public Indicator getEduExitSampleFlag() {return eduExitSampleFlag;}
 
-    public Long getIdOriginalPerson() {
+    public Long getIdPersOriginal() {
         return idPersOriginal;
     }
 
-    public Long getIdOriginalBU() {
+    public Long getIdBuOriginal() {
         return idBuOriginal;
     }
 
-    public Long getIdOriginalHH() {
+    public Long getIdHhOriginal() {
         return idHhOriginal;
     }
 
