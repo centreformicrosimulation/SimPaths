@@ -154,6 +154,7 @@ public class DonorTaxImputation {
         // The candidate pool is organised in increasing order of original income
         // ordering is controlled by database query in SimPathsModel.populateTaxdbReferences
         // normalised income is monthly in BASE_PRICE_YEAR prices (same as EUROMOD)
+        // Search here uses the golden search algorithm
         targetNormalisedOriginalIncome = Parameters.normaliseWeeklyIncome(keys.getPriceYear(), keys.getOriginalIncomePerWeek());
         int lowerInd, upperInd, testInd;
         double lowerOrigInc, upperOrigInc, testOrigInc;
@@ -176,8 +177,13 @@ public class DonorTaxImputation {
                 double adjFactor = 0.5 * MEAN_BIAS + (targetNormalisedOriginalIncome-lowerOrigInc) / (upperOrigInc - lowerOrigInc) * (1-MEAN_BIAS);
                 int adjInd = (int) ((upperInd - lowerInd) * adjFactor);
                 testInd = lowerInd + Math.max(1, adjInd);
-                testOrigInc = Parameters.getDonorPool().get(candidatePool.get(testInd)).getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth();
-
+                double candidateOrigIncMonthly = Parameters.getDonorPool().get(candidatePool.get(testInd)).getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth();
+                if (Parameters.taxDonorUpratingByWage) {
+                    // adjust wage growth to simulated year
+                    candidateOrigIncMonthly = candidateOrigIncMonthly * Parameters.getTimeSeriesValue(keys.getSimYear(), TimeSeriesVariable.WageGrowth) /
+                            Parameters.getTimeSeriesValue(systemYear, TimeSeriesVariable.WageGrowth);
+                }
+                testOrigInc = Parameters.normaliseMonthlyIncome(systemYear, candidateOrigIncMonthly);
                 if (testOrigInc > targetNormalisedOriginalIncome) {
                     upperInd = testInd;
                     upperOrigInc = testOrigInc;
@@ -190,12 +196,15 @@ public class DonorTaxImputation {
                     lowerOrigInc = testOrigInc;
                 }
             }
-            iiTarget = upperInd;
+            if (Math.abs(targetNormalisedOriginalIncome-lowerOrigInc) < Math.abs(targetNormalisedOriginalIncome-upperOrigInc)) {
+                iiTarget = lowerInd;
+            } else {
+                iiTarget = upperInd;
+            }
         }
         DonorTaxUnit targetCandidate = Parameters.getDonorPool().get(candidatePool.get(iiTarget));
         donorID = targetCandidate.getId();
-        double targetIncomeDifference = Math.abs(targetNormalisedOriginalIncome -
-                targetCandidate.getPolicyBySystemYear(systemYear).getNormalisedOriginalIncomePerMonth());
+        double targetIncomeDifference = Math.min(Math.abs(targetNormalisedOriginalIncome - lowerOrigInc), Math.abs(targetNormalisedOriginalIncome - upperOrigInc));
         if (!keys.isLowIncome(matchRegime)) {
             targetIncomeDifference /= Math.abs(targetNormalisedOriginalIncome);
             targetIncomeDifference *= 100;
