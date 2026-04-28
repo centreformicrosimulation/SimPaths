@@ -691,19 +691,23 @@ body:has(.simpaths-home-hero) .md-header__title [data-md-component="header-topic
 }
 
 .md-typeset .highlight .md-clipboard {
-  top: 0.56rem;
-  right: 0.58rem;
+  top: 0.58rem;
+  right: 0.62rem;
+  -webkit-appearance: none;
+  appearance: none;
   display: grid;
   place-items: center;
-  width: 1.72rem;
-  height: 1.72rem;
-  color: rgba(217,230,242,0.82) !important;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0 !important;
+  color: rgba(255,255,255,0.86) !important;
   background: transparent !important;
-  border: 1px solid transparent;
+  border: 0 !important;
   border-radius: 999px !important;
   box-shadow: none !important;
-  opacity: 1;
-  transition: none;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
 }
 
 .md-typeset .highlight .md-clipboard::before {
@@ -711,30 +715,32 @@ body:has(.simpaths-home-hero) .md-header__title [data-md-component="header-topic
 }
 
 .md-typeset .highlight .md-clipboard::after {
-  width: 0.9rem;
-  height: 0.9rem;
+  width: 0.88rem;
+  height: 0.88rem;
   margin: 0;
   background-color: currentColor !important;
 }
 
 .md-typeset .highlight:hover .md-clipboard,
+.md-typeset .highlight .md-clipboard:hover,
 .md-typeset .highlight .md-clipboard:focus {
-  color: #ffffff !important;
+  color: #9fd9ff !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
-.md-typeset .highlight .md-clipboard:hover,
 .md-typeset .highlight .md-clipboard:focus-visible {
-  color: #ffffff !important;
-  background: rgba(255,255,255,0.055) !important;
-  border-color: rgba(255,255,255,0.14);
+  outline: 1px solid rgba(159,217,255,0.6);
+  outline-offset: 0.12rem;
 }
 
 .md-typeset .highlight .md-clipboard:active,
 .md-typeset .highlight .md-clipboard[data-md-clipboard-state="copied"],
 .md-typeset .highlight .md-clipboard.md-clipboard--copied {
   color: #9ed8ff !important;
-  background: rgba(79,179,240,0.1) !important;
-  border-color: rgba(79,179,240,0.22);
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .md-typeset .highlight .c,
