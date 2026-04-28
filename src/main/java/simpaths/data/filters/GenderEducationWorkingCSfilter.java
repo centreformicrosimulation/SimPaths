@@ -21,8 +21,8 @@ public class GenderEducationWorkingCSfilter implements ICollectionFilter{
 		if(object instanceof Person) {
 			Person person = (Person) object;
 			return (person.getDemMaleFlag().equals(demSex) &&
-					person.getDeh_c4().equals(education) &&
-					person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed) &&
+					person.getEduHighestC4().equals(education) &&
+					person.getLabC4().equals(Les_c4.EmployedOrSelfEmployed) &&
 					person.getGrossEarningsYearly() >= 1. &&
 					person.getLabourSupplyHoursWeekly() > 0);
 		}

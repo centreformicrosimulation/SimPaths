@@ -50,8 +50,8 @@ public class InSchoolAlignment implements IEvaluation {
 
         // Ensure each trial point is evaluated from lagged status (pure function for root search).
         persons.parallelStream().forEach(person -> {
-            if (person.getLes_c4_lag1() != null) {
-                person.setLes_c4(person.getLes_c4_lag1());
+            if (person.getLabC4L1() != null) {
+                person.setLabC4(person.getLabC4L1());
             }
             person.inSchool(args[0]);
         });
@@ -77,13 +77,13 @@ public class InSchoolAlignment implements IEvaluation {
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
                         && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
                         && !person.isToLeaveSchool()
-                        && Les_c4.Student.equals(person.getLes_c4())) // count aligned student group only
+                        && Les_c4.Student.equals(person.getLabC4())) // count aligned student group only
                 .count();
         // Counts individuals within education age range: 16-29 (range is defined in Model)
         long numPeople = model.getPersons().stream()
                 .filter(person -> person.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
                         && person.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
-                        && person.getLes_c4() != null)
+                        && person.getLabC4() != null)
                 .count();
 
         return (numStudents > 0) ? (double) numStudents / numPeople : 0.0;

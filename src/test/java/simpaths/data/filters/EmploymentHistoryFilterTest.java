@@ -14,7 +14,7 @@ class EmploymentHistoryFilterTest {
             Les_c4 les_c4_lag1
     ) {
         Person testPerson = new Person(true);
-        testPerson.setLes_c4_lag1(les_c4_lag1);
+        testPerson.setLabC4L1(les_c4_lag1);
 
         return testPerson;
     }

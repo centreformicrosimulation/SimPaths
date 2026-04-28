@@ -17,7 +17,7 @@ public class GenderWorkingCSfilter implements ICollectionFilter{
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getDemMaleFlag().equals(demSex) && person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed) && person.getGrossEarningsYearly() >= 0.);
+			return (person.getDemMaleFlag().equals(demSex) && person.getLabC4().equals(Les_c4.EmployedOrSelfEmployed) && person.getGrossEarningsYearly() >= 0.);
 		}
 		else throw new IllegalArgumentException("Object passed to GenderEducationWorkingCSfilter must be of type Person!");
 	}			

@@ -35,7 +35,7 @@ public class FlexibleInLabourSupplyByAgeAndGenderFilter implements ICollectionFi
         return (person.getDemAge() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY && person.getDemAge() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY &&
                 person.getDemAge() >= ageFrom && person.getDemAge() <= ageTo &&
                 person.getDemMaleFlag().equals(demSex) &&
-                person.getLes_c4() != Les_c4.Student && person.getLes_c4() != Les_c4.Retired &&
-                person.getDlltsd() != Indicator.True);
+                person.getLabC4() != Les_c4.Student && person.getLabC4() != Les_c4.Retired &&
+                person.getHealthDsblLongtermFlag() != Indicator.True);
     }
 }

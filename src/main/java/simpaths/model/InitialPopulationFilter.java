@@ -123,9 +123,9 @@ public class InitialPopulationFilter {
 
             for (Person person : benefitUnit.getMembers()) {
 
-                if (person.getDemAge() < Parameters.MIN_AGE_COHABITATION && Dcpst.Partnered.equals(person.getDcpst()))
+                if (person.getDemAge() < Parameters.MIN_AGE_COHABITATION && Dcpst.Partnered.equals(person.getDemPartnerStatus()))
                     return false;
-                else if (Dcpst.Partnered.equals(person.getDcpst()) && cohabiting <= 0)
+                else if (Dcpst.Partnered.equals(person.getDemPartnerStatus()) && cohabiting <= 0)
                     return false;
                 else {
                     if (IGNORE_REGION) {
@@ -146,7 +146,7 @@ public class InitialPopulationFilter {
                 benefitUnit.setRegion(region);
             for (Person person : benefitUnit.getMembers()) {
 
-                if (Dcpst.Partnered.equals(person.getDcpst()))
+                if (Dcpst.Partnered.equals(person.getDemPartnerStatus()))
                     cohabiting -= 1;
 
                 int age = Math.min(censorAge, person.getDemAge());

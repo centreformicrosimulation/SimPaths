@@ -28,8 +28,8 @@ public class FlexibleInLabourSupplyByEducationFilter implements ICollectionFilte
          */
 
         return (person.getDemAge() >= Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY && person.getDemAge() <= Parameters.MAX_AGE_FLEXIBLE_LABOUR_SUPPLY &&
-                person.getLes_c4() != Les_c4.Student && person.getLes_c4() != Les_c4.Retired &&
-                person.getDlltsd() != Indicator.True &&
-                person.getDeh_c4().equals(education));
+                person.getLabC4() != Les_c4.Student && person.getLabC4() != Les_c4.Retired &&
+                person.getHealthDsblLongtermFlag() != Indicator.True &&
+                person.getEduHighestC4().equals(education));
     }
 }

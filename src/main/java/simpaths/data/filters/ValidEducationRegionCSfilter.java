@@ -24,10 +24,10 @@ public class ValidEducationRegionCSfilter implements ICollectionFilter{
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			if (person.getLes_c4()==null) {
+			if (person.getLabC4()==null) {
 				return false;
 			} else {
-				return (person.getRegion().equals(demRgn) && !person.getLes_c4().equals(Les_c4.Student) && person.getDemAge() >= 18 && person.getDeh_c4() != null);
+				return (person.getRegion().equals(demRgn) && !person.getLabC4().equals(Les_c4.Student) && person.getDemAge() >= 18 && person.getEduHighestC4() != null);
 			}
 		}
 		else if(object instanceof BenefitUnit) {

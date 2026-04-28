@@ -20,10 +20,10 @@ public class RegionEducationWorkingCSfilter implements ICollectionFilter{
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			if (person.getDeh_c4()==null || person.getLes_c4()==null) {
+			if (person.getEduHighestC4()==null || person.getLabC4()==null) {
 				return false;
 			} else {
-				return (person.getRegion().equals(demRgn) && person.getDeh_c4().equals(education) && person.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed) && person.getGrossEarningsYearly() >= 0.);
+				return (person.getRegion().equals(demRgn) && person.getEduHighestC4().equals(education) && person.getLabC4().equals(Les_c4.EmployedOrSelfEmployed) && person.getGrossEarningsYearly() >= 0.);
 			}
 		}
 		else throw new IllegalArgumentException("Object passed to RegionEducationWorkingCSfilter must be of type Person!");

@@ -630,8 +630,8 @@ public class Statistics2 {
                 
                 prMarr[ii] += person.getCohabiting();
                 avkids[ii] += person.getBenefitUnit().getNumberChildrenAll();
-                health[ii] += person.getDheValue();
-                prDisa[ii] += (Indicator.True.equals(person.getDlltsd()))? 1.0: 0.0;
+                health[ii] += person.getHealthSelfRatedValue();
+                prDisa[ii] += (Indicator.True.equals(person.getHealthDsblLongtermFlag()))? 1.0: 0.0;
                 labInc[ii] += person.getEarningsWeekly();
                 if ((double)person.getLabourSupplyHoursWeekly() > Parameters.MIN_HOURS_FULL_TIME_EMPLOYED)
                     workFT[ii] += 1.0;
@@ -664,7 +664,7 @@ public class Statistics2 {
                 }
                 if (person.getDemAge()>=55 && person.getDemAge()<=60) {
 
-                    if (Education.High.equals(person.getDeh_c4())) {
+                    if (Education.High.equals(person.getEduHighestC4())) {
                         numberG += 1.0;
                         ctlG += expenditurePerMonth / Parameters.WEEKS_PER_MONTH / person.getLeisureHoursPerWeek();
                     } else {

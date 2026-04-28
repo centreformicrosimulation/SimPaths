@@ -120,27 +120,27 @@ public class LabourMarket {
 
                         boolean setMaleSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(male, Person.DoublesVariables.class));
                         boolean setFemaleSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(female, Person.DoublesVariables.class));
-                        if (setMaleSelfEmployed && male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                            male.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                        if (setMaleSelfEmployed && male.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                            male.setLabC7Covid(Les_c7_covid.SelfEmployed);
                         }
-                        if (setFemaleSelfEmployed && female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                            female.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                        if (setFemaleSelfEmployed && female.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                            female.setLabC7Covid(Les_c7_covid.SelfEmployed);
                         }
                     } else if (occupancy.equals(Occupancy.Single_Male)) {
                         Person male = benefitUnit.getMale();
                         male.initialise_les_c6_from_c4();
                         personsInBenefitUnit.add(male);
                         boolean setSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(male, Person.DoublesVariables.class));
-                        if (setSelfEmployed && male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                            male.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                        if (setSelfEmployed && male.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                            male.setLabC7Covid(Les_c7_covid.SelfEmployed);
                         }
                     } else if (occupancy.equals(Occupancy.Single_Female)) {
                         Person female = benefitUnit.getFemale();
                         female.initialise_les_c6_from_c4();
                         personsInBenefitUnit.add(female);
                         boolean setSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(female, Person.DoublesVariables.class));
-                        if (setSelfEmployed && female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                            female.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                        if (setSelfEmployed && female.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                            female.setLabC7Covid(Les_c7_covid.SelfEmployed);
                         }
                     } else {
                         throw new RuntimeException("Warning: Occupancy unknown in benefit unit " + benefitUnit.getKey().getId());
@@ -156,38 +156,38 @@ public class LabourMarket {
                         Person female = benefitUnit.getFemale();
                         personsInBenefitUnit.add(male);
                         personsInBenefitUnit.add(female);
-                        if (male != null && male.getLes_c7_covid() == null) {
+                        if (male != null && male.getLabC7Covid() == null) {
                             male.initialise_les_c6_from_c4();
                             boolean setMaleSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(male, Person.DoublesVariables.class));
-                            if (setMaleSelfEmployed && male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                                male.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                            if (setMaleSelfEmployed && male.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                                male.setLabC7Covid(Les_c7_covid.SelfEmployed);
                             }
                         }
-                        if (female != null && female.getLes_c7_covid() == null) {
+                        if (female != null && female.getLabC7Covid() == null) {
                             female.initialise_les_c6_from_c4();
                             boolean setFemaleSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(female, Person.DoublesVariables.class));
-                            if (setFemaleSelfEmployed && female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                                female.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                            if (setFemaleSelfEmployed && female.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                                female.setLabC7Covid(Les_c7_covid.SelfEmployed);
                             }
                         }
                     }  else if (occupancy.equals(Occupancy.Single_Male)) {
                         Person male = benefitUnit.getMale();
                         personsInBenefitUnit.add(male);
-                        if (male != null && male.getLes_c7_covid() == null) {
+                        if (male != null && male.getLabC7Covid() == null) {
                             male.initialise_les_c6_from_c4();
                             boolean setSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(male, Person.DoublesVariables.class));
-                            if (setSelfEmployed && male.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                                male.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                            if (setSelfEmployed && male.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                                male.setLabC7Covid(Les_c7_covid.SelfEmployed);
                             }
                         }
                     } else if (occupancy.equals(Occupancy.Single_Female)) {
                         Person female = benefitUnit.getFemale();
                         personsInBenefitUnit.add(female);
-                        if (female != null && female.getLes_c7_covid() == null) {
+                        if (female != null && female.getLabC7Covid() == null) {
                             female.initialise_les_c6_from_c4();
                             boolean setSelfEmployed = (labourInnov.nextDouble() < Parameters.getRegC19LS_SE().getProbability(female, Person.DoublesVariables.class));
-                            if (setSelfEmployed && female.getLes_c4().equals(Les_c4.EmployedOrSelfEmployed)) {
-                                female.setLes_c7_covid(Les_c7_covid.SelfEmployed);
+                            if (setSelfEmployed && female.getLabC4().equals(Les_c4.EmployedOrSelfEmployed)) {
+                                female.setLabC7Covid(Les_c7_covid.SelfEmployed);
                             }
                         }
                     }
@@ -280,7 +280,7 @@ public class LabourMarket {
                     Person person = benefitUnit.getMale();
                     if (person.atRiskOfWork()) {
 
-                        Education ed = person.getDeh_c4();
+                        Education ed = person.getEduHighestC4();
                         double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);
@@ -292,7 +292,7 @@ public class LabourMarket {
                     Person person = benefitUnit.getFemale();
                     if (person.atRiskOfWork()) {
 
-                        Education ed = person.getDeh_c4();
+                        Education ed = person.getEduHighestC4();
                         double newVal = person.getLabWageFullTimeHrly();
                         potentialHourlyEarningsByEdu.put(ed, potentialHourlyEarningsByEdu.get(ed) + newVal);
                         int oldCount = countByEdu.get(ed);

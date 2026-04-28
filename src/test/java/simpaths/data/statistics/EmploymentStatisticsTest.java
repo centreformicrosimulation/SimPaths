@@ -25,8 +25,8 @@ class EmploymentStatisticsTest {
             Les_c4 les_c4
     ) {
         Person testPerson = new Person(true);
-        testPerson.setLes_c4_lag1(les_c4_lag1);
-        testPerson.setLes_c4(les_c4);
+        testPerson.setLabC4L1(les_c4_lag1);
+        testPerson.setLabC4(les_c4);
 
         return testPerson;
     }

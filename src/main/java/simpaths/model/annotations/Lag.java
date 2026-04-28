@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  *   @Lag(field = "yEmpPersGrossMonthL1")
  *   private Double yEmpPersGrossMonthL2;
  *
- *   @Lag(getter = "getyEmpPersGrossMonth")
+ *   @Lag(getter = "getYEmpPersGrossMonth")
  *   private Double yEmpPersGrossMonthL1;
  * }</pre>
  *

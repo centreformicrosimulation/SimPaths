@@ -19,7 +19,7 @@ public class GenderEducationCSfilter implements ICollectionFilter{
 	public boolean isFiltered(Object object) {
 		if(object instanceof Person) {
 			Person person = (Person) object;
-			return (person.getDemMaleFlag().equals(demSex) && person.getDeh_c4().equals(education) && person.getGrossEarningsYearly() >= 0.);
+			return (person.getDemMaleFlag().equals(demSex) && person.getEduHighestC4().equals(education) && person.getGrossEarningsYearly() >= 0.);
 		}
 		else throw new IllegalArgumentException("Object passed to GenderEducationWorkingCSfilter must be of type Person!");
 	}			

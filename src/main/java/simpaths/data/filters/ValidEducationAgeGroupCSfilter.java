@@ -24,10 +24,10 @@ public class ValidEducationAgeGroupCSfilter implements ICollectionFilter{
 	
 	public boolean isFiltered(Object object) {
 		Person person = (Person) object;
-		if (person.getLes_c4()==null) {
+		if (person.getLabC4()==null) {
 			return false;
 		} else {
-			return ( (person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) && !person.getLes_c4().equals(Les_c4.Student));
+			return ( (person.getDemAge() >= ageFrom) && (person.getDemAge() <= ageTo) && !person.getLabC4().equals(Les_c4.Student));
 		}
 	}
 	

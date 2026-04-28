@@ -245,7 +245,7 @@ public class AlignmentAdjustmentFactors {
                 .filter(p -> p.getDemAge() >= Parameters.MIN_AGE_COHABITATION)
                 .count();
         long numPersonsPartnered = model.getPersons().stream()
-                .filter(p -> Dcpst.Partnered.equals(p.getDcpst()))
+                .filter(p -> Dcpst.Partnered.equals(p.getDemPartnerStatus()))
                 .count();
         setShareCohabitingSim(numPersonsCohabEligible > 0
                 ? (double) numPersonsPartnered / numPersonsCohabEligible : 0.0);
@@ -271,12 +271,12 @@ public class AlignmentAdjustmentFactors {
                 .filter(p -> p.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
                         && p.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
                         && !p.isToLeaveSchool()
-                        && Les_c4.Student.equals(p.getLes_c4()))
+                        && Les_c4.Student.equals(p.getLabC4()))
                 .count();
         long numInSchoolAge = model.getPersons().stream()
                 .filter(p -> p.getDemAge() >= Parameters.MIN_AGE_TO_LEAVE_EDUCATION
                         && p.getDemAge() <= Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION
-                        && p.getLes_c4() != null)
+                        && p.getLabC4() != null)
                 .count();
         setInSchoolShareSim(numInSchoolAge > 0 ? (double) numStudents / numInSchoolAge : 0.0);
         setInSchoolShareTgt(Parameters.getTargetShare(year, TargetShares.Students));

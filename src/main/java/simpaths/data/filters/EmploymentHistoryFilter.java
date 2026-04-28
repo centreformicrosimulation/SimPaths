@@ -19,7 +19,7 @@ public class EmploymentHistoryFilter implements ICollectionFilter {
 
         if (object instanceof Person){
             Person person = (Person) object;
-            return (person.getLes_c4_lag1().equals(employmentLag1));
+            return (person.getLabC4L1().equals(employmentLag1));
         }
         else throw new IllegalArgumentException("Argument passed to EmploymentHistoryFilter must be of object type Person");
      }
