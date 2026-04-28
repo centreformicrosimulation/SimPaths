@@ -1466,8 +1466,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             double recCareInnov = statInnovations.getDoubleDraw(7);
             double probNeedCare = Parameters.getRegNeedCareS2a().getProbability(this, Person.DoublesVariables.class);
             if (recCareInnov < probNeedCare) {
-                // need care
                 careNeedFlag = Indicator.True;
+            } else {
+                careNeedFlag = Indicator.False;
             }
 
             double probRecCare = Parameters.getRegReceiveCareS2b().getProbability(this, Person.DoublesVariables.class);

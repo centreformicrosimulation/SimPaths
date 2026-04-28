@@ -196,15 +196,16 @@ public class DonorTaxImputation {
                     lowerOrigInc = testOrigInc;
                 }
             }
-            if (Math.abs(targetNormalisedOriginalIncome-lowerOrigInc) < Math.abs(targetNormalisedOriginalIncome-upperOrigInc)) {
-                iiTarget = lowerInd;
-            } else {
+            if (Math.abs(upperOrigInc-targetNormalisedOriginalIncome) < Math.abs(lowerOrigInc-targetNormalisedOriginalIncome)) {
                 iiTarget = upperInd;
+            } else {
+                iiTarget = lowerInd;
             }
         }
+        // note that actual donor is identified by focussed search below
         DonorTaxUnit targetCandidate = Parameters.getDonorPool().get(candidatePool.get(iiTarget));
         donorID = targetCandidate.getId();
-        double targetIncomeDifference = Math.min(Math.abs(targetNormalisedOriginalIncome - lowerOrigInc), Math.abs(targetNormalisedOriginalIncome - upperOrigInc));
+        double targetIncomeDifference = Math.min(Math.abs(targetNormalisedOriginalIncome - upperOrigInc), Math.abs(targetNormalisedOriginalIncome - lowerOrigInc));
         if (!keys.isLowIncome(matchRegime)) {
             targetIncomeDifference /= Math.abs(targetNormalisedOriginalIncome);
             targetIncomeDifference *= 100;
@@ -216,16 +217,15 @@ public class DonorTaxImputation {
         // focussed search around target
         //------------------------------------------------------------
         List<CandidateList> candidatesList = new ArrayList<>();
-        int bracketPts = (!flagChildcareCost && !flagSecondIncome) ? 2 : 60;
-        double oi = keys.getOriginalIncomePerWeek();
-        double si = keys.getSecondIncomePerWeek();
-        double cc = keys.getChildcareCostPerWeek();
-        double[] targetVector = getMeasurementVector(keys.getPriceYear(), systemYear, oi, flagSecondIncome, si, flagChildcareCost, cc);
+        int bracketPts = (!flagChildcareCost && !flagSecondIncome) ? 2 : 50;
+        double[] targetVector = getMeasurementVector(Parameters.BASE_PRICE_YEAR, keys.getPriceYear(), keys.getSimYear(), keys.getSimYear(),
+                keys.getOriginalIncomePerWeek(), flagSecondIncome, keys.getSecondIncomePerWeek(), flagChildcareCost, keys.getChildcareCostPerWeek());
+        int targetWagesYear = (Parameters.taxDonorUpratingByWage) ? keys.getSimYear() : systemYear;
         for (int increment=-1; increment<2; increment=increment+2) {
             // search backward and then forward through candidate list
 
             // initialise directional search
-            int bracketInd = 0;
+            int bracketInd = 0; // number of consecutive points within bracket
             double localMin = 999.0;
             double bracketDist = -999.0;
             int ii;
@@ -237,17 +237,20 @@ public class DonorTaxImputation {
             while (ii>=0 && ii<candidatePool.size()) {
 
                 DonorTaxUnit candidate = Parameters.getDonorPool().get(candidatePool.get(ii));
-                double[] candidateVector = getCandidateMeasVector(candidate, flagSecondIncome, flagChildcareCost);
+                double[] candidateVector = getCandidateMeasVector(Parameters.BASE_PRICE_YEAR, systemYear, targetWagesYear, systemYear,
+                        candidate, flagSecondIncome, flagChildcareCost);
                 double distance = evaluateDistance(targetVector, candidateVector, flagSecondIncome, flagChildcareCost);
                 if (Math.abs(distance - bracketDist) > 1.0E-4) {
                     bracketDist = distance;
                     bracketInd++;
                 }
                 if (distance < localMin) {
+                    // new minimum found: reset bracket
                     bracketInd = 0;
                     localMin = distance;
                 }
                 if (bracketInd <= bracketPts) {
+                    // add candidate to list
                     candidatesList.add(new CandidateList(candidate, candidate.getWeight(), distance));
                 } else {
                     break;
@@ -257,7 +260,7 @@ public class DonorTaxImputation {
         }
 
         // select subset of preferred candidates
-        Collections.sort(candidatesList, new CandidateListComparator());
+        candidatesList.sort(new CandidateListComparator());
         int candidateLast = 0;
         int bracketInd = 0;
         double bracketDist = -999.0;
@@ -304,7 +307,11 @@ public class DonorTaxImputation {
         setReceivedUC(0);
         setReceivedLegacyBenefit(0);
         if (systemYear != keys.getPriceYear())
-            infAdj = Parameters.getTimeSeriesIndex(keys.getPriceYear(), UpratingCase.TaxDonor) / Parameters.getTimeSeriesIndex(systemYear, UpratingCase.TaxDonor);
+            infAdj = Parameters.getTimeSeriesValue(keys.getPriceYear(), TimeSeriesVariable.Inflation) /
+                    Parameters.getTimeSeriesValue(systemYear, TimeSeriesVariable.Inflation);
+        if (systemYear != keys.getSimYear() && Parameters.taxDonorUpratingByWage)
+            infAdj = infAdj * Parameters.getTimeSeriesValue(keys.getSimYear(), TimeSeriesVariable.WageGrowth) /
+                    Parameters.getTimeSeriesValue(systemYear, TimeSeriesVariable.WageGrowth);
         for (CandidateList candidateList : candidatesList) {
             // loop over each preferred candidate
 
@@ -342,30 +349,26 @@ public class DonorTaxImputation {
         }
         if (Math.abs(disposableIncomePerWeek+999.0)<1.0E-5) {
             // Deterministic fallback: use nearest neighbour directly.
-            DonorTaxUnit fallback = (targetCandidate != null) ? targetCandidate :
-                    (!candidatesList.isEmpty() ? candidatesList.get(0).getCandidate() : null);
-            if (fallback != null) {
-                donorID = fallback.getId();
-                if (keys.isLowIncome(matchRegime)) {
-                    disposableIncomePerWeek = fallback.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth()
-                            / Parameters.WEEKS_PER_MONTH * infAdj;
-                    benefitsReceivedPerWeek = (fallback.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth()
-                            + fallback.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth())
-                            / Parameters.WEEKS_PER_MONTH * infAdj;
+            donorID = targetCandidate.getId();
+            if (keys.isLowIncome(matchRegime)) {
+                disposableIncomePerWeek = targetCandidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth()
+                        / Parameters.WEEKS_PER_MONTH * infAdj;
+                benefitsReceivedPerWeek = (targetCandidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth()
+                        + targetCandidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth())
+                        / Parameters.WEEKS_PER_MONTH * infAdj;
+            } else {
+                double origIncMonth = targetCandidate.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth();
+                if (Math.abs(origIncMonth) > 1.0E-9) {
+                    disposableIncomePerWeek = targetCandidate.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / origIncMonth;
+                    benefitsReceivedPerWeek = (targetCandidate.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth()
+                            + targetCandidate.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / origIncMonth;
                 } else {
-                    double origIncMonth = fallback.getPolicyBySystemYear(systemYear).getOriginalIncomePerMonth();
-                    if (Math.abs(origIncMonth) > 1.0E-9) {
-                        disposableIncomePerWeek = fallback.getPolicyBySystemYear(systemYear).getDisposableIncomePerMonth() / origIncMonth;
-                        benefitsReceivedPerWeek = (fallback.getPolicyBySystemYear(systemYear).getBenMeansTestPerMonth()
-                                + fallback.getPolicyBySystemYear(systemYear).getBenNonMeansTestPerMonth()) / origIncMonth;
-                    } else {
-                        disposableIncomePerWeek = 0.0;
-                        benefitsReceivedPerWeek = 0.0;
-                    }
+                    disposableIncomePerWeek = 0.0;
+                    benefitsReceivedPerWeek = 0.0;
                 }
-                setReceivedUC(fallback.getPolicyBySystemYear(systemYear).getReceivesUC());
-                setReceivedLegacyBenefit(fallback.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit());
             }
+            setReceivedUC(targetCandidate.getPolicyBySystemYear(systemYear).getReceivesUC());
+            setReceivedLegacyBenefit(targetCandidate.getPolicyBySystemYear(systemYear).getReceivesLegacyBenefit());
         }
         if (Math.abs(disposableIncomePerWeek+999.0)<1.0E-5)
             throw new RuntimeException("Failed to populate disposable income and benefits from donor with inner key value " + keys.getKey(0));
@@ -435,36 +438,59 @@ public class DonorTaxImputation {
         throw new RuntimeException("attempt to evaluate index of unrecognised target feature");
     }
 
-    private double[] getMeasurementVector(int priceYear, int systemYear, double originalIncomePerWeek, boolean flagSecondIncome,
+    /**
+     * Method to package array of metrics used to compare target against potential donors
+     *
+     * @param targetPriceYear           inflation year that monetary variables should be measured in
+     * @param currentPriceYear          inflation year that monetary variables currently measured in
+     * @param targetWagesYear           wage growth year that monetary variables should be measured in
+     * @param currentWagesYear          wage growth year that monetary variables currently measured in
+     * @param originalIncomePerWeek     current original income (per week)
+     * @param flagSecondIncome          if true, second income is also measured
+     * @param secondIncomePerWeek       second income (per week, if measured)
+     * @param flagChildcareCost         if true, childcare cost is also measured
+     * @param childcareCostPerWeek      childcare cost (per week, if measured)
+     * @return
+     */
+    private double[] getMeasurementVector(int targetPriceYear, int currentPriceYear,
+                                          int targetWagesYear, int currentWagesYear,
+                                          double originalIncomePerWeek, boolean flagSecondIncome,
                                           double secondIncomePerWeek, boolean flagChildcareCost, double childcareCostPerWeek) {
 
-        double wageScale = Parameters.taxDonorUpratingByWage
-                ? Parameters.getTimeSeriesValue(systemYear, TimeSeriesVariable.WageGrowth)
-                : 1.0;
-        double oiAdj = Parameters.normaliseWeeklyIncome(priceYear, originalIncomePerWeek * wageScale);
-        double siAdj = Parameters.normaliseWeeklyIncome(priceYear, secondIncomePerWeek * wageScale);
-        double ccAdj = Parameters.normaliseWeeklyIncome(priceYear, childcareCostPerWeek * wageScale);
+        double infAdj = 1.0, wageAdj = 1.0;
+        if (currentPriceYear != targetPriceYear)
+            infAdj = Parameters.getTimeSeriesValue(targetPriceYear, TimeSeriesVariable.Inflation) /
+                    Parameters.getTimeSeriesValue(currentPriceYear, TimeSeriesVariable.Inflation);
+        if (currentWagesYear != targetWagesYear)
+            wageAdj = Parameters.getTimeSeriesValue(targetWagesYear, TimeSeriesVariable.WageGrowth) /
+                    Parameters.getTimeSeriesValue(currentWagesYear, TimeSeriesVariable.WageGrowth);
+
+        double oiAdj = originalIncomePerWeek * infAdj * wageAdj;
+        double siAdj = secondIncomePerWeek * infAdj * wageAdj;
+        double ccAdj = childcareCostPerWeek * infAdj * wageAdj;
         if (!flagSecondIncome && !flagChildcareCost) {
             return new double[] {oiAdj};
         } else if (flagSecondIncome && !flagChildcareCost) {
             return new double[] {oiAdj, siAdj};
-        } else if (!flagSecondIncome && flagChildcareCost) {
+        } else if (!flagSecondIncome) {
             return new double[]{oiAdj, ccAdj};
         } else {
             return new double[]{oiAdj, siAdj, ccAdj};
         }
     }
-    private double[] getCandidateMeasVector(DonorTaxUnit candidate, boolean flagSecondIncome, boolean flagChildcareCost) {
+    private double[] getCandidateMeasVector(int targetPriceYear, int currentPriceYear,
+                                            int targetWagesYear, int currentWagesYear,
+                                            DonorTaxUnit candidate, boolean flagSecondIncome, boolean flagChildcareCost) {
 
-        int priceYear = Parameters.BASE_PRICE_YEAR;
-        double oiWeekly = candidate.getPolicyBySystemYear(priceYear).getOriginalIncomePerMonth() / Parameters.WEEKS_PER_MONTH;
+        double oiWeekly = candidate.getPolicyBySystemYear(currentPriceYear).getOriginalIncomePerMonth() / Parameters.WEEKS_PER_MONTH;
         double siWeekly = 0.0;
         if (flagSecondIncome)
-            siWeekly = candidate.getPolicyBySystemYear(priceYear).getSecondIncomePerMonth() / Parameters.WEEKS_PER_MONTH;
+            siWeekly = candidate.getPolicyBySystemYear(currentPriceYear).getSecondIncomePerMonth() / Parameters.WEEKS_PER_MONTH;
         double ccWeekly = 0.0;
         if (flagChildcareCost)
-            ccWeekly = candidate.getPolicyBySystemYear(priceYear).getChildcareCostPerMonth() / Parameters.WEEKS_PER_MONTH;
-        return getMeasurementVector(priceYear, oiWeekly, flagSecondIncome, siWeekly, flagChildcareCost, ccWeekly);
+            ccWeekly = candidate.getPolicyBySystemYear(currentPriceYear).getChildcareCostPerMonth() / Parameters.WEEKS_PER_MONTH;
+        return getMeasurementVector(targetPriceYear, currentPriceYear, targetWagesYear, currentWagesYear,
+                oiWeekly, flagSecondIncome, siWeekly, flagChildcareCost, ccWeekly);
     }
     private double evaluateDistance(double[] targetVector, double[] candidateVector, boolean flagSecondIncome, boolean flagChildcareCost) {
         if (flagSecondIncome && flagChildcareCost) {

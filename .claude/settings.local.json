@@ -1,13 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git checkout *)",
-      "Bash(mvn compile *)",
-      "Bash(cmd /c \"mvn compile -q 2>&1\")",
-      "Bash(git add *)",
-      "Bash(git commit -m ' *)",
-      "Bash(git push *)",
-      "mcp__github__create_pull_request"
+      "Bash(xargs -I {} wc -l {})",
+      "Bash(mvn clean *)",
+      "Bash(python -c \"import docx; print\\('python-docx available'\\)\")",
+      "Bash(python3 -c \"import docx; print\\('ok'\\)\")",
+      "Bash(where py *)",
+      "Bash(py --version)",
+      "Bash(py -c \"import docx; print\\('ok'\\)\")",
+      "Bash(py -m pip install python-docx -q)",
+      "Bash(py generate_review.py)"
     ]
   }
 }
