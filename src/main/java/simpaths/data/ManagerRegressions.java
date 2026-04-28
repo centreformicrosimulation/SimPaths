@@ -317,9 +317,6 @@ public class ManagerRegressions {
             case WagesFemalesNE -> {
                 code = "Wages_FemalesNE";
             }
-            case ChildcareC1b -> {
-                code = "C1b";
-            }
             default -> {
                 throw new InvalidParameterException("RMSE requested for unrecognised regression equation");
             }
