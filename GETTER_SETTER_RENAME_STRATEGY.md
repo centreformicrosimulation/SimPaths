@@ -50,6 +50,7 @@ Avoid global text replacement across the repository. Some old names may also be 
 | Original household ID accessors | Completed | `mvn test -DskipTests` and local checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Renamed `Person` and `BenefitUnit` `getIdOriginalHH()` to `getIdHhOriginal()`. |
 | Original person/benefit-unit ID accessors | Completed | `mvn test -DskipTests` and local checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Renamed `getIdOriginalPerson()` and `getIdOriginalBU()` to match `idPersOriginal` and `idBuOriginal`. |
 | `i_` accessor naming correction | Completed | `mvn test -DskipTests` passed on 2026-04-28 | Corrected completed `BenefitUnit` `i_...` accessors to keep `I_`, including `getI_yNonBenHhGrossAsinh...` and local proxy setters. |
+| Remaining `Person` direct field-backed residuals | Completed | `mvn test -DskipTests` passed on 2026-04-28 | Combined batch covering direct residuals, benefit lag setters, and local proxy setters. Boolean `is...` predicates and computed helpers intentionally excluded. |
 
 ## Naming Convention
 
@@ -481,41 +482,93 @@ The ID accessor batches for `Household`, `Person`, and `BenefitUnit` have a shar
 - Local focused checkpoint result: passed on 2026-04-28 at 14:58:36, 29 tests run, 0 failures, 0 errors, 0 skipped
 - Maven result: `BUILD SUCCESS`
 
+## Inspected: Outside Person BenefitUnit Household
+
+Inspection outside the current `Person` / `BenefitUnit` / `Household` pass did not find another clear model-entity field-backed accessor batch comparable to the completed work. Remaining public `get...` / `set...` methods with underscores or survey-code names mostly fall into output/statistics, parameter, tax donor, or computed helper APIs.
+
+### To Be Determined: Statistics Output Beans
+
+These methods are direct setters/getters in statistics output classes, but their old names also match persisted output column concepts. Rename only if reviewers agree this branch should include output bean APIs and any downstream output consumers.
+
+| Class | Examples | Backing fields |
+| --- | --- | --- |
+| `simpaths.data.statistics.Statistics` | `getYdses_p20()`, `setYdses_p20(...)`, `getsIndex_p50()`, `setsIndex_p50(...)`, `getGrossLabourIncome_p20()`, `setGrossLabourIncome_p20(...)`, `getEdi_p50()`, `setEdi_p50(...)` | `yHhQuintilesC5P20`, `sIndex_p50`, `yLabP20`, `edi_p50` |
+| `simpaths.data.statistics.HealthStatistics` | `setDhm_mean(...)`, `setDhe_mcs_mean(...)`, `setDhe_pcs_mean(...)`, `setDls_mean(...)`, plus percentile variants | `healthWbScore0to36Avg`, `healthMentalMcsAvg`, `healthPhysicalPcsAvg`, `demLifeSatScore0to10Avg`, etc. |
+
+Recommendation: defer these until colleagues confirm whether external CSV/database output conventions should drive the Java API names. These classes are less central to the model object API and may be reviewed as a separate statistics-output batch.
+
+### To Be Determined: Parameter And Regression Accessors
+
+`simpaths.data.Parameters` contains regression accessors such as `getRegC19LS_SE()`, `getRegC19LS_E1()`, and related Covid-19 labour-transition names. These expose regression IDs/model names rather than normal domain fields.
+
+Recommendation: do not rename in this pass. Treat them as parameter/regression identifier APIs unless a separate configuration naming policy is agreed.
+
+### To Be Determined: Tax Donor And Key APIs
+
+Tax donor/key classes retain survey-code or tax-matching names, for example:
+
+- `DonorPerson.getDlltsd()`
+- `KeyFunction.getDlltsdMan()`
+- `KeyFunction.setDlltsdMan(...)`
+- `KeyFunction.getDlltsdWoman()`
+- `KeyFunction.setDlltsdWoman(...)`
+
+Recommendation: defer. These are outside the main `Person` model API and are tied to donor/tax matching data semantics.
+
+### To Be Determined: Computed Model Helper APIs
+
+`SimPathsModel` has computed projection helpers such as `getPopulationProjectionByAge0_18()`, `getPopulationProjectionByAge2_10()`, and similar age-band methods. They call `getPopulationProjectionByAge(startAge, endAge)` and do not expose backing fields.
+
+Recommendation: keep them in the same "computed helper" category as `Person.getEmployed_Lag1()` and similar methods. Do not rename until the team agrees a rule for computed helper APIs.
+
 ## Planned: Remaining Person Underscore-Style Accessors
 
 Inspection of `src/main/java/simpaths/model/Person.java` found remaining public accessors with underscores. Split them into direct field-backed renames and computed helper APIs. Direct field-backed methods can continue through the normal branch workflow. Computed helpers are labelled "to be determined" because they do not have a clear one-to-one backing-field rename.
 
-### Planned: Person Direct Field-Backed Residuals
+### Completed: Person Direct Field-Backed Residuals
 
-These have clear backing fields and can be renamed under the strict field-name rule.
+These had clear backing fields and were renamed under the strict field-name rule.
 
-| Current method | New method | Backing field |
+Completed renames:
+
+| Old method | New method | Backing field |
 | --- | --- | --- |
 | `getHousehold_status_lag()` | `getDemStatusHhL1()` | `demStatusHhL1` |
 | `setNewWorkHours_lag1(...)` | `setLabHrsWorkNewL1(...)` | `labHrsWorkNewL1` |
 
-Expected call-site area:
+Validation:
 
-- `BenefitUnit` Covid/labour-supply code.
-- Internal `Person` regressor switch.
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Remaining old direct field-backed residual method references in Java source/tests/XML/properties: none
 
-### Planned: Person Benefit Receipt Lag Flags
+### Completed: Person Benefit Receipt Lag Flags
 
-| Current method | New method | Backing field |
+Completed renames:
+
+| Old method | New method | Backing field |
 | --- | --- | --- |
 | `setReceivesBenefitsFlag_L1(...)` | `setYBenReceivedFlagL1(...)` | `yBenReceivedFlagL1` |
 | `setReceivesBenefitsFlagUC_L1(...)` | `setYBenUCReceivedFlagL1(...)` | `yBenUCReceivedFlagL1` |
 | `setReceivesBenefitsFlagNonUC_L1(...)` | `setYBenNonUCReceivedFlagL1(...)` | `yBenNonUCReceivedFlagL1` |
 
-Excluded from this batch:
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Remaining old benefit lag setter references in Java source/tests/XML/properties: none
+
+Intentional exclusions:
 
 - Boolean `is...` methods such as `isReceivesBenefitsFlag_L1()`, `isReceivesBenefitsFlagUC_L1()`, and `isReceivesBenefitsFlagNonUC_L1()` are excluded because the current branch scope is getter/setter method names, not boolean predicate APIs.
 
-### Planned: Person Local Proxy Setters
+### Completed: Person Local Proxy Setters
 
-These are used by decision expectation proxy objects. Under the strict `i_` rule, methods for fields beginning with `i_` should keep the `I_` prefix.
+These are used by decision expectation proxy objects. Under the strict `i_` rule, methods for fields beginning with `i_` keep the `I_` prefix.
 
-| Current method | New method | Backing field |
+Completed renames:
+
+| Old method | New method | Backing field |
 | --- | --- | --- |
 | `setRegionLocal(...)` | `setI_demRgn(...)` | `i_demRgn` |
 | `setDemPartnerStatusLocal(...)` | `setI_demPartnerStatus(...)` | `i_demPartnerStatus` |
@@ -528,10 +581,11 @@ These are used by decision expectation proxy objects. Under the strict `i_` rule
 | `setNumberChildrenAllLocal_lag1(...)` | `setI_demNchildL1(...)` | `i_demNchildL1` |
 | `setNumberChildren02Local_lag1(...)` | `setI_demNchild0to2L1(...)` | `i_demNchild0to2L1` |
 
-Expected call-site area:
+Validation:
 
-- `Expectations`.
-- `ExpectationsFactory`.
+- Compile command: `mvn test -DskipTests`
+- Result: passed
+- Remaining old local proxy setter references in Java source/tests/XML/properties: none
 
 ### To Be Determined: Person Computed Helper APIs
 

@@ -801,7 +801,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
             newWorkHours = person.getLabHrsWorkNewL1();
         } else {
             newWorkHours = person.getLabourSupplyHoursWeekly(); // Note: prediction for hours is in logs, needs to be transformed to levels
-            person.setNewWorkHours_lag1(newWorkHours);
+            person.setLabHrsWorkNewL1(newWorkHours);
         }
         double grossMonthlyIncomeToReturn = 0; // Gross income to return to updateLabourSupplyCovid19() method
 
@@ -930,7 +930,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
         Triple<Les_c7_covid, Double, Integer> stateGrossIncomeWorkHoursTriple = Triple.of(stateTo, grossMonthlyIncomeToReturn, newWorkHours); // Triple contains outcome labour market state after transition, gross income, and work hours
         person.setCovidYLabGrossL1(grossMonthlyIncomeToReturn); // used as a regressor in the Covid-19 regressions
-        person.setNewWorkHours_lag1(newWorkHours); // newWorkHours is not a state variable of a person and is only used from month to month in the covid module, so set lag here
+        person.setLabHrsWorkNewL1(newWorkHours); // newWorkHours is not a state variable of a person and is only used from month to month in the covid module, so set lag here
         person.setLabC7CovidL1(stateTo); // Update lagged value of monthly labour market state
         return stateGrossIncomeWorkHoursTriple;
     }

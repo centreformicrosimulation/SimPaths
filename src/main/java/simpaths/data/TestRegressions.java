@@ -26,20 +26,20 @@ public class TestRegressions {
 
         personProxy.setDemMaleFlag(Gender.Female);
         personProxy.setDemAge(28);
-        personProxy.setRegionLocal(Region.UKF);
-        personProxy.setYearLocal(2010);
+        personProxy.setI_demRgn(Region.UKF);
+        personProxy.setI_demYear(2010);
         probs = ManagerRegressions.getProbabilities(personProxy, regression);
 
         personProxy.setDemMaleFlag(Gender.Male);
         personProxy.setDemAge(23);
-        personProxy.setRegionLocal(Region.UKF);
-        personProxy.setYearLocal(2010);
+        personProxy.setI_demRgn(Region.UKF);
+        personProxy.setI_demYear(2010);
         probs = ManagerRegressions.getProbabilities(personProxy, regression);
 
         personProxy.setDemMaleFlag(Gender.Female);
         personProxy.setDemAge(42);
-        personProxy.setRegionLocal(Region.UKF);
-        personProxy.setYearLocal(2010);
+        personProxy.setI_demRgn(Region.UKF);
+        personProxy.setI_demYear(2010);
         probs = ManagerRegressions.getProbabilities(personProxy, regression);
 
         System.out.println("regression test complete");

@@ -81,7 +81,7 @@ public class ExpectationsFactory {
         for (int ii = 0; ii < numberExpected; ii++) {
             anticipated[ii].labStatesContObject[stateIndexNextPeriod] = currentStates.labStatesContObject[stateIndexCurrPeriod];
         }
-        personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
+        personProxyNextPeriod.setI_demRgn(currentStates.getRegionCode());
     }
 
     public void updateRetirement(boolean retiring) {
@@ -480,11 +480,11 @@ public class ExpectationsFactory {
             } else if (Axis.SocialCareProvision.equals(axis)) {
                 personProxyNextPeriod.setSocialCareProvision(states.getSocialCareProvisionCode());
             } else if (Axis.Cohabitation.equals(axis)) {
-                personProxyNextPeriod.setDemPartnerStatusLocal(states.getDcpst());
+                personProxyNextPeriod.setI_demPartnerStatus(states.getDcpst());
             } else if (Axis.Child.equals(axis)) {
-                personProxyNextPeriod.setNumberChildren017Local(states.getChildren017());
-                personProxyNextPeriod.setIndicatorChildren02Local(states.getChildrenUnder3Indicator());
-                personProxyNextPeriod.setNumberChildrenAllLocal(states.getChildren017());
+                personProxyNextPeriod.setI_demNchild0to17(states.getChildren017());
+                personProxyNextPeriod.setI_demNChild0to2(states.getChildrenUnder3Indicator());
+                personProxyNextPeriod.setI_demNchild(states.getChildren017());
             }
         }
         return changed;
@@ -570,8 +570,8 @@ public class ExpectationsFactory {
 
                 // ii = number of previous births for this birth age
                 int birthsHere02 = Math.min(ii + children02, 2);  // assume at most 2 children under 3
-                personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll + ii);
-                personProxyNextPeriod.setNumberChildren02Local_lag1(birthsHere02);
+                personProxyNextPeriod.setI_demNchildL1(childrenAll + ii);
+                personProxyNextPeriod.setI_demNchild0to2L1(birthsHere02);
                 double proportionBirths = ManagerRegressions.getProbability(personProxyNextPeriod, regression);
                 probabilities[ii+1] += probabilities[ii] * proportionBirths;
                 probabilities[ii] *= (1 - proportionBirths);
@@ -583,8 +583,8 @@ public class ExpectationsFactory {
 
         // restore benefitUnit and person characteristics
         personProxyNextPeriod.setDemAge(ageYearsNextPeriod);
-        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(childrenAll);
-        personProxyNextPeriod.setNumberChildren02Local_lag1(children02);
+        personProxyNextPeriod.setI_demNchildL1(childrenAll);
+        personProxyNextPeriod.setI_demNchild0to2L1(children02);
     }
 
     private void expandExpectationsAllIndices(int stateIndex, LocalExpectations lexpect) {

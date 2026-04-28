@@ -170,24 +170,24 @@ public class Expectations {
         // add new data for within period regression specifications
         personProxyThisPeriod = new Person(true);
         personProxyThisPeriod.setDemAge(ageYearsThisPeriod);
-        personProxyThisPeriod.setRegionLocal(currentStates.getRegionCode());
+        personProxyThisPeriod.setI_demRgn(currentStates.getRegionCode());
         personProxyThisPeriod.setDemMaleFlag(currentStates.getGenderCode());
         personProxyThisPeriod.setHealthSelfRated(currentStates.getHealthCode());
         personProxyThisPeriod.setEduHighestC4(currentStates.getEducationCode());
-        personProxyThisPeriod.setDemPartnerStatusLocal(currentStates.getDcpst());
+        personProxyThisPeriod.setI_demPartnerStatus(currentStates.getDcpst());
         personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
         personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
 
         // add person proxy for next period expectations
         personProxyNextPeriod = new Person(true);
-        personProxyNextPeriod.setYearLocal(currentStates.getYearByAge(ageYearsNextPeriod));
+        personProxyNextPeriod.setI_demYear(currentStates.getYearByAge(ageYearsNextPeriod));
         personProxyNextPeriod.setI_demCompHhC4L1(currentStates.getHouseholdTypeCode());
         personProxyNextPeriod.setI_yHhQuintilesC5(Ydses_c5.Q3);
-        personProxyNextPeriod.setNumberChildrenAllLocal_lag1(currentStates.getChildrenAll());
-        personProxyNextPeriod.setNumberChildrenAllLocal(currentStates.getChildrenAll());
-        personProxyNextPeriod.setNumberChildren02Local_lag1(currentStates.getChildren02());
+        personProxyNextPeriod.setI_demNchildL1(currentStates.getChildrenAll());
+        personProxyNextPeriod.setI_demNchild(currentStates.getChildrenAll());
+        personProxyNextPeriod.setI_demNchild0to2L1(currentStates.getChildren02());
         personProxyNextPeriod.setDemAge(ageYearsNextPeriod);
-        personProxyNextPeriod.setRegionLocal(currentStates.getRegionCode());
+        personProxyNextPeriod.setI_demRgn(currentStates.getRegionCode());
         personProxyNextPeriod.setDemMaleFlag(currentStates.getGenderCode());
         personProxyNextPeriod.setHealthDsblLongtermFlag(currentStates.getDlltsd());
         personProxyNextPeriod.setHealthDsblLongtermFlagL1(currentStates.getDlltsd());
@@ -201,12 +201,12 @@ public class Expectations {
         personProxyNextPeriod.setEduHighestFatherC4(DecisionParams.EDUCATION_FATHER);
         personProxyNextPeriod.setEduHighestMotherC4(DecisionParams.EDUCATION_MOTHER);
         if (ageYearsNextPeriod <= DecisionParams.MAX_AGE_COHABITATION) {
-            personProxyNextPeriod.setDemPartnerStatusLocal(currentStates.getDcpst());
+            personProxyNextPeriod.setI_demPartnerStatus(currentStates.getDcpst());
         } else {
             if (currentStates.getDcpst().equals(Dcpst.Partnered))
-                personProxyNextPeriod.setDemPartnerStatusLocal(Dcpst.Single);
+                personProxyNextPeriod.setI_demPartnerStatus(Dcpst.Single);
             else
-                personProxyNextPeriod.setDemPartnerStatusLocal(Dcpst.Single);
+                personProxyNextPeriod.setI_demPartnerStatus(Dcpst.Single);
         }
         personProxyNextPeriod.setDemPartnerStatusL1(currentStates.getDcpst());
         personProxyNextPeriod.setLiwwh((ageYearsNextPeriod - Parameters.AGE_TO_BECOME_RESPONSIBLE) * DecisionParams.MONTHS_EMPLOYED_PER_YEAR);

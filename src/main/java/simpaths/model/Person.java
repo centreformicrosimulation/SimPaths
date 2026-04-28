@@ -5029,7 +5029,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (Les_c4.NotEmployed.equals(labC4L1)) ? 1 : 0;
     }
 
-    public void setRegionLocal(Region region) {
+    public void setI_demRgn(Region region) {
         i_demRgn = region;
     }
 
@@ -5047,7 +5047,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         this.benefitUnit.setRegion(region);
     }
 
-    public HouseholdStatus getHousehold_status_lag() {
+    public HouseholdStatus getDemStatusHhL1() {
         return demStatusHhL1;
     }
 
@@ -5410,7 +5410,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return Dcpst.Single;
     }
 
-    public void setDemPartnerStatusLocal(Dcpst demPartnerStatus) {
+    public void setI_demPartnerStatus(Dcpst demPartnerStatus) {
         this.i_demPartnerStatus = demPartnerStatus;
     }
 
@@ -5663,7 +5663,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return labHrsWorkNewL1;
     }
 
-    public void setNewWorkHours_lag1(Integer labHrsWorkNewL1) {
+    public void setLabHrsWorkNewL1(Integer labHrsWorkNewL1) {
         this.labHrsWorkNewL1 = labHrsWorkNewL1;
     }
 
@@ -5711,7 +5711,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (yBenReceivedFlagL1 !=null) ? yBenReceivedFlagL1 : false;
     }
 
-    public void setReceivesBenefitsFlag_L1(boolean yBenReceivedFlagL1) {
+    public void setYBenReceivedFlagL1(boolean yBenReceivedFlagL1) {
         this.yBenReceivedFlagL1 = yBenReceivedFlagL1;
     }
 
@@ -5727,7 +5727,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (null != yBenUCReceivedFlagL1) ? yBenUCReceivedFlagL1 : false;
     }
 
-    public void setReceivesBenefitsFlagUC_L1(boolean yBenUCReceivedFlagL1) {
+    public void setYBenUCReceivedFlagL1(boolean yBenUCReceivedFlagL1) {
         this.yBenUCReceivedFlagL1 = yBenUCReceivedFlagL1;
     }
 
@@ -5743,7 +5743,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (null != yBenNonUCReceivedFlagL1) ? yBenNonUCReceivedFlagL1 : false;
     }
 
-    public void setReceivesBenefitsFlagNonUC_L1(boolean yBenNonUCReceivedFlagL1) {
+    public void setYBenNonUCReceivedFlagL1(boolean yBenNonUCReceivedFlagL1) {
         this.yBenNonUCReceivedFlagL1 = yBenNonUCReceivedFlagL1;
     }
 
@@ -5813,7 +5813,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (Les_c4.Retired.equals(getLabC4())) ? 1.0 : 0.0;
     }
 
-    public void setYearLocal(Integer i_demYear) {
+    public void setI_demYear(Integer i_demYear) {
         this.i_demYear = i_demYear;
     }
 
@@ -5835,10 +5835,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void setNumberChildren017Local(Integer nbr) {
+    public void setI_demNchild0to17(Integer nbr) {
         i_demNchild0to17 = nbr;
     }
-    public void setIndicatorChildren02Local(Indicator idctr) {
+    public void setI_demNChild0to2(Indicator idctr) {
         i_demNChild0to2 = idctr;
     }
 
@@ -5894,7 +5894,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void setNumberChildrenAllLocal(Integer nbr) {
+    public void setI_demNchild(Integer nbr) {
         i_demNchild = nbr;
     }
 
@@ -5910,11 +5910,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
     }
 
-    public void setNumberChildrenAllLocal_lag1(Integer nbr) {
+    public void setI_demNchildL1(Integer nbr) {
         i_demNchildL1 = nbr;
     }
 
-    public void setNumberChildren02Local_lag1(Integer nbr) {
+    public void setI_demNchild0to2L1(Integer nbr) {
         i_demNchild0to2L1 = nbr;
     }
 
