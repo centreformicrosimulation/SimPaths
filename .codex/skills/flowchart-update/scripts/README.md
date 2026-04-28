@@ -19,7 +19,7 @@ Default behavior:
 
 If the inspected commit has no matched flowchart module candidates, the wrapper prints a no-review-needed message and does not rewrite the prompt file.
 
-Generated prompt files are ignored by Git by default. Commit `documentation\flowcharts\flowchart_review_prompt.md` only if you intentionally want to preserve a specific review prompt.
+Generated prompt files are ignored by Git by default. It is normal for `documentation\flowcharts\flowchart_review_prompt.md` to be absent on a fresh checkout or branch. The wrapper creates it locally only when the inspected commit has matched flowchart module candidates. Commit that file only if you intentionally want to preserve a specific review prompt.
 
 To mechanically flag matched modules in `modules.yml` at the same time:
 

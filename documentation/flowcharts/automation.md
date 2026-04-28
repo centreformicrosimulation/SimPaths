@@ -25,7 +25,7 @@ documentation/flowcharts/flowchart_review_prompt.md
    - affected files under `documentation/flowcharts/modules/`
    - `documentation/flowcharts/modules.yml`
 
-The generated prompt file is ignored by Git by default. Commit it only if you intentionally want to preserve the exact handoff prompt for an audit trail.
+The generated prompt file is ignored by Git by default. It is normal for a fresh checkout or branch to have no `documentation/flowcharts/flowchart_review_prompt.md` file. The file is created locally only when the wrapper or post-commit hook inspects a code commit with matched flowchart candidates. Commit it only if you intentionally want to preserve the exact handoff prompt for an audit trail.
 
 If the commit has no matched code files or no matched flowchart modules, the script prints a no-review-needed message and does not rewrite the prompt file.
 
@@ -65,7 +65,7 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview
 The hook is local to the current clone. It is not committed to Git. If the repository is cloned elsewhere, run the installer again from that clone, for example:
 
 ```powershell
-D:\CeMPA\SimPaths2\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1
 ```
 
 The installer derives the repository root from its own location, so it installs the hook into the matching clone's `.git/hooks/` folder.
@@ -80,6 +80,8 @@ For a relevant code commit, the hook may leave working-tree changes after the co
 This is expected. The hook runs after the commit has already been created, so those generated changes are not part of the code commit. Review them, send the prompt to Codex if needed, and commit the documentation review output separately.
 
 For a documentation-only commit, the hook should print a no-review-needed message and leave the prompt file unchanged.
+
+If `documentation/flowcharts/flowchart_review_prompt.md` is absent after such a commit, that is expected. The absence means no local prompt has been generated for a relevant code change in that working tree.
 
 ## Remove The Hook
 
