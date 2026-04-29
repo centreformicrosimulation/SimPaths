@@ -319,13 +319,13 @@ public class LabourMarket {
             if (person != null && person.getCovidYLabGrossXt5() == null) {
                 double covidModuleGrossLabourIncomeBaseline = person.getCovidModuleGrossLabourIncome_Baseline();
                 Statistics stats = ((SimPathsCollector) SimulationEngine.getInstance().getManager(SimPathsCollector.class.getCanonicalName())).getStats();
-                if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p20()) {
+                if (covidModuleGrossLabourIncomeBaseline <= stats.getYLabP20()) {
                     person.setCovidYLabGrossXt5(Quintiles.Q1);
-                } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p40()) {
+                } else if (covidModuleGrossLabourIncomeBaseline <= stats.getYLabP40()) {
                     person.setCovidYLabGrossXt5(Quintiles.Q2);
-                } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p60()) {
+                } else if (covidModuleGrossLabourIncomeBaseline <= stats.getYLabP60()) {
                     person.setCovidYLabGrossXt5(Quintiles.Q3);
-                } else if (covidModuleGrossLabourIncomeBaseline <= stats.getGrossLabourIncome_p80()) {
+                } else if (covidModuleGrossLabourIncomeBaseline <= stats.getYLabP80()) {
                     person.setCovidYLabGrossXt5(Quintiles.Q4);
                 } else {
                     person.setCovidYLabGrossXt5(Quintiles.Q5);

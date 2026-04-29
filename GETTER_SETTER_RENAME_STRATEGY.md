@@ -51,6 +51,8 @@ Avoid global text replacement across the repository. Some old names may also be 
 | Original person/benefit-unit ID accessors | Completed | `mvn test -DskipTests` and local checkpoint `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test` passed on 2026-04-28 | Renamed `getIdOriginalPerson()` and `getIdOriginalBU()` to match `idPersOriginal` and `idBuOriginal`. |
 | `i_` accessor naming correction | Completed | `mvn test -DskipTests` passed on 2026-04-28 | Corrected completed `BenefitUnit` `i_...` accessors to keep `I_`, including `getI_yNonBenHhGrossAsinh...` and local proxy setters. |
 | Remaining `Person` direct field-backed residuals | Completed | `mvn test -DskipTests` passed on 2026-04-28 | Combined batch covering direct residuals, benefit lag setters, and local proxy setters. Boolean `is...` predicates and computed helpers intentionally excluded. |
+| Statistics output beans | Completed | `mvn test -DskipTests` passed on 2026-04-29 | Renamed direct field-backed statistics output accessors in `Statistics` and `HealthStatistics`. Persisted `@Column` names unchanged. |
+| Final runtime checkpoint | Completed | Focused tests, single run, and multirun passed on 2026-04-29 | Rename scope frozen before colleague discussion. Remaining computed/helper APIs stay deferred. |
 
 ## Naming Convention
 
@@ -482,44 +484,17 @@ The ID accessor batches for `Household`, `Person`, and `BenefitUnit` have a shar
 - Local focused checkpoint result: passed on 2026-04-28 at 14:58:36, 29 tests run, 0 failures, 0 errors, 0 skipped
 - Maven result: `BUILD SUCCESS`
 
-## Inspected: Outside Person BenefitUnit Household
+## Completed: Final Runtime Checkpoint
 
-Inspection outside the current `Person` / `BenefitUnit` / `Household` pass did not find another clear model-entity field-backed accessor batch comparable to the completed work. Remaining public `get...` / `set...` methods with underscores or survey-code names mostly fall into output/statistics, parameter, tax donor, or computed helper APIs.
+The current rename scope is frozen before colleague discussion.
 
-### To Be Determined: Statistics Output Beans
+- Focused test command: `mvn "-Dtest=PersonTest,EmploymentHistoryFilterTest,EmploymentStatisticsTest" test`
+- Focused test result: passed on 2026-04-29, 29 tests run, 0 failures, 0 errors, 0 skipped
+- Maven result: `BUILD SUCCESS`
+- Runtime validation: single simulation run completed without errors
+- Runtime validation: multirun completed without errors
+- Remaining computed/helper APIs are intentionally deferred for colleague discussion.
 
-These methods are direct setters/getters in statistics output classes, but their old names also match persisted output column concepts. Rename only if reviewers agree this branch should include output bean APIs and any downstream output consumers.
-
-| Class | Examples | Backing fields |
-| --- | --- | --- |
-| `simpaths.data.statistics.Statistics` | `getYdses_p20()`, `setYdses_p20(...)`, `getsIndex_p50()`, `setsIndex_p50(...)`, `getGrossLabourIncome_p20()`, `setGrossLabourIncome_p20(...)`, `getEdi_p50()`, `setEdi_p50(...)` | `yHhQuintilesC5P20`, `sIndex_p50`, `yLabP20`, `edi_p50` |
-| `simpaths.data.statistics.HealthStatistics` | `setDhm_mean(...)`, `setDhe_mcs_mean(...)`, `setDhe_pcs_mean(...)`, `setDls_mean(...)`, plus percentile variants | `healthWbScore0to36Avg`, `healthMentalMcsAvg`, `healthPhysicalPcsAvg`, `demLifeSatScore0to10Avg`, etc. |
-
-Recommendation: defer these until colleagues confirm whether external CSV/database output conventions should drive the Java API names. These classes are less central to the model object API and may be reviewed as a separate statistics-output batch.
-
-### To Be Determined: Parameter And Regression Accessors
-
-`simpaths.data.Parameters` contains regression accessors such as `getRegC19LS_SE()`, `getRegC19LS_E1()`, and related Covid-19 labour-transition names. These expose regression IDs/model names rather than normal domain fields.
-
-Recommendation: do not rename in this pass. Treat them as parameter/regression identifier APIs unless a separate configuration naming policy is agreed.
-
-### To Be Determined: Tax Donor And Key APIs
-
-Tax donor/key classes retain survey-code or tax-matching names, for example:
-
-- `DonorPerson.getDlltsd()`
-- `KeyFunction.getDlltsdMan()`
-- `KeyFunction.setDlltsdMan(...)`
-- `KeyFunction.getDlltsdWoman()`
-- `KeyFunction.setDlltsdWoman(...)`
-
-Recommendation: defer. These are outside the main `Person` model API and are tied to donor/tax matching data semantics.
-
-### To Be Determined: Computed Model Helper APIs
-
-`SimPathsModel` has computed projection helpers such as `getPopulationProjectionByAge0_18()`, `getPopulationProjectionByAge2_10()`, and similar age-band methods. They call `getPopulationProjectionByAge(startAge, endAge)` and do not expose backing fields.
-
-Recommendation: keep them in the same "computed helper" category as `Person.getEmployed_Lag1()` and similar methods. Do not rename until the team agrees a rule for computed helper APIs.
 
 ## Planned: Remaining Person Underscore-Style Accessors
 
@@ -606,6 +581,69 @@ These methods do not directly expose a backing field or they add fallback/defaul
 | `getCareHoursFromSon_L1()` | computed helper, currently zero |
 | `getCareHoursFromOther_L1()` | computed from partner status and informal lag hours |
 | `getYnbcpdf_dv()` | computed current difference between own and partner non-benefit gross personal income; used as a `@Lag` source |
+
+
+
+## Inspected: Outside Person BenefitUnit Household
+
+Inspection outside the current `Person` / `BenefitUnit` / `Household` pass did not find another clear model-entity field-backed accessor batch comparable to the completed work. Remaining public `get...` / `set...` methods with underscores or survey-code names mostly fall into output/statistics, parameter, tax donor, or computed helper APIs.
+
+### Completed: Statistics Output Beans
+
+These methods are direct setters/getters in statistics output classes. Java method names were aligned to backing fields while leaving persisted `@Column` names unchanged.
+
+| Class | Current method group | New method group |
+| --- | --- | --- |
+| `Statistics` | `getYdses_p20()` / `setYdses_p20(...)` | `getYHhQuintilesC5P20()` / `setYHhQuintilesC5P20(...)` |
+| `Statistics` | `getYdses_p40()` / `setYdses_p40(...)` | `getYHhQuintilesC5P40()` / `setYHhQuintilesC5P40(...)` |
+| `Statistics` | `getYdses_p60()` / `setYdses_p60(...)` | `getYHhQuintilesC5P60()` / `setYHhQuintilesC5P60(...)` |
+| `Statistics` | `getYdses_p80()` / `setYdses_p80(...)` | `getYHhQuintilesC5P80()` / `setYHhQuintilesC5P80(...)` |
+| `Statistics` | `getsIndex_p50()` / `setsIndex_p50(...)` | `getSIndex_p50()` / `setSIndex_p50(...)` |
+| `Statistics` | `getGrossLabourIncome_p20()` / `setGrossLabourIncome_p20(...)` | `getYLabP20()` / `setYLabP20(...)` |
+| `Statistics` | `getGrossLabourIncome_p40()` / `setGrossLabourIncome_p40(...)` | `getYLabP40()` / `setYLabP40(...)` |
+| `Statistics` | `getGrossLabourIncome_p60()` / `setGrossLabourIncome_p60(...)` | `getYLabP60()` / `setYLabP60(...)` |
+| `Statistics` | `getGrossLabourIncome_p80()` / `setGrossLabourIncome_p80(...)` | `getYLabP80()` / `setYLabP80(...)` |
+| `HealthStatistics` | `setDhm_*()` setters | `setHealthWbScore0to36*()` setters |
+| `HealthStatistics` | `setDhe_mcs_*()` setters | `setHealthMentalMcs*()` setters |
+| `HealthStatistics` | `setDhe_pcs_*()` setters | `setHealthPhysicalPcs*()` setters |
+| `HealthStatistics` | `setDls_*()` setters | `setDemLifeSatScore0to10*()` setters |
+
+Validation:
+
+- Compile command: `mvn test -DskipTests`
+- Result: passed on 2026-04-29
+- Case-sensitive stale-name scan for old statistics output method names: none
+
+Intentional retained names:
+
+- `getEdi_p50()` and `setEdi_p50(...)` remain unchanged because they already match the backing field `edi_p50`.
+- Persisted `@Column` names such as `Ydses_p20`, `dhm_mean`, and `dhe_mcs_mean` remain unchanged.
+
+### To Be Determined: Parameter And Regression Accessors
+
+`simpaths.data.Parameters` contains regression accessors such as `getRegC19LS_SE()`, `getRegC19LS_E1()`, and related Covid-19 labour-transition names. These expose regression IDs/model names rather than normal domain fields.
+
+Recommendation: do not rename in this pass. Treat them as parameter/regression identifier APIs unless a separate configuration naming policy is agreed.
+
+### To Be Determined: Tax Donor And Key APIs
+
+Tax donor/key classes retain survey-code or tax-matching names, for example:
+
+- `DonorPerson.getDlltsd()`
+- `KeyFunction.getDlltsdMan()`
+- `KeyFunction.setDlltsdMan(...)`
+- `KeyFunction.getDlltsdWoman()`
+- `KeyFunction.setDlltsdWoman(...)`
+
+Recommendation: defer. These are outside the main `Person` model API and are tied to donor/tax matching data semantics.
+
+### To Be Determined: Computed Model Helper APIs
+
+`SimPathsModel` has computed projection helpers such as `getPopulationProjectionByAge0_18()`, `getPopulationProjectionByAge2_10()`, and similar age-band methods. They call `getPopulationProjectionByAge(startAge, endAge)` and do not expose backing fields.
+
+Recommendation: keep them in the same "computed helper" category as `Person.getEmployed_Lag1()` and similar methods. Do not rename until the team agrees a rule for computed helper APIs.
+
+
 
 ## Suggested Batch Order
 

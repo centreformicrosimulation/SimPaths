@@ -75,75 +75,75 @@ public class Statistics {
 		this.yHhDispEquivP50 = yHhDispEquivP50;
 	}
 	
-	public double getYdses_p20() {
+	public double getYHhQuintilesC5P20() {
 		return yHhQuintilesC5P20;
 	}
 
-	public void setYdses_p20(double yHhQuintilesC5P20) {
+	public void setYHhQuintilesC5P20(double yHhQuintilesC5P20) {
 		this.yHhQuintilesC5P20 = yHhQuintilesC5P20;
 	}
 
-	public double getYdses_p40() {
+	public double getYHhQuintilesC5P40() {
 		return yHhQuintilesC5P40;
 	}
 
-	public void setYdses_p40(double yHhQuintilesC5P40) {
+	public void setYHhQuintilesC5P40(double yHhQuintilesC5P40) {
 		this.yHhQuintilesC5P40 = yHhQuintilesC5P40;
 	}
 
-	public double getYdses_p60() {
+	public double getYHhQuintilesC5P60() {
 		return yHhQuintilesC5P60;
 	}
 
-	public void setYdses_p60(double yHhQuintilesC5P60) {
+	public void setYHhQuintilesC5P60(double yHhQuintilesC5P60) {
 		this.yHhQuintilesC5P60 = yHhQuintilesC5P60;
 	}
 
-	public double getYdses_p80() {
+	public double getYHhQuintilesC5P80() {
 		return yHhQuintilesC5P80;
 	}
 
-	public void setYdses_p80(double yHhQuintilesC5P80) {
+	public void setYHhQuintilesC5P80(double yHhQuintilesC5P80) {
 		this.yHhQuintilesC5P80 = yHhQuintilesC5P80;
 	}
 
-	public double getsIndex_p50() {
+	public double getSIndex_p50() {
 		return sIndex_p50;
 	}
 
-	public void setsIndex_p50(double sIndex_p50) {
+	public void setSIndex_p50(double sIndex_p50) {
 		this.sIndex_p50 = sIndex_p50;
 	}
 
-	public double getGrossLabourIncome_p20() {
+	public double getYLabP20() {
 		return yLabP20;
 	}
 
-	public void setGrossLabourIncome_p20(double yLabP20) {
+	public void setYLabP20(double yLabP20) {
 		this.yLabP20 = yLabP20;
 	}
 
-	public double getGrossLabourIncome_p40() {
+	public double getYLabP40() {
 		return yLabP40;
 	}
 
-	public void setGrossLabourIncome_p40(double yLabP40) {
+	public void setYLabP40(double yLabP40) {
 		this.yLabP40 = yLabP40;
 	}
 
-	public double getGrossLabourIncome_p60() {
+	public double getYLabP60() {
 		return yLabP60;
 	}
 
-	public void setGrossLabourIncome_p60(double yLabP60) {
+	public void setYLabP60(double yLabP60) {
 		this.yLabP60 = yLabP60;
 	}
 
-	public double getGrossLabourIncome_p80() {
+	public double getYLabP80() {
 		return yLabP80;
 	}
 
-	public void setGrossLabourIncome_p80(double yLabP80) {
+	public void setYLabP80(double yLabP80) {
 		this.yLabP80 = yLabP80;
 	}
 

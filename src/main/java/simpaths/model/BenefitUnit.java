@@ -1890,13 +1890,13 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
             //Based on the percentiles calculated by the collector, assign household to one of the quintiles of (equivalised) income distribution
             if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
-                if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
+                if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P20()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
+                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P40()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
+                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P60()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
+                } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P80()) {
                     yHhQuintilesMonthC5 = Ydses_c5.Q4;
                 } else {
                     yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -1917,13 +1917,13 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
                 setI_yNonBenHhGrossAsinh(asinh(tmpHHYpnbihs_dv)); //Asinh transformation of HH non-benefit income
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
-                    if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
+                    if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P20()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P40()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P60()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P80()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
                         yHhQuintilesMonthC5 = Ydses_c5.Q5;
@@ -1948,13 +1948,13 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
                 if(collector.getStats() != null) { //Collector only gets initialised when simulation starts running
 
-                    if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p20()) {
+                    if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P20()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q1;
-                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p40()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P40()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q2;
-                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p60()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P60()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q3;
-                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYdses_p80()) {
+                    } else if(getI_yNonBenHhGrossAsinh() <= collector.getStats().getYHhQuintilesC5P80()) {
                         yHhQuintilesMonthC5 = Ydses_c5.Q4;
                     } else {
                         yHhQuintilesMonthC5 = Ydses_c5.Q5;
