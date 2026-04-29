@@ -1648,12 +1648,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (demAge >= MIN_AGE_TO_LEAVE_EDUCATION) {
                 // Is the age of the individual below the max age to leave education (age < maxQuittingAge)?
                 // Yes
-                if (demAge <= MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5) {
+                if (demAge <= MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION) {
                     // --> process E1a
-                    // double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
-                    // double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
-                    double score = Parameters.getRegEducationE2a().getScore(this, Person.DoublesVariables.class);
-                    double prob = Parameters.getRegEducationE2a().getProbability(score + probitAdjustment);
+                    double score = Parameters.getRegEducationE1a().getScore(this, Person.DoublesVariables.class);
+                    double prob = Parameters.getRegEducationE1a().getProbability(score + probitAdjustment);
 
                     if (labourInnov < prob) {
                         // Remain a student *OUTCOME B*

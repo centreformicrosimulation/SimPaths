@@ -13,8 +13,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/household_composition.md
     code_refs:
@@ -59,8 +59,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/cohabitation.md
     code_refs:
@@ -95,8 +95,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/full_time_hourly_earnings.md
     code_refs:
@@ -133,8 +133,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/fertility_give_birth.md
     code_refs:
@@ -173,8 +173,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/health_long_term_sick.md
     code_refs:
@@ -209,8 +209,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_cases.md
     code_refs:
@@ -242,8 +242,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_level.md
     code_refs:
@@ -274,8 +274,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/union_matching.md
     code_refs:
@@ -307,8 +307,8 @@ modules:
     status: active
     review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 15cfa71bd
-    last_trigger_commit: 15cfa71bd
+    last_verified_commit: a9407d16f
+    last_trigger_commit: a9407d16f
     flowchart:
       source_md: documentation/flowcharts/modules/inschool.md
     code_refs:
@@ -329,7 +329,7 @@ modules:
       - documentation/wiki/developer-guide/how-to/code-logic-flowcharts.md
     update_triggers:
       - inSchool branch logic changes
-      - E1a/E1b regression calls change
+      - E2a/E1b regression calls change
       - age thresholds change
       - eduLeaveSchoolFlag handling changes
       - InSchoolAlignment behavior changes
