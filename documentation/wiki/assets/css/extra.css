@@ -2688,6 +2688,12 @@ body:has(.simpaths-home-research-band) .md-footer__inner {
   margin-top: 1.18rem;
 }
 
+.md-typeset .simpaths-home-intro-band__lede,
+.md-typeset .simpaths-home-intro-band__body:not(.simpaths-home-intro-band__body--bridge) {
+  text-align: justify;
+  text-align-last: left;
+}
+
 .md-typeset .simpaths-home-intro-band__lede {
   color: rgba(22,33,49,0.98);
 }
