@@ -57,7 +57,7 @@ This matters because `inSchool()` mainly sets student status and the transient `
 - `Parameters.getRegEducationE1a()`: regression for lagged students deciding whether to remain in education.
 - `Parameters.getRegEducationE1b()`: regression for non-students deciding whether to enter or re-enter education.
 - `Parameters.MIN_AGE_TO_LEAVE_EDUCATION`: minimum age at which lagged students may leave education.
-- `Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`: maximum age for continuous education under the E1a branch.
+- `Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`: upper age used by the student-share alignment target. The E1a branch now keeps using the continuous-education regression through this value plus five years.
 
 ## State Changes
 
@@ -104,8 +104,8 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 
 - Lagged student versus lagged non-student.
 - Lagged student below minimum leaving age.
-- Lagged student between minimum leaving age and maximum continuous-education age.
-- Lagged student above maximum continuous-education age.
+- Lagged student between minimum leaving age and the extended E1a age limit, `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5`.
+- Lagged student above the extended E1a age limit.
 - Lagged retired person.
 - Non-student, non-retired person evaluated by E1b.
 - Alignment run versus ordinary scheduled run.
@@ -154,16 +154,17 @@ For each trial adjustment value, it:
 2. calls `person.inSchool(args[0])`;
 3. calculates the difference between the target student share and the simulated student share.
 
-The alignment target counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` and `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`, excluding people flagged to leave school.
+The alignment target still counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` and `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`, excluding people flagged to leave school. This target-counting age range is narrower than the person-level E1a decision range, which now runs through `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5`.
 
 ## Notes for Debugging
 
 - The return value of `inSchool()` indicates whether the person is a student after the method's decision, but the scheduled collection event does not use the return value directly.
 - The operational link to later education processing is `eduLeaveSchoolFlag`.
 - `eduLeaveSchoolFlag` is transient and is reset at the start of `inSchool()` and again after `leavingSchool()` completes.
-- A lagged student above `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION` is forced to leave education.
+- A lagged student above `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5` is forced to leave education.
 - A lagged retired person is not allowed to become a student through this method.
 - In the active E1b branch, the code does not impose an explicit age upper bound before evaluating entry or re-entry into education. The aggregate alignment count is narrower because it counts the target student share only within the education age range.
+- Mermaid is intentionally unchanged for commit `15cfa71bd`: the control flow is still the same lagged-student age-gate into E1a versus forced leaving; only the numeric upper threshold for that gate changed.
 - If student counts look wrong, inspect the order of `InSchool`, `InSchoolAlignment`, and `LeavingSchool` in the yearly schedule before changing the method logic.
 
 ## Flowchart Maintenance Guidance
