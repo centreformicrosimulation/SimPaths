@@ -33,7 +33,7 @@ The `inSchool()` process updates student status decisions before education-level
 - `src/main/java/simpaths/data/Parameters.java`
   - `MIN_AGE_TO_LEAVE_EDUCATION`
   - `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`
-  - `getRegEducationE2a()`
+  - `getRegEducationE1a()`
   - `getRegEducationE1b()`
 
 ## Schedule Context
@@ -54,10 +54,10 @@ This matters because `inSchool()` mainly sets student status and the transient `
 - `demAge`: current age.
 - `probitAdjustment`: alignment adjustment added to the education regression score.
 - `statInnovations.getDoubleDraw(24)`: stochastic draw for the education decision.
-- `Parameters.getRegEducationE2a()`: regression currently used for lagged students deciding whether to remain in education.
+- `Parameters.getRegEducationE1a()`: regression for lagged students deciding whether to remain in education.
 - `Parameters.getRegEducationE1b()`: regression for non-students deciding whether to enter or re-enter education.
 - `Parameters.MIN_AGE_TO_LEAVE_EDUCATION`: minimum age at which lagged students may leave education.
-- `Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`: upper age used by the student-share alignment target. The lagged-student branch now keeps using the remain-in-education regression through this value plus five years.
+- `Parameters.MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`: maximum age for continuous education under the E1a branch and upper age used by the student-share alignment target.
 
 ## State Changes
 
@@ -84,7 +84,7 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 
 | Variable | Meaning in this flowchart |
 |---|---|
-| `demAge` | Person's current age. Used to decide whether a lagged student is too young to leave, eligible for the remain-in-education decision, or forced to leave continuous education. |
+| `demAge` | Person's current age. Used to decide whether a lagged student is too young to leave, eligible for the E1a decision, or forced to leave continuous education. |
 | `labC4` | Current four-category labour/economic status. The relevant values here are `Student`, `Retired`, and `NotEmployed`. |
 | `labC4L1` | Lagged value of `labC4`. This is the main branching variable: it identifies whether the person was a student or retired in the previous period. |
 | `Les_c4.Student` | Activity-status enum value for being a student. `inSchool()` sets `labC4` to this value when a person remains, enters, or re-enters education. |
@@ -94,9 +94,9 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 | `der` / `eduReturnFlag` | Indicator for returning to education. The `der` accessor maps to the Java field `eduReturnFlag`. |
 | `sedex` / `eduExitSampleFlag` | Indicator related to the year/person leaving education. The `sedex` accessor maps to the Java field `eduExitSampleFlag`. |
 | `eduLeftEduFlag` | Persistent flag indicating that the person has left education. Once set to true in `leavingSchool()`, it is not reset. |
-| `probitAdjustment` | Alignment adjustment added to the E2a/E1b regression score before converting the score to a probability. |
+| `probitAdjustment` | Alignment adjustment added to the E1a/E1b regression score before converting the score to a probability. |
 | `labourInnov` | Stochastic draw from `statInnovations.getDoubleDraw(24)`. The person is assigned the positive education outcome when this draw is below the relevant probability. |
-| `E2a` | Education regression process currently used for lagged students deciding whether to remain in continuous education. |
+| `E1a` | Education regression process for lagged students deciding whether to remain in continuous education. |
 | `E1b` | Education regression process for lagged non-students deciding whether to enter or re-enter education. |
 | `E2` | Education-level assignment process applied later by `setEducationLevel()` when a person leaves school. |
 
@@ -104,8 +104,8 @@ This glossary is process-specific. For the full variable dictionary, see `docume
 
 - Lagged student versus lagged non-student.
 - Lagged student below minimum leaving age.
-- Lagged student between minimum leaving age and the extended remain-in-education age limit, `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5`.
-- Lagged student above the extended remain-in-education age limit.
+- Lagged student between minimum leaving age and maximum continuous-education age.
+- Lagged student above maximum continuous-education age.
 - Lagged retired person.
 - Non-student, non-retired person evaluated by E1b.
 - Alignment run versus ordinary scheduled run.
@@ -127,9 +127,9 @@ flowchart TD
     H -- Yes --> I{"Below minimum<br/>leaving age?"}
     I -- Yes --> J["Remain in school"]
     I -- No --> K{"Within continuous<br/>education age range?"}
-    K -- Yes --> M["Apply E2a:<br/>probability of remaining<br/>in education"]
+    K -- Yes --> M["Apply E1a:<br/>probability of remaining<br/>in education"]
     K -- No --> L["Flag to leave education"]
-    M --> N{"Innovation below<br/>E2a probability?"}
+    M --> N{"Innovation below<br/>E1a probability?"}
     N -- Yes --> O["Remain student"]
     N -- No --> L
 
@@ -154,17 +154,17 @@ For each trial adjustment value, it:
 2. calls `person.inSchool(args[0])`;
 3. calculates the difference between the target student share and the simulated student share.
 
-The alignment target still counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` and `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`, excluding people flagged to leave school. This target-counting age range is narrower than the person-level remain-in-education decision range, which now runs through `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5`.
+The alignment target counts students aged between `MIN_AGE_TO_LEAVE_EDUCATION` and `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION`, excluding people flagged to leave school.
 
 ## Notes for Debugging
 
 - The return value of `inSchool()` indicates whether the person is a student after the method's decision, but the scheduled collection event does not use the return value directly.
 - The operational link to later education processing is `eduLeaveSchoolFlag`.
 - `eduLeaveSchoolFlag` is transient and is reset at the start of `inSchool()` and again after `leavingSchool()` completes.
-- A lagged student above `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION + 5` is forced to leave education.
+- A lagged student above `MAX_AGE_TO_STAY_IN_CONTINUOUS_EDUCATION` is forced to leave education.
 - A lagged retired person is not allowed to become a student through this method.
 - In the active E1b branch, the code does not impose an explicit age upper bound before evaluating entry or re-entry into education. The aggregate alignment count is narrower because it counts the target student share only within the education age range.
-- Mermaid structure is intentionally unchanged for commit `a9407d16f`: the control flow is still the same lagged-student age-gate into a remain-in-education regression versus forced leaving; only the regression label changed from E1a to E2a.
+- Mermaid structure is intentionally unchanged for commit `bac24c3a1`: the control flow is still the same lagged-student age-gate into E1a versus forced leaving; only the reverted threshold and regression labels changed.
 - If student counts look wrong, inspect the order of `InSchool`, `InSchoolAlignment`, and `LeavingSchool` in the yearly schedule before changing the method logic.
 
 ## Flowchart Maintenance Guidance
@@ -172,7 +172,7 @@ The alignment target still counts students aged between `MIN_AGE_TO_LEAVE_EDUCAT
 When updating this flowchart, first check whether any of the following changed:
 
 - the branching variable changed from `labC4L1` to `labC4` or another status field;
-- the E2a or E1b regression calls changed;
+- the E1a or E1b regression calls changed;
 - the age thresholds changed;
 - `eduLeaveSchoolFlag` is set or consumed differently;
 - `InSchoolAlignment.evaluate()` no longer reuses `Person.inSchool(double)`;
