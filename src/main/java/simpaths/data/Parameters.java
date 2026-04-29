@@ -3060,11 +3060,25 @@ public class Parameters {
     public static double normaliseWeeklyIncome(int priceYear, double weeklyFinancial) {
         return normaliseMonthlyIncome(priceYear, weeklyFinancial * WEEKS_PER_MONTH);
     }
-    public static double normaliseMonthlyIncome(int priceYear, double monthlyFinancial) {
+    public static double normaliseWeeklyIncome(int currentPriceYear, int targetWagesYear, double weeklyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, targetWagesYear, weeklyFinancial * WEEKS_PER_MONTH);
+    }
+    public static double normaliseMonthlyIncome(int currentPriceYear, double monthlyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, BASE_PRICE_YEAR, currentPriceYear, currentPriceYear, monthlyFinancial);
+    }
+    public static double normaliseMonthlyIncome(int currentPriceYear, int targetWagesYear, double monthlyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, BASE_PRICE_YEAR, currentPriceYear, targetWagesYear, monthlyFinancial);
+    }
+    public static double normaliseWeeklyIncome(int currentPriceYear, int targetPriceYear, int currentWagesYear, int targetWagesYear, double weeklyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, targetPriceYear, currentWagesYear, targetWagesYear, weeklyFinancial * WEEKS_PER_MONTH);
+    }
+    public static double normaliseMonthlyIncome(int currentPriceYear, int targetPriceYear, int currentWagesYear, int targetWagesYear, double monthlyFinancial) {
         double infAdj = 1.0;
-        if (priceYear != BASE_PRICE_YEAR)
-            infAdj = getTimeSeriesValue(BASE_PRICE_YEAR, TimeSeriesVariable.Inflation) / getTimeSeriesValue(priceYear, TimeSeriesVariable.Inflation);
-        return Parameters.asinh(monthlyFinancial * infAdj);
+        if (currentPriceYear != targetPriceYear)
+            infAdj = getTimeSeriesValue(targetPriceYear, TimeSeriesVariable.Inflation) / getTimeSeriesValue(currentPriceYear, TimeSeriesVariable.Inflation);
+        if (currentWagesYear != targetWagesYear)
+            infAdj *= getTimeSeriesValue(targetWagesYear, TimeSeriesVariable.WageGrowth) / getTimeSeriesValue(currentWagesYear, TimeSeriesVariable.WageGrowth);
+        return asinh(monthlyFinancial * infAdj);
     }
     public static void setTrainingFlag(boolean flag) {
         trainingFlag = flag;

@@ -91,6 +91,9 @@ public class DonorTaxUnitPolicy {
             throw new RuntimeException("attempt to get original income before instantiated");
         return originalIncomePerMonth;
     }
+    public double getNormalisedOriginalIncomePerMonth(int targetWagesYear) {
+        return Parameters.normaliseMonthlyIncome(systemYear, targetWagesYear, getOriginalIncomePerMonth());
+    }
     public double getNormalisedOriginalIncomePerMonth() {
         return Parameters.normaliseMonthlyIncome(systemYear, getOriginalIncomePerMonth());
     }

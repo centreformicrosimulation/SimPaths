@@ -9,7 +9,9 @@
       "Bash(py --version)",
       "Bash(py -c \"import docx; print\\('ok'\\)\")",
       "Bash(py -m pip install python-docx -q)",
-      "Bash(py generate_review.py)"
+      "Bash(py generate_review.py)",
+      "Bash(pip show *)",
+      "PowerShell(Get-Command *)"
     ]
   }
 }
