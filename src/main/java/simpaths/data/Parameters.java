@@ -405,7 +405,7 @@ public class Parameters {
     //Uprating factor
     private static boolean flagDefaultToTimeSeriesAverages;
     private static Double averageSavingReturns, averageDebtCostLow, averageDebtCostHigh;
-    private static MultiKeyCoefficientMap upratingIndexMapRealGDP, mapRealGDPperCapita, upratingIndexMapInflation, socialCareProvisionTimeAdjustment,
+    private static MultiKeyCoefficientMap upratingIndexMapRealGDP, mapRealGDPperCapita, upratingIndexMapInflation,
             partnershipTimeAdjustment, studentsTimeAdjustment, fertilityTimeAdjustment,
             utilityTimeAdjustmentSingleMales, utilityTimeAdjustmentACMales, utilityTimeAdjustmentSingleFemales, utilityTimeAdjustmentACFemales,
             utilityTimeAdjustmentCouples, utilityTimeAdjustmentSingleDepMen, utilityTimeAdjustmentSingleDepWomen,
@@ -2469,7 +2469,6 @@ public class Parameters {
         upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_gdp", 1, 1);
         upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_inflation", 1, 1);
         upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_wage_growth", 1, 1);
-        socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_care_adjustment", 1, 1);
         partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_cohabitation_adjustment", 1, 1);
         studentsTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() +"_students_adjustment", 1, 1);
         fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "time_series_factor.xlsx", country.toString() + "_fertility_adjustment", 1, 1);
@@ -2573,9 +2572,6 @@ public class Parameters {
             }
             case CarerWageRate -> {
                 map = wageRateFormalSocialCare;
-            }
-            case CareProvisionAdjustment -> {
-                map = socialCareProvisionTimeAdjustment;
             }
             case PartnershipAdjustment -> {
                 map = partnershipTimeAdjustment;

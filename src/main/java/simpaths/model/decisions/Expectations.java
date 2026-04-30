@@ -175,7 +175,6 @@ public class Expectations {
         personProxyThisPeriod.setDhe(currentStates.getHealthCode());
         personProxyThisPeriod.setDeh_c4(currentStates.getEducationCode());
         personProxyThisPeriod.setDcpstLocal(currentStates.getDcpst());
-        personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
         personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
 
         // add person proxy for next period expectations
@@ -194,7 +193,6 @@ public class Expectations {
         personProxyNextPeriod.setDhe(currentStates.getHealthCode());
         personProxyNextPeriod.setDhe_lag1(currentStates.getHealthCode());
         personProxyNextPeriod.populateSocialCareReceipt_lag1(currentStates.getSocialCareReceiptStateCode());
-        personProxyNextPeriod.setSocialCareProvision_lag1(currentStates.getSocialCareProvisionCode());
         personProxyNextPeriod.setDed(currentStates.getStudentIndicator());
         personProxyNextPeriod.setDeh_c4(currentStates.getEducationCode());
         personProxyNextPeriod.setDeh_c4_lag1(currentStates.getEducationCode());
@@ -237,13 +235,8 @@ public class Expectations {
         //********************************************************
 
         // care hours per week
-        double careHoursProvidedWeekly = 0.0;
-        int careProvision = 0;
-        if (Parameters.flagSocialCare) {
-            careHoursProvidedWeekly = evalSocialCareHoursProvidedWeekly();
-            if (careHoursProvidedWeekly>1.0E-5)
-                careProvision = 1;
-        }
+        double careHoursProvidedWeekly = evalSocialCareHoursProvidedWeekly();
+        int careProvision = (careHoursProvidedWeekly > 1.0E-5) ? 1 : 0;
 
         // labour and labour income in current period - to evaluate taxes and benefits
         double labourIncome1Weekly = 0.0;
@@ -252,12 +245,6 @@ public class Expectations {
         Integer labourHours1Weekly = null;
         Integer labourHours2Weekly = null;
         leisureTime = 1.0;
-        if (careHoursProvidedWeekly>0.0) {
-            if (cohabitation)
-                leisureTime -= careHoursProvidedWeekly / (2.0*Parameters.HOURS_IN_WEEK);
-            else
-                leisureTime -= careHoursProvidedWeekly / Parameters.HOURS_IN_WEEK;
-        }
         if (ageYearsThisPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
             labourHours1Weekly = (int) Math.round(DecisionParams.FULLTIME_HOURS_WEEKLY * emp1Pr);
             hourlyWageRate1 = getHourlyWageRate(labourHours1Weekly);
@@ -425,11 +412,6 @@ public class Expectations {
                 futures.updateSocialCareReceipt();
             }
 
-            // social care provision
-            if (Parameters.flagSocialCare) {
-                futures.updateSocialCareProvision();
-            }
-
             // full-time wage potential
             if (ageYearsNextPeriod <= DecisionParams.maxAgeFlexibleLabourSupply) {
                 futures.updateWagePotential();
@@ -496,21 +478,7 @@ public class Expectations {
 
     private double evalSocialCareHoursProvidedWeekly() {
 
-        double socialCareHoursProvidedWeekly = 0.0;
-        if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
-
-            SocialCareProvision status = currentStates.getSocialCareProvisionCode();
-            if (!SocialCareProvision.None.equals(status)) {
-                // With S3e retired, no separate regression is used for hours provided in expectations.
-                socialCareHoursProvidedWeekly = 0.0;
-
-                // Retired process (kept for future reuse): S3e provided care hours.
-                // double score = Parameters.getRegCareHoursProvS3e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
-                // double rmse = Parameters.getRMSEForRegression("S3e");
-                // socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
-            }
-        }
-        return socialCareHoursProvidedWeekly;
+        return 0.0;
     }
 
     /**

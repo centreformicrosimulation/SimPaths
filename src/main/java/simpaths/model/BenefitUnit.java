@@ -86,7 +86,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @Lag(getter = "getNumberChildrenAll") @Transient private Integer numberChildrenAll_lag1; //Lag(1) of the number of children of all ages in the household
     @NullInitialised private Double xChildCareWeek;
     @NullInitialised private Double xCareWeek;
-    @NullInitialised private Integer careProvidedFlag;
     @NullInitialised private Long idtaxDbDonor;
     @NullInitialised @Transient private Match demDbMatchTax;
     @Enumerated(EnumType.STRING) private Region region;        //Region of household.  Also used in findDonorHouseholdsByLabour method
@@ -204,7 +203,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.dem4to12L1 = Indicator.False;
         this.xChildCareWeek = 0.0;
         this.xCareWeek = 0.0;
-        this.careProvidedFlag = 0;
         this.yDispMonth = 0.;
         this.yGrossMonth = 0.;
         this.yDispEquivYear = 0.;
@@ -301,7 +299,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         this.dem4to12L1 = originalBenefitUnit.dem4to12L1;
         this.xChildCareWeek = originalBenefitUnit.xChildCareWeek;
         this.xCareWeek = originalBenefitUnit.xCareWeek;
-        this.careProvidedFlag = originalBenefitUnit.careProvidedFlag;
         this.region = originalBenefitUnit.region;
         this.yHhQuintilesMonthC5 = originalBenefitUnit.getYdses_c5();
         this.yHhQuintilesMonthC5L1 = originalBenefitUnit.yHhQuintilesMonthC5L1;
@@ -587,10 +584,13 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         }
 
         xCareWeek = 0.0;
-        careProvidedFlag = 0;
         double socialCareCostPerMonth = 0.0;
+        int careProvided = 0;
         if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
-            updateSocialCareProvision();
+            for (Person person : getMembers()) {
+                if (person.getCareHrsProvidedWeek() > 0.01)
+                    careProvided = 1;
+            }
             updateSocialCareCostPerWeek();
             socialCareCostPerMonth = xCareWeek * Parameters.WEEKS_PER_MONTH;
         }
@@ -605,7 +605,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         double taxInnov = (Parameters.donorPoolAveraging) ? -1.0 : statInnovations.getDoubleDraw(8);
         evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDemAge(), getIntValue(Regressors.NumberMembersOver17),
                 getIntValue(Regressors.NumberChildren04), getIntValue(Regressors.NumberChildren59), getIntValue(Regressors.NumberChildren1017),
-                hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvidedFlag, originalIncomePerMonth, secondIncomePerMonth,
+                hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvided, originalIncomePerMonth, secondIncomePerMonth,
                 childcareCostPerMonth, socialCareCostPerMonth, getLiquidWealth(Parameters.enableIntertemporalOptimisations), taxInnov);
 
         return evaluatedTransfers;
@@ -4680,14 +4680,6 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
         }
     }
 
-    private void updateSocialCareProvision() {
-
-        careProvidedFlag = 0;
-        for (Person person : getMembers()) {
-            if (!SocialCareProvision.None.equals(person.getSocialCareProvision()))
-                careProvidedFlag = 1;
-        }
-    }
 
     public void setDeh_c4Local(Education edu) {
         i_eduHighestC4 = edu;

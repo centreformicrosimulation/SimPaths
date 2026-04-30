@@ -106,10 +106,6 @@ public class States {
         if (Parameters.flagSocialCare && ageYears >= DecisionParams.minAgeReceiveSocialCare)
             populate(Axis.SocialCareReceipt, (double)refPerson.getSocialCareReceiptState().getValue());
 
-        // social care provision
-        if (Parameters.flagSocialCare)
-            populate(Axis.SocialCareProvision, refPerson.getSocialCareProvisionState());
-
         // region
         if ( DecisionParams.flagRegion )
             populate(Axis.Region, benefitUnit.getRegionIndex());
@@ -331,12 +327,6 @@ public class States {
             // one of the labour options in the respective state combination where a wage offer is received
             loopConsider = false;
         }
-
-        // check care provision
-        if (!getCohabitation() &&
-                ( SocialCareProvision.OnlyPartner.equals(getSocialCareProvisionCode()) ||
-                        SocialCareProvision.PartnerAndOther.equals(getSocialCareProvisionCode()) ))
-            loopConsider = false;
 
         // return result
         return loopConsider;
@@ -650,18 +640,6 @@ public class States {
     }
 
     /**
-     * METHOD TO RETURN SOCIAL CARE PROVISION
-     * @return integer (0 no care, 1 only to partner, 2 to partner and other, 3 only to other
-     */
-    int getSocialCareProvision() {
-        if (Parameters.flagSocialCare) {
-            return (int) labStatesContObject[scale.getIndex(Axis.SocialCareProvision, ageYears)];
-        } else {
-            return 0;
-        }
-    }
-
-    /**
      * METHOD TO RETURN EDUCATION STATUS IMPLIED BY STATE COMBINATION
      * @return integer
      */
@@ -912,18 +890,6 @@ public class States {
     }
 
     /**
-     * METHOD TO IDENTIFY SOCIAL CARE PROVISION CODE IMPLIED BY STATE COMBINATION
-     */
-    SocialCareProvision getSocialCareProvisionCode() {
-        SocialCareProvision code;
-        if (Parameters.flagSocialCare)
-            code = SocialCareProvision.getCode(getVal(Axis.SocialCareProvision));
-        else
-            code = SocialCareProvision.None;
-        return code;
-    }
-
-    /**
      * METHOD TO IDENTIFY HEALTH MEASURE USED BY SimPaths AS IMPLIED BY STATE COMBINATION
      * @return double
      */
@@ -1040,14 +1006,6 @@ public class States {
             stateIndex = scale.getIndex(Axis.SocialCareReceipt, ageYears);
             printOutOfBounds(stateIndex);
             msg = "social care receipt: " + String.format(fmtIndicator, labStatesContObject[stateIndex]);
-            System.out.println(msg);
-        }
-
-        // social care provision
-        if (Parameters.flagSocialCare) {
-            stateIndex = scale.getIndex(Axis.SocialCareProvision, ageYears);
-            printOutOfBounds(stateIndex);
-            msg = "social care provision: " + String.format(fmtIndicator, labStatesContObject[stateIndex]);
             System.out.println(msg);
         }
 

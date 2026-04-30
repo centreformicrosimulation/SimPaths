@@ -43,7 +43,6 @@ public class GridScale {
         if (DecisionParams.flagHealth) numberOfStates++;          // health status
         if (DecisionParams.flagDisability) numberOfStates++;      // disability status
         if (Parameters.flagSocialCare) numberOfStates++;          // social care receipt
-        if (Parameters.flagSocialCare) numberOfStates++;          // social care provision
         if (DecisionParams.flagRegion) numberOfStates++;          // region
         if (DecisionParams.flagEducation) numberOfStates++;       // student
         if (DecisionParams.flagEducation) numberOfStates++;       // education
@@ -207,16 +206,6 @@ public class GridScale {
             // social care receipt
             if (Parameters.flagSocialCare && ageHh >= DecisionParams.minAgeReceiveSocialCare) {
                 axes[aa][dimIndex][0] = 4; // none needed, no formal, informal and formal, only formal (see Enum SocialCareReceiptState)
-                axes[aa][dimIndex][1] = 0;
-                axes[aa][dimIndex][2] = 3;
-                axes[aa][dimIndex][3] = 0;
-                axes[aa][dimIndex][4] = 0;
-                dimIndex++;
-            }
-
-            // social care provision
-            if (Parameters.flagSocialCare) {
-                axes[aa][dimIndex][0] = 4; // none, partner only, partner and non-partner, non-partner only (see Enum SocialCareProvision)
                 axes[aa][dimIndex][1] = 0;
                 axes[aa][dimIndex][2] = 3;
                 axes[aa][dimIndex][3] = 0;
@@ -503,14 +492,6 @@ public class GridScale {
             dimIndex++;
         } else {
             if (axisID==Axis.SocialCareReceipt) return -1;
-        }
-
-        // social care provision
-        if (Parameters.flagSocialCare) {
-            if (axisID==Axis.SocialCareProvision) return dimIndex;
-            dimIndex++;
-        } else {
-            if (axisID==Axis.SocialCareProvision) return -1;
         }
 
         // region

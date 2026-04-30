@@ -225,10 +225,6 @@ public class DataParser {
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN financial_distress_add RENAME TO yFinDstrssFlag;"
 
 								//Social care
-								+ "ALTER TABLE " + personTable + " ADD careProvidedFlag VARCHAR_IGNORECASE;"
-								+ "UPDATE " + personTable + " SET careProvidedFlag = 'None' WHERE careHrsProvidedWeek <= 0 OR careHrsProvidedWeek IS NULL;"
-								+ "UPDATE " + personTable + " SET careProvidedFlag = 'OnlyOther' WHERE careHrsProvidedWeek > 0;"
-
 								//SYSTEM : Year
 								+ "ALTER TABLE " + personTable + " ALTER COLUMN statInterviewYear RENAME TO system_year;"
 
