@@ -14,6 +14,12 @@ Prerequisites:
 
 - Commit the automation scripts before installing the hook, so the hook points at a stable version of the scripts.
 
+For the user-facing setup guide, including PowerShell basics, Codex CLI login checks, and troubleshooting, see:
+
+```text
+documentation/flowcharts/automation.md
+```
+
 ### 1.1 Preview Hook Installation
 
 Preview the hook installation without changing `.git/hooks/post-commit`:
@@ -91,6 +97,13 @@ Prerequisites:
 
 - Codex CLI is installed and logged in.
 - On this Windows setup, Codex CLI needs `-BypassCodexSandbox` because the normal Codex sandbox can fail with `CreateProcessAsUserW failed: 5`.
+
+Check Codex CLI before installing agent mode:
+
+```powershell
+codex --version
+codex login
+```
 
 Preview:
 

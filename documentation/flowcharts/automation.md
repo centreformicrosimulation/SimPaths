@@ -1,53 +1,120 @@
 # Flowchart Review Automation
 
-This document describes the assisted automation workflow for keeping SimPaths flowchart Markdown aligned with committed Java code changes.
+This guide explains the user-facing workflow for AI-assisted SimPaths flowchart review. The goal is to catch code changes that may affect flowchart documentation without spending AI review time on every commit.
 
-The automation does not rewrite flowcharts by itself. It detects committed code changes, updates the flowchart manifest when requested, and prepares a review prompt that can be sent to a Codex task.
+## 1. Recommended Workflow
 
-## Routine Workflow
-
-1. Make and test a Java code change.
-2. Commit the code change.
-3. Generate the flowchart review prompt:
-
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview.ps1 -UpdateManifest
-```
-
-4. Open the generated prompt:
+Use automatic candidate detection after each commit, then manually switch on Codex review only when you want flowchart documentation checked or updated.
 
 ```text
+commit Java code -> detect candidates -> generate prompt -> manually run Codex review when wanted
+```
+
+This is the recommended default because it separates cheap local detection from token-spending AI review.
+
+### 1.1 What Runs Automatically
+
+The default hook runs after each local commit and calls:
+
+```powershell
+Prepare-FlowchartReview.ps1 -UpdateManifest
+```
+
+It can update:
+
+```text
+documentation/flowcharts/modules.yml
 documentation/flowcharts/flowchart_review_prompt.md
 ```
 
-5. Send that prompt to a Codex task.
-6. Review the Codex output and commit any resulting documentation changes:
-   - affected files under `documentation/flowcharts/modules/`
-   - `documentation/flowcharts/modules.yml`
+It does not call Codex and does not update flowchart module Markdown files.
 
-The generated prompt file is ignored by Git by default. It is normal for a fresh checkout or branch to have no `documentation/flowcharts/flowchart_review_prompt.md` file. The file is created locally only when the wrapper or post-commit hook inspects a code commit with matched flowchart candidates. Commit it only if you intentionally want to preserve the exact handoff prompt for an audit trail.
+### 1.2 What You Run Manually
 
-If the commit has no matched code files or no matched flowchart modules, the script prints a no-review-needed message and does not rewrite the prompt file.
-
-## What The Prompt Contains
-
-The generated prompt includes:
-
-- the committed code revision being reviewed;
-- changed code files;
-- priority module matches from `code_refs.methods`;
-- broader file-level candidate modules from `code_refs.files`;
-- manifest flagging results, if `-UpdateManifest` was used;
-- explicit instructions for the AI reviewer to update flowcharts only when documented logic changed.
-
-Priority modules should be reviewed first. File-level matches are candidates only; they are often false positives when a shared file such as `Person.java` or `SimPathsModel.java` changes.
-
-## Install Automatic Post-Commit Prompt Generation
-
-To run the prompt preparation automatically after each commit, install the local Git hook once:
+When you decide the accumulated commits should be reviewed by Codex, run:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev OLD_COMMIT..HEAD -BypassCodexSandbox -Quiet
+```
+
+This manual AI review command requires Codex CLI to be installed and logged in. The detection-only hook does not require Codex login.
+
+Replace `OLD_COMMIT` with the last commit that you consider already flowchart-reviewed. The command reviews all committed changes after `OLD_COMMIT` up to `HEAD` as one combined diff.
+
+For a one-commit review:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD~1..HEAD -BypassCodexSandbox -Quiet
+```
+
+Running this command does not change future hook behavior. With the recommended detection hook, later commits are detected and prompted, but Codex is not launched until you run the manual review command again.
+
+## 2. Before You Install
+
+These steps are for users who are not familiar with PowerShell or terminal commands.
+
+### 2.1 Open A PowerShell Terminal
+
+Open one of these:
+
+- Windows Terminal;
+- PowerShell from the Start menu;
+- the terminal inside IntelliJ IDEA or VS Code.
+
+You do not need to start in the repository folder because the commands below use full paths.
+
+### 2.2 Check Codex CLI
+
+Run:
+
+```powershell
+codex --version
+```
+
+If this prints a version number, Codex CLI is available from PowerShell.
+
+If PowerShell says `codex` is not recognized, install or repair Codex CLI before using AI review automation. The detection-only hook can still run without Codex CLI, but manual or automatic AI review cannot.
+
+### 2.3 Log In To Codex CLI
+
+Run:
+
+```powershell
+codex login
+```
+
+Follow the browser or terminal login instructions. This only needs to be done once per machine unless credentials expire.
+
+### 2.4 Check The Repository Path
+
+This guide assumes the repository is here:
+
+```text
+D:\CeMPA\SimPaths
+```
+
+If your clone is elsewhere, replace `D:\CeMPA\SimPaths` in the commands with your clone path.
+
+### 2.5 Commit The Automation Scripts First
+
+Before installing the hook, commit the current automation script and documentation changes. The hook runs scripts from the working tree, so using a committed version makes later behavior easier to reproduce.
+
+## 3. One-Time Installation
+
+Install the default detection hook once per clone.
+
+### 3.1 Preview Installation
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -DryRun
+```
+
+This prints the hook path and command that would be installed without changing `.git/hooks/post-commit`.
+
+### 3.2 Install Detection Hook
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Force
 ```
 
 The installer writes:
@@ -56,66 +123,9 @@ The installer writes:
 .git/hooks/post-commit
 ```
 
-That hook runs after every local `git commit`:
+The hook is local to the current clone. It is not committed to Git. If you clone the repository elsewhere, run the installer again from that clone.
 
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview.ps1 -UpdateManifest
-```
-
-The hook is local to the current clone. It is not committed to Git. If the repository is cloned elsewhere, run the installer again from that clone, for example:
-
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1
-```
-
-The installer derives the repository root from its own location, so it installs the hook into the matching clone's `.git/hooks/` folder.
-
-## Install Automatic Post-Commit AI Review
-
-To avoid manually running the Codex review command after each code commit, install the hook in agent mode:
-
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Mode Agent -BypassCodexSandbox -Quiet -Force
-```
-
-Preview the hook change without installing it:
-
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Mode Agent -BypassCodexSandbox -Quiet -DryRun
-```
-
-After each commit, this runs:
-
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD -BypassCodexSandbox -Quiet
-```
-
-If the new commit has no matched code files, no AI review is launched. If candidates exist, Codex reviews the latest commit and may leave documentation changes in the working tree. Review and commit those documentation changes separately.
-
-`-Quiet` keeps the PowerShell output short. The full Codex transcript is written to:
-
-```text
-documentation/flowcharts/flowchart_review_agent.log
-```
-
-The `.log` file is ignored by Git. Quiet mode reduces terminal noise, but it does not remove the token cost of the AI review itself.
-
-## After The Hook Runs
-
-For a relevant code commit, the hook may leave working-tree changes after the commit:
-
-- `documentation/flowcharts/modules.yml`
-- `documentation/flowcharts/flowchart_review_prompt.md` as an ignored generated file
-
-This is expected. The hook runs after the commit has already been created, so those generated changes are not part of the code commit. Review them, send the prompt to Codex if needed, and commit the documentation review output separately.
-
-For a documentation-only commit, the hook should print a no-review-needed message and leave the prompt file unchanged.
-
-If `documentation/flowcharts/flowchart_review_prompt.md` is absent after such a commit, that is expected. The absence means no local prompt has been generated for a relevant code change in that working tree.
-
-## Remove The Hook
-
-To uninstall the local hook:
+### 3.3 Uninstall Hook
 
 ```powershell
 D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Uninstall
@@ -123,89 +133,199 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReview
 
 The uninstall step removes only a hook created by this workflow. It refuses to remove an unrelated existing `post-commit` hook.
 
-## Manual Commands
+## 4. After A Commit
 
-Run the wrapper manually for the latest commit:
+After a relevant code commit, the detection hook may leave working-tree changes.
 
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview.ps1 -UpdateManifest
+### 4.1 Expected Files
+
+```text
+documentation/flowcharts/modules.yml
+documentation/flowcharts/flowchart_review_prompt.md
 ```
 
-Run it for a specific commit:
+`modules.yml` is tracked and may be changed to mark modules as `candidate_for_review`. `flowchart_review_prompt.md` is generated and ignored by Git.
+
+If a commit has no matched code files or no matched flowchart modules, the hook prints a no-review-needed message and does not rewrite the prompt file.
+
+### 4.2 Where Hook Messages Appear
+
+Hook messages appear in the tool that ran the commit:
+
+- PowerShell: the same PowerShell window;
+- IntelliJ IDEA: the Git or Version Control output area;
+- VS Code: the Git output channel or terminal;
+- GitHub Desktop: usually only visible if the hook fails.
+
+These messages are temporary status output. They are not the same as the persistent log file.
+
+### 4.3 Reviewing The Detection Result
+
+Use your normal Git diff view, for example GitHub Desktop, IntelliJ IDEA, VS Code, or:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Prepare-FlowchartReview.ps1 -Rev e08fbbf46 -UpdateManifest
+git diff documentation/flowcharts/modules.yml
 ```
 
-Use the Python scripts directly only for advanced cases such as alternate manifests, custom output paths, JSON detector output, or debugging the detector.
+The hook output is only a short status signal. The file diff is the authoritative thing to review.
 
-Test the hook workflow without creating a commit:
+## 5. Manual Codex Review
+
+Manual Codex review is the switch that performs AI-assisted documentation review.
+
+### 5.1 Standard Command
+
+Before running this command, check that Codex CLI is available and logged in as described in sections 2.2 and 2.3.
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Test-FlowchartReviewHook.ps1
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev OLD_COMMIT..HEAD -BypassCodexSandbox -Quiet
 ```
 
-## Fully Automated Codex Review
+This command:
 
-The semi-automated workflow stops after writing `flowchart_review_prompt.md`. To send the generated prompt directly to Codex CLI, use:
+1. prepares a Codex-ready prompt from detector output;
+2. stops if no candidates exist;
+3. sends the prompt to Codex CLI;
+4. allows Codex to edit flowchart documentation in the repository workspace.
+
+### 5.2 Review Range Choice
+
+Use `OLD_COMMIT..HEAD` when you want one review for all commits since the last flowchart-reviewed point.
+
+Examples:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1
+# Review the latest commit only
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD~1..HEAD -BypassCodexSandbox -Quiet
+
+# Review all commits after a known reviewed commit
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev OLD_COMMIT..HEAD -BypassCodexSandbox -Quiet
 ```
 
-For shorter terminal output:
+Range reviews use the combined Git diff. If a change is made and later reverted inside the range, the final combined diff may not require a flowchart update.
 
-```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Quiet
+### 5.3 Output Files
+
+The full Codex transcript is written to:
+
+```text
+documentation/flowcharts/flowchart_review_agent.log
 ```
 
-The script:
+The log file is ignored by Git. `-Quiet` keeps the terminal short, but it does not reduce the token cost of AI review.
 
-1. runs `Prepare-FlowchartReview.ps1 -UpdateManifest`;
-2. stops if no prompt was generated;
-3. sends the prompt to `codex exec`;
-4. allows Codex to edit files in the repository workspace.
+### 5.4 Review And Commit Results
 
-The Codex command used is:
+After Codex finishes, review the changed files in your Git diff tool. Expected documentation outputs may include:
 
-```powershell
-codex exec -C <repo-root> --sandbox workspace-write -
+```text
+documentation/flowcharts/modules.yml
+documentation/flowcharts/modules/*.md
 ```
 
-To test the command path without launching Codex:
+Commit the documentation review output separately from the original code commit.
+
+## 6. Optional Fully Automatic AI Review
+
+Fully automatic AI review after every relevant commit is available, but it is not the recommended default.
+
+### 6.1 When To Use It
+
+Use this mode only when you deliberately want Codex to review flowchart documentation after every relevant code commit.
+
+It is convenient, but it can:
+
+- spend tokens on commits that only touch shared files without changing documented logic;
+- slow down frequent commit workflows;
+- leave documentation edits in the working tree when you were not focusing on flowcharts.
+
+### 6.2 Install Agent Hook
+
+Preview:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -DryRun
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Mode Agent -BypassCodexSandbox -Quiet -DryRun
 ```
 
-`-DryRun` does not pass `-UpdateManifest`, so it is safe to use as a launcher test without mechanically flagging modules.
-
-To run it for a specific commit:
+Install:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev a38f4c902
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Mode Agent -BypassCodexSandbox -Quiet -Force
 ```
 
-To review several commits together, pass a Git revision range:
+This hook runs after each commit:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev bac24c3a1..HEAD
+Invoke-FlowchartReviewAgent.ps1 -Rev HEAD -BypassCodexSandbox -Quiet
 ```
 
-Range reviews use the combined Git diff for the range. The launcher skips mechanical `-UpdateManifest` flagging for ranges because `last_trigger_commit` stores a single commit hash. The Codex review agent should update `modules.yml` after checking the combined change.
+If the new commit has no matched code files, no AI review is launched. If candidates exist, Codex reviews the latest commit and may leave documentation changes in the working tree.
 
-If Codex CLI starts but every shell command fails with `CreateProcessAsUserW failed: 5`, the Windows Codex sandbox is blocking process creation. Retry the same review without the Codex CLI sandbox:
+## 7. Generated Prompt
+
+The prompt is a generated handoff artifact, not a source document.
+
+### 7.1 Prompt Location
+
+```text
+documentation/flowcharts/flowchart_review_prompt.md
+```
+
+This file is ignored by Git. It is normal for a fresh checkout or branch not to have it.
+
+### 7.2 Prompt Contents
+
+The generated prompt includes:
+
+- the committed code revision being reviewed;
+- changed code files;
+- priority module matches from `code_refs.methods`;
+- broader file-level candidate modules from `code_refs.files`;
+- manifest flagging results, when applicable;
+- instructions for Codex to update flowcharts only when documented logic changed.
+
+Priority modules should be reviewed first. File-level matches are candidates only and may be false positives when a shared file such as `Person.java` or `SimPathsModel.java` changes.
+
+## 8. Troubleshooting
+
+### 8.1 No Prompt Was Generated
+
+This usually means the commit had no changed code files matched by `documentation/flowcharts/modules.yml`.
+
+### 8.2 Log Contains Only A Header
+
+If `flowchart_review_agent.log` contains only the revision and command header, Codex did not complete the review. Re-run manually:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD~2..HEAD -BypassCodexSandbox
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD~1..HEAD -BypassCodexSandbox -Quiet
+```
+
+### 8.3 Codex Sandbox Fails On Windows
+
+If Codex reports `CreateProcessAsUserW failed: 5`, use:
+
+```powershell
+-BypassCodexSandbox
 ```
 
 Use this mode only from the repository you intend Codex to edit, because it gives the Codex subprocess direct filesystem access.
 
-On the Windows setup where the Codex sandbox reports `CreateProcessAsUserW failed: 5`, use:
+### 8.4 Check The Hook Command
+
+Inspect the installed hook:
 
 ```powershell
-D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -BypassCodexSandbox -Quiet
+Get-Content D:\CeMPA\SimPaths\.git\hooks\post-commit
 ```
 
-Agent mode is optional because running an AI agent inside every commit hook is slower and uses tokens on each relevant code commit. A conservative workflow is to let the hook prepare the prompt automatically, then run `Invoke-FlowchartReviewAgent.ps1` when you want Codex to perform the documentation review. A fully automated local workflow is to install the hook with `-Mode Agent -Quiet`.
+The default detection hook should call `Prepare-FlowchartReview.ps1 -UpdateManifest`. The optional agent hook should call `Invoke-FlowchartReviewAgent.ps1 -Rev HEAD`.
+
+### 8.5 PowerShell Execution Policy Blocks A Script
+
+If PowerShell refuses to run a script because execution is disabled, run the command through PowerShell with a one-time bypass:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -DryRun
+```
+
+Use the same pattern for other `.ps1` scripts by replacing the path and arguments after `-File`.

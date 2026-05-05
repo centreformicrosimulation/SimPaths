@@ -10,3 +10,5 @@ When the task involves documenting, reviewing, updating, or checking SimPaths co
 - Module flowcharts: `documentation/flowcharts/modules/`
 
 Use the manifest to find existing flowcharts affected by code changes. Follow module-specific update guidance when it exists.
+
+For user-facing Markdown documentation, prefer numbered section and subsection headings such as `## 1. ...` and `### 1.1 ...` so concepts, commands, and installation steps can be referenced unambiguously.
