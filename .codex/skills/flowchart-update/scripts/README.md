@@ -56,6 +56,8 @@ documentation\flowcharts\flowchart_review_agent.log
 
 The log and generated prompt are ignored by Git. `-Quiet` reduces terminal noise, but it does not reduce the token cost of the AI review.
 
+For hook reliability on Windows, `Invoke-FlowchartReviewAgent.ps1` prefers `codex.cmd` or `codex.exe` over `codex.ps1` when piping the generated prompt into Codex CLI.
+
 ### 1.5 Uninstall Hook
 
 Uninstall the hook:

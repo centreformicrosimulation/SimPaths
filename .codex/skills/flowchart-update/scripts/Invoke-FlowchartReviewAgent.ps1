@@ -21,7 +21,13 @@ if (-not $LogPath) {
     $LogPath = Join-Path $RepoRoot $LogPath
 }
 
-$Codex = Get-Command codex -ErrorAction SilentlyContinue
+$Codex = Get-Command codex.cmd -ErrorAction SilentlyContinue
+if (-not $Codex) {
+    $Codex = Get-Command codex.exe -ErrorAction SilentlyContinue
+}
+if (-not $Codex) {
+    $Codex = Get-Command codex -ErrorAction SilentlyContinue
+}
 if (-not $Codex) {
     throw "Codex CLI was not found. Install or log in to Codex CLI before using full automation."
 }

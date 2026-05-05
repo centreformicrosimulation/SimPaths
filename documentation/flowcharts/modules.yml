@@ -11,10 +11,10 @@ modules:
   - id: household_composition
     title: Household Composition
     status: active
-    review_state: candidate_for_review
+    review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 2fa6a439b
-    last_trigger_commit: 68190e7f0
+    last_verified_commit: cdf5e2da9
+    last_trigger_commit: cdf5e2da9
     flowchart:
       source_md: documentation/flowcharts/modules/household_composition.md
     code_refs:
@@ -272,10 +272,10 @@ modules:
   - id: union_matching
     title: Union Matching
     status: active
-    review_state: candidate_for_review
+    review_state: up_to_date
     update_mode: assisted
-    last_verified_commit: 2fa6a439b
-    last_trigger_commit: 68190e7f0
+    last_verified_commit: cdf5e2da9
+    last_trigger_commit: cdf5e2da9
     flowchart:
       source_md: documentation/flowcharts/modules/union_matching.md
     code_refs:
