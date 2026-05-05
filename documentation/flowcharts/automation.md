@@ -114,3 +114,48 @@ Test the hook workflow without creating a commit:
 ```powershell
 D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Test-FlowchartReviewHook.ps1
 ```
+
+## Fully Automated Codex Review
+
+The semi-automated workflow stops after writing `flowchart_review_prompt.md`. To send the generated prompt directly to Codex CLI, use:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1
+```
+
+The script:
+
+1. runs `Prepare-FlowchartReview.ps1 -UpdateManifest`;
+2. stops if no prompt was generated;
+3. sends the prompt to `codex exec`;
+4. allows Codex to edit files in the repository workspace.
+
+The Codex command used is:
+
+```powershell
+codex exec -C <repo-root> --sandbox workspace-write --full-auto -
+```
+
+To test the command path without launching Codex:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -DryRun
+```
+
+`-DryRun` does not pass `-UpdateManifest`, so it is safe to use as a launcher test without mechanically flagging modules.
+
+To run it for a specific commit:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev a38f4c902
+```
+
+To review several commits together, pass a Git revision range:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev bac24c3a1..HEAD
+```
+
+Range reviews use the combined Git diff for the range. The launcher skips mechanical `-UpdateManifest` flagging for ranges because `last_trigger_commit` stores a single commit hash. The Codex review agent should update `modules.yml` after checking the combined change.
+
+This is intentionally separate from the post-commit hook. Running an AI agent inside every commit hook would be slow and harder to control. A practical workflow is: let the hook prepare the prompt automatically, then run `Invoke-FlowchartReviewAgent.ps1` when you want Codex to perform the documentation review.

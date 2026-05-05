@@ -1,6 +1,7 @@
 param(
     [string]$Rev = "HEAD",
-    [switch]$UpdateManifest
+    [switch]$UpdateManifest,
+    [switch]$SuppressNextStep
 )
 
 $ErrorActionPreference = "Stop"
@@ -44,7 +45,7 @@ if ($LASTEXITCODE -ne 0) {
 $Output | ForEach-Object { Write-Host $_ }
 
 $PromptWritten = $Output -match "^Wrote flowchart review prompt to "
-if ($PromptWritten) {
+if ($PromptWritten -and -not $SuppressNextStep) {
     Write-Host ""
     Write-Host "Next step:"
     Write-Host "  Open $OutPath"

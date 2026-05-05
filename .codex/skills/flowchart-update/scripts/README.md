@@ -79,6 +79,44 @@ To test against a specific commit and include manifest flagging:
 D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Test-FlowchartReviewHook.ps1 -Rev a38f4c902 -UpdateManifest
 ```
 
+## Full Codex Automation
+
+To prepare the prompt and send it directly to Codex CLI:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1
+```
+
+To test without launching Codex:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -DryRun
+```
+
+To run against a specific commit:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev a38f4c902
+```
+
+To review several commits together, pass a Git revision range:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev bac24c3a1..HEAD
+```
+
+This script runs `Prepare-FlowchartReview.ps1 -UpdateManifest` first. If no prompt is generated, it does not launch Codex. If a prompt is generated, it pipes the prompt into:
+
+```powershell
+codex exec -C <repo-root> --sandbox workspace-write --full-auto -
+```
+
+Review the resulting working-tree changes before committing them.
+
+`-DryRun` prepares the command path without `-UpdateManifest`, so it does not mechanically flag modules while you are only testing the launcher.
+
+Revision ranges are reviewed as one combined Git diff. Mechanical manifest flagging is skipped for ranges because `last_trigger_commit` is a single commit field; the Codex review agent should update `modules.yml` after checking the combined change.
+
 ## Python Prompt Wrapper
 
 `prepare_flowchart_review.py` runs the detector, formats a Codex-ready prompt, and optionally writes it to a file.

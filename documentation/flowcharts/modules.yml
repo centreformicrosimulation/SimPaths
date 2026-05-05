@@ -11,10 +11,10 @@ modules:
   - id: household_composition
     title: Household Composition
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/household_composition.md
     code_refs:
@@ -57,10 +57,10 @@ modules:
   - id: cohabitation
     title: Cohabitation UK Case
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/cohabitation.md
     code_refs:
@@ -93,10 +93,10 @@ modules:
   - id: full_time_hourly_earnings
     title: Full-Time Hourly Earnings
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/full_time_hourly_earnings.md
     code_refs:
@@ -131,10 +131,10 @@ modules:
   - id: fertility_give_birth
     title: Fertility and GiveBirth
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/fertility_give_birth.md
     code_refs:
@@ -171,10 +171,10 @@ modules:
   - id: health_long_term_sick
     title: Health and Long-Term Sick
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/health_long_term_sick.md
     code_refs:
@@ -207,10 +207,10 @@ modules:
   - id: health_mental_hm1_hm2_cases
     title: Health Mental HM1 and HM2 Cases
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_cases.md
     code_refs:
@@ -240,10 +240,10 @@ modules:
   - id: health_mental_hm1_hm2_level
     title: Health Mental HM1 and HM2 Level
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/health_mental_hm1_hm2_level.md
     code_refs:
@@ -272,10 +272,10 @@ modules:
   - id: union_matching
     title: Union Matching
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/union_matching.md
     code_refs:
@@ -305,10 +305,10 @@ modules:
   - id: inschool
     title: InSchool
     status: active
-    review_state: up_to_date
+    review_state: candidate_for_review
     update_mode: assisted
     last_verified_commit: bac24c3a1
-    last_trigger_commit: bac24c3a1
+    last_trigger_commit: a38f4c902
     flowchart:
       source_md: documentation/flowcharts/modules/inschool.md
     code_refs:
