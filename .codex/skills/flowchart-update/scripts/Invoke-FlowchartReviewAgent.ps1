@@ -1,6 +1,9 @@
 param(
     [string]$Rev = "HEAD",
-    [switch]$DryRun
+    [switch]$DryRun,
+    [ValidateSet("read-only", "workspace-write", "danger-full-access")]
+    [string]$CodexSandbox = "workspace-write",
+    [switch]$BypassCodexSandbox
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,11 +63,16 @@ if ($BeforeWriteTime -and $AfterWriteTime -le $BeforeWriteTime) {
 
 $CodexArgs = @(
     "exec",
-    "-C", $RepoRoot,
-    "--sandbox", "workspace-write",
-    "--full-auto",
-    "-"
+    "-C", $RepoRoot
 )
+
+if ($BypassCodexSandbox) {
+    $CodexArgs += "--dangerously-bypass-approvals-and-sandbox"
+} else {
+    $CodexArgs += @("--sandbox", $CodexSandbox)
+}
+
+$CodexArgs += "-"
 
 Write-Host ""
 Write-Host "AI review command:"

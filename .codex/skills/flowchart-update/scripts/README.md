@@ -108,7 +108,7 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewA
 This script runs `Prepare-FlowchartReview.ps1 -UpdateManifest` first. If no prompt is generated, it does not launch Codex. If a prompt is generated, it pipes the prompt into:
 
 ```powershell
-codex exec -C <repo-root> --sandbox workspace-write --full-auto -
+codex exec -C <repo-root> --sandbox workspace-write -
 ```
 
 Review the resulting working-tree changes before committing them.
@@ -116,6 +116,14 @@ Review the resulting working-tree changes before committing them.
 `-DryRun` prepares the command path without `-UpdateManifest`, so it does not mechanically flag modules while you are only testing the launcher.
 
 Revision ranges are reviewed as one combined Git diff. Mechanical manifest flagging is skipped for ranges because `last_trigger_commit` is a single commit field; the Codex review agent should update `modules.yml` after checking the combined change.
+
+If Codex CLI starts but every shell command fails with `CreateProcessAsUserW failed: 5`, the local Windows Codex sandbox is blocking process creation. In that case, run the same review without the Codex CLI sandbox:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD~2..HEAD -BypassCodexSandbox
+```
+
+Use this only from the repository you intend Codex to edit. It gives the Codex subprocess direct filesystem access instead of limiting it to the Codex sandbox.
 
 ## Python Prompt Wrapper
 

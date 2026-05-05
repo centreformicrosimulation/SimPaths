@@ -133,7 +133,7 @@ The script:
 The Codex command used is:
 
 ```powershell
-codex exec -C <repo-root> --sandbox workspace-write --full-auto -
+codex exec -C <repo-root> --sandbox workspace-write -
 ```
 
 To test the command path without launching Codex:
@@ -157,5 +157,13 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewA
 ```
 
 Range reviews use the combined Git diff for the range. The launcher skips mechanical `-UpdateManifest` flagging for ranges because `last_trigger_commit` stores a single commit hash. The Codex review agent should update `modules.yml` after checking the combined change.
+
+If Codex CLI starts but every shell command fails with `CreateProcessAsUserW failed: 5`, the Windows Codex sandbox is blocking process creation. Retry the same review without the Codex CLI sandbox:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD~2..HEAD -BypassCodexSandbox
+```
+
+Use this mode only from the repository you intend Codex to edit, because it gives the Codex subprocess direct filesystem access.
 
 This is intentionally separate from the post-commit hook. Running an AI agent inside every commit hook would be slow and harder to control. A practical workflow is: let the hook prepare the prompt automatically, then run `Invoke-FlowchartReviewAgent.ps1` when you want Codex to perform the documentation review.
