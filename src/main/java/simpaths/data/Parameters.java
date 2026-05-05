@@ -879,6 +879,7 @@ public class Parameters {
     public static boolean flagSuppressChildcareCosts;
     public static boolean flagSuppressSocialCareCosts;
     public static boolean donorPoolAveraging;
+    public static boolean taxDonorUpratingByWage;
     public static boolean lifetimeIncomeImpute;
 
     public static double realInterestRateInnov;
@@ -908,10 +909,11 @@ public class Parameters {
      */
     public static void loadParameters(Country country, int maxAgeModel, boolean enableIntertemporalOptimisations,
                                       boolean projectFormalChildcare, boolean projectSocialCare, boolean donorPoolAveraging1,
-                                      boolean fixTimeTrend, boolean defaultToTimeSeriesAverages, boolean taxDBMatches,
-                                      Integer timeTrendStops, int startYearModel, int endYearModel, double interestRateInnov1,
-                                      double disposableIncomeFromLabourInnov1, boolean flagSuppressChildcareCosts1,
-                                      boolean flagSuppressSocialCareCosts1, boolean lifetimeIncomeImpute1) {
+                                      boolean taxDonorUpratingByWage1, boolean fixTimeTrend, boolean defaultToTimeSeriesAverages,
+                                      boolean taxDBMatches, Integer timeTrendStops, int startYearModel, int endYearModel,
+                                      double interestRateInnov1, double disposableIncomeFromLabourInnov1,
+                                      boolean flagSuppressChildcareCosts1, boolean flagSuppressSocialCareCosts1,
+                                      boolean lifetimeIncomeImpute1) {
 
         // display a dialog box to let the user know what is happening
         System.out.println("Loading model parameters");
@@ -942,6 +944,7 @@ public class Parameters {
         flagSuppressChildcareCosts = flagSuppressChildcareCosts1;
         flagSuppressSocialCareCosts = flagSuppressSocialCareCosts1;
         donorPoolAveraging = donorPoolAveraging1;
+        taxDonorUpratingByWage = taxDonorUpratingByWage1;
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
         lifetimeIncomeImpute = lifetimeIncomeImpute1;
@@ -3057,11 +3060,25 @@ public class Parameters {
     public static double normaliseWeeklyIncome(int priceYear, double weeklyFinancial) {
         return normaliseMonthlyIncome(priceYear, weeklyFinancial * WEEKS_PER_MONTH);
     }
-    public static double normaliseMonthlyIncome(int priceYear, double monthlyFinancial) {
+    public static double normaliseWeeklyIncome(int currentPriceYear, int targetWagesYear, double weeklyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, targetWagesYear, weeklyFinancial * WEEKS_PER_MONTH);
+    }
+    public static double normaliseMonthlyIncome(int currentPriceYear, double monthlyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, BASE_PRICE_YEAR, currentPriceYear, currentPriceYear, monthlyFinancial);
+    }
+    public static double normaliseMonthlyIncome(int currentPriceYear, int targetWagesYear, double monthlyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, BASE_PRICE_YEAR, currentPriceYear, targetWagesYear, monthlyFinancial);
+    }
+    public static double normaliseWeeklyIncome(int currentPriceYear, int targetPriceYear, int currentWagesYear, int targetWagesYear, double weeklyFinancial) {
+        return normaliseMonthlyIncome(currentPriceYear, targetPriceYear, currentWagesYear, targetWagesYear, weeklyFinancial * WEEKS_PER_MONTH);
+    }
+    public static double normaliseMonthlyIncome(int currentPriceYear, int targetPriceYear, int currentWagesYear, int targetWagesYear, double monthlyFinancial) {
         double infAdj = 1.0;
-        if (priceYear != BASE_PRICE_YEAR)
-            infAdj = getTimeSeriesValue(BASE_PRICE_YEAR, TimeSeriesVariable.Inflation) / getTimeSeriesValue(priceYear, TimeSeriesVariable.Inflation);
-        return Parameters.asinh(monthlyFinancial * infAdj);
+        if (currentPriceYear != targetPriceYear)
+            infAdj = getTimeSeriesValue(targetPriceYear, TimeSeriesVariable.Inflation) / getTimeSeriesValue(currentPriceYear, TimeSeriesVariable.Inflation);
+        if (currentWagesYear != targetWagesYear)
+            infAdj *= getTimeSeriesValue(targetWagesYear, TimeSeriesVariable.WageGrowth) / getTimeSeriesValue(currentWagesYear, TimeSeriesVariable.WageGrowth);
+        return asinh(monthlyFinancial * infAdj);
     }
     public static void setTrainingFlag(boolean flag) {
         trainingFlag = flag;

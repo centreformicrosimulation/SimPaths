@@ -438,7 +438,6 @@ public class TaxDonorDataParser {
      * output .txt files, picking up the relevant columns for each EUROMOD policy scenario, that
      * will eventually be parsed into the JAS-mine input database.
      *
-     *
      */
     public static void constructAggregateTaxDonorPopulationCSVfile(Country country, boolean showGui) {
 
