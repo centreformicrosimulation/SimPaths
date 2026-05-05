@@ -98,8 +98,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @NullInitialised @Transient private Boolean careFormalFlag;
     @NullInitialised @Transient private Boolean careFromInformalFlag;
     @Column(name="careHrsProvidedWeek") private Double careHrsProvidedWeek;
-    @Enumerated(EnumType.STRING) @Column(name="careProvidedFlag") private SocialCareProvision careProvidedFlag;
-    @Lag(field="careProvidedFlag") @Transient private SocialCareProvision careProvidedFlagL1;
+    @Transient private Indicator careProvidedFlag;
+    @Lag(field="careProvidedFlag") @Transient private Indicator careProvidedFlagL1;
     @Lag(field="careNeedFlag") @Transient private Indicator careNeedFlagL1;
     @Lag(field="careHrsFormalWeek") @Transient private Double careHrsFormalWeekL1;
     @Lag(field="careHrsProvidedWeek") @Transient private Double careHrsProvidedWeekL1;
@@ -446,7 +446,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         careHrsProvidedWeek = Objects.requireNonNullElse(originalPerson.careHrsProvidedWeek, 0.0);
         careProvidedFlag = Objects.requireNonNullElseGet(originalPerson.careProvidedFlag, () ->
-                (careHrsProvidedWeek > 0.01) ? SocialCareProvision.OnlyOther : SocialCareProvision.None);
+                (careHrsProvidedWeek > 0.01) ? Indicator.True : Indicator.False);
 
         careNeedFlagL1 = Objects.requireNonNullElse(originalPerson.careNeedFlagL1, careNeedFlag);
         careHrsFormalWeekL1 = Objects.requireNonNullElse(originalPerson.careHrsFormalWeekL1, careHrsFormalWeek);
@@ -559,7 +559,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // initialise random draws
         this.statSeed = statSeed;
-        statInnovations = new Innovations(37, 1, 1, statSeed);
+        statInnovations = new Innovations(38, 1, 1, statSeed);
 
         //Draw desired age and wage differential for parametric partnership formation for people above age to get married:
         double[] sampleDifferentials = setMarriageTargets();
@@ -601,12 +601,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         careReceivedFlag = SocialCareReceipt.None;
         careFormalFlag = false;
         careFromInformalFlag = false;
-        careProvidedFlag = SocialCareProvision.None;
+        careProvidedFlag = Indicator.False;
         careNeedFlagL1 = Indicator.False;
         careHrsFormalWeekL1 = -9.0;
         careHrsInformalWeekL1 = -9.0;
         careHrsProvidedWeekL1 = -9.0;
-        careProvidedFlagL1 = SocialCareProvision.None;
+        careProvidedFlagL1 = Indicator.False;
     }
 
     public void setAdditionalFieldsInInitialPopulation() {
@@ -639,6 +639,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         if (!Parameters.checkFinite(careHrsInformalWeek))
             careHrsInformalWeek = 0.0;
+        if (careHrsProvidedWeek < 0.01) {
+            careProvidedFlag = Indicator.False;
+        } else {
+            careProvidedFlag = Indicator.True;
+        }
         if (demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             Person mother = benefitUnit.getFemale();
             if (mother!=null)
@@ -1490,7 +1495,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegInformalCareHoursS2d().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2d");
                     double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(12));
-                    double informalHours = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * gauss));
+                    double informalHours = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.sinh(score + rmse * gauss));
                     careFromInformalFlag = true;
                     careHrsInformalWeek = informalHours;
 
@@ -1563,7 +1568,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     double score = Parameters.getRegFormalCareHoursS2e().getScore(this,Person.DoublesVariables.class);
                     double rmse = Parameters.getRMSEForRegression("S2e");
                     double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(13));
-                    careHrsFormalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.exp(score + rmse * gauss));
+                    careHrsFormalWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_FORMAL_CARE, Math.sinh(score + rmse * gauss));
                     careFormalX = careHrsFormalWeek * Parameters.getTimeSeriesValue(model.getYear(), TimeSeriesVariable.CarerWageRate);
 
                     // Retired process (kept for future reuse): S2k formal care hours.
@@ -1583,7 +1588,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void evaluateSocialCareProvision(double probitAdjustment) {
 
-        careProvidedFlag = SocialCareProvision.None;
+        careProvidedFlag = Indicator.False;
         careHrsProvidedWeek = 0.0;
         if (demAge >= Parameters.MIN_AGE_TO_PROVIDE_CARE) {
 
@@ -1606,7 +1611,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 double score = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getScore(this, Person.DoublesVariables.class);
                 probProvideAny = Parameters.getRegNoCarePartnerProvCareToOtherS3b().getProbability(score + probitAdjustment);
             }
-            boolean provideCare = (statInnovations.getDoubleDraw(13) < probProvideAny);
+            boolean provideCare = (statInnovations.getDoubleDraw(37) < probProvideAny);
             if (!Parameters.flagSuppressSocialCareCosts && provideCare) {
 
                 double score;
@@ -1623,20 +1628,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                     rmse = Parameters.getRMSEForRegression("S3d");
                 }
                 double gauss = Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(14));
-                careHrsProvidedWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.exp(score + rmse * gauss));
-                if (careToPartner) {
-
-                    if (careHrsProvidedWeek > careHoursToPartner) {
-
-                        careProvidedFlag = SocialCareProvision.PartnerAndOther;
-                    } else {
-
-                        careProvidedFlag = SocialCareProvision.OnlyPartner;
-                    }
-                } else {
-
-                    careProvidedFlag = SocialCareProvision.OnlyOther;
-                }
+                careHrsProvidedWeek = Math.min(Parameters.MAX_HOURS_WEEKLY_INFORMAL_CARE, Math.sinh(score + rmse * gauss));
+                careProvidedFlag = Indicator.True;
             }
         }
     }
@@ -3250,25 +3243,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return (partner != null && Indicator.True.equals(partner.getNeedSocialCare())) ? 1. : 0.;
             }
             case ProvideCare_L1 -> {
-                return (careProvidedFlagL1 != null && !SocialCareProvision.None.equals(careProvidedFlagL1)) ? 1. : 0.;
-            }
-            case CareToPartnerOnly -> {
-                return (SocialCareProvision.OnlyPartner.equals(careProvidedFlag)) ? 1. : 0.;
-            }
-            case CareToPartnerAndOther -> {
-                return (SocialCareProvision.PartnerAndOther.equals(careProvidedFlag)) ? 1. : 0.;
-            }
-            case CareToOtherOnly -> {
-                return (SocialCareProvision.OnlyOther.equals(careProvidedFlag)) ? 1. : 0.;
-            }
-            case CareToPartnerOnly_L1 -> {
-                return (SocialCareProvision.OnlyPartner.equals(careProvidedFlagL1)) ? 1. : 0.;
-            }
-            case CareToPartnerAndOther_L1 -> {
-                return (SocialCareProvision.PartnerAndOther.equals(careProvidedFlagL1)) ? 1. : 0.;
-            }
-            case CareToOtherOnly_L1 -> {
-                return (SocialCareProvision.OnlyOther.equals(careProvidedFlagL1)) ? 1. : 0.;
+                return (Indicator.True.equals(careProvidedFlagL1)) ? 1. : 0.;
             }
             case ReceiveCare_L1 -> {
                 return (getTotalHoursSocialCare_L1() > 0.01) ? 1. : 0.;
@@ -5146,15 +5121,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else return null;
     }
 
-    private void nullPartnerVariables() {
-
-        demPartnerNYear = 0;
-        if (SocialCareProvision.OnlyPartner.equals(careProvidedFlag))
-            careProvidedFlag = SocialCareProvision.None;
-        else if (SocialCareProvision.PartnerAndOther.equals(careProvidedFlag))
-            careProvidedFlag = SocialCareProvision.OnlyOther;
-    }
-
     public Labour getLabourSupplyWeekly() {
         if (labHrsWorkEnumWeek ==null)
             throw new RuntimeException("request for labourSupplyWeekly before it has been initialised");
@@ -5324,7 +5290,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setCareHoursFromFormalWeekly_lag1(double val) {
         careHrsFormalWeekL1 = val;
     }
-    public void setSocialCareProvision_lag1(SocialCareProvision careProvision) {
+    public void setSocialCareProvision_lag1(Indicator careProvision) {
         careProvidedFlagL1 = careProvision;
     }
 
@@ -5426,8 +5392,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         careReceivedFlag = who;
     }
 
-    public void setSocialCareProvision(SocialCareProvision who) {
-        careProvidedFlag = who;
+    public void setSocialCareProvision(Indicator provide) {
+        careProvidedFlag = provide;
     }
 
     public Indicator getDlltsd_lag1() {
@@ -5803,11 +5769,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return (double)getSocialCareProvision().getValue();
     }
 
-    public SocialCareProvision getSocialCareProvision() {
-        if (careProvidedFlag ==null)
-            return SocialCareProvision.None;
-        else
-            return careProvidedFlag;
+    public Indicator getSocialCareProvision() {
+        return Objects.requireNonNullElse(careProvidedFlag, Indicator.False);
     }
 
     public double getRetired() {

@@ -175,7 +175,7 @@ public class Expectations {
         personProxyThisPeriod.setDhe(currentStates.getHealthCode());
         personProxyThisPeriod.setDeh_c4(currentStates.getEducationCode());
         personProxyThisPeriod.setDcpstLocal(currentStates.getDcpst());
-        personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionCode());
+        personProxyThisPeriod.setSocialCareProvision(currentStates.getSocialCareProvisionState());
         personProxyThisPeriod.populateSocialCareReceipt(currentStates.getSocialCareReceiptStateCode());
 
         // add person proxy for next period expectations
@@ -194,7 +194,7 @@ public class Expectations {
         personProxyNextPeriod.setDhe(currentStates.getHealthCode());
         personProxyNextPeriod.setDhe_lag1(currentStates.getHealthCode());
         personProxyNextPeriod.populateSocialCareReceipt_lag1(currentStates.getSocialCareReceiptStateCode());
-        personProxyNextPeriod.setSocialCareProvision_lag1(currentStates.getSocialCareProvisionCode());
+        personProxyNextPeriod.setSocialCareProvision_lag1(currentStates.getSocialCareProvisionState());
         personProxyNextPeriod.setDed(currentStates.getStudentIndicator());
         personProxyNextPeriod.setDeh_c4(currentStates.getEducationCode());
         personProxyNextPeriod.setDeh_c4_lag1(currentStates.getEducationCode());
@@ -499,15 +499,18 @@ public class Expectations {
         double socialCareHoursProvidedWeekly = 0.0;
         if (Parameters.flagSocialCare && !Parameters.flagSuppressSocialCareCosts) {
 
-            SocialCareProvision status = currentStates.getSocialCareProvisionCode();
-            if (!SocialCareProvision.None.equals(status)) {
-                // With S3e retired, no separate regression is used for hours provided in expectations.
-                socialCareHoursProvidedWeekly = 0.0;
+            Indicator status = currentStates.getSocialCareProvisionState();
+            if (!Indicator.False.equals(status)) {
 
-                // Retired process (kept for future reuse): S3e provided care hours.
-                // double score = Parameters.getRegCareHoursProvS3e().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
-                // double rmse = Parameters.getRMSEForRegression("S3e");
-                // socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
+                double score, rmse;
+                if (cohabitation) {
+                    score = Parameters.getRegCareHoursProvS3d().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
+                    rmse = Parameters.getRMSEForRegression("S3d");
+                } else {
+                    score = Parameters.getRegCareHoursProvS3c().getScore(personProxyThisPeriod,Person.DoublesVariables.class);
+                    rmse = Parameters.getRMSEForRegression("S3c");
+                }
+                socialCareHoursProvidedWeekly = Math.min(80.0, Math.exp(score + rmse*rmse/2.0));
             }
         }
         return socialCareHoursProvidedWeekly;

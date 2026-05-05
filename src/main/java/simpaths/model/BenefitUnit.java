@@ -4684,7 +4684,7 @@ Contemporaneous values of dhhtp_c4 are required for validation. Update and outpu
 
         careProvidedFlag = 0;
         for (Person person : getMembers()) {
-            if (!SocialCareProvision.None.equals(person.getSocialCareProvision()))
+            if (!Indicator.False.equals(person.getSocialCareProvision()))
                 careProvidedFlag = 1;
         }
     }
