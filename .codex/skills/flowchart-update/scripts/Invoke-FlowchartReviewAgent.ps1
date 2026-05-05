@@ -3,7 +3,9 @@ param(
     [switch]$DryRun,
     [ValidateSet("read-only", "workspace-write", "danger-full-access")]
     [string]$CodexSandbox = "workspace-write",
-    [switch]$BypassCodexSandbox
+    [switch]$BypassCodexSandbox,
+    [switch]$Quiet,
+    [string]$LogPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +14,12 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = (Resolve-Path -LiteralPath (Join-Path $ScriptDir "..\..\..\..")).Path
 $PrepareWrapper = Join-Path $ScriptDir "Prepare-FlowchartReview.ps1"
 $PromptPath = Join-Path $RepoRoot "documentation\flowcharts\flowchart_review_prompt.md"
+
+if (-not $LogPath) {
+    $LogPath = Join-Path $RepoRoot "documentation\flowcharts\flowchart_review_agent.log"
+} elseif (-not [System.IO.Path]::IsPathRooted($LogPath)) {
+    $LogPath = Join-Path $RepoRoot $LogPath
+}
 
 $Codex = Get-Command codex -ErrorAction SilentlyContinue
 if (-not $Codex) {
@@ -43,7 +51,14 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-$PrepareOutput | ForEach-Object { Write-Host $_ }
+if ($Quiet) {
+    $PrepareSummary = ($PrepareOutput | Select-Object -First 1)
+    if ($PrepareSummary) {
+        Write-Host $PrepareSummary
+    }
+} else {
+    $PrepareOutput | ForEach-Object { Write-Host $_ }
+}
 
 $PromptWritten = $PrepareOutput -match "^Wrote flowchart review prompt to "
 if (-not $PromptWritten) {
@@ -93,4 +108,24 @@ if ($IsRange) {
 
 Write-Host ""
 Write-Host "Launching Codex flowchart review agent..."
-Get-Content -LiteralPath $PromptPath -Raw | & $Codex.Source @CodexArgs
+if ($Quiet) {
+    $LogDir = Split-Path -Parent $LogPath
+    if ($LogDir -and -not (Test-Path -LiteralPath $LogDir)) {
+        New-Item -ItemType Directory -Path $LogDir | Out-Null
+    }
+    "Flowchart review agent log" | Set-Content -LiteralPath $LogPath -Encoding utf8
+    "Revision: $Rev" | Add-Content -LiteralPath $LogPath -Encoding utf8
+    "Command: codex $($CodexArgs -join ' ')" | Add-Content -LiteralPath $LogPath -Encoding utf8
+    "" | Add-Content -LiteralPath $LogPath -Encoding utf8
+    Get-Content -LiteralPath $PromptPath -Raw | & $Codex.Source @CodexArgs *>> $LogPath
+    $CodexExitCode = $LASTEXITCODE
+    if ($CodexExitCode -ne 0) {
+        Write-Host "Codex flowchart review failed. See log:"
+        Write-Host "  $LogPath"
+        exit $CodexExitCode
+    }
+    Write-Host "Codex flowchart review finished. Verbose output logged to:"
+    Write-Host "  $LogPath"
+} else {
+    Get-Content -LiteralPath $PromptPath -Raw | & $Codex.Source @CodexArgs
+}

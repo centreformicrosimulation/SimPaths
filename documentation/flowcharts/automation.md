@@ -70,6 +70,36 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReview
 
 The installer derives the repository root from its own location, so it installs the hook into the matching clone's `.git/hooks/` folder.
 
+## Install Automatic Post-Commit AI Review
+
+To avoid manually running the Codex review command after each code commit, install the hook in agent mode:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Mode Agent -BypassCodexSandbox -Quiet -Force
+```
+
+Preview the hook change without installing it:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Install-FlowchartReviewHook.ps1 -Mode Agent -BypassCodexSandbox -Quiet -DryRun
+```
+
+After each commit, this runs:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Rev HEAD -BypassCodexSandbox -Quiet
+```
+
+If the new commit has no matched code files, no AI review is launched. If candidates exist, Codex reviews the latest commit and may leave documentation changes in the working tree. Review and commit those documentation changes separately.
+
+`-Quiet` keeps the PowerShell output short. The full Codex transcript is written to:
+
+```text
+documentation/flowcharts/flowchart_review_agent.log
+```
+
+The `.log` file is ignored by Git. Quiet mode reduces terminal noise, but it does not remove the token cost of the AI review itself.
+
 ## After The Hook Runs
 
 For a relevant code commit, the hook may leave working-tree changes after the commit:
@@ -123,6 +153,12 @@ The semi-automated workflow stops after writing `flowchart_review_prompt.md`. To
 D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1
 ```
 
+For shorter terminal output:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -Quiet
+```
+
 The script:
 
 1. runs `Prepare-FlowchartReview.ps1 -UpdateManifest`;
@@ -166,4 +202,10 @@ D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewA
 
 Use this mode only from the repository you intend Codex to edit, because it gives the Codex subprocess direct filesystem access.
 
-This is intentionally separate from the post-commit hook. Running an AI agent inside every commit hook would be slow and harder to control. A practical workflow is: let the hook prepare the prompt automatically, then run `Invoke-FlowchartReviewAgent.ps1` when you want Codex to perform the documentation review.
+On the Windows setup where the Codex sandbox reports `CreateProcessAsUserW failed: 5`, use:
+
+```powershell
+D:\CeMPA\SimPaths\.codex\skills\flowchart-update\scripts\Invoke-FlowchartReviewAgent.ps1 -BypassCodexSandbox -Quiet
+```
+
+Agent mode is optional because running an AI agent inside every commit hook is slower and uses tokens on each relevant code commit. A conservative workflow is to let the hook prepare the prompt automatically, then run `Invoke-FlowchartReviewAgent.ps1` when you want Codex to perform the documentation review. A fully automated local workflow is to install the hook with `-Mode Agent -Quiet`.

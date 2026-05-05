@@ -1,6 +1,11 @@
 param(
     [switch]$Uninstall,
-    [switch]$Force
+    [switch]$Force,
+    [ValidateSet("Prompt", "Agent")]
+    [string]$Mode = "Prompt",
+    [switch]$BypassCodexSandbox,
+    [switch]$Quiet,
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -47,12 +52,13 @@ $Hook = @'
 # SimPaths flowchart review hook
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-SCRIPT="$REPO_ROOT/.codex/skills/flowchart-update/scripts/Prepare-FlowchartReview.ps1"
+SCRIPT="$REPO_ROOT/.codex/skills/flowchart-update/scripts/__SCRIPT_NAME__"
+ARGS="__SCRIPT_ARGS__"
 
 if command -v powershell.exe >/dev/null 2>&1; then
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" -UpdateManifest
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" $ARGS
 elif command -v pwsh >/dev/null 2>&1; then
-  pwsh -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" -UpdateManifest
+  pwsh -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT" $ARGS
 else
   echo "Flowchart review hook skipped: PowerShell was not found." >&2
 fi
@@ -60,7 +66,30 @@ fi
 exit 0
 '@
 
+if ($Mode -eq "Agent") {
+    $ScriptName = "Invoke-FlowchartReviewAgent.ps1"
+    $ScriptArgs = "-Rev HEAD"
+    if ($BypassCodexSandbox) {
+        $ScriptArgs += " -BypassCodexSandbox"
+    }
+    if ($Quiet) {
+        $ScriptArgs += " -Quiet"
+    }
+} else {
+    $ScriptName = "Prepare-FlowchartReview.ps1"
+    $ScriptArgs = "-UpdateManifest"
+}
+
+$Hook = $Hook.Replace("__SCRIPT_NAME__", $ScriptName).Replace("__SCRIPT_ARGS__", $ScriptArgs)
+
+if ($DryRun) {
+    Write-Host "Dry run only. Would install flowchart review post-commit hook: $HookPath"
+    Write-Host "After each commit, the hook would run:"
+    Write-Host "  .codex/skills/flowchart-update/scripts/$ScriptName $ScriptArgs"
+    exit 0
+}
+
 Set-Content -LiteralPath $HookPath -Value $Hook -Encoding ascii
 Write-Host "Installed flowchart review post-commit hook: $HookPath"
 Write-Host "After each commit, the hook runs:"
-Write-Host "  .codex/skills/flowchart-update/scripts/Prepare-FlowchartReview.ps1 -UpdateManifest"
+Write-Host "  .codex/skills/flowchart-update/scripts/$ScriptName $ScriptArgs"
