@@ -1573,10 +1573,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 if (partner == null) {
                     // partnership formation
 
-                    // double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
-                    // prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
-                    double score = Parameters.getRegPartnershipU1b().getScore(this, Person.DoublesVariables.class);
-                    prob = Parameters.getRegPartnershipU1b().getProbability(score + probitAdjustment);
+                    double score = Parameters.getRegPartnershipU1().getScore(this, Person.DoublesVariables.class);
+                    prob = Parameters.getRegPartnershipU1().getProbability(score + probitAdjustment);
                     demBePartnerFlag = (cohabitInnov < prob);
                     if (demBePartnerFlag)
                         model.getPersonsToMatch().get(demMaleFlag).get(getRegion()).add(this);
