@@ -311,7 +311,7 @@ public class ExpectationsFactory {
             if (Dcpst.Partnered.equals(personProxyNextPeriod.getDcpst()))
                 lexpectations.evaluateDiscrete(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis));
             else
-                lexpectations.evaluateLabelledIndicator(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis), 3.0);
+                lexpectations.evaluateDiscrete(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis));
         } else if (Axis.WagePotential.equals(axis)) {
 
             lexpectations.evaluateGaussian(personProxyNextPeriod, personProxyNextPeriod.getRegressionName(axis),
@@ -445,7 +445,7 @@ public class ExpectationsFactory {
             val1 = states.getSocialCareReceiptCode();
         } else if (Axis.SocialCareProvision.equals(axis)) {
             val0 = personProxyNextPeriod.getSocialCareProvision();
-            val1 = states.getSocialCareProvisionCode();
+            val1 = states.getSocialCareProvisionState();
         } else if (Axis.Cohabitation.equals(axis)) {
             val0 = personProxyNextPeriod.getDcpst();
             val1 = states.getDcpst();
@@ -478,7 +478,7 @@ public class ExpectationsFactory {
             } else if (Axis.SocialCareReceipt.equals(axis)) {
                 personProxyNextPeriod.setSocialCareReceipt(states.getSocialCareReceiptCode());
             } else if (Axis.SocialCareProvision.equals(axis)) {
-                personProxyNextPeriod.setSocialCareProvision(states.getSocialCareProvisionCode());
+                personProxyNextPeriod.setSocialCareProvision(states.getSocialCareProvisionState());
             } else if (Axis.Cohabitation.equals(axis)) {
                 personProxyNextPeriod.setDcpstLocal(states.getDcpst());
             } else if (Axis.Child.equals(axis)) {

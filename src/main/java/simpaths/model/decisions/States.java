@@ -332,12 +332,6 @@ public class States {
             loopConsider = false;
         }
 
-        // check care provision
-        if (!getCohabitation() &&
-                ( SocialCareProvision.OnlyPartner.equals(getSocialCareProvisionCode()) ||
-                        SocialCareProvision.PartnerAndOther.equals(getSocialCareProvisionCode()) ))
-            loopConsider = false;
-
         // return result
         return loopConsider;
     }
@@ -651,7 +645,7 @@ public class States {
 
     /**
      * METHOD TO RETURN SOCIAL CARE PROVISION
-     * @return integer (0 no care, 1 only to partner, 2 to partner and other, 3 only to other
+     * @return integer (0 no care, 1 care)
      */
     int getSocialCareProvision() {
         if (Parameters.flagSocialCare) {
@@ -914,12 +908,16 @@ public class States {
     /**
      * METHOD TO IDENTIFY SOCIAL CARE PROVISION CODE IMPLIED BY STATE COMBINATION
      */
-    SocialCareProvision getSocialCareProvisionCode() {
-        SocialCareProvision code;
+    Indicator getSocialCareProvisionState() {
+        Indicator code;
         if (Parameters.flagSocialCare)
-            code = SocialCareProvision.getCode(getVal(Axis.SocialCareProvision));
+            if (getSocialCareProvision()==0) {
+                code = Indicator.False;
+            } else {
+                code = Indicator.True;
+            }
         else
-            code = SocialCareProvision.None;
+            code = Indicator.False;
         return code;
     }
 

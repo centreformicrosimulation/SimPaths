@@ -802,7 +802,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         EndYear,
         UnionMatching,
         LabourMarketAndIncomeUpdate,
-        SocialCareMarketClearing,
 
         //Alignment Processes
         FertilityAlignment,
@@ -881,9 +880,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     unionMatchingNoRegion(false); //Run matching again relaxing regions this time
                 }
                 if (commentsOn) log.info("Union matching complete.");
-            }
-            case SocialCareMarketClearing -> {
-                socialCareMarketClearing();
             }
             case FertilityAlignment -> {
 
@@ -1908,21 +1904,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 }
             }
             matches.addAll(matchesHere);
-        }
-    }
-
-    private void socialCareMarketClearing() {
-
-        // adjust provision so that aggregate provision broadly matches aggregate receipt
-        double careProvisionAdjustment = Parameters.getTimeSeriesValue(getYear(),TimeSeriesVariable.CareProvisionAdjustment);
-        SocialCareAlignment socialCareAlignment = new SocialCareAlignment(persons, careProvisionAdjustment);
-        double[] startVal = new double[] {careProvisionAdjustment};
-        double[] lowerBound = new double[] {careProvisionAdjustment - 1.5};
-        double[] upperBound = new double[] {careProvisionAdjustment + 1.5};
-        RootSearch search = new RootSearch(lowerBound, upperBound, startVal, socialCareAlignment, 1.0E-2, 0.001);
-        search.evaluate();
-        if (search.isTargetAltered()) {
-            Parameters.putTimeSeriesValue(getYear(), search.getTarget()[0], TimeSeriesVariable.CareProvisionAdjustment);
         }
     }
 
