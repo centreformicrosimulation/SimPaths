@@ -176,8 +176,7 @@ public class UnionMatching {
                 Math.abs(earningsMatch) < Parameters.POTENTIAL_EARNINGS_DIFFERENCE_INITIAL_BOUND) {
 
             // Score currently based on an equally weighted measure.  The Iterative (Simple and Random) Matching algorithm prioritises matching to the potential partner that returns the lowest score from this method (therefore, on aggregate we are trying to minimize the value below).
-            // return earningsMatch * earningsMatch + ageMatch * ageMatch;
-            return Math.abs(earningsMatch) + Math.abs(ageMatch);
+            return earningsMatch * earningsMatch + ageMatch * ageMatch;
         } else return Double.POSITIVE_INFINITY;        //Not to be included in possible partners
     }
 }
