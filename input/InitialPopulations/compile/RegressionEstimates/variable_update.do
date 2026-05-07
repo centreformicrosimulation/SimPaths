@@ -17,6 +17,10 @@ foreach var in idhh idperson idpartner idfather idmother dct drgn1 dwt dnc02 dnc
         qui recode `var' (-9/-1=.)
 }
 
+* Set data
+xtset idperson swv
+sort idperson swv
+
 *==================================================
 * Student flag
 *==================================================
@@ -275,7 +279,7 @@ gen Dhe       = dhe
 gen Ydses_c5  = ydses_c5
 gen Dcpyy     = dcpyy
 gen Dcpagdf   = dcpagdf
-gen FertilityRate = dukfr
+gen fertilityRate = dukfr
 gen Dhh_owned = dhh_owned
 
 gen Elig_pen    = dagpns
@@ -388,7 +392,8 @@ replace dage10prime = 2 if (dag>44 & dag<55)
 replace dage10prime = 3 if (dag>54 & dag<65)
 replace dage10prime = 4 if (dag>64)
 //table dage10prime, stat(min dag) stat(max dag)
-table dage10prime, c(min dag max dag)
+//table dage10prime, c(min dag max dag)
+tabstat dag, by(dage10prime) stat(min max)
 
 * - Categorical: 65-66, 67-68, 69-70, 71-72..., 85+
 gen dage2old = 0
@@ -397,7 +402,8 @@ forval ii = 1/10 {
 }
 replace dage2old = 11 if (dag >= 85)
 //table dage2old, stat(min dag) stat(max dag)
-table dage2old, c(min dag max dag)
+//table dage2old, c(min dag max dag)
+tabstat dag, by(dage2old) stat(min max)
 
 * Poor health flag
 gen poor_health = (dhe == 1)
@@ -433,7 +439,8 @@ cap rename Age_16 Age85plus
 
 tab dage10prime, gen(Age_)
 //table dage10prime, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-table dage10prime, c(min dag max dag)	
+//table dage10prime, c(min dag max dag)	
+tabstat dag, by(dage10prime) stat(min max)
 drop Age_1
 rename Age_2 Age35to44
 rename Age_3 Age45to54
@@ -442,7 +449,8 @@ rename Age_5 Age65plus
 
 tab dage2old, gen(Age_)
 //table dage2old, stat(min dag) stat(max dag)	// RMK: AgeXX categories start at 1, hence shifted by 1
-table dage2old, c(min dag max dag)
+//table dage2old, c(min dag max dag)
+tabstat dag, by(dage2old) stat(min max)
 drop Age_1	
 rename Age_2 Age65to66
 rename Age_3 Age67to68
@@ -632,4 +640,360 @@ replace lhw_c5=40 if (lhw>=36 & lhw!=.)
 label define lhwsp 0 "Zero" 10 "Ten" 20 "Twenty" 30 "Thirty" 40 "Forty"
 label value lhw_c5 lhwsp
 la var lhw_c5 "Hours worked per week (category)"
+
+
+*==================================================
+* Refactoring variable names 
+*==================================================
+xtset idperson stm
+
+gen demMaleFlag	= dgn
+gen demAge = dag
+gen demAgeSq = dagsq
+gen eduSampleFlag = ded
+
+
+gen eduSampleFlagL1 = l.ded
+
+gen eduHighestParentC3 = dehmf_c3 
+tab eduHighestParentC3, gen(eduHighestParentC3_)
+
+rename eduHighestParentC3_1 eduHighestParentC3High
+rename eduHighestParentC3_2 eduHighestParentC3Medium
+rename eduHighestParentC3_3 eduHighestParentC3Low
+
+gen eduHighestParentC3L1 = l.dehmf_c3 
+tab eduHighestParentC3L1, gen(eduHighestParentC3L1_)
+
+rename eduHighestParentC3L1_1 eduHighestParentC3HighL1 
+rename eduHighestParentC3L1_2 eduHighestParentC3MediumL1 
+rename eduHighestParentC3L1_3 eduHighestParentC3LowL1 
+
+gen yHhQuintilesMonthC5 = ydses_c5
+tab yHhQuintilesMonthC5 , gen(yHhQuintilesMonthC5Q)
+
+gen yHhQuintilesMonthC5L1 = l.ydses_c5
+tab yHhQuintilesMonthC5L1 , gen(yHhQuintilesMonthC5L1_Q)
+
+rename yHhQuintilesMonthC5L1_Q1 yHhQuintilesMonthC5Q1L1
+rename yHhQuintilesMonthC5L1_Q2 yHhQuintilesMonthC5Q2L1
+rename yHhQuintilesMonthC5L1_Q3 yHhQuintilesMonthC5Q3L1
+rename yHhQuintilesMonthC5L1_Q4 yHhQuintilesMonthC5Q4L1
+rename yHhQuintilesMonthC5L1_Q5 yHhQuintilesMonthC5Q5L1
+
+gen demRgn = drgn1
+
+tab drgn1, gen(demRgn_)
+
+rename demRgn_1  demRgnUKC
+rename demRgn_2  demRgnUKD
+rename demRgn_3  demRgnUKE
+rename demRgn_4  demRgnUKF
+rename demRgn_5  demRgnUKG
+rename demRgn_6  demRgnUKH
+rename demRgn_7  demRgnUKI
+rename demRgn_8  demRgnUKJ
+rename demRgn_9  demRgnUKK
+rename demRgn_10 demRgnUKL
+rename demRgn_11 demRgnUKM
+rename demRgn_12 demRgnUKN
+
+gen demYear = stm
+
+foreach y of numlist 11/25 {
+    gen demYear20`y' = (demYear == `y')
+	}
+
+gen demEthnC4 = dot 
+tab demEthnC4, gen(demEthnC4_)
+
+rename demEthnC4_1 demEthnC4White
+rename demEthnC4_2 demEthnC4Asian
+rename demEthnC4_3 demEthnC4Black
+rename demEthnC4_4 demEthnC4Other	
+	
+gen demPartnerStatus = dcpst
+gen demPartnerStatusPartnered = (dcpst==1)
+gen demPartnerStatusSingle = (dcpst==2)
+
+gen demPartnerStatusL1 = l.dcpst
+gen demPartnerStatusPartneredL1 = (demPartnerStatusL1==1)
+gen demPartnerStatusSingleL1 = (demPartnerStatusL1==2)
+
+gen eduHighestC4 = deh_c4
+gen eduHighestC4L1 = l.deh_c4
+
+gen eduHighestC4Na = (eduHighestC4==0)
+gen eduHighestC4High = (eduHighestC4==1)
+gen eduHighestC4Medium = (eduHighestC4==2)
+gen eduHighestC4Low = (eduHighestC4==3)
+
+gen eduHighestC4NaL1 = (eduHighestC4L1==0)
+gen eduHighestC4HighL1 = (eduHighestC4L1==1)
+gen eduHighestC4MediumL1 = (eduHighestC4L1==2)
+gen eduHighestC4LowL1 = (eduHighestC4L1==3)
+
+gen eduHighestPartnerC3	= dehsp_c3
+gen eduHighestPartnerC3L1	= l.dehsp_c3
+
+gen eduHighestPartnerC3HighL1 = (eduHighestPartnerC3L1==1)
+gen eduHighestPartnerC3MediumL1 = (eduHighestPartnerC3L1==2)
+gen eduHighestPartnerC3LowL1 = (eduHighestPartnerC3L1==3)
+
+gen labStatusC3 = les_c3
+gen labStatusC3L1 = l.les_c3
+
+gen labStatusC3EmployedL1    = (labStatusC3L1==1)
+gen labStatusC3StudentL1     = (labStatusC3L1==2)
+gen labStatusC3NotEmployedL1 = (labStatusC3L1==3)
+
+
+gen labStatusPartnerC3	= lessp_c3
+gen labStatusPartnerC3L1 = l.les_c3
+
+gen labStatusPartnerC3EmployedL1    = (labStatusPartnerC3L1==1)
+gen labStatusPartnerC3StudentL1     = (labStatusPartnerC3L1==2)
+gen labStatusPartnerC3NotEmplL1 = (labStatusPartnerC3L1==3)
+
+gen labStatusC4 = les_c4
+gen labStatusC4L1 = l.les_c4
+
+gen labStatusC4EmployedL1    = (labStatusC4L1==1)
+gen labStatusC4StudentL1     = (labStatusC4L1==2)
+gen labStatusC4NotEmployedL1 = (labStatusC4L1==3)
+gen labStatusC4RetiredL1     = (labStatusC4L1==4)
+
+gen demNChild = dnc
+gen demNChild0to2 = dnc02
+
+gen demNChildL1 = l.demNChild
+gen demNChild0to2L1 = l.demNChild0to2
+
+gen eduSampleFlag_demMaleFlag = eduSampleFlag * demMaleFlag
+gen eduSampleFlag_demNChildL1 = eduSampleFlag * demNChildL1
+gen eduSampleFlag_demNChild0to2L1 = eduSampleFlag * demNChild0to2L1
+gen eduSampleFlag_Single = eduSampleFlag * demPartnerStatusSingle
+
+gen eduSampleFlag_Q2L1 = eduSampleFlag * yHhQuintilesMonthC5Q2L1
+gen eduSampleFlag_Q3L1 = eduSampleFlag * yHhQuintilesMonthC5Q3L1
+gen eduSampleFlag_Q4L1 = eduSampleFlag * yHhQuintilesMonthC5Q4L1
+gen eduSampleFlag_Q5L1 = eduSampleFlag * yHhQuintilesMonthC5Q5L1
+
+
+gen labStatusC4EmployedL1_Male = labStatusC4EmployedL1 * demMaleFlag
+gen labStatusC4StudentL1_Male = labStatusC4StudentL1 * demMaleFlag
+//gen labStatusC4NotEmployedL1_Male = labStatusC4NotEmployedL1 * demMaleFlag
+gen labStatusC4RetiredL1_Male = labStatusC4RetiredL1 * demMaleFlag
+
+gen healthPhysicalPcs = dhe_pcs
+gen healthMentalMcs	= dhe_mcs
+
+gen healthPhysicalPcsL1 = l.healthPhysicalPcs
+gen healthMentalMcsL1	= l.healthMentalMcs
+
+gen healthPhysicalPartnerPcs = dhe_pcssp
+gen healthMentalPartnerMcs = dhe_mcssp
+
+gen healthPhysicalPartnerPcsL1 = l.dhe_pcssp
+gen healthMentalPartnerMcsL1	= l.dhe_mcssp
+
+gen demPartnerNYear	= dcpyy
+gen demPartnerNYearL1 = l.demPartnerNYear
+
+gen demEnterPartnerFlag = new_rel
+gen demEnterPartnerFlagL1 = l.new_rel
+
+gen demAgePartnerDiff = dcpagdf
+gen demAgePartnerDiffL1 = l.dcpagdf
+
+gen labStatusPartnerAndOwnC4 = lesdf_c4
+gen labStatusPartnerAndOwnC4L1 = l.lesdf_c4
+
+gen labStatusPartnerAndOwnC41L1     = (labStatusPartnerAndOwnC4L1==1)
+gen labStatusPartnerAndOwnC42L1     = (labStatusPartnerAndOwnC4L1==2)
+gen labStatusPartnerAndOwnC43L1     = (labStatusPartnerAndOwnC4L1==3)
+gen labStatusPartnerAndOwnC44L1     = (labStatusPartnerAndOwnC4L1==4)
+
+gen yNonBenPersGrossMonth = ypnbihs_dv
+gen yNonBenPersGrossMonthL1 = l.ypnbihs_dv
+
+gen yPersAndPartnerGrossDiffMonth = ynbcpdf_dv
+gen yPersAndPartnerGrossDiffMonthL1 = l.ynbcpdf_dv
+
+gen demCompHhC4 = dhhtp_c4
+gen demCompHhC4L1 = l.dhhtp_c4
+
+gen demCompHhC4CoupleNoChL1 = (l.dhhtp_c4==1)
+gen demCompHhC4CoupleChL1   = (l.dhhtp_c4==2)
+gen demCompHhC4SingleNoChL1 = (l.dhhtp_c4==3)
+gen demCompHhC4L1SingleChL1 = (l.dhhtp_c4==4)
+					
+gen healthDsblLongtermFlag = dlltsd01
+gen healthDsblLongtermFlagL1 = l.dlltsd01
+
+gen demCompHhC8= dhhtp_c8
+tab demCompHhC8, gen(demCompHhC8)
+
+gen demCompHhC8L1  = l.dhhtp_c8
+
+gen demCompHhC81L1 = (l.dhhtp_c8==1)
+gen demCompHhC82L1 = (l.dhhtp_c8==2)
+gen demCompHhC83L1 = (l.dhhtp_c8==3)
+gen demCompHhC84L1 = (l.dhhtp_c8==4)
+gen demCompHhC85L1 = (l.dhhtp_c8==5)
+gen demCompHhC86L1 = (l.dhhtp_c8==6)
+gen demCompHhC87L1 = (l.dhhtp_c8==7)
+gen demCompHhC88L1 = (l.dhhtp_c8==8)
+
+gen yMiscPersGrossMonth	= yptciihs_dv
+gen yMiscPersGrossMonthL1	= l.yptciihs_dv
+
+gen wealthPrptyFlag = dhh_owned
+gen wealthPrptyFlagL1 = l.dhh_owned
+
+gen demPensAgeFlag	= dagpns
+gen demPensPartnerAgeFlag = dagpns_sp
+
+gen demPensAgeFlag_NotEmployedL1 = demPensAgeFlag * labStatusC3NotEmployedL1 
+
+
+* adjust capital income 
+sum ypncp, det
+scalar p99 = r(p99)
+replace ypncp = . if ypncp >= p99
+
+gen yCapitalPersMonth = ypncp
+gen yCapitalPersMonthL1 = l.ypncp
+gen yCapitalPersMonthL2 = l2.ypncp
+
+gen yEmpPersGrossMonth = yplgrs_dv
+gen yEmpPersGrossMonthL1 = l.yplgrs_dv
+gen yEmpPersGrossMonthL2 = l2.yplgrs_dv
+gen yEmpPersGrossMonthL3 = l3.yplgrs_dv
+
+gen eduSampleFlag_Male  = eduSampleFlag * demMaleFlag
+
+gen eduSampleFlag_Pcs = eduSampleFlag * healthPhysicalPcs
+gen eduSampleFlag_Mcs = eduSampleFlag * healthMentalMcs
+
+gen eduSampleFlag_PcsL1 = l.eduSampleFlag_Pcs
+gen eduSampleFlag_McsL1 = l.eduSampleFlag_Mcs
+
+gen eduSampleFlag_yCapitalPers = eduSampleFlag * yCapitalPersMonth
+gen eduSampleFlag_yCapitalPersL1 = l.eduSampleFlag_yCapitalPers
+gen eduSampleFlag_yCapitalPersL2 = l2.eduSampleFlag_yCapitalPers
+
+gen eduSampleFlag_yEmpPersGross = eduSampleFlag * yEmpPersGrossMonth
+gen eduSampleFlag_yEmpPersGrossL1 = l.eduSampleFlag_yEmpPersGross
+gen eduSampleFlag_yEmpPersGrossL2 = l2.eduSampleFlag_yEmpPersGross
+
+gen eduHighestC4Na_demAge = eduHighestC4Na * dag 
+gen eduHighestC4Low_demAge = eduHighestC4Low * dag 
+gen eduHighestC4Medium_demAge = eduHighestC4Medium * dag 
+gen eduHighestC4High_demAge = eduHighestC4High * dag 
+
+gen eduHighestC4NaL1_demAge   = eduHighestC4NaL1 * demAge
+gen eduHighestC4LowL1_demAge    = eduHighestC4LowL1 * demAge
+gen eduHighestC4MediumL1_demAge = eduHighestC4MediumL1 * demAge
+gen eduHighestC4HighL1_demAge   = eduHighestC4HighL1 * demAge
+
+gen labPt = (lhw > 0 & lhw <=25)
+
+* adjust pension income 
+sum ypnoab, det
+scalar p99 = r(p99)
+replace ypnoab = . if ypnoab >= p99
+
+gen yPensPersGrossMonth = ypnoab
+gen yPensPersGrossMonthL1 = l.ypnoab
+gen yPensPersGrossMonthL2 = l2.ypnoab
+
+gen healthSelfRated = dhe 
+
+tab healthSelfRated, gen(healthSelfRated_)
+rename healthSelfRated_1 healthSelfRatedPoor
+rename healthSelfRated_2 healthSelfRatedFair
+rename healthSelfRated_3 healthSelfRatedGood
+rename healthSelfRated_4 healthSelfRatedVeryGood
+rename healthSelfRated_5 healthSelfRatedExcellent
+
+
+gen healthPartnerSelfRated = dhesp 
+
+tab healthPartnerSelfRated, gen(healthPartnerSelfRated_)
+rename healthPartnerSelfRated_1 healthPartnerSelfRatedPoor
+rename healthPartnerSelfRated_2 healthPartnerSelfRatedFair
+rename healthPartnerSelfRated_3 healthPartnerSelfRatedGood
+rename healthPartnerSelfRated_4 healthPartnerSelfRatedVeryGood
+rename healthPartnerSelfRated_5 healthPartnerSelfRatedExcellent
+
+
+
+rename Age20to24 demAge20to24
+rename Age25to29 demAge25to29
+rename Age30to34 demAge30to34
+rename Age35to39 demAge35to39
+rename Age40to44 demAge40to44
+rename Age45to49 demAge45to49
+rename Age50to54 demAge50to54
+rename Age55to59 demAge55to59
+rename Age60to64 demAge60to64
+rename Age65to69 demAge65to69
+rename Age70to74 demAge70to74
+rename Age75to79 demAge75to79
+rename Age80to84 demAge80to84
+rename Age85plus demAge85plus
+
+rename Age65to66 demAge65to66
+rename Age67to68 demAge67to68
+rename Age69to70 demAge69to70
+rename Age71to72 demAge71to72
+rename Age73to74 demAge73to74
+rename Age75to76 demAge75to76
+rename Age77to78 demAge77to78
+rename Age79to80 demAge79to80
+rename Age81to82 demAge81to82
+rename Age83to84 demAge83to84
+
+gen careMarket = CareMarket
+gen careMarketL1 = l.careMarket
+
+
+gen careMarketInformal = (careMarket == 2)
+gen careMarketMixed = (careMarket == 3)
+gen careMarketFormal = (careMarket == 4)
+
+gen careMarketInformalL1 = (l.careMarket== 2)
+gen careMarketMixedL1    = (l.careMarket == 3)
+gen careMarketFormalL1   = (l.careMarket == 4)
+
+gen careHrsInformalIhs = HrsReceivedInformalIHS
+gen careHrsInformalIhsL1 = l.HrsReceivedInformalIHS
+
+gen careHrsFormalIhs = HrsReceivedFormalIHS 
+gen careHrsFormalIhsL1 = l.HrsReceivedFormalIHS
+
+
+gen careNeedFlag = NeedCare	
+gen careNeedFlagL1 = l.NeedCare
+
+gen careReceivedFlag = ReceiveCare 
+gen careReceivedFlagL1 = l.ReceiveCare 
+
+gen careProvidedFlag = ProvideCare	
+gen careProvidedFlagL1 = l.ProvideCare
+
+gen careNeedPartnerFlag = NeedCarePartner
+gen careReceivedPartnerFlag = ReceiveCarePartner 
+
+gen careMarketInformalPartner = CareMarketInformalPartner
+gen careMarketMixedPsrtner = CareMarketMixedPartner
+gen careMarketFormalPartner = CareMarketFormalPartner 
+
+gen careHrsProvidedWeekIhs = HrsProvidedInformalIHS 
+gen careHrsProvidedWeekIhsL1 = l.HrsProvidedInformalIHS 
+
+*==================================================
+* End  
+*==================================================
 
