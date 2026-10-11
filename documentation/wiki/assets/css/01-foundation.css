@@ -68,6 +68,11 @@
   --sp-accent:          #972A6C;
   --sp-accent-light:    #B9318A;
   --sp-accent-bright:   #972A6C;
+  /* Fixed ink for the deliberately light editorial panels in either theme. */
+  --sp-panel-ink:       #343134;
+  --sp-panel-muted:     #64616B;
+  --sp-panel-link:      #972A6C;
+  --sp-panel-link-hover:#712050;
   --sp-hairline:        linear-gradient(to right, #D5D2DA 0%, #D5D2DA 40%, transparent 100%);
   --sp-surface:         #FFFFFF;
   --sp-surface-strong:  #FFFFFF;
@@ -95,9 +100,9 @@ body {
 ═══════════════════════════════════════════════ */
 
 [data-md-color-primary="custom"] {
-  --md-primary-fg-color:        #343134;
-  --md-primary-fg-color--light: #514B56;
-  --md-primary-fg-color--dark:  #27232D;
+  --md-primary-fg-color:        var(--sp-midnight);
+  --md-primary-fg-color--light: var(--sp-wine);
+  --md-primary-fg-color--dark:  var(--sp-midnight-deep);
   --md-primary-bg-color:        var(--sp-paper);
   --md-primary-bg-color--light: rgba(250,249,245,0.7);
 }
@@ -126,41 +131,32 @@ body {
 ═══════════════════════════════════════════════ */
 
 [data-md-color-scheme="slate"] {
-  --sp-accent: #5cb8f0; --sp-crimson: #8dd0f7;
-  --md-default-bg-color:          #141e2a;
-  --md-default-bg-color--light:   #1a2836;
-  --md-default-bg-color--lighter: #223444;
-  --md-default-bg-color--lightest:#2c3f54;
-  --md-code-bg-color:             #1a2836;
-  --md-default-fg-color:          rgba(250,249,245,0.92);
-  --md-default-fg-color--light:   rgba(250,249,245,0.72);
-  --md-default-fg-color--lighter: rgba(250,249,245,0.48);
-  --md-default-fg-color--lightest:rgba(250,249,245,0.14);
-  --sp-surface:                   rgba(25,37,49,0.84);
-  --sp-surface-strong:            rgba(28,42,56,0.94);
+  color-scheme: dark;
+  --sp-midnight:                  #F1EDF2;
+  --sp-wine:                      #DCD4DF;
+  --sp-wine-soft:                 #BDB4C4;
+  --sp-ghost:                     #514957;
+  --sp-accent:                    #EFA8D2;
+  --sp-accent-light:              #F6C8E4;
+  --sp-accent-bright:             #EFA8D2;
+  --sp-crimson:                   #F6C8E4;
+  --md-default-bg-color:          #211E26;
+  --md-default-bg-color--light:   #2B2731;
+  --md-default-bg-color--lighter: #36303E;
+  --md-default-bg-color--lightest:#514957;
+  --md-code-bg-color:             #2B2731;
+  --md-default-fg-color:          var(--sp-midnight);
+  --md-default-fg-color--light:   var(--sp-wine-soft);
+  --md-default-fg-color--lighter: #A89CAF;
+  --md-default-fg-color--lightest:#514957;
+  --sp-surface:                   #2B2731;
+  --sp-surface-strong:            #36303E;
   --sp-border-soft:               rgba(250,249,245,0.08);
   --sp-border-strong:             rgba(250,249,245,0.14);
   --sp-shadow-soft:               0 10px 28px rgba(0,0,0,0.22);
   --sp-shadow-medium:             0 18px 38px rgba(0,0,0,0.3);
-  --sp-sidebar-hover:             rgba(92,184,240,0.08);
-  --sp-sidebar-active:            rgba(92,184,240,0.14);
-}
-
-[data-md-color-scheme="slate"] .md-typeset a {
-  color: #5cb8f0 !important;
-}
-[data-md-color-scheme="slate"] .md-typeset a:hover {
-  color: #8dd0f7 !important;
-}
-
-[data-md-color-scheme="slate"] .md-nav__item--active > .md-nav__link {
-  color: #5cb8f0 !important;
-}
-[data-md-color-scheme="slate"] .md-nav__link:hover {
-  color: #8dd0f7 !important;
-}
-[data-md-color-scheme="slate"] .md-nav__link--active {
-  color: #5cb8f0 !important;
+  --sp-sidebar-hover:             rgba(239,168,210,0.08);
+  --sp-sidebar-active:            rgba(239,168,210,0.14);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .highlight {
@@ -168,9 +164,9 @@ body {
 }
 
 [data-md-color-scheme="slate"] .md-typeset blockquote {
-  background: linear-gradient(135deg, rgba(32,46,60,0.9) 0%, rgba(25,36,47,0.96) 100%);
+  background: var(--sp-surface);
   border-color: var(--sp-border-soft);
-  border-left-color: rgba(92,184,240,0.32);
+  border-left-color: var(--sp-accent);
 }
 
 /* ═══════════════════════════════════════════════
@@ -189,10 +185,9 @@ body {
   border-bottom-color: var(--sp-crimson);
 }
 
-[data-md-color-scheme="slate"] .md-typeset a:not(.md-button):not(.headerlink):not(.md-nav__link):hover {
-  color: #8dd0f7 !important;
-  border-bottom-color: #8dd0f7 !important;
-}
-
 /* Inline links remain identifiable without relying on hue. */
 .md-typeset p a:not(.md-button) { text-decoration: underline; text-underline-offset: 0.16em; }
+@media (prefers-reduced-motion: reduce) {
+  :root { --sp-transition: none; }
+  .md-tabs__link::after, .md-button, .simpaths-home-research-band :is(a.research-entry, .research-title) { transition: none !important; transform: none !important; }
+}

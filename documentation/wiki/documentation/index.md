@@ -69,9 +69,9 @@ hide:
     <span class="docs-index__description">Reference material for the JAS-mine libraries used by SimPaths.</span>
   </a>
   <a class="docs-index__link" href="../developer-guide/internals/api/">
-    <strong>SimPaths API</strong>
+    <strong>Generate API documentation</strong>
     <span class="docs-index__arrow" aria-hidden="true">→</span>
-    <span class="docs-index__description">API documentation for the principal SimPaths classes and interfaces.</span>
+    <span class="docs-index__description">Build and inspect the Javadoc reference for your local version of SimPaths.</span>
   </a>
 </div>
 </section>

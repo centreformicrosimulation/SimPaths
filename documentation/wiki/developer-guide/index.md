@@ -1,258 +1,25 @@
 ---
+layout: directory
 hide:
   - toc
 ---
 
 # Developer Guide
 
-<style>
-  .md-typeset .dev-guide-intro {
-    margin: -0.08rem 0 1rem;
-  }
-
-  .md-typeset .dev-guide-intro__copy {
-    max-width: 52rem;
-  }
-
-  .md-typeset .dev-guide-intro__copy p {
-    margin: 0;
-    font-size: 0.8rem;
-    line-height: 1.65;
-    color: var(--sp-midnight);
-    text-align: left;
-  }
-
-  .md-typeset .dev-guide-intro__copy p + p {
-    margin-top: 0.55rem;
-  }
-
-  .md-typeset .dev-guide-intro__brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.9rem;
-    margin: 0.9rem 0 0.2rem;
-    padding-top: 0.78rem;
-    border-top: 1px solid rgba(42,56,72,0.1);
-  }
-
-  .md-typeset .dev-guide-intro__eyebrow {
-    margin: 0;
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgba(42,56,72,0.55);
-  }
-
-  .md-typeset .dev-guide-intro__brand img {
-    width: min(16rem, 100%);
-    margin: 0;
-    opacity: 0.96;
-  }
-
-  .md-typeset > ul:first-of-type {
-    margin: 0.55rem 0 1.3rem;
-  }
-
-  .md-typeset details.dev-guide-panel,
-  .md-typeset details.dev-guide-focus {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .md-typeset details.dev-guide-panel {
-    margin: 0.95rem 0 1rem;
-    border: 1px solid rgba(42,56,72,0.1);
-    border-radius: 16px !important;
-    background: rgba(255,255,255,0.99);
-    box-shadow: 0 8px 22px rgba(24,32,44,0.03);
-  }
-
-  .md-typeset details.dev-guide-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 4px;
-    background: #6095da;
-    pointer-events: none;
-  }
-
-  .md-typeset details.dev-guide-panel:hover {
-    border-color: rgba(42,56,72,0.15);
-    box-shadow: 0 12px 28px rgba(24,32,44,0.05);
-  }
-
-  .md-typeset details.dev-guide-panel[open] {
-    border-color: rgba(42,56,72,0.16);
-    box-shadow: 0 14px 30px rgba(24,32,44,0.055);
-  }
-
-  .md-typeset details.dev-guide-panel > summary {
-    position: relative;
-    font-family: var(--sp-heading-font) !important;
-    font-size: 1.06rem;
-    font-weight: 680;
-    letter-spacing: 0.005em;
-    color: var(--sp-midnight);
-    background: rgba(255,255,255,0.99) !important;
-    padding: 1.08rem 3.3rem 1.08rem 1.55rem;
-    transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-  }
-
-  .md-typeset details.dev-guide-panel > summary:hover {
-    background: rgba(249,251,253,0.98) !important;
-  }
-
-  .md-typeset details.dev-guide-panel > summary::before {
-    background-color: #6095da !important;
-  }
-
-  .md-typeset details.dev-guide-panel > summary::after {
-    content: "";
-    position: absolute;
-    right: 1.3rem;
-    top: 50%;
-    width: 0.52rem;
-    height: 0.52rem;
-    border-right: 1.75px solid rgba(42,56,72,0.44);
-    border-bottom: 1.75px solid rgba(42,56,72,0.44);
-    transform: translateY(-58%) rotate(-45deg);
-    transition: transform 0.18s ease, border-color 0.18s ease;
-  }
-
-  .md-typeset details.dev-guide-panel[open] > summary {
-    border-bottom: 1px solid rgba(42,56,72,0.08);
-    background: rgba(252,253,255,0.99) !important;
-  }
-
-  .md-typeset details.dev-guide-panel[open] > summary::after {
-    transform: translateY(-68%) rotate(45deg);
-    border-color: rgba(96,149,218,0.82);
-  }
-
-  .md-typeset details.dev-guide-panel > :not(summary) {
-    margin-left: 1.4rem;
-    margin-right: 1.4rem;
-  }
-
-  .md-typeset details.dev-guide-panel p,
-  .md-typeset details.dev-guide-panel ul,
-  .md-typeset details.dev-guide-panel ol,
-  .md-typeset details.dev-guide-focus p,
-  .md-typeset details.dev-guide-focus ul,
-  .md-typeset details.dev-guide-focus ol {
-    text-align: left;
-    hyphens: none;
-    -webkit-hyphens: none;
-  }
-
-  .md-typeset details.dev-guide-panel > p:first-of-type,
-  .md-typeset details.dev-guide-panel > ul:first-of-type,
-  .md-typeset details.dev-guide-panel > ol:first-of-type,
-  .md-typeset details.dev-guide-panel > details:first-of-type {
-    margin-top: 1.1rem;
-  }
-
-  .md-typeset details.dev-guide-panel > p:last-child,
-  .md-typeset details.dev-guide-panel > ul:last-child,
-  .md-typeset details.dev-guide-panel > ol:last-child,
-  .md-typeset details.dev-guide-panel > details:last-child {
-    margin-bottom: 1.15rem;
-  }
-
-  .md-typeset details.dev-guide-focus {
-    margin: 1rem 0 0.45rem;
-    border: 1px solid rgba(96,149,218,0.16);
-    border-radius: 12px !important;
-    background: rgba(249,252,255,0.98);
-    box-shadow: none;
-  }
-
-  .md-typeset details.dev-guide-focus::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 3px;
-    background: rgba(96,149,218,0.72);
-    pointer-events: none;
-  }
-
-  .md-typeset details.dev-guide-focus > summary {
-    position: relative;
-    font-family: var(--md-text-font) !important;
-    font-size: 0.72rem;
-    font-weight: 750;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #4f7db8;
-    background: rgba(249,252,255,0.98) !important;
-    padding: 0.88rem 2.6rem 0.88rem 1.35rem;
-    border-bottom: 1px solid rgba(96,149,218,0.1);
-  }
-
-  .md-typeset details.dev-guide-focus > summary::before {
-    background-color: #6095da !important;
-  }
-
-  .md-typeset details.dev-guide-focus > summary::after {
-    content: "";
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    width: 0.42rem;
-    height: 0.42rem;
-    border-right: 1.75px solid rgba(42,56,72,0.42);
-    border-bottom: 1.75px solid rgba(42,56,72,0.42);
-    transform: translateY(-58%) rotate(-45deg);
-    transition: transform 0.18s ease, border-color 0.18s ease;
-  }
-
-  .md-typeset details.dev-guide-focus[open] > summary::after {
-    transform: translateY(-68%) rotate(45deg);
-    border-color: rgba(96,149,218,0.82);
-  }
-
-  .md-typeset details.dev-guide-focus > :not(summary) {
-    margin-left: 1.15rem;
-    margin-right: 1.15rem;
-  }
-
-  .md-typeset details.dev-guide-focus > p:first-of-type,
-  .md-typeset details.dev-guide-focus > ul:first-of-type,
-  .md-typeset details.dev-guide-focus > ol:first-of-type {
-    margin-top: 0.85rem;
-  }
-
-  .md-typeset details.dev-guide-focus > p:last-child,
-  .md-typeset details.dev-guide-focus > ul:last-child,
-  .md-typeset details.dev-guide-focus > ol:last-child {
-    margin-bottom: 0.95rem;
-  }
-
-  @media (max-width: 44.9375em) {
-    .md-typeset .dev-guide-intro__brand {
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-
-    .md-typeset details.dev-guide-panel > :not(summary),
-    .md-typeset details.dev-guide-focus > :not(summary) {
-      margin-left: 1rem;
-      margin-right: 1rem;
-    }
-  }
-</style>
-
 <div class="dev-guide-intro">
   <div class="dev-guide-intro__copy">
     <p>SimPaths is a Java project based on the JAS-mine simulation libraries.</p>
     <p>JAS-mine extends Java functionalities and provides an architectural template for dynamic microsimulation and agent-based models, aimed at improving the clarity and transparency of the model structure.</p>
-    <div class="dev-guide-intro__brand">
-      <p class="dev-guide-intro__eyebrow">Built on</p>
-      <img src="https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png" alt="JAS-mine logo">
-    </div>
+
   </div>
 </div>
+
+<nav class="sp-section-routes" aria-label="Developer guide routes">
+  <a href="repository-guide/"><strong>Repository Guide</strong><span>Locate the implementation, input files and estimation pipeline.</span></a>
+  <a href="jasmine/"><strong>JAS-mine Architecture</strong><span>Understand the project structure, event schedule and simulation entry points.</span></a>
+  <a href="internals/"><strong>SimPaths Internals</strong><span>Explore the key classes and their implementation in SimPaths.</span></a>
+  <a href="how-to/"><strong>How-To Guides</strong><span>Introduce variables, expose GUI parameters and run batch simulations.</span></a>
+</nav>
 
 ## Start here
 
@@ -263,6 +30,11 @@ hide:
 5. Use [Working in GitHub](working-in-github.md) to prepare a tested, reviewable contribution.
 
 The principles below explain the underlying JAS-mine architecture. For library-level reference material, consult:
+
+<div class="dev-guide-intro__brand">
+  <span class="dev-guide-intro__eyebrow">Built on</span>
+  <img src="https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png" alt="JAS-mine logo" loading="lazy" decoding="async">
+</div>
 
 * [JAS-mine GitHub repository](https://github.com/jasmineRepo)
 * [JAS-mine core API](https://raw.githack.com/jasmineRepo/JAS-mine-core/master/microsim-core/doc/index.html)

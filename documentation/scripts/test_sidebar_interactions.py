@@ -1,6 +1,7 @@
 """Source contracts for restrained Documentation sidebar interactions."""
 
 from pathlib import Path
+from html.parser import HTMLParser
 import unittest
 
 from test_site_typography import blocks
@@ -77,7 +78,7 @@ class SidebarInteractionTest(unittest.TestCase):
     def test_documentation_home_has_both_theme_palettes(self):
         dark = '[data-md-color-scheme="slate"].sp-docs-navigation .md-sidebar--primary'
         for selector, colours in ((SIDEBAR, ("#fff", "#d9dce0", "#fff")),
-                                  (dark, ("#1a2836", "#465565", "#1a2836"))):
+                                  (dark, ("var(--sp-surface)", "var(--sp-border-strong)", "var(--sp-surface-strong)"))):
             rule = blocks(self.source, selector)[0]
             for role, value in zip(("bg", "border", "hover"), colours):
                 self.assertEqual(rule["--sp-sidebar-home-" + role], value)
@@ -124,8 +125,39 @@ class SidebarInteractionTest(unittest.TestCase):
         self.assertEqual(light_rule["--sp-sidebar-hover-bg"], "#eceef0")
         dark = '[data-md-color-scheme="slate"].sp-docs-navigation .md-sidebar--primary'
         dark_rule = blocks(self.source, dark)[0]
-        self.assertEqual(dark_rule["--sp-sidebar-hover-ink"], "#f5f8fb")
-        self.assertEqual(dark_rule["--sp-sidebar-hover-bg"], "rgba(255, 255, 255, 0.075)")
+        self.assertEqual(dark_rule["--sp-sidebar-hover-ink"], "var(--md-default-fg-color)")
+        self.assertEqual(dark_rule["--sp-sidebar-hover-bg"], "var(--sp-sidebar-hover)")
+
+    def test_header_drawer_and_search_are_named_native_buttons(self):
+        class Controls(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.controls = {}
+
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                if "data-sp-toggle" in attrs:
+                    self.controls[attrs["data-sp-toggle"]] = (tag, attrs)
+
+        parser = Controls()
+        parser.feed((CSS.parents[3] / "overrides/partials/header.html").read_text())
+        self.assertEqual(set(parser.controls), {"drawer", "search"})
+        for name, controlled in (("drawer", "sp-site-navigation"), ("search", "sp-site-search")):
+            tag, attrs = parser.controls[name]
+            self.assertEqual(tag, "button")
+            self.assertEqual(attrs["type"], "button")
+            self.assertEqual(attrs["aria-controls"], controlled)
+            self.assertEqual(attrs["aria-expanded"], "false")
+            self.assertTrue(attrs["aria-label"])
+
+    def test_mobile_parent_title_cannot_cover_nested_back_controls(self):
+        # A global z-index on this title would paint it over Material's z=1
+        # mobile subpanels, making the nested Back control unreachable.
+        general = blocks(self.source, ".md-nav__title")[0]
+        self.assertNotIn("z-index", general)
+        self.assertNotIn("position", general)
+        self.assertNotIn("box-shadow", general)
+        self.assertIn("@media screen and (min-width: 76.25em)", self.source)
 
 
 if __name__ == "__main__":

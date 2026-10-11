@@ -1,7 +1,6 @@
 ---
 title: Funding
 hide:
-  - navigation
   - toc
 ---
 

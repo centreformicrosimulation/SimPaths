@@ -1,3 +1,13 @@
+---
+reading_navigation:
+  previous:
+    title: Getting Started
+    url: getting-started/
+  next:
+    title: Input Data
+    url: getting-started/data/
+---
+
 <div class="setup-guide" markdown="1">
 
 <header class="setup-guide__intro" markdown="1">

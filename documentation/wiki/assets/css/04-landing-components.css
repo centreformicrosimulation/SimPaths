@@ -81,6 +81,7 @@
 
 .md-typeset .docs-index__intro {
   margin: 1.05rem 0 0;
+  max-width: var(--sp-reading-measure);
   color: rgba(31, 38, 48, 0.72);
   font-size: 0.72rem;
   line-height: 1.6;

@@ -1,14 +1,13 @@
-/* ═══════════════════════════════════════════════
-   HOMEPAGE — INSTITUTIONAL SYSTEM
-   Evidence-led landing page patterns for SimPaths.
-═══════════════════════════════════════════════ */
+/* HOMEPAGE — INSTITUTIONAL SYSTEM
+   Evidence-led landing page patterns for SimPaths. */
 
 html.sp-page-home .md-main__inner {
   margin-top: 0;
 }
 
-html.sp-page-home .md-content .md-content__inner {
+html.sp-page-home .md-container .md-main .md-content > .md-content__inner {
   padding-top: 0;
+  margin-inline: 0;
   margin-bottom: 0;
 }
 
@@ -18,258 +17,122 @@ html.sp-page-home .md-main .md-top {
 }
 
 .simpaths-home-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
   width: 100vw;
   margin: 0 calc(50% - 50vw);
   padding: 2.65rem 1.2rem 2.72rem;
   background: var(--sp-home-hero-bg);
-  border-top: none;
-  border-bottom: none;
-  box-shadow: none;
-}
-
-.simpaths-home-hero::before {
-  display: none;
 }
 
 .simpaths-home-hero__inner {
-  position: relative;
-  z-index: 1;
   max-width: 43rem;
   margin: 0 auto;
   padding: 0.25rem 0;
   text-align: center;
 }
-
 .simpaths-home-hero__brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
+  display: flex; flex-direction: column; align-items: center;
   margin-bottom: 0.6rem;
 }
-
 .simpaths-home-hero__logo {
   display: block;
   width: clamp(5.25rem, 9.1vw, 6.12rem); aspect-ratio: 514 / 256;
-  height: auto;
-  margin: 0 auto 0.62rem;
+  height: auto; margin: 0 auto 0.62rem;
   filter: saturate(1.16) brightness(1.08) contrast(1.06) drop-shadow(0 16px 26px rgba(14,22,34,0.24));
 }
 
 .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
-  position: relative;
-  margin: 0 !important;
-  padding-bottom: 0 !important;
+  margin: 0;
   color: rgba(255,255,255,0.92);
-  border-bottom: none !important;
-  font-family: var(--sp-hero-title-font) !important;
-  font-size: clamp(1.78rem, 3.2vw, 2.24rem) !important;
+  font-size: clamp(1.78rem, 3.2vw, 2.24rem);
   font-weight: 610;
   line-height: 1.02;
   letter-spacing: -0.035em;
-  text-shadow: 0 3px 9px rgba(0,0,0,0.1);
 }
-
-.md-typeset .simpaths-home-hero h1.simpaths-home-hero__title::after {
-  display: none !important;
-  content: none;
-}
-
 .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
-  margin: 0.42rem 0 0 !important;
-  padding-bottom: 0 !important;
+  margin: 0.42rem 0 0;
   color: rgba(255,255,255,0.9);
-  font-size: 0.62rem;
-  font-weight: 650;
-  line-height: 1.2;
-  letter-spacing: 0.195em;
-  text-align: center !important;
-  text-shadow:
-    0 0 16px rgba(151,190,255,0.22),
-    0 1px 10px rgba(0,0,0,0.32);
-  text-transform: uppercase;
+  font-size: 0.62rem; font-weight: 650; line-height: 1.2;
+  letter-spacing: 0.195em; text-align: center; text-transform: uppercase;
 }
 
 .simpaths-home-intro-band {
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 4.75rem 1.2rem 3.45rem;
-  background: #FFFFFF;
+  padding: 2.5rem 1.2rem 2.75rem;
+  background: var(--md-default-bg-color);
 }
 
 .simpaths-home-intro-band__inner {
   max-width: var(--sp-home-max);
   margin: 0 auto;
 }
-
 .md-typeset .simpaths-home-intro-band__lede,
 .md-typeset .simpaths-home-intro-band__body {
   margin: 0;
-  max-width: 64rem;
-  color: #343134;
+  color: var(--sp-midnight);
   font-size: var(--sp-reading-copy-size);
-  font-weight: 520;
+  font-weight: 450;
   line-height: var(--sp-reading-line-height);
   text-align: left;
   hyphens: none;
   -webkit-hyphens: none;
 }
+.md-typeset .simpaths-home-intro-band__body { margin-top: 1.05rem; }
 
-.md-typeset .simpaths-home-intro-band__body {
-  margin-top: 1.18rem;
-  max-width: 60rem;
+.md-typeset .simpaths-home-features__heading {
+  margin: 1.8rem 0 0;
+  font-size: var(--sp-section-size);
+  font-weight: var(--sp-section-weight);
+  scroll-margin-top: calc(var(--sp-header-height) + 1.2rem);
 }
 
-.md-typeset .simpaths-home-intro-band__lede,
-.md-typeset .simpaths-home-intro-band__body:not(.simpaths-home-intro-band__body--bridge) {
-  hyphens: none;
-}
-
-.md-typeset .simpaths-capability-combination {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 1.9rem minmax(12rem, 0.28fr);
-  gap: 1.15rem;
-  align-items: stretch;
-  max-width: var(--sp-home-max);
-  margin-top: 1.28rem;
-}
-
-.md-typeset .simpaths-capability-combination__features {
+.md-typeset .simpaths-home-features {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-areas:
-    "capability-one capability-two"
-    "capability-three capability-four"
-    "capability-five capability-five";
-  gap: 0.92rem 1.5rem;
+  gap: 1.5rem 3rem;
+  margin: 1.2rem 0 0;
 }
 
-.md-typeset .simpaths-capability-combination__features article {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1.36rem minmax(0, 1fr);
-  gap: 0 0.7rem;
+.md-typeset .simpaths-home-features > div {
   min-width: 0;
-  padding: 0.1rem 0 0;
 }
 
-.md-typeset .simpaths-capability-combination__features article:nth-child(1) {
-  grid-area: capability-one;
-}
-
-.md-typeset .simpaths-capability-combination__features article:nth-child(2) {
-  grid-area: capability-two;
-}
-
-.md-typeset .simpaths-capability-combination__features article:nth-child(3) {
-  grid-area: capability-three;
-}
-
-.md-typeset .simpaths-capability-combination__features article:nth-child(4) {
-  grid-area: capability-four;
-}
-
-.md-typeset .simpaths-capability-combination__features article:nth-child(5) {
-  grid-area: capability-five;
-}
-
-.md-typeset .simpaths-capability-combination__features article:nth-child(5) p {
-  max-width: 36rem;
-}
-
-.md-typeset .simpaths-capability-combination__features span {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: grid;
-  place-items: center;
-  width: 1.18rem;
-  height: 1.18rem;
-  color: #64616B;
-  font-size: 0.48rem;
-  font-weight: 780;
-  line-height: 1;
-  background: #FFFFFF;
-  border: 1px solid #D5D2DA;
-  border-radius: 999px;
-}
-
-.md-typeset .simpaths-capability-combination__features h3 {
-  grid-column: 2;
-  margin: 0 0 0.34rem !important;
-  color: #343134 !important;
-  font-family: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-  font-size: var(--sp-reading-copy-size);
-  font-weight: var(--sp-subheading-weight);
-  line-height: 1.18;
-  letter-spacing: 0.01em;
-}
-
-.md-typeset .simpaths-capability-combination__features p {
-  grid-column: 2;
+.md-typeset .simpaths-home-features dt {
   margin: 0;
-  color: #343134;
+  color: var(--sp-midnight);
+  font-size: var(--sp-subheading-size);
+  font-weight: var(--sp-subheading-weight);
+  line-height: 1.4;
+}
+
+.md-typeset .simpaths-home-features dt a:not(.md-button):not(.headerlink):not(.md-nav__link) {
+  border-bottom: 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.simpaths-home-features dt a:focus-visible {
+  outline: 2px solid var(--sp-accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.md-typeset .simpaths-home-features dd {
+  margin: 0.35rem 0 0;
+  color: var(--sp-midnight);
   font-size: var(--sp-reading-copy-size);
+  font-weight: 400;
   line-height: var(--sp-reading-line-height);
   text-align: left;
   hyphens: none;
   -webkit-hyphens: none;
-}
-
-.md-typeset .simpaths-capability-combination__brace {
-  align-self: stretch;
-  position: relative;
-  width: 1.65rem;
-}
-
-.md-typeset .simpaths-capability-combination__brace::before {
-  position: absolute;
-  top: 0.48rem;
-  right: 0;
-  bottom: 0.48rem;
-  width: 1.55rem;
-  content: "";
-  border-top: 1.5px solid #D5D2DA;
-  border-right: 1.5px solid #D5D2DA;
-  border-bottom: 1.5px solid #D5D2DA;
-  border-radius: 0 1.7rem 1.7rem 0;
-}
-
-.md-typeset .simpaths-capability-combination__result {
-  display: grid;
-  align-content: center;
-  justify-items: start;
-  min-height: 9rem;
-  padding-left: 0.15rem;
-  border-left: 0;
-}
-
-.md-typeset .simpaths-capability-combination__result span {
-  color: #64616B;
-  font-size: 0.56rem;
-  font-weight: 760;
-  line-height: 1.22;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.md-typeset .simpaths-capability-combination__result strong {
-  margin-top: 0.42rem;
-  color: #343134;
-  font-family: var(--sp-heading-font);
-  font-size: clamp(1.38rem, 2.7vw, 1.86rem);
-  font-weight: 700;
-  line-height: 1.04;
-  letter-spacing: -0.035em;
 }
 
 .simpaths-home-intro-band__access-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.62rem 1.15rem;
+  gap: 0.62rem 1.35rem;
   margin-top: 1.35rem;
 }
 
@@ -279,9 +142,8 @@ html.sp-page-home .md-main .md-top {
   gap: 0.42rem;
   color: var(--sp-accent);
   font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: var(--sp-label-weight);
+  letter-spacing: 0;
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: color 0.2s ease, border-color 0.2s ease;
@@ -383,74 +245,21 @@ html.sp-page-home .md-main .md-top {
   outline: 2px solid var(--sp-accent); outline-offset: 5px;
 }
 
-@media (max-width: 900px) {
-  .md-typeset .simpaths-capability-combination {
-    grid-template-columns: 1fr;
-    gap: 0.82rem;
-  }
-
-  .md-typeset .simpaths-capability-combination__features {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .md-typeset .simpaths-capability-combination__features article:nth-child(5) {
-    max-width: 100%;
-  }
-
-  .md-typeset .simpaths-capability-combination__brace {
-    display: none;
-  }
-
-  .md-typeset .simpaths-capability-combination__result {
-    min-height: auto;
-    padding: 0.88rem 0 0;
-    border-left: 0;
-    border-top: 1px solid #D5D2DA;
-  }
-
-}
-
 @media (max-width: 760px) {
   .simpaths-home-hero {
     padding: 1.85rem 1rem 2rem;
   }
-
-  .simpaths-home-hero__logo {
-    width: 4.2rem;
-  }
-
-  .md-typeset .simpaths-home-hero h1.simpaths-home-hero__title {
-    font-size: clamp(1.86rem, 6.1vw, 2.2rem) !important;
-  }
-
-  .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap {
-    font-size: 0.55rem;
-    letter-spacing: 0.11em;
-  }
-
+  .simpaths-home-hero__logo { width: 4.2rem; }
+  .md-typeset .simpaths-home-hero p.simpaths-home-hero__strap { font-size: 0.55rem; letter-spacing: 0.11em; }
   .simpaths-home-intro-band {
-    padding: 2.9rem 1rem 2.15rem;
+    padding: 2rem 1rem 2.15rem;
   }
 
-  .md-typeset .simpaths-capability-combination {
-    margin-top: 1.08rem;
-  }
-
-  .md-typeset .simpaths-capability-combination__features {
+  .md-typeset .simpaths-home-features {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "capability-one"
-      "capability-two"
-      "capability-three"
-      "capability-four"
-      "capability-five";
-    gap: 0.82rem;
+    gap: 1.2rem;
   }
 
-  .md-typeset .simpaths-capability-combination__features article {
-    padding-top: 0;
-    padding-left: 0;
-  }
   .md-typeset ol.simpaths-first-run__steps { grid-template-columns: 1fr; gap: 0; }
 }
 
@@ -487,16 +296,14 @@ html.sp-page-home .md-main .md-top {
   background: linear-gradient(90deg, rgba(92,184,240,0.2) 0%, rgba(195,198,213,0.32) 35%, transparent 100%);
 }
 
-/* Homepage closing sequence: primary routes and compact research evidence. */
-.simpaths-home-intro-band__access-row {
-  max-width: 49rem;
-  gap: 0.62rem 1.35rem;
-}
-
+/* Homepage closing sequence: compact research evidence. */
 .simpaths-home-research-band {
+  --sp-midnight: var(--sp-panel-ink);
+  --sp-accent: var(--sp-panel-link);
+  --sp-crimson: var(--sp-panel-link-hover);
   width: 100vw;
   margin: 0 calc(50% - 50vw);
-  padding: 5rem 1.2rem 5.25rem;
+  padding: 3rem 1.2rem 3.25rem;
   background: #F7F7F9;
 }
 .md-typeset .simpaths-home-research-band .research-section {
@@ -651,10 +458,6 @@ html.sp-page-home .md-main .md-top {
 }
 
 @media (max-width: 900px) {
-  .simpaths-home-research-band {
-    padding: 4rem 1.2rem 4.25rem;
-  }
-
   .md-typeset .simpaths-home-research-band .research-section {
     grid-template-columns: 1fr;
     gap: 1.8rem;
@@ -691,17 +494,12 @@ html.sp-page-home .md-main .md-top {
 }
 
 @media (max-width: 620px) {
-  .simpaths-home-research-band {
-    padding: 3.25rem 1rem 3.5rem;
-  }
-
   .md-typeset .simpaths-home-research-band .archive-link {
     margin-top: 0;
   }
 
   .md-typeset .simpaths-home-research-band a.research-entry,
   .md-typeset .simpaths-home-research-band a.research-entry:first-child {
-    min-height: 0;
     padding: 1.25rem 1.15rem;
   }
 }

@@ -10,6 +10,8 @@ styles=(
   documentation/wiki/assets/css/06-page-sections.css
   documentation/wiki/assets/css/07-roadmap.css
   documentation/wiki/assets/css/08-home.css
+  documentation/wiki/assets/css/09-model-explorer.css
+  documentation/wiki/assets/css/10-developer-guide.css
 )
 
 max_file_lines=1000

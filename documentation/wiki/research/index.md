@@ -1,7 +1,6 @@
 ---
 title: Research
 hide:
-  - navigation
   - toc
   - footer
 ---

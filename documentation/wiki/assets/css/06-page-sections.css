@@ -1,25 +1,10 @@
-/* Model section: concise orientation and direct routes into the science. */
-.model-overview__topics { margin-top: 2rem; border-bottom: 1px solid var(--sp-border-strong); }
-.md-typeset a.model-overview__route {
-  display: grid; grid-template-columns: 11rem minmax(0, 1fr) auto;
-  align-items: start; gap: 1.15rem; padding: 1.35rem 0;
-  color: var(--md-default-fg-color); text-decoration: none;
-  border-top: 1px solid var(--sp-border-strong);
+/* Model overview uses the shared reading typography throughout. */
+.md-typeset .model-overview,
+.md-typeset .model-overview > h1,
+.md-typeset .model-overview h3 {
+  scroll-margin-top: calc(var(--sp-header-height) + 0.75rem);
 }
-.md-typeset .model-overview__route h2 {
-  margin: 0; font-size: var(--sp-subheading-size); font-weight: var(--sp-subheading-weight); line-height: 1.5;
-}
-.md-typeset .model-overview__route p { margin: 0; color: var(--md-default-fg-color--light); }
-.model-overview__route > span { color: var(--sp-accent); }
-.md-typeset .model-overview__route:is(:hover, :focus-visible) h2 { color: var(--sp-accent); text-decoration: underline; text-underline-offset: 0.2em; }
-.model-overview__route:focus-visible { outline: 2px solid var(--sp-accent); outline-offset: 5px; }
 .md-typeset .model-overview__related { margin-top: 1.3rem; font-size: var(--sp-label-size); }
-.md-typeset .model-overview__scope { margin-top: 1.25rem; color: var(--md-default-fg-color--light); font-size: var(--sp-label-size); }
-@media (max-width: 40em) {
-  .md-typeset a.model-overview__route { grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 0.8rem; padding-block: 1.1rem; }
-  .model-overview__route p { grid-column: 1; }
-  .model-overview__route > span { grid-column: 2; grid-row: 1; }
-}
 
 /* Validation keeps one body-text treatment throughout its instructions. */
 html.sp-page-validation .md-typeset p,

@@ -4,10 +4,10 @@
     <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}" class="md-header__button md-logo" aria-label="{{ config.site_name }}" data-md-component="logo">
       {% include "partials/logo.html" %}
     </a>
-    <label class="md-header__button md-icon" for="__drawer">
+    <button class="md-header__button md-icon" type="button" data-sp-toggle="drawer" aria-label="Open site navigation" aria-controls="sp-site-navigation" aria-expanded="false">
       {% set icon = config.theme.icon.menu or "material/menu" %}
       {% include ".icons/" ~ icon ~ ".svg" %}
-    </label>
+    </button>
     <a class="md-header__title" data-md-component="header-title" href="{{ nav.homepage.url | url }}" aria-label="{{ config.site_name }} home">
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
@@ -43,10 +43,10 @@
     {% if "material/search" in config.plugins %}
       {% set search = config.plugins["material/search"] | attr("config") %}
       {% if search.enabled %}
-        <label class="md-header__button md-icon" for="__search">
+        <button class="md-header__button md-icon" type="button" data-sp-toggle="search" aria-label="Search SimPaths" aria-controls="sp-site-search" aria-expanded="false">
           {% set icon = config.theme.icon.search or "material/magnify" %}
           {% include ".icons/" ~ icon ~ ".svg" %}
-        </label>
+        </button>
         {% include "partials/search.html" %}
       {% endif %}
     {% endif %}

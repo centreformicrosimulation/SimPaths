@@ -3,10 +3,10 @@
 =============================================== */
 
 .md-typeset .roadmap-page {
-  --roadmap-copy: rgba(35, 48, 63, 0.78);
+  --roadmap-copy: var(--md-default-fg-color);
   --roadmap-muted: var(--md-default-fg-color--light);
-  --roadmap-rule: rgba(52, 49, 52, 0.14);
-  --roadmap-line: rgba(61, 93, 130, 0.24);
+  --roadmap-rule: var(--sp-border-strong);
+  --roadmap-line: var(--sp-border-strong);
   padding-bottom: 1rem;
 }
 .md-typeset .roadmap-page p,
@@ -56,7 +56,7 @@
   position: absolute;
   top: 50%;
   right: 0.48rem;
-  color: rgba(61, 93, 130, 0.48);
+  color: var(--md-default-fg-color--light);
   content: "→";
   font-size: 0.72rem;
   transform: translateY(-50%);
@@ -66,7 +66,7 @@
 .md-typeset .roadmap-sequence a:focus-visible .roadmap-sequence__name {
   color: var(--sp-midnight);
   text-decoration: underline;
-  text-decoration-color: rgba(52, 49, 52, 0.34);
+  text-decoration-color: currentColor;
   text-underline-offset: 0.14em;
 }
 .md-typeset .roadmap-sequence__name {
@@ -77,7 +77,7 @@
   transition: color 150ms ease;
 }
 .md-typeset .roadmap-stage {
-  --roadmap-stage-color: rgba(61, 93, 130, 0.72);
+  --roadmap-stage-color: var(--md-default-fg-color--light);
   display: grid;
   grid-template-columns: 1.55rem minmax(0, 1fr);
   gap: 1.05rem;
@@ -85,7 +85,7 @@
 }
 
 .md-typeset .roadmap-stage--now {
-  --roadmap-stage-color: var(--sp-link);
+  --roadmap-stage-color: var(--sp-accent);
 }
 
 .md-typeset .roadmap-stage--pipeline .roadmap-stage__rail::after {
@@ -196,14 +196,14 @@
 .md-typeset .roadmap-meta a {
   color: inherit;
   text-decoration: underline;
-  text-decoration-color: rgba(52, 49, 52, 0.24);
+  text-decoration-color: currentColor;
   text-underline-offset: 0.12em;
 }
 
 .md-typeset .roadmap-meta a:hover,
 .md-typeset .roadmap-meta a:focus-visible {
   color: var(--sp-midnight);
-  text-decoration-color: rgba(52, 49, 52, 0.58);
+  text-decoration-color: currentColor;
 }
 
 .md-typeset .roadmap-contact {
@@ -236,13 +236,13 @@
 .md-typeset .roadmap-contact a {
   color: var(--sp-midnight);
   text-decoration: underline;
-  text-decoration-color: rgba(52, 49, 52, 0.28);
+  text-decoration-color: currentColor;
   text-underline-offset: 0.12em;
 }
 
 .md-typeset .roadmap-contact a:hover,
 .md-typeset .roadmap-contact a:focus-visible {
-  text-decoration-color: rgba(52, 49, 52, 0.62);
+  text-decoration-color: currentColor;
 }
 
 @media (max-width: 1219px) {

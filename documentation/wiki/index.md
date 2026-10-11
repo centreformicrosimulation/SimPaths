@@ -1,61 +1,43 @@
 ---
 hide:
-  - navigation
   - toc
 ---
 
-<div class="simpaths-home-hero">
+<section class="simpaths-home-hero" aria-labelledby="home-title">
 <div class="simpaths-home-hero__inner">
   <div class="simpaths-home-hero__brand">
 --8<-- "documentation/wiki/assets/images/homepage-hero-logo-dark.svg"
-    <h1 class="simpaths-home-hero__title">SimPaths</h1>
+    <h1 id="home-title" class="simpaths-home-hero__title">SimPaths</h1>
     <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
   </div>
-
 </div>
-</div>
+</section>
 
 <section class="simpaths-home-intro-band">
 <div class="simpaths-home-intro-band__inner">
   <p class="simpaths-home-intro-band__lede">SimPaths is an open-source framework for modelling individual and household life courses. It projects how people’s careers, family relationships, health and financial circumstances evolve over time and interact with one another. Its modular design supports analysis of alternative assumptions about tax and benefit systems, sensitivity to parameter estimates, and different approaches to projecting labour and leisure, consumption and saving decisions.</p>
   <p class="simpaths-home-intro-band__body">Standardised assumptions and data sources facilitate adaptation across countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy and Poland, with Germany, Spain and Sweden under development.</p>
   <p class="simpaths-home-intro-band__body">All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
-  <p class="simpaths-home-intro-band__body simpaths-home-intro-band__body--bridge">The framework incorporates many state-of-the-art features which are rarely combined in dynamic models:</p>
-  <div class="simpaths-capability-combination" aria-label="State-of-the-art capabilities combined in SimPaths">
-    <div class="simpaths-capability-combination__features">
-      <article>
-        <span>01</span>
-        <h3>Life-course feedback</h3>
-        <p>Education, work, income and wealth, family life, and health evolve together rather than as isolated outputs.</p>
-      </article>
-      <article>
-        <span>02</span>
-        <h3>Policy realism</h3>
-        <p>An underlying tax-benefit model links individual outcomes to population-level policy effects.</p>
-      </article>
-      <article>
-        <span>03</span>
-        <h3>Behavioural responses</h3>
-        <p>Time-use and savings choices respond to characteristics, fiscal incentives, and future expectations.</p>
-      </article>
-      <article>
-        <span>04</span>
-        <h3>Modular design</h3>
-        <p>Java and JAS-mine provide a modular architecture for switching assumptions and projection methods.</p>
-      </article>
-      <article>
-        <span>05</span>
-        <h3>Country adaptation</h3>
-        <p>Model dynamics are decoupled from tax-benefit systems, making the framework easier to adapt across country settings.</p>
-      </article>
+  <h2 id="model-features" class="simpaths-home-features__heading">Model features</h2>
+  <dl class="simpaths-home-features" aria-labelledby="model-features">
+    <div>
+      <dt><a href="overview/#transitions-and-individual-variation">Linked life histories</a></dt>
+      <dd>Simulated people retain individual histories and family links. Equations estimated from survey data connect earlier circumstances to later outcomes, allowing changes in education, health and family composition to influence subsequent employment and income.</dd>
     </div>
-    <div class="simpaths-capability-combination__brace" aria-hidden="true"></div>
-    <div class="simpaths-capability-combination__result">
-      <span>combined in one framework</span>
-      <strong>SimPaths</strong>
+    <div>
+      <dt><a href="overview/modules/labour-income/#employment-decisions">Current and forward-looking decisions</a></dt>
+      <dd>The default specification models work choices using current income and leisure. A forward-looking alternative jointly models employment and consumption over the remaining lifetime, with saving and borrowing transferring resources between years.</dd>
     </div>
-  </div>
-  <div class="simpaths-home-intro-band__access-row" aria-label="SimPaths source code repositories">
+    <div>
+      <dt><a href="overview/modules/disposable-income/">Tax–benefit policy responses</a></dt>
+      <dd>Precomputed tax–benefit results establish disposable income under alternative working hours and family circumstances. Changing the policy system can therefore affect both family resources and labour supply through changes in work incentives.</dd>
+    </div>
+    <div>
+      <dt><a href="user-guide/uncertainty-analysis/">Sensitivity and uncertainty</a></dt>
+      <dd>Researchers can compare behavioural specifications and demographic or economic assumptions, and repeat simulations with different random seeds and resampled coefficients. These comparisons help assess how particular sources of uncertainty affect the results.</dd>
+    </div>
+  </dl>
+  <div class="simpaths-home-intro-band__access-row" aria-label="SimPaths source code">
     <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-intro-band__access">UK source code</a>
     <a href="https://github.com/simpaths/SimPathsEU" class="simpaths-home-intro-band__access">EU source code</a>
   </div>

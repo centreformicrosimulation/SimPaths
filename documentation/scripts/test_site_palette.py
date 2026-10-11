@@ -1,12 +1,24 @@
 """Source-level contracts for the pristine palette preview; these are not browser tests."""
 
 from pathlib import Path
+import re
 import unittest
 
 from test_site_typography import blocks
 
 
 CSS_DIR = Path(__file__).resolve().parents[1] / "wiki" / "assets" / "css"
+
+
+def contrast_ratio(first, second):
+    def luminance(value):
+        if len(value) == 4:
+            value = "#" + "".join(channel * 2 for channel in value[1:])
+        channels = [int(value[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        linear = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
+        return sum(c * weight for c, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
+    low, high = sorted((luminance(first), luminance(second)))
+    return (high + 0.05) / (low + 0.05)
 
 
 class SitePaletteTest(unittest.TestCase):
@@ -39,7 +51,8 @@ class SitePaletteTest(unittest.TestCase):
 
     def test_homepage_directory_and_research_bands_keep_the_approved_palette(self):
         expected = {
-            ".simpaths-home-intro-band": "#FFFFFF",
+            ".simpaths-home-hero": "var(--sp-home-hero-bg)",
+            ".simpaths-home-intro-band": "var(--md-default-bg-color)",
             ".simpaths-home-paths": "#E8F0F5",
             ".simpaths-home-research-band": "#F7F7F9",
             ".md-typeset .simpaths-home-research-band a.research-entry": "#fff",
@@ -90,18 +103,17 @@ class SitePaletteTest(unittest.TestCase):
         contrast = (luminance(footer["--sp-footer-muted"]) + 0.05) / (luminance(footer["background"]) + 0.05)
         self.assertGreaterEqual(contrast, 4.5)
 
-    def test_homepage_prose_uses_solid_charcoal_while_publication_metadata_stays_muted(self):
+    def test_homepage_prose_follows_the_theme_while_light_panel_metadata_stays_muted(self):
         filename = "08-home.css"
-        for selector in (".md-typeset .simpaths-home-intro-band__lede",
-                         ".md-typeset .simpaths-home-intro-band__body",
-                         ".md-typeset .simpaths-capability-combination__features p"):
+        for selector, colour in {
+            ".md-typeset .simpaths-home-intro-band__lede": "var(--sp-midnight)",
+            ".md-typeset .simpaths-home-intro-band__body": "var(--sp-midnight)",
+            ".md-typeset .simpaths-home-features dd": "var(--sp-midnight)",
+        }.items():
             with self.subTest(selector=selector):
                 rule = self.rule(filename, selector)
-                self.assertEqual(rule["color"], "#343134")
+                self.assertEqual(rule["color"], colour)
                 self.assertNotIn("opacity", rule)
-        for bridge in blocks(self.styles[filename], ".md-typeset .simpaths-home-intro-band__body--bridge"):
-            self.assertNotIn("color", bridge)
-            self.assertNotIn("opacity", bridge)
         for selector, colour in {
             ".md-typeset .simpaths-home-research-band .research-journal": "#64616B",
             ".md-typeset .simpaths-home-research-band .research-authors": "#64616B",
@@ -185,11 +197,37 @@ class SitePaletteTest(unittest.TestCase):
         self.assertIn("--sp-search-surface: #fff;", self.styles["05-site-chrome.css"])
         self.assertIn("--sp-code-bg: #ffffff;", self.styles["03-content.css"])
 
-    def test_dark_palette_is_preserved(self):
+    def test_dark_palette_uses_semantic_ink_and_preserves_light_panel_ink(self):
         dark = self.rule("01-foundation.css", '[data-md-color-scheme="slate"]')
-        self.assertEqual(dark["--md-default-bg-color"], "#141e2a")
-        self.assertEqual(dark["--md-default-fg-color"], "rgba(250,249,245,0.92)")
-        self.assertEqual(dark["--sp-surface"], "rgba(25,37,49,0.84)")
+        self.assertEqual(dark["--md-default-fg-color"], "var(--sp-midnight)")
+        for token in ("--sp-panel-ink", "--sp-panel-muted", "--sp-panel-link", "--sp-panel-link-hover"):
+            self.assertNotIn(token, dark)
+            self.assertGreaterEqual(contrast_ratio(self.tokens[token], "#FFFFFF"), 4.5)
+        self.assertNotIn('[data-md-color-scheme="slate"] .md-typeset a {', self.styles["01-foundation.css"])
+
+    def test_dark_header_navigation_links_and_roadmap_have_readable_contrast(self):
+        tokens = {**self.tokens, **self.rule("01-foundation.css", '[data-md-color-scheme="slate"]')}
+        tokens.update(self.rule("07-roadmap.css", ".md-typeset .roadmap-page"))
+
+        def resolve(value):
+            value = value.replace(" !important", "")
+            while value.startswith("var("):
+                value = tokens[re.fullmatch(r"var\(([^)]+)\)", value).group(1)]
+            return value
+
+        checks = [
+            ("02-shell-navigation.css", ".md-header__title", "color"),
+            ("02-shell-navigation.css", ".md-tabs__link", "color"),
+            ("01-foundation.css", ".md-typeset a:not(.md-button):not(.headerlink):not(.md-nav__link)", "color"),
+            ("07-roadmap.css", ".md-typeset .roadmap-lede", "color"),
+            ("07-roadmap.css", ".md-typeset .roadmap-status", "color"),
+            ("07-roadmap.css", ".md-typeset .roadmap-item > p", "color"),
+        ]
+        surface = resolve(tokens["--md-default-bg-color"])
+        for filename, selector, property_name in checks:
+            with self.subTest(selector=selector):
+                foreground = resolve(self.rule(filename, selector)[property_name])
+                self.assertGreaterEqual(contrast_ratio(foreground, surface), 4.5)
 
 
 if __name__ == "__main__":

@@ -12,10 +12,13 @@ Changing that order can alter the cascade even when no selector changes.
 6. `06-page-sections.css`: research, funding, modules, and other page-specific
    sections.
 7. `07-roadmap.css`: the development roadmap and its compact contents view.
-8. `08-home.css`: the homepage system and its responsive refinements.
+8. `08-home.css`: the homepage and its responsive refinements.
+9. `09-model-explorer.css`: the optional annual-cycle inspector.
+10. `10-developer-guide.css`: architecture disclosures in the developer directory.
 
-`assets/js/site-state.js` is the single adapter between Material's generated
-markup and the styling layer. It exposes explicit `sp-page-*`, `sp-tab-*`,
+The main template sets page classes before the first render and embeds a matching
+context marker in the article. `assets/js/site-state.js` reads that marker after
+Material instant navigation and adapts interaction state for the styling layer. It exposes explicit `sp-page-*`, `sp-tab-*`,
 `sp-search-open`, and navigation state classes. CSS should consume those
 classes rather than rediscovering page state with relational selectors.
 
@@ -35,6 +38,8 @@ keep neutral-grey hover. On desktop, the filter and navigation share the same
 list padding and nav/link side margins so bars, hover surfaces and section rules
 share both edges. Indent nested link text, not its row surface. Keep the filter
 sticky with an opaque page background and scroll padding for keyboard navigation.
+Reserve a 0.8rem strip beyond the row edges for overlay scrollbars; a stable
+scrollbar gutter also prevents classic scrollbars from shifting filtered results.
 Leave the native mobile drawer layout intact.
 
 ## Shared typography convention
@@ -59,13 +64,17 @@ headings, the Documentation masthead's mobile title and its compact description
 code and small supporting notes retain their
 purpose-specific treatments. Sharing typography does not mean sharing layouts.
 
-All interior pages use the shared grid in `05-site-chrome.css`. It owns the
+All interior pages use the shared layout in `05-site-chrome.css`. It owns the
 reading measure, horizontal position and top spacing. Pages with section navigation
-reserve its left rail; Validation, Research and Funding align with the Model
-sidebar text on desktop, including its 0.8rem inset from the frame. Do not centre
-individual page wrappers, add title padding or set per-page article widths. Homepage bands
+retain the Model reading column and its navigation rails. Validation, Research
+and Funding use one centred column with the same 42rem maximum width and no
+reserved sidebar tracks. Do not add title padding or per-page article widths. Homepage bands
 retain their distinct full-width composition. Palette changes are separate
 from this convention and must not change typography or layout.
+
+MathJax loads only when a page contains `.arithmatex`. The loader handles instant
+navigation, clears detached items and queues typesetting without duplicate CDN
+requests. Search opens promptly without delayed input or hiding the brand.
 
 Run `python3 -m unittest discover -s documentation/scripts -p 'test_*.py'` to check
 the shared scale and component adoption as well as code highlighting.
@@ -77,7 +86,11 @@ The white, graphite and berry design was approved for publication on 7 October
 navy Use SimPaths band. Use `--sp-paper` (#FFFFFF), graphite text (#343134),
 secondary text (#64616B) and berry links/selection (#972A6C). Keep the white
 search surface, syntax colours and individual funder/research accents. Dark
-reading pages retain their separate slate palette.
+reading pages use a charcoal-plum surface and light text with berry accents.
+Use semantic tokens for theme-dependent surfaces and ink. Fixed pale panels have
+separate `--sp-panel-*` ink tokens; never apply a blanket light-link override to them.
+The footer theme select delegates System/Light/Dark preferences to Material's native
+palette controls, including persistence and OS preference changes.
 
 The brand, main navigation and search share one header through
 `partials/header.html`. `--sp-header-height` controls its height and section
@@ -85,25 +98,34 @@ scroll offsets. Within the brand, centre the logo above the SimPaths wordmark
 with a 0.2rem gap on desktop and mobile. Desktop uses a 5rem header with navigation
 and search lowered to the wordmark line via `--sp-header-row-offset`; the mobile
 header remains 4rem. Keep the main template's tabs block empty to avoid duplicating
-the navigation. The mobile drawer remains native Material navigation. Desktop
+the navigation. The mobile drawer retains Material navigation structure, enhanced with native
+buttons, focus containment, Escape dismissal and focus return. Desktop
 search hides the tabs while expanded, and restores them when closed.
 
 `sp-no-toc` identifies pages whose contents panel is hidden or empty, on both
-initial load and instant navigation. It only hides the panel; it must not move
-or resize the article. Desktop uses equal 11.5rem navigation/contents rails,
+initial load and instant navigation. Section pages retain their reading column
+when it is absent; directories do not expand into the contents rail. Desktop uses equal 11.5rem navigation/contents rails,
 1.2rem gaps and a central reading column capped at 42rem. Tablet keeps the
 reading column and right contents rail while the primary navigation becomes
-a drawer. Mobile uses one column with 0.8rem side gutters. Every interior page
-uses the same outer frame at each breakpoint. On desktop, `sp-no-section-nav`
-lets Validation, Research and Funding use the space otherwise reserved for
-section navigation, with a 0.8rem content inset matching the Model navigation text
-and any contents panel directly alongside. Other interior pages retain
-their section-navigation rail. Titles share a top baseline; pages of each layout
-share a left edge. Preserve the real contents panel
+a drawer. Mobile uses one column with 0.8rem side gutters. `sp-no-section-nav`
+gives Validation, Research and Funding a centred 42rem frame with no navigation
+or contents rails. Validation hides its contents panel through page metadata
+and proceeds directly from its introduction to the checks and reproduction instructions.
+Other interior pages retain their section-navigation rail. Titles share a top
+baseline; pages of each layout share a left edge. Preserve the real contents panel
 on longer technical pages and the native mobile navigation drawer.
-The Model landing page provides three explanatory routes, plus roadmap and
-citation links; it omits the redundant Previous/Next pager. The Documentation
-directory uses a 42rem content measure. Keep the homepage's spacing independent
+The Model overview explains the population, model components, annual simulation
+and projection inputs in one reading page, with an On this Page sidebar for
+its sections and subsections alongside the shared reading column. Component descriptions use the shared
+prose and heading styles, with links to the detailed modules; statistical output
+is explained within the annual cycle. Keep roadmap and citation links secondary
+and omit the Previous/Next
+pager. The former Model Description route redirects here, preserving query
+strings and section fragments; retain the `model`, `model-description` and
+`simulated-modules` anchors for existing links. Directory pages (`layout: directory`,
+plus the Documentation landing page) keep the same article width as Model pages.
+Research and Funding records stay within the shared standalone reading column.
+Keep the homepage's spacing independent
 of the tighter interior-page top spacing.
 
 Research inherits the shared article column and presents complete publication
@@ -119,12 +141,25 @@ substitute editorial headlines for paper titles, hide citations, add summaries,
 use a two-column paper grid or add detached reading links. Omit the Previous/Next
 pager. Inherit the page frame and alignment from the shared no-section-navigation layout.
 
-Homepage introductory paragraphs and feature descriptions use solid charcoal
-(#343134), without separate faded lead/body colours. This is a text-only
-exception: retain the existing layout, heading scale and muted publication metadata.
-The introductory paragraphs share the 520 weight of the "The framework..."
-bridge sentence; feature descriptions keep their existing weight. Do not
-restore a lighter lead/body weight or increase their font size to compensate.
+The homepage opens with a full-width graphite hero band (#27232D), containing
+the centred SimPaths logo, wordmark and Life Course Microsimulation strapline.
+The three-paragraph introduction beneath it covers the framework, country
+adaptation and source-code availability, in that order. These paragraphs span
+the homepage content width and lead directly into model features, separated by
+spacing without a divider or second navigation menu. A description list
+explains four capabilities in two open columns, stacking on smaller screens:
+linked life histories, current and forward-looking decisions, tax–benefit policy
+responses, and sensitivity and uncertainty. Give each feature a focused
+explanation and an underlined heading linking directly to its detailed methods
+or guide. Use the shared subheading scale and a visible keyboard focus outline;
+do not add a separate row of navigation or repeat the introduction's description
+of modularity.
+The feature descriptions are followed by the UK and EU source-code links.
+Keep the text solid charcoal (#343134),
+the introduction at weight 450 and feature descriptions at 400, using the shared
+reading scale. Feature links use the theme's berry accent. Avoid numbered
+badges, a combining brace or a repeated wordmark in this section. Preserve the
+muted publication metadata in the research band.
 
 The homepage's "Use SimPaths" section introduces a first simulation using the
 bundled training data. Keep the explanation, three numbered steps and a secondary
@@ -137,6 +172,12 @@ separate model-assessment, research-analysis and development directories here.
 "Selected Research" uses #F7F7F9 with graphite headings, white cards and the
 existing topic accents. Remove Material's trailing article margin on the
 homepage only so the final research band meets the footer.
+The annual-cycle figure remains the primary complete sequence. An optional
+inspector lets readers select a stage and inspect its agents, inputs, updates and
+module links. Its nine native disclosures remain usable without JavaScript;
+enhancement adds keyboard tabs on wide layouts and a labelled select on small
+layouts. It has no autoplay or fabricated simulation, and respects reduced motion.
+
 The shared footer uses graphite #27232D in both themes; only the SimPaths brand is
 white, while the sentence-case description and links use readable grey #C6C2CD.
 It contains site identity and links, not page navigation. Disable the theme's
@@ -144,7 +185,9 @@ generator line through `extra.generator: false` rather than hiding a line that
 still occupies space.
 
 Previous/Next lives after the article content through `partials/page-navigation.html`,
-using MkDocs' actual previous/next pages and respecting `hide: [footer]`.
+using adjacent pages within the same parent section and respecting `hide: [footer]`.
+The first-run learning sequence has explicit routes so it cannot jump into an
+unrelated branch. Breadcrumbs expose parent routes on nested pages.
 Keep it absent on the homepage. The two compact outlined links share the article's
 width, use sentence-case direction labels and wrapping page titles, and stack
 on small screens. Retain native links, keyboard focus and reduced-motion support.

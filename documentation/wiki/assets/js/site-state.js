@@ -2,6 +2,7 @@
   const managedBodyClasses = [
     "sp-page-home",
     "sp-page-docs-index",
+    "sp-page-directory",
     "sp-page-funding",
     "sp-page-roadmap",
     "sp-page-validation",
@@ -65,32 +66,11 @@
   const updateSiteState = () => {
     const body = document.body;
     const pageRoots = [document.documentElement, body];
-    const togglePageClass = (className, active) => {
-      pageRoots.forEach((root) => root.classList.toggle(className, active));
-    };
+    const pageState = document.querySelector("[data-sp-page-classes]");
+    const classes = new Set((pageState?.dataset.spPageClasses || "").split(/\s+/));
     managedBodyClasses.forEach((className) => {
-      pageRoots.forEach((root) => root.classList.remove(className));
+      pageRoots.forEach((root) => root.classList.toggle(className, classes.has(className)));
     });
-
-    togglePageClass("sp-page-home", Boolean(document.querySelector(".simpaths-home-hero")));
-    togglePageClass("sp-page-docs-index", Boolean(document.querySelector(".docs-hub--index")));
-    togglePageClass("sp-page-funding", Boolean(document.querySelector(".funding-page")));
-    togglePageClass("sp-page-roadmap", Boolean(document.querySelector(".roadmap-page")));
-    togglePageClass(
-      "sp-page-validation",
-      Boolean(document.querySelector(".validation-page-marker"))
-    );
-    togglePageClass(
-      "sp-no-section-nav",
-      Boolean(document.querySelector(".research-page, .funding-page, .validation-page-marker"))
-    );
-    const tocSidebar = document.querySelector(".md-sidebar--secondary");
-    togglePageClass("sp-no-toc", !tocSidebar || tocSidebar.hidden || !tocSidebar.querySelector("a[href]"));
-
-    const activeTab = document.querySelector(".md-tabs__item--active .md-tabs__link")
-      ?.textContent.trim().toLocaleLowerCase();
-    togglePageClass("sp-tab-model", activeTab === "model");
-    togglePageClass("sp-tab-documentation", activeTab === "documentation");
 
     markNavigationState();
     bindSearchState();

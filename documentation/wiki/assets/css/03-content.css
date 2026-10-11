@@ -107,15 +107,15 @@
 [data-md-color-scheme="slate"] .md-typeset h2,
 [data-md-color-scheme="slate"] .md-typeset h3,
 [data-md-color-scheme="slate"] .md-typeset h4 {
-  color: #c8d8e8;
+  color: var(--md-default-fg-color);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .page-intro {
-  color: #d7e3ef;
+  color: var(--md-default-fg-color);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .page-intro--support {
-  color: rgba(250,249,245,0.72);
+  color: var(--md-default-fg-color--light);
 }
 
 @media (max-width: 760px) {
@@ -190,7 +190,7 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.55rem 0;
-  color: var(--sp-ink);
+  color: var(--md-default-fg-color);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -231,16 +231,16 @@
 }
 
 [data-md-color-scheme="slate"] {
-  --sp-code-bg: #172432;
-  --sp-code-border: rgba(220,229,239,0.16);
-  --sp-code-text: #d6e0e8;
-  --sp-code-muted: #91a0ad;
+  --sp-code-bg: var(--sp-surface);
+  --sp-code-border: var(--sp-border-strong);
+  --sp-code-text: var(--md-default-fg-color);
+  --sp-code-muted: var(--md-default-fg-color--light);
   --sp-code-keyword: #e2a3c4;
   --sp-code-function: #d8b980;
   --sp-code-type: #c6afe9;
   --sp-code-string: #9ec9aa;
   --sp-code-number: #e9ad92;
-  --sp-code-operator: #aebdca;
+  --sp-code-operator: var(--sp-wine);
   --sp-code-annotation: #d5a4bd;
   --sp-code-error: #ffb5b5;
   --sp-code-gutter-bg: rgba(255,255,255,0.035);
@@ -543,17 +543,17 @@
 [data-md-color-scheme="slate"] .md-typeset .admonition,
 [data-md-color-scheme="slate"] .md-typeset details {
   border-left-color: var(--sp-border-soft) !important;
-  background: linear-gradient(180deg, rgba(28,42,56,0.95) 0%, rgba(22,33,45,0.94) 100%);
+  background: var(--sp-surface);
 }
 
 [data-md-color-scheme="slate"] .md-typeset .admonition-title,
 [data-md-color-scheme="slate"] .md-typeset summary {
-  background: linear-gradient(90deg, rgba(92,184,240,0.12) 0%, rgba(195,198,213,0.06) 100%) !important;
+  background: var(--sp-surface-strong) !important;
 }
 
 [data-md-color-scheme="slate"] .md-typeset .admonition-title::before,
 [data-md-color-scheme="slate"] .md-typeset summary::before {
-  background-color: var(--sp-ghost) !important;
+  background-color: var(--md-default-fg-color--light) !important;
 }
 
 /* ═══════════════════════════════════════════════

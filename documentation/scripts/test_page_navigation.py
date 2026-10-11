@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import unittest
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+import yaml
 
 from test_site_typography import blocks
 
@@ -22,12 +23,15 @@ class PageNavigationTest(unittest.TestCase):
         cls.css = (DOCS / "wiki/assets/css/05-site-chrome.css").read_text()
 
     def render(self, *, previous="Getting Started", following="Input Data", home=False,
-               hide=(), features=("navigation.footer",)):
+               hide=(), features=("navigation.footer",), previous_section="setup",
+               following_section="setup", reading_navigation=None):
         page = SimpleNamespace(
-            is_homepage=home, meta={"hide": list(hide)},
-            previous_page=SimpleNamespace(title=previous, url="getting-started/") if previous else None,
-            next_page=SimpleNamespace(title=following, url="getting-started/data/") if following else None,
+            is_homepage=home, meta={"hide": list(hide)}, parent="setup",
+            previous_page=SimpleNamespace(title=previous, url="getting-started/", parent=previous_section) if previous else None,
+            next_page=SimpleNamespace(title=following, url="getting-started/data/", parent=following_section) if following else None,
         )
+        if reading_navigation is not None:
+            page.meta["reading_navigation"] = reading_navigation
         language = SimpleNamespace(t=lambda key: {"footer.previous": "Previous", "footer.next": "Next"}[key])
         return self.template.render(page=page, features=features, lang=language)
 
@@ -64,6 +68,30 @@ class PageNavigationTest(unittest.TestCase):
         self.assertIn('Previous: A &lt; B &amp; &#34;C&#34;', html)
         self.assertNotIn('A < B', html)
 
+    def test_global_section_order_does_not_create_a_reading_journey(self):
+        html = self.render(previous="Validation", following="Funding",
+                           previous_section="validation", following_section="funding")
+        self.assertNotIn("<nav", html)
+        html = self.render(following_section="other")
+        self.assertIn('rel="prev"', html)
+        self.assertNotIn('rel="next"', html)
+
+    def test_explicit_reading_route_can_cross_sections_without_unrelated_fallback(self):
+        html = self.render(reading_navigation={"next": {"title": "User Guide", "url": "user-guide/"}})
+        self.assertIn('href="/preview/user-guide/"', html)
+        self.assertNotIn('rel="prev"', html)
+        self.assertNotIn("<nav", self.render(reading_navigation={}))
+
+    def test_first_run_route_visits_data_overview_then_execution(self):
+        route = (("getting-started/index.md", "getting-started/environment-setup/"),
+                 ("getting-started/environment-setup.md", "getting-started/data/"),
+                 ("getting-started/data/index.md", "getting-started/first-simulation/"),
+                 ("getting-started/first-simulation.md", "user-guide/"))
+        for source, destination in route:
+            metadata = yaml.safe_load((DOCS / "wiki" / source).read_text().split("---", 2)[1])
+            html = self.render(reading_navigation=metadata["reading_navigation"])
+            self.assertIn(f'href="/preview/{destination}"', html)
+
     def test_pager_is_after_content_and_not_inside_the_site_footer(self):
         main = (DOCS / "overrides/main.html").read_text()
         content_block = main.split("{% block content %}", 1)[1].split("{% endblock %}", 1)[0]
@@ -90,7 +118,7 @@ class PageNavigationTest(unittest.TestCase):
 
     def test_homepage_has_no_theme_margin_between_the_final_band_and_footer(self):
         css = (DOCS / "wiki/assets/css/08-home.css").read_text()
-        rules = blocks(css, "html.sp-page-home .md-content .md-content__inner")
+        rules = blocks(css, "html.sp-page-home .md-container .md-main .md-content > .md-content__inner")
         self.assertEqual(rules[0]["margin-bottom"], "0")
         self.assertFalse(blocks(css, ".md-content .md-content__inner"))
 

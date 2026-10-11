@@ -13,8 +13,13 @@ copyright: >-
 theme:
   name: material
   custom_dir: documentation/overrides
+  logo: assets/images/header-logo-mark.svg
   favicon: assets/images/favicon-192.png
   palette:
+    - media: "(prefers-color-scheme)"
+      scheme: default
+      primary: custom
+      accent: custom
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: custom
@@ -43,21 +48,25 @@ theme:
 
 extra_css:
   # Keep this order: later component files intentionally refine earlier layers.
-  - assets/css/01-foundation.css?v=20261008-header-row-1
-  - assets/css/02-shell-navigation.css?v=20261008-header-row-1
-  - assets/css/03-content.css?v=20261007-shared-grid-1
-  - assets/css/04-landing-components.css?v=20261008-muted-panels-2
-  - assets/css/05-site-chrome.css?v=20261008-header-row-1
-  - assets/css/06-page-sections.css?v=20261008-funding-width-1
-  - assets/css/07-roadmap.css?v=20261007-shared-grid-1
-  - assets/css/08-home.css?v=20261008-first-run-1
+  - assets/css/01-foundation.css?v=20261011-audit-1
+  - assets/css/02-shell-navigation.css?v=20261011-audit-1
+  - assets/css/03-content.css?v=20261011-audit-1
+  - assets/css/04-landing-components.css?v=20261011-audit-1
+  - assets/css/05-site-chrome.css?v=20261011-audit-1
+  - assets/css/06-page-sections.css?v=20261011-audit-1
+  - assets/css/07-roadmap.css?v=20261011-audit-1
+  - assets/css/08-home.css?v=20261011-features-1
+  - assets/css/09-model-explorer.css?v=20261011-audit-1
+  - assets/css/10-developer-guide.css?v=20261011-audit-1
 
 extra_javascript:
-  - assets/js/mathjax.js?v=20260831-math-svg-1
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js
-  - assets/js/site-state.js?v=20261008-page-edge-1
+  - assets/js/mathjax.js?v=20261011-audit-1
+  - assets/js/site-state.js?v=20261011-audit-1
+  - assets/js/navigation-controls.js?v=20261011-audit-1
+  - assets/js/theme-preference.js?v=20261011-audit-1
   - assets/js/toc-indicator.js?v=20260905-toc-marker-1
-  - assets/js/sidebar-filter.js?v=20260907-sidebar-alignment-1
+  - assets/js/sidebar-filter.js?v=20261011-audit-1
+  - assets/js/annual-cycle.js?v=20261011-audit-1
 
 plugins:
   - search:
@@ -113,7 +122,6 @@ nav:
 
   - Model:
       - overview/index.md
-      - Model Description: overview/model-description.md
       - Simulated Modules:
           - Ageing: overview/modules/ageing.md
           - Education: overview/modules/education.md

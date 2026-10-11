@@ -66,7 +66,7 @@ class SiteTypographyTest(unittest.TestCase):
             "07-roadmap.css": [".md-typeset .roadmap-stage__heading h2", ".md-typeset .roadmap-item h3",
                                ".md-typeset .roadmap-contact h2"],
             "08-home.css": [".md-typeset .simpaths-home-paths__header h2",
-                            ".md-typeset .simpaths-capability-combination__features h3"],
+                            ".md-typeset .simpaths-home-features dt"],
         }
         for filename, selectors in headings.items():
             for selector in selectors:
@@ -86,8 +86,7 @@ class SiteTypographyTest(unittest.TestCase):
             "07-roadmap.css": [".md-typeset .roadmap-lede", ".md-typeset .roadmap-stage__heading p",
                                ".md-typeset .roadmap-item > p", ".md-typeset .roadmap-contact p"],
             "08-home.css": [".md-typeset .simpaths-home-intro-band__lede",
-                            ".md-typeset .simpaths-home-intro-band__body",
-                            ".md-typeset .simpaths-capability-combination__features p"],
+                            ".md-typeset .simpaths-home-features dd"],
         }
         for filename, selectors in prose.items():
             for selector in selectors:
@@ -95,18 +94,13 @@ class SiteTypographyTest(unittest.TestCase):
                     self.assert_uses(filename, selector, "font-size", "--sp-reading-copy-size")
                     self.assert_uses(filename, selector, "line-height", "--sp-reading-line-height")
 
-    def test_homepage_intro_matches_the_framework_sentence_weight(self):
+    def test_homepage_intro_keeps_the_lighter_reading_weight(self):
         source = self.styles["08-home.css"]
-        for selector in (".md-typeset .simpaths-home-intro-band__lede",
-                         ".md-typeset .simpaths-home-intro-band__body"):
-            with self.subTest(selector=selector):
-                weights = [rule["font-weight"] for rule in blocks(source, selector)
-                           if "font-weight" in rule]
-                self.assertTrue(weights)
-                self.assertEqual(set(weights), {"520"})
-        for rule in blocks(source, ".md-typeset .simpaths-home-intro-band__body--bridge"):
-            if "font-weight" in rule:
-                self.assertEqual(rule["font-weight"], "520")
+        weights = [rule["font-weight"]
+                   for rule in blocks(source, ".md-typeset .simpaths-home-intro-band__lede")
+                   if "font-weight" in rule]
+        self.assertTrue(weights)
+        self.assertEqual(set(weights), {"450"})
 
     def test_documentation_description_keeps_its_original_compact_scale(self):
         rules = blocks(self.styles["04-landing-components.css"], ".md-typeset .docs-index__intro")

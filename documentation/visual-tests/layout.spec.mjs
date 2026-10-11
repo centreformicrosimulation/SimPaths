@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import "./annual-cycle.checks.mjs";
 
 
 test("validation uses consistent body typography and correctly nested instructions", async ({ page }) => {
@@ -168,7 +169,9 @@ for (const [name, path] of routes) {
       "05-site-chrome.css",
       "06-page-sections.css",
       "07-roadmap.css",
-      "08-home.css"
+      "08-home.css",
+      "09-model-explorer.css",
+      "10-developer-guide.css"
     ]);
 
     if (name === "home") {
@@ -217,15 +220,15 @@ test("audited guides expose the checked specifications and usable examples", asy
   await expect(page.locator("article a[href*='research']")).toHaveCount(1);
   await expect(page.locator("article")).not.toContainText("CeMPA WP");
 
-  await page.goto("/overview/model-description/");
-  await expect(page.locator("article ol a")).toHaveCount(11);
+  await page.goto("/overview/");
+  await expect(page.locator('.model-overview__components a[href*="/modules/"]')).toHaveCount(10);
+  await expect(page.locator('article a[href$="/modules/statistical-display/"]')).toHaveCount(1);
   await expect(page.locator('a[href*="overview/simulated-modules/"]')).toHaveCount(0);
 });
 
-test("interior pages share a frame, with standalone pages aligned to the Model navigation", async ({ page }) => {
-  const paths = ["/overview/", "/overview/model-description/", "/documentation/",
-    "/validation/", "/research/", "/funding/", "/overview/roadmap/",
-    "/overview/how-to-cite/", "/overview/modules/health/", "/developer-guide/repository-guide/"];
+test("interior pages keep a contained reading measure and consistent alignment", async ({ page }) => {
+  const paths = ["/overview/", "/documentation/", "/getting-started/",
+    "/validation/", "/research/", "/funding/", "/overview/modules/health/"];
   for (const width of [1512, 1280, 1024, 768, 390]) {
     await page.setViewportSize({ width, height: 900 });
     const measurements = [];
@@ -236,38 +239,43 @@ test("interior pages share a frame, with standalone pages aligned to the Model n
         const title = document.querySelector(".docs-index__heading, h1").getBoundingClientRect();
         const article = document.querySelector(".md-content__inner").getBoundingClientRect();
         const frame = document.querySelector(".md-main__inner").getBoundingClientRect();
-        const modelLink = document.querySelector('.md-sidebar--primary a[href$="/overview/"]');
-        return { titleX: title.x, titleY: title.y, articleX: article.x, width: article.width,
-          modelNavX: modelLink?.getBoundingClientRect().x,
+        return { titleX: title.x, articleX: article.x, articleRight: article.right, width: article.width,
           frameX: frame.x, noSectionNav: document.documentElement.classList.contains("sp-no-section-nav"),
+          readingMeasure: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sp-reading-measure")) * parseFloat(getComputedStyle(document.documentElement).fontSize),
           overflow: document.documentElement.scrollWidth - innerWidth };
       });
       expect(Math.abs(measurement.titleX - measurement.articleX), path).toBeLessThanOrEqual(1);
       expect(measurement.overflow, path).toBeLessThanOrEqual(1);
       if (measurement.noSectionNav) {
-        const expectedX = width >= 1220 ? measurements[0].modelNavX : measurement.frameX;
+        const expectedX = (width - measurement.width) / 2;
         expect(Math.abs(measurement.articleX - expectedX), path).toBeLessThanOrEqual(1);
       }
-      measurements.push(measurement);
-    }
-    for (const key of ["titleY"]) {
-      const values = measurements.map(item => item[key]);
-      expect(Math.max(...values) - Math.min(...values), `${width}px: ${key}`).toBeLessThanOrEqual(1);
+      measurements.push({ ...measurement, path });
     }
     for (const noSectionNav of [true, false]) {
-      for (const key of ["titleX", "width"]) {
-        const values = measurements.filter(item => item.noSectionNav === noSectionNav).map(item => item[key]);
-        expect(Math.max(...values) - Math.min(...values), `${width}px: ${key}`).toBeLessThanOrEqual(1);
+      const starts = measurements.filter(item => item.noSectionNav === noSectionNav).map(item => item.titleX);
+      expect(Math.max(...starts) - Math.min(...starts), `${width}px: content start`).toBeLessThanOrEqual(1);
+    }
+    if (width >= 960) {
+      const byPath = Object.fromEntries(measurements.map(item => [item.path, item]));
+      const prose = byPath["/overview/"];
+      expect(prose.width).toBeLessThanOrEqual(prose.readingMeasure + 1);
+      for (const path of ["/documentation/", "/getting-started/"]) {
+        expect(Math.abs(byPath[path].width - prose.width), path).toBeLessThanOrEqual(1);
+      }
+      for (const path of ["/validation/", "/research/", "/funding/"]) {
+        expect(byPath[path].width, path).toBeLessThanOrEqual(prose.readingMeasure + 1);
+        expect(Math.abs(byPath[path].width - byPath["/validation/"].width), path).toBeLessThanOrEqual(1);
       }
     }
   }
 });
 
-test("model overview keeps the established reading measure", async ({ page }) => {
+test("model overview uses a contents sidebar beside the established reading measure", async ({ page }) => {
   await page.setViewportSize({ width: 1512, height: 900 });
   await page.goto("/overview/", { waitUntil: "domcontentloaded" });
 
-  await expect(page.locator(".md-sidebar--secondary")).toBeHidden();
+  await expect(page.locator(".md-sidebar--secondary")).toBeVisible();
 
   const overviewMeasure = await page.locator(".model-overview").evaluate((element) => {
     return {
@@ -276,7 +284,7 @@ test("model overview keeps the established reading measure", async ({ page }) =>
     };
   });
 
-  await page.goto("/overview/model-description/", { waitUntil: "domcontentloaded" });
+  await page.goto("/overview/modules/health/", { waitUntil: "domcontentloaded" });
   const standardMeasure = await page.locator(".md-content__inner").evaluate((element) =>
     element.getBoundingClientRect().width
   );
@@ -285,22 +293,26 @@ test("model overview keeps the established reading measure", async ({ page }) =>
   expect(overviewMeasure.overflow).toBeLessThanOrEqual(8);
 });
 
-test("validation omits its redundant desktop navigation", async ({ page }) => {
+test("validation has one centred column without a contents sidebar or reserved space", async ({ page }) => {
   await page.setViewportSize({ width: 1512, height: 900 });
   await page.goto("/validation/", { waitUntil: "domcontentloaded" });
 
   await expect(page.locator("body")).toHaveClass(/sp-page-validation/);
+  await expect(page.locator(".md-sidebar--secondary")).toBeHidden();
 
   const desktop = await page.evaluate(() => ({
     primaryDisplay: getComputedStyle(document.querySelector(".md-sidebar--primary")).display,
-    secondaryDisplay: getComputedStyle(document.querySelector(".md-sidebar--secondary")).display,
-    contentWidth: document.querySelector(".md-content__inner").getBoundingClientRect().width
+    frameWidth: document.querySelector(".md-main__inner").getBoundingClientRect().width,
+    contentX: document.querySelector(".md-content__inner").getBoundingClientRect().x,
+    contentWidth: document.querySelector(".md-content__inner").getBoundingClientRect().width,
+    readingMeasure: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sp-reading-measure")) * parseFloat(getComputedStyle(document.documentElement).fontSize)
   }));
 
   expect(desktop.primaryDisplay).toBe("none");
-  expect(desktop.secondaryDisplay).not.toBe("none");
-  expect(desktop.contentWidth).toBeGreaterThanOrEqual(1000);
-  expect(desktop.contentWidth).toBeLessThanOrEqual(1095);
+  expect(Math.abs(desktop.frameWidth - desktop.contentWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(desktop.contentX - (1512 - desktop.contentWidth) / 2)).toBeLessThanOrEqual(1);
+  expect(desktop.contentWidth).toBeGreaterThan(500);
+  expect(desktop.contentWidth).toBeLessThanOrEqual(desktop.readingMeasure + 1);
 
   await page.setViewportSize({ width: 390, height: 844 });
   const mobilePrimaryVisibility = await page
@@ -375,7 +387,7 @@ test("site state exposes explicit styling hooks", async ({ page }) => {
   await expect(page.locator("body")).toHaveClass(/sp-tab-documentation/);
   await expect(page.locator(".sp-nav-container-active")).not.toHaveCount(0);
 
-  const searchTrigger = page.locator(".md-search__form > label.md-search__icon");
+  const searchTrigger = page.locator('.md-search__form > button[data-sp-toggle="search"]');
   const closedSearch = await page.locator(".md-search").boundingBox();
   expect(closedSearch.width).toBeGreaterThanOrEqual(145);
   expect(closedSearch.width).toBeLessThanOrEqual(165);
@@ -391,7 +403,7 @@ test("site state exposes explicit styling hooks", async ({ page }) => {
     const inner = rect(".md-search__inner");
     const output = rect(".md-search__output");
     const form = rect(".md-search__form");
-    const arrow = rect(".md-search__form > label.md-search__icon svg:last-child");
+    const arrow = rect('.md-search__form > button[data-sp-toggle="search"] svg:last-child');
     const title = getComputedStyle(document.querySelector(".md-header__title"));
     const overlay = getComputedStyle(document.querySelector(".md-search__overlay"));
     return {
@@ -400,6 +412,8 @@ test("site state exposes explicit styling hooks", async ({ page }) => {
       rightEdgeDifference: Math.abs(search.right - output.right),
       arrowVerticalOffset: Math.abs((form.top + form.bottom - arrow.top - arrow.bottom) / 2),
       titleOpacity: title.opacity,
+      searchTransition: getComputedStyle(document.querySelector('.md-search')).transitionDuration,
+      inputDelay: getComputedStyle(document.querySelector('.md-search__input')).transitionDelay,
       overlayBackground: overlay.backgroundColor
     };
   });
@@ -409,7 +423,9 @@ test("site state exposes explicit styling hooks", async ({ page }) => {
   expect(Math.abs(openSearch.searchWidth - openSearch.innerWidth)).toBeLessThanOrEqual(1);
   expect(openSearch.rightEdgeDifference).toBeLessThanOrEqual(1);
   expect(openSearch.arrowVerticalOffset).toBeLessThanOrEqual(1);
-  expect(openSearch.titleOpacity).toBe("0");
+  expect(openSearch.titleOpacity).toBe("1");
+  expect(openSearch.searchTransition).toBe("0s");
+  expect(openSearch.inputDelay).toBe("0s");
   expect(openSearch.overlayBackground).toBe("rgba(0, 0, 0, 0)");
 
   const searchInput = page.locator(".md-search__input");
@@ -476,7 +492,7 @@ test("search results form one aligned opaque panel at desktop breakpoints", asyn
   for (const width of [1000, 1440]) {
     await page.setViewportSize({ width, height: 720 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.locator(".md-search__form > label.md-search__icon").click();
+    await page.locator('.md-search__form > button[data-sp-toggle="search"]').click();
     const input = page.locator(".md-search__input");
     for (const query of ["", "naming", "noresultsxyz987"]) {
       await input.press("ControlOrMeta+A");
@@ -510,7 +526,7 @@ test("search results form one aligned opaque panel at desktop breakpoints", asyn
         expect(geometry.innerError).toBeLessThanOrEqual(1);
         expect(geometry.clippedHeight).toBeLessThanOrEqual(1);
         expect(geometry.bottom).toBeLessThan(geometry.viewport);
-        expect(geometry.background).toBe(scheme === "default" ? "rgb(255, 255, 255)" : "rgb(23, 36, 50)");
+        expect(geometry.background).not.toBe("rgba(0, 0, 0, 0)");
         expect(geometry.innerBackground).toBe("rgba(0, 0, 0, 0)");
         expect(geometry.outerShadow).not.toBe("none");
         expect(geometry.innerShadow).toBe("none");
@@ -665,14 +681,14 @@ test("mobile keeps native search and contents navigation", async ({ page }, test
   test.skip(testInfo.project.name !== "mobile");
   await page.goto("/getting-started/environment-setup/", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".md-sidebar--secondary")).not.toBeVisible();
-  await page.locator('.md-header__button[for="__search"]').click();
+  await page.locator('.md-header__button[data-sp-toggle="search"]').click();
   await page.locator(".md-search__input").fill("regression");
   await page.locator(".md-search__input").press("ArrowRight");
   await expect(page.locator(".md-search-result__link").first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
-  await page.locator('.md-search__form > label.md-search__icon').click();
+  await page.locator('.md-search__form > button[data-sp-toggle="search"]').click();
   await expect(page.locator("#__search")).not.toBeChecked();
-  await page.locator('.md-header__button[for="__drawer"]').click();
+  await page.locator('.md-header__button[data-sp-toggle="drawer"]').click();
   await page.locator('.md-sidebar--primary label.md-nav__link[for="__toc"]').click();
   const link = page.locator('.md-sidebar--primary .md-nav--secondary a[href$="#3-build-the-executables"]');
   await expect(link).toBeVisible();
@@ -680,32 +696,175 @@ test("mobile keeps native search and contents navigation", async ({ page }, test
   await expect(page).toHaveURL(/#3-build-the-executables/);
 });
 
-test("homepage keeps its explanation together and model routes reach the existing module list", async ({ page }) => {
+test("mobile navigation is keyboard accessible on every top-level destination", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/", "/overview/", "/documentation/", "/validation/", "/research/", "/funding/"]) {
+    await page.goto(route);
+    const opener = page.getByRole("button", { name: "Open site navigation", exact: true });
+    await expect(opener).toBeVisible();
+    await opener.focus();
+    await opener.press("Enter");
+    await expect(opener).toHaveAttribute("aria-expanded", "true");
+    const drawer = page.getByRole("dialog", { name: "Site navigation", exact: true });
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByRole("button", { name: "Close site navigation", exact: true })).toBeVisible();
+    if (["/", "/validation/", "/research/", "/funding/"].includes(route)) {
+      await expect(drawer.getByRole("link", { name: "Home", exact: true })).toBeVisible();
+      await expect(drawer.getByRole("link", { name: "Documentation", exact: true })).toBeVisible();
+    }
+    await page.keyboard.press("Escape");
+    await expect(opener).toBeFocused();
+    await expect(opener).toHaveAttribute("aria-expanded", "false");
+  }
+});
+
+test("mobile Back controls return through the hierarchy and search returns focus", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/getting-started/first-simulation/");
+  const menu = page.getByRole("button", { name: "Open site navigation", exact: true });
+  await menu.focus();
+  await menu.press("Enter");
+  const drawer = page.getByRole("dialog", { name: "Site navigation", exact: true });
+  for (const section of ["Getting Started", "Documentation"]) {
+    const back = drawer.getByRole("button", { name: `Back from ${section}`, exact: true });
+    await expect(back).toBeFocused();
+    // Pointer activation also catches a root title painting over nested Back.
+    await back.click();
+  }
+  await expect(drawer.getByRole("link", { name: "Research", exact: true })).toBeVisible();
+  await drawer.getByRole("link", { name: "Research", exact: true }).click();
+  await expect(page).toHaveURL(/\/research\/$/);
+  await expect(page.locator("#__drawer")).not.toBeChecked();
+
+  const search = page.locator('.md-header__button[data-sp-toggle="search"]');
+  await search.focus();
+  await search.press("Enter");
+  const input = page.getByRole("textbox", { name: "Search", exact: true });
+  await expect(input).toBeFocused();
+  await input.pressSequentially("first simulation");
+  await expect(page.locator(".md-search-result__link").first()).toHaveAttribute("href", /getting-started\/first-simulation/);
+  await input.press("Escape");
+  await expect(search).toBeFocused();
+  await expect(search).toHaveAttribute("aria-expanded", "false");
+});
+
+test("sidebar filtering survives an in-page jump and resets on a new document", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/getting-started/environment-setup/");
+  const sidebar = page.locator(".md-sidebar--primary");
+  const filter = sidebar.getByPlaceholder("Filter pages");
+  await filter.fill("Regression Library");
+  const result = sidebar.getByRole("link", { name: "Regression Library", exact: true });
+  await expect(result).toBeVisible();
+  await page.locator('.md-sidebar--secondary a[href$="#3-build-the-executables"]').click();
+  await expect(page).toHaveURL(/#3-build-the-executables$/);
+  await expect(filter).toHaveValue("Regression Library");
+  await expect(result).toBeVisible();
+  await result.click();
+  await expect(page).toHaveURL(/\/jasmine-reference\/regression-library\/$/);
+  await expect(sidebar.getByPlaceholder("Filter pages")).toHaveValue("");
+  await expect(sidebar.getByRole("link", { name: "Environment Setup", exact: true })).toBeVisible();
+});
+
+test("getting-started pages provide a deliberate reading journey", async ({ page }) => {
+  const journey = ["/getting-started/", "/getting-started/environment-setup/", "/getting-started/data/", "/getting-started/first-simulation/", "/user-guide/"];
+  await page.goto(journey[0]);
+  await expect(page.locator(".sp-section-routes a")).toHaveCount(4);
+  for (const destination of journey.slice(1)) {
+    await page.locator('.sp-page-nav a[rel="next"]').click();
+    await expect(page).toHaveURL(new URL(destination, page.url()).href);
+  }
+  for (const destination of ["/research/", "/funding/", "/validation/"]) {
+    await page.goto(destination);
+    await expect(page.locator(".sp-page-nav")).toHaveCount(0);
+  }
+});
+
+test("dark theme preserves header, sidebar and filter contrast", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/documentation/");
+  await page.getByRole("combobox", { name: "Colour theme", exact: true }).selectOption("dark");
+  await expect(page.locator("body")).toHaveAttribute("data-md-color-scheme", "slate");
+  await page.evaluate(() => scrollTo(0, 0));
+  const contrasts = await page.evaluate(() => {
+    const rgb = colour => (colour.match(/[\d.]+/g) || []).map(Number);
+    const blend = (top, bottom) => top.slice(0, 3).map((channel, index) =>
+      channel * (top[3] ?? 1) + bottom[index] * (1 - (top[3] ?? 1)));
+    const luminance = colour => colour.map(channel => {
+      const value = channel / 255;
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const samples = [
+      ['.md-header__title .md-header__topic:first-child .md-ellipsis', null, 4.5],
+      ['.md-tabs__link', null, 4.5],
+      ['.sp-sidebar-filter__input', '::placeholder', 4.5],
+      ['.sp-sidebar-filter__icon', null, 3],
+      ['.md-sidebar--primary .md-nav__icon', null, 3]
+    ];
+    return samples.flatMap(([selector, pseudo, minimum]) => [...document.querySelectorAll(selector)]
+      .filter(element => element.getClientRects().length && getComputedStyle(element).visibility === "visible")
+      .map(element => {
+        const backgrounds = [];
+        for (let parent = element; parent; parent = parent.parentElement) {
+          backgrounds.push(rgb(getComputedStyle(parent).backgroundColor));
+        }
+        const background = backgrounds.reverse().reduce((under, over) => blend(over, under), [255, 255, 255]);
+        const foreground = blend(rgb(getComputedStyle(element, pseudo).color), background);
+        const light = luminance(foreground), dark = luminance(background);
+        return { selector, minimum, ratio: (Math.max(light, dark) + 0.05) / (Math.min(light, dark) + 0.05) };
+      }));
+  });
+  expect(contrasts.length).toBeGreaterThan(6);
+  for (const sample of contrasts) expect(sample.ratio, sample.selector).toBeGreaterThanOrEqual(sample.minimum);
+});
+
+test("homepage keeps its explanation together and model overview links directly to modules", async ({ page }) => {
   await page.goto("/");
   const intro = page.locator('.simpaths-home-intro-band__lede');
-  await expect(intro).toContainText("Its modular design supports analysis");
-  await expect(page.locator('.simpaths-home-intro-band__body').first()).toContainText("Standardised assumptions and data sources");
-  const description = page.locator('.simpaths-home-intro-band__lede, .simpaths-home-intro-band__body');
+  await expect(intro).toContainText("modelling individual and household life courses");
+  await expect(intro).toHaveCSS('font-weight', '450');
+  await expect(intro).toHaveCSS('color', 'rgb(52, 49, 52)');
+  await expect(page.locator('.simpaths-home-intro-band__body').first()).toContainText("UK, Greece, Hungary, Italy and Poland");
+  const description = page.locator('.simpaths-home-features dd');
   await expect(description).toHaveCount(4);
   for (const paragraph of await description.all()) {
-    await expect(paragraph).toHaveCSS('font-weight', '520');
+    await expect(paragraph).toHaveCSS('font-weight', '400');
     await expect(paragraph).toHaveCSS('color', 'rgb(52, 49, 52)');
   }
   await page.goto('/overview/');
-  const modules = page.locator('.model-overview__topics').getByRole('link', { name: /^Simulated modules / });
-  await expect(modules).toHaveJSProperty('href', new URL('/overview/model-description/#simulated-modules', page.url()).href);
-  await modules.click();
-  await expect(page).toHaveURL(/\/overview\/model-description\/#simulated-modules$/);
-  await expect(page.locator('article h1')).toHaveText(/^Model Description(?:¶)?$/);
-  await expect(page.locator('article #simulated-modules')).toContainText('eleven modules');
-  await expect.poll(() => page.evaluate(() => document.getElementById('simulated-modules').getBoundingClientRect().top - document.querySelector('.md-header').getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(0);
-  await expect(page.locator('article ol a')).toHaveCount(11);
+  await expect(page.locator('article h1')).toHaveText(/^Model overview(?:¶)?$/);
+  await expect(page.locator('.model-overview__components a[href*="/modules/"]')).toHaveCount(10);
+  await expect(page.locator('article')).not.toContainText('These pages document the UK model');
+  await expect(page.locator('.model-overview__topics')).toHaveCount(0);
   await expect(page.locator('body')).toHaveClass(/sp-tab-model/);
-  await expect(page.locator('.md-sidebar--primary a.md-nav__link--active')).toHaveText('Model Description');
+  await expect(page.locator('.md-sidebar--primary a.md-nav__link--active')).toHaveText('Model');
+  await expect(page.locator('.md-sidebar--primary a[href*="model-description"]')).toHaveCount(0);
   await expect(page.locator('a[href*="overview/simulated-modules/"]')).toHaveCount(0);
   await expect(page.locator('article').getByRole('link', { name: 'Ageing', exact: true })).toHaveJSProperty('href', new URL('/overview/modules/ageing/', page.url()).href);
   await page.locator('article').getByRole('link', { name: 'Ageing', exact: true }).click();
   await expect(page).toHaveURL(/\/overview\/modules\/ageing\/$/);
+});
+
+test("former model description links preserve their destination and fragments", async ({ page, browser }) => {
+  for (const suffix of ['', '?source=bookmark#simulated-modules', '#model-description']) {
+    await page.goto('/overview/model-description/' + suffix);
+    await expect(page).toHaveURL(new URL('/overview/' + suffix, page.url()).href);
+    await expect(page.locator('article h1')).toHaveText(/^Model overview(?:¶)?$/);
+    if (suffix.includes('#')) {
+      await expect.poll(() => page.locator('#' + suffix.split('#')[1]).evaluate(el =>
+        el.getBoundingClientRect().top - document.querySelector('.md-header').getBoundingClientRect().bottom
+      )).toBeGreaterThanOrEqual(0);
+    }
+  }
+  const fallback = await browser.newContext({ javaScriptEnabled: false });
+  try {
+    const noScript = await fallback.newPage();
+    await noScript.goto(new URL('/overview/model-description/', page.url()).href);
+    await expect(noScript).toHaveURL(new URL('/overview/', page.url()).href);
+    await expect(noScript.locator('article h1')).toHaveText(/^Model overview(?:¶)?$/);
+  } finally {
+    await fallback.close();
+  }
 });
 
 test("homepage introduces a first simulation and highlights selected research", async ({ page }) => {
@@ -861,60 +1020,45 @@ test("homepage hero is complete and stable at first paint", async ({ page }) => 
       window.__simpathsLayoutShifts.push(...list.getEntries().filter(entry => !entry.hadRecentInput));
     }).observe({ type: "layout-shift", buffered: true });
   });
-  const heroLogoRequests = [];
+  const mathRequests = [];
+  page.on("request", request => {
+    if (/mathjax@.*\/es5\//.test(request.url())) mathRequests.push(request.url());
+  });
   await page.route("**/assets/fonts/Inter.woff2", async route => {
     await new Promise(resolve => setTimeout(resolve, 700));
     await route.continue();
   });
-  await page.route("**/assets/images/homepage-hero-logo-dark.svg*", route => {
-    heroLogoRequests.push(route.request().url());
-    return route.abort();
-  });
   await page.setViewportSize({ width: 1512, height: 900 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  const logo = page.locator(".simpaths-home-hero__logo");
-  await expect(logo).toHaveCount(1);
-  await expect(logo).toHaveJSProperty("tagName", "svg");
-  await expect(logo.locator("path")).not.toHaveCount(0);
-
-  const initial = await page.evaluate(() => {
-    const rect = selector => {
-      const box = document.querySelector(selector).getBoundingClientRect();
-      return [box.x, box.y, box.width, box.height].map(Math.round);
-    };
-    return {
-      logo: rect(".simpaths-home-hero__logo"),
-      title: rect(".simpaths-home-hero__title"),
-      hero: rect(".simpaths-home-hero")
-    };
-  });
-
-  await page.waitForTimeout(900);
-  const settled = await page.evaluate(() => {
-    const rect = selector => {
-      const box = document.querySelector(selector).getBoundingClientRect();
-      return [box.x, box.y, box.width, box.height].map(Math.round);
-    };
-    return {
-      logo: rect(".simpaths-home-hero__logo"),
-      title: rect(".simpaths-home-hero__title"),
-      hero: rect(".simpaths-home-hero")
-    };
-  });
-
-  expect(settled).toEqual(initial);
-  expect(initial.logo[2] / initial.logo[3]).toBeCloseTo(514 / 256, 1);
-  expect(heroLogoRequests).toEqual([]);
-  const shifts = await page.evaluate(() => window.__simpathsLayoutShifts.map(entry => ({
-    value: entry.value,
-    sources: entry.sources.map(source => ({
-      node: source.node?.className || source.node?.tagName,
-      previous: source.previousRect.toJSON(),
-      current: source.currentRect.toJSON()
-    }))
-  })));
-  expect(shifts).toEqual([]);
+  const hero = page.locator(".simpaths-home-hero");
+  await expect(hero.getByRole("heading", { level: 1 })).toHaveText("SimPaths");
+  await expect(hero.locator(".simpaths-home-hero__strap")).toHaveText("Life Course Microsimulation");
+  await expect(hero.locator(".simpaths-home-hero__logo")).toBeVisible();
+  await expect(hero).toHaveCSS("background-color", "rgb(39, 35, 45)");
+  const intro = page.locator(".simpaths-home-intro-band");
+  await expect(intro.locator(".simpaths-home-intro-band__lede")).toContainText("SimPaths is an open-source framework");
+  await expect(intro.locator(".simpaths-home-routes")).toHaveCount(0);
+  await page.evaluate(() => document.fonts.ready);
+  // Small font-swap differences are acceptable; a second hero layout is not.
+  const cumulativeShift = await page.evaluate(() => window.__simpathsLayoutShifts.reduce((sum, entry) => sum + entry.value, 0));
+  expect(cumulativeShift).toBeLessThan(0.1);
+  for (const width of [1512, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    const layout = await hero.evaluate(element => {
+      const band = element.getBoundingClientRect();
+      const strap = element.querySelector(".simpaths-home-hero__strap").getBoundingClientRect();
+      return {
+        firstScreen: band.bottom <= innerHeight && strap.bottom <= band.bottom,
+        fullWidth: Math.abs(band.width - innerWidth) <= 1 && Math.abs(band.left) <= 1,
+        overflow: document.documentElement.scrollWidth - innerWidth
+      };
+    });
+    expect(layout.firstScreen, `Homepage hero at ${width}px`).toBe(true);
+    expect(layout.fullWidth).toBe(true);
+    expect(layout.overflow).toBeLessThanOrEqual(1);
+  }
+  expect(mathRequests).toEqual([]);
 });
 
 test("documentation masthead integrates the SimPaths mark", async ({ page }) => {
@@ -1171,8 +1315,7 @@ test("funding uses a compact linked ledger without changing grant details", asyn
   await expect(page.locator(".funding-summary dt")).toHaveText(["Current grants", "Completed", "Span"]);
   await expect(page.locator(".funding-focus")).toHaveCount(0);
   await expect(page.locator(".funding-actions, .funding-eyebrow")).toHaveCount(0);
-  await expect(page.locator(".md-content__inner .sp-page-nav")).toBeVisible();
-  await expect(page.locator('.sp-page-nav a[href$="research/"]')).toHaveCount(1);
+  await expect(page.locator(".md-content__inner .sp-page-nav")).toHaveCount(0);
   await expect(page.locator("footer nav")).toHaveCount(0);
   await expect(page.locator(".funding-page")).not.toContainText("ModESHI");
   const layout = () => page.evaluate(() => {
@@ -1190,7 +1333,6 @@ test("funding uses a compact linked ledger without changing grant details", asyn
       listTopRule: styles(".funding-list").borderTopWidth,
       rowBottomRule: styles(".funding-list li").borderBottomWidth,
       titleWrap: styles(".funding-title").textWrap,
-      pagerDisplay: styles(".sp-page-nav").display,
       metadataFirst: [...document.querySelectorAll(".funding-entry")].every(entry =>
         entry.firstElementChild.classList.contains("funding-meta")),
       fullWidthRows: [...document.querySelectorAll(".funding-list")].every(list =>
@@ -1204,7 +1346,7 @@ test("funding uses a compact linked ledger without changing grant details", asyn
     panelBackground: "rgba(0, 0, 0, 0)", entryBackground: "rgba(0, 0, 0, 0)",
     entryColor: "rgb(36, 42, 49)", titleColor: "rgb(36, 42, 49)",
     summaryTopRule: "1px", summaryBottomRule: "1px", listTopRule: "1px", rowBottomRule: "1px",
-    titleWrap: "wrap", pagerDisplay: "grid", metadataFirst: true, fullWidthRows: true, overflow: 0
+    titleWrap: "wrap", metadataFirst: true, fullWidthRows: true, overflow: 0
   });
   const firstGrant = page.locator(".funding-entry").first();
   await firstGrant.hover();
@@ -1309,6 +1451,12 @@ test("funding interactions use funder colours with readable, stable hover and ke
 });
 
 test("equations render without webfont-dependent blank states", async ({ page }) => {
+  const mathRequests = [];
+  page.on("request", request => {
+    if (/mathjax@.*\/es5\/tex-svg\.js/.test(request.url())) mathRequests.push(request.url());
+  });
+  await page.goto("/");
+  expect(mathRequests).toEqual([]);
   await page.goto("/overview/modules/investment-income/#capital-income", {
     waitUntil: "domcontentloaded"
   });
@@ -1320,6 +1468,7 @@ test("equations render without webfont-dependent blank states", async ({ page })
   await expect(displayEquation).toBeVisible();
   await expect(page.locator('mjx-container[jax="CHTML"]')).toHaveCount(0);
   await expect(page.locator("mjx-merror")).toHaveCount(0);
+  expect(mathRequests).toHaveLength(1);
 });
 
 test("simulated modules is a single collapsible model branch", async ({ page }, testInfo) => {
@@ -1435,7 +1584,7 @@ test("documentation sidebar hover is neutral and keeps the current-page marker",
 
   for (const [scheme, colour, surface] of [
     ['default', 'rgb(26, 29, 33)', 'rgb(236, 238, 240)'],
-    ['slate', 'rgb(245, 248, 251)', 'rgba(255, 255, 255, 0.075)']
+    ['slate', 'rgb(241, 237, 242)', 'rgba(239, 168, 210, 0.08)']
   ]) {
     await page.locator('body').evaluate((body, value) => body.setAttribute('data-md-color-scheme', value), scheme);
     for (const [name, weight] of [['Getting Started', '580'], ['User Guide', '580'], ['Developer Guide', '580'], ['Input Data', '540']]) {

@@ -1,3 +1,13 @@
+---
+reading_navigation:
+  previous:
+    title: Environment Setup
+    url: getting-started/environment-setup/
+  next:
+    title: Running Your First Simulation
+    url: getting-started/first-simulation/
+---
+
 # Input Data
 
 SimPaths needs a starting population, tax-benefit donor data, and model parameters. These serve different purposes and should be versioned together for each research application.

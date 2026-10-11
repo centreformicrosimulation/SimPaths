@@ -1,5 +1,6 @@
 (() => {
   let disposeSidebarViewport = null;
+  let mountedRootList = null;
 
   const getDirectLabel = (item) => {
     const label = item.querySelector(
@@ -70,13 +71,7 @@
   };
 
   const setupSidebar = () => {
-    disposeSidebarViewport?.();
-    disposeSidebarViewport = null;
-    document.body.classList.remove("sp-docs-navigation");
-
     const activeTab = document.querySelector(".md-tabs__item--active .md-tabs__link");
-    if (!activeTab || activeTab.textContent.trim() !== "Documentation") return;
-
     const sidebarPanel = document.querySelector(".md-sidebar--primary");
     const sidebar = sidebarPanel?.querySelector(".md-sidebar__inner");
     const primaryNav = sidebar?.querySelector("nav.md-nav--primary");
@@ -84,7 +79,19 @@
       ":scope > .md-nav__list > .md-nav__item--active.md-nav__item--section > nav.md-nav"
     );
     const rootList = documentationNav?.querySelector(":scope > .md-nav__list");
-    if (!sidebarPanel || !sidebar || !rootList) return;
+    const isDocumentation = activeTab?.textContent.trim() === "Documentation";
+
+    // Material also emits on same-document anchors. Keep the mounted filter,
+    // its query and its expanded branches while the navigation tree is reused.
+    if (isDocumentation && rootList && rootList === mountedRootList) return;
+
+    disposeSidebarViewport?.();
+    disposeSidebarViewport = null;
+    mountedRootList = null;
+    document.body.classList.remove("sp-docs-navigation");
+    if (!isDocumentation || !sidebarPanel || !sidebar || !rootList) return;
+
+    mountedRootList = rootList;
 
     document.body.classList.add("sp-docs-navigation");
     sidebarPanel.querySelector(".sp-sidebar-tools")?.remove();
