@@ -52,7 +52,7 @@ class SitePaletteTest(unittest.TestCase):
     def test_homepage_directory_and_research_bands_keep_the_approved_palette(self):
         expected = {
             ".simpaths-home-hero": "var(--sp-home-hero-bg)",
-            ".simpaths-home-intro-band": "var(--md-default-bg-color)",
+            ".simpaths-home-intro-band": "var(--sp-paper)",
             ".simpaths-home-paths": "#E8F0F5",
             ".simpaths-home-research-band": "#F7F7F9",
             ".md-typeset .simpaths-home-research-band a.research-entry": "#fff",

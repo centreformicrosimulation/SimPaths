@@ -146,24 +146,31 @@ substitute editorial headlines for paper titles, hide citations, add summaries,
 use a two-column paper grid or add detached reading links. Omit the Previous/Next
 pager. Inherit the page frame and alignment from the shared no-section-navigation layout.
 
-The homepage opens with a full-width graphite hero band (#27232D), containing
+The homepage opens with a full-width hero band: graphite (#27232D) in light mode
+and the original midnight blue (#000A2D) in dark mode, set by `--sp-home-hero-bg`. It contains
 the centred SimPaths logo, wordmark and Life Course Microsimulation strapline.
-The three-paragraph introduction beneath it covers the framework, country
+The introduction and Model features share a white band in both themes, with
+fixed charcoal ink and berry links from the `--sp-panel-*` tokens. Scope these
+tokens to the band so dark-mode headings, links and focus outlines remain readable.
+The three-paragraph introduction beneath the hero covers the framework, country
 adaptation and source-code availability, in that order. These paragraphs span
 the homepage content width and lead directly into model features, separated by
-spacing without a divider or second navigation menu. A description list
-explains four capabilities in two open columns, stacking on smaller screens:
-linked life histories, current and forward-looking decisions, tax–benefit policy
-responses, and sensitivity and uncertainty. Give each feature a focused
-explanation and an underlined heading linking directly to its detailed methods
-or guide. Use the shared subheading scale and a visible keyboard focus outline;
-do not add a separate row of navigation or repeat the introduction's description
-of modularity.
+spacing without a divider or second navigation menu. Four short descriptions
+cover connected life domains, behavioural responses, tax–benefit detail and
+alternative assumptions. Arrange them in two open columns beside their shared
+purpose: policy analysis over the life course. A restrained connecting rule
+groups the capabilities; it does not imply an execution sequence. Place the
+purpose beneath the list on smaller screens, removing the connector, and stack
+the features on mobile. Keep the underlined headings linked to detailed methods
+or guides, at the shared subheading scale with visible keyboard focus outlines.
+Keep descriptions concrete and concise; the linked pages carry the technical
+detail. Do not add a separate row of navigation or repeat the introduction's
+description of modularity.
 The feature descriptions are followed by the UK and EU source-code links.
 Keep the text solid charcoal (#343134),
 the introduction at weight 450 and feature descriptions at 400, using the shared
-reading scale. Feature links use the theme's berry accent. Avoid numbered
-badges, a combining brace or a repeated wordmark in this section. Preserve the
+reading scale. Feature links use the band's fixed berry accent. Avoid numbered
+badges, an oversized brace or a repeated wordmark in this section. Preserve the
 muted publication metadata in the research band.
 
 The homepage's "Use SimPaths" section introduces a first simulation using the

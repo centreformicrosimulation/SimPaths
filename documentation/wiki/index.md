@@ -19,24 +19,30 @@ hide:
   <p class="simpaths-home-intro-band__body">Standardised assumptions and data sources facilitate adaptation across countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy and Poland, with Germany, Spain and Sweden under development.</p>
   <p class="simpaths-home-intro-band__body">All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
   <h2 id="model-features" class="simpaths-home-features__heading">Model features</h2>
+  <div class="simpaths-home-feature-map">
   <dl class="simpaths-home-features" aria-labelledby="model-features">
     <div>
-      <dt><a href="overview/#transitions-and-individual-variation">Linked life histories</a></dt>
-      <dd>Simulated people retain individual histories and family links. Equations estimated from survey data connect earlier circumstances to later outcomes, allowing changes in education, health and family composition to influence subsequent employment and income.</dd>
+      <dt><a href="overview/#transitions-and-individual-variation">Connected life domains</a></dt>
+      <dd>Education, work, family life, health and finances evolve together, with earlier circumstances influencing later outcomes.</dd>
     </div>
     <div>
-      <dt><a href="overview/modules/labour-income/#employment-decisions">Current and forward-looking decisions</a></dt>
-      <dd>The default specification models work choices using current income and leisure. A forward-looking alternative jointly models employment and consumption over the remaining lifetime, with saving and borrowing transferring resources between years.</dd>
+      <dt><a href="overview/modules/labour-income/#employment-decisions">Behavioural responses</a></dt>
+      <dd>Employment responds to financial incentives and family circumstances. A forward-looking option also models consumption and saving.</dd>
     </div>
     <div>
-      <dt><a href="overview/modules/disposable-income/">Tax–benefit policy responses</a></dt>
-      <dd>Precomputed tax–benefit results establish disposable income under alternative working hours and family circumstances. Changing the policy system can therefore affect both family resources and labour supply through changes in work incentives.</dd>
+      <dt><a href="overview/modules/disposable-income/">Tax–benefit detail</a></dt>
+      <dd>Results from tax–benefit models link policy rules to disposable income for different working hours and family circumstances.</dd>
     </div>
     <div>
-      <dt><a href="user-guide/uncertainty-analysis/">Sensitivity and uncertainty</a></dt>
-      <dd>Researchers can compare behavioural specifications and demographic or economic assumptions, and repeat simulations with different random seeds and resampled coefficients. These comparisons help assess how particular sources of uncertainty affect the results.</dd>
+      <dt><a href="user-guide/uncertainty-analysis/">Alternative assumptions</a></dt>
+      <dd>Vary economic and demographic assumptions, compare behavioural specifications, and test sensitivity to estimated parameters.</dd>
     </div>
   </dl>
+  <div class="simpaths-home-features__purpose">
+    <h3>Policy analysis over the life course</h3>
+    <p>Together, these features allow policies to be compared by their effects on incomes, behaviour and inequalities over time.</p>
+  </div>
+  </div>
   <div class="simpaths-home-intro-band__access-row" aria-label="SimPaths source code">
     <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-intro-band__access">UK source code</a>
     <a href="https://github.com/simpaths/SimPathsEU" class="simpaths-home-intro-band__access">EU source code</a>

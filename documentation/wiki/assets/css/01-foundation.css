@@ -132,6 +132,7 @@ body {
 
 [data-md-color-scheme="slate"] {
   color-scheme: dark;
+  --sp-home-hero-bg:              #000A2D;
   --sp-midnight:                  #F1EDF2;
   --sp-wine:                      #DCD4DF;
   --sp-wine-soft:                 #BDB4C4;

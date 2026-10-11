@@ -56,10 +56,15 @@ html.sp-page-home .md-main .md-top {
 }
 
 .simpaths-home-intro-band {
+  --sp-midnight: var(--sp-panel-ink);
+  --sp-accent: var(--sp-panel-link);
+  --sp-crimson: var(--sp-panel-link-hover);
+  --md-default-fg-color: var(--sp-panel-ink);
   width: 100vw;
   margin: 0 calc(50% - 50vw);
   padding: 2.5rem 1.2rem 2.75rem;
-  background: var(--md-default-bg-color);
+  color: var(--sp-panel-ink);
+  background: var(--sp-paper);
 }
 
 .simpaths-home-intro-band__inner {
@@ -86,11 +91,18 @@ html.sp-page-home .md-main .md-top {
   scroll-margin-top: calc(var(--sp-header-height) + 1.2rem);
 }
 
+.simpaths-home-feature-map {
+  display: grid;
+  grid-template-columns: minmax(0, 2.8fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2.5rem;
+  margin: 1.2rem 0 0;
+}
 .md-typeset .simpaths-home-features {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem 3rem;
-  margin: 1.2rem 0 0;
+  gap: 1.4rem 2rem;
+  margin: 0;
 }
 
 .md-typeset .simpaths-home-features > div {
@@ -127,6 +139,33 @@ html.sp-page-home .md-main .md-top {
   text-align: left;
   hyphens: none;
   -webkit-hyphens: none;
+}
+.simpaths-home-features__purpose {
+  position: relative;
+  padding-left: 1.3rem;
+  border-left: 1px solid #C9BDC5;
+}
+.simpaths-home-features__purpose::before {
+  position: absolute;
+  top: 50%; left: -1.3rem; width: 1.3rem;
+  border-top: 1px solid #C9BDC5;
+  content: "";
+}
+.md-typeset .simpaths-home-features__purpose h3 {
+  margin: 0;
+  font-size: var(--sp-section-size);
+  font-weight: var(--sp-section-weight);
+  line-height: 1.35;
+}
+.md-typeset .simpaths-home-features__purpose p {
+  margin: 0.6rem 0 0;
+  font-size: var(--sp-reading-copy-size);
+  line-height: var(--sp-reading-line-height);
+}
+@media (max-width: 980px) {
+  .simpaths-home-feature-map { grid-template-columns: 1fr; gap: 1.5rem; }
+  .simpaths-home-features__purpose { max-width: 38rem; padding-left: 0; border: 0; }
+  .simpaths-home-features__purpose::before { display: none; }
 }
 
 .simpaths-home-intro-band__access-row {
