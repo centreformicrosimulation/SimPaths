@@ -144,7 +144,8 @@ html.sp-page-validation .md-typeset li > ul { margin-top: 0.45em; }
   --funding-label-bg: #253444;
 }
 [data-md-color-scheme="slate"] .md-typeset .funding-page a.funding-entry {
-  --funding-ink: color-mix(in srgb, var(--funding-brand) 42%, white);
+  /* The badge wash sits over the row wash, so test ink against both layers. */
+  --funding-ink: color-mix(in srgb, var(--funding-brand) 38%, white);
   --funding-wash: color-mix(in srgb, var(--funding-ink) 12%, transparent);
   color: var(--funding-copy) !important;
 }

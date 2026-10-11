@@ -1,6 +1,8 @@
 (() => {
   let disposeSidebarViewport = null;
   let mountedRootList = null;
+  let mountedPage = null;
+  let mountedInput = null;
 
   const getDirectLabel = (item) => {
     const label = item.querySelector(
@@ -81,13 +83,18 @@
     const rootList = documentationNav?.querySelector(":scope > .md-nav__list");
     const isDocumentation = activeTab?.textContent.trim() === "Documentation";
 
-    // Material also emits on same-document anchors. Keep the mounted filter,
-    // its query and its expanded branches while the navigation tree is reused.
-    if (isDocumentation && rootList && rootList === mountedRootList) return;
+    const pageKey = location.pathname + location.search;
+    const samePage = mountedPage === pageKey;
+    // An anchor visit can replace Material's navigation tree. Preserve the
+    // query by page identity even when the filter itself has to be rebuilt.
+    if (isDocumentation && samePage && rootList && rootList === mountedRootList) return;
+    const previousQuery = samePage ? mountedInput?.value || "" : "";
 
     disposeSidebarViewport?.();
     disposeSidebarViewport = null;
     mountedRootList = null;
+    mountedInput = null;
+    mountedPage = pageKey;
     document.body.classList.remove("sp-docs-navigation");
     if (!isDocumentation || !sidebarPanel || !sidebar || !rootList) return;
 
@@ -115,6 +122,8 @@
     sidebar.prepend(tools);
 
     const input = tools.querySelector(".sp-sidebar-filter__input");
+    mountedInput = input;
+    input.value = previousQuery;
     const clear = tools.querySelector(".sp-sidebar-filter__clear");
     const status = tools.querySelector(".sp-sidebar-filter__status");
     const scrollwrap = sidebarPanel.querySelector(":scope > .md-sidebar__scrollwrap");
@@ -196,6 +205,7 @@
       applyFilter();
       input.focus();
     });
+    applyFilter();
   };
 
   if (typeof document$ !== "undefined") {

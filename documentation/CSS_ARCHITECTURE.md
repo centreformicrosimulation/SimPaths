@@ -101,6 +101,11 @@ header remains 4rem. Keep the main template's tabs block empty to avoid duplicat
 the navigation. The mobile drawer retains Material navigation structure, enhanced with native
 buttons, focus containment, Escape dismissal and focus return. Desktop
 search hides the tabs while expanded, and restores them when closed.
+Keep `toc.follow` for the visible section indicator and explicit anchor links,
+but leave `navigation.tracking` disabled: its deferred scroll handler can append
+the departing page's fragment to a destination during instant navigation.
+Preserve the sidebar filter query across same-page anchor visits even when
+Material replaces the navigation DOM; reset it when the page path changes.
 
 `sp-no-toc` identifies pages whose contents panel is hidden or empty, on both
 initial load and instant navigation. Section pages retain their reading column

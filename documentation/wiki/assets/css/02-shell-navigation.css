@@ -100,7 +100,9 @@
   letter-spacing: 0;
   opacity: 1;
   color: var(--md-default-fg-color--light);
-  transition: opacity 0.2s ease, color 0.2s ease;
+  /* Theme changes must switch text and its surface together; the underline
+     provides hover motion without a low-contrast colour interpolation. */
+  transition: none;
 }
 
 .md-tabs__link:hover {

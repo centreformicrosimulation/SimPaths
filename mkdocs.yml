@@ -38,7 +38,6 @@ theme:
     - navigation.indexes
     - navigation.top
     - navigation.footer
-    - navigation.tracking
     - toc.follow
     - search.suggest
     - search.highlight
@@ -49,11 +48,11 @@ theme:
 extra_css:
   # Keep this order: later component files intentionally refine earlier layers.
   - assets/css/01-foundation.css?v=20261011-audit-1
-  - assets/css/02-shell-navigation.css?v=20261011-audit-1
+  - assets/css/02-shell-navigation.css?v=20261011-navigation-fix-1
   - assets/css/03-content.css?v=20261011-audit-1
   - assets/css/04-landing-components.css?v=20261011-audit-1
   - assets/css/05-site-chrome.css?v=20261011-audit-1
-  - assets/css/06-page-sections.css?v=20261011-audit-1
+  - assets/css/06-page-sections.css?v=20261011-contrast-fix-1
   - assets/css/07-roadmap.css?v=20261011-audit-1
   - assets/css/08-home.css?v=20261011-features-1
   - assets/css/09-model-explorer.css?v=20261011-audit-1
@@ -65,7 +64,7 @@ extra_javascript:
   - assets/js/navigation-controls.js?v=20261011-audit-1
   - assets/js/theme-preference.js?v=20261011-audit-1
   - assets/js/toc-indicator.js?v=20260905-toc-marker-1
-  - assets/js/sidebar-filter.js?v=20261011-audit-1
+  - assets/js/sidebar-filter.js?v=20261011-navigation-fix-1
   - assets/js/annual-cycle.js?v=20261011-audit-1
 
 plugins:

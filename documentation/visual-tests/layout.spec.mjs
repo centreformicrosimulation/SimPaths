@@ -6,14 +6,14 @@ test("validation uses consistent body typography and correctly nested instructio
   await page.goto("/validation/");
   const article = page.locator(".md-content__inner");
   const sectionTitles = [
-    "Introduction",
+    "Scope of the checks",
     "Obtaining the validation scripts",
     "Running the validation scripts",
     "Validating regression estimates",
     "Validating the simulated output"
   ];
   await expect(article.locator("h2, h3")).toHaveText(sectionTitles.map(title => new RegExp(`^${title}(?:¶)?$`)));
-  await expect(page.locator(".md-sidebar--secondary .md-nav__link")).toHaveText(sectionTitles);
+  await expect(page.locator(".md-sidebar--secondary")).toBeHidden();
   expect(await article.locator("h2, h3").evaluateAll(elements => elements.map(element => element.id))).toEqual([
     "1-introduction",
     "2-obtaining-the-validation-scripts",
@@ -700,8 +700,10 @@ test("mobile navigation is keyboard accessible on every top-level destination", 
   await page.setViewportSize({ width: 390, height: 844 });
   for (const route of ["/", "/overview/", "/documentation/", "/validation/", "/research/", "/funding/"]) {
     await page.goto(route);
-    const opener = page.getByRole("button", { name: "Open site navigation", exact: true });
+    // The button's accessible name changes while the drawer is open.
+    const opener = page.locator('.md-header__button[data-sp-toggle="drawer"]');
     await expect(opener).toBeVisible();
+    await expect(opener).toHaveAccessibleName("Open site navigation");
     await opener.focus();
     await opener.press("Enter");
     await expect(opener).toHaveAttribute("aria-expanded", "true");
@@ -715,6 +717,7 @@ test("mobile navigation is keyboard accessible on every top-level destination", 
     await page.keyboard.press("Escape");
     await expect(opener).toBeFocused();
     await expect(opener).toHaveAttribute("aria-expanded", "false");
+    await expect(opener).toHaveAccessibleName("Open site navigation");
   }
 });
 
@@ -910,7 +913,13 @@ test("homepage introduces a first simulation and highlights selected research", 
       stepTops: stepItems.map((item) => item.getBoundingClientRect().top),
       pathDescriptionCount: steps.querySelectorAll(".simpaths-first-run__description").length,
       pathBeforeResearch: paths.getBoundingClientRect().bottom <= band.getBoundingClientRect().top,
-      bandHeight: band.getBoundingClientRect().height,
+      researchContentContained: [header, list, ...entries].every(element => {
+        const outer = band.getBoundingClientRect();
+        const inner = element.getBoundingClientRect();
+        return inner.width > 0 && inner.height > 0 &&
+          inner.top >= outer.top && inner.bottom <= outer.bottom &&
+          inner.left >= outer.left && inner.right <= outer.right;
+      }),
       columns: getComputedStyle(list).gridTemplateColumns.split(" ").length,
       entryCount: entries.length,
       entryHeights: entries.map((entry) => Math.round(entry.getBoundingClientRect().height)),
@@ -942,7 +951,7 @@ test("homepage introduces a first simulation and highlights selected research", 
   expect(new Set(presentation.stepBackgrounds)).toEqual(new Set(["rgba(0, 0, 0, 0)"]));
   expect(presentation.pathDescriptionCount).toBe(3);
   expect(presentation.pathBeforeResearch).toBe(true);
-  expect(presentation.bandHeight).toBeGreaterThan(500);
+  expect(presentation.researchContentContained).toBe(true);
   expect(presentation.columns).toBe(3);
   expect(presentation.entryCount).toBe(3);
   expect(new Set(presentation.entryHeights).size).toBe(1);
