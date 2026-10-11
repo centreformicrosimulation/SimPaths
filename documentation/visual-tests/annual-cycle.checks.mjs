@@ -7,7 +7,7 @@ test("annual module inspection preserves the diagram and exposes the selected ex
   await expect(explorer).not.toHaveAttribute("open", "");
   await explorer.locator(":scope > summary").click();
 
-  const picker = explorer.getByLabel("Module", { exact: true });
+  const picker = explorer.getByRole("combobox", { name: "Module", exact: true });
   const tabs = explorer.getByRole("tablist");
   if (await tabs.isVisible()) {
     const first = tabs.getByRole("tab", { name: "Ageing", exact: true });
