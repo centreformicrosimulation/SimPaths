@@ -57,7 +57,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     // identifiers
     private Long idPersOriginal;
-    @Transient private Long inheritanceSourceId;
     private Long idBuOriginal;
     private Long idHhOriginal;
     private Long idMother;
@@ -193,10 +192,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Lag(getter="getYPensPersGrossMonth") @Transient private Double yPensPersGrossMonthL1; //Lag(1) of pension income
     @Lag(field="yPensPersGrossMonthL1") @Transient private Double yPensPersGrossMonthL2; //Lag(2) of pension income
     @NullInitialised private Double wealthPensValue;
-    @NullInitialised private Double wealthPensDcValue;
-    @NullInitialised private Double wealthPensDbValue;
-    @NullInitialised private Double wealthPensInPaymentValue;
-    @NullInitialised private Double wealthPensOtherValue;
     @NullInitialised private Double contRateOPEe;           //employee contribution rate to occupation pension
     @NullInitialised private Double contRateOPEr;           //employer contribution rate to occupation pension
     @NullInitialised private Double contRatePP;             //employee contribution rate to personal pension
@@ -338,8 +333,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public Person (Person originalPerson, long statSeed, SampleEntry demEnterSample) {
 
         this(personIdCounter++, statSeed);
-        inheritanceSourceId = originalPerson.inheritanceSourceId != null
-                ? originalPerson.inheritanceSourceId : originalPerson.getId();
         switch (demEnterSample) {
             case ProcessedInputData -> {
                 key.setId(originalPerson.getId());
@@ -448,10 +441,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         wealthNonPensValue = originalPerson.wealthNonPensValue;
         wealthPensValue = originalPerson.wealthPensValue;
-        wealthPensDcValue = originalPerson.wealthPensDcValue;
-        wealthPensDbValue = originalPerson.wealthPensDbValue;
-        wealthPensInPaymentValue = originalPerson.wealthPensInPaymentValue;
-        wealthPensOtherValue = originalPerson.wealthPensOtherValue;
         contRateOPEe = originalPerson.contRateOPEe;
         contRateOPEr = originalPerson.contRateOPEr;
         contRatePP = originalPerson.contRatePP;
@@ -694,7 +683,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         } else {
             careProvidedFlag = Indicator.True;
         }
-        // Parent IDs are ancestry and must survive later changes of caregiver.
+        if (demAge < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            Person mother = benefitUnit.getFemale();
+            if (mother!=null)
+                idMother = mother.getId();
+            else
+                idMother = null;
+            Person father = benefitUnit.getMale();
+            if (father!=null)
+                idFather = father.getId();
+            else
+                idFather = null;
+        }
 
         // Mental and Physical health status of the partner
         if (partner != null) {
@@ -713,15 +713,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // instantiate privatePension
         wealthPensValue = 0.0;
-        wealthPensDcValue = 0.0;
-        wealthPensDbValue = 0.0;
-        wealthPensInPaymentValue = 0.0;
-        wealthPensOtherValue = 0.0;
         wealthNonPensValue = 0.0;
         privatePension = new PrivatePension();
         if (demAge >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-		    double[] pensionComponents = getBenefitUnit().getInitialPensionComponents();
-		    double adultShare = partner != null ? 0.5 : 1.0;
 
             if (partner != null) {
                 wealthPensValue = getBenefitUnit().getWealthPensValue() / 2.0;
@@ -730,13 +724,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 wealthPensValue = getBenefitUnit().getWealthPensValue();
                 wealthNonPensValue = getBenefitUnit().getWealthNonPensValue();
             }
-            privatePension.setInitialComponents(pensionComponents[0] * adultShare,
-                    pensionComponents[1] * adultShare, pensionComponents[2] * adultShare,
-                    pensionComponents[3] * adultShare);
-            wealthPensDcValue = privatePension.getDcWealth();
-            wealthPensDbValue = privatePension.getDbRightsValue();
-            wealthPensInPaymentValue = privatePension.getInPaymentRightsValue();
-            wealthPensOtherValue = privatePension.getOtherRightsValue();
+            privatePension.setWealth(wealthPensValue);
             privatePension.setPensionIncomeAnnual(Math.sinh(yPensPersGrossMonth) * 12.0);
             privatePension.setContRateOPEe(contRateOPEe);
             privatePension.setContRateOPEr(contRateOPEr);
@@ -1051,18 +1039,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (privatePension == null)
             privatePension = new PrivatePension();
 
-        if (demAge >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-            if (!Les_c4.Retired.equals(labC4)) {
-                double pensionReturn = Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealPensionReturn);
-                privatePension.projectWealth(privatePensionL1, getGrossEarningsYearly(), pensionReturn, labC4);
-            }
-        }
+        if (demAge >= Parameters.AGE_TO_BECOME_RESPONSIBLE && !Les_c4.Retired.equals(labC4))
+            privatePension.projectWealth(privatePensionL1.getWealth(), getGrossEarningsYearly(), Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealPensionReturn), labC4);
 
         wealthPensValue = privatePension.getWealth();
-        wealthPensDcValue = privatePension.getDcWealth();
-        wealthPensDbValue = privatePension.getDbRightsValue();
-        wealthPensInPaymentValue = privatePension.getInPaymentRightsValue();
-        wealthPensOtherValue = privatePension.getOtherRightsValue();
         contRateOPEe = privatePension.getContRateOPEe();
         contRateOPEr = privatePension.getContRateOPEr();
         contRatePP = privatePension.getContRatePP();
@@ -2191,7 +2171,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             else
                 throw new RuntimeException("privatePension should be null");
 
-            pensionIncMonth = privatePension.projectPensionAccess(demAge, demMaleFlag, benefitUnit.getYear(), privatePensionL1);
+            pensionIncMonth = privatePension.projectPensionAccess(demAge, demMaleFlag, benefitUnit.getYear(), privatePensionL1.getWealth());
         } else {
 
             // 1. SELECTION (Process I3a - Logit)
@@ -2358,9 +2338,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (demAge <= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             return 0.0;
         } else if (benefitUnit != null) {
-            return (Occupancy.Couple.equals(benefitUnit.getOccupancy()))
-                    ? benefitUnit.getWealthTotValueForDecisions() / 2.0
-                    : benefitUnit.getWealthTotValueForDecisions();
+            return (Occupancy.Couple.equals(benefitUnit.getOccupancy())) ? benefitUnit.getWealthTotValue() / 2.0 : benefitUnit.getWealthTotValue();
         } else {
             throw new RuntimeException("Call to get liquid wealth for person object without benefit unit assigned");
         }
@@ -2383,7 +2361,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         // eduSpellFlag = (Les_c4.Student.equals(labC4)) ? Indicator.True : Indicator.False;
         // no need to update eduSpellFlag as its value is persisted from the previous year
 
-        // Keep the recorded ancestry even when a child's benefit unit changes.
+        if (demAge < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+            Person mother = benefitUnit.getFemale();
+            if (mother!=null)
+                idMother = mother.getId();
+            else
+                idMother = null;
+            Person father = benefitUnit.getMale();
+            if (father!=null)
+                idFather = father.getId();
+            else
+                idFather = null;
+        }
 
         // Mental and Physical health status of the partner
         if (this.getPartner() != null) {
@@ -2513,13 +2502,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Set<Person> childrenToNewBenefitUnit = new LinkedHashSet<>();
         if (person.demAge <Parameters.AGE_TO_BECOME_RESPONSIBLE)
             throw new RuntimeException("problem identifying allocation of children to new benefit unit");
-        // Custody follows the current responsible adult. Parent IDs continue
-        // to identify ancestry for children who later leave this unit.
-        Person caregiver = person.getBenefitUnit().getFemale();
-        if (caregiver == null)
-            caregiver = person.getBenefitUnit().getMale();
-        if (caregiver == person)
-            childrenToNewBenefitUnit.addAll(person.getBenefitUnit().getChildren());
+        if (Gender.Female.equals(person.demMaleFlag))
+            for (Person child : person.getBenefitUnit().getChildren()) {
+                if (child.getIdMother()!=null && person.getId()==child.getIdMother())
+                    childrenToNewBenefitUnit.add(child);
+            }
+        else {
+            for (Person child : person.getBenefitUnit().getChildren()) {
+                if (child.idMother==null && child.getIdFather()!=null && person.getId()==child.getIdFather())
+                    childrenToNewBenefitUnit.add(child);
+            }
+        }
+
         return childrenToNewBenefitUnit;
     }
 
@@ -7333,11 +7327,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         wealthPensValue = v;
     }
 
-    public double getWealthPensDcValue() { return Objects.requireNonNullElse(wealthPensDcValue, 0.0); }
-    public double getWealthPensDbValue() { return Objects.requireNonNullElse(wealthPensDbValue, 0.0); }
-    public double getWealthPensInPaymentValue() { return Objects.requireNonNullElse(wealthPensInPaymentValue, 0.0); }
-    public double getWealthPensOtherValue() { return Objects.requireNonNullElse(wealthPensOtherValue, 0.0); }
-
     public double getYEmpPersGrossMonthL1() {
         return yEmpPersGrossMonthL1;
     }
@@ -8092,18 +8081,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return idFather;
     }
 
-    public Long getInheritanceSourceId() {
-        return inheritanceSourceId;
-    }
-
-    // Cloned family links are resolved only after every benefit unit in the
-    // household has been cloned. Parent IDs identify ancestry, not the adults
-    // currently responsible for a child.
-    void setParentIds(Long motherId, Long fatherId) {
-        idMother = motherId;
-        idFather = fatherId;
-    }
-
     public boolean getToBePartnered() {return demBePartnerFlag;}
 
     public static void setPersonIdCounter(long id) {personIdCounter=id;}
@@ -8333,12 +8310,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public void setWealthNonPensValue(Double v) {
         wealthNonPensValue = v;
-    }
-
-    void addInheritanceToPersonalFinancialBalance(double amount) {
-        if (!Double.isFinite(amount))
-            throw new IllegalArgumentException("Non-finite inheritance transfer");
-        wealthNonPensValue = Objects.requireNonNullElse(wealthNonPensValue, 0.0) + amount;
     }
 
     public Double getWealthNonPensValueL1() {
