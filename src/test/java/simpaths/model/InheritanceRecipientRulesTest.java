@@ -204,7 +204,7 @@ class InheritanceRecipientRulesTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {19, 25, 47, 48, 75})
+    @ValueSource(ints = {18, 19, 25, 40, 47, 48, 49, 75})
     void targetAgesRespectYoungDonorBoundaryAndMatchedRecipientsAreAdults(int donorAge) {
         World world = new World();
         Person donor = world.person(1, donorAge, 10_000);
@@ -215,16 +215,35 @@ class InheritanceRecipientRulesTest {
         world.settle();
         assertEquals(2, world.module.getSyntheticMatches().size());
         for (InheritanceModule.SyntheticMatch match : world.module.getSyntheticMatches()) {
-            int lower = donorAge < 48 ? Math.max(18, donorAge - 5) : donorAge - 30;
-            int upper = donorAge < 48 ? donorAge + 5 : donorAge - 20;
+            int lower = donorAge < 48 ? 18 : donorAge - 30;
+            int upper = donorAge < 48 ? 28 : donorAge - 20;
             assertTrue(match.targetAge() >= lower && match.targetAge() <= upper);
-            assertEquals(donorAge < 48 ? "donor_age_pm5" : "donor_minus_20_to_30", match.ageRule());
+            assertEquals(donorAge < 48 ? "young_adult_band" : "donor_minus_20_to_30", match.ageRule());
             assertEquals(donorAge - match.targetAge(), match.ageGap());
             assertEquals(match.ageGap(), match.actualAgeGap());
             assertTrue(donorAge - match.actualAgeGap() >= 18);
             assertEquals(2, match.actualCount());
         }
         assertEquals(10_000, world.module.getTransfers().stream().mapToDouble(InheritanceModule.Transfer::value).sum(), 1e-6);
+    }
+
+    @Test
+    void youngerDonorPrefersYoungAdultBandOverSameAgeEducationAndRegionMatch() {
+        World world = new World();
+        Person donor = world.person(1, 47, 10_000, Education.High, Region.UKC);
+        Person peer = world.person(2, 47, 0, Education.High, Region.UKC);
+        for (int age = 18; age <= 28; age++)
+            world.person(100 + age, age, 0, Education.Low, Region.UKD);
+        world.die(donor);
+        world.settle();
+
+        assertEquals(0, world.balance(peer));
+        assertEquals(2, world.module.getSyntheticMatches().size());
+        assertTrue(world.module.getSyntheticMatches().stream().allMatch(match ->
+                match.ageRule().equals("young_adult_band") &&
+                match.actualAgeGap() >= 19 && match.actualAgeGap() <= 29));
+        assertEquals(10_000, world.module.getTransfers().stream()
+                .mapToDouble(InheritanceModule.Transfer::value).sum(), 1e-6);
     }
 
     @Test

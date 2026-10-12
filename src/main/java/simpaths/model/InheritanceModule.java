@@ -569,8 +569,10 @@ public final class InheritanceModule {
     private Match matchRecipient(Person reference, Set<Long> used, SplittableRandom rng) {
         int adultAge = Parameters.AGE_TO_BECOME_RESPONSIBLE;
         boolean young = reference.getDemAge() - 30 < adultAge;
-        int lower = young ? Math.max(adultAge, reference.getDemAge() - 5) : reference.getDemAge() - 30;
-        int upper = young ? Math.max(lower, reference.getDemAge() + 5) : reference.getDemAge() - 20;
+        // Use the same young-adult band whenever the intergenerational band
+        // would include minors: ages 18-28 for UK donors younger than 48.
+        int lower = young ? adultAge : reference.getDemAge() - 30;
+        int upper = young ? adultAge + 10 : reference.getDemAge() - 20;
         int targetAge = lower + rng.nextInt(upper - lower + 1);
         Comparator<Person> rank = Comparator
                 .comparingInt((Person p) -> Math.abs(p.getDemAge() - targetAge))
@@ -589,7 +591,7 @@ public final class InheritanceModule {
         String tier = (recipient.getDemAge() == targetAge ? "exact_age" : "age_relaxed") +
                 (education == Integer.MAX_VALUE ? "_education_missing" : "_education_distance_" + education) +
                 (region ? "_same_region" : "_other_region");
-        return new Match(recipient, targetAge, young ? "donor_age_pm5" : "donor_minus_20_to_30",
+        return new Match(recipient, targetAge, young ? "young_adult_band" : "donor_minus_20_to_30",
                 education == Integer.MAX_VALUE ? -1 : education, region, tier);
     }
 
@@ -806,7 +808,7 @@ public final class InheritanceModule {
                         "; pooled_parent_fallback=unique_surviving_parents_of_current_deceased_adults_equal_shares" +
                         "; matching_priority=age_education_region_seeded_tie" +
                         "; matched_recipients=active_adults_only" +
-                        "; matching_age=minus_20_to_30_unless_range_includes_minors_then_donor_pm5" +
+                        "; matching_age=minus_20_to_30_unless_range_includes_minors_then_adult_age_to_plus_10" +
                         "; orphan_reference=latest_parent_death_year_then_highest_person_id" +
                         "; orphan_existing_trust=reuse_parent_referenced_adult_match" +
                         "; deceased_minor_trust=normal_heir_hierarchy" +

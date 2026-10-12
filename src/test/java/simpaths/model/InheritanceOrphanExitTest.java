@@ -281,6 +281,37 @@ class InheritanceOrphanExitTest {
     }
 
     @Test
+    void orphanTrustAndNewEstateUseYoungAdultBandOfLastDeceasedParent() {
+        Family family = new Family();
+        family.establishTrust();
+        List<WealthNonPension> recipientWealth = new ArrayList<>();
+        for (int age = 18; age <= 28; age++) {
+            Person recipient = person(100 + age, age);
+            WealthNonPension wealth = wealth(0);
+            family.people.add(recipient);
+            family.units.add(unit(100 + age, wealth, recipient));
+            recipientWealth.add(wealth);
+        }
+        family.homeWealth.setWealthFinancialValue(30_000);
+        family.mother.setSampleExit(SampleExit.Death);
+        family.settle(2030);
+
+        List<InheritanceModule.SyntheticMatch> matches = family.module.getSyntheticMatches();
+        assertEquals(2, matches.size());
+        assertTrue(matches.stream().allMatch(match -> match.referenceId() == 2 &&
+                match.ageRule().equals("young_adult_band") &&
+                match.targetAge() >= 18 && match.targetAge() <= 28 &&
+                family.people.stream().anyMatch(person ->
+                        person.getId() == match.recipientId() &&
+                        person.getDemAge() >= 18 && person.getDemAge() <= 28)));
+        assertEquals(matches.getFirst().recipientId(), matches.getLast().recipientId());
+        assertEquals(40_000, recipientWealth.stream()
+                .mapToDouble(wealth -> wealth.getWealthFinancial().getValue()).sum(), 1e-6);
+        assertEquals(0, family.module.getIlliquidAssetWealth(family.home));
+        assertEquals(SampleExit.Orphan, family.child.getSampleExit());
+    }
+
+    @Test
     void sameYearParentDeathsUseHigherPersonIdAndSettlePooledEstateOnce() {
         Family family = new Family();
         family.home.getMembers().add(family.father);
