@@ -1,6 +1,10 @@
 /* HOMEPAGE — INSTITUTIONAL SYSTEM
    Evidence-led landing page patterns for SimPaths. */
 
+html.sp-page-home {
+  --sp-home-section-weight: 580;
+}
+
 html.sp-page-home .md-main__inner {
   margin-top: 0;
 }
@@ -87,7 +91,7 @@ html.sp-page-home .md-main .md-top {
 .md-typeset .simpaths-home-features__heading {
   margin: 1.8rem 0 0;
   font-size: var(--sp-section-size);
-  font-weight: var(--sp-section-weight);
+  font-weight: var(--sp-home-section-weight);
   scroll-margin-top: calc(var(--sp-header-height) + 1.2rem);
 }
 
@@ -95,8 +99,7 @@ html.sp-page-home .md-main .md-top {
   display: grid;
   grid-template-columns: minmax(0, 2.8fr) minmax(0, 1fr);
   align-items: center;
-  gap: 2.5rem;
-  margin: 1.2rem 0 0;
+  gap: 2.5rem; margin: 1.2rem 0 0;
 }
 .md-typeset .simpaths-home-features {
   display: grid;
@@ -112,8 +115,8 @@ html.sp-page-home .md-main .md-top {
 .md-typeset .simpaths-home-features dt {
   margin: 0;
   color: var(--sp-midnight);
-  font-size: var(--sp-subheading-size);
-  font-weight: var(--sp-subheading-weight);
+  font-size: var(--sp-reading-copy-size);
+  font-weight: calc(var(--sp-subheading-weight) - 20);
   line-height: 1.4;
 }
 
@@ -140,21 +143,19 @@ html.sp-page-home .md-main .md-top {
   hyphens: none;
   -webkit-hyphens: none;
 }
+
 .simpaths-home-features__purpose {
   position: relative;
-  padding-left: 1.3rem;
-  border-left: 1px solid #C9BDC5;
+  padding-left: 1.3rem; border-left: 1px solid #C9BDC5;
 }
 .simpaths-home-features__purpose::before {
   position: absolute;
   top: 50%; left: -1.3rem; width: 1.3rem;
-  border-top: 1px solid #C9BDC5;
-  content: "";
+  border-top: 1px solid #C9BDC5; content: "";
 }
 .md-typeset .simpaths-home-features__purpose h3 {
   margin: 0;
-  font-size: var(--sp-section-size);
-  font-weight: var(--sp-section-weight);
+  font-size: var(--sp-section-size); font-weight: var(--sp-section-weight);
   line-height: 1.35;
 }
 .md-typeset .simpaths-home-features__purpose p {
@@ -224,7 +225,7 @@ html.sp-page-home .md-main .md-top {
   color: var(--md-default-fg-color);
   font-family: var(--sp-heading-font) !important;
   font-size: clamp(1.55rem, 2.7vw, 1.9rem) !important;
-  font-weight: var(--sp-section-weight);
+  font-weight: var(--sp-home-section-weight);
   line-height: 1.15; letter-spacing: -0.035em;
 }
 .md-typeset .simpaths-first-run {
@@ -239,7 +240,7 @@ html.sp-page-home .md-main .md-top {
   font-size: 0.8rem; line-height: 1.6;
 }
 .md-typeset .simpaths-first-run__intro {
-  max-width: 46rem; margin: 0; color: var(--md-default-fg-color--light);
+  max-width: none; margin: 0; color: var(--md-default-fg-color--light);
 }
 .md-typeset ol.simpaths-first-run__steps {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -256,7 +257,7 @@ html.sp-page-home .md-main .md-top {
   color: var(--md-default-fg-color--light);
   font-weight: 550; font-variant-numeric: tabular-nums;
 }
-.simpaths-first-run__steps strong { color: var(--md-default-fg-color); font-weight: var(--sp-label-weight); }
+.simpaths-first-run__steps strong { color: var(--md-default-fg-color); font-weight: calc(var(--sp-label-weight) - 15); }
 .simpaths-first-run__description {
   display: block; margin-top: 0.22rem;
   color: var(--md-default-fg-color--light);
@@ -317,7 +318,7 @@ html.sp-page-home .md-main .md-top {
   color: var(--sp-midnight);
   font-family: var(--sp-heading-font) !important;
   font-size: var(--sp-section-size);
-  font-weight: var(--sp-section-weight);
+  font-weight: var(--sp-home-section-weight);
 }
 
 .md-typeset .section-heading::after {
@@ -367,7 +368,7 @@ html.sp-page-home .md-main .md-top {
   margin-bottom: 0;
   color: #343134;
   font-size: 1.55rem;
-  font-weight: var(--sp-section-weight);
+  font-weight: var(--sp-home-section-weight);
   line-height: 1.08;
 }
 .md-typeset .simpaths-home-research-band .research-header .section-heading::after {

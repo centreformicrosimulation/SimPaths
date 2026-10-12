@@ -75,6 +75,8 @@ from this convention and must not change typography or layout.
 MathJax loads only when a page contains `.arithmatex`. The loader handles instant
 navigation, clears detached items and queues typesetting without duplicate CDN
 requests. Search opens promptly without delayed input or hiding the brand.
+Display equations retain their intrinsic SVG width in Material's mobile scroll
+container; long equations scroll horizontally instead of shrinking the symbols.
 
 Run `python3 -m unittest discover -s documentation/scripts -p 'test_*.py'` to check
 the shared scale and component adoption as well as code highlighting.
@@ -146,8 +148,9 @@ substitute editorial headlines for paper titles, hide citations, add summaries,
 use a two-column paper grid or add detached reading links. Omit the Previous/Next
 pager. Inherit the page frame and alignment from the shared no-section-navigation layout.
 
-The homepage opens with a full-width hero band: graphite (#27232D) in light mode
-and the original midnight blue (#000A2D) in dark mode, set by `--sp-home-hero-bg`. It contains
+The homepage opens with a full-width hero band: graphite (#27232D) in light mode.
+In dark mode, `--sp-home-hero-bg` follows `--md-default-bg-color` (#211E26),
+matching the header for a continuous background. It contains
 the centred SimPaths logo, wordmark and Life Course Microsimulation strapline.
 The introduction and Model features share a white band in both themes, with
 fixed charcoal ink and berry links from the `--sp-panel-*` tokens. Scope these
@@ -161,11 +164,13 @@ alternative assumptions. Arrange them in two open columns beside their shared
 purpose: policy analysis over the life course. A restrained connecting rule
 groups the capabilities; it does not imply an execution sequence. Place the
 purpose beneath the list on smaller screens, removing the connector, and stack
-the features on mobile. Keep the underlined headings linked to detailed methods
-or guides, at the shared subheading scale with visible keyboard focus outlines.
+the features on mobile. Keep the underlined feature headings linked to detailed
+methods or guides, at the body-text size with visible keyboard focus outlines.
 Keep descriptions concrete and concise; the linked pages carry the technical
 detail. Do not add a separate row of navigation or repeat the introduction's
 description of modularity.
+Homepage section headings use weight 580 through `--sp-home-section-weight`,
+feature headings 540 and first-run headings 535, at the existing sizes.
 The feature descriptions are followed by the UK and EU source-code links.
 Keep the text solid charcoal (#343134),
 the introduction at weight 450 and feature descriptions at 400, using the shared
@@ -174,7 +179,8 @@ badges, an oversized brace or a repeated wordmark in this section. Preserve the
 muted publication metadata in the research band.
 
 The homepage's "Use SimPaths" section introduces a first simulation using the
-bundled training data. Keep the explanation, three numbered steps and a secondary
+bundled training data. Let its introduction span the full content width and wrap
+naturally. Keep the explanation, three numbered steps and a secondary
 link to the full documentation, which owns the broader guide directory. Display
 the steps in three open columns, stacking them on smaller screens. Keep the
 training-data limitation. Use the full-width pale blue band (#E8F0F5), graphite

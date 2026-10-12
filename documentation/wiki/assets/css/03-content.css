@@ -204,6 +204,16 @@
   max-width: 100%;
 }
 
+/* Preserve intrinsic equation size inside Material's mobile scroll container. */
+.md-typeset div.arithmatex > mjx-container[jax="SVG"] {
+  width: max-content;
+  min-width: 100%;
+}
+
+.md-typeset mjx-container[jax="SVG"][display="true"] > svg {
+  max-width: none;
+}
+
 [data-md-color-scheme="slate"] .md-typeset .arithmatex {
   color: var(--md-default-fg-color);
 }

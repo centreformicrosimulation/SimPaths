@@ -47,14 +47,14 @@ theme:
 
 extra_css:
   # Keep this order: later component files intentionally refine earlier layers.
-  - assets/css/01-foundation.css?v=20261011-midnight-hero-1
+  - assets/css/01-foundation.css?v=20261011-matching-hero-2
   - assets/css/02-shell-navigation.css?v=20261011-navigation-fix-1
-  - assets/css/03-content.css?v=20261011-audit-1
+  - assets/css/03-content.css?v=20261012-equations-1
   - assets/css/04-landing-components.css?v=20261011-audit-1
   - assets/css/05-site-chrome.css?v=20261011-audit-1
   - assets/css/06-page-sections.css?v=20261011-contrast-fix-1
   - assets/css/07-roadmap.css?v=20261011-audit-1
-  - assets/css/08-home.css?v=20261011-feature-map-1
+  - assets/css/08-home.css?v=20261012-policy-summary-1
   - assets/css/09-model-explorer.css?v=20261011-audit-1
   - assets/css/10-developer-guide.css?v=20261011-audit-1
 

@@ -75,7 +75,10 @@ class SiteTypographyTest(unittest.TestCase):
                     self.assertTrue(rules)
                     for rule in rules:
                         if "font-weight" in rule:
-                            self.assertRegex(rule["font-weight"], r"^var\(--sp-(title|section|subheading)-weight\)$")
+                            pattern = (r"^(var\(--sp-home-section-weight\)|calc\(var\(--sp-subheading-weight\) - 20\))$"
+                                       if filename == "08-home.css" else
+                                       r"^var\(--sp-(title|section|subheading)-weight\)$")
+                            self.assertRegex(rule["font-weight"], pattern)
 
     def test_main_prose_uses_the_same_scale_including_mobile(self):
         prose = {

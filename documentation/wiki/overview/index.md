@@ -10,7 +10,7 @@ hide:
 
 SimPaths is an open-source dynamic microsimulation model for studying how living standards and inequalities develop over the life course. Starting from a population derived from survey data, it projects changes in education, family composition, health, care, employment and financial circumstances in annual steps. It represents individuals within families and households, preserving links between partners and between parents and dependent children as their circumstances change. Births, deaths and migration also alter the population. The resulting simulated histories allow researchers to examine the distribution of outcomes in each year and how those outcomes develop over individual lives.
 
-Demographic and health transitions are largely described by **reduced-form equations** estimated from survey data. These relate outcomes such as partnership formation or a change in health to individual and family characteristics, including previous states. Labour supply is represented by a **structural behavioural model**: eligible adults are assumed to choose working hours to maximise utility from disposable income and leisure, with preferences estimated from observed choices. Tax–benefit rules enter this decision through the disposable income associated with each alternative. A reform can therefore change both a family's income at given hours of work and its incentives to work. An alternative, forward-looking specification extends the decision problem to consumption and saving over the remaining lifetime.
+Demographic and health transitions largely use **reduced-form equations** estimated from survey data, relating outcomes to individual and family characteristics, including previous states. Economic decisions use a **structural behavioural model**, representing choices through preferences and budget constraints. Tax–benefit rules determine the disposable income available under different working-hours alternatives, so a reform can change both income at given hours and the incentives to work. Decisions can be evaluated within the current period or over the remaining lifetime.
 
 ## Population and model components {#simulated-modules}
 
@@ -34,7 +34,7 @@ The [labour-income module](modules/labour-income.md) projects potential hourly w
 
 ### Consumption and wealth
 
-The [consumption module](modules/consumption.md) represents expenditure, including formal childcare and social-care costs. The default specification derives consumption from disposable income using an assumed saving rate. It expresses consumption in equivalised terms, adjusting for family size and composition. With forward-looking economic decisions, discretionary consumption is chosen explicitly and saving follows from income less expenditure. Net wealth is carried between periods, affecting future resources through investment returns and the financing of consumption. Homeownership is also represented as a state used in mental-health projections.
+The [consumption module](modules/consumption.md) represents discretionary expenditure and formal childcare and social-care costs. Consumption is expressed in equivalised terms to account for family size and composition. When wealth is tracked explicitly, it connects current expenditure to future resources through saving, borrowing and investment returns. Homeownership is also represented as a state used in mental-health projections.
 
 </section>
 
@@ -166,25 +166,48 @@ The sequence determines when updated information becomes available. Each equatio
 
 ### Transitions and individual variation
 
-Many demographic, family and health outcomes use equations estimated from survey data. For a discrete outcome, an equation supplies probabilities conditional on the person's characteristics and family circumstances; random draws determine individual realisations. Continuous outcomes can include a draw from an estimated residual distribution. Eligibility rules restrict the population to which a process applies, and procedures such as partner matching resolve relationships between individuals.
+Consider the education equation E1a. For someone who was a student in the preceding year and is within the eligible age range, the probability of remaining a student is
 
-Dependence on past states gives these transitions persistence. Their dependence on characteristics projected by other modules transmits changes between domains: leaving education can alter employment eligibility and wage potential; a partnership or birth can alter income needs and benefit entitlements.
+$$
+p_{it}=\Phi\!\left(\mathbf{x}_{it}'\widehat{\boldsymbol\beta}+a_t\right).
+$$
+
+Here, $\mathbf{x}_{it}$ contains the person's individual and family characteristics, $\widehat{\boldsymbol\beta}$ the estimated coefficients, and $\Phi$ the standard normal cumulative distribution function. The adjustment $a_t$ aligns student participation to an aggregate target when enabled. A uniform random draw between zero and one determines the event: the person remains a student if the draw is below $p_{it}$; otherwise, they leave and their attainment is evaluated. [Education](modules/education.md) specifies the covariates, age rules and separate re-entry equation.
+
+This calculation illustrates how an estimated relationship becomes an individual event. Other processes use ordered or multinomial probabilities, or continuous predictions with residual draws. Their covariates can include previous states and outcomes from other modules, carrying individual histories and changes in circumstances into subsequent projections.
 
 ### Economic decisions and policy
 
-The default labour-supply specification uses a **discrete-choice random utility model** to evaluate income and leisure in the current year. Eligible adults face working-hours alternatives, including non-employment; for couples with two eligible adults, choices are combinations of both partners' hours. Estimated preferences over each alternative's disposable income and leisure define choice probabilities, allowing for unobserved variation in preferences.
+Two specifications describe economic choices as utility maximisation at benefit-unit level:
 
-To construct these alternatives, SimPaths combines potential wages, other income and family circumstances with precomputed tax–benefit results from UKMOD. Results are imputed by matching to a donor database containing the relevant policy calculations. Changing the policy system changes the income available at different working hours, allowing a reform to affect both disposable income and labour supply. UKMOD supplies the tax–benefit calculations in advance; SimPaths evaluates their consequences as people and families change.
+| Aspect | Default within-period specification | Forward-looking specification |
+| --- | --- | --- |
+| Criterion | Utility from current disposable income and leisure. | Expected utility from consumption and leisure over the remaining lifetime. |
+| Work | Discrete hours alternatives, including non-employment; joint choices for two eligible partners. | Employment chosen jointly with discretionary consumption. |
+| Consumption | Derived from disposable income, with an assumed saving adjustment for non-retired people. | Chosen using current resources and expectations of future circumstances. |
+| Saving and wealth | Saving represented implicitly through the consumption rule. | Income less expenditure updates net wealth; borrowing is subject to a net-wealth constraint. |
 
-The alternative **forward-looking specification** solves a joint employment and consumption problem based on expected utility over the remaining lifetime. Current choices depend on expectations of future earnings, family circumstances and needs, as well as on current resources. Saving and borrowing transfer resources between periods, subject to a net-wealth constraint. Both specifications produce dynamic life histories; the distinction is whether future consequences enter the economic decision problem explicitly.
+In the default **discrete-choice random utility model**, potential wages and other income establish resources under each hours alternative. Matching family circumstances and earnings to precomputed UKMOD donor records supplies disposable income. Estimated utility scores for income and leisure are converted into choice probabilities using a conditional-logit formula; a benefit-unit random draw selects the realised alternative. A reform changes the incomes associated with those alternatives and can therefore change work choices.
+
+Both specifications produce dynamic life histories. The forward-looking model also makes future consequences explicit in current decisions: anticipated care costs, for example, can influence saving before those costs arise. [Labour income](modules/labour-income.md) and [Consumption](modules/consumption.md) describe the decision problems in detail.
 
 ## Defining and interpreting a projection
 
-A projection depends on the initial population, estimated parameters, policy settings and external demographic and economic assumptions. Population projections, price and wage indices, returns on assets and borrowing costs supply trajectories for the environment in which individual lives develop. The chosen economic specification and the processes enabled for a run also determine which relationships operate. [Parameterisation](parameterisation.md) describes these inputs and their roles.
+A projection is defined by its initial population, estimated parameters, policy settings, economic specification and enabled processes. External trajectories for population, prices, wages, asset returns and borrowing costs describe the environment. [Parameterisation](parameterisation.md) explains these inputs.
 
-Selected outcomes are **aligned** to external targets. Population alignment adjusts simulated counts by age, gender and region to demographic projections. Other alignment procedures adjust transition probabilities or decision parameters, for example to reproduce observed employment rates. These targets are part of the specification: their use needs to be distinguished from comparisons with observations used to assess model performance, as described in [Validation](../validation/index.md).
+**Alignment** brings selected outcomes towards external targets by adjusting different parts of the calculation. Examples include:
 
-Policy analysis compares projections under explicitly defined alternatives, such as different tax–benefit systems applied to the same starting population. The resulting differences reflect the reform's direct effects and the responses transmitted through the model's specified relationships. Their interpretation depends on the empirical and behavioural assumptions underlying those relationships. [Uncertainty analysis](../user-guide/uncertainty-analysis.md) addresses simulation variation, uncertainty in estimated parameters and sensitivity to alternative assumptions.
+| Process | What alignment adjusts |
+| --- | --- |
+| Student participation | The probit adjustment $a_t$ changes probabilities of remaining in education. |
+| Default employment | Utility adjustments bring subgroup employment rates towards their targets when employment alignment is enabled. |
+| Population | Simulated counts, or weights in the weighted implementation, are adjusted to demographic totals by age, gender and region. |
+
+Targets, the years in which they apply, and adjustments retained in later years are part of the specification. Agreement with an imposed target is not independent evidence of predictive accuracy; [Validation](../validation/index.md) explains how model performance is assessed.
+
+Policy analysis compares scenarios with explicitly defined differences in policy or other assumptions, holding the remaining settings fixed. Differences in outcomes reflect both the direct changes and responses transmitted through the model's relationships; their interpretation depends on those relationships and each scenario's alignment settings.
+
+Varying random draws while holding coefficients and other inputs fixed assesses **simulation variation**. Resampling estimated coefficients examines **parameter uncertainty**; changing equations or external assumptions examines sensitivity to the specification or scenario. Changing a seed can affect both simulation draws and coefficient resampling. [Uncertainty analysis](../user-guide/uncertainty-analysis.md) explains how to distinguish these comparisons in practice.
 
 For the model's design and methodological foundations, see [Bronka et al. (2025), *SimPaths: an open-source microsimulation model for life course analysis*](https://microsimulation.pub/articles/00318).
 
