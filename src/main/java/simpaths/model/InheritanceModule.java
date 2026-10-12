@@ -14,8 +14,8 @@ import java.util.*;
 /**
  * The wealth module's pooled bequest rule. Non-pension wealth stays with a
  * surviving responsible adult; the remaining unit estate passes at the last
- * adult's death. A remaining modelled pension pot may be settled before its
- * owner's retirement.
+ * adult's death. A remaining modelled pension pot is distributed at its owner's
+ * death before retirement.
  */
 public final class InheritanceModule {
 
@@ -41,7 +41,6 @@ public final class InheritanceModule {
     private FamilyLinkAudit familyLinkAudit;
     private long seed = 606L;
     private int syntheticRecipientCount = 2;
-    private boolean transferDcPensionAtDeath = false;
 
     public record Transfer(int year, long deceasedId, Long recipientId, String asset,
                            String timing, double value, String reason, String deathCause) { }
@@ -92,12 +91,6 @@ public final class InheritanceModule {
     }
 
     public int getSyntheticRecipientCount() { return syntheticRecipientCount; }
-
-    public void setTransferDcPensionAtDeath(boolean enabled) {
-        transferDcPensionAtDeath = enabled;
-    }
-
-    public boolean isTransferDcPensionAtDeath() { return transferDcPensionAtDeath; }
 
     /** Index source families before independent sampling obscures some links. */
     public void indexSourceFamilies(List<Household> inputHouseholds) {
@@ -338,7 +331,7 @@ public final class InheritanceModule {
 
     private void settlePension(int year, Person deceased, Person partner) {
         PrivatePension pension = deceased.getPrivatePension();
-        double pot = transferDcPensionAtDeath && !pension.isRetired() &&
+        double pot = !pension.isRetired() &&
                 !Les_c4.Retired.equals(deceased.getLabC4())
                 ? Math.max(0.0, pension.getRemainingDcFund()) : 0.0;
         deceased.getBenefitUnit().removeDeceasedPensionStock(deceased);
@@ -797,7 +790,7 @@ public final class InheritanceModule {
                     "," + flow.minorTrust());
         Files.write(outputDirectory.resolve("alignment_wealth_flows.csv"), lines);
         Files.writeString(outputDirectory.resolve("inheritance_method.txt"),
-                "pooled_last_adult; transfer_dc_pension_at_death=" + transferDcPensionAtDeath +
+                "pooled_last_adult; pension_inheritance=remaining_modelled_pot_before_retirement" +
                         "; synthetic_recipient_count=" + syntheticRecipientCount +
                         "; natural_deaths_trigger_bequests=true" +
                         "; alignment_deaths_trigger_bequests=true" +

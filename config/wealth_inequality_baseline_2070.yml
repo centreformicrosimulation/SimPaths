@@ -16,7 +16,6 @@ parameter_args:
 
 model_args:
   bequestSyntheticRecipientCount: 2
-  transferDcPensionAtDeath: true
   alignPopulation: true
   alignCohabitation: true
   alignFertility: true

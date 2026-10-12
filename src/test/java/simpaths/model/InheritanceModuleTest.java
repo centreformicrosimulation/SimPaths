@@ -47,7 +47,6 @@ class InheritanceModuleTest {
         when(exited.getPrivatePension()).thenReturn(pot);
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(exited, child), Set.of(estateUnit, childUnit));
 
         assertEquals(120_000, childWealth.getWealthFinancial().getValue(), 1e-6);
@@ -91,7 +90,6 @@ class InheritanceModuleTest {
         when(exited.getPrivatePension()).thenReturn(pot);
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(exited, survivor), Set.of(unit));
 
         assertEquals(50_000, wealth.getWealthFinancial().getValue(), 1e-6);
@@ -133,7 +131,6 @@ class InheritanceModuleTest {
         when(deceased.getPrivatePension()).thenReturn(pot);
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(deceased, exitedPartner, child),
                 Set.of(estateUnit, childUnit));
 
@@ -202,7 +199,6 @@ class InheritanceModuleTest {
         when(deceased.getPrivatePension()).thenReturn(pension);
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(deceased, survivor), Set.of(unit));
 
         assertEquals(20_000, wealth.getWealthFinancial().getValue(), 1e-6);
@@ -234,7 +230,6 @@ class InheritanceModuleTest {
         when(deceased.getPrivatePension()).thenReturn(pension);
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(deceased, survivor), Set.of(unit));
 
         assertEquals(0, wealth.getWealthFinancial().getValue(), 1e-6);
@@ -245,7 +240,7 @@ class InheritanceModuleTest {
 
     @ParameterizedTest
     @EnumSource(value = SampleExit.class, names = {"Death", "DeathAlignment"})
-    void pensionSwitchOffStillTransfersHousingAndFinancialEstate(SampleExit death) {
+    void pensionInheritanceAutomaticallyTransfersOnlyRemainingDcFundAlongsideEstate(SampleExit death) {
         Person deceased = person(201, 75);
         Person child = person(202, 45);
         BenefitUnit estateUnit = mock(BenefitUnit.class);
@@ -268,15 +263,15 @@ class InheritanceModuleTest {
         when(deceased.getPrivatePension()).thenReturn(pension);
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(false);
         module.settleYear(2030, Set.of(deceased, child), Set.of(estateUnit, childUnit));
 
-        assertEquals(100_000, childWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(120_000, childWealth.getWealthFinancial().getValue(), 1e-6);
         assertEquals(0, estate.getWealthFinancial().getValue(), 1e-6);
         assertEquals(0, estate.getWealthPrptyValue(), 1e-6);
         verify(estateUnit).removeDeceasedPensionStock(deceased);
-        assertTrue(module.getTransfers().stream().noneMatch(t ->
-                t.reason().startsWith("unaccessed_pension")));
+        assertEquals(20_000, module.getTransfers().stream()
+                .filter(t -> t.reason().startsWith("unaccessed_pension"))
+                .mapToDouble(InheritanceModule.Transfer::value).sum(), 1e-6);
     }
 
     @ParameterizedTest
@@ -310,7 +305,6 @@ class InheritanceModuleTest {
         when(survivor.getPrivatePension()).thenReturn(new PrivatePension());
 
         InheritanceModule module = new InheritanceModule();
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(first, survivor, child), Set.of(home, childUnit));
 
         assertEquals(300_000, homeWealth.getWealthFinancial().getValue(), 1e-6);
@@ -373,7 +367,6 @@ class InheritanceModuleTest {
 
         InheritanceModule module = new InheritanceModule();
         module.setSeed(606);
-        module.setTransferDcPensionAtDeath(true);
         module.settleYear(2030, Set.of(donor, firstRecipient, secondRecipient, thirdRecipient),
                 Set.of(donorUnit, firstUnit, secondUnit, thirdUnit));
 

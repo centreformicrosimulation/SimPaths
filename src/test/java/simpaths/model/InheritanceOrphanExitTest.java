@@ -106,7 +106,6 @@ class InheritanceOrphanExitTest {
     @Test
     void newPensionShareIsRedirectedBeforeAnOrphanCanReceiveIt() {
         Family family = new Family();
-        family.module.setTransferDcPensionAtDeath(true);
         PrivatePension pension = mock(PrivatePension.class);
         when(pension.getRemainingDcFund()).thenReturn(12_000.0);
         when(family.mother.getPrivatePension()).thenReturn(pension);

@@ -174,7 +174,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private final InheritanceModule inheritanceModule = new InheritanceModule();
     private int bequestSyntheticRecipientCount = 2;
-    private boolean transferDcPensionAtDeath = false;
     private Path inheritanceOutputDirectory;
     private final Map<Long, List<Person>> inheritanceClonesBySourceId = new HashMap<>();
     private final List<PendingParentLink> pendingInheritanceParentLinks = new ArrayList<>();
@@ -394,7 +393,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         if (fixRandomSeed) SimulationEngine.getRnd().setSeed(randomSeedIfFixed);
         inheritanceModule.setSeed(Objects.requireNonNullElse(randomSeedIfFixed, 606L));
         inheritanceModule.setSyntheticRecipientCount(bequestSyntheticRecipientCount);
-        inheritanceModule.setTransferDcPensionAtDeath(transferDcPensionAtDeath);
         cohabitInnov = new Random(SimulationEngine.getRnd().nextLong());
         initialiseInnov1 = new Random(SimulationEngine.getRnd().nextLong());
         initialiseInnov2 = new Random(SimulationEngine.getRnd().nextLong());
@@ -791,7 +789,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             line = "bequestSyntheticRecipientCount: " +
                     inheritanceModule.getSyntheticRecipientCount();
             pw.println(line);
-            line = "transferDcPensionAtDeath: " + transferDcPensionAtDeath;
+            line = "pensionInheritanceRule: remaining_modelled_pot_before_retirement";
             pw.println(line);
             line = "alignFertility: " + alignFertility;
             pw.println(line);
@@ -3421,15 +3419,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public void setBequestSyntheticRecipientCount(int count) {
         bequestSyntheticRecipientCount = count;
         inheritanceModule.setSyntheticRecipientCount(count);
-    }
-
-    public void setTransferDcPensionAtDeath(boolean enabled) {
-        transferDcPensionAtDeath = enabled;
-        inheritanceModule.setTransferDcPensionAtDeath(enabled);
-    }
-
-    public boolean isTransferDcPensionAtDeath() {
-        return transferDcPensionAtDeath;
     }
 
     public InheritanceModule getInheritanceModule() {

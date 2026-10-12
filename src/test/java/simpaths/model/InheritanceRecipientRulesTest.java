@@ -29,7 +29,6 @@ class InheritanceRecipientRulesTest {
         PrivatePension pension = mock(PrivatePension.class);
         when(pension.getRemainingDcFund()).thenReturn(30_000.0);
         when(donor.getPrivatePension()).thenReturn(pension);
-        world.module.setTransferDcPensionAtDeath(true);
         world.die(donor);
         world.settle();
 
