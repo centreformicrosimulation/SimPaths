@@ -529,6 +529,9 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         wealthTotValue = 0.0;
         if (wealthNonPension != null)
             wealthTotValue = wealthNonPension.getWealthNonPensionValue();
+        else if (wealthNonPensionL1 != null)
+            // Before wealth projection, decisions use the opening balance.
+            wealthTotValue = wealthNonPensionL1.getWealthNonPensionValue();
         wealthTotValue += Objects.requireNonNullElse(wealthPensValue, 0.0);
         wealthTotValue += model.getInheritanceModule().getIlliquidAssetWealth(this);
     }
@@ -538,6 +541,19 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             throw new IllegalStateException("Inheritance cash requires initialised wealth");
         wealthNonPension.setWealthFinancialValue(
                 wealthNonPension.getWealthFinancial().getValue() + amount);
+        updateTotalWealth();
+    }
+
+    void addMatureInheritanceCash(double amount) {
+        if (!Double.isFinite(amount) || wealthNonPensionL1 == null)
+            throw new IllegalStateException("Trust maturation requires opening wealth");
+        // Annual projection starts from L1. Crediting only the current balance
+        // would lose this transfer when that projection creates a new object.
+        wealthNonPensionL1.setWealthFinancialValue(
+                wealthNonPensionL1.getWealthFinancial().getValue() + amount);
+        if (wealthNonPension != null)
+            wealthNonPension.setWealthFinancialValue(
+                    wealthNonPension.getWealthFinancial().getValue() + amount);
         updateTotalWealth();
     }
 

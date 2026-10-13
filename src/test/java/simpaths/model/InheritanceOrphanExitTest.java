@@ -4,14 +4,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import simpaths.data.Parameters;
 import simpaths.model.benefitunit.WealthNonPension;
 import simpaths.model.enums.Gender;
 import simpaths.model.enums.Region;
 import simpaths.model.enums.SampleExit;
+import simpaths.model.enums.Occupancy;
 import simpaths.model.person.PrivatePension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -259,7 +262,15 @@ class InheritanceOrphanExitTest {
     void survivingChildStillReceivesTheirOwnTrustAtAdulthoodExactlyOnce() {
         Family family = new Family();
         family.establishTrust();
+        when(family.child.getDemAge()).thenReturn(17);
+        family.module.releaseMatureTrusts(2036, family.people);
+        assertEquals(0, family.homeWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(10_000, family.module.getIlliquidAssetWealth(family.home), 1e-6);
         when(family.child.getDemAge()).thenReturn(18);
+        // The balance is available before settlement, not just at year end.
+        family.module.releaseMatureTrusts(2037, family.people);
+        assertEquals(10_000, family.homeWealth.getWealthFinancial().getValue(), 1e-6);
+        family.module.releaseMatureTrusts(2037, family.people);
         family.settle(2037);
         family.settle(2037);
         assertEquals(10_000, family.homeWealth.getWealthFinancial().getValue(), 1e-6);
@@ -277,6 +288,98 @@ class InheritanceOrphanExitTest {
         family.settle(2030);
         assertEquals(2, family.module.getOrphanExits().getFirst().referenceParentId());
         assertEquals(2, family.module.getOrphanReassignments().getFirst().referenceParentId());
+    }
+
+    @Test
+    void maturityCreditsNewAdultUnitAndLaterDeathSettlesItsEstateOnce() {
+        Family family = new Family();
+        family.establishTrust();
+        when(family.child.getDemAge()).thenReturn(18);
+        family.home.getMembers().remove(family.child);
+        WealthNonPension adultWealth = wealth(0);
+        BenefitUnit adultUnit = unit(8, adultWealth, family.child);
+        family.units.add(adultUnit);
+        clearInvocations(family.home, adultUnit);
+
+        family.module.releaseMatureTrusts(2037, family.people);
+        assertEquals(10_000, adultWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(0, family.homeWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(0, family.module.getIlliquidAssetWealth(adultUnit), 1e-6);
+        verify(family.home).updateTotalWealth();
+        verify(adultUnit).updateTotalWealth();
+        assertEquals(1, family.module.getDeathEvents().size()); // only the earlier father's death
+
+        family.child.setSampleExit(SampleExit.Death);
+        family.settle(2037);
+        family.settle(2037);
+        assertEquals(0, adultWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(10_000, family.homeWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(2, family.module.getDeathEvents().size());
+    }
+
+    @Test
+    void liquidWealthBecomesAccessibleAtEighteen() {
+        Person person = mock(Person.class, CALLS_REAL_METHODS);
+        BenefitUnit unit = mock(BenefitUnit.class);
+        when(unit.getHousehold()).thenReturn(mock(Household.class));
+        when(unit.getMembers()).thenReturn(new HashSet<>());
+        when(unit.getWealthTotValueForDecisions()).thenReturn(12_000.0);
+        person.setBenefitUnit(unit);
+        person.setDemAge(17);
+        assertEquals(0, person.getLiquidWealth(), 1e-6);
+        person.setDemAge(18);
+        assertEquals(12_000, person.getLiquidWealth(), 1e-6);
+        person.setDemAge(19);
+        assertEquals(12_000, person.getLiquidWealth(), 1e-6);
+    }
+
+    @Test
+    void matureInheritanceRemainsAvailableThroughAnnualWealthProjection() throws Exception {
+        boolean savedProjection = Parameters.projectNonPensionWealth;
+        Parameters.projectNonPensionWealth = true;
+        try {
+            Person adult = mock(Person.class, CALLS_REAL_METHODS);
+            adult.setDemAge(18);
+            adult.setWealthNonPensValueL1(0.0);
+            BenefitUnit unit = mock(BenefitUnit.class, CALLS_REAL_METHODS);
+            doReturn(8L).when(unit).getId();
+            SimPathsModel model = mock(SimPathsModel.class);
+            when(model.getInheritanceModule()).thenReturn(new InheritanceModule());
+            setField(unit, "model", model);
+            setField(unit, "wealthNonPensionL1", wealth(0));
+            setField(unit, "yDispMonth", 0.0);
+            setField(unit, "xDiscConsumptionAnnual", 1_200.0);
+            doReturn(new LinkedHashSet<Person>()).when(unit).getMembers();
+            doReturn(mock(Household.class)).when(unit).getHousehold();
+            doReturn(adult).when(unit).getRefPerson();
+            doReturn(null).when(unit).getMale();
+            doReturn(null).when(unit).getFemale();
+            doReturn(false).when(unit).getCoupleBoolean();
+            doReturn(Occupancy.Single_Male).when(unit).getOccupancy();
+            adult.setBenefitUnit(unit);
+
+            unit.addMatureInheritanceCash(10_000);
+            adult.addMatureInheritanceToPersonalFinancialBalance(10_000);
+            assertEquals(10_000, adult.getLiquidWealth(), 1e-6);
+            assertEquals(10_000, adult.getWealthNonPensValueL1(), 1e-6);
+
+            // The normal projection must still run, retaining the inheritance
+            // and deducting consumption once from both sets of accounts.
+            unit.updateNonPensionWealth();
+            unit.updateNetFinancialAssetsValue();
+            unit.updateTotalWealth();
+            adult.updateNonPensionWealth();
+            assertEquals(8_800, adult.getLiquidWealth(), 1e-6);
+            assertEquals(8_800, adult.getWealthNonPensValue(), 1e-6);
+        } finally {
+            Parameters.projectNonPensionWealth = savedProjection;
+        }
+    }
+
+    private static void setField(BenefitUnit unit, String name, Object value) throws Exception {
+        Field field = BenefitUnit.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(unit, value);
     }
 
     @Test
@@ -371,6 +474,7 @@ class InheritanceOrphanExitTest {
         }
 
         void settle(int year) {
+            module.releaseMatureTrusts(year, people);
             SimPathsModel.markOrphanExits(units);
             module.settleYear(year, people, units);
         }
@@ -414,6 +518,10 @@ class InheritanceOrphanExitTest {
                     invocation.getArgument(0, Double.class));
             return null;
         }).when(unit).addInheritanceCash(anyDouble());
+        doAnswer(invocation -> {
+            unit.addInheritanceCash(invocation.getArgument(0, Double.class));
+            return null;
+        }).when(unit).addMatureInheritanceCash(anyDouble());
         doAnswer(ignored -> {
             wealth.setWealthFinancialValue(0);
             return null;

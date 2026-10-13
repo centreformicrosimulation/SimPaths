@@ -534,6 +534,9 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Update);
 
         yearlySchedule.addCollectionEvent(persons, Person.Processes.Aging);
+        // Ageing also creates the new adult's benefit unit. Release their
+        // deferred inheritance before this year's economic decisions.
+        addEventToAllYears(Processes.ReleaseMatureTrusts);
 
         // Health Alignment - redrawing alignment used adjust state of individuals to projections by Gender and Age
         //Turned off for now as health determined below based on individual characteristics
@@ -855,6 +858,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
     public enum Processes {
 
         StartYear,
+        ReleaseMatureTrusts,
         EndYear,
         UnionMatching,
         LabourMarketUpdate,
@@ -922,6 +926,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                     }
                 }
             }
+            case ReleaseMatureTrusts -> inheritanceModule.releaseMatureTrusts(year, persons);
             case SettleInheritance -> {
                 markOrphanExits(benefitUnits);
                 inheritanceModule.settleYear(year, persons, benefitUnits);
@@ -1625,6 +1630,12 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
     private void remapClonedParentLinks(Map<Long, Person> clonedPersons, List<PendingParentLink> parentLinks) {
         for (PendingParentLink link : parentLinks) {
+            if (SampleEntry.ProcessedInputData.equals(link.entry())) {
+                // Cached clones retain their simulated IDs. A parent in
+                // another household therefore retains the same ID as well.
+                link.child().setParentIds(link.sourceMotherId(), link.sourceFatherId());
+                continue;
+            }
             Person mother = clonedPersons.get(link.sourceMotherId());
             Person father = clonedPersons.get(link.sourceFatherId());
             link.child().setParentIds(mother == null ? null : mother.getId(),
@@ -2777,10 +2788,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         double aggregateHouseholdsWeight = 0.;        //Aggregate Weight of simulated benefitUnits (a weighted sum of the simulated households)
 
         //TODO: Slight differences between otherwise identical simulations arise when loading "processed" vs "unprocessed" data (distinguished by the if statement below)
-        // Processed populations predate the inheritance lineage repair and
-        // discard unresolved source-parent references. Rebuild from the raw
-        // input while inheritance is enabled until the cache records lineage.
-        Processed processed = null;
+        Processed processed = PersistPopulation ? getProcessed() : null;
         LifetimeIncomeImputation lifetimeIncomes = lifetimeIncomeImpute ? getLifetimeIncomes(startYear) : null;
         if (processed!=null) {
 
@@ -2788,6 +2796,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             if (households.isEmpty())
                 throw new RuntimeException("No households in processed set");
             System.out.println("Found processed dataset - preparing for simulation");
+            inheritanceModule.restorePopulationLineage(processed.getInheritanceLineage(),
+                    processed.getPersons());
 
             // check if need to add income histories
             if (lifetimeIncomes!=null)
@@ -2944,7 +2954,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             System.out.println("Time elapsed " + stopwatch.getTime()/1000 + " seconds");
         }
 
-        resolveUnambiguousCrossHouseholdParents();
+        if (processed == null)
+            resolveUnambiguousCrossHouseholdParents();
 
         if (Parameters.projectNonPensionWealth) {
             // HW2c residual reconstruction uses the same common income ranks
@@ -2955,7 +2966,10 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
         // Save only newly compiled input data. The wealth module deliberately
         // reconstructs its transient state whenever population data load.
-        // The processed cache does not preserve the source-family audit.
+        if (processed == null && PersistPopulation) {
+            System.out.println("Saving compiled input data for future reference");
+            persistProcessed();
+        }
 
         // finalise
         System.out.println("Number of simulated individuals (persons.size()) is " + persons.size() + " living in " + benefitUnits.size() + " simulated benefitUnits.");
@@ -3823,6 +3837,16 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             List<Processed> processedList = em.createQuery(query).getResultList();
             log.info("Query complete");
+            List<Processed> compatible = new ArrayList<>();
+            for (Processed candidate : processedList) {
+                if (candidate.hasCompatibleInheritanceLineage()) {
+                    compatible.add(candidate);
+                } else {
+                    log.info("Rebuilding processed population without compatible inheritance lineage: " + candidate.getId());
+                    em.remove(candidate);
+                }
+            }
+            processedList = compatible;
             if (!processedList.isEmpty()) {
 
                 if (processedList.size()>1)
@@ -3840,6 +3864,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             }
 
             // close database connection
+            txn.commit();
             em.close();
         } catch (Exception e) {
             if (txn != null) {
@@ -3912,6 +3937,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
 
             log.info("Initialising processed");
             Processed processed = new Processed(country, startYear, popSize, ignoreTargetsAtPopulationLoad);
+            processed.setInheritanceLineage(inheritanceModule.exportPopulationLineage(persons));
             log.info("Generating ID");
             em.persist(processed);  // generates processed id
             log.info("Assigning ID across households");

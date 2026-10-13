@@ -25,6 +25,7 @@ public final class InheritanceModule {
     private final Map<Long, Set<Long>> sourceChildren = new HashMap<>();
     private final Map<Long, Map<String, ChildBranch>> carriedBranches = new HashMap<>();
     private final Map<Long, Double> minorTrusts = new HashMap<>();
+    private final Map<Long, BenefitUnit> trustUnits = new HashMap<>();
     private final Map<Long, Integer> deathYears = new HashMap<>();
     private final Map<Long, OrphanReference> orphanReferences = new HashMap<>();
     private final Map<Long, Match> orphanRecipients = new HashMap<>();
@@ -98,9 +99,64 @@ public final class InheritanceModule {
         for (Household household : inputHouseholds)
             for (BenefitUnit unit : household.getBenefitUnits())
                 for (Person child : unit.getMembers()) {
+                    if (child.getInheritanceSourceId() == null)
+                        child.setInheritanceSourceId(child.getId());
                     addSourceChild(child.getIdMother(), child.getId());
                     addSourceChild(child.getIdFather(), child.getId());
                 }
+    }
+
+    /** Cache source identities, including child branches omitted by sampling. */
+    public String exportPopulationLineage(Set<Person> persons) {
+        if (familyLinkAudit == null)
+            throw new IllegalStateException("Cannot cache a population without its family-link audit");
+        StringBuilder data = new StringBuilder("A," + familyLinkAudit.year() + "," +
+                familyLinkAudit.validReferences() + "," + familyLinkAudit.resolvedAcrossHouseholds() +
+                "," + familyLinkAudit.unresolvedReferences() + "\n");
+        persons.stream().sorted(Comparator.comparingLong(Person::getId)).forEach(person -> {
+            Long sourceId = person.getInheritanceSourceId();
+            if (sourceId == null)
+                throw new IllegalStateException("Missing source identity for cached person " + person.getId());
+            data.append("P,").append(person.getId()).append(',').append(sourceId).append('\n');
+        });
+        new TreeMap<>(sourceChildren).forEach((parent, children) ->
+                new TreeSet<>(children).forEach(child ->
+                        data.append("C,").append(parent).append(',').append(child).append('\n')));
+        return data.toString();
+    }
+
+    public void restorePopulationLineage(String data, Set<Person> persons) {
+        Map<Long, Long> sources = new HashMap<>();
+        Map<Long, Set<Long>> families = new HashMap<>();
+        FamilyLinkAudit audit = null;
+        for (String line : data.lines().toList()) {
+            String[] fields = line.split(",");
+            if (fields.length == 5 && fields[0].equals("A") && audit == null) {
+                audit = new FamilyLinkAudit(Integer.parseInt(fields[1]), Long.parseLong(fields[2]),
+                        Long.parseLong(fields[3]), Long.parseLong(fields[4]), 0, 0);
+            } else if (fields.length == 3 && fields[0].equals("P")) {
+                long id = Long.parseLong(fields[1]);
+                long source = Long.parseLong(fields[2]);
+                if (id <= 0 || source <= 0 || sources.putIfAbsent(id, source) != null)
+                    throw new IllegalArgumentException("Invalid source identity in population cache");
+            } else if (fields.length == 3 && fields[0].equals("C")) {
+                long parent = Long.parseLong(fields[1]);
+                long child = Long.parseLong(fields[2]);
+                if (parent <= 0 || child <= 0 || parent == child)
+                    throw new IllegalArgumentException("Invalid source family in population cache");
+                families.computeIfAbsent(parent, ignored -> new TreeSet<>()).add(child);
+            } else {
+                throw new IllegalArgumentException("Malformed inheritance lineage in population cache");
+            }
+        }
+        if (audit == null || sources.size() != persons.size() ||
+                persons.stream().anyMatch(person -> !sources.containsKey(person.getId())))
+            throw new IllegalArgumentException("Incomplete inheritance lineage in population cache");
+        sourceChildren.clear();
+        sourceChildren.putAll(families);
+        familyLinkAudit = audit;
+        for (Person person : persons)
+            person.setInheritanceSourceId(sources.get(person.getId()));
     }
 
     private void addSourceChild(Long parentId, long childId) {
@@ -137,8 +193,10 @@ public final class InheritanceModule {
     public void cloneBalances(Map<Long, Person> clonedPersons) {
         for (Map.Entry<Long, Person> entry : clonedPersons.entrySet()) {
             double trust = minorTrusts.getOrDefault(entry.getKey(), 0.0);
-            if (trust > EPS)
+            if (trust > EPS) {
                 minorTrusts.put(entry.getValue().getId(), trust);
+                trustUnits.put(entry.getValue().getId(), entry.getValue().getBenefitUnit());
+            }
             Map<String, ChildBranch> original = carriedBranches.get(entry.getKey());
             if (original == null)
                 continue;
@@ -161,7 +219,7 @@ public final class InheritanceModule {
                 stock.housing(), unit.getWealthPensValue(false), trustStock(unit));
     }
 
-    public void settleYear(int year, Set<Person> persons, Set<BenefitUnit> units) {
+    private void indexCurrentPopulation(Set<Person> persons) {
         Set<Long> activeIds = new HashSet<>();
         for (Person person : persons) {
             activeIds.add(person.getId());
@@ -172,6 +230,31 @@ public final class InheritanceModule {
             }
         }
         currentPopulationIds = activeIds;
+    }
+
+    /** Make earlier inheritances available as soon as their holders reach adulthood. */
+    public void releaseMatureTrusts(int year, Set<Person> persons) {
+        indexCurrentPopulation(persons);
+        Set<BenefitUnit> movedUnits = new LinkedHashSet<>();
+        for (Long id : minorTrusts.keySet()) {
+            Person holder = knownPeople.get(id);
+            if (holder != null && isLiving(holder)) {
+                BenefitUnit current = holder.getBenefitUnit();
+                BenefitUnit previous = trustUnits.put(id, current);
+                if (previous != null && previous != current) {
+                    movedUnits.add(previous);
+                    movedUnits.add(current);
+                }
+            }
+        }
+        releaseAdultTrusts(year);
+        // Ageing can move the holder to a new unit. Remove the trust from
+        // the former unit's resources and include it in the current unit.
+        movedUnits.forEach(BenefitUnit::updateTotalWealth);
+    }
+
+    public void settleYear(int year, Set<Person> persons, Set<BenefitUnit> units) {
+        indexCurrentPopulation(persons);
         // Death years are available before trusts are processed, including
         // parents who have already disappeared from the annual population.
         for (Person person : persons)
@@ -200,7 +283,6 @@ public final class InheritanceModule {
         // Snapshot estates before crediting any separate trust or pension
         // transfer into a surviving adult's unit.
         settleExitedTrusts(year);
-        releaseAdultTrusts(year);
 
         // Both mortality and residual population-alignment deaths settle under
         // the same rule. Only emigration removes estate stock from the sample.
@@ -603,6 +685,7 @@ public final class InheritanceModule {
             record(year, deceased, recipient, "cash", "out_of_sample", value, reason);
         } else if (recipient.getDemAge() < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             minorTrusts.merge(recipient.getId(), value, Double::sum);
+            trustUnits.put(recipient.getId(), recipient.getBenefitUnit());
             record(year, deceased, recipient, "minor_trust", "deferred", value, reason);
         } else {
             recipient.getBenefitUnit().addInheritanceCash(value);
@@ -617,8 +700,9 @@ public final class InheritanceModule {
             if (holder != null && isLiving(holder) &&
                     holder.getDemAge() >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
                 double value = minorTrusts.remove(id);
-                holder.getBenefitUnit().addInheritanceCash(value);
-                holder.addInheritanceToPersonalFinancialBalance(value);
+                trustUnits.remove(id);
+                holder.getBenefitUnit().addMatureInheritanceCash(value);
+                holder.addMatureInheritanceToPersonalFinancialBalance(value);
                 record(year, null, holder, "minor_trust", "released", value,
                         "age_of_majority");
             }
@@ -656,6 +740,7 @@ public final class InheritanceModule {
             // Remove only after successful settlement, so no failed match
             // silently destroys the original balance.
             minorTrusts.remove(id);
+            trustUnits.remove(id);
         }
     }
 

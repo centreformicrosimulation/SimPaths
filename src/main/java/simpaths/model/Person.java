@@ -2334,7 +2334,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
     public double getLiquidWealth() {
 
-        if (demAge <= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
+        if (demAge < Parameters.AGE_TO_BECOME_RESPONSIBLE) {
             return 0.0;
         } else if (benefitUnit != null) {
             return (Occupancy.Couple.equals(benefitUnit.getOccupancy()))
@@ -8070,6 +8070,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         return inheritanceSourceId;
     }
 
+    void setInheritanceSourceId(Long sourceId) {
+        inheritanceSourceId = sourceId;
+    }
+
     // Cloned family links are resolved only after every benefit unit in the
     // household has been cloned. Parent IDs identify ancestry, not the adults
     // currently responsible for a child.
@@ -8313,6 +8317,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (!Double.isFinite(amount))
             throw new IllegalArgumentException("Non-finite inheritance transfer");
         wealthNonPensValue = Objects.requireNonNullElse(wealthNonPensValue, 0.0) + amount;
+    }
+
+    void addMatureInheritanceToPersonalFinancialBalance(double amount) {
+        addInheritanceToPersonalFinancialBalance(amount);
+        wealthNonPensValueL1 = Objects.requireNonNullElse(wealthNonPensValueL1, 0.0) + amount;
     }
 
     public Double getWealthNonPensValueL1() {
