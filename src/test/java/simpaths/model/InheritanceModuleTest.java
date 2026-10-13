@@ -43,7 +43,7 @@ class InheritanceModuleTest {
         when(exited.getSampleExit()).thenReturn(cause);
         when(exited.getWealthPensValue(false)).thenReturn(20_000.0);
         PrivatePension pot = new PrivatePension();
-        pot.setInitialComponents(20_000, 0, 0, 0);
+        pot.setWealth(20_000);
         when(exited.getPrivatePension()).thenReturn(pot);
 
         InheritanceModule module = new InheritanceModule();
@@ -86,7 +86,7 @@ class InheritanceModuleTest {
         when(exited.getSampleExit()).thenReturn(SampleExit.DeathAlignment);
         when(exited.getWealthPensValue(false)).thenReturn(10_000.0);
         PrivatePension pot = new PrivatePension();
-        pot.setInitialComponents(10_000, 0, 0, 0);
+        pot.setWealth(10_000);
         when(exited.getPrivatePension()).thenReturn(pot);
 
         InheritanceModule module = new InheritanceModule();
@@ -127,7 +127,7 @@ class InheritanceModuleTest {
         when(exitedPartner.getSampleExit()).thenReturn(partnerExit);
         when(exitedPartner.getPrivatePension()).thenReturn(new PrivatePension());
         PrivatePension pot = new PrivatePension();
-        pot.setInitialComponents(20_000, 0, 0, 0);
+        pot.setWealth(20_000);
         when(deceased.getPrivatePension()).thenReturn(pot);
 
         InheritanceModule module = new InheritanceModule();
@@ -195,7 +195,7 @@ class InheritanceModuleTest {
         when(deceased.getSampleExit()).thenReturn(SampleExit.Death);
         when(deceased.getWealthPensValue(false)).thenReturn(20_000.0);
         PrivatePension pension = new PrivatePension();
-        pension.setInitialComponents(20_000, 0, 0, 0);
+        pension.setWealth(20_000);
         when(deceased.getPrivatePension()).thenReturn(pension);
 
         InheritanceModule module = new InheritanceModule();
@@ -225,7 +225,7 @@ class InheritanceModuleTest {
         when(deceased.getSampleExit()).thenReturn(death);
         when(deceased.getWealthPensValue(false)).thenReturn(20_000.0);
         PrivatePension pension = new PrivatePension();
-        pension.setInitialComponents(20_000, 0, 0, 0);
+        pension.setWealth(20_000);
         pension.setPensioner(true);
         when(deceased.getPrivatePension()).thenReturn(pension);
 
@@ -240,7 +240,7 @@ class InheritanceModuleTest {
 
     @ParameterizedTest
     @EnumSource(value = SampleExit.class, names = {"Death", "DeathAlignment"})
-    void pensionInheritanceAutomaticallyTransfersOnlyRemainingDcFundAlongsideEstate(SampleExit death) {
+    void pensionInheritanceAutomaticallyTransfersRemainingPotAlongsideEstate(SampleExit death) {
         Person deceased = person(201, 75);
         Person child = person(202, 45);
         BenefitUnit estateUnit = mock(BenefitUnit.class);
@@ -259,17 +259,17 @@ class InheritanceModuleTest {
         when(deceased.getSampleExit()).thenReturn(death);
         when(deceased.getWealthPensValue(false)).thenReturn(100_000.0);
         PrivatePension pension = new PrivatePension();
-        pension.setInitialComponents(20_000, 80_000, 0, 0);
+        pension.setWealth(100_000);
         when(deceased.getPrivatePension()).thenReturn(pension);
 
         InheritanceModule module = new InheritanceModule();
         module.settleYear(2030, Set.of(deceased, child), Set.of(estateUnit, childUnit));
 
-        assertEquals(120_000, childWealth.getWealthFinancial().getValue(), 1e-6);
+        assertEquals(200_000, childWealth.getWealthFinancial().getValue(), 1e-6);
         assertEquals(0, estate.getWealthFinancial().getValue(), 1e-6);
         assertEquals(0, estate.getWealthPrptyValue(), 1e-6);
         verify(estateUnit).removeDeceasedPensionStock(deceased);
-        assertEquals(20_000, module.getTransfers().stream()
+        assertEquals(100_000, module.getTransfers().stream()
                 .filter(t -> t.reason().startsWith("unaccessed_pension"))
                 .mapToDouble(InheritanceModule.Transfer::value).sum(), 1e-6);
     }
@@ -300,7 +300,7 @@ class InheritanceModuleTest {
         when(first.getSampleExit()).thenReturn(firstDeath);
         when(first.getWealthPensValue(false)).thenReturn(100_000.0);
         PrivatePension pot = new PrivatePension();
-        pot.setInitialComponents(100_000.0, 0.0, 0.0, 0.0);
+        pot.setWealth(100_000.0);
         when(first.getPrivatePension()).thenReturn(pot);
         when(survivor.getPrivatePension()).thenReturn(new PrivatePension());
 
@@ -362,7 +362,7 @@ class InheritanceModuleTest {
         when(thirdUnit.getMembers()).thenReturn(Set.of(thirdRecipient));
         when(donor.getSampleExit()).thenReturn(death);
         PrivatePension pension = new PrivatePension();
-        pension.setInitialComponents(20_000, 0, 0, 0);
+        pension.setWealth(20_000);
         when(donor.getPrivatePension()).thenReturn(pension);
 
         InheritanceModule module = new InheritanceModule();

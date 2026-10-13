@@ -133,10 +133,6 @@ public class Parameters {
 		"wealthPrptyFlag",		        //flag indicating if benefit unit owns a house
 		"wealthTotValue",	            //benefit unit total net wealth (includes pensions assets and housing)
         "wealthPensValue",              //benefit unit total private (personal and occupational) pensions
-        "wealthPensDcValue",            //remaining unannuitised DC funds, transferable at death
-        "wealthPensDbValue",            //DB rights, not a transferable fund
-        "wealthPensInPaymentValue",     //capitalised pensions already in payment
-        "wealthPensOtherValue",         //former-partner/unknown rights, not treated as DC
         "wealthPrptyValue",             //benefit unit value of main home (gross of mortgage debt)
         "wealthMortgageDebtValue",      //benefit unit value of mortgage debt
         "wealthUnsecuredDebtLowValue",  //benefit unit value of low-cost unsecured debt

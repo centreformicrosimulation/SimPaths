@@ -97,10 +97,6 @@ public class DataParser {
 				// create person table
 				stat.execute(
 						"CREATE TABLE " + inputFileName + " AS SELECT * FROM CSVREAD(\'" + inputFileLocation + "\');"
-								+ "ALTER TABLE " + inputFileName + " ADD COLUMN IF NOT EXISTS wealthPensDcValue DOUBLE;"
-								+ "ALTER TABLE " + inputFileName + " ADD COLUMN IF NOT EXISTS wealthPensDbValue DOUBLE;"
-								+ "ALTER TABLE " + inputFileName + " ADD COLUMN IF NOT EXISTS wealthPensInPaymentValue DOUBLE;"
-								+ "ALTER TABLE " + inputFileName + " ADD COLUMN IF NOT EXISTS wealthPensOtherValue DOUBLE;"
 								+ "DROP TABLE IF EXISTS " + personTable + " CASCADE;"
 								+ "CREATE TABLE " + personTable + " AS (SELECT " + stringAppender(inputPersonColumnNamesSet) + " FROM " + inputFileName + ");"
 
@@ -317,10 +313,6 @@ public class DataParser {
 								//WEALTH
 								+ "UPDATE " + benefitUnitTable + " SET wealthTotValue = 0.0 WHERE wealthTotValue = -9.0;"
 								+ "UPDATE " + benefitUnitTable + " SET wealthPensValue = 0.0 WHERE wealthPensValue = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET wealthPensDcValue = 0.0 WHERE wealthPensDcValue = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET wealthPensDbValue = 0.0 WHERE wealthPensDbValue = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET wealthPensInPaymentValue = 0.0 WHERE wealthPensInPaymentValue = -9.0;"
-								+ "UPDATE " + benefitUnitTable + " SET wealthPensOtherValue = 0.0 WHERE wealthPensOtherValue = -9.0;"
 								+ "UPDATE " + benefitUnitTable + " SET wealthPrptyValue = 0.0 WHERE wealthPrptyValue = -9.0;"
                                 + "UPDATE " + benefitUnitTable + " SET wealthMortgageDebtValue = 0.0 WHERE wealthMortgageDebtValue = -9.0;"
 

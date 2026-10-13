@@ -107,7 +107,7 @@ class InheritanceOrphanExitTest {
     void newPensionShareIsRedirectedBeforeAnOrphanCanReceiveIt() {
         Family family = new Family();
         PrivatePension pension = mock(PrivatePension.class);
-        when(pension.getRemainingDcFund()).thenReturn(12_000.0);
+        when(pension.getWealth()).thenReturn(12_000.0);
         when(family.mother.getPrivatePension()).thenReturn(pension);
         family.mother.setSampleExit(SampleExit.Death);
         family.settle(2030);

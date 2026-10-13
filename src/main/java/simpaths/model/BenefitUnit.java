@@ -79,11 +79,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
     @NullInitialised @Transient private WealthNonPension wealthNonPension;
     @Lag(getter="getWealthNonPension") @Transient private WealthNonPension wealthNonPensionL1;
     @NullInitialised @Column(name="wealthPensValue") private Double wealthPensValue;                    // total private (personal and occupational) pensions
-    @NullInitialised private Double wealthPensDcValue;
-    @NullInitialised private Double wealthPensDbValue;
-    @NullInitialised private Double wealthPensInPaymentValue;
-    @NullInitialised private Double wealthPensOtherValue;
-    @Transient private boolean legacyUnsplitPensionInput;
     @NullInitialised @Column(name="wealthTotValue") private Double wealthTotValue;                      // total net wealth (includes pensions assets and housing)
     @NullInitialised @Column(name="wealthPrptyValue") private Double wealthPrptyValue;                  // value of main home (gross of mortgage debt)
     @NullInitialised @Column(name="wealthMortgageDebtValue") private Double wealthMortgageDebtValue;    // value of outstanding mortgage debt
@@ -309,11 +304,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         yDiffDispEquivPrevYear = Objects.requireNonNullElse(originalBenefitUnit.yDiffDispEquivPrevYear,0.0);
         wealthTotValue = Objects.requireNonNullElse(originalBenefitUnit.wealthTotValue,0.0);
         wealthPensValue = Objects.requireNonNullElse(originalBenefitUnit.wealthPensValue,0.0);
-        wealthPensDcValue = originalBenefitUnit.wealthPensDcValue;
-        wealthPensDbValue = originalBenefitUnit.wealthPensDbValue;
-        wealthPensInPaymentValue = originalBenefitUnit.wealthPensInPaymentValue;
-        wealthPensOtherValue = originalBenefitUnit.wealthPensOtherValue;
-        legacyUnsplitPensionInput = originalBenefitUnit.legacyUnsplitPensionInput;
         wealthPrptyValue = Objects.requireNonNullElse(originalBenefitUnit.wealthPrptyValue,0.0);
         wealthPrptyFlag = Objects.requireNonNullElse(originalBenefitUnit.wealthPrptyFlag,false);
         wealthMortgageDebtValue = Objects.requireNonNullElse(originalBenefitUnit.wealthMortgageDebtValue,0.0);
@@ -485,25 +475,13 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             return;
 
         wealthPensValue = 0.;
-        wealthPensDcValue = 0.0;
-        wealthPensDbValue = 0.0;
-        wealthPensInPaymentValue = 0.0;
-        wealthPensOtherValue = 0.0;
         Person male = getMale();
         if (male != null) {
             wealthPensValue += male.getWealthPensValue();
-            wealthPensDcValue += male.getWealthPensDcValue();
-            wealthPensDbValue += male.getWealthPensDbValue();
-            wealthPensInPaymentValue += male.getWealthPensInPaymentValue();
-            wealthPensOtherValue += male.getWealthPensOtherValue();
         }
         Person female = getFemale();
         if (female != null) {
             wealthPensValue += female.getWealthPensValue();
-            wealthPensDcValue += female.getWealthPensDcValue();
-            wealthPensDbValue += female.getWealthPensDbValue();
-            wealthPensInPaymentValue += female.getWealthPensInPaymentValue();
-            wealthPensOtherValue += female.getWealthPensOtherValue();
         }
     }
 
@@ -570,10 +548,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     void removeDeceasedPensionStock(Person deceased) {
         removeDeceasedPensionStock(deceased.getWealthPensValue(false));
-        wealthPensDcValue = Math.max(0.0, Objects.requireNonNullElse(wealthPensDcValue, 0.0) - deceased.getWealthPensDcValue());
-        wealthPensDbValue = Math.max(0.0, Objects.requireNonNullElse(wealthPensDbValue, 0.0) - deceased.getWealthPensDbValue());
-        wealthPensInPaymentValue = Math.max(0.0, Objects.requireNonNullElse(wealthPensInPaymentValue, 0.0) - deceased.getWealthPensInPaymentValue());
-        wealthPensOtherValue = Math.max(0.0, Objects.requireNonNullElse(wealthPensOtherValue, 0.0) - deceased.getWealthPensOtherValue());
     }
 
     void sellHomeForInheritance() {
@@ -4707,58 +4681,6 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
     public void setWealthPensValue(Double wealthPensValue) {
         this.wealthPensValue = wealthPensValue;
-    }
-
-    public double[] getInitialPensionComponents() {
-        double total = getWealthPensValue(false);
-        if (legacyUnsplitPensionInput)
-            return new double[]{total, 0.0, 0.0, 0.0};
-        boolean hasDc = Parameters.isFinite(wealthPensDcValue);
-        boolean hasDb = Parameters.isFinite(wealthPensDbValue);
-        boolean hasInPayment = Parameters.isFinite(wealthPensInPaymentValue);
-        boolean hasOther = Parameters.isFinite(wealthPensOtherValue);
-        if ((hasDc || hasDb || hasInPayment || hasOther) &&
-                !(hasDc && hasDb && hasInPayment && hasOther))
-            throw new IllegalStateException("Initial pension component split is incomplete in benefit unit " + getId());
-        if (hasDc && hasDb && hasInPayment && hasOther) {
-            double sum = wealthPensDcValue + wealthPensDbValue + wealthPensInPaymentValue + wealthPensOtherValue;
-            if (wealthPensDcValue < 0 || wealthPensDbValue < 0 || wealthPensInPaymentValue < 0 || wealthPensOtherValue < 0 ||
-                    Math.abs(sum - total) > Math.max(0.01, Math.abs(total) * 1.0e-7))
-                throw new IllegalStateException("Initial pension components do not sum to total in benefit unit " + getId());
-            // SimPaths treats the imputed starting total as one modelled pot.
-            // The source components remain useful for data validation, but do
-            // not define bequest eligibility under this simplified convention.
-            wealthPensDcValue = total;
-            wealthPensDbValue = 0.0;
-            wealthPensInPaymentValue = 0.0;
-            wealthPensOtherValue = 0.0;
-            return new double[]{total, 0.0, 0.0, 0.0};
-        }
-        if (Math.abs(total) < 0.01)
-            return new double[]{0.0, 0.0, 0.0, 0.0};
-        // The legacy 2021 input has only this total. Use it as the modelled pot,
-        // which is cleared when the person retires.
-        wealthPensDcValue = total;
-        wealthPensDbValue = 0.0;
-        wealthPensInPaymentValue = 0.0;
-        wealthPensOtherValue = 0.0;
-        legacyUnsplitPensionInput = true;
-        return new double[]{total, 0.0, 0.0, 0.0};
-    }
-
-    public boolean isLegacyUnsplitPensionInput() { return legacyUnsplitPensionInput; }
-
-    public double getWealthPensDcValue() { return Objects.requireNonNullElse(wealthPensDcValue, 0.0); }
-    public double getWealthPensDbValue() { return Objects.requireNonNullElse(wealthPensDbValue, 0.0); }
-    public double getWealthPensInPaymentValue() { return Objects.requireNonNullElse(wealthPensInPaymentValue, 0.0); }
-    public double getWealthPensOtherValue() { return Objects.requireNonNullElse(wealthPensOtherValue, 0.0); }
-
-    public void setInitialPensionComponents(double dc, double db, double inPayment, double other) {
-        legacyUnsplitPensionInput = false;
-        wealthPensDcValue = dc;
-        wealthPensDbValue = db;
-        wealthPensInPaymentValue = inPayment;
-        wealthPensOtherValue = other;
     }
 
     public double getWealthPrptyValue() {

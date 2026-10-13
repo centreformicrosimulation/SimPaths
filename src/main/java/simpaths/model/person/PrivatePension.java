@@ -16,11 +16,8 @@ public class PrivatePension {
     private double contRateOPEe;                         //contribution rate of employee to occupational pension
     private double contRateOPEr;                         //contribution rate of employer to occupational pension
     private double contRatePP;                           //contribution rate to personal pension
-    private double dcWealth;                             //remaining modelled pot before retirement
-    private double dbRightsValue;                        //source categories retained for input compatibility
-    private double inPaymentRightsValue;
-    private double otherRightsValue;
-    private boolean isPensioner;                         //indicator of whether the person is retired
+    private double wealth;                               //remaining modelled private pension pot
+    private boolean isPensioner;                         //indicator that private pension income has been accessed
     private double lumpSumPayment;                       //value of lump sum payment at time of pension access
     private double pensionIncomeAnnual;                  //private pension annuity income per year
 
@@ -31,10 +28,7 @@ public class PrivatePension {
         contRateOPEr = 0.0;
         contRateOPEe = 0.0;
         contRatePP = 0.0;
-        dcWealth = 0.0;
-        dbRightsValue = 0.0;
-        inPaymentRightsValue = 0.0;
-        otherRightsValue = 0.0;
+        wealth = 0.0;
         pensionIncomeAnnual = 0.0;
         lumpSumPayment = 0.0;
     }
@@ -46,10 +40,7 @@ public class PrivatePension {
         this.contRateOPEr = original.contRateOPEr;
         this.contRateOPEe = original.contRateOPEe;
         this.contRatePP = original.contRatePP;
-        this.dcWealth = original.dcWealth;
-        this.dbRightsValue = original.dbRightsValue;
-        this.inPaymentRightsValue = original.inPaymentRightsValue;
-        this.otherRightsValue = original.otherRightsValue;
+        this.wealth = original.wealth;
         this.pensionIncomeAnnual = original.pensionIncomeAnnual;
         this.lumpSumPayment = original.lumpSumPayment;
     }
@@ -166,11 +157,8 @@ public class PrivatePension {
 
     public void projectWealth(PrivatePension previous, double employmentIncomeAnnual, double growthRate, Les_c4 labC4) {
 
-        // All starting pension wealth is a modelled pot until retirement.
-        dcWealth = previous.getWealth() * (1.0 + growthRate);
-        dbRightsValue = 0.0;
-        inPaymentRightsValue = 0.0;
-        otherRightsValue = 0.0;
+        // Project the single modelled pension pot.
+        wealth = previous.getWealth() * (1.0 + growthRate);
         if (!Les_c4.EmployedOrSelfEmployed.equals(labC4)) {
 
             contRateOPEe = 0.0;
@@ -185,7 +173,7 @@ public class PrivatePension {
             if (!memberPP) {
                 contRatePP = 0.0;
             }
-            dcWealth += (contRatePP + contRateOPEe + contRateOPEr) * employmentIncomeAnnual;
+            wealth += (contRatePP + contRateOPEe + contRateOPEr) * employmentIncomeAnnual;
         }
     }
 
@@ -218,10 +206,7 @@ public class PrivatePension {
             throw new RuntimeException("Annuity price not found for " + male + " " + age + " " + year);
         pensionIncomeAnnual = (pot - lumpSumPayment) / annuityPrice;
         // The modelled pot is exhausted by the lump sum and annuity purchase.
-        dcWealth = 0.0;
-        dbRightsValue = 0.0;
-        inPaymentRightsValue = 0.0;
-        otherRightsValue = 0.0;
+        wealth = 0.0;
         return pensionIncomeAnnual / 12.0;
     }
 
@@ -301,38 +286,11 @@ public class PrivatePension {
     }
 
     public double getWealth() {
-        return dcWealth + dbRightsValue + inPaymentRightsValue + otherRightsValue;
+        return wealth;
     }
 
-    public void setInitialComponents(double dc, double db, double inPayment, double other) {
-        if (!Double.isFinite(dc) || !Double.isFinite(db) ||
-                !Double.isFinite(inPayment) || !Double.isFinite(other) ||
-                dc < 0.0 || db < 0.0 || inPayment < 0.0 || other < 0.0)
-            throw new IllegalArgumentException("Pension components must be finite and non-negative");
-        dcWealth = dc;
-        dbRightsValue = db;
-        inPaymentRightsValue = inPayment;
-        otherRightsValue = other;
-    }
-
-    public double getRemainingDcFund() {
-        return dcWealth;
-    }
-
-    public double getDcWealth() {
-        return dcWealth;
-    }
-
-    public double getDbRightsValue() {
-        return dbRightsValue;
-    }
-
-    public double getInPaymentRightsValue() {
-        return inPaymentRightsValue;
-    }
-
-    public double getOtherRightsValue() {
-        return otherRightsValue;
+    public void setWealth(double wealth) {
+        this.wealth = wealth;
     }
 
 }

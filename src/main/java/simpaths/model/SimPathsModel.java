@@ -2701,16 +2701,6 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
                 }
             }
 
-            // Older research databases contain only combined pension wealth.
-            // Add nullable fields to the run tables so non-DC bequest runs can
-            // load that input without altering or guessing its source split.
-            for (String table : new String[]{"BENEFITUNIT", "PERSON"}) {
-                stat.execute("ALTER TABLE " + table + " ADD COLUMN IF NOT EXISTS wealthPensDcValue DOUBLE");
-                stat.execute("ALTER TABLE " + table + " ADD COLUMN IF NOT EXISTS wealthPensDbValue DOUBLE");
-                stat.execute("ALTER TABLE " + table + " ADD COLUMN IF NOT EXISTS wealthPensInPaymentValue DOUBLE");
-                stat.execute("ALTER TABLE " + table + " ADD COLUMN IF NOT EXISTS wealthPensOtherValue DOUBLE");
-            }
-
             initialHoursWorkedWeekly = new LinkedHashMap<Long, Double>();
 
             //Add hours from initial population which is now different than donor

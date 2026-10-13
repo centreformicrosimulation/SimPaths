@@ -27,7 +27,7 @@ class InheritanceRecipientRulesTest {
         when(donor.getIdMother()).thenReturn(2L);
         when(donor.getIdFather()).thenReturn(3L);
         PrivatePension pension = mock(PrivatePension.class);
-        when(pension.getRemainingDcFund()).thenReturn(30_000.0);
+        when(pension.getWealth()).thenReturn(30_000.0);
         when(donor.getPrivatePension()).thenReturn(pension);
         world.die(donor);
         world.settle();

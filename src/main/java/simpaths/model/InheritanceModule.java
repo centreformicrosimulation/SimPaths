@@ -333,7 +333,7 @@ public final class InheritanceModule {
         PrivatePension pension = deceased.getPrivatePension();
         double pot = !pension.isPensioner() &&
                 !Les_c4.Retired.equals(deceased.getLabC4())
-                ? Math.max(0.0, pension.getRemainingDcFund()) : 0.0;
+                ? Math.max(0.0, pension.getWealth()) : 0.0;
         deceased.getBenefitUnit().removeDeceasedPensionStock(deceased);
         if (pot <= EPS)
             return;

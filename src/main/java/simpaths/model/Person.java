@@ -193,10 +193,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     @Lag(getter="getYPensPersGrossMonth") @Transient private Double yPensPersGrossMonthL1; //Lag(1) of pension income
     @Lag(field="yPensPersGrossMonthL1") @Transient private Double yPensPersGrossMonthL2; //Lag(2) of pension income
     @NullInitialised private Double wealthPensValue;
-    @NullInitialised private Double wealthPensDcValue;
-    @NullInitialised private Double wealthPensDbValue;
-    @NullInitialised private Double wealthPensInPaymentValue;
-    @NullInitialised private Double wealthPensOtherValue;
     @NullInitialised private Double contRateOPEe;           //employee contribution rate to occupation pension
     @NullInitialised private Double contRateOPEr;           //employer contribution rate to occupation pension
     @NullInitialised private Double contRatePP;             //employee contribution rate to personal pension
@@ -448,10 +444,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         wealthNonPensValue = originalPerson.wealthNonPensValue;
         wealthPensValue = originalPerson.wealthPensValue;
-        wealthPensDcValue = originalPerson.wealthPensDcValue;
-        wealthPensDbValue = originalPerson.wealthPensDbValue;
-        wealthPensInPaymentValue = originalPerson.wealthPensInPaymentValue;
-        wealthPensOtherValue = originalPerson.wealthPensOtherValue;
         contRateOPEe = originalPerson.contRateOPEe;
         contRateOPEr = originalPerson.contRateOPEr;
         contRatePP = originalPerson.contRatePP;
@@ -713,15 +705,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
 
         // instantiate privatePension
         wealthPensValue = 0.0;
-        wealthPensDcValue = 0.0;
-        wealthPensDbValue = 0.0;
-        wealthPensInPaymentValue = 0.0;
-        wealthPensOtherValue = 0.0;
         wealthNonPensValue = 0.0;
         privatePension = new PrivatePension();
         if (demAge >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
-		    double[] pensionComponents = getBenefitUnit().getInitialPensionComponents();
-		    double adultShare = partner != null ? 0.5 : 1.0;
 
             if (partner != null) {
                 wealthPensValue = getBenefitUnit().getWealthPensValue() / 2.0;
@@ -730,13 +716,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 wealthPensValue = getBenefitUnit().getWealthPensValue();
                 wealthNonPensValue = getBenefitUnit().getWealthNonPensValue();
             }
-            privatePension.setInitialComponents(pensionComponents[0] * adultShare,
-                    pensionComponents[1] * adultShare, pensionComponents[2] * adultShare,
-                    pensionComponents[3] * adultShare);
-            wealthPensDcValue = privatePension.getDcWealth();
-            wealthPensDbValue = privatePension.getDbRightsValue();
-            wealthPensInPaymentValue = privatePension.getInPaymentRightsValue();
-            wealthPensOtherValue = privatePension.getOtherRightsValue();
+            privatePension.setWealth(wealthPensValue);
             privatePension.setPensionIncomeAnnual(Math.sinh(yPensPersGrossMonth) * 12.0);
             privatePension.setContRateOPEe(contRateOPEe);
             privatePension.setContRateOPEr(contRateOPEr);
@@ -1062,10 +1042,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         }
 
         wealthPensValue = privatePension.getWealth();
-        wealthPensDcValue = privatePension.getDcWealth();
-        wealthPensDbValue = privatePension.getDbRightsValue();
-        wealthPensInPaymentValue = privatePension.getInPaymentRightsValue();
-        wealthPensOtherValue = privatePension.getOtherRightsValue();
         contRateOPEe = privatePension.getContRateOPEe();
         contRateOPEr = privatePension.getContRateOPEr();
         contRatePP = privatePension.getContRatePP();
@@ -7335,11 +7311,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public void setWealthPensValue(Double v) {
         wealthPensValue = v;
     }
-
-    public double getWealthPensDcValue() { return Objects.requireNonNullElse(wealthPensDcValue, 0.0); }
-    public double getWealthPensDbValue() { return Objects.requireNonNullElse(wealthPensDbValue, 0.0); }
-    public double getWealthPensInPaymentValue() { return Objects.requireNonNullElse(wealthPensInPaymentValue, 0.0); }
-    public double getWealthPensOtherValue() { return Objects.requireNonNullElse(wealthPensOtherValue, 0.0); }
 
     public double getYEmpPersGrossMonthL1() {
         return yEmpPersGrossMonthL1;
