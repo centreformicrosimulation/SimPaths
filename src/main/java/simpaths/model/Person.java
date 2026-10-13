@@ -1011,14 +1011,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (Parameters.projectPensionWealth) {
 
             if (privatePension != null) {
-                if (privatePension.getPensionIncomeAnnual() > 0.0)
-                    throw new RuntimeException("pension contribution update requested for retiree");
-            }
 
-            privatePension = new PrivatePension();
-            privatePension.membership(this, privatePensionL1.isMemberOP(), privatePensionL1.isMemberPP(), statInnovations.getDoubleDraw(5), statInnovations.getDoubleDraw(6));
-            privatePension.contributionRates(this, statInnovations.getDoubleDraw(39), statInnovations.getDoubleDraw(40),
-                    statInnovations.getDoubleDraw(41), statInnovations.getDoubleDraw(42), statInnovations.getDoubleDraw(43));
+                if (!privatePension.isPensioner())
+                    throw new RuntimeException("privatePension object non-null for non-pensioner");
+            }
+            else {
+
+                privatePension = new PrivatePension();
+                privatePension.membership(this, privatePensionL1.isMemberOP(), privatePensionL1.isMemberPP(), statInnovations.getDoubleDraw(5), statInnovations.getDoubleDraw(6));
+                privatePension.contributionRates(this, statInnovations.getDoubleDraw(39), statInnovations.getDoubleDraw(40),
+                        statInnovations.getDoubleDraw(41), statInnovations.getDoubleDraw(42), statInnovations.getDoubleDraw(43));
+            }
         } else {
 
             if (privatePension == null)

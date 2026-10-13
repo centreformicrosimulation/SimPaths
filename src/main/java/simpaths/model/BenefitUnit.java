@@ -1981,6 +1981,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     maleIncome = Math.sinh(male.getYMiscPersGrossMonth());
                 }
+                maleIncome += male.getPrivatePension().getPensionIncomeAnnual() / 12.0;
             }
             if (female != null) {
 
@@ -1994,6 +1995,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     femaleIncome = Math.sinh(female.getYMiscPersGrossMonth());
                 }
+                femaleIncome += female.getPrivatePension().getPensionIncomeAnnual() / 12.0;
             }
 
             // Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)

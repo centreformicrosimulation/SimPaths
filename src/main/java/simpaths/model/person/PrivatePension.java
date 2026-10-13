@@ -191,9 +191,14 @@ public class PrivatePension {
 
     public double projectInPaymentPension(int year, double pensionIncomePerYearL1) {
 
+        isPensioner = true;
+        memberPP = false;
+        memberOP = false;
+        contRateOPEr = 0.0;
+        contRateOPEe = 0.0;
+        contRatePP = 0.0;
         double inflationIndexL1 = Parameters.getTimeSeriesValue(year-1, TimeSeriesVariable.Inflation);
         double inflationIndex = Parameters.getTimeSeriesValue(year, TimeSeriesVariable.Inflation);
-        isPensioner = true;
         pensionIncomeAnnual = pensionIncomePerYearL1 * inflationIndexL1 / inflationIndex;
         return pensionIncomeAnnual / 12.0;
     }
@@ -201,6 +206,11 @@ public class PrivatePension {
     public double projectPensionAccess(int age, Gender male, int year, PrivatePension previous) {
 
         isPensioner = true;
+        memberPP = false;
+        memberOP = false;
+        contRateOPEr = 0.0;
+        contRateOPEe = 0.0;
+        contRatePP = 0.0;
         double pot = previous.getWealth();
         lumpSumPayment = Math.min(pot * Parameters.pensionLumpSumShare, Parameters.pensionLumpSumCap);
         Double annuityPrice = Parameters.annuityRates.getAnnuityRateByGenderAgeYear(male, age, year);

@@ -611,8 +611,8 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
             yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateStates, false);
 
         yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdateInvestmentIncome);
-        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdatePrivatePensionIncome);
-        yearlySchedule.addEvent(this, Processes.LabourMarketUpdate);
+        yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.UpdatePrivatePensionIncome);  // initialises privatePension for pensioners, including transition for new pensioners
+        yearlySchedule.addEvent(this, Processes.LabourMarketUpdate);    // pension contributions for workers not yet pensioners
 
         // Assign benefit status to individuals in benefit units, from donors. Based on donor tax unit status.
         yearlySchedule.addCollectionEvent(benefitUnits, BenefitUnit.Processes.ReceivesBenefits);
