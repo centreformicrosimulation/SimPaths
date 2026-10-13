@@ -398,16 +398,16 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demStatusHhL1 = originalPerson.demStatusHhL1;
         if (demAge > MAX_AGE_FLEXIBLE_LABOUR_SUPPLY)
             labC4 = Les_c4.Retired;
-        else if (originalPerson.yPensPersGrossMonth > 0. && originalPerson.demAge >= MIN_AGE_TO_RETIRE)
-            labC4 = Les_c4.Retired;
         else if (originalPerson.demAge < Parameters.MIN_AGE_TO_LEAVE_EDUCATION)
             labC4 = Les_c4.Student;
         else if (originalPerson.labC4 != null)
             labC4 = originalPerson.labC4;
-        else if (originalPerson.demAge > (int)Parameters.getTimeSeriesValue(model.getYear(), originalPerson.getDemMaleFlag().toString(), TimeSeriesVariable.FixedRetirementAge))
-            labC4 = Les_c4.Retired;
         else if (originalPerson.getLabourSupplyWeekly() != null && originalPerson.getLabourSupplyWeekly().getHours(originalPerson) > 0)
             labC4 = Les_c4.EmployedOrSelfEmployed;
+        else if (originalPerson.demAge > (int)Parameters.getTimeSeriesValue(model.getYear(), originalPerson.getDemMaleFlag().toString(), TimeSeriesVariable.FixedRetirementAge))
+            labC4 = Les_c4.Retired;
+        else if (originalPerson.yPensPersGrossMonth > 0. && originalPerson.demAge >= MIN_AGE_TO_RETIRE)
+            labC4 = Les_c4.Retired;
         else
             labC4 = Les_c4.NotEmployed;
         labC4L1 = labC4;
@@ -741,7 +741,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             privatePension.setContRateOPEe(contRateOPEe);
             privatePension.setContRateOPEr(contRateOPEr);
             privatePension.setContRatePP(contRatePP);
-            privatePension.setRetired(Les_c4.Retired.equals(getLabC4()));
+            privatePension.setPensioner(privatePension.getPensionIncomeAnnual() > 0);
         }
     }
 
@@ -2142,7 +2142,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             if (demAge >= Parameters.MIN_AGE_TO_RETIRE) {
 
                 // --- BRANCH 1: CONTINUING PENSIONERS ---
-                if (Les_c4.Retired.equals(labC4L1)) {
+                if (Les_c4.Retired.equals(labC4L1) || privatePensionL1.isPensioner()) {
 
                     updateContinuingRetiree();
                 }

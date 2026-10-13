@@ -20,14 +20,14 @@ public class PrivatePension {
     private double dbRightsValue;                        //source categories retained for input compatibility
     private double inPaymentRightsValue;
     private double otherRightsValue;
-    private boolean isRetired;                           //indicator of whether the person is retired
+    private boolean isPensioner;                         //indicator of whether the person is retired
     private double lumpSumPayment;                       //value of lump sum payment at time of pension access
-    private double pensionIncomeAnnual;                 //private pension annuity income per year
+    private double pensionIncomeAnnual;                  //private pension annuity income per year
 
     public PrivatePension() {
         memberPP = false;
         memberOP = false;
-        isRetired = false;
+        isPensioner = false;
         contRateOPEr = 0.0;
         contRateOPEe = 0.0;
         contRatePP = 0.0;
@@ -42,7 +42,7 @@ public class PrivatePension {
     public PrivatePension(PrivatePension original) {
         this.memberPP = original.memberPP;
         this.memberOP = original.memberOP;
-        this.isRetired = original.isRetired;
+        this.isPensioner = original.isPensioner;
         this.contRateOPEr = original.contRateOPEr;
         this.contRateOPEe = original.contRateOPEe;
         this.contRatePP = original.contRatePP;
@@ -193,14 +193,14 @@ public class PrivatePension {
 
         double inflationIndexL1 = Parameters.getTimeSeriesValue(year-1, TimeSeriesVariable.Inflation);
         double inflationIndex = Parameters.getTimeSeriesValue(year, TimeSeriesVariable.Inflation);
-        isRetired = true;
+        isPensioner = true;
         pensionIncomeAnnual = pensionIncomePerYearL1 * inflationIndexL1 / inflationIndex;
         return pensionIncomeAnnual / 12.0;
     }
 
     public double projectPensionAccess(int age, Gender male, int year, PrivatePension previous) {
-        isRetired = true;
 
+        isPensioner = true;
         double pot = previous.getWealth();
         lumpSumPayment = Math.min(pot * Parameters.pensionLumpSumShare, Parameters.pensionLumpSumCap);
         Double annuityPrice = Parameters.annuityRates.getAnnuityRateByGenderAgeYear(male, age, year);
@@ -228,12 +228,12 @@ public class PrivatePension {
         this.lumpSumPayment = lumpSumPayment;
     }
 
-    public boolean isRetired() {
-        return isRetired;
+    public boolean isPensioner() {
+        return isPensioner;
     }
 
-    public void setRetired(boolean retired) {
-        isRetired = retired;
+    public void setPensioner(boolean pensioner) {
+        isPensioner = pensioner;
     }
 
     public double getPensionIncomeAnnual() {

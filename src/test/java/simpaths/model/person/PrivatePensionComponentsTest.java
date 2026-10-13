@@ -46,7 +46,7 @@ class PrivatePensionComponentsTest {
             assertEquals(7_500, retired.getPensionIncomeAnnual(), 1e-6);
             assertEquals(0, retired.getWealth(), 1e-6);
             assertEquals(0, retired.getRemainingDcFund(), 1e-6);
-            assertTrue(retired.isRetired());
+            assertTrue(retired.isPensioner());
         } finally {
             Parameters.annuityRates = savedRates;
         }
