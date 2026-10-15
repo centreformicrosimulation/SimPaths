@@ -3,8 +3,8 @@ clear all
 set more off
 
 * Run from the SimPaths repository root. The source workbook is never changed.
-local source "input/align_popProjections.xlsx"
-local output "input/align_popProjections_no_ageing_2026.xlsx"
+local source "input/alignment_files/align_popProjections.xlsx"
+local output "input/alignment_files/align_popProjections_no_ageing_2026.xlsx"
 
 * The UK sheet has Gender, Region, Age in A:C and years 2011-2120 in D:DI.
 * S is 2026; T:DI are 2027-2120. Retaining the full horizon keeps the

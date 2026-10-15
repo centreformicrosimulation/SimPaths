@@ -6,6 +6,7 @@
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <byte-buddy-agent.version>1.17.7</byte-buddy-agent.version>
     </properties>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -22,6 +23,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.5.6</version>
 				<configuration>
+					<argLine>-javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${byte-buddy-agent.version}/byte-buddy-agent-${byte-buddy-agent.version}.jar</argLine>
 					<excludes>
 						<exclude>**/*IntegrationTest.java</exclude>
 					</excludes>
@@ -189,6 +191,12 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
             <version>1.18.10</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>${byte-buddy-agent.version}</version>
+            <scope>test</scope>
         </dependency>
 	</dependencies>
 	<repositories>

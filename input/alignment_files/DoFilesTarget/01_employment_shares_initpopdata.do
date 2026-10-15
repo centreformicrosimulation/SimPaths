@@ -204,7 +204,7 @@ putexcel set "${dir_output}/alignment_targets_employment.xlsx", sheet("Info") mo
 putexcel A1=("Field") B1=("Value")
 putexcel A2=("Workbook") B2=("alignment_targets_employment.xlsx")
 putexcel A3=("Data sheets") B3=("Couples, SingleDep_Males, SingleDep_Females, Single_male, SingleAC_Males, Single_female, SingleAC_Females")
-putexcel A4=("Relevant do file") B4=("input/DoFilesTarget/01_employment_shares_initpopdata.do")
+putexcel A4=("Relevant do file") B4=("input/alignment_files/DoFilesTarget/01_employment_shares_initpopdata.do")
 putexcel A5=("Source data") B5=("input/InitialPopulations/population_initial_UK_2011.csv to population_initial_UK_2023.csv")
 putexcel A6=("Years covered") B6=("2011-2023")
 putexcel A7=("Unit of analysis") B7=("Benefit unit (BU)")
