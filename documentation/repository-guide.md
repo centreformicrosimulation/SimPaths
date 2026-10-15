@@ -53,7 +53,7 @@ SimPaths/
 │   │   │   └── training/               # Training UKMOD outputs (included in repo)
 │   │   └── EUROMODpolicySchedule*.xlsx # Policy schedules
 │   ├── InitialPopulations/             # Starting population data
-│   │   ├──compile/                     # Stata pipeline: builds initial populations
+│   │   ├── compile/                    # Stata pipeline: builds initial populations
 │   │   │   └── do_emphist/             # Employment history reconstruction sub-pipeline
 │   │   └── training/                   # De-identified training population (included in repo)
 │   ├── lifetime_incomes/               # Lifetime-income estimation inputs
