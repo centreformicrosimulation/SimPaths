@@ -671,6 +671,7 @@ public class SimPathsModel extends AbstractSimulationManager implements EventLis
         addCollectionEventToAllYears(persons, Person.Processes.ConsiderMortality);
         addEventToAllYears(Processes.PopulationAlignment); // start population alignment in year 0 (startYear)
         addEventToAllYears(Processes.SettleInheritance);
+        addCollectionEventToAllYears(benefitUnits, BenefitUnit.Processes.UpdateDemographics);
         // yearlySchedule.addEvent(this, Processes.PopulationAlignment);
 
         // END OF YEAR PROCESSES

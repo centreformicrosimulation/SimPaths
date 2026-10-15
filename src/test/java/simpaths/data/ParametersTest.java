@@ -17,7 +17,7 @@ class ParametersTest {
     void validateRegressors() {
 
         String[] badValueVector = new String[] {"Dag", "Not_a_valid_value"};
-        String[] goodValueVector = new String[] {"Dag", "D_Home_owner", "PovertyToNonPoverty"};
+        String[] goodValueVector = new String[] {"Dag", "Dhh_owned_L1", "PovertyToNonPoverty"};
         String[] keyVector = new String[] {"REGRESSOR"};
 
         MultiKeyCoefficientMap badMap = new MultiKeyCoefficientMap(keyVector, badValueVector);

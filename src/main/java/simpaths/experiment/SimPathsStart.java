@@ -266,8 +266,8 @@ public class SimPathsStart implements ExperimentBuilder {
 
 		// Create EUROMODPolicySchedule input from files
 		if (!rewritePolicySchedule &&
-				!new File(Parameters.getInputDirectory() + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
-			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + Parameters.getInputDirectory() +
+				!new File(Parameters.EUROMOD_DIRECTORY + Parameters.EUROMODpolicyScheduleFilename + ".xlsx").exists()) {
+			throw new FileNotFoundException("Policy Schedule file '"+ File.separator + Parameters.EUROMOD_DIRECTORY +
 					Parameters.EUROMODpolicyScheduleFilename + ".xlsx` doesn't exist. " +
 					"Provide excel file or use `--rewrite-policy-schedule` to re-construct from available policy files.");
 		};
@@ -316,7 +316,7 @@ public class SimPathsStart implements ExperimentBuilder {
 			row++;
 		}
 
-		XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
+		XLSXfileWriter.createXLSX(Parameters.EUROMOD_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
 	}
 
 
@@ -399,7 +399,7 @@ public class SimPathsStart implements ExperimentBuilder {
 			// call to select policies
 
 			// load previously stored values for policy description and initiation year
-			MultiKeyCoefficientMap previousEUROMODfileInfo = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1);
+			MultiKeyCoefficientMap previousEUROMODfileInfo = ExcelAssistant.loadCoefficientMap(Parameters.EUROMOD_DIRECTORY + Parameters.EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1);
 			Collection<File> euromodOutputTextFiles = FileUtils.listFiles(new File(Parameters.getEuromodOutputDirectory()), new String[]{"txt"}, false);
 			Iterator<File> fIter = euromodOutputTextFiles.iterator();
 			while (fIter.hasNext()) {
@@ -453,7 +453,7 @@ public class SimPathsStart implements ExperimentBuilder {
 			FormattedDialogBoxNonStatic policyScheduleBox = new FormattedDialogBoxNonStatic(titleEUROMODtable, null, 900, 300 + euromodOutputTextFiles.size()*11, tableEUROMODscenarios, true);
 
 			//Store a copy in the input directory so that we have a record of the policy schedule for reference
-			XLSXfileWriter.createXLSX(Parameters.INPUT_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
+			XLSXfileWriter.createXLSX(Parameters.EUROMOD_DIRECTORY, Parameters.EUROMODpolicyScheduleFilename, country.toString(), columnNames, data);
 		}
 
 		if(choices[0] || choices[2] || choices[3] || choices[4]) {

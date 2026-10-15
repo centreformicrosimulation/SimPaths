@@ -1,8 +1,8 @@
 # Wealth and income inequality with the 2026 population age structure.
 # Initialise in 2021 (the year available in the local database);
 # compare outcomes in 2025-2070.
-# Generate input/align_popProjections_no_ageing_2026.xlsx with
-# input/DoFilesTarget/04_no_ageing_population_targets.do before running.
+# Generate input/alignment_files/align_popProjections_no_ageing_2026.xlsx with
+# input/alignment_files/DoFilesTarget/04_no_ageing_population_targets.do before running.
 # Run with: -config wealth_inequality_no_ageing_2070.yml
 
 maxNumberOfRuns: 1

@@ -103,7 +103,7 @@ putexcel set "${dir_output}/alignment_targets_inSchool.xlsx", sheet("Info") modi
 putexcel A1=("Field") B1=("Value")
 putexcel A2=("Workbook") B2=("alignment_targets_inSchool.xlsx")
 putexcel A3=("Data sheet") B3=("students")
-putexcel A4=("Relevant do file") B4=("input/DoFilesTarget/02_inSchool_targets_initpopdata.do")
+putexcel A4=("Relevant do file") B4=("input/alignment_files/DoFilesTarget/02_inSchool_targets_initpopdata.do")
 putexcel A5=("Source data") B5=("input/InitialPopulations/population_initial_UK_2011.csv to population_initial_UK_2023.csv")
 putexcel A6=("Years covered") B6=("2011-2023")
 putexcel A7=("Unit of analysis") B7=("Person-year")

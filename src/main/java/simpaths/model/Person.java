@@ -2275,7 +2275,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Person "flexible in labour supply" must meet the following conditions:
         age >= 16 and <= 75
         not a student or retired
-        not disabled
          */
 
         if (demAge < Parameters.MIN_AGE_FLEXIBLE_LABOUR_SUPPLY)
@@ -2286,18 +2285,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             return false;
         if (Les_c4.Student.equals(labC4) && !Parameters.enableIntertemporalOptimisations)
             return false;
+//  Previously, we had a condition that if the person had a long-term health disability or care needs, they were not at risk of work. However, this was commented out to allow for scenarios where social care costs are suppressed. The logic was as follows:
 //        if (Indicator.True.equals(healthDsblLongtermFlag) && !Parameters.flagSuppressSocialCareCosts)
 //            return false;
 //        if (Indicator.True.equals(careNeedFlag) && !Parameters.flagSuppressSocialCareCosts)
 //            return false;
 
-        //For cases where the participation equation used for the Heckmann Two-stage correction of the wage equation results in divide by 0 errors.
-        //These people will not work for any wage (their activity status will be set to Nonwork in the Labour Market Module
+//  The folllowing condition is for cases where the participation equation used for the Heckman Two-stage correction of the wage equation results in divide by 0 errors.
+//  These people will not work for any wage (their activity status will be set to Nonwork in the Labour Market Module)
         Double inverseMillsRatio = getInverseMillsRatio();
         if (!Double.isFinite(inverseMillsRatio))
             return false;
 
-        return true;		//Else return true
+        return true;		// Else return true
     }
 
 
@@ -2609,38 +2609,25 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
     public enum Variables {
         // ORGANISED ALPHABETICALLY TO ASSIST IDENTIFICATION
 
-        demAge_Sq,
-        labWorkHist,
         labStatusC4Student_MaleL1,
         labStatusC4Retired_MaleL1,
         labStatusPartnerC3NotEmployedL1,
         labStatusC4NotEmployed_MaleL1,
-        Age,
-        AgeSquared,
-        AgeCubed,
         Age20to24,
-        Age21to27,						// Indicator for whether the person is in the Age category (see below for definition)
-        Age23to25,						// Indicator for whether the person is in the Age category (see below for definition)
         Age25to29,
-        Age25to39,
-        Age26to30,						// Indicator for whether the person is in the Age category (see below for definition)
-        Age28to30,						// Indicator for whether the person is in the Age category (see below for definition)
         Age30to34,
         Age35to39,
-        Age35to44,
         Age40to44,
         Age45to49,
-        Age45to54,
         Age50to54,
         Age55to59,
-        Age55to64,
         Age60to64,
         Age65plus,
         Age65to69,
         Age67to68,
         Age69to70,
-        Age70to74,
         Age70plus,
+        Age70to74,
         Age71to72,
         Age73to74,
         Age75to76,
@@ -2652,46 +2639,18 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Age81to82,
         Age83to84,
         Age85plus,
-        AgeOver39,
-        AgeUnder25,
         Asinhop_empee,
         Blpay_Q2,
         Blpay_Q3,
         Blpay_Q4,
         Blpay_Q5,
-        CareFromDaughter,
-        CareFromDaughter_L1,
-        CareFromDaughterOther_L1,
-        CareFromDaughterOnly_L1,
-        CareFromDaughterSon_L1,
-        CareFromFormal,
-        CareFromInformal,
-        CareFromOther_L1,
-        CareFromOtherOnly_L1,
-        CareFromPartner,
-        CareFromPartner_L1,
-        CareFromSon,
-        CareFromSon_L1,
-        CareFromSonOnly_L1,
-        CareFromOther,
-        CareFromSonOther_L1,
         CareMarketFormalPartner,
         CareMarketInformal_L1,
         CareMarketInformalPartner,
         CareMarketFormal_L1,
         CareMarketMixed,
         CareMarketMixed_L1,
-        CareToOtherOnly,
-        CareToOtherOnly_L1,
-        CareToPartnerAndOther,
-        CareToPartnerAndOther_L1,
-        CareToPartnerOnly,
-        CareToPartnerOnly_L1,
-        Cohort,
         Constant, 						// For the constant (intercept) term of the regression
-        Covid_D,
-        Covid_2020_D,
-        Covid_2021_D,
         Covid19GrossPayMonthly_L1,
         Covid19ReceivesSEISS_L1,
         CovidTransitionsMonth,
@@ -2708,164 +2667,37 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Cut10,
         Cut11,
         Cut12,
-        D_children,
-        D_Children,
-        D_children_2under,				// Indicator (dummy variables for presence of children of certain ages in the benefitUnit)
-        D_children_3_6,
-        D_children_7_12,
-        D_children_13_17,
-        D_children_18over,				//Currently this will return 0 (false) as children leave home when they are 18
         D_Econ_benefits,
-        D_Econ_benefits_NonUC,
-        D_Econ_benefits_UC,
-        D_Econ_benefits_UC_Lhw_ZERO,
-        D_Econ_benefits_UC_Lhw_TEN,
-        D_Econ_benefits_UC_Lhw_TWENTY,
-        D_Econ_benefits_UC_Lhw_THIRTY,
-        D_Econ_benefits_UC_Lhw_FORTY,
-        D_Home_owner,
-        D_Home_owner_L1,
         Dag,
         Dag_L1,
         Dag_sq,
         Dag_sq_L1,
-        Dag_u22,
-        Dag_sq_u22,
-        Dag_cb_u22,
-        Dag_22o,
-        Dag_sq_22o,
-        Dag_cb_22o,
-        DagCeiling54,
-        Dag_sqCeiling54,
-        Dcpagdf_L1, 					//Lag(1) of age difference between partners
-        Dcpyy_L1, 						//Lag(1) number of years in partnership
-        Dcpst_Partnered,				//Partnered
-        Dcpst_Partnered_L1,             //Lag(1) of partnership status is partnered
-        Dcpst_PreviouslyPartnered,		//Single (previously partnered category merged)
-        Dcpst_PreviouslyPartnered_L1,   //Lag(1) of partnership status is single (merged)
-        New_rel_L1,
         Dcpst_Single,					//Single
         Dcpst_Single_L1, 				//Lag(1) of partnership status is Single
-        Dcrisis,
-        Ded,
-        Ded_L1,
-        Ded_Dgn,
-        Ded_Dag,
-        Ded_Dag_sq,
-        Ded_Dhe_pcs_L1,
-        Ded_Dhe_mcs_L1,
-        Ded_Ypncp_L1,
-        Ded_Yplgrs_dv_L1,
-        Ded_Yplgrs_dv_L2,
-        Ded_Ypncp_L2,
-        Ded_Ydses_c5_Q2_L1,
-        Ded_Ydses_c5_Q3_L1,
-        Ded_Ydses_c5_Q4_L1,
-        Ded_Ydses_c5_Q5_L1,
-        Ded_Dnc_L1_,
-        Ded_Dnc02_L1,
         Ded_Dcpst_Single,
         demDChild,
-        demDChildL1,
-        demYear2010,
-        demYear2011,
-        demYear2012,
-        demYear2013,
-        demYear2014,
-        demYear2015,
-        demYear2016,
-        demYear2017,
-        demYear2018,
-        demYear2019,
-        demYear2022,
-        demYear2023,
-        demYear2024,
-        demAge_10,
-        demAge_11,
-        demAge_12,
-        demAge_13,
-        demAge_14,
-        Dnc_L1_,
         demCompHhC4SingleChL1,
         Deh_c3_High,
         Deh_c3_Low,
-        Deh_c3_Low_Dag,
-        Deh_c3_Low_L1,					//Education level lag(1) equals low
         Deh_c3_Medium,
-        Deh_c3_Medium_Dag,
-        Deh_c3_Medium_L1, 				//Education level lag(1) equals medium
         Deh_c4_Low,
-        Deh_c4_Low_Dag,
-        Deh_c4_Low_L1,
         Deh_c4_Medium,
-        Deh_c4_Medium_Dag,
-        Deh_c4_Medium_L1,
-        Deh_c4_High,
-        Deh_c4_High_L1,
         Deh_c4_Na,
-        Deh_c4_Na_L1,
-        Dehf_c3_High,					//Father's education == High indicator
-        Dehf_c3_Low,					//Father's education == Low indicator
-        Dehf_c3_Medium,					//Father's education == Medium indicator
-        Dehm_c3_High,					//Mother's education == High indicator
-        Dehm_c3_Low,					//Mother's education == Low indicator
-        Dehm_c3_Medium,					//Mother's education == Medium indicator
-        Dehmf_c3_High,
-        Dehmf_c3_Medium,
-        Dehmf_c3_Medium_L1,
-        Dehmf_c3_Low,
-        Dehmf_c3_Low_L1,
-        Dehsp_c3_Low_L1,				//Partner's education == Low at lag(1)
-        Dehsp_c3_Medium_L1,				//Partner's education == Medium at lag(1)
-        He_eq5d,                          //EQ5D quality of life score
         Dgn,							//Gender: returns 1 if male
-        Dgn_baseline,
         Dgn_Dag,
         Dgn_Lhw_L1,
         Dhe,							//Health status
-        Dhe_2,
-        Dhe_3,
-        Dhe_4,
-        Dhe_5,
-        Dhe_c5_1_L1,
-        Dhe_c5_2_L1,
-        Dhe_c5_3_L1,
-        Dhe_c5_4_L1,
-        Dhe_c5_5_L1,
-        Dhe_L1, 						//Health status lag(1)
-        Dhe_Poor,
         Dhe_Fair,
         Dhe_Good,
         Dhe_VeryGood,
         Dhe_Excellent,
-        Dhe_Poor_L1,
-        Dhe_Fair_L1,
-        Dhe_Good_L1,
-        Dhe_VeryGood_L1,
-        Dhe_Excellent_L1,
-        Dhesp_L1, 						//Lag(1) of partner's health status
         Dhesp_Fair,
         Dhesp_Good,
         Dhesp_VeryGood,
-        Dhesp_Excellent,
-        Dhesp_Poor_L1,
-        Dhesp_Fair_L1,
-        Dhesp_Good_L1,
-        Dhesp_VeryGood_L1,
-        Dhesp_Excellent_L1,
         Dhh_owned_L1,
         Dhhtp_c4_CoupleChildren_L1,
         Dhhtp_c4_CoupleNoChildren_L1,
         Dhhtp_c4_SingleChildren_L1,
-        Dhhtp_c4_SingleChildren_L1_,
-        Dhhtp_c4_SingleNoChildren_L1,
-        L_Dhhtp_c4_CoupleChildren,
-        L_Dhhtp_c4_SingleChildren,
-        L_Dhhtp_c4_SingleNoChildren,
-        L_Dehmf_c3_Low_,
-        L_Dehmf_c3_Low,
-        L_Dehmf_c3_Medium_,
-        L_Dehmf_c3_Medium,
         Dhhtp_c8_2_L1,
         Dhhtp_c8_3_L1,
         Dhhtp_c8_4_L1,
@@ -2873,45 +2705,27 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Dhhtp_c8_6_L1,
         Dhhtp_c8_7_L1,
         Dhhtp_c8_8_L1,
-        Dhm,							//Mental health status
         Dhm_L1,							//Mental health status lag(1)
-        Dls,                            //Life satisfaction status
         Dls_L1,                         //Life satisfaction status lag(1)
         Dhe_mcs,                        //Mental well-being status
-        dhe_mcs,                        //Mental well-being status (lowercase)
-        Dhe_Mcs,
         Dhe_mcs_L1,                     //Mental well-being status lag(1)
-        Dhe_Mcs_L1,
         L_Dhe_mcs,
-        dhe_mcs_L1,                     //Mental well-being status lag(1) (lowercase)
         Dhe_mcs_sq,                     //MCS score squared
         Dhe_mcs_times_pcs,              //MCS times PCS
         Dhe_mcs_c_times_pcs_c,          //Centralised MCS times PCS
         Dhe_mcs_c,                      //MCS centralised by subtracting population mean
         Dhe_mcs_c_sq,                   //Square of centralised MCS
-        Dhe_mcssp_L1,                      //Mental well-being status of the partner
         Dhe_pcs,                        //Physical well-being status
-        dhe_pcs,                        //Physical well-being status (lowercase)
-        Dhe_Pcs,
         Dhe_pcs_L1,                     //Physical well-being status lag(1)
-        Dhe_Pcs_L1,
         L_Dhe_pcs,
-        dhe_pcs_L1,                     //Physical well-being status lag(1) (lowercase)
         Dhe_pcs_sq,                     //PCS score squared
         Dhe_pcs_cb,                     //PCS score cubed
         Dhe_pcs_c,                      //MCS centralised by subtracting population mean
         Dhe_pcs_c_sq,                   //Square of centralised MCS
-        Dhe_pcssp_L1,                      //Physical well-being status of the partner
         Dhmghq_L1,
-        Dlltsd,							//Long-term sick or disabled
-        Dlltsd01,
-        Dlltsd_L1,						//Long-term sick or disabled lag(1)
-        Dlltsd01_L1,
         L_Dlltsd01,
-        Dlltsd01_sp_L1,
         Dnc_L1, 						//Lag(1) of number of children of all ages in the benefitUnit
         Dnc02_L1, 						//Lag(1) of number of children aged 0-2 in the benefitUnit
-        Dnc017, 						//Number of children aged 0-17 in the benefitUnit
         Earnings_Q2,
         demYearTransformed,
         Earnings_Q3,
@@ -2923,116 +2737,36 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         EmployedToUnemployed,
         Employmentsonflexiblefurlough,
         Employmentsonfullfurlough,
-        EquivalisedConsumptionYearly,
-        EquivalisedIncomeYearly, 							//Equivalised income for use with the security index
-        Ethn_White,
         // Ethn_Mixed,
-        Ethn_Asian,
-        EthnicityAsian,
-        Ethn_Black,
-        Ethn_Black_,
-        EthnicityBlack,
-        Ethn_Other,
-        Ethn_Other_,
-        EthnicityOther,
-        EthnicityMixed,
         // Ethn_Missing,
         Female,
         FertilityRate,
         FinancialDistress,
         L_FinancialDistress,
-        GrossEarningsYearly,
-        GrossLabourIncomeMonthly,
-        InverseMillsRatio,
         InvMillsRatio,
-        L1_hourly_wage,
-        L1_log_hourly_wage,
-        Hourly_wage_L1,
-        L1_log_hourly_wage_sq,
-        Ld_children_2under,
-        Ld_children_3under,
-        Ld_children_4_12,
-        Lemployed,
         Lhw_L1,
         Lhw_10,                         // Used by financial distress process
         Lhw_20,                         // Used by financial distress process
         Lhw_30,                         // Used by financial distress process
         Lhw_40,                         // Used by financial distress process
-        Les_c3_Employed_L1,
-        Les_c3_NotEmployed_L1,
-        L_Les_c3_NotEmployed,
-        Les_c3_Sick_L1,					//This is based on dlltsd
-        Les_c3_Student_L1,
-        L_Les_c3_Student,
-        Les_c4_Student_L1,
-        Les_c4_NotEmployed_L1,
-        Les_c4_Retired_L1,
-        Les_c4_Student_Dgn_L1,
-        Les_c4_NotEmployed_Dgn_L1,
-        Les_c4_Retired_Dgn_L1,
         Les_c7_Covid_Furlough_L1,
-        Lesdf_c4_BothNotEmployed_L1,
-        Lesdf_c4_EmployedSpouseNotEmployed_L1, 					//Own and partner's activity status lag(1)
-        Lesdf_c4_EmpSpouseNotEmp_L1,
-        Lesdf_c4_NotEmployedSpouseEmployed_L1,
-        Lesdf_c4_NotEmpSpouseEmp_L1,
-        Lessp_c3_NotEmployed_L1,
-        Lessp_c3_NotEmployed,
-        Lessp_c3_Sick_L1,
-        Lessp_c3_Student_L1,			//Partner variables
-        Lesnr_c2_NotEmployed_L1,
-        Reached_Retirement_Age_Lesnr_c2_NotEmployed_L1,
-        Liwwh,
-        LnAge,
-        Lnonwork,
         Lnop_all,//Work history in months
-        Lstudent,
-        Lunion,
-        HrsReceivedFormalIHS_L1,
-        HrsReceivedInformalIHS_L1,
-        HrsProvidedInformalIHS_L1,
         NeedCare,
-        NeedCare_L1,
-        NeedCarePartner,
         NonPovertyToPoverty,
         NotEmployed_L1,
-        NumberChildren,
-        NumberChildren_2under,
-        OnleaveBenefits,
-        OtherIncome,
-        Parents,
         Partnered,
-        PartTime_AND_Ld_children_3under,			//Interaction term conditional on if the person had a child under 3 at the previous time-step
-        PartTimeRate,
         PersistentPoverty,
         PersistentUnemployed,
         PovertyToNonPoverty,
-        Pt,
         Reached_Retirement_Age,						//Indicator whether individual is at or above retirement age
-        Reached_Retirement_Age_Les, //Interaction term for being at or above retirement age and not employed in the previous year
         Reached_Retirement_Age_Sp,					//Indicator whether spouse is at or above retirement age
-        RealGDPGrowth,
         RealIncomeChange, //Note: the above return a 0 or 1 value, but income variables will return the change in income or 0
         RealIncomeDecrease_D,
-        RealWageGrowth,
         ReceiveCare,
-        ReceiveCare_L1,
-        ReceiveCarePartner,
-        ResStanDev,
-        Retired,
-        Sfr, 										//Scenario : fertility rate This retrieves the fertility rate by region and year to use in fertility regression
-        Single,
-        Single_kids,
-        StatePensionAge,
-        ProvideCare_L1,
         UnemployedToEmployed,
         UnemploymentRate,
-        Union,
-        Union_kids,
         UKC,				//UK
-        UKC_,
         UKD,
-        UKD_,
         UKE,
         UKF,
         UKG,
@@ -3041,94 +2775,26 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         UKJ,
         UKK,
         UKL,
-        UKL_,
         UKM,
-        UKM_,
-        UKmissing,
         UKN,
         Year,										//Year as in the simulation, e.g. 2009
         Year2010,
         Year2011,
         Year2012,
-        Y2012,
         Year2013,
-        Y2013,
-        Y2013_,
         Year2014,
-        Y2014,
-        Y2014_,
         Year2015,
-        Y2015,
         Year2016,
-        Y2016,
         Year2017,
-        Y2017,
         Year2018,
-        Y2018,
         Year2019,
-        Y2019,
         Year2020,
         Y2020,
         Year2021,
         Y2021,
         Year2022,
-        Y2022,
         Year2023,
-        Y2023,
         Year2024,
-        Y2024,
-        Y2012_Poor,
-        Y2012_Fair,
-        Y2012_Good,
-        Y2012_VeryGood,
-        Y2013_Poor,
-        Y2013_Fair,
-        Y2013_Good,
-        Y2013_VeryGood,
-        Y2014_Poor,
-        Y2014_Fair,
-        Y2014_Good,
-        Y2014_VeryGood,
-        Y2015_Poor,
-        Y2015_Fair,
-        Y2015_Good,
-        Y2015_VeryGood,
-        Y2016_Poor,
-        Y2016_Fair,
-        Y2016_Good,
-        Y2016_VeryGood,
-        Y2017_Poor,
-        Y2017_Fair,
-        Y2017_Good,
-        Y2017_VeryGood,
-        Y2018_Poor,
-        Y2018_Fair,
-        Y2018_Good,
-        Y2018_VeryGood,
-        Y2019_Poor,
-        Y2019_Fair,
-        Y2019_Good,
-        Y2019_VeryGood,
-        Y2020_Poor,
-        Y2020_Fair,
-        Y2020_Good,
-        Y2020_VeryGood,
-        Y2021_Poor,
-        Y2021_Fair,
-        Y2021_Good,
-        Y2021_VeryGood,
-        Y2022_Poor,
-        Y2022_Fair,
-        Y2022_Good,
-        Y2022_VeryGood,
-        Y2023_Poor,
-        Y2023_Fair,
-        Y2023_Good,
-        Y2023_VeryGood,
-        Y2024_Poor,
-        Y2024_Fair,
-        Y2024_Good,
-        Y2024_VeryGood,
         Year2025,
         Year2026,
         Year2027,
@@ -3145,45 +2811,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         Year2038,
         Year2039,
         Year2040,
-        Year2041,
-        Year2042,
-        Year2043,
-        Year2044,
-        Year2045,
-        Year2046,
-        Year2047,
-        Year2048,
-        Year2049,
-        Year2050,
-        Year2051,
-        Year2052,
-        Year2053,
-        Year2054,
-        Year2055,
-        Year2056,
-        Year2057,
-        Year2058,
-        Year2059,
-        Year2060,
-        Year2061,
-        Year2062,
-        Year2063,
-        Year2064,
-        Year2065,
-        Year2066,
-        Year2067,
-        Year2068,
-        Year2069,
-        Year2070,
-        Year2071,
-        Year2072,
-        Year2073,
-        Year2074,
-        Year2075,
-        Year2076,
-        Year2077,
-        Year2078,
-        Year2079,
         Ydses_c5_Q2_L1, 							//HH Income Lag(1) 2nd Quantile
         L_Ydses_c5_Q2,
         Ydses_c5_Q3_L1,								//HH Income Lag(1) 3rd Quantile
@@ -3192,302 +2819,31 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         L_Ydses_c5_Q4,
         Ydses_c5_Q5_L1,								//HH Income Lag(1) 5th Quantile
         L_Ydses_c5_Q5,
-        Ydses_c5_L1,
-        HHincomeQ2,
-        HHincomeQ3,
-        HHincomeQ4,
-        HHincomeQ5,
         Year_transformed,							//Year - 2000
-        Year_transformed_monetary,					//Year-2000 that stops in 2017, for use with monetary processes
-        Ynbcpdf_dv_L1, 								//Lag(1) of difference between own and partner's gross personal non-benefit income
         Yplgrs_dv_L1,								//Lag(1) of gross personal employment income
         Yplgrs_dv_L2,								//Lag(2) of gross personal employment income
-        Yplgrs_dv_L3,								//Lag(3) of gross personal employment income
-        Ypnbihs_dv_L1,								//Gross personal non-benefit income lag(1)
-        Ypnbihs_dv_L1_sq,							//Square of gross personal non-benefit income lag(1)
         Ypncp_L1,									//Lag(1) of capital income
 	    L_Ypncp,
         Ypncp_L2,									//Lag(2) of capital income
-        Ypnoab_L1,									//Lag(1) of pension income
 	    L_Ypnoab,
-        Ypnoab_L2,									//Lag(2) of pension income
-        Yptciihs_dv_L1,								//Lag(1) of gross personal non-employment non-benefit income
-        Yptciihs_dv_L2,								//Lag(2) of gross personal non-employment non-benefit income
-        Yptciihs_dv_L3,								//Lag(3) of gross personal non-employment non-benefit income
         // S2c multinomial labels with alternative suffixes
-        CareMarketFormal_L1_Mixed,
-        CareMarketFormal_L1_Formal,
-        CareMarketInformal_L1_Mixed,
-        CareMarketInformal_L1_Formal,
-        CareMarketMixed_L1_Mixed,
-        CareMarketMixed_L1_Formal,
-        Dgn_Mixed,
-        Dgn_Formal,
-        Age67to68_Mixed,
-        Age67to68_Formal,
-        Age69to70_Mixed,
-        Age69to70_Formal,
-        Age71to72_Mixed,
-        Age71to72_Formal,
-        Age73to74_Mixed,
-        Age73to74_Formal,
-        Age75to76_Mixed,
-        Age75to76_Formal,
-        Age77to78_Mixed,
-        Age77to78_Formal,
-        Age79to80_Mixed,
-        Age79to80_Formal,
-        Age81to82_Mixed,
-        Age81to82_Formal,
-        Age83to84_Mixed,
-        Age83to84_Formal,
-        Age85plus_Mixed,
-        Age85plus_Formal,
-        Dhe_Fair_Mixed,
-        Dhe_Fair_Formal,
-        Dhe_Good_Mixed,
-        Dhe_Good_Formal,
-        Dhe_VeryGood_Mixed,
-        Dhe_VeryGood_Formal,
-        Dhe_Excellent_Mixed,
-        Dhe_Excellent_Formal,
-        Partnered_Mixed,
-        Partnered_Formal,
-        Deh_c3_Medium_Mixed,
-        Deh_c3_Medium_Formal,
-        Deh_c3_Low_Mixed,
-        Deh_c3_Low_Formal,
-        HHincomeQ2_Mixed,
-        HHincomeQ2_Formal,
-        HHincomeQ3_Mixed,
-        HHincomeQ3_Formal,
-        HHincomeQ4_Mixed,
-        HHincomeQ4_Formal,
-        HHincomeQ5_Mixed,
-        HHincomeQ5_Formal,
-        UKC_Mixed,
-        UKC_Formal,
-        UKD_Mixed,
-        UKD_Formal,
-        UKE_Mixed,
-        UKE_Formal,
-        UKF_Mixed,
-        UKF_Formal,
-        UKG_Mixed,
-        UKG_Formal,
-        UKH_Mixed,
-        UKH_Formal,
-        UKJ_Mixed,
-        UKJ_Formal,
-        UKK_Mixed,
-        UKK_Formal,
-        UKL_Mixed,
-        UKL_Formal,
-        UKM_Mixed,
-        UKM_Formal,
-        UKN_Mixed,
-        UKN_Formal,
-        Y2020_Mixed,
-        Y2020_Formal,
-        Y2021_Mixed,
-        Y2021_Formal,
         Constant_Mixed,
         Constant_Formal,
-        Age65to66,
-        Age_10,
-        Age_11,
-        Age_12,
-        Age_13,
-        Age_14,
-        Age_15,
-        Age_16,
-        Age_2,
-        Age_3,
-        Age_4,
-        Age_5,
-        Age_6,
-        Age_7,
-        Age_8,
-        Age_9,
-        CareMarket,
-        CareMarketFormal,
-        CareMarketInformal,
-        CareMarketMixedPartner,
-        Dag_c,
-        Dag_c_sq,
-        Dag_post18_sq,
-        Dag_post21,
-        Dag_post21_sq,
-        Dag_post25,
-        Dag_post25_sq,
-        Dag_post26_sq,
-        Dcpagdf,
-        Dcpst_1,
-        Dcpst_2,
-        Dcpyy,
-        Ded_Dcpst_Single_L1,
-        Ded_Dehsp_c3_Low_L1,
-        Ded_Dehsp_c3_Medium_L1,
-        Ded_Dhe,
-        Ded_Dhe_Excellent_L1,
-        Ded_Dhe_Fair_L1,
-        Ded_Dhe_Good_L1,
-        Ded_Dhe_VeryGood_L1,
-        Ded_Dhe_mcs,
-        Ded_Dhe_pcs,
-        Ded_Dhesp_Fair_L1,
-        Ded_Dhesp_Good_L1,
-        Ded_Ydses_c5_Q,
-        Ded_Yplgrs_dv,
-        Ded_Ypncp,
-        Deh_c3_1,
-        Deh_c3_2,
-        Deh_c3_3,
-        Deh_c4_1,
-        Deh_c4_2,
-        Deh_c4_3,
-        Deh_c4_4,
-        Dehmf_c3_1,
-        Dehmf_c3_2,
-        Dehmf_c3_3,
-        Dehsp_c3_1,
-        Dehsp_c3_2,
-        Dehsp_c3_3,
-        Dehsp_c3_High,
-        Dehsp_c3_Low,
-        Dehsp_c3_Medium,
-        Dhe_1,
-        Dhe_mcssp,
-        Dhe_pcssp,
-        Dhesp_1,
-        Dhesp_2,
-        Dhesp_3,
-        Dhesp_4,
-        Dhesp_5,
-        Dhesp_Poor,
-        Dhh_owned,
-        Dhhtp_c4_1,
-        Dhhtp_c4_2,
-        Dhhtp_c4_3,
-        Dhhtp_c4_4,
-        Dhhtp_c4_CoupleChildren,
-        Dhhtp_c4_CoupleNoChildren,
-        Dhhtp_c4_SingleChildren,
-        Dhhtp_c4_SingleNoChildren,
-        Dlltsd01sp,
-        Dlltsdsp,
-        Dnc,
-        Dnc02,
-        Dst,
-        Elig_pen,
-        Elig_pen_L1,
-        HrsProvidedInformalIHS,
-        HrsReceivedFormalIHS,
-        HrsReceivedInformalIHS,
-        L_Dehmf_c3,
-        L_Dehmf_c3_1,
-        L_Dehmf_c3_2,
-        L_Dehmf_c3_3,
-        L_Dehmf_c3_High,
-        L_Dhe,
-        L_Dhhtp_c4_1,
-        L_Dhhtp_c4_2,
-        L_Dhhtp_c4_3,
-        L_Dhhtp_c4_4,
-        L_Dhhtp_c4_CoupleNoChildren,
-        L_Les_c4_1,
-        L_Les_c4_2,
-        L_Les_c4_3,
-        L_Les_c4_4,
-        L_Les_c4_Employed,
-        L_Les_c4_NotEmployed,
-        L_Les_c4_Retired,
-        L_Les_c4_Student,
-        L_Need_socare,
-        L_Ydses_c5,
-        Les_c3_1,
-        Les_c3_2,
-        Les_c3_3,
-        Les_c3_Employed,
-        Les_c3_NotEmployed,
-        Les_c3_Student,
-        Les_c4_1,
-        Les_c4_2,
-        Les_c4_3,
-        Les_c4_4,
-        Les_c4_Employed,
-        Les_c4_NotEmployed,
-        Les_c4_NotEmployed_Dgn,
-        Les_c4_Retired,
-        Les_c4_Retired_Dgn,
-        Les_c4_Student,
-        Les_c4_Student_Dgn,
-        Lesdf_c4_1,
-        Lesdf_c4_2,
-        Lesdf_c4_3,
-        Lesdf_c4_4,
-        Lesdf_c4_BothEmployed,
-        Lesdf_c4_BothNotEmployed,
-        Lesdf_c4_EmpSpouseNotEmp,
-        Lesdf_c4_NotEmpSpouseEmp,
-        Lessp_c3_1,
-        Lessp_c3_2,
-        Lessp_c3_3,
-        Lessp_c3_Employed,
-        Lessp_c3_Student,
-        New_rel,
-        ProvideCare,
-        UK1,
-        UK10,
-        UK11,
-        UK12,
-        UK2,
-        UK3,
-        UK4,
-        UK5,
-        UK6,
-        UK7,
-        UK8,
-        UK9,
-        Y,
-        Y2223,
-        Ydses_c5,
-        YearSquared,
-        Ynbcpdf_dv,
-        Yplgrs_dv,
-        Ypnbihs_dv,
-        Ypnbihs_dv_sq,
-        Ypncp,
-        Ypnoab,
-        Yptciihs_dv,
-        careHrsFormalIhs,
         careHrsFormalIhsL1,
-        careHrsInformalIhs,
         careHrsInformalIhsL1,
-        careHrsProvidedWeekIhs,
         careHrsProvidedWeekIhsL1,
-        careMarket,
-        careMarketFormal,
         careMarketFormalL1,
         careMarketFormalPartner,
-        careMarketInformal,
         careMarketInformalL1,
         careMarketInformalPartner,
-        careMarketL1,
         careMarketMixed,
         careMarketMixedL1,
-        careMarketMixedPartner,
         careNeedFlag,
         careNeedFlagL1,
-        careNeedPartnerFlag,
-        careProvidedFlag,
         careProvidedFlagL1,
         careReceivedFlag,
         careReceivedFlagL1,
         careReceivedPartnerFlag,
-        dage10prime,
-        dage2old,
-        dage5,
         demAge,
         demAge20to24,
         demAge25to29,
@@ -3512,17 +2868,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demAge81to82,
         demAge83to84,
         demAge85plus,
-        demAgePartnerDiff,
         demAgePartnerDiffL1,
         demAgeSq,
-        demCompHhC4,
         demCompHhC4CoupleChL1,
-        demCompHhC4CoupleNoChL1,
-        demCompHhC4L1,
-        demCompHhC4L1SingleChL1,
         demCompHhC4SingleNoChL1,
-        demCompHhC8,
-        demCompHhC81L1,
         demCompHhC82L1,
         demCompHhC83L1,
         demCompHhC84L1,
@@ -3530,27 +2879,14 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demCompHhC86L1,
         demCompHhC87L1,
         demCompHhC88L1,
-        demCompHhC8L1,
-        demEnterPartnerFlag,
         demEnterPartnerFlagL1,
-        demEthnC4,
         demEthnC4Asian,
         demEthnC4Black,
         demEthnC4Other,
-        demEthnC4White,
-        demEthnC4_1,
-        demEthnC4_2,
-        demEthnC4_3,
-        demEthnC4_4,
         demMaleFlag,
-        demNChild,
-        demNChild0to2,
         demNChild0to2L1,
         demNChildL1,
-        demPartnerNYear,
         demPartnerNYearL1,
-        demPartnerStatus,
-        demPartnerStatusL1,
         demPartnerStatusPartnered,
         demPartnerStatusPartneredL1,
         demPartnerStatusSingle,
@@ -3558,79 +2894,37 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demPensAgeFlag,
         demPensAgeFlag_NotEmployedL1,
         demPensPartnerAgeFlag,
-        demRgn,
         demRgnUKC,
         demRgnUKD,
         demRgnUKE,
         demRgnUKF,
         demRgnUKG,
         demRgnUKH,
-        demRgnUKI,
         demRgnUKJ,
         demRgnUKK,
         demRgnUKL,
         demRgnUKM,
         demRgnUKN,
-        demRgn_1,
-        demRgn_10,
-        demRgn_11,
-        demRgn_12,
-        demRgn_2,
-        demRgn_3,
-        demRgn_4,
-        demRgn_5,
-        demRgn_6,
-        demRgn_7,
-        demRgn_8,
-        demRgn_9,
-        demYear,
-        demYear20,
-        dot_1,
-        dot_2,
-        dot_3,
-        dot_4,
-        econ_realequivinc,
-        eduHighestC4,
         eduHighestC4High,
         eduHighestC4HighL1,
-        eduHighestC4HighL1_demAge,
-        eduHighestC4High_demAge,
-        eduHighestC4L1,
         eduHighestC4Low,
         eduHighestC4LowL1,
-        eduHighestC4LowL1_demAge,
         eduHighestC4Low_demAge,
         eduHighestC4Medium,
         eduHighestC4MediumL1,
-        eduHighestC4MediumL1_demAge,
         eduHighestC4Medium_demAge,
         eduHighestC4Na,
         eduHighestC4NaL1,
-        eduHighestC4NaL1_demAge,
-        eduHighestC4Na_demAge,
-        eduHighestParentC3,
-        eduHighestParentC3High,
-        eduHighestParentC3HighL1,
-        eduHighestParentC3L1,
-        eduHighestParentC3L1_1,
-        eduHighestParentC3L1_2,
-        eduHighestParentC3L1_3,
         eduHighestParentC3Low,
         eduHighestParentC3LowL1,
         eduHighestParentC3Medium,
         eduHighestParentC3MediumL1,
-        eduHighestParentC3_1,
-        eduHighestParentC3_2,
-        eduHighestParentC3_3,
-        eduHighestPartnerC3HighL1,
         eduHighestPartnerC3LowL1,
         eduHighestPartnerC3MediumL1,
         eduSampleFlag,
         eduSampleFlagL1,
         eduSampleFlag_Male,
-        eduSampleFlag_Mcs,
         eduSampleFlag_McsL1,
-        eduSampleFlag_Pcs,
         eduSampleFlag_PcsL1,
         eduSampleFlag_Q2L1,
         eduSampleFlag_Q3L1,
@@ -3640,82 +2934,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         eduSampleFlag_demMaleFlag,
         eduSampleFlag_demNChild0to2L1,
         eduSampleFlag_demNChildL1,
-        eduSampleFlag_yCapitalPers,
         eduSampleFlag_yCapitalPersL1,
         eduSampleFlag_yCapitalPersL2,
-        eduSampleFlag_yEmpPersGross,
-        eduSampleFlag_yEmpPersGrossL1,
-        eduSampleFlag_yEmpPersGrossL2,
-        exp_emp,
-        exp_incchange,
-        exp_poverty,
         fertilityRate,
         healthDsblLongtermFlag,
         healthDsblLongtermFlagL1,
-        healthMentalMcs,
         healthMentalMcsL1,
-        healthMentalPartnerMcs,
         healthMentalPartnerMcsL1,
-        healthPartnerSelfRated,
-        healthPartnerSelfRatedExcellent,
-        healthPartnerSelfRatedFair,
-        healthPartnerSelfRatedGood,
-        healthPartnerSelfRatedPoor,
-        healthPartnerSelfRatedVeryGood,
-        healthPartnerSelfRated_1,
-        healthPartnerSelfRated_2,
-        healthPartnerSelfRated_3,
-        healthPartnerSelfRated_4,
-        healthPartnerSelfRated_5,
-        healthPartnerSelfRatedExcel,
-        healthSelfRatedExcellentL1,
-        healthSelfRatedFairL1,
-        healthSelfRatedGoodL1,
-        healthSelfRatedVeryGoodL1,
-        healthPhysicalPartnerPcs,
         healthPhysicalPartnerPcsL1,
-        healthPhysicalPcs,
         healthPhysicalPcsL1,
-        healthSelfRated,
-        healthSelfRatedExcellent,
-        healthSelfRatedFair,
-        healthSelfRatedGood,
-        healthSelfRatedPoor,
-        healthSelfRatedVeryGood,
-        healthSelfRated_1,
-        healthSelfRated_2,
-        healthSelfRated_3,
-        healthSelfRated_4,
-        healthSelfRated_5,
-        idpartner,
-        idperson,
-        informal_socare_hrs,
-        l_,
         labPt,
-        labStatusC3,
-        labStatusC3EmployedL1,
-        labStatusC3L1,
         labStatusC3NotEmployedL1,
         labStatusC3StudentL1,
-        labStatusC4,
-        labStatusC4EmployedL1,
-        labStatusC4EmployedL1_Male,
-        labStatusC4L1,
         labStatusC4NotEmployedL1,
-        labStatusC4NotEmployedL1_Male,
         labStatusC4RetiredL1,
-        labStatusC4RetiredL1_Male,
         labStatusC4StudentL1,
-        labStatusC4StudentL1_Male,
-        labStatusPartnerAndOwnC4,
-        labStatusPartnerAndOwnC41L1,
         labStatusPartnerAndOwnC42L1,
         labStatusPartnerAndOwnC43L1,
         labStatusPartnerAndOwnC44L1,
-        labStatusPartnerAndOwnC4L1,
-        labStatusPartnerC3,
-        need_care,
-        receive_care,
         // New-naming variables and interaction terms from refactored estimation files (PR #465)
         // Social care multinomial - new demAge prefix for age-group dummies
         demAge67to68_Formal,
@@ -3842,12 +3078,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         demRgnUKN_Mixed,
         demRgnUKN_Poor,
         demRgnUKN_VeryGood,
-        demYear_Fair,
-        demYear_Good,
-        demYear_Low,
-        demYear_Medium,
-        demYear_Poor,
-        demYear_VeryGood,
         demYear2020,
         demYear2020_Formal,
         demYear2020_Mixed,
@@ -3863,18 +3093,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         eduHighestC4Low_Mixed,
         eduHighestC4Medium_Formal,
         eduHighestC4Medium_Mixed,
-        eduHighestC4LowL1_Fair,
-        eduHighestC4LowL1_Good,
-        eduHighestC4LowL1_Poor,
-        eduHighestC4LowL1_VeryGood,
-        eduHighestC4MediumL1_Fair,
-        eduHighestC4MediumL1_Good,
-        eduHighestC4MediumL1_Poor,
-        eduHighestC4MediumL1_VeryGood,
-        eduHighestC4NaL1_Fair,
-        eduHighestC4NaL1_Good,
-        eduHighestC4NaL1_Poor,
-        eduHighestC4NaL1_VeryGood,
         // Health interaction terms
         healthDsblLongtermFlagL1_Fair,
         healthDsblLongtermFlagL1_Good,
@@ -3888,19 +3106,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         healthPhysicalPcsL1_Good,
         healthPhysicalPcsL1_Poor,
         healthPhysicalPcsL1_VeryGood,
-        healthSelfRatedExcellent_Formal,
-        healthSelfRatedExcellent_Mixed,
-        healthSelfRatedFair_Formal,
-        healthSelfRatedFair_Mixed,
-        healthSelfRatedGood_Formal,
-        healthSelfRatedGood_Mixed,
-        healthSelfRatedVeryGood_Formal,
-        healthSelfRatedVeryGood_Mixed,
         // Labour status interaction terms
-        labStatusC4EmployedL1_Fair,
-        labStatusC4EmployedL1_Good,
-        labStatusC4EmployedL1_Poor,
-        labStatusC4EmployedL1_VeryGood,
         labStatusC4RetiredL1_Fair,
         labStatusC4RetiredL1_Good,
         labStatusC4RetiredL1_Poor,
@@ -3939,19 +3145,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yHhQuintilesMonthC5Q5_Formal,
         yHhQuintilesMonthC5Q5_Mixed,
         // Lowercase / legacy-naming aliases
-        dag_L1,
-        dagsq_L1,
-        dgn,
-        dhh_owned_L1,
-        dlltsd01_L1,
-        dnc_L1,
-        drgn1_L1,
-        econ_benefits_L1,
-        financial_distress_L1,
         labWageHrlyL1,
         labWageHrlyLogL1,
         realWageGrowth,
-        stm,
         wealthPrptyFlagL1,
         yCapitalPersMonthL1,
         yCapitalPersMonthL2,
@@ -3961,8 +3157,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         yNonBenPersGrossMonthL1,
         yPensPersGrossMonthL1,
         yPensPersGrossMonthL2,
-        ypncp_L1,
-        ypnoab_L1,
         yPersAndPartnerGrossDiffMonthL1,
     }
 
@@ -3973,51 +3167,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Age80plus -> {
                 return (demAge >= 80) ? 1. : 0.;
             }
-            case Age70plus -> {
-                return (demAge >= 70) ? 1. : 0.;
-            }
-            case Age, Dag, demAge -> {
+            case Dag, demAge -> {
                 return (double) demAge;
             }
             case Dag_L1 -> {
                 return (double) demAge - 1;
             }
-            case demAgeSq, demAge_Sq, Dag_sq, AgeSquared -> {
+            case demAgeSq, Dag_sq -> {
                 return (double) demAge * demAge;
             }
             case Dag_sq_L1 -> {
                 return (double) (demAge - 1) * (demAge - 1);
-            }
-            case Dag_u22 -> {
-                return (double) demAge < 22 ? demAge : 0;
-            }
-            case Dag_sq_u22 -> {
-                return (double) demAge < 22 ? demAge * demAge : 0;
-            }
-            case Dag_cb_u22 -> {
-                return (double) demAge < 22 ? demAge * demAge * demAge : 0;
-            }
-            case Dag_22o -> {
-                return (double) demAge >= 22 ? demAge : 0;
-            }
-            case Dag_sq_22o -> {
-                return (double) demAge >= 22 ? demAge * demAge : 0;
-            }
-            case Dag_cb_22o -> {
-                return (double) demAge >= 22 ? demAge * demAge * demAge : 0;
-            }
-            case DagCeiling54 -> {
-                return (double) Math.min(demAge, 54);
-            }
-            case Dag_sqCeiling54 -> {
-                return (double) Math.min(demAge, 54) * Math.min(demAge, 54);
-            }
-            case AgeCubed -> {
-                //			log.debug("age cub");
-                return (double) demAge * demAge * demAge;
-            }
-            case LnAge -> {
-                return Math.log(demAge);
             }
             case Age20to24 -> {
                 return (demAge >= 20 && demAge <= 24) ? 1. : 0.;
@@ -4049,6 +3209,9 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Age65to69 -> {
                 return (demAge >= 65 && demAge <= 69) ? 1. : 0.;
             }
+            case Age70plus -> {
+                return (demAge >= 70) ? 1. : 0.;
+            }
             case Age70to74 -> {
                 return (demAge >= 70 && demAge <= 74) ? 1. : 0.;
             }
@@ -4058,115 +3221,52 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Age80to84 -> {
                 return (demAge >= 80 && demAge <= 84) ? 1. : 0.;
             }
-            case Age35to44 -> {
-                return (demAge >= 35 && demAge <= 44) ? 1. : 0.;
-            }
-            case Age45to54 -> {
-                return (demAge >= 45 && demAge <= 54) ? 1. : 0.;
-            }
-            case Age55to64 -> {
-                return (demAge >= 55 && demAge <= 64) ? 1. : 0.;
-            }
             case Age65plus -> {
                 return (demAge >= 65) ? 1. : 0.;
             }
-            case Age23to25 -> {
-                return (demAge >= 23 && demAge <= 25) ? 1. : 0.;
-            }
-            case Age26to30 -> {
-                return (demAge >= 26 && demAge <= 30) ? 1. : 0.;
-            }
-            case Age21to27 -> {
-                return (demAge >= 21 && demAge <= 27) ? 1. : 0.;
-            }
-            case Age28to30 -> {
-                return (demAge >= 28 && demAge <= 30) ? 1. : 0.;
-            }
-            case AgeUnder25 -> {
-                return (demAge < 25) ? 1. : 0.;
-            }
-            case Age25to39 -> {
-                return (demAge >= 25 && demAge <= 39) ? 1. : 0.;
-            }
-            case AgeOver39 -> {
-                return (demAge > 39) ? 1. : 0.;
-            }
-            case Age67to68, Age67to68_Mixed, Age67to68_Formal -> {
+            case Age67to68 -> {
                 return (demAge >= 67 && demAge <= 68) ? 1. : 0.;
             }
-            case Age69to70, Age69to70_Mixed, Age69to70_Formal -> {
+            case Age69to70 -> {
                 return (demAge >= 69 && demAge <= 70) ? 1. : 0.;
             }
-            case Age71to72, Age71to72_Mixed, Age71to72_Formal -> {
+            case Age71to72 -> {
                 return (demAge >= 71 && demAge <= 72) ? 1. : 0.;
             }
-            case Age73to74, Age73to74_Mixed, Age73to74_Formal -> {
+            case Age73to74 -> {
                 return (demAge >= 73 && demAge <= 74) ? 1. : 0.;
             }
-            case Age75to76, Age75to76_Mixed, Age75to76_Formal -> {
+            case Age75to76 -> {
                 return (demAge >= 75 && demAge <= 76) ? 1. : 0.;
             }
-            case Age77to78, Age77to78_Mixed, Age77to78_Formal -> {
+            case Age77to78 -> {
                 return (demAge >= 77 && demAge <= 78) ? 1. : 0.;
             }
-            case Age79to80, Age79to80_Mixed, Age79to80_Formal -> {
+            case Age79to80 -> {
                 return (demAge >= 79 && demAge <= 80) ? 1. : 0.;
             }
-            case Age81to82, Age81to82_Mixed, Age81to82_Formal -> {
+            case Age81to82 -> {
                 return (demAge >= 81 && demAge <= 82) ? 1. : 0.;
             }
-            case Age83to84, Age83to84_Mixed, Age83to84_Formal -> {
+            case Age83to84 -> {
                 return (demAge >= 83 && demAge <= 84) ? 1. : 0.;
             }
-            case Age85plus, Age85plus_Mixed, Age85plus_Formal -> {
+            case Age85plus -> {
                 return (demAge >= 85) ? 1. : 0.;
-            }
-            case StatePensionAge -> {
-                return (demAge >= 68) ? 1. : 0.;
-            }
-            case NeedCare_L1 -> {
-                return (Indicator.True.equals(careNeedFlagL1)) ? 1. : 0.;
             }
             case NeedCare -> {
                 return (Indicator.True.equals(careNeedFlag)) ? 1. : 0.;
             }
-            case NeedCarePartner -> {
-                Person partner = getPartner();
-                return (partner != null && Indicator.True.equals(partner.getCareNeedFlag())) ? 1. : 0.;
-            }
-            case ProvideCare_L1 -> {
-                return (Indicator.True.equals(careProvidedFlagL1)) ? 1. : 0.;
-            }
-            case ReceiveCare_L1 -> {
-                return (getCareHrsTotalWeekL1() > 0.01) ? 1. : 0.;
-            }
             case ReceiveCare -> {
                 return (getHoursFormalSocialCare() + getCareHrsInformalWeek() > 0.01) ? 1. : 0.;
-            }
-            case ReceiveCarePartner -> {
-                Person partner = getPartner();
-                if (partner == null) {
-                    return 0.;
-                }
-                return (partner.getHoursFormalSocialCare() + partner.getCareHrsInformalWeek() > 0.01) ? 1. : 0.;
-            }
-            case HrsReceivedInformalIHS_L1 -> {
-                return FastMath.asinh(getCareHrsInformalWeekL1());
-            }
-            case HrsReceivedFormalIHS_L1 -> {
-                return FastMath.asinh(getCareHrsFormalWeekL1());
-            }
-            case HrsProvidedInformalIHS_L1 -> {
-                double hours = (careHrsProvidedWeekL1 != null && careHrsProvidedWeekL1 > 0.0) ? careHrsProvidedWeekL1 : 0.0;
-                return FastMath.asinh(hours);
             }
             case CareMarketMixed -> {
                 return (getHoursFormalSocialCare() > 0.01 && getCareHrsInformalWeek() > 0.01) ? 1. : 0.;
             }
-            case CareMarketMixed_L1, CareMarketMixed_L1_Mixed, CareMarketMixed_L1_Formal -> {
+            case CareMarketMixed_L1 -> {
                 return (getCareHrsFormalWeekL1() > 0.01 && getCareHrsInformalWeekL1() > 0.01) ? 1. : 0.;
             }
-            case CareMarketInformal_L1, CareMarketInformal_L1_Mixed, CareMarketInformal_L1_Formal -> {
+            case CareMarketInformal_L1 -> {
                 return (getCareHrsFormalWeekL1() < 0.01 && getCareHrsInformalWeekL1() > 0.01) ? 1. : 0.;
             }
             case CareMarketInformalPartner -> {
@@ -4176,7 +3276,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
                 return (partner.getHoursFormalSocialCare() < 0.01 && partner.getCareHrsInformalWeek() > 0.01) ? 1. : 0.;
             }
-            case CareMarketFormal_L1, CareMarketFormal_L1_Mixed, CareMarketFormal_L1_Formal -> {
+            case CareMarketFormal_L1 -> {
                 return (getCareHrsFormalWeekL1() > 0.01 && getCareHrsInformalWeekL1() < 0.01) ? 1. : 0.;
             }
             case CareMarketFormalPartner -> {
@@ -4186,106 +3286,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 }
                 return (partner.getHoursFormalSocialCare() > 0.01 && partner.getCareHrsInformalWeek() < 0.01) ? 1. : 0.;
             }
-            case CareFromPartner_L1 -> {
-                return (getCareHoursFromPartner_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromDaughter_L1 -> {
-                return (getCareHoursFromDaughter_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromSon_L1 -> {
-                return (getCareHoursFromSon_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromOther_L1 -> {
-                return (getCareHoursFromOther_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromDaughterOnly_L1 -> {
-                return (getCareHoursFromDaughter_L1() > 0.01 && Math.abs(getCareHrsInformalWeekL1() - getCareHoursFromDaughter_L1()) < 0.01) ? 1. : 0.;
-            }
-            case CareFromDaughterSon_L1 -> {
-                return (getCareHoursFromDaughter_L1() > 0.01 && getCareHoursFromSon_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromDaughterOther_L1 -> {
-                return (getCareHoursFromDaughter_L1() > 0.01 && getCareHoursFromOther_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromSonOnly_L1 -> {
-                return (getCareHoursFromSon_L1() > 0.01 && Math.abs(getCareHrsInformalWeekL1() - getCareHoursFromSon_L1()) < 0.01) ? 1. : 0.;
-            }
-            case CareFromSonOther_L1 -> {
-                return (getCareHoursFromSon_L1() > 0.01 && getCareHoursFromOther_L1() > 0.01) ? 1. : 0.;
-            }
-            case CareFromOtherOnly_L1 -> {
-                return (getCareHoursFromOther_L1() > 0.01 && Math.abs(getCareHrsInformalWeekL1() - getCareHoursFromOther_L1()) < 0.01) ? 1. : 0.;
-            }
-            case CareFromFormal -> {
-                return (careFormalFlag) ? 1. : 0.;
-            }
-            case CareFromInformal -> {
-                return (careFromInformalFlag) ? 1. : 0.;
-            }
-            case CareFromPartner -> {
-                return (careFromInformalFlag && getPartner() != null) ? 1. : 0.;
-            }
-            case CareFromDaughter -> {
-                return 0.;
-            }
-            case CareFromSon -> {
-                return 0.;
-            }
-            case CareFromOther -> {
-                return (careFromInformalFlag && getPartner() == null) ? 1. : 0.;
-            }
             case Constant, Constant_Mixed, Constant_Formal -> {
                 return 1.;
-            }
-            case Dcpyy_L1 -> {
-                return (demPartnerNYearL1 != null) ? (double) demPartnerNYearL1 : 0.0;
-            }
-            case Dcpagdf_L1 -> {
-                return (demAgePartnerDiffL1 != null) ? (double) demAgePartnerDiffL1 : 0.0;
             }
             case Dcpst_Single -> {
                 return (Dcpst.Single.equals(getDemPartnerStatus())) ? 1.0 : 0.0;
             }
-            case Dcpst_Partnered, Partnered, Partnered_Mixed, Partnered_Formal -> {
+            case Partnered -> {
                 return (Dcpst.Partnered.equals(getDemPartnerStatus())) ? 1.0 : 0.0;
-            }
-            case Dcpst_PreviouslyPartnered -> {
-                return (Dcpst.Single.equals(getDemPartnerStatus())) ? 1.0 : 0.0;
-            }
-            case Dcpst_Partnered_L1 -> {
-                if (demPartnerStatusL1 != null) {
-                    return demPartnerStatusL1.equals(Dcpst.Partnered) ? 1. : 0.;
-                } else return 0.;
             }
             case Dcpst_Single_L1 -> {
                 if (demPartnerStatusL1 != null) {
                     return demPartnerStatusL1.equals(Dcpst.Single) ? 1. : 0.;
                 } else return 0.;
             }
-            case Dcpst_PreviouslyPartnered_L1 -> {
-                if (demPartnerStatusL1 != null) {
-                    return demPartnerStatusL1.equals(Dcpst.Single) ? 1. : 0.;
-                } else return 0.;
-            }
-            case New_rel_L1 -> {
-                return (demPartnerStatusL1.equals(Dcpst.Partnered) && !demPartnerStatusL2.equals(Dcpst.Partnered))? 1. : 0.;
-            }
-            case D_children_2under -> {
-                return (double) benefitUnit.getIndicatorChildren(0, 2).ordinal();
-            }
-            case D_children_3_6 -> {
-                return (double) benefitUnit.getIndicatorChildren(3, 6).ordinal();
-            }
-            case D_children_7_12 -> {
-                return (double) benefitUnit.getIndicatorChildren(7, 12).ordinal();
-            }
-            case D_children_13_17 -> {
-                return (double) benefitUnit.getIndicatorChildren(13, 17).ordinal();
-            }
-            case D_children_18over -> {
-                return (double) benefitUnit.getIndicatorChildren(18, 99).ordinal();
-            }
-            case D_children, D_Children, demDChild, demDChildL1 -> {
+            case demDChild -> {
                 return (getNumberChildrenAll() > 0) ? 1. : 0.;
             }
             case Dnc_L1 -> {
@@ -4294,118 +3309,45 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dnc02_L1 -> {
                 return (double) getNumberChildren02L1();
             }
-            case Dnc017 -> {
-                return (double) getNumberChildren017();
-            }
-            case Dgn, Dgn_Mixed, Dgn_Formal -> {
+            case Dgn -> {
                 return (Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
             }
             case Dhe -> {
                 return (double) healthSelfRated.getValue();
             }
-            case Dhe_L1 -> {
-                return (double) healthSelfRatedL1.getValue();
-            }
-            case Dhe_Excellent, Dhe_Excellent_Mixed, Dhe_Excellent_Formal -> {
+            case Dhe_Excellent -> {
                 return (Dhe.Excellent.equals(healthSelfRated)) ? 1. : 0.;
             }
-            case Dhe_VeryGood, Dhe_VeryGood_Mixed, Dhe_VeryGood_Formal -> {
+            case Dhe_VeryGood -> {
                 return (Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
             }
-            case Dhe_Good, Dhe_Good_Mixed, Dhe_Good_Formal -> {
+            case Dhe_Good -> {
                 return (Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
             }
-            case Dhe_Fair, Dhe_Fair_Mixed, Dhe_Fair_Formal -> {
+            case Dhe_Fair -> {
                 return (Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Dhe_Poor -> {
-                return (Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Dhe_Excellent_L1 -> {
-                return (Dhe.Excellent.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhe_VeryGood_L1 -> {
-                return (Dhe.VeryGood.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhe_Good_L1 -> {
-                return (Dhe.Good.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhe_Fair_L1 -> {
-                return (Dhe.Fair.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhe_Poor_L1 -> {
-                return (Dhe.Poor.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhesp_Excellent_L1 -> {
-                return (Dhe.Excellent.equals(healthPartnerSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhesp_Excellent -> {
-                Person partner = getPartner();
-                return (partner != null && Dhe.Excellent.equals(partner.getHealthSelfRated())) ? 1. : 0.;
-            }
-            case Dhesp_VeryGood_L1 -> {
-                return (Dhe.VeryGood.equals(healthPartnerSelfRatedL1)) ? 1. : 0.;
             }
             case Dhesp_VeryGood -> {
                 Person partner = getPartner();
                 return (partner != null && Dhe.VeryGood.equals(partner.getHealthSelfRated())) ? 1. : 0.;
             }
-            case Dhesp_Good_L1 -> {
-                return (Dhe.Good.equals(healthPartnerSelfRatedL1)) ? 1. : 0.;
-            }
             case Dhesp_Good -> {
                 Person partner = getPartner();
                 return (partner != null && Dhe.Good.equals(partner.getHealthSelfRated())) ? 1. : 0.;
             }
-            case Dhesp_Fair_L1 -> {
-                return (Dhe.Fair.equals(healthPartnerSelfRatedL1)) ? 1. : 0.;
-            }
             case Dhesp_Fair -> {
                 Person partner = getPartner();
                 return (partner != null && Dhe.Fair.equals(partner.getHealthSelfRated())) ? 1. : 0.;
-            }
-            case Dhesp_Poor_L1 -> {
-                return (Dhe.Poor.equals(healthPartnerSelfRatedL1)) ? 1. : 0.;
-            }
-            case Dhe_2 -> {
-                return (Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Dhe_3 -> {
-                return (Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Dhe_4 -> {
-                return (Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Dhe_5 -> {
-                return (Dhe.Excellent.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Dhe_c5_1_L1 -> {
-                return (Dhe.Poor.equals(healthSelfRatedL1)) ? 1.0 : 0.0;
-            }
-            case Dhe_c5_2_L1 -> {
-                return (Dhe.Fair.equals(healthSelfRatedL1)) ? 1.0 : 0.0;
-            }
-            case Dhe_c5_3_L1 -> {
-                return (Dhe.Good.equals(healthSelfRatedL1)) ? 1.0 : 0.0;
-            }
-            case Dhe_c5_4_L1 -> {
-                return (Dhe.VeryGood.equals(healthSelfRatedL1)) ? 1.0 : 0.0;
-            }
-            case Dhe_c5_5_L1 -> {
-                return (Dhe.Excellent.equals(healthSelfRatedL1)) ? 1.0 : 0.0;
-            }
-            case Dhm -> {
-                return healthWbScore0to36;
             }
             case Dhm_L1 -> {
                 if (healthWbScore0to36L1 != null && healthWbScore0to36L1 >= 0.) {
                     return healthWbScore0to36L1;
                 } else return 0.;
             }
-            case Dhe_mcs, dhe_mcs, Dhe_Mcs -> {
+            case Dhe_mcs -> {
                 return healthMentalMcs;
             }
-            case Dhe_mcs_L1, dhe_mcs_L1, L_Dhe_mcs, Dhe_Mcs_L1 -> {
+            case Dhe_mcs_L1, L_Dhe_mcs -> {
                 if (healthMentalMcsL1 != null && healthMentalMcsL1 >= 0.) {
                     return healthMentalMcsL1;
                 } else return 0.;
@@ -4430,21 +3372,10 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // Used to calculate he_eq5d in regHealthEQ5D
                 return (healthMentalMcs - 51.5) * (healthPhysicalPcs - 49.9);
             }
-            case Dhe_mcssp_L1 -> {
-                Person partner = getPartner();
-                if (partner != null) {
-                    if (partner.getHealthMentalMcsL1() != null) {return partner.getHealthMentalMcsL1();}
-                    else throw new IllegalArgumentException(
-                            "No Dhe_mcssp_L1 value." + partner.getKey().getId()
-                    );
-                } else throw new IllegalArgumentException(
-                        "No partner found." + this.getKey().getId()
-                );
-            }
-            case Dhe_pcs, dhe_pcs, Dhe_Pcs -> {
+            case Dhe_pcs -> {
                 return healthPhysicalPcs;
             }
-            case Dhe_pcs_L1, dhe_pcs_L1, L_Dhe_pcs, Dhe_Pcs_L1 -> {
+            case Dhe_pcs_L1, L_Dhe_pcs -> {
                 if (healthPhysicalPcsL1 != null && healthPhysicalPcsL1 >= 0.) {
                     return healthPhysicalPcsL1;
                 } else return 0.;
@@ -4465,20 +3396,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // Used to calculate he_eq5d in regHealthEQ5D
                 return Math.pow(healthPhysicalPcs - 49.9, 2);
             }
-            case Dhe_pcssp_L1 -> {
-                Person partner = getPartner();
-                if (partner != null) {
-                    if (partner.getHealthPhysicalPcsL1() != null){return partner.getHealthPhysicalPcsL1();}
-                    else throw new IllegalArgumentException(
-                            "No Dhe_pcssp_L1 value." + partner.getKey().getId()
-                    );
-                } else throw new IllegalArgumentException(
-                        "No partner found." + this.getKey().getId()
-                );
-            }
-            case Dls -> {
-                return demLifeSatScore0to10;
-            }
             case Dls_L1 -> {
                 if (demLifeSatScore0to10L1 != null && demLifeSatScore0to10L1 >= 0.) {
                     return demLifeSatScore0to10L1;
@@ -4487,154 +3404,31 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Dhmghq_L1 -> {
                 return gethealthPsyDstrss_lag1();
             }
-            case Dnc_L1_ -> {
-                return getDoubleValue(Variables.Dnc_L1);
-            }
-            case Dhesp_L1 -> {
-                return (healthPartnerSelfRatedL1 != null) ? (double) healthPartnerSelfRatedL1.getValue() : 0.0;
-            }
-            case Ded -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
-            }
-            case Ded_Dgn -> {
-                return (Indicator.True.equals(eduSpellFlag) && Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
-            }
-            case Ded_Dag -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? (double) demAge : 0.0;
-            }
-            case Ded_Dag_sq -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? (double) getDemAgeSq() : 0.0;
-            }
-            case Ded_Dhe_pcs_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Dhe_pcs_L1) : 0.0;
-            }
-            case Ded_Dhe_mcs_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Dhe_mcs_L1) : 0.0;
-            }
-            case Ded_Ypncp_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Ypncp_L1) : 0.0;
-            }
-            case Ded_Yplgrs_dv_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Yplgrs_dv_L1) : 0.0;
-            }
-            case Ded_Yplgrs_dv_L2 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Yplgrs_dv_L2) : 0.0;
-            }
-            case Ded_Ypncp_L2 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Ypncp_L2) : 0.0;
-            }
-            case Ded_Ydses_c5_Q2_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Ydses_c5_Q2_L1) : 0.0;
-            }
-            case Ded_Ydses_c5_Q3_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Ydses_c5_Q3_L1) : 0.0;
-            }
-            case Ded_Ydses_c5_Q4_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Ydses_c5_Q4_L1) : 0.0;
-            }
-            case Ded_Ydses_c5_Q5_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Ydses_c5_Q5_L1) : 0.0;
-            }
-            case Ded_Dnc_L1_ -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Dnc_L1) : 0.0;
-            }
-            case Ded_Dnc02_L1 -> {
-                return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Dnc02_L1) : 0.0;
-            }
             case Ded_Dcpst_Single -> {
                 return (Indicator.True.equals(eduSpellFlag)) ? getDoubleValue(Variables.Dcpst_Single) : 0.0;
             }
-            case Ded_L1 -> {
-                return (double) eduSpellFlagL1.getValue() ;
-            }
-            case Deh_c3_High, Deh_c4_High -> {
+            case Deh_c3_High -> {
                 return (Education.High.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
-            case Deh_c4_High_L1 -> {
-                return (Education.High.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case Deh_c3_Medium, Deh_c4_Medium, Deh_c3_Medium_Mixed, Deh_c3_Medium_Formal -> {
+            case Deh_c3_Medium, Deh_c4_Medium -> {
                 return (Education.Medium.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
-            case Deh_c3_Medium_L1, Deh_c4_Medium_L1 -> {
-                return (Education.Medium.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case Deh_c3_Low, Deh_c3_Low_Mixed, Deh_c3_Low_Formal -> {
+            case Deh_c3_Low -> {
                 return (Education.Low.equals(eduHighestC4) || Education.InEducation.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
             case Deh_c4_Low -> {
                 return (Education.Low.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
-            case Deh_c4_Low_Dag -> {
-                return (Education.Low.equals(eduHighestC4)) ? demAge : 0.0;
-            }
-            case Deh_c3_Low_L1 -> {
-                return (Education.Low.equals(eduHighestC4L1) || Education.InEducation.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case Deh_c4_Low_L1 -> {
-                return (Education.Low.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case Deh_c4_Medium_Dag -> {
-                return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
-            }
             case Deh_c4_Na -> {
                 return (Education.InEducation.equals(eduHighestC4) || Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
             }
-            case Deh_c4_Na_L1 -> {
-                return (Education.InEducation.equals(eduHighestC4L1) || Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
-            }
-            case Dehm_c3_High -> {
-                return (Education.High.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
-            }
-            case Dehm_c3_Medium -> {
-                return (Education.Medium.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
-            }
-            case Dehm_c3_Low -> {
-                return (Education.Low.equals(eduHighestMotherC4) || Education.InEducation.equals(eduHighestMotherC4)) ? 1.0 : 0.0;
-            }
-            case Dehf_c3_High -> {
-                return (Education.High.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
-            }
-            case Dehf_c3_Medium -> {
-                return (Education.Medium.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
-            }
-            case Dehf_c3_Low -> {
-                return (Education.Low.equals(eduHighestFatherC4)) ? 1.0 : 0.0;
-            }
-            case Dehmf_c3_High -> {
-                return (checkHighestParentalEducationEquals(Education.High)) ? 1.0 : 0.0;
-            }
-            case Dehmf_c3_Medium -> {
-                return (checkHighestParentalEducationEquals(Education.Medium)) ? 1.0 : 0.0;
-            }
-            case Dehmf_c3_Medium_L1, L_Dehmf_c3_Medium_, L_Dehmf_c3_Medium -> {
-                return (checkHighestParentalEducationEquals(Education.Medium)) ? 1.0 : 0.0;
-            }
-            case Dehmf_c3_Low -> {
-                return (checkHighestParentalEducationEquals(Education.Low) || checkHighestParentalEducationEquals(Education.InEducation)) ? 1.0 : 0.0;
-            }
-            case Dehmf_c3_Low_L1, L_Dehmf_c3_Low_, L_Dehmf_c3_Low -> {
-                return (checkHighestParentalEducationEquals(Education.Low) || checkHighestParentalEducationEquals(Education.InEducation)) ? 1.0 : 0.0;
-            }
-            case Dehsp_c3_Medium_L1 -> {
-                return (Education.Medium.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
-            }
-            case Dehsp_c3_Low_L1 -> {
-                return (Education.Low.equals(eduHighestPartnerC4L1) || Education.InEducation.equals(eduHighestPartnerC4L1)) ? 1. : 0.;
-            }
-            case He_eq5d -> {
-                return getDemLifeSatEQ5D();
-            }
-            case Dhhtp_c4_CoupleChildren_L1, L_Dhhtp_c4_CoupleChildren -> {
+            case Dhhtp_c4_CoupleChildren_L1 -> {
                 return (Dhhtp_c4.CoupleChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
             case Dhhtp_c4_CoupleNoChildren_L1 -> {
                 return (Dhhtp_c4.CoupleNoChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
-            case Dhhtp_c4_SingleNoChildren_L1, L_Dhhtp_c4_SingleNoChildren -> {
-                return (Dhhtp_c4.SingleNoChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
-            }
-            case Dhhtp_c4_SingleChildren_L1, L_Dhhtp_c4_SingleChildren, Dhhtp_c4_SingleChildren_L1_, demCompHhC4SingleChL1 -> {
+            case Dhhtp_c4_SingleChildren_L1, demCompHhC4SingleChL1 -> {
                 return (Dhhtp_c4.SingleChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
             case Dhhtp_c8_2_L1 -> {
@@ -4715,30 +3509,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 // Single with children
                 return Dhhtp_c4.SingleChildren.equals(getDemCompHhC4L1()) ? 1. : 0.;
             }
-            case Dlltsd, Dlltsd01 -> {
-                return Indicator.True.equals(healthDsblLongtermFlag) ? 1. : 0.;
-            }
-            case Dlltsd_L1, Dlltsd01_L1, Dlltsd01_sp_L1, L_Dlltsd01 -> {
+            case L_Dlltsd01 -> {
                 return Indicator.True.equals(healthDsblLongtermFlagL1) ? 1. : 0.;
-            }
-            case Ethn_White -> {
-                return demEthnC6.equals(Ethnicity.White) ? 1. : 0.;
             }
             // case Ethn_Mixed -> {
             //    return dot01.equals(Ethnicity.Mixed) ? 1. : 0.;
             //}
-            case Ethn_Asian, EthnicityAsian -> {
-                return demEthnC6.equals(Ethnicity.Asian) ? 1. : 0.;
-            }
-            case Ethn_Black, EthnicityBlack, Ethn_Black_ -> {
-                return demEthnC6.equals(Ethnicity.Black) ? 1. : 0.;
-            }
-            case Ethn_Other, EthnicityOther, Ethn_Other_ -> {
-                return (demEthnC6.equals(Ethnicity.Other) || demEthnC6.equals(Ethnicity.Missing)) ? 1. : 0.;
-            }
-            case EthnicityMixed -> {
-                return demEthnC6.equals(Ethnicity.Mixed) ? 1. : 0.;
-            }
             // case Ethn_Missing -> {
             //    return dot01.equals(Ethnicity.Missing) ? 1. : 0.;
             // }
@@ -4754,184 +3530,23 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case FinancialDistress -> {
                 return yFinDstrssFlag ? 1. : 0.;
             }
-            case GrossEarningsYearly -> {
-                return getGrossEarningsYearly();
-            }
-            case GrossLabourIncomeMonthly -> {
-                return getCovidYLabGross();
-            }
-            case InverseMillsRatio, InvMillsRatio -> {
+            case InvMillsRatio -> {
                 return getInverseMillsRatio();
             }
-            case Ld_children_2under -> {
-                return (getNumberChildren02L1() > 0) ? 1.0 : 0.0;
-            }
-            case Ld_children_3under -> {
-                return benefitUnit.getDem0to3L1().ordinal();
-            }
-            case Ld_children_4_12 -> {
-                return benefitUnit.getDem4to12L1().ordinal();
-            }
-            case Lemployed -> {
-                if (labC4L1 != null)        //Problem will null pointer exceptions for those who are inactive and then become active as their lagged employment status is null!
-                    return labC4L1.equals(Les_c4.EmployedOrSelfEmployed) ? 1. : 0.;
-                else
-                    return 0.;
-            }            //A person who was not active but has become active in this year should have an employment_status_lag == null.  In this case, we assume this means 0 for the Employment regression, where Lemployed is used.
-            case Lnonwork -> {
-                return (labC4L1.equals(Les_c4.NotEmployed) || labC4L1.equals(Les_c4.Retired)) ? 1. : 0.;
-            }
-            case Lstudent -> {
-                //			log.debug("Lstudent");
-                return labC4L1.equals(Les_c4.Student) ? 1. : 0.;
-            }
-            case Lunion -> {
-                //			log.debug("Lunion");
-                return demStatusHhL1.equals(HouseholdStatus.Couple) ? 1. : 0.;
-            }
-            case Les_c3_Student_L1, L_Les_c3_Student -> {
-                return (Les_c4.Student.equals(labC4L1)) ? 1.0 : 0.0;
-            }
-            case Les_c3_NotEmployed_L1, L_Les_c3_NotEmployed -> {
-                return ((Les_c4.NotEmployed.equals(labC4L1)) || (Les_c4.Retired.equals(labC4L1))) ? 1.0 : 0.0;
-            }
-            case Les_c3_Employed_L1 -> {
-                return (Les_c4.EmployedOrSelfEmployed.equals(labC4L1)) ? 1.0 : 0.0;
-            }
-            case Les_c3_Sick_L1 -> {
-                if (healthDsblLongtermFlagL1 != null)
-                    return healthDsblLongtermFlagL1.equals(Indicator.True) ? 1. : 0.;
-                else
-                    return 0.0;
-            }
-            case Les_c4_Student_L1 -> {
-                return (Les_c4.Student.equals(labC4L1)) ? 1. : 0. ;
-            }
-            case Les_c4_Student_Dgn_L1 -> {
-                return (Les_c4.Student.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1. : 0. ;
-            }
-            case Les_c4_NotEmployed_L1 -> {
-                return (Les_c4.NotEmployed.equals(labC4L1)) ? 1. : 0. ;
-            }
-            case Les_c4_NotEmployed_Dgn_L1 -> {
-                return (Les_c4.NotEmployed.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1. : 0. ;
-            }
-            case Les_c4_Retired_L1 -> {
-                return (Les_c4.Retired.equals(labC4L1)) ? 1. : 0. ;
-            }
-            case Les_c4_Retired_Dgn_L1 -> {
-                return (Les_c4.Retired.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1. : 0. ;
-            }
-            case Lessp_c3_Student_L1 -> {
-                Person partner = getPartner();
-                if (partner != null && partner.labC4L1 != null)
-                    return partner.labC4L1.equals(Les_c4.Student) ? 1. : 0.;
-                else
-                    return 0.;
-            }
-            case Lessp_c3_NotEmployed -> {
-                Person partner = getPartner();
-                if (partner != null && partner.labC4 != null)
-                    return (partner.labC4.equals(Les_c4.NotEmployed) || partner.labC4.equals(Les_c4.Retired)) ? 1. : 0.;
-                else
-                    return 0.;
-            }
-            case Lessp_c3_NotEmployed_L1, labStatusPartnerC3NotEmployedL1 -> {
+            //A person who was not active but has become active in this year should have an employment_status_lag == null.  In this case, we assume this means 0 for the Employment regression, where Lemployed is used.
+            case labStatusPartnerC3NotEmployedL1 -> {
                 Person partner = getPartner();
                 if (partner != null && partner.labC4L1 != null)
                     return (partner.labC4L1.equals(Les_c4.NotEmployed) || partner.labC4L1.equals(Les_c4.Retired)) ? 1. : 0.;
                 else
                     return 0.;
             }
-            case Lessp_c3_Sick_L1 -> {
-                Person partner = getPartner();
-                if (partner != null && partner.healthDsblLongtermFlagL1 != null)
-                    return partner.healthDsblLongtermFlagL1.equals(Indicator.True) ? 1. : 0.;
-                else
-                    return 0.;
-            }
-            case Lesnr_c2_NotEmployed_L1 -> {
-                return (Les_c4.NotEmployed.equals(labC4L1) || (Les_c4.Student.equals(labC4L1))) ? 1. : 0. ;
-            }
-            case Reached_Retirement_Age_Lesnr_c2_NotEmployed_L1 -> {
-                int retirementAge;
-                if (demMaleFlag.equals(Gender.Female)) {
-                    retirementAge = (int) Parameters.getTimeSeriesValue(
-                            getYear(),
-                            Gender.Female.toString(),
-                            TimeSeriesVariable.FixedRetirementAge
-                    );
-                } else {
-                    retirementAge = (int) Parameters.getTimeSeriesValue(
-                            getYear(),
-                            Gender.Male.toString(),
-                            TimeSeriesVariable.FixedRetirementAge
-                    );
-                }
-                return (Les_c4.NotEmployed.equals(labC4L1) || (Les_c4.Student.equals(labC4L1)) && demAge >= retirementAge) ? 1.0 : 0.0;
-            }
-            case Retired -> {
-                return Les_c4.Retired.equals(labC4) ? 1. : 0.;
-            }
-            case Lesdf_c4_EmployedSpouseNotEmployed_L1, Lesdf_c4_EmpSpouseNotEmp_L1 -> {                    //Own and partner's activity status lag(1)
-                return (Lesdf_c4.EmployedSpouseNotEmployed.equals(labStatusPartnerAndOwnC4L1)) ? 1. : 0.;
-            }
-            case Lesdf_c4_NotEmployedSpouseEmployed_L1, Lesdf_c4_NotEmpSpouseEmp_L1 -> {
-                return (Lesdf_c4.NotEmployedSpouseEmployed.equals(labStatusPartnerAndOwnC4L1)) ? 1. : 0.;
-            }
-            case Lesdf_c4_BothNotEmployed_L1 -> {
-                if (labStatusPartnerAndOwnC4L1 != null)
-                    return labStatusPartnerAndOwnC4L1.equals(Lesdf_c4.BothNotEmployed) ? 1. : 0.;
-                else
-                    return 0.;
-            }
-            case Liwwh, labWorkHist -> {
-                return (double) labEmpNyear;
-            }
             case NotEmployed_L1 -> {
                 return (labC4L1.equals(Les_c4.NotEmployed)) ? 1. : 0.;
             }
-            case NumberChildren -> {
-                return (double) benefitUnit.getNumberChildrenAll();
-            }
-            case NumberChildren_2under -> {
-                return (double) benefitUnit.getNumberChildren(0, 2);
-            }
-            case OtherIncome -> {            // "Other income corresponds to other benefitUnit incomes divided by 10,000." (From Bargain et al. (2014).  From employment selection equation.
-                return 0.;
-            }                // Other incomes "correspond to partner's and other family members' income as well as capital income of various sources."
-            case Parents -> {
-                return HouseholdStatus.Parents.equals(getHouseholdStatus()) ? 1. : 0.;
-            }
-            case ResStanDev -> {        //Draw from standard normal distribution will be multiplied by the value in the .xls file, which represents the standard deviation
-                //If model.addRegressionStochasticComponent set to true, return a draw from standard normal distribution, if false return 0.
-                return (model.addRegressionStochasticComponent) ?
-                        Parameters.getStandardNormalDistribution().inverseCumulativeProbability(statInnovations.getDoubleDraw(20)) : 0.0;
-            }
-            case Single -> {
-                return HouseholdStatus.Single.equals(getHouseholdStatus()) ? 1. : 0.;
-            }
-            case Single_kids -> {        //TODO: Is this sufficient, or do we need to take children aged over 12 into account as well?
-                if (HouseholdStatus.Single.equals(getHouseholdStatus())) {
-                    if (benefitUnit.getChildren().isEmpty())
-                        return 0.0;
-                    else
-                        return 1.0;
-                } else return 0.;
-            }
+                // Other incomes "correspond to partner's and other family members' income as well as capital income of various sources."
             case UnemploymentRate -> {
                 return getUnemploymentRateByGenderEducationAgeYear(getDemMaleFlag(), getEduHighestC4(), getDemAge(), getYear());
-            }
-            case Union -> {
-                return HouseholdStatus.Couple.equals(getHouseholdStatus()) ? 1. : 0.;
-            }
-            case Union_kids -> {        //TODO: Is this sufficient, or do we need to take children aged over 12 into account as well?
-                if (HouseholdStatus.Couple.equals(getHouseholdStatus())) {
-                    if (benefitUnit.getChildren().isEmpty())
-                        return 0.0;
-                    else
-                        return 1.0;
-                } else return 0.0;
             }
             case Year -> {
                 return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? (double) Parameters.timeTrendStopsIn : (double) getYear();
@@ -4942,200 +3557,44 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2011 -> {
                 return (getYear() == 2011) ? 1. : 0.;
             }
-            case Year2012, Y2012 -> {
+            case Year2012 -> {
                 return (getYear() == 2012) ? 1. : 0.;
             }
-            case Year2013, Y2013, Y2013_ -> {
+            case Year2013 -> {
                 return (getYear() == 2013) ? 1. : 0.;
             }
-            case Year2014, Y2014, Y2014_, demYear2014 -> {
+            case Year2014 -> {
                 return (getYear() == 2014) ? 1. : 0.;
             }
-            case Year2015, Y2015, demYear2015 -> {
+            case Year2015 -> {
                 return (getYear() == 2015) ? 1. : 0.;
             }
-            case Year2016, Y2016, demYear2016 -> {
+            case Year2016 -> {
                 return (getYear() == 2016) ? 1. : 0.;
             }
-            case Year2017, Y2017, demYear2017 -> {
+            case Year2017 -> {
                 return (getYear() == 2017) ? 1. : 0.;
             }
-            case Year2018, Y2018, demYear2018 -> {
+            case Year2018 -> {
                 return (getYear() == 2018) ? 1. : 0.;
             }
-            case Year2019, Y2019, demYear2019 -> {
+            case Year2019 -> {
                 return (getYear() == 2019) ? 1. : 0.;
             }
-            case Year2020, Y2020, Y2020_Mixed, Y2020_Formal, demYear2020 -> {
+            case Year2020, Y2020, demYear2020 -> {
                 return (getYear() == 2020) ? 1. : 0.;
             }
-            case Year2021, Y2021, Y2021_Mixed, Y2021_Formal, demYear2021 -> {
+            case Year2021, Y2021, demYear2021 -> {
                 return (getYear() == 2021) ? 1. : 0.;
             }
-            case Year2022, Y2022, demYear2022 -> {
+            case Year2022 -> {
                 return (getYear() == 2022) ? 1. : 0.;
             }
-            case Year2023, Y2023, demYear2023 -> {
+            case Year2023 -> {
                 return (getYear() == 2023) ? 1. : 0.;
             }
-            case Year2024, Y2024, demYear2024 -> {
+            case Year2024 -> {
                 return (getYear() == 2024) ? 1. : 0.;
-            }
-            case Y2012_Poor -> {
-                return (getYear() == 2012 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2012_Fair -> {
-                return (getYear() == 2012 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2012_Good -> {
-                return (getYear() == 2012 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2012_VeryGood -> {
-                return (getYear() == 2012 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2013_Poor -> {
-                return (getYear() == 2013 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2013_Fair -> {
-                return (getYear() == 2013 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2013_Good -> {
-                return (getYear() == 2013 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2013_VeryGood -> {
-                return (getYear() == 2013 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2014_Poor -> {
-                return (getYear() == 2014 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2014_Fair -> {
-                return (getYear() == 2014 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2014_Good -> {
-                return (getYear() == 2014 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2014_VeryGood -> {
-                return (getYear() == 2014 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2015_Poor -> {
-                return (getYear() == 2015 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2015_Fair -> {
-                return (getYear() == 2015 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2015_Good -> {
-                return (getYear() == 2015 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2015_VeryGood -> {
-                return (getYear() == 2015 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2016_Poor -> {
-                return (getYear() == 2016 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2016_Fair -> {
-                return (getYear() == 2016 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2016_Good -> {
-                return (getYear() == 2016 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2016_VeryGood -> {
-                return (getYear() == 2016 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2017_Poor -> {
-                return (getYear() == 2017 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2017_Fair -> {
-                return (getYear() == 2017 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2017_Good -> {
-                return (getYear() == 2017 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2017_VeryGood -> {
-                return (getYear() == 2017 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2018_Poor -> {
-                return (getYear() == 2018 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2018_Fair -> {
-                return (getYear() == 2018 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2018_Good -> {
-                return (getYear() == 2018 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2018_VeryGood -> {
-                return (getYear() == 2018 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2019_Poor -> {
-                return (getYear() == 2019 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2019_Fair -> {
-                return (getYear() == 2019 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2019_Good -> {
-                return (getYear() == 2019 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2019_VeryGood -> {
-                return (getYear() == 2019 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2020_Poor -> {
-                return (getYear() == 2020 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2020_Fair -> {
-                return (getYear() == 2020 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2020_Good -> {
-                return (getYear() == 2020 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2020_VeryGood -> {
-                return (getYear() == 2020 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2021_Poor -> {
-                return (getYear() == 2021 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2021_Fair -> {
-                return (getYear() == 2021 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2021_Good -> {
-                return (getYear() == 2021 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2021_VeryGood -> {
-                return (getYear() == 2021 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2022_Poor -> {
-                return (getYear() == 2022 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2022_Fair -> {
-                return (getYear() == 2022 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2022_Good -> {
-                return (getYear() == 2022 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2022_VeryGood -> {
-                return (getYear() == 2022 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2023_Poor -> {
-                return (getYear() == 2023 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2023_Fair -> {
-                return (getYear() == 2023 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2023_Good -> {
-                return (getYear() == 2023 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2023_VeryGood -> {
-                return (getYear() == 2023 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2024_Poor -> {
-                return (getYear() == 2024 && Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2024_Fair -> {
-                return (getYear() == 2024 && Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2024_Good -> {
-                return (getYear() == 2024 && Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case Y2024_VeryGood -> {
-                return (getYear() == 2024 && Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
             }
             case Year2025 -> {
                 return (getYear() == 2025) ? 1. : 0.;
@@ -5185,130 +3644,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Year2040 -> {
                 return (getYear() == 2040) ? 1. : 0.;
             }
-            case Year2041 -> {
-                return (getYear() == 2041) ? 1. : 0.;
-            }
-            case Year2042 -> {
-                return (getYear() == 2042) ? 1. : 0.;
-            }
-            case Year2043 -> {
-                return (getYear() == 2043) ? 1. : 0.;
-            }
-            case Year2044 -> {
-                return (getYear() == 2044) ? 1. : 0.;
-            }
-            case Year2045 -> {
-                return (getYear() == 2045) ? 1. : 0.;
-            }
-            case Year2046 -> {
-                return (getYear() == 2046) ? 1. : 0.;
-            }
-            case Year2047 -> {
-                return (getYear() == 2047) ? 1. : 0.;
-            }
-            case Year2048 -> {
-                return (getYear() == 2048) ? 1. : 0.;
-            }
-            case Year2049 -> {
-                return (getYear() == 2049) ? 1. : 0.;
-            }
-            case Year2050 -> {
-                return (getYear() == 2050) ? 1. : 0.;
-            }
-            case Year2051 -> {
-                return (getYear() == 2051) ? 1. : 0.;
-            }
-            case Year2052 -> {
-                return (getYear() == 2052) ? 1. : 0.;
-            }
-            case Year2053 -> {
-                return (getYear() == 2053) ? 1. : 0.;
-            }
-            case Year2054 -> {
-                return (getYear() == 2054) ? 1. : 0.;
-            }
-            case Year2055 -> {
-                return (getYear() == 2055) ? 1. : 0.;
-            }
-            case Year2056 -> {
-                return (getYear() == 2056) ? 1. : 0.;
-            }
-            case Year2057 -> {
-                return (getYear() == 2057) ? 1. : 0.;
-            }
-            case Year2058 -> {
-                return (getYear() == 2058) ? 1. : 0.;
-            }
-            case Year2059 -> {
-                return (getYear() == 2059) ? 1. : 0.;
-            }
-            case Year2060 -> {
-                return (getYear() == 2060) ? 1. : 0.;
-            }
-            case Year2061 -> {
-                return (getYear() == 2061) ? 1. : 0.;
-            }
-            case Year2062 -> {
-                return (getYear() == 2062) ? 1. : 0.;
-            }
-            case Year2063 -> {
-                return (getYear() == 2063) ? 1. : 0.;
-            }
-            case Year2064 -> {
-                return (getYear() == 2064) ? 1. : 0.;
-            }
-            case Year2065 -> {
-                return (getYear() == 2065) ? 1. : 0.;
-            }
-            case Year2066 -> {
-                return (getYear() == 2066) ? 1. : 0.;
-            }
-            case Year2067 -> {
-                return (getYear() == 2067) ? 1. : 0.;
-            }
-            case Year2068 -> {
-                return (getYear() == 2068) ? 1. : 0.;
-            }
-            case Year2069 -> {
-                return (getYear() == 2069) ? 1. : 0.;
-            }
-            case Year2070 -> {
-                return (getYear() == 2070) ? 1. : 0.;
-            }
-            case Year2071 -> {
-                return (getYear() == 2071) ? 1. : 0.;
-            }
-            case Year2072 -> {
-                return (getYear() == 2072) ? 1. : 0.;
-            }
-            case Year2073 -> {
-                return (getYear() == 2073) ? 1. : 0.;
-            }
-            case Year2074 -> {
-                return (getYear() == 2074) ? 1. : 0.;
-            }
-            case Year2075 -> {
-                return (getYear() == 2075) ? 1. : 0.;
-            }
-            case Year2076 -> {
-                return (getYear() == 2076) ? 1. : 0.;
-            }
-            case Year2077 -> {
-                return (getYear() == 2077) ? 1. : 0.;
-            }
-            case Year2078 -> {
-                return (getYear() == 2078) ? 1. : 0.;
-            }
-            case Year2079 -> {
-                return (getYear() >= 2079) ? 1. : 0.;
-            }
             case Year_transformed, demYearTransformed -> {
                 return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? (double) Parameters.timeTrendStopsIn - 2000 : (double) getYear() - 2000;
             }
-            case Year_transformed_monetary -> {
-                return (double) model.getTimeTrendStopsInMonetaryProcesses() - 2000;
-            } //Note: this returns base price year - 2000 (e.g. 17 for 2017 as base price year) and monetary variables are then uprated from 2017 level to the simulated year
-            case Ydses_c5_Q2_L1, L_Ydses_c5_Q2, Ydses_c5_L1 -> {
+ //Note: this returns base price year - 2000 (e.g. 17 for 2017 as base price year) and monetary variables are then uprated from 2017 level to the simulated year
+            case Ydses_c5_Q2_L1, L_Ydses_c5_Q2 -> {
                 return (Ydses_c5.Q2.equals(getYHhQuintilesMonthC5L1())) ? 1.0 : 0.0;
             }
             case Ydses_c5_Q3_L1, L_Ydses_c5_Q3 -> {
@@ -5320,64 +3660,20 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Ydses_c5_Q5_L1, L_Ydses_c5_Q5 -> {
                 return (Ydses_c5.Q5.equals(getYHhQuintilesMonthC5L1())) ? 1.0 : 0.0;
             }
-            case HHincomeQ2, HHincomeQ2_Mixed, HHincomeQ2_Formal -> {
-                return (Ydses_c5.Q2.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
-            }
-            case HHincomeQ3, HHincomeQ3_Mixed, HHincomeQ3_Formal -> {
-                return (Ydses_c5.Q3.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
-            }
-            case HHincomeQ4, HHincomeQ4_Mixed, HHincomeQ4_Formal -> {
-                return (Ydses_c5.Q4.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
-            }
-            case HHincomeQ5, HHincomeQ5_Mixed, HHincomeQ5_Formal -> {
-                return (Ydses_c5.Q5.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
-            }
-            case Ypnbihs_dv_L1 -> {
-                if (yNonBenPersGrossMonthL1 != null) {
-                    return yNonBenPersGrossMonthL1;
-                } else {
-                    throw new RuntimeException("call to uninitialised ypnbihs_dv_lag1 in Person");
-                }
-            }
-            case Ypnbihs_dv_L1_sq -> {
-                if (yNonBenPersGrossMonthL1 != null) {
-                    return yNonBenPersGrossMonthL1 * yNonBenPersGrossMonthL1;
-                } else {
-                    throw new RuntimeException("call to uninitialised ypnbihs_dv_lag1 in Person");
-                }
-            }
-            case Ynbcpdf_dv_L1 -> {
-                return (yPersAndPartnerGrossDiffMonthL1 != null) ? yPersAndPartnerGrossDiffMonthL1 : 0.0;
-            }
-            case Yptciihs_dv_L1 -> {
-                return yMiscPersGrossMonthL1;
-            }
-            case Yptciihs_dv_L2 -> {
-                return yMiscPersGrossMonthL2;
-            }
-            case Yptciihs_dv_L3 -> {
-                return yMiscPersGrossMonthL3;
-            }
             case Ypncp_L1, L_Ypncp -> {
                 return yCapitalPersMonthL1;
             }
             case Ypncp_L2 -> {
                 return yCapitalPersMonthL2;
             }
-            case Ypnoab_L1, L_Ypnoab -> {
+            case L_Ypnoab -> {
                 return yPensPersGrossMonthL1;
-            }
-            case Ypnoab_L2 -> {
-                return yPensPersGrossMonthL2;
             }
             case Yplgrs_dv_L1 -> {
                 return yEmpPersGrossMonthL1;
             }
             case Yplgrs_dv_L2 -> {
                 return yEmpPersGrossMonthL2;
-            }
-            case Yplgrs_dv_L3 -> {
-                return yEmpPersGrossMonthL3;
             }
             case Reached_Retirement_Age -> {
                 int retirementAge;
@@ -5401,23 +3697,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 } else {
                     return 0.;
                 }
-            }
-            case Reached_Retirement_Age_Les -> { //Reached retirement age and was not employed in the previous year
-                int retirementAge;
-                if (demMaleFlag.equals(Gender.Female)) {
-                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Female.toString(), TimeSeriesVariable.FixedRetirementAge);
-                } else {
-                    retirementAge = (int) Parameters.getTimeSeriesValue(getYear(), Gender.Male.toString(), TimeSeriesVariable.FixedRetirementAge);
-                }
-                return ((demAge >= retirementAge) && (labC4L1.equals(Les_c4.NotEmployed) || labC4L1.equals(Les_c4.Retired))) ? 1. : 0.;
-            }
-            case EquivalisedIncomeYearly -> {
-                return getBenefitUnit().getEquivalisedDisposableIncomeYearly();
-            }
-            case EquivalisedConsumptionYearly -> {
-                if (xEquivYear != null) {
-                    return xEquivYear;
-                } else return -9999.99;
             }
             //New enums for the mental health Step 1 and 2:
             case EmployedToUnemployed -> {
@@ -5453,112 +3732,53 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case D_Econ_benefits -> {
                 return isReceivesBenefitsFlag_L1() ? 1. : 0.;
             }
-            case D_Econ_benefits_NonUC -> {
-                return isReceivesBenefitsFlagNonUC() ? 1. : 0.;
-            }
-            case D_Econ_benefits_UC -> {
-                return isReceivesBenefitsFlagUC() ? 1. : 0.;
-            }
-            case D_Econ_benefits_UC_Lhw_ZERO -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.ZERO ? 1. : 0.;
-            }
-            case D_Econ_benefits_UC_Lhw_TEN -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TEN ? 1. : 0.;
-            }
-            case D_Econ_benefits_UC_Lhw_TWENTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.TWENTY ? 1. : 0.;
-            }
-            case D_Econ_benefits_UC_Lhw_THIRTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY ? 1. : 0.;
-            }
-            case D_Econ_benefits_UC_Lhw_FORTY -> {
-                return isReceivesBenefitsFlagUC() && getLabourSupplyWeekly() == Labour.THIRTY_EIGHT ? 1. : 0.;
-            }
-            case D_Home_owner -> {
-                return getBenefitUnit().isHousingOwned() ? 1. : 0.;
-            } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
-            case D_Home_owner_L1, Dhh_owned_L1 -> {
+ // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
+            case Dhh_owned_L1 -> {
                 return demPrptyFlagL1 ? 1. : 0.;
             } // Evaluated at the level of a benefit unit. If required, can be changed to individual-level homeownership status.
-            case Covid_D -> {
-                return (getYear() > 2019 & getYear() < 2023) ? 1. : 0.;
-            }
-            case Covid_2020_D -> {
-                return (getYear() == 2020) ? 1. : 0.;
-            }
-            case Covid_2021_D -> {
-                return (getYear() == 2021) ? 1. : 0.;
-            }
-            case Pt -> {
-                return (getLabourSupplyHoursWeekly() > 0 && getLabourSupplyHoursWeekly() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED) ? 1. : 0.;
-            }
-            case L1_log_hourly_wage, Hourly_wage_L1, labWageHrlyLogL1 -> {
+            case labWageHrlyLogL1 -> {
                 if (labWageFullTimeHrlyL1 == null) {
                     throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
                 } else {
                     return Math.log(labWageFullTimeHrlyL1);
                 }
             }
-            case L1_log_hourly_wage_sq -> {
-                if (labWageFullTimeHrlyL1 > 0) {
-                    return Math.pow(Math.log(labWageFullTimeHrlyL1), 2);
-                } else {
-                    throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
-                }
-            }
-            case L1_hourly_wage -> {
-                if (labWageFullTimeHrlyL1 > 0) {
-                    return labWageFullTimeHrlyL1;
-                } else {
-                    throw new RuntimeException("call to evaluate lag potential hourly earnings before initialisation");
-                }
-            }
-            case Deh_c3_Low_Dag -> {
-                return (Education.Low.equals(eduHighestC4) || Education.InEducation.equals(eduHighestC4)) ? demAge : 0.0;
-            }
-            case Deh_c3_Medium_Dag -> {
-                return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
-            }
             //UK
-            case UKC, UKC_Mixed, UKC_Formal, UKC_ -> {
+            case UKC -> {
                 return Region.UKC.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKD, UKD_Mixed, UKD_Formal, UKD_ -> {
+            case UKD -> {
                 return Region.UKD.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKE, UKE_Mixed, UKE_Formal -> {
+            case UKE -> {
                 return Region.UKE.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKF, UKF_Mixed, UKF_Formal -> {
+            case UKF -> {
                 return Region.UKF.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKG, UKG_Mixed, UKG_Formal -> {
+            case UKG -> {
                 return Region.UKG.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKH, UKH_Mixed, UKH_Formal -> {
+            case UKH -> {
                 return Region.UKH.equals(getRegion()) ? 1.0 : 0.0;
             }
             case UKI -> {
                 return Region.UKI.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKJ, UKJ_Mixed, UKJ_Formal -> {
+            case UKJ -> {
                 return Region.UKJ.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKK, UKK_Mixed, UKK_Formal -> {
+            case UKK -> {
                 return Region.UKK.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKL, UKL_Mixed, UKL_Formal, UKL_ -> {
+            case UKL -> {
                 return Region.UKL.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKM, UKM_Mixed, UKM_Formal, UKM_ -> {
+            case UKM -> {
                 return Region.UKM.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case UKN, UKN_Mixed, UKN_Formal -> {
+            case UKN -> {
                 return Region.UKN.equals(getRegion()) ? 1.0 : 0.0;
-            }
-            case UKmissing -> {
-                return 0.;        //For our purpose, all our simulated people have a region, so this enum value is always going to be 0 (false).
-                //			return (getRegion().equals(Region.UKmissing)) ? 1. : 0.;		//For people whose region info is missing.  The UK survey did not record the region in the first two waves (2006 and 2007, each for 4 years). For all those individuals we have gender, education etc but not region. If we exclude them we lose a large part of the UK sample, so this is the trick to keep them in the estimates.
             }
             // Regressors used in the Covid-19 labour market module below:
             case Dgn_Dag -> {
@@ -5618,14 +3838,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case Blpay_Q5 -> {
                 return (getCovidYLabGrossXt5().equals(Quintiles.Q5)) ? 1. : 0.;
             }
-            case Dgn_baseline -> {
-                return 0.;
-            }
-            case RealWageGrowth, realWageGrowth -> { // Note: the values provided to the wage regression must be rebased to 2015, the default BASE_PRICE_YEAR.
+            case realWageGrowth -> { // Note: the values provided to the wage regression must be rebased to 2015, the default BASE_PRICE_YEAR.
                 return Parameters.getTimeSeriesIndex(getYear(), UpratingCase.Earnings);
-            }
-            case RealGDPGrowth -> {
-                return Parameters.getTimeSeriesIndex(getYear(), UpratingCase.Capital);
             }
             case Cut1 -> {
                 // ordered probit/logit cut points ignored when calculating score
@@ -5665,77 +3879,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return 0.;
             }
 
-            case Age_10, demAge_10 -> {
-                return (demAge == 10) ? 1.0 : 0.0;
-            }
 
-            case Age_11, demAge_11 -> {
-                return (demAge == 11) ? 1.0 : 0.0;
-            }
 
-            case Age_12, demAge_12 -> {
-                return (demAge == 12) ? 1.0 : 0.0;
-            }
 
-            case Age_13, demAge_13 -> {
-                return (demAge == 13) ? 1.0 : 0.0;
-            }
 
-            case Age_14, demAge_14 -> {
-                return (demAge == 14) ? 1.0 : 0.0;
-            }
 
-            case Age_15 -> {
-                return (demAge == 15) ? 1.0 : 0.0;
-            }
 
-            case Age_16 -> {
-                return (demAge == 16) ? 1.0 : 0.0;
-            }
 
-            case Age_2 -> {
-                return (demAge == 2) ? 1.0 : 0.0;
-            }
 
-            case Age_3 -> {
-                return (demAge == 3) ? 1.0 : 0.0;
-            }
 
-            case Age_4 -> {
-                return (demAge == 4) ? 1.0 : 0.0;
-            }
 
-            case Age_5 -> {
-                return (demAge == 5) ? 1.0 : 0.0;
-            }
 
-            case Age_6 -> {
-                return (demAge == 6) ? 1.0 : 0.0;
-            }
 
-            case Age_7 -> {
-                return (demAge == 7) ? 1.0 : 0.0;
-            }
 
-            case Age_8 -> {
-                return (demAge == 8) ? 1.0 : 0.0;
-            }
 
-            case Age_9 -> {
-                return (demAge == 9) ? 1.0 : 0.0;
-            }
 
-            case Dag_c -> {
-                return getDoubleValue(Variables.Dag);
-            }
 
-            case Ded_Dcpst_Single_L1 -> {
-                return getDoubleValue(Variables.Ded_Dcpst_Single);
-            }
-
-            case Dhe_1 -> {
-                return getDoubleValue(Variables.Dhe);
-            }
 
             case careMarketFormalL1 -> {
                 return getDoubleValue(Variables.CareMarketFormal_L1);
@@ -5760,6 +3919,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case careMarketMixedL1 -> {
                 return getDoubleValue(Variables.CareMarketMixed_L1);
             }
+
 
             case demAge20to24 -> {
                 return getDoubleValue(Variables.Age20to24);
@@ -5857,13 +4017,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 return getDoubleValue(Variables.FertilityRate);
             }
 
-            case need_care -> {
-                return getDoubleValue(Variables.NeedCare);
-            }
 
-            case receive_care -> {
-                return getDoubleValue(Variables.ReceiveCare);
-            }
 
             // -----------------------------------------------------------------------
             // social care age interaction variants
@@ -5925,28 +4079,24 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             // -----------------------------------------------------------------------
             // demMaleFlag interaction terms
             // -----------------------------------------------------------------------
-            case demMaleFlag_Fair, demMaleFlag_Formal, demMaleFlag_Good, demMaleFlag_Low,
-                 demMaleFlag_Medium, demMaleFlag_Mixed, demMaleFlag_Poor, demMaleFlag_VeryGood -> {
+            case demMaleFlag_Fair, demMaleFlag_Formal, demMaleFlag_Good, demMaleFlag_Low, demMaleFlag_Medium, demMaleFlag_Mixed, demMaleFlag_Poor, demMaleFlag_VeryGood -> {
                 return (Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
             }
 
             // -----------------------------------------------------------------------
             // demCompHhC4 interaction terms
             // -----------------------------------------------------------------------
-            case demCompHhC4CoupleChL1_Fair, demCompHhC4CoupleChL1_Good,
-                 demCompHhC4CoupleChL1_Poor, demCompHhC4CoupleChL1_VeryGood -> {
+            case demCompHhC4CoupleChL1_Fair, demCompHhC4CoupleChL1_Good, demCompHhC4CoupleChL1_Poor, demCompHhC4CoupleChL1_VeryGood -> {
                 return (Dhhtp_c4.CoupleChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
-            case demCompHhC4SingleNoChL1_Fair, demCompHhC4SingleNoChL1_Good,
-                 demCompHhC4SingleNoChL1_Poor, demCompHhC4SingleNoChL1_VeryGood -> {
+            case demCompHhC4SingleNoChL1_Fair, demCompHhC4SingleNoChL1_Good, demCompHhC4SingleNoChL1_Poor, demCompHhC4SingleNoChL1_VeryGood -> {
                 return (Dhhtp_c4.SingleNoChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
 
             // -----------------------------------------------------------------------
             // demEthnC4 interaction terms
             // -----------------------------------------------------------------------
-            case demEthnC4Asian_Fair, demEthnC4Asian_Formal, demEthnC4Asian_Good,
-                 demEthnC4Asian_Mixed, demEthnC4Asian_Poor, demEthnC4Asian_VeryGood -> {
+            case demEthnC4Asian_Fair, demEthnC4Asian_Formal, demEthnC4Asian_Good, demEthnC4Asian_Mixed, demEthnC4Asian_Poor, demEthnC4Asian_VeryGood -> {
                 return demEthnC6.equals(Ethnicity.Asian) ? 1. : 0.;
             }
             case demEthnC4Black_Formal, demEthnC4Black_Mixed -> {
@@ -5972,28 +4122,22 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case demRgnUKD_Formal, demRgnUKD_Mixed -> {
                 return Region.UKD.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKE_Fair, demRgnUKE_Formal, demRgnUKE_Good, demRgnUKE_Low,
-                 demRgnUKE_Medium, demRgnUKE_Mixed, demRgnUKE_Poor, demRgnUKE_VeryGood -> {
+            case demRgnUKE_Fair, demRgnUKE_Formal, demRgnUKE_Good, demRgnUKE_Low, demRgnUKE_Medium, demRgnUKE_Mixed, demRgnUKE_Poor, demRgnUKE_VeryGood -> {
                 return Region.UKE.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKF_Fair, demRgnUKF_Formal, demRgnUKF_Good,
-                 demRgnUKF_Mixed, demRgnUKF_Poor, demRgnUKF_VeryGood -> {
+            case demRgnUKF_Fair, demRgnUKF_Formal, demRgnUKF_Good, demRgnUKF_Mixed, demRgnUKF_Poor, demRgnUKF_VeryGood -> {
                 return Region.UKF.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKG_Fair, demRgnUKG_Formal, demRgnUKG_Good,
-                 demRgnUKG_Mixed, demRgnUKG_Poor, demRgnUKG_VeryGood -> {
+            case demRgnUKG_Fair, demRgnUKG_Formal, demRgnUKG_Good, demRgnUKG_Mixed, demRgnUKG_Poor, demRgnUKG_VeryGood -> {
                 return Region.UKG.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKH_Fair, demRgnUKH_Formal, demRgnUKH_Good,
-                 demRgnUKH_Mixed, demRgnUKH_Poor, demRgnUKH_VeryGood -> {
+            case demRgnUKH_Fair, demRgnUKH_Formal, demRgnUKH_Good, demRgnUKH_Mixed, demRgnUKH_Poor, demRgnUKH_VeryGood -> {
                 return Region.UKH.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKJ_Fair, demRgnUKJ_Formal, demRgnUKJ_Good,
-                 demRgnUKJ_Mixed, demRgnUKJ_Poor, demRgnUKJ_VeryGood -> {
+            case demRgnUKJ_Fair, demRgnUKJ_Formal, demRgnUKJ_Good, demRgnUKJ_Mixed, demRgnUKJ_Poor, demRgnUKJ_VeryGood -> {
                 return Region.UKJ.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKK_Fair, demRgnUKK_Formal, demRgnUKK_Good,
-                 demRgnUKK_Mixed, demRgnUKK_Poor, demRgnUKK_VeryGood -> {
+            case demRgnUKK_Fair, demRgnUKK_Formal, demRgnUKK_Good, demRgnUKK_Mixed, demRgnUKK_Poor, demRgnUKK_VeryGood -> {
                 return Region.UKK.equals(getRegion()) ? 1.0 : 0.0;
             }
             case demRgnUKL_Formal, demRgnUKL_Mixed -> {
@@ -6002,22 +4146,17 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case demRgnUKM_Formal, demRgnUKM_Low, demRgnUKM_Medium, demRgnUKM_Mixed -> {
                 return Region.UKM.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKN_Fair, demRgnUKN_Formal, demRgnUKN_Good, demRgnUKN_Low,
-                 demRgnUKN_Medium, demRgnUKN_Mixed, demRgnUKN_Poor, demRgnUKN_VeryGood -> {
+            case demRgnUKN_Fair, demRgnUKN_Formal, demRgnUKN_Good, demRgnUKN_Low, demRgnUKN_Medium, demRgnUKN_Mixed, demRgnUKN_Poor, demRgnUKN_VeryGood -> {
                 return Region.UKN.equals(getRegion()) ? 1.0 : 0.0;
             }
 
             // -----------------------------------------------------------------------
             // demYear interaction terms
             // -----------------------------------------------------------------------
-            case demYear_Fair, demYear_Good, demYear_Low, demYear_Medium, demYear_Poor, demYear_VeryGood -> {
-                return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? (double) Parameters.timeTrendStopsIn : (double) getYear();
-            }
             case demYear2020_Formal, demYear2020_Mixed -> {
                 return (getYear() == 2020) ? 1. : 0.;
             }
-            case demYear2021_Fair, demYear2021_Formal, demYear2021_Good,
-                 demYear2021_Mixed, demYear2021_Poor, demYear2021_VeryGood -> {
+            case demYear2021_Fair, demYear2021_Formal, demYear2021_Good, demYear2021_Mixed, demYear2021_Poor, demYear2021_VeryGood -> {
                 return (getYear() == 2021) ? 1. : 0.;
             }
 
@@ -6030,21 +4169,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case eduHighestC4Medium_Formal, eduHighestC4Medium_Mixed -> {
                 return (Education.Medium.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
-            case eduHighestC4LowL1_Fair, eduHighestC4LowL1_Good, eduHighestC4LowL1_Poor, eduHighestC4LowL1_VeryGood -> {
-                return (Education.Low.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case eduHighestC4MediumL1_Fair, eduHighestC4MediumL1_Good, eduHighestC4MediumL1_Poor, eduHighestC4MediumL1_VeryGood -> {
-                return (Education.Medium.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case eduHighestC4NaL1_Fair, eduHighestC4NaL1_Good, eduHighestC4NaL1_Poor, eduHighestC4NaL1_VeryGood -> {
-                return (Education.InEducation.equals(eduHighestC4L1) || Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
-            }
 
             // -----------------------------------------------------------------------
             // health interaction terms
             // -----------------------------------------------------------------------
-            case healthDsblLongtermFlagL1_Fair, healthDsblLongtermFlagL1_Good,
-                 healthDsblLongtermFlagL1_Poor, healthDsblLongtermFlagL1_VeryGood -> {
+            case healthDsblLongtermFlagL1_Fair, healthDsblLongtermFlagL1_Good, healthDsblLongtermFlagL1_Poor, healthDsblLongtermFlagL1_VeryGood -> {
                 return Indicator.True.equals(healthDsblLongtermFlagL1) ? 1. : 0.;
             }
             case healthMentalMcsL1_Fair, healthMentalMcsL1_Good, healthMentalMcsL1_Poor, healthMentalMcsL1_VeryGood -> {
@@ -6053,28 +4182,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case healthPhysicalPcsL1_Fair, healthPhysicalPcsL1_Good, healthPhysicalPcsL1_Poor, healthPhysicalPcsL1_VeryGood -> {
                 return (healthPhysicalPcsL1 != null && healthPhysicalPcsL1 >= 0.) ? healthPhysicalPcsL1 : 0.;
             }
-            case healthSelfRatedExcellent_Formal, healthSelfRatedExcellent_Mixed -> {
-                return (Dhe.Excellent.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedFair_Formal, healthSelfRatedFair_Mixed -> {
-                return (Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedGood_Formal, healthSelfRatedGood_Mixed -> {
-                return (Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedVeryGood_Formal, healthSelfRatedVeryGood_Mixed -> {
-                return (Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
 
             // -----------------------------------------------------------------------
             // labour status interaction terms
             // -----------------------------------------------------------------------
-            case labStatusC4EmployedL1_Fair, labStatusC4EmployedL1_Good,
-                 labStatusC4EmployedL1_Poor, labStatusC4EmployedL1_VeryGood -> {
-                return (Les_c4.EmployedOrSelfEmployed.equals(labC4L1)) ? 1.0 : 0.0;
-            }
-            case labStatusC4RetiredL1_Fair, labStatusC4RetiredL1_Good,
-                 labStatusC4RetiredL1_Poor, labStatusC4RetiredL1_VeryGood -> {
+            case labStatusC4RetiredL1_Fair, labStatusC4RetiredL1_Good, labStatusC4RetiredL1_Poor, labStatusC4RetiredL1_VeryGood -> {
                 return (Les_c4.Retired.equals(labC4L1)) ? 1. : 0.;
             }
 
@@ -6084,67 +4196,36 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case yHhQuintilesMonthC5Q2, yHhQuintilesMonthC5Q2_Formal, yHhQuintilesMonthC5Q2_Mixed -> {
                 return (Ydses_c5.Q2.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
             }
-            case yHhQuintilesMonthC5Q2L1, yHhQuintilesMonthC5Q2L1_Fair, yHhQuintilesMonthC5Q2L1_Good,
-                 yHhQuintilesMonthC5Q2L1_Poor, yHhQuintilesMonthC5Q2L1_VeryGood -> {
+            case yHhQuintilesMonthC5Q2L1, yHhQuintilesMonthC5Q2L1_Fair, yHhQuintilesMonthC5Q2L1_Good, yHhQuintilesMonthC5Q2L1_Poor, yHhQuintilesMonthC5Q2L1_VeryGood -> {
                 return (Ydses_c5.Q2.equals(getYHhQuintilesMonthC5L1())) ? 1.0 : 0.0;
             }
             case yHhQuintilesMonthC5Q3, yHhQuintilesMonthC5Q3_Formal, yHhQuintilesMonthC5Q3_Mixed -> {
                 return (Ydses_c5.Q3.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
             }
-            case yHhQuintilesMonthC5Q3L1, yHhQuintilesMonthC5Q3L1_Fair, yHhQuintilesMonthC5Q3L1_Good,
-                 yHhQuintilesMonthC5Q3L1_Poor, yHhQuintilesMonthC5Q3L1_VeryGood -> {
+            case yHhQuintilesMonthC5Q3L1, yHhQuintilesMonthC5Q3L1_Fair, yHhQuintilesMonthC5Q3L1_Good, yHhQuintilesMonthC5Q3L1_Poor, yHhQuintilesMonthC5Q3L1_VeryGood -> {
                 return (Ydses_c5.Q3.equals(getYHhQuintilesMonthC5L1())) ? 1.0 : 0.0;
             }
             case yHhQuintilesMonthC5Q4, yHhQuintilesMonthC5Q4_Formal, yHhQuintilesMonthC5Q4_Mixed -> {
                 return (Ydses_c5.Q4.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
             }
-            case yHhQuintilesMonthC5Q4L1, yHhQuintilesMonthC5Q4L1_Fair, yHhQuintilesMonthC5Q4L1_Good,
-                 yHhQuintilesMonthC5Q4L1_Poor, yHhQuintilesMonthC5Q4L1_VeryGood -> {
+            case yHhQuintilesMonthC5Q4L1, yHhQuintilesMonthC5Q4L1_Fair, yHhQuintilesMonthC5Q4L1_Good, yHhQuintilesMonthC5Q4L1_Poor, yHhQuintilesMonthC5Q4L1_VeryGood -> {
                 return (Ydses_c5.Q4.equals(getYHhQuintilesMonthC5L1())) ? 1.0 : 0.0;
             }
             case yHhQuintilesMonthC5Q5, yHhQuintilesMonthC5Q5_Formal, yHhQuintilesMonthC5Q5_Mixed -> {
                 return (Ydses_c5.Q5.equals(getYHhQuintilesMonthC5Current())) ? 1.0 : 0.0;
             }
-            case yHhQuintilesMonthC5Q5L1, yHhQuintilesMonthC5Q5L1_Fair, yHhQuintilesMonthC5Q5L1_Good,
-                 yHhQuintilesMonthC5Q5L1_Poor, yHhQuintilesMonthC5Q5L1_VeryGood -> {
+            case yHhQuintilesMonthC5Q5L1, yHhQuintilesMonthC5Q5L1_Fair, yHhQuintilesMonthC5Q5L1_Good, yHhQuintilesMonthC5Q5L1_Poor, yHhQuintilesMonthC5Q5L1_VeryGood -> {
                 return (Ydses_c5.Q5.equals(getYHhQuintilesMonthC5L1())) ? 1.0 : 0.0;
             }
 
             // -----------------------------------------------------------------------
             // lowercase / legacy-naming aliases
             // -----------------------------------------------------------------------
-            case dag_L1 -> {
-                return (double) demAge - 1;
-            }
-            case dagsq_L1 -> {
-                return (double) (demAge - 1) * (demAge - 1);
-            }
-            case dgn -> {
-                return (Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
-            }
-            case dhh_owned_L1 -> {
-                return demPrptyFlagL1 ? 1. : 0.;
-            }
-            case dlltsd01_L1 -> {
-                return Indicator.True.equals(healthDsblLongtermFlagL1) ? 1. : 0.;
-            }
-            case dnc_L1 -> {
-                return (double) getNumberChildrenAllL1();
-            }
-            case drgn1_L1 -> {
-                return (double) getRegion().getValue();
-            }
-            case econ_benefits_L1 -> {
-                return isReceivesBenefitsFlag_L1() ? 1. : 0.;
-            }
-            case financial_distress_L1, L_FinancialDistress -> {
+            case L_FinancialDistress -> {
                 return (yFinDstrssFlag != null && yFinDstrssFlag) ? 1. : 0.;
             }
             case labWageHrlyL1 -> {
                 return (labWageFullTimeHrlyL1 != null && labWageFullTimeHrlyL1 > 0) ? labWageFullTimeHrlyL1 : 0.;
-            }
-            case stm -> {
-                return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? (double) Parameters.timeTrendStopsIn : (double) getYear();
             }
             case wealthPrptyFlagL1 -> {
                 return demPrptyFlagL1 ? 1. : 0.;
@@ -6173,12 +4254,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case yPensPersGrossMonthL2 -> {
                 return yPensPersGrossMonthL2 != null ? yPensPersGrossMonthL2 : 0.;
             }
-            case ypncp_L1 -> {
-                return yCapitalPersMonthL1 != null ? yCapitalPersMonthL1 : 0.;
-            }
-            case ypnoab_L1 -> {
-                return yPensPersGrossMonthL1 != null ? yPensPersGrossMonthL1 : 0.;
-            }
             case yPersAndPartnerGrossDiffMonthL1 -> {
                 return yPersAndPartnerGrossDiffMonthL1 != null ? yPersAndPartnerGrossDiffMonthL1 : 0.;
             }
@@ -6195,11 +4270,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case careHrsProvidedWeekIhsL1 -> {
                 double hrs = (careHrsProvidedWeekL1 != null && careHrsProvidedWeekL1 > 0.0) ? careHrsProvidedWeekL1 : 0.0;
                 return FastMath.asinh(hrs);
-            }
-            case careMarketMixedPartner -> {
-                Person partner = getPartner();
-                if (partner == null) return 0.;
-                return (partner.getHoursFormalSocialCare() > 0.01 && partner.getCareHrsInformalWeek() > 0.01) ? 1. : 0.;
             }
             case careNeedFlag -> {
                 return Indicator.True.equals(careNeedFlag) ? 1. : 0.;
@@ -6227,19 +4297,8 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case demCompHhC4CoupleChL1 -> {
                 return (Dhhtp_c4.CoupleChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
             }
-            case demCompHhC4L1SingleChL1 -> {
-                return (Dhhtp_c4.SingleChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
-            }
             case demCompHhC4SingleNoChL1 -> {
                 return (Dhhtp_c4.SingleNoChildren.equals(getDemCompHhC4L1())) ? 1.0 : 0.0;
-            }
-            case demCompHhC81L1 -> {
-                // Couple with no children, spouse employed (baseline category)
-                Person partner = getPartner();
-                if (partner != null && partner.labC4L1 != null)
-                    return (Les_c4.EmployedOrSelfEmployed.equals(partner.labC4L1) && Dhhtp_c4.CoupleNoChildren.equals(getDemCompHhC4L1())) ? 1. : 0.;
-                else
-                    return 0.;
             }
             case demCompHhC82L1 -> {
                 return getDoubleValue(Variables.Dhhtp_c8_2_L1);
@@ -6279,9 +4338,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             }
             case demMaleFlag -> {
                 return (Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
-            }
-            case demNChild -> {
-                return (double) getNumberChildrenAll();
             }
             case demNChild0to2L1 -> {
                 return (double) getNumberChildren02L1();
@@ -6331,9 +4387,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case demRgnUKH -> {
                 return Region.UKH.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demRgnUKI -> {
-                return Region.UKI.equals(getRegion()) ? 1.0 : 0.0;
-            }
             case demRgnUKJ -> {
                 return Region.UKJ.equals(getRegion()) ? 1.0 : 0.0;
             }
@@ -6349,17 +4402,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case demRgnUKN -> {
                 return Region.UKN.equals(getRegion()) ? 1.0 : 0.0;
             }
-            case demYear -> {
-                return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? (double) Parameters.timeTrendStopsIn : (double) getYear();
-            }
             case eduHighestC4High -> {
                 return (Education.High.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
             case eduHighestC4HighL1 -> {
                 return (Education.High.equals(eduHighestC4L1)) ? 1.0 : 0.0;
-            }
-            case eduHighestC4HighL1_demAge -> {
-                return (Education.High.equals(eduHighestC4L1)) ? demAge : 0.0;
             }
             case eduHighestC4Low -> {
                 return (Education.Low.equals(eduHighestC4)) ? 1.0 : 0.0;
@@ -6370,9 +4417,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case eduHighestC4Low_demAge -> {
                 return (Education.Low.equals(eduHighestC4)) ? demAge : 0.0;
             }
-            case eduHighestC4LowL1_demAge -> {
-                return (Education.Low.equals(eduHighestC4L1)) ? demAge : 0.0;
-            }
             case eduHighestC4Medium -> {
                 return (Education.Medium.equals(eduHighestC4)) ? 1.0 : 0.0;
             }
@@ -6382,17 +4426,11 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case eduHighestC4Medium_demAge -> {
                 return (Education.Medium.equals(eduHighestC4)) ? demAge : 0.0;
             }
-            case eduHighestC4MediumL1_demAge -> {
-                return (Education.Medium.equals(eduHighestC4L1)) ? demAge : 0.0;
-            }
             case eduHighestC4Na -> {
                 return (Education.InEducation.equals(eduHighestC4) || Indicator.True.equals(eduSpellFlag)) ? 1.0 : 0.0;
             }
             case eduHighestC4NaL1 -> {
                 return (Education.InEducation.equals(eduHighestC4L1) || Indicator.True.equals(eduSpellFlagL1)) ? 1.0 : 0.0;
-            }
-            case eduHighestParentC3High -> {
-                return checkHighestParentalEducationEquals(Education.High) ? 1.0 : 0.0;
             }
             case eduHighestParentC3Medium -> {
                 return checkHighestParentalEducationEquals(Education.Medium) ? 1.0 : 0.0;
@@ -6457,12 +4495,6 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case eduSampleFlag_yCapitalPersL2 -> {
                 return Indicator.True.equals(eduSpellFlag) ? getDoubleValue(Variables.Ypncp_L2) : 0.0;
             }
-            case exp_incchange -> {
-                return 0.; // approximate - income change transition not directly stored
-            }
-            case exp_poverty -> {
-                return 0.; // approximate - poverty transition code not directly stored
-            }
             case healthDsblLongtermFlag -> {
                 return Indicator.True.equals(healthDsblLongtermFlag) ? 1. : 0.;
             }
@@ -6476,52 +4508,12 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
                 Person partner = getPartner();
                 return (partner != null && partner.getHealthMentalMcsL1() != null) ? partner.getHealthMentalMcsL1() : 0.;
             }
-            case healthPartnerSelfRatedExcellent, healthPartnerSelfRatedExcel -> {
-                Person partner = getPartner();
-                return (partner != null && Dhe.Excellent.equals(partner.getHealthSelfRated())) ? 1. : 0.;
-            }
-            case healthPartnerSelfRatedFair -> {
-                return getDoubleValue(Variables.Dhesp_Fair);
-            }
-            case healthPartnerSelfRatedGood -> {
-                return getDoubleValue(Variables.Dhesp_Good);
-            }
-            case healthPartnerSelfRatedVeryGood -> {
-                return getDoubleValue(Variables.Dhesp_VeryGood);
-            }
             case healthPhysicalPartnerPcsL1 -> {
                 Person partner = getPartner();
                 return (partner != null && partner.getHealthPhysicalPcsL1() != null) ? partner.getHealthPhysicalPcsL1() : 0.;
             }
             case healthPhysicalPcsL1 -> {
                 return (healthPhysicalPcsL1 != null && healthPhysicalPcsL1 >= 0.) ? healthPhysicalPcsL1 : 0.;
-            }
-            case healthSelfRatedExcellent -> {
-                return (Dhe.Excellent.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedExcellentL1 -> {
-                return (Dhe.Excellent.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case healthSelfRatedFair -> {
-                return (Dhe.Fair.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedFairL1 -> {
-                return (Dhe.Fair.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case healthSelfRatedGood -> {
-                return (Dhe.Good.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedGoodL1 -> {
-                return (Dhe.Good.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case healthSelfRatedVeryGood -> {
-                return (Dhe.VeryGood.equals(healthSelfRated)) ? 1. : 0.;
-            }
-            case healthSelfRatedVeryGoodL1 -> {
-                return (Dhe.VeryGood.equals(healthSelfRatedL1)) ? 1. : 0.;
-            }
-            case healthSelfRatedPoor -> {
-                return (Dhe.Poor.equals(healthSelfRated)) ? 1. : 0.;
             }
             case labPt -> {
                 return (getLabourSupplyHoursWeekly() > 0 && getLabourSupplyHoursWeekly() < Parameters.MIN_HOURS_FULL_TIME_EMPLOYED) ? 1. : 0.;
@@ -6532,28 +4524,19 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             case labStatusC3StudentL1 -> {
                 return Les_c4.Student.equals(labC4L1) ? 1. : 0.;
             }
-            case labStatusC4EmployedL1 -> {
-                return (Les_c4.EmployedOrSelfEmployed.equals(labC4L1)) ? 1.0 : 0.0;
-            }
-            case labStatusC4EmployedL1_Male -> {
-                return (Les_c4.EmployedOrSelfEmployed.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
-            }
             case labStatusC4NotEmployedL1 -> {
                 return (Les_c4.NotEmployed.equals(labC4L1)) ? 1.0 : 0.0;
             }
-            case labStatusC4NotEmployedL1_Male, labStatusC4NotEmployed_MaleL1 -> {
+            case labStatusC4NotEmployed_MaleL1 -> {
                 return (Les_c4.NotEmployed.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
             }
             case labStatusC4RetiredL1 -> {
                 return (Les_c4.Retired.equals(labC4L1)) ? 1.0 : 0.0;
             }
-            case labStatusC4RetiredL1_Male -> {
-                return (Les_c4.Retired.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
-            }
             case labStatusC4StudentL1 -> {
                 return (Les_c4.Student.equals(labC4L1)) ? 1.0 : 0.0;
             }
-            case labStatusC4StudentL1_Male, labStatusC4Student_MaleL1 -> {
+            case labStatusC4Student_MaleL1 -> {
                 return (Les_c4.Student.equals(labC4L1) && Gender.Male.equals(demMaleFlag)) ? 1.0 : 0.0;
             }
             case labStatusC4Retired_MaleL1 -> {

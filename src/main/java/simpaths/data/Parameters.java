@@ -359,7 +359,12 @@ public class Parameters {
     public static String INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
     public static boolean trainingFlag = false;
     public static String INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
-    public static String EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
+    public static String ALIGNMENT_DIRECTORY = INPUT_DIRECTORY + "alignment_files" + File.separator;
+    public static String EUROMOD_DIRECTORY = INPUT_DIRECTORY + "EUROMOD" + File.separator;
+    public static String EUROMOD_OUTPUT_DIRECTORY = EUROMOD_DIRECTORY + "EUROMODoutput" + File.separator;
+    public static String PROJECTIONS_DIRECTORY = INPUT_DIRECTORY + "projections" + File.separator;
+    public static String REGRESSION_DIRECTORY = INPUT_DIRECTORY + "regression_files" + File.separator;
+    public static String SCENARIO_DIRECTORY = INPUT_DIRECTORY + "scenario" + File.separator;
     public static String EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
     public static String EUROMODpolicyScheduleFilename = "EUROMODpolicySchedule";
     public static String DatabaseCountryYearFilename = "DatabaseCountryYear";
@@ -1005,118 +1010,118 @@ public class Parameters {
         realInterestRateInnov = interestRateInnov1;
         disposableIncomeFromLabourInnov = disposableIncomeFromLabourInnov1;
         lifetimeIncomeImpute = lifetimeIncomeImpute1;
-        fixedRetireAge = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1);
+        fixedRetireAge = ExcelAssistant.loadCoefficientMap(SCENARIO_DIRECTORY + "scenario_retirementAgeFixed.xlsx", countryString, 1);
 
         // alignment parameters
-        populationProjections = ExcelAssistant.loadCoefficientMap(getInputDirectory() + populationProjectionFilename, countryString, 3);
+        populationProjections = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + populationProjectionFilename, countryString, 3);
         setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels
-        projectionsHighEdu = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "align_educLevel.xlsx", "High", 1);
-        projectionsLowEdu = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "align_educLevel.xlsx", "Low", 1);
+        projectionsHighEdu = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "align_educLevel.xlsx", "High", 1);
+        projectionsLowEdu = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "align_educLevel.xlsx", "Low", 1);
 
         //Marriage types frequencies:
         marriageTypesFrequency = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "marriageTypes2.xlsx", countryString, 2);
         marriageTypesFrequencyByGenderAndRegion = new LinkedHashMap<Gender, MultiKeyMap<Region, Double>>();	//Create a map of maps to store the frequencies
 
         //Mortality rates
-        mortalityProbabilityByGenderAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "projections_mortality.xlsx", "MortalityByGenderAgeYear", 2);
+        mortalityProbabilityByGenderAgeYear = ExcelAssistant.loadCoefficientMap(PROJECTIONS_DIRECTORY + "projections_mortality.xlsx", "MortalityByGenderAgeYear", 2);
         setMapBounds(MapBounds.Mortality, countryString);
 
         //Fertility rates:
-        fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "projections_fertility.xlsx", "FertilityByYear", 1);
+        fertilityProjectionsByYear = ExcelAssistant.loadCoefficientMap(PROJECTIONS_DIRECTORY + "projections_fertility.xlsx", "FertilityByYear", 1);
         setMapBounds(MapBounds.Fertility, countryString);
 
         //Lifetime incomes
-        equivalisedIncomeByGenderAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "geometric_means", 2);
+        equivalisedIncomeByGenderAgeYear = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifetime_incomes.xlsx", "geometric_means", 2);
         setMapBounds(MapBounds.EquivalisedIncome, countryString);
-        mapRealGDPperCapita = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "gdp_pc", 1, 1);
-        coeffLifetimeIncome1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI1a", 1);
-        coeffLifetimeIncome1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI1b", 1);
-        coeffLifetimeIncome2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI2a", 1);
-        coeffLifetimeIncome2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifetime_incomes.xlsx", "LI2b", 1);
+        mapRealGDPperCapita = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifetime_incomes.xlsx", "gdp_pc", 1, 1);
+        coeffLifetimeIncome1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifetime_incomes.xlsx", "LI1a", 1);
+        coeffLifetimeIncome1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifetime_incomes.xlsx", "LI1b", 1);
+        coeffLifetimeIncome2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifetime_incomes.xlsx", "LI2a", 1);
+        coeffLifetimeIncome2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifetime_incomes.xlsx", "LI2b", 1);
 
         //Unemployment rates
-        unemploymentRatesMaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "RatesMaleGraduates", 1);
+        unemploymentRatesMaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "RatesMaleGraduates", 1);
         setMapBounds(MapBounds.UnemploymentMaleGraduates, countryString);
-        unemploymentRatesMaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "RatesMaleNonGraduates", 1);
+        unemploymentRatesMaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "RatesMaleNonGraduates", 1);
         setMapBounds(MapBounds.UnemploymentMaleNonGraduates, countryString);
-        unemploymentRatesFemaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "RatesFemaleGraduates", 1);
+        unemploymentRatesFemaleGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "RatesFemaleGraduates", 1);
         setMapBounds(MapBounds.UnemploymentFemaleGraduates, countryString);
-        unemploymentRatesFemaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "RatesFemaleNonGraduates", 1);
+        unemploymentRatesFemaleNonGraduatesByAgeYear = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "RatesFemaleNonGraduates", 1);
         setMapBounds(MapBounds.UnemploymentFemaleNonGraduates, countryString);
 
         //RMSE
-        coefficientMapRMSE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_RMSE.xlsx", countryString, 1);
+        coefficientMapRMSE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_RMSE.xlsx", countryString, 1);
 
         //Employments on furlough
-        employmentsFurloughedFull = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_employments_furloughed.xlsx", "FullFurlough", 2);
-        employmentsFurloughedFlex = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_employments_furloughed.xlsx", "FlexibleFurlough", 2);
+        employmentsFurloughedFull = ExcelAssistant.loadCoefficientMap(SCENARIO_DIRECTORY + "scenario_employments_furloughed.xlsx", "FullFurlough", 2);
+        employmentsFurloughedFlex = ExcelAssistant.loadCoefficientMap(SCENARIO_DIRECTORY + "scenario_employments_furloughed.xlsx", "FlexibleFurlough", 2);
 
         //The Raw maps contain the estimates and covariance matrices, from which we bootstrap at the start of each simulation
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", "W1mb-sel", 1);
-        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", "W1ma-sel", 1);
-        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", "W1fb-sel", 1);
-        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_employment_selection.xlsx", "W1fa-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1mb-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1ma-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1fb-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1fa-sel", 1);
 
         // Wages
-        coeffCovarianceWagesMalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", "W1mb", 1);
-        coeffCovarianceWagesMalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", "W1ma", 1);
-        coeffCovarianceWagesFemalesE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", "W1fb", 1);
-        coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wages.xlsx", "W1fa", 1);
+        coeffCovarianceWagesMalesE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wages.xlsx", "W1mb", 1);
+        coeffCovarianceWagesMalesNE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wages.xlsx", "W1ma", 1);
+        coeffCovarianceWagesFemalesE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wages.xlsx", "W1fb", 1);
+        coeffCovarianceWagesFemalesNE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wages.xlsx", "W1fa", 1);
 
         //Labour Supply coefficients from Zhechun's estimates on the EM input data
         //Employment alignment adjusts *fixed-cost* -> add the relevant alignment fixed-cost regressors to each subgroup
-        coeffLabourSupplyUtilityMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Males", 1);
+        coeffLabourSupplyUtilityMales = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourSupplyUtility.xlsx", "Single_Males", 1);
 
-        coeffLabourSupplyUtilityFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Single_Females", 1);
+        coeffLabourSupplyUtilityFemales = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourSupplyUtility.xlsx", "Single_Females", 1);
 
-        coeffLabourSupplyUtilitySingleDep = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleDep", 1);
+        coeffLabourSupplyUtilitySingleDep = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourSupplyUtility.xlsx", "SingleDep", 1);
 
-        coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1);
+        coeffLabourSupplyUtilityACMales = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourSupplyUtility.xlsx", "SingleAC_Males", 1);
 
-        coeffLabourSupplyUtilityACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "SingleAC_Females", 1);
+        coeffLabourSupplyUtilityACFemales = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourSupplyUtility.xlsx", "SingleAC_Females", 1);
 
-        coeffLabourSupplyUtilityCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourSupplyUtility.xlsx", "Couples", 1);
+        coeffLabourSupplyUtilityCouples = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourSupplyUtility.xlsx", "Couples", 1);
 
         //Heckman model employment selection
-        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1mb-sel", 1);
-        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1ma-sel", 1);
-        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1fb-sel", 1);
-        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_employment_selection.xlsx", "W1fa-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1mb-sel", 1);
+        coeffCovarianceEmploymentSelectionMalesNE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1ma-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1fb-sel", 1);
+        coeffCovarianceEmploymentSelectionFemalesNE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_employment_selection.xlsx", "W1fa-sel", 1);
 
         // Load coefficients for Covid-19 labour supply models
         // Coefficients for process assigning simulated people to self-employment
-        coeffCovarianceC19LS_SE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_SE", 1);
+        coeffCovarianceC19LS_SE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_SE", 1);
 
         // Transitions from lagged state: employed
-        coeffC19LS_E1_NE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E1_NE", 1);
-        coeffC19LS_E1_SE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E1_SE", 1);
-        coeffC19LS_E1_FF = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E1_FF", 1);
-        coeffC19LS_E1_FX = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E1_FX", 1);
-        coeffC19LS_E1_SC = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E1_SC", 1);
+        coeffC19LS_E1_NE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E1_NE", 1);
+        coeffC19LS_E1_SE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E1_SE", 1);
+        coeffC19LS_E1_FF = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E1_FF", 1);
+        coeffC19LS_E1_FX = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E1_FX", 1);
+        coeffC19LS_E1_SC = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E1_SC", 1);
 
         // Transitions from lagged state: furloughed full
-        coeffC19LS_FF1_E = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FF1_E", 1);
-        coeffC19LS_FF1_FX = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FF1_FX", 1);
-        coeffC19LS_FF1_NE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FF1_NE", 1);
-        coeffC19LS_FF1_SE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FF1_SE", 1);
+        coeffC19LS_FF1_E = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FF1_E", 1);
+        coeffC19LS_FF1_FX = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FF1_FX", 1);
+        coeffC19LS_FF1_NE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FF1_NE", 1);
+        coeffC19LS_FF1_SE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FF1_SE", 1);
 
         // Transitions from lagged state: furloughed flex
-        coeffC19LS_FX1_E = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FX1_E", 1);
-        coeffC19LS_FX1_FF = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FX1_FF", 1);
-        coeffC19LS_FX1_NE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FX1_NE", 1);
-        coeffC19LS_FX1_SE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_FX1_SE", 1);
+        coeffC19LS_FX1_E = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FX1_E", 1);
+        coeffC19LS_FX1_FF = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FX1_FF", 1);
+        coeffC19LS_FX1_NE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FX1_NE", 1);
+        coeffC19LS_FX1_SE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_FX1_SE", 1);
 
         // Transitions from lagged state: self-employed
-        coeffC19LS_S1_E = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_S1_E", 1);
-        coeffC19LS_S1_NE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_S1_NE", 1);
+        coeffC19LS_S1_E = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_S1_E", 1);
+        coeffC19LS_S1_NE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_S1_NE", 1);
 
         // Transitions from lagged state: not-employed
-        coeffC19LS_U1_E = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_U1_E", 1);
-        coeffC19LS_U1_SE = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_U1_SE", 1);
+        coeffC19LS_U1_E = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_U1_E", 1);
+        coeffC19LS_U1_SE = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_U1_SE", 1);
 
         // For multi logit regressions, put coefficients loaded below into maps
         coeffC19LS_E1Map = new LinkedHashMap<>(); //Add only categories from Les_transitions_E1 enum which are possible destinations for transitions from employment
@@ -1147,136 +1152,136 @@ public class Parameters {
         coeffC19LS_U1Map.put(Les_transitions_U1.SelfEmployed, coeffC19LS_U1_SE);
 
         // Coefficients for new working hours
-        coeffC19LS_E2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E2a", 1);
-        coeffC19LS_E2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_E2b", 1);
-        coeffC19LS_F2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_F2a", 1);
-        coeffC19LS_F2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_F2b", 1);
-        coeffC19LS_F2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_F2c", 1);
-        coeffC19LS_S2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_S2a", 1);
-        coeffC19LS_U2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_U2a", 1);
+        coeffC19LS_E2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E2a", 1);
+        coeffC19LS_E2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_E2b", 1);
+        coeffC19LS_F2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_F2a", 1);
+        coeffC19LS_F2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_F2b", 1);
+        coeffC19LS_F2c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_F2c", 1);
+        coeffC19LS_S2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_S2a", 1);
+        coeffC19LS_U2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_U2a", 1);
 
         // Coefficients for probability of SEISS
-        coeffC19LS_S3 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_labourCovid19.xlsx", "C19LS_S3", 1);
+        coeffC19LS_S3 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_labourCovid19.xlsx", "C19LS_S3", 1);
 
         //Health
-        coeffCovarianceHealthH1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", "H1", 1);
-        coeffCovarianceHealthH2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_health.xlsx", "H2", 1);
+        coeffCovarianceHealthH1 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_health.xlsx", "H1", 1);
+        coeffCovarianceHealthH2 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_health.xlsx", "H2", 1);
 
         //Social care
-        // coeffCovarianceSocialCareS1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S1b", 1); // retired process
-        coeffCovarianceSocialCareS2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2a", 1);
-        coeffCovarianceSocialCareS2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2b", 1);
-        coeffCovarianceSocialCareS2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2c", 1);
-        coeffCovarianceSocialCareS2d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2d", 1);
-        coeffCovarianceSocialCareS2e = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2e", 1);
-        // coeffCovarianceSocialCareS2f = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2f", 1); // retired process
-        // coeffCovarianceSocialCareS2g = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2g", 1); // retired process
-        // coeffCovarianceSocialCareS2h = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2h", 1); // retired process
-        // coeffCovarianceSocialCareS2i = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2i", 1); // retired process
-        // coeffCovarianceSocialCareS2j = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2j", 1); // retired process
-        // coeffCovarianceSocialCareS2k = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S2k", 1); // retired process
-        coeffCovarianceSocialCareS3a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3a", 1);
-        coeffCovarianceSocialCareS3b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3b", 1);
-        coeffCovarianceSocialCareS3c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3c", 1);
-        coeffCovarianceSocialCareS3d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3d", 1);
-        // coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_socialcare.xlsx", "S3e", 1); // retired process
+        // coeffCovarianceSocialCareS1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S1b", 1); // retired process
+        coeffCovarianceSocialCareS2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2a", 1);
+        coeffCovarianceSocialCareS2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2b", 1);
+        coeffCovarianceSocialCareS2c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2c", 1);
+        coeffCovarianceSocialCareS2d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2d", 1);
+        coeffCovarianceSocialCareS2e = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2e", 1);
+        // coeffCovarianceSocialCareS2f = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2f", 1); // retired process
+        // coeffCovarianceSocialCareS2g = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2g", 1); // retired process
+        // coeffCovarianceSocialCareS2h = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2h", 1); // retired process
+        // coeffCovarianceSocialCareS2i = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2i", 1); // retired process
+        // coeffCovarianceSocialCareS2j = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2j", 1); // retired process
+        // coeffCovarianceSocialCareS2k = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S2k", 1); // retired process
+        coeffCovarianceSocialCareS3a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S3a", 1);
+        coeffCovarianceSocialCareS3b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S3b", 1);
+        coeffCovarianceSocialCareS3c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S3c", 1);
+        coeffCovarianceSocialCareS3d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S3d", 1);
+        // coeffCovarianceSocialCareS3e = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_socialcare.xlsx", "S3e", 1); // retired process
 
         //Pension wealth
-        coeffCovariancePensionWealthPW1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW1a", 1);
-        coeffCovariancePensionWealthPW1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW1b", 1);
-        coeffCovariancePensionWealthPW1c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW1c", 1);
-        coeffCovariancePensionWealthPW1d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW1d", 1);
-        coeffCovariancePensionWealthPW1e = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW1e", 1);
-        coeffCovariancePensionWealthPW1f = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW1f", 1);
-        coeffCovariancePensionWealthPW2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW2a", 1);
-        coeffCovariancePensionWealthPW2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW2b", 1);
-        coeffCovariancePensionWealthPW2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_pensions.xlsx", "PW2c", 1);
+        coeffCovariancePensionWealthPW1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW1a", 1);
+        coeffCovariancePensionWealthPW1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW1b", 1);
+        coeffCovariancePensionWealthPW1c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW1c", 1);
+        coeffCovariancePensionWealthPW1d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW1d", 1);
+        coeffCovariancePensionWealthPW1e = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW1e", 1);
+        coeffCovariancePensionWealthPW1f = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW1f", 1);
+        coeffCovariancePensionWealthPW2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW2a", 1);
+        coeffCovariancePensionWealthPW2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW2b", 1);
+        coeffCovariancePensionWealthPW2c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_pensions.xlsx", "PW2c", 1);
 
         //Housing wealth
-        coeffCovariancePensionWealthHW1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW1a", 1);
-        coeffCovariancePensionWealthHW1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW1b", 1);
-        coeffCovariancePensionWealthHW1c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW1c", 1);
-        coeffCovariancePensionWealthHW1d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW1d", 1);
-        coeffCovariancePensionWealthHW2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW2a", 1);
-        coeffCovariancePensionWealthHW2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW2b", 1);
-        coeffCovariancePensionWealthHW2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW2c", 1);
-        coeffCovariancePensionWealthHW2d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_housing.xlsx", "HW2d", 1);
+        coeffCovariancePensionWealthHW1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW1a", 1);
+        coeffCovariancePensionWealthHW1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW1b", 1);
+        coeffCovariancePensionWealthHW1c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW1c", 1);
+        coeffCovariancePensionWealthHW1d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW1d", 1);
+        coeffCovariancePensionWealthHW2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW2a", 1);
+        coeffCovariancePensionWealthHW2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW2b", 1);
+        coeffCovariancePensionWealthHW2c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW2c", 1);
+        coeffCovariancePensionWealthHW2d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_housing.xlsx", "HW2d", 1);
 
         //Financial wealth
-        coeffCovarianceFinancialWealthFW1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_financial.xlsx", "FW1a", 1);
-        coeffCovarianceFinancialWealthFW2a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_financial.xlsx", "FW2a", 1);
-        coeffCovarianceFinancialWealthFW2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_financial.xlsx", "FW2b", 1);
-        coeffCovarianceFinancialWealthFW2c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_financial.xlsx", "FW2c", 1);
-        coeffCovarianceFinancialWealthFW2d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_wealth_financial.xlsx", "FW2d", 1);
+        coeffCovarianceFinancialWealthFW1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_financial.xlsx", "FW1a", 1);
+        coeffCovarianceFinancialWealthFW2a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_financial.xlsx", "FW2a", 1);
+        coeffCovarianceFinancialWealthFW2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_financial.xlsx", "FW2b", 1);
+        coeffCovarianceFinancialWealthFW2c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_financial.xlsx", "FW2c", 1);
+        coeffCovarianceFinancialWealthFW2d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_wealth_financial.xlsx", "FW2d", 1);
 
         //Unemployment
-        coeffCovarianceUnemploymentU1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "U1a", 1);
-        coeffCovarianceUnemploymentU1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "U1b", 1);
-        coeffCovarianceUnemploymentU1c = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "U1c", 1);
-        coeffCovarianceUnemploymentU1d = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_unemployment.xlsx", "U1d", 1);
+        coeffCovarianceUnemploymentU1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "U1a", 1);
+        coeffCovarianceUnemploymentU1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "U1b", 1);
+        coeffCovarianceUnemploymentU1c = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "U1c", 1);
+        coeffCovarianceUnemploymentU1d = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_unemployment.xlsx", "U1d", 1);
 
         //Financial distress
-        coeffCovarianceFinancialDistress = safeReadExcel(Parameters.getInputDirectory() + "reg_financial_distress.xlsx", "FinDis", 1);
+        coeffCovarianceFinancialDistress = safeReadExcel(REGRESSION_DIRECTORY + "reg_financial_distress.xlsx", "FinDis", 1);
 
         //Health mental: level and case-based
-        coeffCovarianceHM1Level = safeReadExcel(Parameters.getInputDirectory() + "reg_health_mental.xlsx", "HM1_L", 1);
-        coeffCovarianceHM2LevelMales = safeReadExcel(Parameters.getInputDirectory() + "reg_health_mental.xlsx", "HM2_Males_L", 1);
-        coeffCovarianceHM2LevelFemales = safeReadExcel(Parameters.getInputDirectory() + "reg_health_mental.xlsx", "HM2_Females_L", 1);
-        coeffCovarianceHM1Case = safeReadExcel(Parameters.getInputDirectory() + "reg_health_mental.xlsx", "HM1_C", 1);
-        coeffCovarianceHM2CaseMales = safeReadExcel(Parameters.getInputDirectory() + "reg_health_mental.xlsx", "HM2_Males_C", 1);
-        coeffCovarianceHM2CaseFemales = safeReadExcel(Parameters.getInputDirectory() + "reg_health_mental.xlsx", "HM2_Females_C", 1);
+        coeffCovarianceHM1Level = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_mental.xlsx", "HM1_L", 1);
+        coeffCovarianceHM2LevelMales = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_mental.xlsx", "HM2_Males_L", 1);
+        coeffCovarianceHM2LevelFemales = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_mental.xlsx", "HM2_Females_L", 1);
+        coeffCovarianceHM1Case = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_mental.xlsx", "HM1_C", 1);
+        coeffCovarianceHM2CaseMales = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_mental.xlsx", "HM2_Males_C", 1);
+        coeffCovarianceHM2CaseFemales = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_mental.xlsx", "HM2_Females_C", 1);
 
         //Health
-        coeffCovarianceDHE_MCS1 = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DHE_MCS1", 1);
-        coeffCovarianceDHE_MCS2Males = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DHE_MCS2_Males", 1);
-        coeffCovarianceDHE_MCS2Females = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DHE_MCS2_Females", 1);
+        coeffCovarianceDHE_MCS1 = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DHE_MCS1", 1);
+        coeffCovarianceDHE_MCS2Males = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DHE_MCS2_Males", 1);
+        coeffCovarianceDHE_MCS2Females = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DHE_MCS2_Females", 1);
 
-        coeffCovarianceDHE_PCS1 = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DHE_PCS1", 1);
-        coeffCovarianceDHE_PCS2Males = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DHE_PCS2_Males", 1);
-        coeffCovarianceDHE_PCS2Females = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DHE_PCS2_Females", 1);
+        coeffCovarianceDHE_PCS1 = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DHE_PCS1", 1);
+        coeffCovarianceDHE_PCS2Males = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DHE_PCS2_Males", 1);
+        coeffCovarianceDHE_PCS2Females = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DHE_PCS2_Females", 1);
 
-        coeffCovarianceDLS1 = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DLS1", 1);
-        coeffCovarianceDLS2Males = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DLS2_Males", 1);
-        coeffCovarianceDLS2Females = safeReadExcel(Parameters.getInputDirectory() + "reg_health_wellbeing.xlsx", "DLS2_Females", 1);
+        coeffCovarianceDLS1 = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DLS1", 1);
+        coeffCovarianceDLS2Males = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DLS2_Males", 1);
+        coeffCovarianceDLS2Females = safeReadExcel(REGRESSION_DIRECTORY + "reg_health_wellbeing.xlsx", "DLS2_Females", 1);
 
         loadEQ5DParameters(countryString);
 
         //Life satisfaction
-//        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_lifesatisfaction.xlsx", "DLS1", 1, columnsLifeSatisfaction1);
+//        coeffCovarianceDLS1 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_lifesatisfaction.xlsx", "DLS1", 1, columnsLifeSatisfaction1);
 
         //Education
-        coeffCovarianceEducationE1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", "E1a", 1);
-        coeffCovarianceEducationE1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", "E1b", 1);
-        coeffCovarianceEducationE2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_education.xlsx", "E2", 1);
+        coeffCovarianceEducationE1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_education.xlsx", "E1a", 1);
+        coeffCovarianceEducationE1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_education.xlsx", "E1b", 1);
+        coeffCovarianceEducationE2 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_education.xlsx", "E2", 1);
 
         //Partnership
-        coeffCovariancePartnershipU1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", "U1", 1);
-        coeffCovariancePartnershipU2 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_partnership.xlsx", "U2", 1);
-        meanCovarianceParametricMatching = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "scenario_parametricMatching.xlsx", "Parameters", 1);
+        coeffCovariancePartnershipU1 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_partnership.xlsx", "U1", 1);
+        coeffCovariancePartnershipU2 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_partnership.xlsx", "U2", 1);
+        meanCovarianceParametricMatching = ExcelAssistant.loadCoefficientMap(SCENARIO_DIRECTORY + "scenario_parametricMatching.xlsx", "Parameters", 1);
 
         //Fertility
-        coeffCovarianceFertilityF1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_fertility.xlsx", "F1", 1);
+        coeffCovarianceFertilityF1 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_fertility.xlsx", "F1", 1);
 
         //Income
-        coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", "I1a", 1);
-        coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", "I1b", 1);
-        coeffCovarianceIncomeI2b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", "I2b", 1);
-        coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", "I3a", 1);
-        coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_income.xlsx", "I3b", 1);
+        coeffCovarianceIncomeI1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_income.xlsx", "I1a", 1);
+        coeffCovarianceIncomeI1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_income.xlsx", "I1b", 1);
+        coeffCovarianceIncomeI2b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_income.xlsx", "I2b", 1);
+        coeffCovarianceIncomeI3a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_income.xlsx", "I3a", 1);
+        coeffCovarianceIncomeI3b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_income.xlsx", "I3b", 1);
 
         //Leaving parental home
-        coeffCovarianceLeaveHomeP1 = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_leave_parental_home.xlsx", "P1", 1);
+        coeffCovarianceLeaveHomeP1 = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_leave_parental_home.xlsx", "P1", 1);
 
         //Homeownership
-        coeffCovarianceHomeownership = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_home_ownership.xlsx", "HO1", 1);
+        coeffCovarianceHomeownership = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_home_ownership.xlsx", "HO1", 1);
 
         //Retirement
-        coeffCovarianceRetirementR1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_retirement.xlsx", "R1a", 1);
-        coeffCovarianceRetirementR1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_retirement.xlsx", "R1b", 1);
+        coeffCovarianceRetirementR1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_retirement.xlsx", "R1a", 1);
+        coeffCovarianceRetirementR1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_retirement.xlsx", "R1b", 1);
 
         //Childcare
-        coeffCovarianceChildcareC1a = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_childcarecost.xlsx", "C1a", 1);
-        coeffCovarianceChildcareC1b = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "reg_childcarecost.xlsx", "C1b", 1);
+        coeffCovarianceChildcareC1a = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_childcarecost.xlsx", "C1a", 1);
+        coeffCovarianceChildcareC1b = ExcelAssistant.loadCoefficientMap(REGRESSION_DIRECTORY + "reg_childcarecost.xlsx", "C1b", 1);
 
         //Bootstrap the coefficients
         if(bootstrapAll) {
@@ -1980,8 +1985,8 @@ public class Parameters {
         MultiKeyCoefficientMap currentEUROMODpolicySchedule;
 
         if (trainingFlag) {
-            File trainingSchedule = new File(getInputDirectory() + "EUROMODoutput" + File.separator + "training" + File.separator + EUROMODpolicyScheduleFilename + ".xlsx");
-            File runSchedule = new File(getInputDirectory() + EUROMODpolicyScheduleFilename + ".xlsx");
+            File trainingSchedule = new File(EUROMOD_TRAINING_DIRECTORY + EUROMODpolicyScheduleFilename + ".xlsx");
+            File runSchedule = new File(EUROMOD_DIRECTORY + EUROMODpolicyScheduleFilename + ".xlsx");
             try {
                 FileUtils.copyFile(trainingSchedule, runSchedule);
             } catch (IOException e) {
@@ -1989,7 +1994,7 @@ public class Parameters {
             }
         }
         
-        currentEUROMODpolicySchedule = ExcelAssistant.loadCoefficientMap(getInputDirectory() + EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1, 3);
+        currentEUROMODpolicySchedule = ExcelAssistant.loadCoefficientMap(EUROMOD_DIRECTORY + EUROMODpolicyScheduleFilename + ".xlsx", country.toString(), 1, 3);
         TreeMap<Integer, String> newEUROMODpolicySchedule = new TreeMap<>();
 
         for (var k : currentEUROMODpolicySchedule.keySet()) {
@@ -2761,18 +2766,18 @@ public class Parameters {
         upratingIndexMapRealGDP = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "economic_time_series.xlsx", "gdp", 1, 1);
         upratingIndexMapInflation = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "economic_time_series.xlsx", "inflation", 1, 1);
         upratingIndexMapRealWageGrowth = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "economic_time_series.xlsx", "wage_growth", 1, 1);
-        socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "care_adjustment", 1, 1);
-        partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "cohabitation_adjustment", 1, 1);
-        studentsTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "students_adjustment", 1, 1);
-        fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "fertility_adjustment", 1, 1);
-        utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_smales", 1, 1);
-        utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_sfemales", 1, 1);
-        utilityTimeAdjustmentACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_acmales", 1, 1);
-        utilityTimeAdjustmentACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_acfemales", 1, 1);
+        socialCareProvisionTimeAdjustment = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "care_adjustment", 1, 1);
+        partnershipTimeAdjustment = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "cohabitation_adjustment", 1, 1);
+        studentsTimeAdjustment = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "students_adjustment", 1, 1);
+        fertilityTimeAdjustment = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "fertility_adjustment", 1, 1);
+        utilityTimeAdjustmentSingleMales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_smales", 1, 1);
+        utilityTimeAdjustmentSingleFemales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_sfemales", 1, 1);
+        utilityTimeAdjustmentACMales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_acmales", 1, 1);
+        utilityTimeAdjustmentACFemales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_acfemales", 1, 1);
 
-        utilityTimeAdjustmentCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_couples", 1, 1);
-        utilityTimeAdjustmentSingleDepMen = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_singledepmen", 1, 1);
-        utilityTimeAdjustmentSingleDepWomen = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_adjustment_series.xlsx", "utility_adj_singledepwomen", 1, 1);
+        utilityTimeAdjustmentCouples = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_couples", 1, 1);
+        utilityTimeAdjustmentSingleDepMen = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_singledepmen", 1, 1);
+        utilityTimeAdjustmentSingleDepWomen = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_adjustment_series.xlsx", "utility_adj_singledepwomen", 1, 1);
 
 
         // rebase indices to base year defined by BASE_PRICE_YEAR
@@ -2781,22 +2786,22 @@ public class Parameters {
         rebaseIndexMap(TimeSeriesVariable.WageGrowth);
 
         //studentShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "social_care_parameters.xlsx", "students", 1,1);
-        studentShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_inSchool.xlsx", "students", 1,1);
+        studentShare = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_inSchool.xlsx", "students", 1,1);
 
         // load year-specific social care policy parameters
         socialCarePolicy = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "social_care_parameters.xlsx", "social care", 1, 8);
-        partneredShare = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_partnered_share.xlsx", "partnered_share", 1, 1);
+        partneredShare = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_partnered_share.xlsx", "partnered_share", 1, 1);
         //employedShareSingleMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "social_care_parameters.xlsx", "employment_smales", 1, 1);
         //employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "social_care_parameters.xlsx", "employment_sfemales", 1, 1);
         //employedShareCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "social_care_parameters.xlsx", "employment_couples", 1, 1);
 
-        employedShareSingleMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_employment.xlsx", "Single_male", 1,1);
-        employedShareACMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_employment.xlsx", "SingleAC_Males", 1,1);
-        employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() +  "alignment_targets_employment.xlsx", "Single_female", 1,1);
-        employedShareACFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_employment.xlsx", "SingleAC_Females", 1,1);
-        employedShareCouples = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_employment.xlsx", "Couples", 1,1);
-        employedShareSingleDepMales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_employment.xlsx", "SingleDep_Males", 1,1);
-        employedShareSingleDepFemales = ExcelAssistant.loadCoefficientMap(Parameters.getInputDirectory() + "alignment_targets_employment.xlsx", "SingleDep_Females", 1,1);
+        employedShareSingleMales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "Single_male", 1,1);
+        employedShareACMales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "SingleAC_Males", 1,1);
+        employedShareSingleFemales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "Single_female", 1,1);
+        employedShareACFemales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "SingleAC_Females", 1,1);
+        employedShareCouples = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "Couples", 1,1);
+        employedShareSingleDepMales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "SingleDep_Males", 1,1);
+        employedShareSingleDepFemales = ExcelAssistant.loadCoefficientMap(ALIGNMENT_DIRECTORY + "alignment_targets_employment.xlsx", "SingleDep_Females", 1,1);
 
     }
 
@@ -3619,15 +3624,29 @@ public class Parameters {
 
     public static void loadEQ5DParameters(String countryString) {
 
-        coeffCovarianceEQ5D = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "reg_eq5d.xlsx", countryString + "_EQ5D_" + eq5dConversionParameters, 1);
+        File regressionFile = new File(REGRESSION_DIRECTORY + "reg_eq5d.xlsx");
+        if (!regressionFile.isFile()) {
+            // Keep small/custom input fixtures that pre-date the subdirectory layout working.
+            regressionFile = new File(INPUT_DIRECTORY + "reg_eq5d.xlsx");
+        }
+        coeffCovarianceEQ5D = ExcelAssistant.loadCoefficientMap(regressionFile.getPath(), countryString + "_EQ5D_" + eq5dConversionParameters, 1);
         regHealthEQ5D = new LinearRegression(coeffCovarianceEQ5D);
     }
+    private static void updateInputSubdirectories() {
+        INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator;
+        ALIGNMENT_DIRECTORY = INPUT_DIRECTORY + "alignment_files" + File.separator;
+        EUROMOD_DIRECTORY = INPUT_DIRECTORY + "EUROMOD" + File.separator;
+        EUROMOD_OUTPUT_DIRECTORY = EUROMOD_DIRECTORY + "EUROMODoutput" + File.separator;
+        PROJECTIONS_DIRECTORY = INPUT_DIRECTORY + "projections" + File.separator;
+        REGRESSION_DIRECTORY = INPUT_DIRECTORY + "regression_files" + File.separator;
+        SCENARIO_DIRECTORY = INPUT_DIRECTORY + "scenario" + File.separator;
+        EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+    }
+
     public static void setWorkingDirectory(String workingDirectory) {
         WORKING_DIRECTORY = workingDirectory;
         INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + "input" + File.separator;
-        INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
-        EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
-        EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+        updateInputSubdirectories();
     }
 
     public static void setInputDirectory(String inputDirectory) {
@@ -3637,9 +3656,7 @@ public class Parameters {
         } else {
             INPUT_DIRECTORY = WORKING_DIRECTORY + File.separator + inputDirectory + File.separator;
         }
-        INPUT_DIRECTORY_INITIAL_POPULATIONS = INPUT_DIRECTORY + "InitialPopulations" + File.separator; //Path to directory containing initial population for each year
-        EUROMOD_OUTPUT_DIRECTORY = INPUT_DIRECTORY + "EUROMODoutput" + File.separator;
-        EUROMOD_TRAINING_DIRECTORY = EUROMOD_OUTPUT_DIRECTORY + "training" + File.separator;
+        updateInputSubdirectories();
     }
     public static void setInputDirectoryInitialPopulations(String inputDirectoryInitialPopulations) {
         File inputpath = new File(inputDirectoryInitialPopulations);
@@ -3680,7 +3697,7 @@ public class Parameters {
 
                     // This fires if the string isn't in the Enum
                     throw new RuntimeException("Validation failed for " + excelFileName + " in " + sheetName +
-                            ": Regressor '" + keyName + "' not found in Person.DoublesVariables. " +
+                            ": Regressor '" + keyName + "' not found in Person.Variables. " +
                             "Check for typos in Excel or missing Enums in Person.java.");
                 }
             }
