@@ -7,7 +7,7 @@
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
 *                       WAS EUL version - UKDA-7215-stata [to wave 7]
 * AUTHORS: 				Liang Shi (LS), Justin van de Ven (JV), Daria Popova (DP)
-* LAST UPDATE:          22/07/2026 (JV)
+* LAST UPDATE:          14/10/2026 (JV)
 * NOTE:					Called from 00_master.do - see master file for further details
 *
 *	File currently compiles data to merge from 2016
@@ -264,6 +264,7 @@ foreach file in "${dir_was_data}/was_round_5_person_eul_oct_2020.dta" ///
 		// ypnbihs
 		recode dvgiemp dvgise dvgippen dvgiinv dvoigrrannual_i dvoiggtannual_i dvoigegannual_i dvoigfrannual_i dvoigmaannual_i dvoigroannual_i dvoigopannual_i (missing=0)
 		gen inci = dvgiemp + dvgise + dvgippen + dvgiinv + dvoigrrannual_i + dvoiggtannual_i + dvoigegannual_i + dvoigfrannual_i + dvoigmaannual_i + dvoigroannual_i + dvoigopannual_i
+		gen pensioner = (dvgippen > 0.01)
 		
 		// fix some partner person numbers
 		duplicates tag case partno, gen(dup)	// Rows should be unique in case partno, assuming monogamy
@@ -287,6 +288,7 @@ foreach file in "${dir_was_data}/was_round_5_person_eul_oct_2020.dta" ///
 		gsort case -hrp person				    /* Place hh ref person at top of household */
 		by case: replace hrp=1 if hrp[1]==0		/* to account for missing reference adults - not really important */
 		by case: gen sps = partno==person[1]	/* spouse/partner of hrp */
+		by case: egen pensioners = sum(pensioner)
 		gen chld = isdep2==1					/* Dependent child */
 		gen adlt = 1-chld						/* Adult */
 		gsort case -hrp -sps person
@@ -416,6 +418,7 @@ foreach file in "${dir_was_data}/was_round_5_person_eul_oct_2020.dta" ///
 // 		label var ocdc_contrate_emee "DC occupational employee pension contribution rate (% of gross employment income)"
 // 		label var ocdc_contrate_emer "DC occupational employer pension contribution rate (% of gross employment income)"
 		label var pp_membu "number of personal pension members in benefit unit"
+		label var pensioners "number of recipients of private pension in benefit unit"
 
 		gen occ_emp_contrib_rate = .
 		replace occ_emp_contrib_rate = max(dvcontocc_emee_dc1,0) + max(dvcontocc_emee_dc2,0) if !missing(dvcontocc_emee_dc1) | !missing(dvcontocc_emee_dc2)
@@ -771,7 +774,7 @@ foreach file in "${dir_was_data}/was_round_5_person_eul_oct_2020.dta" ///
 			cc_debt cc_debt_trans cc_debt_pers hp_debt loan_debt loan_debt_exc_slc loan_debt_slc ///
 			loan_doorstep loan_pawnbroker loan_payday informal_loan_debt highcost_loan_debt ///
 			mail_debt unsec_debt_total unsec_debt_core highcost_debt_proxy lowcost_debt ///
-			op_memb pp_membu op_membu op_db op_dc ///
+			op_memb pp_membu op_membu op_db op_dc pensioners ///
 			pp_core_annual pp_fallback_annual pp_contrib_annual pp_contrib_rate_income priv_total_contrib_rate_inc ///
 			pp_contrib_source_core pp_contrib_source_fallback occ_emp_contrib_rate occ_emp_contrib_annual ///
 			caser5 caser6 caser7 personw5 personw6 personr7
@@ -994,6 +997,8 @@ label var was_pid "Synthetic longitudinal person ID (WAS rounds 5-8 linkage)"
 
 sort was_pid year was_round
 save "${dir_data}/was_wealthdata.dta", replace
+
+
 /**************************************************************/
 *
 *	ANALYSIS OF WORKING VARIABLES

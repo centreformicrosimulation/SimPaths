@@ -710,9 +710,21 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
         if (demAge >= Parameters.AGE_TO_BECOME_RESPONSIBLE) {
 
             if (partner != null) {
-                wealthPensValue = getBenefitUnit().getWealthPensValue() / 2.0;
+
+                if (yPensPersGrossMonth > 0.05) {
+
+                    wealthPensValue = 0.0;
+                }
+                else {
+
+                    if (partner.getYPensPersGrossMonth() > 0.0)
+                        wealthPensValue = getBenefitUnit().getWealthPensValue();
+                    else
+                        wealthPensValue = getBenefitUnit().getWealthPensValue() / 2.0;
+                }
                 wealthNonPensValue = getBenefitUnit().getWealthNonPensValue() / 2.0;
             } else {
+
                 wealthPensValue = getBenefitUnit().getWealthPensValue();
                 wealthNonPensValue = getBenefitUnit().getWealthNonPensValue();
             }
@@ -721,7 +733,7 @@ public class Person implements EventListener, IDoubleSource, IIntSource, Weight,
             privatePension.setContRateOPEe(contRateOPEe);
             privatePension.setContRateOPEr(contRateOPEr);
             privatePension.setContRatePP(contRatePP);
-            privatePension.setPensioner(privatePension.getPensionIncomeAnnual() > 0);
+            privatePension.setPensioner(yPensPersGrossMonth > 0.05);
         }
     }
 

@@ -7,7 +7,7 @@
 * DATA:         	    UKHLS EUL version - UKDA-6614-stata [to wave o]
 *                       WAS EUL version - UKDA-7215-stata [to wave 7]
 * AUTHORS: 				Justin van de Ven, Daria Popova
-* LAST UPDATE:          15 Jan 2026 DP 
+* LAST UPDATE:          14/10/2026 (JV)
 * NOTE:					Called from 00_master.do - see master file for further details
 *
 *********************************************************************/
@@ -22,7 +22,7 @@ log using "${dir_log}/08_wealth_to_ukhls.log", replace
 *********************************************************************/
 cd "${dir_data}"
 disp "imputing wealth data"
-*global yearWealth = 2019
+//global yearWealth = 2019
 
 /**********************************************************************
 *	preliminaries
@@ -119,6 +119,8 @@ set seed `seed'
 gen ee = rnormal()
 gen ee2 = runiform()
 
+gen pensioner = (ypnoab > 0.01)
+
 gen was = 0
 
 gen long bu = idbenefitunit
@@ -192,6 +194,7 @@ use "ukhls_wealthtemp.dta", clear
 gen treat = (single_woman + single_man + couple_ref)
 gsort bu -treat
 by bu: egen chk = sum(treat)
+by bu: egen pensioners = sum(pensioner)
 tab chk
 drop chk
 replace treat = 0 if (bu==bu[_n-1])
@@ -202,6 +205,9 @@ save "ukhls_wealthtemp2.dta", replace
 * identify reference population and append WAS data
 use "ukhls_wealthtemp1.dta", clear
 keep if (treat == 1)
+
+// keep if _n <= 500
+
 append using "was_wealthdata.dta"
 drop if (bu_rp==0)
 *keep if (year==$yearWealth)
@@ -327,7 +333,7 @@ forval kk = 1/`nn' {
 	
 		gen chk = 1-treat
 		local rnk = 1
-		foreach vv in tt grad gradsp gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp {
+		foreach vv in tt grad gradsp gor3 dhe3 idnk04 nk2 dvage07 pct emp empsp pensioners {
 		// limit data point in from dataset to those with the same discrete characteristics
 			replace chk = 0 if (`vv'!=`vv'[`kk'])  
 		}
@@ -340,7 +346,7 @@ forval kk = 1/`nn' {
 			drop chk
 			gen chk = 1-treat
 			local rnk = 2
-			foreach vv in tt grad gor3 nk3 dvage07 pct2 {
+			foreach vv in tt grad gor3 nk3 dvage07 pct2 pensioners {
 				replace chk = 0 if (`vv'!=`vv'[`kk'])
 			}
 			sum chk, mean
@@ -352,7 +358,7 @@ forval kk = 1/`nn' {
 				drop chk
 				gen chk = 1-treat
 				local rnk = 3
-				foreach vv in tt grad gor4 dvage07 pct2 {
+				foreach vv in tt gor4 dvage07 pct2 {
 					replace chk = 0 if (`vv'!=`vv'[`kk'])
 				}
 				sum chk, mean
@@ -418,14 +424,14 @@ keep if (treat)
 *********************************************************************/
 append using "ukhls_wealthtemp2.dta"
 sort bu
-recode wealthi (mis=0)
-recode tot_peni (mis=0)
-recode housingi (mis=0)
-recode mortgagei (mis=0)
-recode unsec_lowi (mis=0)
-recode unsec_highi (mis=0)
-recode op_membui (mis=0)
-recode pp_membui (mis=0)
+recode wealthi (. -9 = 0)
+recode tot_peni (. -9 = 0)
+recode housingi (. -9 = 0)
+recode mortgagei (. -9 = 0)
+recode unsec_lowi (. -9 = 0)
+recode unsec_highi (. -9 = 0)
+recode op_membui (. -9 = 0)
+recode pp_membui (. -9 = 0)
 by bu: egen total_wealth = sum(wealthi)
 by bu: egen total_pensions = sum(tot_peni)
 by bu: egen housing_wealth = sum(housingi)
@@ -440,6 +446,16 @@ replace contRateOPEe = 0.05 if ((treat & op_membu==1) | (op_membu==2 & (dag>17))
 gen contRateOPEr = contRateOPEe
 gen contRatePP = 0
 replace contRatePP = 0.05 if ((treat & pp_membu==1) | (pp_membu==2 & (dag>17)))
+
+// adjust for receipt of pension income
+// from age 65, any receipt of pension income in benefit unit assume all adult members are pensioners
+// under age 65, allow for mixed pensioner / non-pensioner benefit units
+by bu: egen max_age = max(dag)
+gen init_pensions = total_pensions
+replace total_pensions = 0 if (pensioners>0 & max_age>=65)
+replace total_pensions = total_pensions * max(0,(na-pensioners)/max(1,na)) if (max_age<65)
+gen adj_wealth = total_pensions - init_pensions
+replace total_wealth = total_wealth + adj_wealth if (adj_wealth < 0)
 
 recode total_wealth (-9=0)
 recode total_pensions (-9=0)
