@@ -406,6 +406,7 @@ public class Parameters {
     public static double pensionLumpSumCap = 250000;
     private static Map<Integer, Double> fertilityRateByYear;
     private static MultiKeyCoefficientMap populationProjections;
+    private static String populationProjectionFilename = "align_popProjections.xlsx";
     public static final int ALIGN_MIN_AGE_ASSUME_DEATH = 65;
     public static final int ALIGN_MAX_AGE_REQUIRE_MATCH = 65;
     private static int populationProjectionsMaxYear;
@@ -1007,7 +1008,7 @@ public class Parameters {
         fixedRetireAge = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "scenario_retirementAgeFixed.xlsx", countryString, 1);
 
         // alignment parameters
-        populationProjections = ExcelAssistant.loadCoefficientMap(getInputDirectory() + "align_popProjections.xlsx", countryString, 3);
+        populationProjections = ExcelAssistant.loadCoefficientMap(getInputDirectory() + populationProjectionFilename, countryString, 3);
         setMapBounds(MapBounds.Population, countryString);
 
         //Alignment of education levels

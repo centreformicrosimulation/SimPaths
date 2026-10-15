@@ -33,6 +33,9 @@ public class Processed {
     @Column(name = "start_year") int startYear;
     @Column(name = "pop_size") int popSize;
     @Column(name = "no_targets") boolean noTargets;
+    private static final int INHERITANCE_LINEAGE_VERSION = 1;
+    private Integer inheritanceLineageVersion;
+    @Lob private String inheritanceLineage;
     @Transient private Set<BenefitUnit> benefitUnits = null;
     @Transient private Set<Person> persons = null;
 
@@ -118,6 +121,18 @@ public class Processed {
     }
 
     public long getId() {return id;}
+
+    public boolean hasCompatibleInheritanceLineage() {
+        return Objects.equals(inheritanceLineageVersion, INHERITANCE_LINEAGE_VERSION)
+                && inheritanceLineage != null;
+    }
+
+    public String getInheritanceLineage() { return inheritanceLineage; }
+
+    public void setInheritanceLineage(String lineage) {
+        inheritanceLineage = Objects.requireNonNull(lineage);
+        inheritanceLineageVersion = INHERITANCE_LINEAGE_VERSION;
+    }
 
 
     /**

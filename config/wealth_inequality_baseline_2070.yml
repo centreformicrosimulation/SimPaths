@@ -1,0 +1,23 @@
+# Wealth and income inequality with the standard population projections.
+# Initialise in 2021 (the year available in the local database);
+# compare outcomes in 2025-2070.
+# Run with: -config wealth_inequality_baseline_2070.yml
+
+maxNumberOfRuns: 1
+executeWithGui: false
+randomSeed: 606
+startYear: 2021
+endYear: 2070
+popSize: 50000
+
+parameter_args:
+  populationProjectionFilename: align_popProjections.xlsx
+  EUROMODpolicyScheduleFilename: EUROMODpolicySchedule_wealth_scenarios
+
+model_args:
+  bequestSyntheticRecipientCount: 2
+  alignPopulation: true
+  alignCohabitation: true
+  alignFertility: true
+  FERTILITY_ALIGNMENT_END_YEAR: 2070
+  PARTNERSHIP_ALIGNMENT_END_YEAR: 2070

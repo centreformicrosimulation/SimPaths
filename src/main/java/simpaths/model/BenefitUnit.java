@@ -529,7 +529,67 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         wealthTotValue = 0.0;
         if (wealthNonPension != null)
             wealthTotValue = wealthNonPension.getWealthNonPensionValue();
+        else if (wealthNonPensionL1 != null)
+            // Before wealth projection, decisions use the opening balance.
+            wealthTotValue = wealthNonPensionL1.getWealthNonPensionValue();
         wealthTotValue += Objects.requireNonNullElse(wealthPensValue, 0.0);
+        wealthTotValue += model.getInheritanceModule().getIlliquidAssetWealth(this);
+    }
+
+    void addInheritanceCash(double amount) {
+        if (!Double.isFinite(amount) || wealthNonPension == null)
+            throw new IllegalStateException("Inheritance cash requires initialised wealth");
+        wealthNonPension.setWealthFinancialValue(
+                wealthNonPension.getWealthFinancial().getValue() + amount);
+        updateTotalWealth();
+    }
+
+    void addMatureInheritanceCash(double amount) {
+        if (!Double.isFinite(amount) || wealthNonPensionL1 == null)
+            throw new IllegalStateException("Trust maturation requires opening wealth");
+        // Annual projection starts from L1. Crediting only the current balance
+        // would lose this transfer when that projection creates a new object.
+        wealthNonPensionL1.setWealthFinancialValue(
+                wealthNonPensionL1.getWealthFinancial().getValue() + amount);
+        if (wealthNonPension != null)
+            wealthNonPension.setWealthFinancialValue(
+                    wealthNonPension.getWealthFinancial().getValue() + amount);
+        updateTotalWealth();
+    }
+
+    void removeDeceasedPensionStock(double amount) {
+        wealthPensValue = Math.max(0.0, getWealthPensValue(false) - amount);
+        updateTotalWealth();
+    }
+
+    void removeDeceasedPensionStock(Person deceased) {
+        removeDeceasedPensionStock(deceased.getWealthPensValue(false));
+    }
+
+    void sellHomeForInheritance() {
+        if (wealthNonPension == null)
+            throw new IllegalStateException("Housing wealth is not initialised");
+        double netHousing = wealthNonPension.getWealthHousing().getWealthNetHousing();
+        wealthNonPension.getWealthHousing().setWealthPrptyValue(0.0);
+        wealthNonPension.getWealthHousing().setWealthMortgageDebtValue(0.0);
+        wealthNonPension.setWealthFinancialValue(wealthNonPension.getWealthFinancial().getValue() + netHousing);
+        wealthPrptyValue = 0.0;
+        wealthMortgageDebtValue = 0.0;
+        wealthPrptyFlag = false;
+        updateTotalWealth();
+    }
+
+    void clearEstateWealth() {
+        if (wealthNonPension != null) {
+            wealthNonPension.getWealthHousing().setWealthPrptyValue(0.0);
+            wealthNonPension.getWealthHousing().setWealthMortgageDebtValue(0.0);
+            wealthNonPension.setWealthFinancialValue(0.0);
+        }
+        wealthPrptyValue = 0.0;
+        wealthMortgageDebtValue = 0.0;
+        wealthPrptyFlag = false;
+        wealthPensValue = 0.0;
+        updateTotalWealth();
     }
 
 
@@ -779,7 +839,8 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         evaluatedTransfers = new TaxEvaluation(model.getYear(), getRefPersonForDecisions().getDemAge(), getIntValue(Variables.NumberMembersOver17),
                 getIntValue(Variables.NumberChildren04), getIntValue(Variables.NumberChildren59), getIntValue(Variables.NumberChildren1017),
                 hoursWorkedPerWeekM, hoursWorkedPerWeekF, dlltsdM, dlltsdF, careProvidedFlag, originalIncomePerMonth, secondIncomePerMonth,
-                childcareCostPerMonth, socialCareCostPerMonth, getWealthTotValue(Parameters.enableIntertemporalOptimisations), taxInnov);
+                childcareCostPerMonth, socialCareCostPerMonth,
+                getWealthTotValueForDecisions(Parameters.enableIntertemporalOptimisations), taxInnov);
 
         return evaluatedTransfers;
     }
@@ -1910,6 +1971,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     maleIncome = Math.sinh(male.getYMiscPersGrossMonth());
                 }
+                maleIncome += male.getPrivatePension().getPensionIncomeAnnual() / 12.0;
             }
             if (female != null) {
 
@@ -1923,6 +1985,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 } else {
                     femaleIncome = Math.sinh(female.getYMiscPersGrossMonth());
                 }
+                femaleIncome += female.getPrivatePension().getPensionIncomeAnnual() / 12.0;
             }
 
             // Earnings are composed of the labour income and non-benefit non-employment income Yptciihs_dv() (this is monthly, so no need to multiply by WEEKS_PER_MONTH_RATIO)
@@ -4584,6 +4647,16 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         return wealthTotValue;
     }
 
+    /** Claims and minors' trusts appear in net wealth, but are not consumption resources. */
+    public double getWealthTotValueForDecisions() {
+        return getWealthTotValueForDecisions(true);
+    }
+
+    public double getWealthTotValueForDecisions(boolean throwError) {
+        double total = getWealthTotValue(throwError);
+        return total - model.getInheritanceModule().getIlliquidAssetWealth(this);
+    }
+
     public void setNonPensionWealth(Person person) {
 
         wealthNonPensionL1 = new WealthNonPension();
@@ -5163,11 +5236,12 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             Person refPerson = getRefPersonForDecisions();
             boolean toRetire = refPerson.updateRetirementStatus();
             Occupancy occupancy = getOccupancy();
-            if (toRetire && getWealthTotValue() > 0.0) {
+            if (toRetire && getWealthTotValueForDecisions() > 0.0) {
 
-                yPensionAnnual = wealthTotValue * Parameters.pensionLumpSumShare /
+                double spendableWealth = getWealthTotValueForDecisions();
+                yPensionAnnual = spendableWealth * Parameters.pensionLumpSumShare /
                         Parameters.annuityRates.getAnnuityRateByOccupancyBirthYearAge(occupancy, getYear()-refPerson.getDemAge(), refPerson.getDemAge());
-                wealthTotValue *= (1.0 - Parameters.pensionLumpSumShare);
+                wealthTotValue -= spendableWealth * Parameters.pensionLumpSumShare;
 
                 // update person variables
                 Person male = getMale();
@@ -5223,7 +5297,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
 
             Person male = getMale();
             Person female = getFemale();
-            if (getWealthTotValue() < 0) {
+            if (getWealthTotValueForDecisions() < 0) {
 
                 double wageFactor = 0.0;
                 if (male != null) wageFactor += 0.7 * male.getEarningsWeekly(DecisionParams.FULLTIME_HOURS_WEEKLY) * 52.0;
@@ -5232,7 +5306,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 if (wageFactor < 0.1) {
                     phi = 1.0;
                 } else {
-                    phi = -wealthTotValue / wageFactor;
+                    phi = -getWealthTotValueForDecisions() / wageFactor;
                 }
                 phi = Math.min(phi, 1.0);
                 yInvestAnnual = (Parameters.getTimeSeriesRate(model.getYear(), TimeVaryingRate.RealDebtCostLow)*(1.0-phi) +
@@ -5294,7 +5368,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                 throw new RuntimeException("Disposable income not defined.");
             }
 
-            double cashOnHand = Math.max(getWealthTotValue(), DecisionParams.getMinWealthByAge(getIntValue(Variables.MaximumAge)))
+            double cashOnHand = Math.max(getWealthTotValueForDecisions(), DecisionParams.getMinWealthByAge(getIntValue(Variables.MaximumAge)))
                     + getDisposableIncomeMonthly()*12.0 + labStatesContObject.getAvailableCredit() - getNonDiscretionaryConsumptionPerYear();
             if (!Parameters.isFinite(cashOnHand)) {
                 throw new RuntimeException("Problem identifying cash on hand");

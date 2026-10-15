@@ -16,15 +16,15 @@ public class PrivatePension {
     private double contRateOPEe;                         //contribution rate of employee to occupational pension
     private double contRateOPEr;                         //contribution rate of employer to occupational pension
     private double contRatePP;                           //contribution rate to personal pension
-    private double wealth;                               //wealth held in private pensions
-    private boolean isRetired;                           //indicator of whether the person is retired
+    private double wealth;                               //remaining modelled private pension pot
+    private boolean isPensioner;                         //indicator that private pension income has been accessed
     private double lumpSumPayment;                       //value of lump sum payment at time of pension access
-    private double pensionIncomeAnnual;                 //private pension annuity income per year
+    private double pensionIncomeAnnual;                  //private pension annuity income per year
 
     public PrivatePension() {
         memberPP = false;
         memberOP = false;
-        isRetired = false;
+        isPensioner = false;
         contRateOPEr = 0.0;
         contRateOPEe = 0.0;
         contRatePP = 0.0;
@@ -36,7 +36,7 @@ public class PrivatePension {
     public PrivatePension(PrivatePension original) {
         this.memberPP = original.memberPP;
         this.memberOP = original.memberOP;
-        this.isRetired = original.isRetired;
+        this.isPensioner = original.isPensioner;
         this.contRateOPEr = original.contRateOPEr;
         this.contRateOPEe = original.contRateOPEe;
         this.contRatePP = original.contRatePP;
@@ -155,9 +155,10 @@ public class PrivatePension {
         }
     }
 
-    public void projectWealth(double wealthL1, double employmentIncomeAnnual, double growthRate, Les_c4 labC4) {
+    public void projectWealth(PrivatePension previous, double employmentIncomeAnnual, double growthRate, Les_c4 labC4) {
 
-        wealth = wealthL1 * (1.0 + growthRate);
+        // Project the single modelled pension pot.
+        wealth = previous.getWealth() * (1.0 + growthRate);
         if (!Les_c4.EmployedOrSelfEmployed.equals(labC4)) {
 
             contRateOPEe = 0.0;
@@ -178,20 +179,34 @@ public class PrivatePension {
 
     public double projectInPaymentPension(int year, double pensionIncomePerYearL1) {
 
+        isPensioner = true;
+        memberPP = false;
+        memberOP = false;
+        contRateOPEr = 0.0;
+        contRateOPEe = 0.0;
+        contRatePP = 0.0;
         double inflationIndexL1 = Parameters.getTimeSeriesValue(year-1, TimeSeriesVariable.Inflation);
         double inflationIndex = Parameters.getTimeSeriesValue(year, TimeSeriesVariable.Inflation);
-        isRetired = true;
         pensionIncomeAnnual = pensionIncomePerYearL1 * inflationIndexL1 / inflationIndex;
         return pensionIncomeAnnual / 12.0;
     }
 
-    public double projectPensionAccess(int age, Gender male, int year, double wealth) {
+    public double projectPensionAccess(int age, Gender male, int year, PrivatePension previous) {
 
-        lumpSumPayment = Math.min(wealth * Parameters.pensionLumpSumShare, Parameters.pensionLumpSumCap);
+        isPensioner = true;
+        memberPP = false;
+        memberOP = false;
+        contRateOPEr = 0.0;
+        contRateOPEe = 0.0;
+        contRatePP = 0.0;
+        double pot = previous.getWealth();
+        lumpSumPayment = Math.min(pot * Parameters.pensionLumpSumShare, Parameters.pensionLumpSumCap);
         Double annuityPrice = Parameters.annuityRates.getAnnuityRateByGenderAgeYear(male, age, year);
         if (annuityPrice == null)
             throw new RuntimeException("Annuity price not found for " + male + " " + age + " " + year);
-        pensionIncomeAnnual = (wealth - lumpSumPayment) / annuityPrice;
+        pensionIncomeAnnual = (pot - lumpSumPayment) / annuityPrice;
+        // The modelled pot is exhausted by the lump sum and annuity purchase.
+        wealth = 0.0;
         return pensionIncomeAnnual / 12.0;
     }
 
@@ -208,12 +223,12 @@ public class PrivatePension {
         this.lumpSumPayment = lumpSumPayment;
     }
 
-    public boolean isRetired() {
-        return isRetired;
+    public boolean isPensioner() {
+        return isPensioner;
     }
 
-    public void setRetired(boolean retired) {
-        isRetired = retired;
+    public void setPensioner(boolean pensioner) {
+        isPensioner = pensioner;
     }
 
     public double getPensionIncomeAnnual() {
