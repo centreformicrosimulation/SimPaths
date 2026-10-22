@@ -48,7 +48,7 @@ class SidebarInteractionTest(unittest.TestCase):
                                     (".md-nav__container", "background-color 120ms ease")):
             rules = blocks(self.source, SIDEBAR + " " + element)
             self.assertEqual(rules[0]["transition"], transition)
-            self.assertEqual(rules[-1]["transition"], "none")
+            self.assertEqual(rules[-1]["transition"].replace("!important", "").strip(), "none")
         self.assertIn("@media (prefers-reduced-motion: reduce)", self.source)
 
     def test_current_page_keeps_its_marker(self):
