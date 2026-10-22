@@ -35,7 +35,7 @@ class Page(HTMLParser):
             self.h1_count += 1
         if tag == "article":
             self.article_depth += 1
-        if tag == "a" and attrs.get("href"):
+        if tag == "a" and attrs.get("href") and "data-version-target" not in attrs:
             self.links.append(attrs["href"])
 
     def handle_endtag(self, tag):
