@@ -18,7 +18,13 @@ Regenerate the SVG from this directory:
 node render-current-diagram.cjs geometry.json ../../wiki/assets/images/model-structure-uk.svg
 ```
 
-## Status evidence
+## Main status evidence
+
+The main website renderer is checked against `b649c6967db2d9cced068c8878a2979725dc39e0`. `SimPathsModel.buildSchedule()` schedules `BenefitUnit.Processes.UpdateWealth` when `enableIntertemporalOptimisations` is enabled; `BenefitUnit.updateWealth()` adds disposable income less discretionary and non-discretionary expenditure to aggregate wealth. Main does not contain the separate asset-projection classes and inheritance settlement listed below. The renderer therefore marks those separate processes as development extensions. This does not imply that main has no wealth representation.
+
+`uk-current.ccd` remains the preserved development working copy. Regenerate the main website SVG using this branch's renderer, not by exporting that native development copy.
+
+## Preserved development status evidence
 
 Reviewed on 22 October 2026 against `origin/develop`, commit `971d050c521e9d1aa6b86308655bc5ae7d8d8741` (15 October 2026). The key describes UK development implementation, not release readiness, validation or cross-country availability.
 
