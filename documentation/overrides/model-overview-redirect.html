@@ -1,0 +1,20 @@
+{# Compatibility route for bookmarks and links to the former description page. #}
+{% set destination = '../' %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Model overview - {{ config.site_name | e }}</title>
+    <link rel="canonical" href="{{ (config.site_url ~ 'overview/') | e }}">
+    <script>
+      window.location.replace({{ destination | tojson }} + window.location.search + window.location.hash);
+    </script>
+    <noscript><meta http-equiv="refresh" content="0; url={{ destination }}"></noscript>
+  </head>
+  <body>
+    <h1>Model overview</h1>
+    <p>The model description is now part of the <a href="{{ destination }}">Model overview</a>.</p>
+  </body>
+</html>

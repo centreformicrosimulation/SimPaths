@@ -1,0 +1,212 @@
+/* ═══════════════════════════════════════════════
+   DOCUMENTATION LANDING PAGE
+   An editorial directory with muted blue, terracotta and plum panels.
+═══════════════════════════════════════════════ */
+
+.md-typeset .docs-hub--index {
+  --docs-panel-ink: #343134;
+  --docs-panel-copy: #55515C;
+  --docs-panel-rule: rgba(52, 49, 52, 0.16);
+  width: 100%;
+  margin: 0;
+  padding-bottom: 2rem;
+  color: #1f2630;
+  hyphens: none;
+}
+
+.md-typeset .docs-hub--index p {
+  hyphens: none;
+  text-align: left !important;
+}
+
+.md-typeset .docs-index__masthead {
+  margin-bottom: 1.4rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--sp-border-strong);
+}
+
+.md-typeset .docs-index__mark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 2.34rem;
+  padding: 0.1rem 0.3rem;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.md-typeset .docs-index__mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.md-typeset .docs-index__mark svg.docs-index__mark-image--dark {
+  display: none;
+}
+
+.md-typeset .docs-index__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.md-typeset .docs-hub--index h1,
+.md-typeset .docs-hub--index h2 {
+  max-width: none;
+  padding: 0;
+  color: #171b21;
+  border: 0;
+  font-family: "Inter", var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  letter-spacing: -0.025em;
+}
+
+.md-typeset .docs-hub--index h1 {
+  margin: 0;
+  font-size: var(--sp-title-size);
+  font-weight: var(--sp-title-weight);
+  line-height: 1.3;
+}
+
+.md-typeset .docs-hub--index h2 {
+  margin: 0 0 0.6rem;
+  color: var(--docs-panel-ink);
+  font-size: var(--sp-section-size);
+  font-weight: var(--sp-section-weight);
+  line-height: 1.3;
+}
+
+.md-typeset .docs-index__intro {
+  margin: 1.05rem 0 0;
+  max-width: var(--sp-reading-measure);
+  color: rgba(31, 38, 48, 0.72);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.md-typeset .docs-index__section {
+  min-width: 0;
+  padding: 1.2rem 1.3rem 0.3rem;
+  color: var(--docs-panel-ink);
+  background: var(--docs-panel-background);
+  border-radius: 6px;
+}
+
+/* Lighter guide/resource surfaces balance the deeper reference panel. */
+.md-typeset .docs-index__section--guides {
+  --docs-panel-background: #C8DDE8;
+}
+.md-typeset .docs-index__section--resources {
+  --docs-panel-background: #E8BEAD;
+}
+.md-typeset .docs-index__section--reference {
+  --docs-panel-background: #725B73;
+  --docs-panel-ink: #FFFFFF;
+  --docs-panel-copy: #F4EDF3;
+  --docs-panel-rule: rgba(255, 255, 255, 0.25);
+}
+
+.md-typeset .docs-index__secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+}
+
+.md-typeset .docs-index__links { display: grid; }
+.md-typeset .docs-index__section--guides .docs-index__links {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.4rem;
+}
+
+.md-typeset .docs-hub--index .docs-index__section a.docs-index__link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  gap: 0.45rem 0.8rem;
+  min-width: 0;
+  padding: 1rem 0;
+  color: var(--docs-panel-ink) !important;
+  background: transparent;
+  border: 0 !important;
+  border-top: 1px solid var(--docs-panel-rule) !important;
+  transition: none;
+}
+
+.md-typeset .docs-index__link strong {
+  color: var(--docs-panel-ink);
+  font-size: var(--sp-reading-copy-size);
+  font-weight: var(--sp-subheading-weight);
+  line-height: 1.35;
+}
+
+.md-typeset .docs-index__description {
+  grid-column: 1 / -1;
+  color: var(--docs-panel-copy);
+  font-size: var(--sp-label-size);
+  line-height: 1.48;
+}
+
+.md-typeset .docs-index__arrow {
+  color: var(--docs-panel-ink);
+  font-size: 1rem;
+  line-height: 1.1;
+  transition: transform 180ms ease;
+}
+
+.md-typeset .docs-index__link:hover .docs-index__arrow,
+.md-typeset .docs-index__link:active .docs-index__arrow,
+.md-typeset .docs-index__link:focus-visible .docs-index__arrow {
+  transform: translateX(0.18rem);
+}
+
+.md-typeset .docs-index__link:focus-visible {
+  outline: 2px solid var(--docs-panel-ink);
+  outline-offset: 4px;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .docs-hub--index {
+  color: #dce5ee;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .docs-hub--index h1 {
+  color: #edf3f8;
+}
+
+[data-md-color-scheme="slate"] .md-typeset .docs-index__intro {
+  color: rgba(220, 229, 238, 0.68);
+}
+
+@media (max-width: 680px) {
+  .md-typeset .docs-hub--index {
+    width: 100%;
+    margin-left: 0;
+  }
+
+}
+
+@media (max-width: 520px) {
+  .md-typeset .docs-index__mark {
+    width: 2.5rem;
+    padding-inline: 0.1rem;
+  }
+  .md-typeset .docs-index__secondary,
+  .md-typeset .docs-index__section--guides .docs-index__links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The header already carries the mark; give the title room on narrow phones. */
+@media (max-width: 360px) {
+  .md-typeset .docs-index__mark { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-typeset .docs-index__arrow { transition: none; }
+  .md-typeset .docs-index__link:hover .docs-index__arrow,
+  .md-typeset .docs-index__link:active .docs-index__arrow,
+  .md-typeset .docs-index__link:focus-visible .docs-index__arrow { transform: none; }
+}

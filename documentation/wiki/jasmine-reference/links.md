@@ -6,4 +6,4 @@ When an object has more than one link with objects belonging to the same entity 
 
 A problem then arises if one wants to keep record of all the links, as (i) the list size is not a priori defined, (ii) the list size can change over time. The solution envisaged in the JAS-mine architecture is to fully exploit the potentiality of the underlying relational database, and model the link as an object in itself, which will then be stored in a separate table with the identifiers of the two connected nodes and the time.
 
-The JAS-mine demo model [Applications](https://www.microsimulation.ac.uk/jas-mine/demo/job-applications) exemplifies.
+The JAS-mine demo model [Applications](https://www.microsimulation.ac.uk/jas-mine/demo/job-applications) exemplifies this type of relationship in practice.

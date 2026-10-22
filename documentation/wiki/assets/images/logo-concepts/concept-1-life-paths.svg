@@ -1,0 +1,42 @@
+<svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Concept 1: Diverging Life Paths
+       A bold S-curve as the primary path, with fainter parallel paths
+       branching off — representing diverging life courses through a population.
+       The origin node is a person/cohort; paths fan out showing different outcomes. -->
+
+  <defs>
+    <linearGradient id="mainPath" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2478b5"/>
+      <stop offset="100%" stop-color="#4fb3f0"/>
+    </linearGradient>
+    <linearGradient id="fadePath" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2478b5" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#4fb3f0" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Faint diverging paths — life course variations -->
+  <path d="M70 195 C70 220, 170 210, 170 160 C170 115, 60 135, 70 80 C78 35, 140 20, 175 35"
+        stroke="url(#fadePath)" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M70 195 C65 215, 175 230, 170 160 C165 100, 80 120, 70 80 C60 30, 155 10, 185 50"
+        stroke="url(#fadePath)" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M70 195 C80 225, 155 205, 170 160 C185 110, 50 140, 70 80 C90 20, 130 30, 150 25"
+        stroke="url(#fadePath)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Primary S-curve path -->
+  <path d="M70 195 C70 220, 170 220, 170 160 C170 110, 70 130, 70 80 C70 30, 170 30, 170 55"
+        stroke="url(#mainPath)" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+  <!-- Origin node -->
+  <circle cx="70" cy="195" r="14" fill="#2478b5"/>
+  <circle cx="70" cy="195" r="7" fill="white" opacity="0.9"/>
+
+  <!-- Destination node -->
+  <circle cx="170" cy="55" r="14" fill="#4fb3f0"/>
+  <circle cx="170" cy="55" r="7" fill="white" opacity="0.9"/>
+
+  <!-- Small intermediate waypoint nodes on diverging paths -->
+  <circle cx="175" cy="35" r="5" fill="#4fb3f0" opacity="0.4"/>
+  <circle cx="185" cy="50" r="5" fill="#4fb3f0" opacity="0.3"/>
+  <circle cx="150" cy="25" r="5" fill="#4fb3f0" opacity="0.25"/>
+</svg>

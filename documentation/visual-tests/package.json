@@ -1,0 +1,10 @@
+{
+  "name": "simpaths-documentation-layout-tests",
+  "private": true,
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}

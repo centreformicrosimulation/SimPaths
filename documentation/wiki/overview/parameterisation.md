@@ -1,71 +1,42 @@
 # Model Parameterisation
 
-The estimates for the utility functions used in the labour supply model are separately described in Richiardi, M. and He, Z. (2021), “_No one left behind: The labour supply behaviour of the entire Italian population_”, Centre for Microsimulation and Policy Analysis, mimeo.
+The UK model combines estimated behavioural relationships, demographic and alignment targets, tax-benefit donor data, and scenario assumptions. A simulation's specification depends on both its code revision and the input files supplied to it.
 
-The estimates for the psychological distress models are separately described in Kopasker, D., et al. "_Evaluating the influence of taxation and social security policies on psychological distress: a microsimulation study of the UK during the COVID-19 economic crisis._" Social Science & Medicine (2024): 116953.
+The [repository input directory](https://github.com/simpaths/SimPaths/tree/develop/input) is the canonical file inventory. The [parameter-loading code](https://github.com/simpaths/SimPaths/blob/b649c6967db2d9cced068c8878a2979725dc39e0/src/main/java/simpaths/data/Parameters.java) identifies the workbooks and worksheets used by the implementation. The existence of a file alone does not establish that every run uses it: country, module switches and scenario settings also matter.
 
-The model has been parametrised for the UK using data described in the [data section](https://github.com/simpaths/SimPaths/wiki/4.-Data).
+## Tax and benefit inputs {#1-description-of-the-tax-and-benefit-system-display}
 
-The most recent parametrisation of the model is [stored on Github](https://github.com/simpaths/SimPaths/tree/develop/input). 
+SimPaths imputes tax-benefit outcomes from precomputed UKMOD donor files in `input/EUROMODoutput/`. The policy schedule maps simulation years to policy systems. [Tax-Benefit Donors (UK)](../getting-started/data/tax-benefit-donors-uk.md) explains how to obtain and prepare the files; [Modifying Tax-Benefit Settings](../user-guide/tax-benefit-parameters.md) explains scenario configuration.
 
+Training donor data are available in the repository for testing. They are not a substitute for authorised research data.
 
+## Parameters and targets {#2-model-parameters}
 
-## 1. Description of the tax and benefit system display
+| File family | Role |
+| --- | --- |
+| `reg_*.xlsx` | Regression coefficients and, where provided, covariance matrices. Some workbooks contain multiple processes; `reg_RMSE.xlsx` contains residual error scales rather than a separate behavioural equation. |
+| `align_*.xlsx` and `alignment_targets_*.xlsx` | Targets used to align selected simulated outcomes. |
+| `projections_*.xlsx` | Demographic projections, including fertility and mortality inputs. |
+| `scenario_*.xlsx` | Time paths and assumptions for the selected scenario. |
+| `EUROMODpolicySchedule.xlsx` | Maps simulation years to tax-benefit systems. |
+| `social_care_parameters.xlsx` | Social-care policy parameters. |
+| `economic_time_series.xlsx` | Price and wage indices, returns, debt costs and care wages. |
+| `alignment_adjustment_series.xlsx` | Time-varying adjustments for alignment processes. |
 
-Description of the tax and benefit system is provided through UKMOD output files stored in the [EUROMODoutput](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/) folder. Version developed on the basis of test data, which can be shared on GitHub, is available in the [training subfolder](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training). 
+The [Repository Guide's estimation reference](../developer-guide/repository-guide.md#data-pipeline-reference) maps UK Stata scripts to the outcomes they estimate. This is distinct from the workbook inventory: a script can update several workbooks, and a workbook can supply several processes.
 
-To learn more about UKMOD, visit [UKMOD's website](https://www.microsimulation.ac.uk/ukmod/). 
+For example, `reg_health.xlsx` supplies self-rated health and disability; `reg_health_wellbeing.xlsx` supplies SF-12 physical and mental health scores and life satisfaction; and `reg_financial_distress.xlsx` supplies financial distress. These should not be treated as interchangeable health specifications.
 
+## Interpreting estimates and references
 
+The [SimPaths reference paper](https://microsimulation.pub/articles/00318) provides the model-level description. The [Labour supply](modules/labour-income.md) and [Mental health](modules/mental-health.md) pages explain the corresponding processes.
 
-## 2. Model parameters 
+Richiardi and He's 2021 paper, “No one left behind: The labour supply behaviour of the entire Italian population”, concerns the Italian application. It should not be read as an inventory of the current UK coefficient estimates. For UK work, consult the labour-supply specification and the parameter files for the revision being used.
 
-Source: [Github](https://github.com/simpaths/SimPaths/tree/develop/input).
+Kopasker et al. (2024), [Evaluating the influence of taxation and social security policies on psychological distress](https://doi.org/10.1016/j.socscimed.2024.116953), describes a UK application. Later development versions can change its implementation or extend the outcomes; the paper and current code are not automatically identical.
 
-**align_ files**  
-Files listed below contain alignment targets.
+## Reproducible use
 
-* align_educLevel.xlsx
-* align_popProjections.xlsx 
+Record the code revision, parameter-file versions, initial population, donor data, policy schedule and configuration with each analysis. After re-estimation, check coefficient names, outcome coding, worksheet names and covariance matrices against the Java loader, then perform the relevant [validation](../validation/index.md). Do not mix parameter files from different revisions without checking compatibility.
 
-**alignment_targets_ files**  
-Files listed below contain alignment targets for in-school, partnership, and employment shares.
-
-* alignment_targets_employment.xlsx
-* alignment_targets_inSchool.xlsx
-* alignment_targets_partnered_share.xlsx
-
-**projections_ files**  
-Files listed below contain demographic projections.
-
-* projections_fertility.xlsx 
-* projections_mortality.xlsx
-
-**reg_ files**  
-Files listed below contain regression estimates for specific processes described in the [model structure](https://github.com/simpaths/SimPaths/wiki/1.-Model-structure) section.
-
-* reg_RMSE.xlsx 
-* reg_childcarecost.xlsx 
-* reg_education.xlsx 
-* reg_employmentSelection.xlsx
-* reg_fertility.xlsx 
-* reg_health.xlsx 
-* reg_health_mental.xlsx 
-* reg_home_ownership.xlsx 
-* reg_income.xlsx 
-* reg_labourCovid19.xlsx 
-* reg_labourSupplyUtility.xlsx 
-* reg_leaveParentalHome.xlsx 
-* reg_partnership.xlsx 
-* reg_retirement.xlsx 
-* reg_socialcare.xlsx 
-* reg_unemployment.xlsx 
-* reg_wages.xlsx
-
-**scenario_ files**  
-Files listed below contain parameters reflecting specific modelling assumptions. 
-
-* scenario_CPI.xlsx 
-* scenario_employments_furloughed.xlsx 
-* scenario_parametricMatching.xlsx 
-* scenario_retirementAgeFixed.xlsx
+See [Uncertainty Analysis](../user-guide/uncertainty-analysis.md) for the distinction between coefficient resampling, simulation randomness and sensitivity to assumptions.
