@@ -1,5 +1,7 @@
 # The JAS-mine Statistical Package
 
+In SimPaths, `SimPathsCollector` builds and exports summary statistics, while `SimPathsObserver` supplies live charts. See [Statistical display](../overview/modules/statistical-display.md) for run settings and the [collector source](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/experiment/SimPathsCollector.java) for the current implementations. The examples below explain JAS-mine concepts; generic agent and statistic names are not SimPaths configuration keys.
+
 The statistics package is the built-in library of JAS-mine specifically designed to collect data in a simulation context. Since data sets collected from simulations are frequently updated and sometimes data structures change at runtime, the code is optimized to reduce memory occupancy and CPU time consumption.
 
 The present guide shows step by step the package features and their use.
@@ -10,7 +12,7 @@ The package structure is composed of three sections:
 2. the **statistics.reflectors** package contains classes that retrieve data from common java objects;
 3. the **statistics.functions** package contains the functions that compute statistics on data sets. The statistics computing algorithms are mainly based on the `cern.jet.stat` package.
 
-# 1. How JAS-mine retrieves data from objects
+## 1. How JAS-mine retrieves data from objects
 
 In order to compute statistics, a statistical object must be able to dynamically collect data from simulation objects. This represents a problem, since the statistical library classes do not know the structure of the target objects (designed by users) and so they cannot access their internal data using instructions like `myObject.getDatum()`.
 
@@ -79,7 +81,7 @@ This way, the series object will now access the target object's variables throug
 Although boring, this mechanism is more efficient than the previous one, and it is recommended for 'large' (or 'long') simulations. However, the choice between using the reflection or the native access is left to the user.
 
 
-# 2. Series and time series
+## 2. Series and time series
 
 A `Series` is a time memory data collector. It requires a single source and append at each update a new reading from the object to the list of stored values. If the source object implement the `I*Source` interface data are read directly, otherwise they are collected through a type specific reflector (`*Invoker`).
 
@@ -97,7 +99,7 @@ Each of the four classes implements a specific `I*ArraySource` interface, meanin
 The series in not yet a time series, because it does not record the time when the data have been stored. In order to have a time series, the user has to append the series to a `TimeSeries` object, which can contain more than one series, synchronizing them with time.
 
 
-# 3. Cross section objects
+## 3. Cross section objects
 
 A `CrossSection` object retrieves values from each agent or object contained in a Java collection. If these agents or objects implement the `I*Source` interface data are read directly, otherwise they are collected through a type specific reflector (`*Invoker`).
 
@@ -129,7 +131,7 @@ public class Filter implements ICollectionFilter {
 Passing an instance of the `Filter` class to the cross section, we will obtain an array representing the age of the "adult" agents only.
 
 
-# 4. Functions
+## 4. Functions
 
 A data source can be processed by a `*Function` object, which applies the function and return a value, via an `I*Source` interface.
 
@@ -155,7 +157,7 @@ Finally, the following table gives an example of Trace functions which operate o
 | [MultiTraceFunction](https://raw.githack.com/jasmineRepo/JAS-mine-core/master/microsim-core/doc/microsim/statistics/functions/MultiTraceFunction.html) | Computes the minimum, maximum, sum, mean and variance of the present and past readings by storing the sums and the count of the values received over time. |
 
 
-# 5. The encapsulation system
+## 5. The encapsulation system
 
 The `I*Source` and `I*ArraySource` interfaces are used to sequentially encapsulate different computational operations. Every time an object implements one of those interfaces it can be inserted in the encapsulation stack as a source of data used by a subsequent object in the stack. The encapsulation allows an infinite number of operations to be sequentially executed, with a single update operation (see below).
 
@@ -184,7 +186,7 @@ MovingAverageArrayFunction fMAIncome = new MovingAverageArrayFunction(seriesMean
 ```
 
 
-# 6. How statistics are updated
+## 6. How statistics are updated
 
 If user had to update all the elements in the encapsulation system, the system would be very complex to manage. In the previous example, the reader should update the `crossSection` object, than the series and finally the `ma` objects, to obtain a new reading of the moving average.
 

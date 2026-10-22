@@ -147,3 +147,10 @@ input/EUROMODoutput/baseline/*
 
 input/InitialPopulations/original/*
 input/InitialPopulations/base/*
+
+# Documentation build and browser-check output
+/site/
+/documentation/visual-tests/node_modules/
+/documentation/visual-tests/test-results/
+/documentation/visual-tests/playwright-report/
+__pycache__/

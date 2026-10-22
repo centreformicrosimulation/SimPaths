@@ -1,0 +1,84 @@
+/* Developer directory: shared route rows above the existing technical reference. */
+.md-typeset .dev-guide-intro__copy p {
+  margin: 0 0 0.65rem;
+  color: var(--md-default-fg-color);
+  font-size: var(--sp-reading-copy-size);
+  line-height: var(--sp-reading-line-height);
+  text-align: left;
+}
+
+.md-typeset .dev-guide-intro__brand {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+  margin: 1rem 0;
+}
+
+.md-typeset .dev-guide-intro__eyebrow {
+  color: var(--md-default-fg-color--light);
+  font-size: var(--sp-label-size);
+  font-weight: var(--sp-label-weight);
+}
+
+.md-typeset .dev-guide-intro__brand img {
+  display: block;
+  width: 10rem;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+.md-typeset details.dev-guide-panel,
+.md-typeset details.dev-guide-focus {
+  margin: 0.8rem 0;
+  padding: 0;
+  border: 1px solid var(--sp-border-strong);
+  border-radius: 0.25rem !important;
+  background: var(--md-default-bg-color);
+  box-shadow: none;
+  font-size: var(--sp-reading-copy-size);
+  line-height: var(--sp-reading-line-height);
+}
+
+.md-typeset details.dev-guide-focus {
+  border-inline-start: 2px solid var(--sp-accent);
+}
+
+.md-typeset details.dev-guide-panel > summary,
+.md-typeset details.dev-guide-focus > summary {
+  position: relative;
+  margin: 0;
+  padding: 0.7rem 2rem 0.7rem 0.85rem;
+  background: transparent !important;
+  color: var(--md-default-fg-color);
+  font-size: var(--sp-reading-copy-size);
+  font-weight: var(--sp-subheading-weight);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus) > summary::before { display: none; }
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus) > summary::after { right: 0.7rem; }
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus)[open] > summary {
+  border-bottom: 1px solid var(--sp-border-soft);
+}
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus) > summary:hover {
+  color: var(--sp-accent);
+}
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus) > summary:focus-visible {
+  outline: 2px solid var(--sp-accent);
+  outline-offset: -3px;
+}
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus) > :not(summary) {
+  margin-inline: 0.85rem;
+}
+.md-typeset :is(.dev-guide-panel, .dev-guide-focus) :is(p, ul, ol) {
+  text-align: left;
+  hyphens: none;
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.dev-guide-panel,
+[data-md-color-scheme="slate"] .md-typeset details.dev-guide-focus {
+  background: var(--md-default-bg-color);
+}

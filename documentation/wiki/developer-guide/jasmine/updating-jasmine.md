@@ -1,40 +1,35 @@
 # Updating JAS-mine
 
-# 1. Using Apache Maven
+SimPaths manages JAS-mine through Maven. Use the dependency declared in the checked-out `pom.xml`; do not add a second copy of the library manually to an IDE build path.
 
-The easiest way to update the JAS-mine libraries in your project is to use Apache Maven. Maven now comes pre-installed with most IDEs. Details slightly change based on the IDE, the instructions below refer to Eclipse (version Luna). 
+## Check the dependency {#1-using-apache-maven}
 
-Open the `pom.xml` file in Eclipse and go to the Dependencies tab. Select the libraries to update. Click on the Manage button.
+From the repository root:
 
-![JAS-mine dependencies](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-dependencies.png)
+```bash
+mvn dependency:tree
+```
 
-The dependency will now display on the right column, under the "Dependency Management" heading:
+Locate `com.github.jasmineRepo:JAS-mine-core`. The [verified development revision](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/pom.xml) declares version `5.2.0`; this is a version reference, not a claim that it is the latest available release.
 
-![JAS-mine dependencies managed](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-dependencies-managed.png)
+## Evaluate an update
 
-Select it, and click on the Properties button. Then, update the version and press OK.
+1. Create a branch from the appropriate SimPaths development revision.
+2. Review the proposed JAS-mine release and its compatibility with the project's Java version and dependent libraries.
+3. Update the dependency in `pom.xml`, then reload the Maven project in your IDE.
+4. Run the unit and integration tests:
 
-![JAS-mine dependency properties](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-dependency-properties.png)
+    ```bash
+    mvn verify
+    ```
 
-You should now see the new version of the JAS-mine library in the dependencies list:
+5. Build the executables and check the first training-data run, multi-run execution, GUI, regression loading and persistence paths affected by the update.
+6. Include the old and new dependency versions, compatibility changes and test results in the pull request.
 
-![JAS-mine dependencies changed](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-dependencies-changed.png)
+A successful compilation alone does not establish that the simulation behaves identically after a library update.
 
-To update the .jars in the project, you may have to get Maven to update them. This is done by right clicking on the project in Eclipse's 'Package Explorer' window, then choosing the 'Maven / Update Project' menu, as in the screenshot below. Click OK on the window that pops up, and Maven should automatically download the new JAS-mine libraries and add them to the project.
+## IDE setup {#2-manual-update}
 
-![JAS-mine maven update](https://www.microsimulation.ac.uk/wp-content/uploads/documentation/JAS-mine-maven-update.png)
+Import SimPaths as a Maven project using its root `pom.xml`. Maven should supply the dependencies consistently for the IDE, command-line build and CI. The old Eclipse Luna/manual-JAR workflow is not required for this project.
 
-
-# 2. Manual update
-
-An alternative and more involved way to update the JAS-mine libraries is to manually update an existing project to a new version of JAS-mine. This is done by manually downloading the new `JAS-mine-core-with-dependencies` and `JAS-mine-gui-with-dependencies` .jar files from the [JAS-mine download area](https://sourceforge.net/projects/jas-mine/files/Libraries/), and referring to them in your project. In order to do it, right-click on the project you want to update. Select Properties, then go to the Java Build Path tab on the vertical menu and on the Libraries tab on the horizontal menu. Select the old JAS-mine .jars, and remove them. After removal, no JAS-mine libraries should be present in the Libraries tab, as in the screenshot below:
-
-![JAS-mine build path](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-build-path.png)
-
-After [downloading](https://github.com/jasmineRepo) the JAS-mine libraries, copy these files to the 'libs' folder in the Eclipse project (create a 'libs' folder if there isn't one in the project). Then select both JAS-mine .jar files and right click, select 'Build Path / Add To Build Path':
-
-![JAS-mine add build path](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-add-build-path.png)
-
-You can check the JAS-mine .jars are on the build path by right-clicking on the project and selecting 'Build Path / Configure Build Path'. Check the new .jars are there in the Libraries tab. Note that your IDE should no longer show any Errors in your project related to missing JAS-mine classes. You should see the following:
-
-![JAS-mine build path configured](https://www.microsimulation.ac.uk/wp-content/uploads/2019/06/JAS-mine-build-path-1.png)
+See [Environment Setup](../../getting-started/environment-setup.md), [Working in GitHub](../working-in-github.md) and the [JAS-mine core repository](https://github.com/jasmineRepo/JAS-mine-core) for the corresponding project and library guidance.

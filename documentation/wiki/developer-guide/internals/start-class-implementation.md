@@ -1,81 +1,34 @@
 # Start Class Implementation
 
-The [SimPathsStart](https://github.com/simpaths/SimPaths/blob/main/src/main/java/simpaths/experiment/SimPathsStart.java) class is the entry point for running the SimPaths microsimulation model. It provides essential functionalities for initializing the simulation environment and offers methods for configuring simulation parameters, database setup, and user interactions.
+`simpaths.experiment.SimPathsStart` is the single-run entry point. For commands and first-use setup, see [Single Runs](../../user-guide/single-runs.md); this page describes the implementation.
 
-# 1. Overview
+## Startup sequence
 
-This class handles the following primary functionalities:
+1. `main()` parses the command-line arguments.
+2. In GUI mode, `runGUIdialog()` presents the setup choices. In headless mode, `runGUIlessSetup()` performs setup when requested.
+3. A setup-only invocation exits. Otherwise, startup reads the saved database country/year metadata before creating the simulation engine.
+4. The experiment builder registers the model, collector and, where enabled, observer.
+5. The engine builds the experiment. The GUI controls interactive execution; headless execution starts the simulation and waits for completion.
 
-1. **Displaying a GUI:** Users can define startup processes, such as selecting policies, modifying policies, or rebuilding the database, using the dialog box presented by this class.
+In the [checked revision](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/experiment/SimPathsStart.java), run startup explicitly selects the UK and reads its saved start year from `DatabaseCountryYear.xlsx`. Supplying `-s` to a run-only invocation does not rebuild or replace that saved metadata. Use setup to prepare the intended start year.
 
-2. **Selecting simulation country and start year:** The class adjusts country and start year based on user's choice. 
+## Responsibilities
 
-3. **Starting the Simulation Engine:** It initializes the JAS-mine simulation engine, optionally creating and displaying a graphical user interface for the simulation.
+| Component | Responsibility |
+| --- | --- |
+| `parseCommandLineArgs()` | Country/year arguments, mutually exclusive setup-only and run-only modes, GUI and policy-schedule options |
+| `runGUIdialog()` / `runGUIlessSetup()` | Coordinate preparation of the inputs |
+| `buildExperiment()` | Create and register SimPaths managers |
+| `Parameters.databaseSetup()` and input parsers | Build or load the required population and donor inputs |
+| `SimPathsModel.buildObjects()` | Initialise the simulation population and model state |
+| `SimPathsModel.buildSchedule()` | Define the simulation event order |
 
-4. **Selecting and Starting an Experiment:** The `buildExperiment` method configures various components of the SimPaths model, including the model itself, a collector, and an observer.
+Database preparation is not all implemented inside the start class. Follow the called parser and parameter methods before changing input handling.
 
-5. **Creating Database Tables:** The `createDatabaseTables` method facilitates the creation of initial and donor population database tables based on user choices.
+## Extending startup
 
+Keep setup and simulation responsibilities separate. A new option should have a defined default, validation and help text, and should behave consistently in GUI and headless use where both are supported.
 
-# 2. Methods and Functionality
+Test setup-only and run-only paths, missing inputs, saved country/year metadata and the normal training-data workflow. Preserve custom policy schedules unless rewriting them was explicitly requested. Do not reset entity ID counters during setup or between runs.
 
-<details markdown>
-<summary><b>The <code>main</code> method</b></summary>
-
-The `main` method serves as the entry point for running the SimPaths microsimulation model. It initializes simulation parameters, displays a GUI, and starts the JAS-mine simulation engine.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>buildExperiment</code> method</b></summary>
-
-This method is called by the JAS-mine simulation engine to configure the components of the SimPaths model, including the model itself, a collector, and an observer.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>runGUIdialog</code> method</b></summary>
-
-The `runGUIdialog` method allows users to define startup processes for the simulation through a dialog box. Options include running the GUI, selecting policies, modifying policies, and rebuilding the database.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>createDatabaseTables</code> method</b></summary>
-
-This method is responsible for creating database tables required for the simulation. Users can choose to create initial population tables, donor population tables, or both, thus setting up the necessary database environment.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>chooseCountryAndStartYear</code> method</b></summary>
-
-This method displays a GUI for selecting the country and starting year for the simulation. Users make choices via combo-boxes, and the selected values set the simulation's country and starting year. Additionally, the method saves these choices to an Excel file for future use.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>constructAggregatePopulationCSVfile(Country country)</code> method</b></summary>
-
-This method constructs a CSV file by aggregating data from multiple UKMOD/EUROMOD output text files for a specific country. It extracts relevant columns and creates a CSV file that serves as input data for the creation of donor database tables.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>createInitialDatabaseTablesFromCSVfile(Country country)</code> method</b></summary>
-
-This method builds initial population database tables from initial population CSV files. These tables represent the initial population for a specific country and starting year and are foundational for running simulations in the JAS-mine model.
-
-</details>
-
-<details markdown>
-<summary><b>The <code>populateDonorTaxUnitTables(Country country)</code> method</b></summary>
-
-This method populates donor tax unit tables with data from UKMOD/EUROMOD. It gathers information on gross and net income, demographic characteristics and benefits and stores it in the database. The method calculates various attributes related to tax units and adds them to the database tables.
-
-</details>
-
-
-# 3. Usage
-Compiling and running the `SimPathsStart` class launches the app. 
-
+For repeated execution and YAML configuration, see [MultiRun Implementation](multirun-implementation.md).

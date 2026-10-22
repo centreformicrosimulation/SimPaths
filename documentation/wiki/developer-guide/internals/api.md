@@ -1,29 +1,23 @@
 # SimPaths API
 
-SimPaths APIs are published [here](https://simpaths.github.io/SimPaths/javadoc/).
+The API documentation is generated from Javadoc comments in the Java source. Use it to inspect classes and methods; use the [Repository Guide](../repository-guide.md) and [model schedule](../jasmine/model-and-schedule.md) to understand how those components work together.
 
-# 1. Introduction
+## Generate the API locally {#1-introduction}
 
-The SimPaths API documentation is generated using [Maven's Javadoc Plugin](https://maven.apache.org/plugins/maven-javadoc-plugin/).
+From the repository root, with the project's JDK and Maven installed:
 
-Javadoc is a Java tool that automatically generates HTML documentation from [Javadoc comments](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html) embedded in the source code.  
+```bash
+mvn javadoc:javadoc
+```
 
-The documentation website is updated automatically whenever a commit is pushed to the `develop` branch of SimPaths. This process is handled via GitHub Actions using a [Javadoc-publisher workflow developed by MathieuSoysal](https://github.com/MathieuSoysal/Javadoc-publisher.yml). The workflow file is available [here](https://github.com/simpaths/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml).
+Inspect the generated HTML under `target/reports/apidocs/` or `target/site/apidocs/`, depending on the Maven Javadoc plugin version and configuration. The command output reports the destination.
 
-To update the API documentation, add or modify Javadoc comments in the source code following [this guide](https://www.oracle.com/uk/technical-resources/articles/java/javadoc-tool.html), then push your changes to the `develop` branch.
+When changing a public method, document its purpose, inputs, return value, side effects and relevant assumptions. Verify the generated page before submitting the change through the normal code-review process.
 
-# 2. Workflow Details
+## Publishing workflow {#2-workflow-details}
 
-[The workflow](https://github.com/simpaths/SimPaths/blob/develop/.github/workflows/publish-javadoc.yml) automates the generation and publishing of HTML documentation from Javadoc comments whenever changes are pushed to the `develop` branch.
+The website builds the API from the same Git revision as the selected documentation version. Main documentation and its API are published at the default website; the develop version has its own API under `/develop/api/`.
 
-The generated documentation is deployed to the `javadoc` branch of the SimPaths repository.
+The combined Pages publisher runs from `main` after a main update or successful development documentation checks. Both versions must build successfully before either is published. A documentation change should accompany the code change in the same branch and pull request.
 
-The published documentation is hosted using [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site). GitHub Pages is a service that hosts static websites directly from a GitHub repository.
-
-GitHub pages is combined with the GitHub Actions workflow to ensure that the documentation is always up to date without the need for manual deployment:
-
-- The `javadoc` branch contains the generated HTML API documentation.
-- GitHub Pages is configured to use this branch as the site’s content source.
-- Each time the GitHub Actions workflow updates the `javadoc` branch, GitHub Pages automatically refreshes the live site.
-
-
+Use the source revision displayed above to identify the exact build. Branch names identify moving documentation channels; release tags and commit hashes identify reproducible versions.

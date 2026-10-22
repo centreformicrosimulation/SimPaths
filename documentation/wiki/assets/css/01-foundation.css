@@ -1,0 +1,194 @@
+/* ═══════════════════════════════════════════════
+   SimPaths Documentation — Institutional Theme
+   Inter typography · restrained scholarly palette
+═══════════════════════════════════════════════ */
+
+/* ── Self-hosted fonts ── */
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: optional;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/JetBrainsMono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: optional;
+}
+
+:root {
+  --md-text-font: "Inter";
+  --md-code-font: "JetBrains Mono";
+  --sp-heading-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sp-brand-font: var(--sp-heading-font);
+  --sp-hero-title-font: var(--sp-heading-font);
+  --sp-research-font: var(--md-text-font), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Shared editorial scale; display branding and compact metadata stay distinct. */
+  --sp-title-size: 1.8rem;
+  --sp-title-weight: 560;
+  --sp-section-size: 1.16rem;
+  --sp-section-weight: 520;
+  --sp-subheading-size: 0.95rem;
+  --sp-subheading-weight: 560;
+  --sp-reading-copy-size: 0.82rem;
+  --sp-reading-line-height: 1.75;
+  --sp-reading-measure: 42rem;
+  --sp-layout-rail: 11.5rem;
+  --sp-layout-gap: 1.2rem;
+  --sp-page-gutter: 0.8rem;
+  --sp-section-gap: 2.1rem;
+  --sp-subheading-gap: 1.35rem;
+  --sp-label-size: 0.7rem;
+  --sp-label-weight: 550;
+  --sp-meta-size: 0.62rem;
+  --sp-nav-size: 0.675rem;
+  --sp-header-height: 4rem;
+  --sp-header-row-offset: 0rem;
+  --sp-toc-size: 0.67rem;
+}
+
+@media (min-width: 64em) {
+  :root {
+    --sp-header-height: 5rem;
+    --sp-header-row-offset: 0.8rem;
+  }
+}
+
+/* ── White, graphite and berry — drawn from the SimPaths mark ── */
+:root {
+  --sp-midnight:        #343134;
+  --sp-midnight-deep:   #27232D;
+  --sp-crimson:         #712050;
+  --sp-paper:           #FFFFFF;
+  --sp-ghost:           #D5D2DA;
+  --sp-wine:            #45414B;
+  --sp-wine-soft:       #64616B;
+  --sp-accent:          #972A6C;
+  --sp-accent-light:    #B9318A;
+  --sp-accent-bright:   #972A6C;
+  /* Fixed ink for the deliberately light editorial panels in either theme. */
+  --sp-panel-ink:       #343134;
+  --sp-panel-muted:     #64616B;
+  --sp-panel-link:      #972A6C;
+  --sp-panel-link-hover:#712050;
+  --sp-hairline:        linear-gradient(to right, #D5D2DA 0%, #D5D2DA 40%, transparent 100%);
+  --sp-surface:         #FFFFFF;
+  --sp-surface-strong:  #FFFFFF;
+  --sp-border-soft:     rgba(52,49,52,0.1);
+  --sp-border-strong:   rgba(52,49,52,0.16);
+  --sp-shadow-soft:     0 10px 28px rgba(32,22,28,0.06);
+  --sp-shadow-medium:   0 18px 38px rgba(32,22,28,0.1);
+  --sp-sidebar-hover:   rgba(52,49,52,0.05);
+  --sp-sidebar-active:  rgba(151,42,108,0.07);
+  --sp-transition:      all 0.2s ease;
+  --sp-home-hero-bg: #27232D;
+  --sp-home-max: 61rem;
+}
+
+/* Full-bleed bands and off-canvas Material drawers must not widen the page. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* ═══════════════════════════════════════════════
+   MATERIAL THEME PALETTE
+═══════════════════════════════════════════════ */
+
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color:        var(--sp-midnight);
+  --md-primary-fg-color--light: var(--sp-wine);
+  --md-primary-fg-color--dark:  var(--sp-midnight-deep);
+  --md-primary-bg-color:        var(--sp-paper);
+  --md-primary-bg-color--light: rgba(250,249,245,0.7);
+}
+
+[data-md-color-accent="custom"] {
+  --md-accent-fg-color:              var(--sp-crimson);
+  --md-accent-fg-color--transparent: rgba(151,42,108,0.08);
+  --md-accent-bg-color:              var(--sp-paper);
+  --md-accent-bg-color--light:       rgba(250,249,245,0.7);
+}
+
+/* Pure white canvas; neutral layers and readable secondary text. */
+[data-md-color-scheme="default"] {
+  --md-default-bg-color:          var(--sp-paper);
+  --md-default-bg-color--light:   #F6F6F8;
+  --md-default-bg-color--lighter: #EEEDEF;
+  --md-default-bg-color--lightest:#E1DFE5;
+  --md-default-fg-color: #343134;
+  --md-default-fg-color--light: #64616B;
+  --md-default-fg-color--lighter: #79747F;
+  --md-default-fg-color--lightest: #E1DFE5;
+}
+
+/* ═══════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════ */
+
+[data-md-color-scheme="slate"] {
+  color-scheme: dark;
+  --sp-home-hero-bg:              var(--md-default-bg-color);
+  --sp-midnight:                  #F1EDF2;
+  --sp-wine:                      #DCD4DF;
+  --sp-wine-soft:                 #BDB4C4;
+  --sp-ghost:                     #514957;
+  --sp-accent:                    #EFA8D2;
+  --sp-accent-light:              #F6C8E4;
+  --sp-accent-bright:             #EFA8D2;
+  --sp-crimson:                   #F6C8E4;
+  --md-default-bg-color:          #211E26;
+  --md-default-bg-color--light:   #2B2731;
+  --md-default-bg-color--lighter: #36303E;
+  --md-default-bg-color--lightest:#514957;
+  --md-code-bg-color:             #2B2731;
+  --md-default-fg-color:          var(--sp-midnight);
+  --md-default-fg-color--light:   var(--sp-wine-soft);
+  --md-default-fg-color--lighter: #A89CAF;
+  --md-default-fg-color--lightest:#514957;
+  --sp-surface:                   #2B2731;
+  --sp-surface-strong:            #36303E;
+  --sp-border-soft:               rgba(250,249,245,0.08);
+  --sp-border-strong:             rgba(250,249,245,0.14);
+  --sp-shadow-soft:               0 10px 28px rgba(0,0,0,0.22);
+  --sp-shadow-medium:             0 18px 38px rgba(0,0,0,0.3);
+  --sp-sidebar-hover:             rgba(239,168,210,0.08);
+  --sp-sidebar-active:            rgba(239,168,210,0.14);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .highlight {
+  box-shadow: none;
+}
+
+[data-md-color-scheme="slate"] .md-typeset blockquote {
+  background: var(--sp-surface);
+  border-color: var(--sp-border-soft);
+  border-left-color: var(--sp-accent);
+}
+
+/* ═══════════════════════════════════════════════
+   LINKS
+═══════════════════════════════════════════════ */
+
+.md-typeset a:not(.md-button):not(.headerlink):not(.md-nav__link) {
+  color: var(--sp-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.md-typeset a:not(.md-button):not(.headerlink):not(.md-nav__link):hover {
+  color: var(--sp-crimson);
+  border-bottom-color: var(--sp-crimson);
+}
+
+/* Inline links remain identifiable without relying on hue. */
+.md-typeset p a:not(.md-button) { text-decoration: underline; text-underline-offset: 0.16em; }
+@media (prefers-reduced-motion: reduce) {
+  :root { --sp-transition: none; }
+  .md-tabs__link::after, .md-button, .simpaths-home-research-band :is(a.research-entry, .research-title) { transition: none !important; transform: none !important; }
+}
