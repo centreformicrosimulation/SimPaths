@@ -1,31 +1,29 @@
 # Website publication
 
-The default site at https://simpaths.org/ is built from main. The selectable develop site at https://simpaths.org/develop/ describes unreleased code. Each build displays its source commit and any tag pointing exactly at that commit. Channels are not release identifiers.
+https://simpaths.org/ is built only from `develop`, including matching Javadoc. There is one public site, with no version selector or separate `/develop/` site. Documentation follows ongoing model development; it may describe features not yet included in the latest release.
 
 ## Editing
 
-Keep model documentation changes in the same pull request as their code. Main corrections should also be merged into develop. Shared theme changes follow the same route. Do not publish from the retired documentation branch.
+Keep documentation beside its model code. Start website changes from the latest `develop`, preview and check them, and push only the intended website files. Trusted maintainers can push small website edits directly. Code, input data and publishing-system changes should receive normal review. Documentation for a model change belongs in the same change as its implementation.
+
+Bring code and documentation from develop into main together for releases. Main is not a publishing branch. No separate documentation branch is needed.
 
 ## Publication
 
-Documentation checks build the selected branch and its Javadoc without write permissions. A publisher running from main builds frozen revisions of both branches and publishes one Pages artifact. A successful push check on develop triggers that publisher; pull-request checks never deploy. Both builds must pass. The deploy job rejects a build if either branch has advanced. Only that job has Pages write permission.
+Documentation checks run on both branches and their pull requests without publishing. A push to `develop`, or a manual deployment explicitly run on `develop`, builds one frozen develop revision and its matching Javadoc. The workflow checks the site, uploads one Pages artifact, and rejects a superseded build. Only the deploy job has Pages write permission. The github-pages environment permits deployments from develop only.
 
-The selector preserves the current page and anchor when the page exists in the destination version. Otherwise it shows the destination homepage with an explanation. Develop pages carry noindex metadata and separate search and API output.
+Each successful deployment replaces the entire site. If a build fails, the existing website remains published. Main pushes do not deploy. Until main receives this workflow at release time, its old workflow may still run on main pushes, but the deployment environment blocks its publication.
 
 ## Local build
 
-Install documentation/requirements.txt, JDK 25 and Maven. Run:
+Install `documentation/requirements.txt`, JDK 25 and Maven, then run:
 
 ```sh
-bash documentation/scripts/build-version.sh main /tmp/simpaths-main-site
-# In a develop checkout:
-bash documentation/scripts/build-version.sh develop /tmp/simpaths-develop-site
+bash documentation/scripts/build-version.sh develop /tmp/simpaths-website
 ```
 
-Serve the main output with develop output copied into its develop/ directory to test the selector. Ordinary mkdocs serve works without generating the API; use the full build to verify API links.
+The branch argument identifies the checkout being checked, not a public channel. Ordinary `mkdocs serve` previews content without regenerating the API; use the full build to verify API links.
 
-## Initial migration and rollback
+## Rollback
 
-Land the develop migration first, then the main migration after its required review. The existing documentation deployment remains available until the main publisher succeeds. Verify both channels, source commits, search, assets, selector and APIs at simpaths.org. Only then disable the old documentation-branch deployment and archive that branch. Do not delete either source branch or the existing Pages deployment during migration.
-
-If either source build fails, the existing website remains published. To roll back, revert the offending source change and rerun the publisher from main. Historical tags remain in Git; this migration does not publish a separate site for every historical release.
+Revert the offending change on develop and rerun its publisher. Historical releases are identified by Git tags and commits; they do not create additional websites.

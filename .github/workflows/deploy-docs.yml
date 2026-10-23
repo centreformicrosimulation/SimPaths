@@ -1,12 +1,8 @@
-name: Deploy versioned documentation
+name: Deploy documentation
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
-  workflow_run:
-    workflows: [Documentation checks]
-    types: [completed]
     branches: [develop]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -14,25 +10,22 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    if: github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository))
+    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     outputs:
-      main: ${{ steps.revisions.outputs.main }}
-      develop: ${{ steps.revisions.outputs.develop }}
+      source: ${{ steps.revisions.outputs.source }}
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: develop
           persist-credentials: false
           fetch-depth: 0
-      - name: Freeze both source revisions
+      - name: Freeze publishing revision
         id: revisions
         run: |
-          git fetch origin main develop --tags
-          echo "main=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
-          echo "develop=$(git rev-parse origin/develop)" >> "$GITHUB_OUTPUT"
-          git checkout --detach origin/main
-          git worktree add "$RUNNER_TEMP/develop-source" origin/develop
+          git fetch origin develop --tags
+          echo "source=$(git rev-parse origin/develop)" >> "$GITHUB_OUTPUT"
+          git checkout --detach origin/develop
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
@@ -42,21 +35,14 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: maven
-      - name: Build main
-        run: bash documentation/scripts/build-version.sh main "$RUNNER_TEMP/published"
-      - name: Build develop
-        working-directory: ${{ runner.temp }}/develop-source
-        run: |
-          pip install -r documentation/requirements.txt
-          bash documentation/scripts/build-version.sh develop "$RUNNER_TEMP/develop-site"
-      - name: Assemble channels
-        run: |
-          mv "$RUNNER_TEMP/develop-site" "$RUNNER_TEMP/published/develop"
-          python documentation/scripts/check-versioned-site.py "$RUNNER_TEMP/published"
+      - name: Build website and matching API
+        run: bash documentation/scripts/build-version.sh develop "$RUNNER_TEMP/published"
+      - name: Verify publication contents
+        run: python documentation/scripts/check-published-site.py "$RUNNER_TEMP/published"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify channel switching in a browser
+      - name: Verify published site in a browser
         working-directory: documentation/visual-tests
         run: |
           npm ci
@@ -64,7 +50,7 @@ jobs:
           python3 -m http.server 8316 --bind 127.0.0.1 --directory "$RUNNER_TEMP/published" &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
-          npx playwright test --config versioning.config.mjs
+          npx playwright test --config publication.config.mjs
       - uses: actions/upload-pages-artifact@v4
         with:
           path: ${{ runner.temp }}/published
@@ -83,10 +69,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          MAIN_SHA: ${{ needs.build.outputs.main }}
-          DEVELOP_SHA: ${{ needs.build.outputs.develop }}
+          SOURCE_SHA: ${{ needs.build.outputs.source }}
         run: |
-          test "$(gh api "repos/$REPOSITORY/commits/main" --jq .sha)" = "$MAIN_SHA"
-          test "$(gh api "repos/$REPOSITORY/commits/develop" --jq .sha)" = "$DEVELOP_SHA"
+          test "$(gh api "repos/$REPOSITORY/commits/develop" --jq .sha)" = "$SOURCE_SHA"
       - uses: actions/deploy-pages@v4
         id: deployment

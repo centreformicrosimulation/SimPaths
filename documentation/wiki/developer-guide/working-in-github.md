@@ -1,6 +1,6 @@
 # Working in GitHub
 
-SimPaths development uses Git branches and pull requests. Code changes normally target `develop`; stable releases are maintained on `main`. Documentation lives alongside the model: use `main` for corrections to the default website and `develop` for development-only features.
+SimPaths development uses Git branches and pull requests. Code changes normally target `develop`; stable releases are maintained on `main`. Documentation lives alongside the model: edit `develop`, which publishes the website, and bring code and documentation into `main` together for releases.
 
 ## Prepare a fork and local clone
 
@@ -36,9 +36,9 @@ git merge --ff-only upstream/develop
 git switch -c short-purposeful-name
 ```
 
-Use the equivalent fetch, branch and checkout controls in GitHub Desktop if preferred. Do not work directly on `main` or `develop`, and do not mix unrelated changes in one branch.
+Use the equivalent fetch, branch and checkout controls in GitHub Desktop if preferred. For model changes, use a separate branch rather than working directly on `main` or `develop`. Do not mix unrelated changes in one branch.
 
-For documentation work, start from the branch whose model you are documenting. Target `main` for corrections to the current default version and `develop` for changes accompanying unreleased code. Bring main corrections into develop through the normal merge workflow.
+For documentation work, start from the latest `develop`. It publishes the website at simpaths.org, including documentation for ongoing development. Trusted maintainers can push small website edits directly after checking them; model changes should follow the reviewed pull-request workflow. Bring code and documentation into `main` together when preparing a release.
 
 ## Make and verify the change
 

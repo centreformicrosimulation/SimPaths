@@ -25,7 +25,6 @@
 {% block tabs %}{% endblock %}
 
 {% block content %}
-  {% include "partials/version-selector.html" %}
   <span data-sp-page-classes="{{ page_classes(page) }}" hidden></span>
   {% set trail = namespace(items=[]) %}
   {% if page and not page.is_homepage %}
@@ -50,14 +49,12 @@
     </nav>
   {% endif %}
   {{ super() }}
-  {% if page and page.url == 'developer-guide/internals/api/' %}<p><a href="{{ 'api/index.html' | url }}">Open the API for {{ config.extra.docs_version.channel }}</a></p>{% endif %}
+  {% if page and page.url == 'developer-guide/internals/api/' %}<p><a href="{{ 'api/index.html' | url }}">Open the API documentation</a></p>{% endif %}
   {% include "partials/page-navigation.html" %}
 {% endblock %}
 
 {% block extrahead %}
-  <script src="{{ 'assets/js/version-selector.js' | url }}"></script>
   {{ super() }}
-  {% if config.extra.docs_version.channel == 'develop' %}<meta name="robots" content="noindex, nofollow">{% endif %}
   <meta property="og:site_name" content="{{ config.site_name | e }}">
   {% if page and page.is_homepage %}
   <script type="application/ld+json">

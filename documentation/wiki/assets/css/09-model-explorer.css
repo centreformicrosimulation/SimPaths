@@ -169,3 +169,19 @@
   .annual-explorer__picker { display: none; }
   .annual-explorer--enhanced .annual-explorer__stages { display: block; }
 }
+
+/* Quiet supporting controls beneath the model diagram. */
+.md-typeset .diagram-key { margin: 1rem 0 1.6rem; font-size: .75rem; }
+.md-typeset details.diagram-key__notes { margin: 0; padding: 0; border: 0; border-radius: 0 !important; background: transparent; box-shadow: none; font-size: inherit; overflow: visible; }
+.md-typeset .diagram-key__notes > summary { display: inline-flex; align-items: center; gap: .5rem; margin: 0; padding: .25rem 0; background: transparent !important; color: var(--md-accent-fg-color); font-weight: 500; cursor: pointer; }
+.md-typeset .diagram-key__notes > summary::before { display: none; }
+.md-typeset .diagram-key__notes > summary::after { content: "+"; position: static; width: auto; height: auto; background: none; mask: none; transform: none; }
+.md-typeset .diagram-key__notes[open] > summary::after { content: "−"; }
+.md-typeset .diagram-key__notes > summary:focus-visible { outline: 2px solid var(--md-accent-fg-color); outline-offset: 4px; }
+.md-typeset .diagram-key__notes dl { margin: .3rem 0 .9rem; }
+.md-typeset .diagram-key__notes dt { margin-top: .8rem; font-weight: 600; }
+.md-typeset .diagram-key__notes dd { margin: .25rem 0 0; line-height: 1.65; }
+.md-typeset .diagram-key__notes > p { font-size: .7rem; }
+@media (max-width: 50em) {
+}
+.md-typeset .diagram-key__full-size { display: inline-block; margin-top: .5rem; font-size: .7rem; }
