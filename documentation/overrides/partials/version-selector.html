@@ -1,7 +1,0 @@
-{% set version = config.extra.docs_version %}
-<nav class="sp-version" aria-label="Documentation version" data-docs-channel="{{ version.channel }}" data-docs-page="{{ page.url if page else '' }}">
-  <span>Version: <span class="sp-version__channel">{{ version.channel }}</span>{% if version.channel == 'develop' %} · Unreleased development{% endif %}</span>
-  <a href="{{ ('/develop/' if version.channel == 'main' else '/') ~ (page.url if page else '') }}" data-version-target="{{ 'develop' if version.channel == 'main' else 'main' }}">{{ 'View develop' if version.channel == 'main' else 'View main' }}</a>
-  <a class="sp-version__source" href="https://github.com/simpaths/SimPaths/tree/{{ version.sha }}" title="Source revision">{{ version.sha[:7] }}{% if version.tags %} · {{ version.tags | join(', ') }}{% endif %}</a>
-  <span data-version-notice role="status" hidden></span>
-</nav>
