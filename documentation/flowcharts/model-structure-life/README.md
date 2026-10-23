@@ -8,7 +8,7 @@ The user supplied `model structure - LIFe.ccd` (ClickCharts). Related Box source
 - `web.ccd`: original geometry with the two left-hand explanatory text blocks removed.
 - `uk-current.ccd`: native working copy with UK implementation colours updated on 22 October 2026. Geometry and module labels are preserved. Its legend is supplied by the website; dashed extension outlines are applied in the SVG renderer.
 - `geometry.json`: object centres and half-dimensions extracted from `web.ccd`.
-- `render-current-diagram.cjs`: independent SVG rendering of the source geometry, labels and connections. This avoids the trial watermark on subsequent ClickCharts exports and provides scalable text. It adds a dated key and dashed outlines for unimplemented extensions. Website labels use a larger text scale for readability; childcare is labelled as costs and the macro heading as wage-growth assumptions to reflect the implemented scope. Two narrow boxes are widened slightly to retain text padding.
+- `render-current-diagram.cjs`: independent SVG rendering of the source geometry, labels and connections. This avoids the trial watermark on subsequent ClickCharts exports and provides scalable text. It adds a dated heading and a single dashed-line key for components under development. Website labels use a larger text scale for readability. Two narrow boxes are widened slightly to retain text padding.
 - Website asset: `../../wiki/assets/images/model-structure-uk.svg`.
 - Earlier historical ClickCharts PNG: `../../wiki/assets/images/model-structure-life.png` (Summer 2025 country-status colours; no longer used by the overview).
 
@@ -48,3 +48,9 @@ Checked against main c62e487e42f5b658af3e91718c794154eec4a846. Model source is u
 ## Publishing-source change, 23 October 2026
 
 The website now follows develop (model code checked at 11bec2bd95b9caff1562509b32dcb375a6cbe15d). The revised geometry and explanatory notes are retained, but separate asset projections and bequest settlement are solid implemented processes again. Additional well-being outcomes, inter-vivos transfers and dedicated pension-rule imputation remain dashed. Release availability is explained in the website notes. Earlier main-specific status evidence above is historical.
+
+## Matteo’s diagram corrections, 23 October 2026
+
+The website SVG incorporates Matteo’s subsequent email corrections. The implemented-process and alignment/assumptions/costs legend entries are removed; those outlines now share the standard charcoal styling. The only legend item is **Under development**, shown with a purple dashed line. The wealth module contains Housing, Private pensions, Other assets and Debt, replacing the Aggregate wealth box. Debt is supported by the scheduled `UpdateUnsecuredDebt` process.
+
+The wage-growth group is renamed **Macro module**, with **Long term growth** and **Short term fluctuations** boxes. Long term growth denotes the supplied economic time-series assumptions (`Parameters` loads `economic_time_series.xlsx`, including `wage_growth`); it does not claim an endogenous growth model. Short term fluctuations has a dashed outline because no dedicated implementation was identified in the current source. The other dashed components retain their existing status. Original ClickCharts files and earlier status evidence above are preserved as history.

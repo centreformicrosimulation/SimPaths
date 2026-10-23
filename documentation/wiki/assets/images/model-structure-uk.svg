@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1078" viewBox="-28 -115 365 281" role="img" aria-labelledby="title desc">
 <title id="title">SimPaths UK model structure</title>
-<desc id="desc">Conceptual annual module cycle. Charcoal process outlines indicate implementation in the documented UK model. Amber identifies alignment, external assumptions and costs: migration through population alignment, external wage-growth assumptions, and formal childcare costs. Purple dashed outlines indicate proposed extensions not implemented: other well-being outcomes, inter-vivos transfers and pension-rule imputation. Separate asset projections and bequest settlement are implemented; release availability is explained in the accompanying notes. The model includes aggregate intertemporal wealth accounting. Circles group processes; arrows do not specify the exact execution schedule.</desc>
+<desc id="desc">Conceptual annual module cycle. The wealth module includes housing, private pensions, other assets and debt. The macro module distinguishes long term growth from short term fluctuations. Purple dashed outlines indicate components under development: short term fluctuations, other well-being outcomes, inter-vivos transfers and pension-rule imputation. Long term growth uses external economic assumptions. Circles group processes; arrows do not specify the exact execution schedule.</desc>
 <defs><marker id="arrow" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L5 2.5L0 5Z" fill="#263238"/></marker></defs>
 <rect x="-28" y="-115" width="365" height="281" fill="white"/>
 <g stroke="#263238" stroke-width=".28" fill="none" marker-end="url(#arrow)">
@@ -45,16 +45,16 @@
 <rect x="20" y="67.2" width="38" height="9.6" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="186" y="6.2" width="36" height="7.6" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="186.42767333984375" y="-58.73137664794922" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
-<rect x="186.9722137451172" y="-47.33888626098633" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
-<rect x="185.4722137451172" y="-36.23332977294922" width="39" height="10.0111083984375" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<rect x="186.9722137451172" y="-47.33888626098633" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="185.4722137451172" y="-36.23332977294922" width="39" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <path d="M204.42767333984375 -109.3611068725586L222.42767333984375 -99.3611068725586L204.42767333984375 -89.3611068725586L186.42767333984375 -99.3611068725586Z" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="131.06430053710938" y="-103.7833251953125" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <ellipse cx="282.2" cy="72.5" rx="32" ry="31" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="264.2" y="49.5" width="36" height="10" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="264.2" y="62" width="36" height="10" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="264.2" y="74" width="36" height="10" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
-<rect x="264.2" y="86" width="36" height="10" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
-<ellipse cx="282.4222412109375" cy="134.9193878173828" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#9c6513" stroke-width=".4"/>
-<rect x="264.4222412109375" y="129.80833435058594" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<ellipse cx="282.4222412109375" cy="134.9193878173828" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="263.4222412109375" y="121" width="38" height="12" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="110.48568725585938" y="57.72798824310303" width="36" height="8.526689529418945" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="110.48568725585938" y="78.85387325286865" width="36" height="8.42808723449707" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="110.48568725585938" y="68.47610473632812" width="36" height="8.156341552734375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
@@ -63,10 +63,11 @@
 <ellipse cx="38.99324035644531" cy="134.9193878173828" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="22.937685012817383" y="121.80833435058594" width="32.11111068725586" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
 <rect x="20" y="55.2" width="38" height="9.6" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
-<rect x="20" y="79.2" width="38" height="9.6" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<rect x="20" y="79.2" width="38" height="9.6" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="22.937685012817383" y="136.84657287597656" width="32.11111068725586" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
 <rect x="20" y="11" width="38" height="12" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
-<rect x="263.2" y="49" width="38" height="11" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="264.2" y="86" width="36" height="10" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="263.4222412109375" y="136" width="38" height="12" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
 <g stroke="#263238" stroke-width=".28" fill="none" marker-end="url(#arrow)"><path d="M225.78 106H204.43V84.66"/><path d="M193.63 129.58V140.8"/><path d="M175.63 145.99H158"/><path d="M137.14 142.04V129.58"/></g>
 <text x="204.42767333984375" y="-65.55000305175781" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42767333984375" dy="0">Ageing</tspan></text>
 <text x="128.55044555664062" y="8.497651100158691" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.55044555664062" dy="0">Partnership</tspan></text>
@@ -98,11 +99,11 @@
 <text x="204.42767333984375" y="-99.3611068725586" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42767333984375" dy="0">Start</tspan></text>
 <text x="149.06430053710938" y="-101.12777099609374" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="149.06430053710938" dy="0">Past income</tspan><tspan x="149.06430053710938" dy="4.7">trajectories</tspan></text>
 <text x="317.5000305175781" y="49.206671142578124" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="317.5000305175781" dy="0">Wealth</tspan><tspan x="317.5000305175781" dy="4.7">module</tspan></text>
-<text x="282.2" y="67" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Housing</tspan></text>
-<text x="282.2" y="79" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Private pensions</tspan></text>
-<text x="282.2" y="91" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Other assets</tspan></text>
-<text x="317.70001220703125" y="112.9810775756836" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="317.70001220703125" dy="0">Wage-growth</tspan><tspan x="317.70001220703125" dy="4.7">assumptions</tspan></text>
-<text x="282.4222412109375" y="135" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.4222412109375" dy="0">Wage growth</tspan></text>
+<text x="282.2" y="54.5" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Housing</tspan></text>
+<text x="282.2" y="67" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Private pensions</tspan></text>
+<text x="282.2" y="79" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Other assets</tspan></text>
+<text x="317.70001220703125" y="112.9810775756836" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="317.70001220703125" dy="0">Macro</tspan><tspan x="317.70001220703125" dy="4.7">module</tspan></text>
+<text x="282.4222412109375" y="124.65" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.4222412109375" dy="0">Long term</tspan><tspan x="282.4222412109375" dy="4.7">growth</tspan></text>
 <text x="88.19444274902344" y="50.566664123535155" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="88.19444274902344" dy="0">Social care</tspan><tspan x="88.19444274902344" dy="4.7">module</tspan></text>
 <text x="128.48568725585938" y="61.9913330078125" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.48568725585938" dy="0">Care needs</tspan></text>
 <text x="128.48568725585938" y="83.06791687011719" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.48568725585938" dy="0">Informal care</tspan></text>
@@ -116,9 +117,8 @@
 <text x="-3.5" y="-6.35" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="-3.5" dy="0">Well-being</tspan><tspan x="-3.5" dy="4.7">module</tspan></text>
 <text x="-3.527777671813965" y="114.06666412353516" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="-3.527777671813965" dy="0">Private monetary</tspan><tspan x="-3.527777671813965" dy="4.7">transfers module</tspan></text>
 <text x="39" y="14.65" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="39" dy="0">Other well-being</tspan><tspan x="39" dy="4.7">outcomes</tspan></text>
-<text x="282.2" y="54.5" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Aggregate wealth</tspan></text>
+<text x="282.2" y="91" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.2" dy="0">Debt</tspan></text>
+<text x="282.4222412109375" y="139.65" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.4222412109375" dy="0">Short term</tspan><tspan x="282.4222412109375" dy="4.7">fluctuations</tspan></text>
 <g font-family="Arial,sans-serif" fill="#18252b"><text x="-18" y="-102" font-size="5.4" font-weight="700">SimPaths UK</text><text x="-18" y="-95" font-size="4">Model structure · October 2026</text>
-<path d="M-18 -87H-10" stroke="#263238" stroke-width=".7" /><text x="-7" y="-85.9" font-size="4">Implemented process</text>
-<path d="M-18 -81H-10" stroke="#9c6513" stroke-width=".7" /><text x="-7" y="-79.9" font-size="4">Alignment, assumptions and costs</text>
-<path d="M-18 -75H-10" stroke="#85538f" stroke-width=".7" stroke-dasharray="1.5 .8"/><text x="-7" y="-73.9" font-size="4">Extension not implemented</text>
+<path d="M-18 -87H-10" stroke="#85538f" stroke-width=".7" stroke-dasharray="1.5 .8"/><text x="-7" y="-85.9" font-size="4">Under development</text>
 </g></svg>

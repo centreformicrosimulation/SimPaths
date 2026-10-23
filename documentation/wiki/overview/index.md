@@ -46,7 +46,7 @@ The modules operate in a defined [annual sequence](../developer-guide/internals/
 
 <figure class="module-diagram">
   <a href="../assets/images/model-structure-uk.svg" target="_blank" rel="noopener" aria-label="Open the model structure diagram at full size">
-    <img src="../assets/images/model-structure-uk.svg" alt="SimPaths UK model structure. Charcoal outlines mark implemented processes, including asset projections and bequest settlement. Amber marks population alignment, external wage-growth assumptions and childcare costs. Purple dashed outlines mark extensions not implemented: pension-rule imputation, inter-vivos transfers and additional well-being outcomes." width="1400" height="1078" loading="lazy" decoding="async">
+    <img src="../assets/images/model-structure-uk.svg" alt="SimPaths UK model structure. Modules cover demography, education, health, well-being, care, income, consumption, wealth and transfers. Wealth includes housing, private pensions, other assets and debt. The Macro module contains long term growth and short term fluctuations. Dashed outlines mark components under development." width="1400" height="1078" loading="lazy" decoding="async">
   </a>
 
 </figure>
@@ -57,7 +57,7 @@ The modules operate in a defined [annual sequence](../developer-guide/internals/
 <dl>
 <dt>Wealth and transfers</dt>
 <dd>The model includes aggregate wealth accounting under intertemporal optimisation and separate housing, financial and private-pension projections controlled by configuration switches. Bequest settlement distributes estates after death; it does not model transfers between living people. These asset projections and bequest processes are implemented in the development model but have not yet been included in the latest release. Inter-vivos transfers remain proposed.</dd>
-<dt>Alignment, assumptions and costs</dt>
+<dt>Population, wages and childcare</dt>
 <dd>Internal mobility and external migration use population alignment to adjust the population to demographic targets, rather than modelling migration decisions. Wage growth comes from external time-series assumptions. Childcare calculations represent formal use and expenditure, not general childcare time allocation.</dd>
 <dt>Well-being and pensions</dt>
 <dd>Life satisfaction and public pension income are already represented. Additional well-being outcomes and dedicated pension-rule imputation remain proposed extensions; the latter is a separate method of projecting entitlements.</dd>

@@ -4,7 +4,17 @@ Uncertainty analysis examines how precisely a model can estimate an outcome or p
 
 ## Sources of uncertainty {#decide-what-to-vary}
 
-Following the [JAS-mine methodological discussion](https://www.microsimulation.ac.uk/jas-mine/resources/focus/uncertainty-analysis/), it is useful to distinguish five sources. The distinction between model structure and specification separates uncertainty about the general modelling approach from uncertainty about the particular equations used within it.
+Uncertainty regarding a model’s projections can arise from a variety of reasons (Creedy et al., 2007; Bilcke et al., 2011; Sharif et al., 2012). In particular, sources of uncertainty are generally distinguished in (i) input data, for instance due to sampling errors in the initial population, (ii) model structure, that is the validity of the general modelling approach used (also called “methodological uncertainty”), (iii) model specification, which concerns the choice of the covariates and the functional forms used, and in particular the crucial assumption that any regularity observed in the data will not break up in the future, (iv) model parameters, pointing to the imprecision of the estimates and/or externally provided parameters, and finally (v) Montecarlo variation of the model output, which originates from the fact that the simulated aggregate quantities are also imprecise estimates of the theoretical aggregate quantities that the model implicitly defines. None of the above sources of uncertainty is generally considered in microsimulation studies, although this is recognised and criticised (see for instance Goedemé et al, 2013). However, “the calculation of confidence intervals around model results that account for all sources of error remains a major challenge” (Mitton et al., 2000).
+
+To varying degrees, all these sources of uncertainty can be explored by means of a combination of sensitivity analysis and statistical techniques. Sensitivity analysis asks how results change when assumptions change. Probabilistic statistical analysis assigns distributions to uncertain quantities and propagates them into results.
+
+Generally speaking, uncertainty over the input data quality / appropriateness (source i) should be limited when high-quality survey data are used. Comparison of the input data with other available information on the population of interest helps checking this. Uncertainty over model structure and parameterisation (sources ii-iii) can be explored by systematic [validation](../validation/index.md) of the specification of each module and the overall performance of the model. Montecarlo variation of the model outcome (source v) can be brought down to negligible by appropriately scaling up simulated population size. Multiple runs with different seeds of the random number generators allow precise quantification. The remaining source of uncertainty is parameters uncertainty, stemming from sampling errors in estimation (source iv). Parameter uncertainty stems from the imprecision of the underlying estimates, and can be quantified by exploring how the model behaves under different parameterisations. This is discussed more in details in the Section below.
+
+To be noted, these sources need not be independent. For example, the quality of survey data can influence both the initial population from which projections take off, and the estimated coefficients used in projection.
+
+Table 1 summarises the main sources of uncertainty in dynamic microsimulation modelling and how they can be investigated.
+
+Table 1: Sources of uncertainty in dynamic microsimulation modelling.
 
 | Source | Meaning | How it can be investigated |
 | --- | --- | --- |
@@ -14,61 +24,17 @@ Following the [JAS-mine methodological discussion](https://www.microsimulation.a
 | Model parameters | Imprecision in estimated coefficients and externally supplied parameters | Propagate their uncertainty through the simulation using justified joint distributions |
 | Monte Carlo variation | Variation in simulated statistics due to finite stochastic simulation, even with all inputs and parameters fixed | Repeat fixed-parameter runs and assess precision as population size and replication count increase |
 
-These sources need not be independent. For example, a survey can contribute both to the initial population and to coefficient estimation. An analysis that varies both should consider their dependence rather than simply adding separately estimated variances.
+## Modelling parameter uncertainty
 
-Good data and sampling weights do not eliminate sampling or measurement uncertainty. Similarly, a good fit to estimation data does not establish that the model's mechanisms are correct or that relationships will remain stable under a new policy. Larger simulated populations can reduce Monte Carlo variation for many aggregate statistics, but cannot create additional empirical information or resolve uncertainty about the model itself.
+To deal with parameter uncertainty, we can follow a “brute force” approach and bootstrap the coefficients of the estimated equations from their estimated distribution (e.g. multivariate normal in case of multinomial probit regressions) with mean equal to the point estimate, and variance-covariance matrix equal to the estimated variance-covariance. ‘Bootstrapping’ refers here to draws from an estimated parameter distribution; not to resampling the survey observations and re-estimating the equations.
 
-**Sensitivity analysis** asks how results change when assumptions change. **Probabilistic uncertainty analysis** additionally assigns distributions to uncertain quantities and propagates them into results. A collection of alternative specifications or policy scenarios is not a probability distribution unless a basis for assigning probabilities is supplied.
+In this approach, for each estimated process the coefficients are drawn jointly, preserving their estimated covariance.
 
-## Propagating parameter uncertainty
+Bootstrapping needs to be performed only once, at the beginning of the simulation: the entire simulation is then performed with the bootstrapped values of the coefficients.
 
-Regression coefficients are estimated from finite samples. Using only their point estimates produces a projection conditional on one set of parameter values. To assess how estimation uncertainty affects the projection, the model can instead be run repeatedly with alternative coefficient vectors.
+The JAS-mine simulation library allows for a simple implementation of this approach, by exploiting the [bootstrapping feature of its Regression library](../jasmine-reference/regression-library.md#3-bootstrap-methods-to-address-parameter-uncertainty) within a [multi-run implementation](multiple-runs.md): the simulation is run many times (e.g. 1,000 times), each using a different set of coefficients. The result is a distribution of model outcomes, around the central projections obtained with the estimated coefficients.
 
-For an equation with estimated vector \(\hat{\boldsymbol\beta}\) and estimated covariance matrix \(\hat{\mathbf V}\), a common large-sample approximation is
-
-\[
-\boldsymbol\beta^{(r)} \sim
-\mathcal N\!\left(\hat{\boldsymbol\beta},\hat{\mathbf V}\right),
-\qquad r=1,\ldots,R.
-\]
-
-The coefficients are drawn **jointly**, preserving the estimated covariance between them. Drawing each coefficient independently from its own standard error would generally represent a different distribution. The normal approximation must also be appropriate for the estimator and respect any parameter restrictions, for example through a suitable transformation.
-
-In each replication, draw the coefficients before the simulation begins and retain that draw throughout the projected life courses. A new replication receives a new draw. Redrawing coefficients every year would introduce time-varying parameters, changing the model rather than representing uncertainty about a fixed estimated relationship. Random individual transitions remain a separate part of each simulation.
-
-The [JAS-mine regression library](../jasmine-reference/regression-library.md#3-bootstrap-methods-to-address-parameter-uncertainty) provides coefficient-drawing utilities for this approach. Its use of the term *bootstrap* refers here to draws from an estimated parameter distribution; it does not itself resample the survey observations and re-estimate the equations. Covariance within a supplied coefficient vector is represented, while dependence between separately estimated processes requires additional information or an estimation and resampling design that preserves it.
-
-### Empirical distributions and normal approximations
-
-[Creedy, Kalb and Kew (2007)](https://doi.org/10.1111/j.0307-3378.2007.00250.x) compare repeated parameter draws with a less computationally intensive approach that assumes a normal distribution for the resulting aggregate statistic. With repeated draws, empirical quantiles can describe an asymmetric distribution of results. A normal approximation summarises that distribution through its location and variance, but can be unsuitable for skewed outcomes or statistics concerning small groups. Normal coefficient draws do not imply normally distributed model outputs: behavioural choices, thresholds and interactions can make the mapping nonlinear.
-
-The projection obtained from point-estimate coefficients should be reported separately where relevant. In a nonlinear model, it need not equal the mean or median across parameter draws.
-
-## Interpreting uncertainty in results
-
-### Simulation precision and uncertainty intervals
-
-With parameters and inputs fixed, independent stochastic replications estimate the model's conditional expected outcome. If the run-level statistic has sample standard deviation \(s\) across \(R\) replications, the Monte Carlo standard error of its estimated mean is \(s/\sqrt{R}\). This measures numerical precision in estimating that expectation; it is not an interval for uncertainty in the underlying parameters or model structure.
-
-When replications vary parameters, their spread describes the consequences of those parameter draws, together with any simulation variation left in the runs. More replications improve the estimation of this distribution; they do not make the represented parameter uncertainty disappear. To distinguish the components, a designed experiment can repeat stochastic runs within each parameter draw. This requires control over parameter draws and simulation seeds, rather than a single loop that changes both together.
-
-Percentile ranges from parameter draws may be used as approximate confidence intervals when the sampling approximation and propagation method justify that interpretation. State the uncertainty sources they cover. They are not automatically prediction intervals for realised future outcomes, nor do they cover omitted processes or structural change. Choose the simulation size and replication count by checking stability of the particular means, quantiles and subgroup results needed for the analysis.
-
-### Policy comparisons
-
-For a policy effect, calculate the reform-minus-baseline difference within each matched replication and summarise those differences. Use the same input population and parameter draw in each pair where appropriate. Shared simulation random numbers can also improve precision if the implementation maintains the intended pairing.
-
-For reform and baseline statistics \(Y_R\) and \(Y_B\), the covariance matters:
-
-\[
-\begin{aligned}
-\operatorname{Var}(Y_R-Y_B)
-&=\operatorname{Var}(Y_R)+\operatorname{Var}(Y_B)\\
-&\quad -2\operatorname{Cov}(Y_R,Y_B).
-\end{aligned}
-\]
-
-Consequently, overlap between two separate outcome intervals is not a test of the policy difference. [Goedemé et al. (2013)](https://www.microsimulation.pub/articles/00088) explain the importance of accounting for this dependence in microsimulation comparisons. Report the magnitude and uncertainty of the effect together; statistical precision alone does not establish its substantive importance.
+Creedy et al. (2007) compare repeated parameter draws with a less computationally intensive approach that assumes a normal distribution for the resulting aggregate statistic. Normal coefficient draws do not imply normally distributed model outputs: behavioural choices, thresholds and interactions can make the mapping nonlinear. For this reason, SimPaths implements the more computationally intensive bootstrapping approach.
 
 ## Implementation in SimPaths
 
@@ -83,10 +49,14 @@ Not every input parameter is necessarily covered by that bootstrap block. Inspec
 ### Set up repeated runs
 
 1. Follow [Multiple Runs](multiple-runs.md) and copy its configuration into a named file for the experiment.
-2. Record the code revision, parameter workbooks, input population, donor data and policy schedule.
-3. Set `maxNumberOfRuns` and the initial `randomSeed`. Set `innovation_args.randomSeedInnov` to `true` if the seed should increase between runs.
-4. Hold other scenario and innovation settings fixed unless varying them is part of the design.
-5. Check the effective settings and output files for each run, then summarise the distribution of the outcomes and policy differences you actually need.
+
+1. Record the code revision, parameter workbooks, input population, donor data and policy schedule.
+
+1. Set `maxNumberOfRuns` and the initial `randomSeed`. Set `innovation_args.randomSeedInnov` to `true` if the seed should increase between runs.
+
+1. Hold other scenario and innovation settings fixed unless varying them is part of the design.
+
+1. Check the effective settings and output files for each run, then summarise the distribution of the outcomes and policy differences you actually need.
 
 With coefficient resampling disabled, changing the seed does not resample the regression coefficients. Repeated runs with fixed inputs, coefficients and scenario settings can therefore be used to assess Monte Carlo variation.
 
@@ -103,6 +73,11 @@ The [Development Roadmap](../overview/roadmap.md) describes planned improvements
 ## Further reading
 
 - Bilcke J, Beutels P, Brisson M, Jit M (2011). Accounting for Methodological, Structural, and Parameter Uncertainty in Decision-Analytic Models: A Practical Guide. Medical Decision Making 31(4): 675-692.
+
 - Creedy J, Kalb G, Kew H (2007). [Confidence intervals for policy reforms in behavioural tax microsimulation modelling](https://doi.org/10.1111/j.0307-3378.2007.00250.x). Bulletin of Economic Research 59(1): 37-65.
+
 - Goedemé T, Van den Bosch K, Salanauskaite L, Verbist G (2013). [Testing the Statistical Significance of Microsimulation Results: A Plea](https://www.microsimulation.pub/articles/00088). International Journal of Microsimulation 6(3): 50-77.
+
 - Mitton L, Sutherland H, Weeks M (2000). Microsimulation Modelling for Policy Analysis. Challenges and Innovations. Cambridge University Press.
+
+- Sharif B, Kopec JA, Wong H, Finès P, Sayre EC, Liu RR, Wolfson MC (2012). [Uncertainty Analysis in Population-Based Disease Microsimulation Models](https://doi.org/10.1155/2012/610405). Epidemiology Research International, 2012: 610405.
