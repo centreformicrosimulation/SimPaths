@@ -2,7 +2,10 @@
 * Export Stata predictions for a deterministic synthetic consumption test grid.
 * No observed LCFS rows are read or exported by this script.
 * Arguments: saved m4 estimates (.ster), then destination fixture CSV.
-* See validation/consumption/README.md for the shared Drive estimation workflow.
+* Saved estimates are supplied through the team's shared Drive workflow.
+* From the repository root, regenerate fixtures after updating FW1a and RMSE:
+* do "src/test/stata/export_consumption_fixtures.do" "path/to/model.ster" ///
+*     "src/test/resources/simpaths/model/consumption_stata_fixtures.csv"
 ********************************************************************************
 args estimates_file output_file
 if (`"`estimates_file'"'=="" | `"`output_file'"'=="") {
