@@ -128,7 +128,7 @@
 		<dependency>
 			<groupId>com.github.jasmineRepo</groupId>
 			<artifactId>JAS-mine-core</artifactId>
-            <version>5.2.0</version>
+            <version>03cf319978a9528ece88510f95c2dbc84f9a14d1</version> <!--JASMINE-->
 			<scope>compile</scope>
 		</dependency>
 		<!-- Modern replacement for xmlParserAPIs -->
