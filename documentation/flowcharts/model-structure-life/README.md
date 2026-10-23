@@ -15,7 +15,7 @@ The user supplied `model structure - LIFe.ccd` (ClickCharts). Related Box source
 Regenerate the SVG from this directory:
 
 ```sh
-node render-current-diagram.cjs geometry.json ../../wiki/assets/images/model-structure-uk.svg
+node render-current-diagram.cjs geometry-main-20261023.json ../../wiki/assets/images/model-structure-uk.svg
 ```
 
 ## Main status evidence
@@ -36,3 +36,11 @@ Reviewed on 22 October 2026 against `origin/develop`, commit `971d050c521e9d1aa6
 - The October 2026 LIFe presentation (Box file 2536644460533) changes country tiers but does not establish process-level implementation in each country. Old country tiers have therefore been replaced with an explicitly UK-scoped key.
 
 The source's arrows are conceptual connections, not the exact UK event schedule. For example, mortality/alignment and mental-health/life-satisfaction updates occur later in the actual schedule than their positions in this diagram suggest. The overview retains this distinction and explains execution order beneath the diagram.
+
+## Main diagram revision, 23 October 2026
+
+The preview incorporates Matteo’s discussion: life satisfaction moves to a separate well-being module; other well-being outcomes are explicitly proposed, not implemented. Demand for care is labelled Care needs. The time-transfer grouping and unimplemented home production are omitted; implemented childcare costs move to the income/consumption grouping. Aggregate wealth accounting is explicitly shown alongside the dashed separate-asset extensions. Private monetary transfers remain dashed for main.
+
+`geometry-main-20261023.json` is the revised editable geometry. `geometry.json` and the native ClickCharts files preserve the earlier layout; they do not represent this revision. The JavaScript renderer and JSON geometry are the editable source for the website SVG and require no proprietary editor.
+
+Checked against main c62e487e42f5b658af3e91718c794154eec4a846. Model source is unchanged from b649c6967. LifeSatisfaction1/2 are scheduled; no additional dedicated well-being-outcomes module is claimed. The connecting path is conceptual, not an assertion of execution order.
