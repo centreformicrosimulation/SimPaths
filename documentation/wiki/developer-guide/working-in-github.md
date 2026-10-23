@@ -38,7 +38,7 @@ git switch -c short-purposeful-name
 
 Use the equivalent fetch, branch and checkout controls in GitHub Desktop if preferred. Do not work directly on `main` or `develop`, and do not mix unrelated changes in one branch.
 
-For documentation work, start from the branch whose model you are documenting. Target `main` for corrections to the current default version and `develop` for changes accompanying unreleased code. Bring main corrections into develop through the normal merge workflow.
+For documentation work, start from the branch whose model you are documenting. Target `main` for corrections to the current default version and `develop` for changes accompanying unreleased code. Bring main corrections into develop through the normal merge workflow. Only `main` is published at simpaths.org; development documentation becomes public when it is merged into `main`.
 
 ## Make and verify the change
 

@@ -412,7 +412,3 @@ html.sp-tab-documentation .md-container .md-top {
 }
 
 /* Version identity follows the selected source branch. */
-.sp-version { display:flex; flex-wrap:wrap; align-items:center; gap:.35rem .8rem; margin:0 0 1rem; font-size:.65rem; line-height:1.5; }
-.sp-version__source { margin-left:auto; }
-.sp-version [role="status"] { flex-basis:100%; }
-.sp-version[data-docs-channel="develop"] { border-left:2px solid var(--md-accent-fg-color); padding-left:.6rem; }
