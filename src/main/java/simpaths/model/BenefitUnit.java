@@ -2538,6 +2538,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         Liwwh_Male_66,
         LnDispInc,
         LnDispInc_sq,
+        Age20to24_LnDispInc,
+        Age25to29_LnDispInc,
+        Age30to34_LnDispInc,
+        Age35to39_LnDispInc,
+        Age40to44_LnDispInc,
+        Age45to49_LnDispInc,
+        Age50to54_LnDispInc,
+        Age55to59_LnDispInc,
+        Age60to64_LnDispInc,
+        Age65to69_LnDispInc,
+        Age70to74_LnDispInc,
+        Age75to79_LnDispInc,
+        Age80plus_LnDispInc,
+        ReferenceAdultStudent,
         MaleEduH_1,
         MaleEduH_10,
         MaleEduH_2,
@@ -2673,6 +2687,7 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
         YdsesC54,
         YdsesC55,
         Year,
+        YearFrom2015,
         Year2009,
         Year2010,
         Year2011,
@@ -4052,6 +4067,20 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
                     throw new RuntimeException("request for parameter LnDispInc without specifying yDispMonth");
                 return Math.pow(Math.log(Math.max(yDispMonth, 1.0)),2.0);
             }
+            case Age20to24_LnDispInc, Age25to29_LnDispInc, Age30to34_LnDispInc,
+                    Age35to39_LnDispInc, Age40to44_LnDispInc, Age45to49_LnDispInc,
+                    Age50to54_LnDispInc, Age55to59_LnDispInc, Age60to64_LnDispInc,
+                    Age65to69_LnDispInc, Age70to74_LnDispInc, Age75to79_LnDispInc,
+                    Age80plus_LnDispInc -> {
+                // FW1a adds an income slope to each existing age-band intercept.
+                // Under 20 is the baseline slope; quadratic curvature stays common.
+                String ageVariable = variableID.name().replace("_LnDispInc", "");
+                return getDoubleValue(Variables.valueOf(ageVariable)) * getDoubleValue(Variables.LnDispInc);
+            }
+            case ReferenceAdultStudent -> {
+                // Use the same reference adult as the consumption age regressors.
+                return Les_c4.Student.equals(getRefPerson().getLabC4()) ? 1.0 : 0.0;
+            }
             case MaleEduM_10 -> {
                 return (getMale() != null && getMale().getLabourSupplyWeekly().equals(Labour.TEN) && getMale().getEduHighestC4().equals(Education.Medium)) ? 1. : 0.;
             }
@@ -4181,6 +4210,10 @@ public class BenefitUnit implements EventListener, IDoubleSource, Weight, Compar
             }
             case Year -> {
                 return (Parameters.isFixTimeTrend && getYear() >= Parameters.timeTrendStopsIn) ? Parameters.timeTrendStopsIn : getYear();
+            }
+            case YearFrom2015 -> {
+                // Matches Stata's centred trend, including the existing trend freeze.
+                return getDoubleValue(Variables.Year) - 2015.0;
             }
             case Year2009 -> {
                 return (getYear() == 2009) ? 1. : 0.;
