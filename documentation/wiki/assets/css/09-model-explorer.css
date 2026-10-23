@@ -1,0 +1,171 @@
+/* Optional inspection of the published annual module cycle.
+   The complete figure remains visible; native disclosures work without JavaScript. */
+.md-typeset details.annual-explorer,
+.md-typeset details.annual-explorer__stage {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.md-typeset details.annual-explorer {
+  container-type: inline-size;
+  margin: 1.3rem 0 1.65rem;
+  border-block: 1px solid var(--sp-border-strong);
+}
+
+[data-md-color-scheme="slate"] .md-typeset details.annual-explorer,
+[data-md-color-scheme="slate"] .md-typeset details.annual-explorer__stage {
+  background: transparent;
+}
+
+.md-typeset .annual-explorer > summary,
+.md-typeset .annual-explorer__stage > summary {
+  position: relative;
+  margin: 0;
+  padding: 0.7rem 1.5rem 0.7rem 0;
+  border: 0;
+  background: transparent !important;
+  color: var(--md-default-fg-color);
+  font-size: var(--sp-reading-copy-size);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.md-typeset .annual-explorer summary::before { display: none; }
+
+.md-typeset .annual-explorer summary::after {
+  position: absolute;
+  inset: 50% 0 auto auto;
+  width: 1rem;
+  height: 1rem;
+  margin: -0.5rem 0 0;
+  color: var(--sp-accent);
+}
+
+.md-typeset .annual-explorer__body { padding-bottom: 0.95rem; }
+
+.md-typeset .annual-explorer__intro,
+.md-typeset .annual-explorer__note {
+  margin: 0.2rem 0 1rem;
+  font-size: var(--sp-label-size);
+  line-height: 1.65;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .annual-explorer__note {
+  margin: 1rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--sp-border-soft);
+}
+
+.md-typeset .annual-explorer__stage + .annual-explorer__stage {
+  border-top: 1px solid var(--sp-border-soft);
+}
+
+.md-typeset .annual-explorer__content {
+  padding: 0.35rem 0 0.6rem;
+  font-size: var(--sp-reading-copy-size);
+  line-height: 1.65;
+}
+
+.md-typeset .annual-explorer__content dl { margin: 0; }
+.md-typeset .annual-explorer__content dt {
+  margin: 0.85rem 0 0.15rem;
+  font-size: var(--sp-label-size);
+  font-weight: var(--sp-subheading-weight);
+  color: var(--md-default-fg-color--light);
+}
+.md-typeset .annual-explorer__content dt:first-child { margin-top: 0; }
+.md-typeset .annual-explorer__content dd { margin: 0; }
+.md-typeset .annual-explorer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.9rem 0 0;
+  font-size: var(--sp-label-size);
+}
+
+.annual-explorer__tabs {
+  display: none;
+  align-content: start;
+  gap: 0.1rem;
+}
+
+.annual-explorer__picker {
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  font-size: var(--sp-label-size);
+  font-weight: var(--sp-label-weight);
+}
+
+.annual-explorer__picker select {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--sp-border-strong);
+  border-radius: 0.2rem;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  font: inherit;
+}
+
+.annual-explorer__tab {
+  display: block;
+  width: 100%;
+  padding: 0.42rem 0.65rem;
+  border-inline-start: 2px solid transparent;
+  color: var(--md-default-fg-color--light);
+  font-family: inherit;
+  font-size: var(--sp-label-size);
+  font-weight: var(--sp-label-weight);
+  line-height: 1.45;
+  text-align: start;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.annual-explorer__tab:hover { background: var(--sp-sidebar-hover); }
+.annual-explorer__tab[aria-selected="true"] {
+  color: var(--sp-accent);
+  border-inline-start-color: currentColor;
+  background: var(--sp-sidebar-active);
+}
+
+.annual-explorer :is(summary, button, select, [role="tabpanel"]):focus-visible {
+  outline: 2px solid var(--sp-accent);
+  outline-offset: 3px;
+}
+
+.md-typeset .annual-explorer--enhanced .annual-explorer__stage {
+  border: 0;
+  margin: 0;
+}
+.annual-explorer--enhanced .annual-explorer__stage > summary { display: none; }
+.annual-explorer--enhanced .annual-explorer__stage[hidden] { display: none !important; }
+
+@container (min-width: 29rem) {
+  .annual-explorer--enhanced .annual-explorer__stages {
+    display: grid;
+    grid-template-columns: 10.8rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1.25rem;
+  }
+  .annual-explorer__tabs { display: grid; }
+  .annual-explorer__picker { display: none; }
+  .annual-explorer--enhanced .annual-explorer__content { padding-top: 0.3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annual-explorer__tab { transition: none; }
+}
+
+@media print {
+  .annual-explorer__tabs,
+  .annual-explorer__picker { display: none; }
+  .annual-explorer--enhanced .annual-explorer__stages { display: block; }
+}

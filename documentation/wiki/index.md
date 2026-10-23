@@ -1,109 +1,124 @@
 ---
 hide:
-  - navigation
   - toc
 ---
 
-<div class="hero" markdown>
+<section class="simpaths-home-hero" aria-labelledby="home-title">
+<div class="simpaths-home-hero__inner">
+  <div class="simpaths-home-hero__brand">
+--8<-- "documentation/wiki/assets/images/homepage-hero-logo-dark.svg"
+    <h1 id="home-title" class="simpaths-home-hero__title">SimPaths</h1>
+    <p class="simpaths-home-hero__strap">Life Course Microsimulation</p>
+  </div>
+</div>
+</section>
 
-# SimPaths
+<section class="simpaths-home-intro-band">
+<div class="simpaths-home-intro-band__inner">
+  <p class="simpaths-home-intro-band__lede">SimPaths is an open-source framework for modelling individual and household life courses. It projects how people’s careers, family relationships, health and financial circumstances evolve over time and interact with one another. Its modular design supports analysis of alternative assumptions about tax and benefit systems, sensitivity to parameter estimates, and different approaches to projecting labour and leisure, consumption and saving decisions.</p>
+  <p class="simpaths-home-intro-band__body">Standardised assumptions and data sources facilitate adaptation across countries. Models based on the framework currently exist for the UK, Greece, Hungary, Italy and Poland, with Germany, Spain and Sweden under development.</p>
+  <p class="simpaths-home-intro-band__body">All source code is freely available for download under a European Free/Open Source Software (F/OSS) EUPL-1.2 license, alongside evolving, increasingly detailed documentation.</p>
+  <h2 id="model-features" class="simpaths-home-features__heading">Model features</h2>
+  <div class="simpaths-home-feature-map">
+  <dl class="simpaths-home-features" aria-labelledby="model-features">
+    <div>
+      <dt><a href="overview/#transitions-and-individual-variation">Connected life domains</a></dt>
+      <dd>Education, work, family life, health and finances evolve together, with earlier circumstances influencing later outcomes.</dd>
+    </div>
+    <div>
+      <dt><a href="overview/modules/labour-income/#employment-decisions">Behavioural responses</a></dt>
+      <dd>Employment responds to financial incentives and family circumstances. A forward-looking option also models consumption and saving.</dd>
+    </div>
+    <div>
+      <dt><a href="overview/modules/disposable-income/">Tax–benefit detail</a></dt>
+      <dd>Results from tax–benefit models link policy rules to disposable income for different working hours and family circumstances.</dd>
+    </div>
+    <div>
+      <dt><a href="user-guide/uncertainty-analysis/">Alternative assumptions</a></dt>
+      <dd>Vary economic and demographic assumptions, compare behavioural specifications, and test sensitivity to estimated parameters.</dd>
+    </div>
+  </dl>
+  <div class="simpaths-home-features__purpose">
+    <h3>Policy analysis over the life course</h3>
+    <p>Together, these features allow policies to be compared by their effects on incomes, behaviour and inequalities over time.</p>
+  </div>
+  </div>
+  <div class="simpaths-home-intro-band__access-row" aria-label="SimPaths source code">
+    <a href="https://github.com/simpaths/SimPaths" class="simpaths-home-intro-band__access">UK source code</a>
+    <a href="https://github.com/simpaths/SimPathsEU" class="simpaths-home-intro-band__access">EU source code</a>
+  </div>
+</div>
+</section>
 
-<p class="tagline">Open-source dynamic microsimulation for life course modelling — projecting careers, families, health, and finances across populations.</p>
+<section id="use-simpaths" class="simpaths-home-paths" aria-labelledby="use-simpaths-title">
+<div class="simpaths-home-paths__inner">
+  <header class="simpaths-home-paths__header">
+    <h2 id="use-simpaths-title">Use SimPaths</h2>
+  </header>
 
-<div class="hero-badges">
-  <span class="hero-badge">✓ Open Source</span>
-  <span class="hero-badge">🌍 5 Countries</span>
-  <span class="hero-badge">☕ Java / JAS-mine</span>
-  <span class="hero-badge">🔬 UKRI HealthMod</span>
+  <div class="simpaths-first-run">
+      <p class="simpaths-first-run__intro">Try a first simulation using the training population and tax–benefit data included in the repository. This lets you check the installation before preparing inputs for your own research.</p>
+      <ol class="simpaths-first-run__steps" aria-label="Steps to a first simulation">
+        <li><a href="getting-started/environment-setup/">
+          <span class="simpaths-first-run__number" aria-hidden="true">01</span>
+          <span><strong>Set up the software</strong><span class="simpaths-first-run__description">Install Java and Maven, then build SimPaths.</span></span>
+          <span class="simpaths-first-run__arrow" aria-hidden="true">→</span>
+        </a></li>
+        <li><a href="getting-started/data/">
+          <span class="simpaths-first-run__number" aria-hidden="true">02</span>
+          <span><strong>Check the input data</strong><span class="simpaths-first-run__description">Locate the training population, tax–benefit donors and parameter files.</span></span>
+          <span class="simpaths-first-run__arrow" aria-hidden="true">→</span>
+        </a></li>
+        <li><a href="getting-started/first-simulation/">
+          <span class="simpaths-first-run__number" aria-hidden="true">03</span>
+          <span><strong>Run your first simulation</strong><span class="simpaths-first-run__description">Prepare the database, launch the model and check the run.</span></span>
+          <span class="simpaths-first-run__arrow" aria-hidden="true">→</span>
+        </a></li>
+      </ol>
+      <footer class="simpaths-first-run__footer">
+        <p class="simpaths-first-run__note">Training data are for learning and testing, not substantive analysis.</p>
+        <a class="simpaths-home-paths__browse" href="documentation/">Browse the full documentation <span aria-hidden="true">→</span></a>
+      </footer>
+  </div>
+</div>
+</section>
+
+<section id="selected-research" class="simpaths-home-research-band">
+<div class="research-section">
+<div class="research-header">
+  <h2 class="section-heading">Selected Research</h2>
+  <a href="research/" class="archive-link">All research</a>
 </div>
 
-<div class="hero-cta">
-  <a href="getting-started/" class="btn-primary">Get Started →</a>
-  <a href="overview/" class="btn-outline">Read the Docs</a>
-  <a href="https://github.com/simpaths/SimPaths" class="btn-outline">View on GitHub</a>
-</div>
+<div class="research-list">
 
-</div>
-
----
-
-## About SimPaths
-
-SimPaths builds upon **JAS-mine**, an open-source Java platform designed for discrete-event simulations. Models currently exist for the **UK, Greece, Hungary, Italy, and Poland**.
-
-<div class="countries">
-  <span class="country-tag">🇬🇧 United Kingdom</span>
-  <span class="country-tag">🇬🇷 Greece</span>
-  <span class="country-tag">🇭🇺 Hungary</span>
-  <span class="country-tag">🇮🇹 Italy</span>
-  <span class="country-tag">🇵🇱 Poland</span>
-</div>
-
----
-
-<h2 class="section-heading">Explore the Documentation</h2>
-
-<div class="card-grid">
-
-<a href="overview/" class="feature-card">
-<div class="card-icon-wrap card-icon--overview">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-</div>
-<h3>Overview</h3>
-<p>What SimPaths models and why — architecture, modules, and parameterisation.</p>
-<span class="card-link">Explore →</span>
+<a href="https://doi.org/10.1093/eurpub/ckaf161.076" class="research-entry research-entry--mental-health">
+  <div class="research-entry__meta">
+    <span class="research-label">MENTAL HEALTH · 2025</span>
+    <span class="research-journal">European Journal of Public Health</span>
+  </div>
+  <p class="research-title">Tax reforms vs benefit enhancement to address mental health inequalities: a microsimulation study</p>
+  <p class="research-authors">Igelstrom E, Kopasker D, Richiardi MG, Katikireddi SV</p>
 </a>
 
-<a href="getting-started/" class="feature-card">
-<div class="card-icon-wrap card-icon--start">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-</div>
-<h3>Getting Started</h3>
-<p>Set up your environment, load input data, and run your first simulation.</p>
-<span class="card-link">Get Started →</span>
+<a href="https://www.sciencedirect.com/science/article/pii/S0167268125000319" class="research-entry research-entry--life-course">
+  <div class="research-entry__meta">
+    <span class="research-label">LIFE COURSE · 2025</span>
+    <span class="research-journal">Journal of Economic Behavior &amp; Organization</span>
+  </div>
+  <p class="research-title">Attenuation and reinforcement mechanisms over the life course</p>
+  <p class="research-authors">Richiardi M, Bronka P, van de Ven J</p>
 </a>
 
-<a href="user-guide/" class="feature-card">
-<div class="card-icon-wrap card-icon--user">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-</div>
-<h3>User Guide</h3>
-<p>Single and multi-run simulations, GUI, parameter editing, and uncertainty analysis.</p>
-<span class="card-link">View Guide →</span>
-</a>
-
-<a href="developer-guide/" class="feature-card">
-<div class="card-icon-wrap card-icon--dev">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-</div>
-<h3>Developer Guide</h3>
-<p>JAS-mine architecture, SimPaths internals, and how-to guides for extending the model.</p>
-<span class="card-link">Developer Guide →</span>
-</a>
-
-<a href="validation/" class="feature-card">
-<div class="card-icon-wrap card-icon--ref">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-</div>
-<h3>Model Validation</h3>
-<p>Validation procedures, alignment diagnostics, and comparison against external targets.</p>
-<span class="card-link">Validation →</span>
-</a>
-
-<a href="research/" class="feature-card">
-<div class="card-icon-wrap card-icon--research">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-</div>
-<h3>Research</h3>
-<p>Published papers, working papers, and ongoing research using SimPaths.</p>
-<span class="card-link">Research →</span>
+<a href="https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.1004358" class="research-entry research-entry--health-policy">
+  <div class="research-entry__meta">
+    <span class="research-label">HEALTH POLICY · 2024</span>
+    <span class="research-journal">PLOS Medicine</span>
+  </div>
+  <p class="research-title">Short-term impacts of Universal Basic Income on population mental health inequalities in the UK</p>
+  <p class="research-authors">Thomson RM, Kopasker D, Bronka P, et al.</p>
 </a>
 
 </div>
-
----
-
-!!! tip "New to SimPaths?"
-    Start with the [Overview](overview/) to understand what the model does, then follow the [Getting Started](getting-started/) guide to run your first simulation.
-
-For papers using SimPaths, see the [Research](research/) page.
+</div>
+</section>

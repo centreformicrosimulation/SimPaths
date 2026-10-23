@@ -1,0 +1,30 @@
+{# Follow an explicit learning route, or adjacent topics in the same section.
+   The global navigation order is not a reading journey between sections. #}
+{% if page and not page.is_homepage and "navigation.footer" in features %}
+  {% if not (page.meta and page.meta.hide and "footer" in page.meta.hide) %}
+    {% set previous = page.previous_page if page.parent and page.previous_page and page.previous_page.parent == page.parent else none %}
+    {% set following = page.next_page if page.parent and page.next_page and page.next_page.parent == page.parent else none %}
+    {% if page.meta.reading_navigation is defined %}
+      {% set previous = page.meta.reading_navigation.previous | default(none) %}
+      {% set following = page.meta.reading_navigation.next | default(none) %}
+    {% endif %}
+    {% if previous or following %}
+      <nav class="sp-page-nav" aria-label="Page navigation">
+        {% if previous %}
+          {% set direction = lang.t("footer.previous") %}
+          <a class="sp-page-nav__link sp-page-nav__link--prev" href="{{ previous.url | url }}" rel="prev" aria-label="{{ direction }}: {{ previous.title | e }}">
+            <span class="sp-page-nav__direction"><span aria-hidden="true">←</span> {{ direction }}</span>
+            <span class="sp-page-nav__title">{{ previous.title | e }}</span>
+          </a>
+        {% endif %}
+        {% if following %}
+          {% set direction = lang.t("footer.next") %}
+          <a class="sp-page-nav__link sp-page-nav__link--next" href="{{ following.url | url }}" rel="next" aria-label="{{ direction }}: {{ following.title | e }}">
+            <span class="sp-page-nav__direction">{{ direction }} <span aria-hidden="true">→</span></span>
+            <span class="sp-page-nav__title">{{ following.title | e }}</span>
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+{% endif %}

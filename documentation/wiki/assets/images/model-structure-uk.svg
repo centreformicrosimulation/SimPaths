@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1078" viewBox="-28 -115 365 281" role="img" aria-labelledby="title desc">
+<title id="title">SimPaths UK model structure — main implementation</title>
+<desc id="desc">Conceptual annual module cycle. Charcoal process outlines indicate implementation in the checked UK main branch. Amber identifies alignment, external assumptions and costs: migration through population alignment, external wage-growth assumptions, and formal childcare costs. Purple dashed outlines indicate proposed extensions not implemented: home production, inter-vivos transfers and pension-rule imputation. Separate asset projections and bequest settlement are development extensions. Main retains aggregate intertemporal wealth accounting. Circles group processes; arrows do not specify the exact execution schedule.</desc>
+<defs><marker id="arrow" markerWidth="5" markerHeight="5" refX="4.5" refY="2.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L5 2.5L0 5Z" fill="#263238"/></marker></defs>
+<rect x="-28" y="-115" width="365" height="281" fill="white"/>
+<g stroke="#263238" stroke-width=".28" fill="none" marker-end="url(#arrow)">
+<path d="M204.43 -89.36V-74.08"/>
+<path d="M149.06 -93.77V-84H204.43"/>
+<path d="M229.36 -49.15H279.5V-15.88"/>
+<path d="M254.2 9.42H228.25"/>
+<path d="M178.87 9.42H153.18"/>
+<path d="M128.49 34.11V46.68"/>
+<path d="M154.31 72.5H180.04"/>
+<path d="M229.42 72.5H257.53"/>
+<path d="M282.22 97.19V110.23"/>
+<path d="M257.73 134.92H224.09"/>
+<path d="M104.11 134.92H63.68"/>
+<path d="M38.99 110.23V95.32"/>
+<path d="M38.99 46.88V34.2"/>
+<path d="M38.99 -15.18V-49.15H179.5"/>
+</g>
+<rect x="104.10857391357422" y="111.98883056640625" width="119.97419738769531" height="45.861114501953125" rx="22.930557250976562" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="128.48565673828125" cy="9.416278839111328" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="38.99324035644531" cy="9.513402938842773" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="279.5034484863281" cy="9.416278839111328" rx="25.303890228271484" ry="25.303890228271484" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="204.42767333984375" cy="-49.152774810791016" rx="24.930553436279297" ry="24.930553436279297" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="128.48568725585938" cy="72.50497436523438" rx="25.822994232177734" ry="25.822994232177734" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="186.42767333984375" y="-70.55555725097656" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="110.55044555664062" y="3.305985450744629" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="110.55044555664062" y="15.000362396240234" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="261.5034484863281" y="11.046453475952148" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="119.14404296875" y="119.19713592529297" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="175.6321258544922" y="140.80087280273438" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="116.28467178344727" y="142.03823471069336" width="41.71874237060547" height="7.908607482910156" rx="3.954303741455078" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="203.56192016601562" cy="9.416278839111328" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="175.6321258544922" y="119.19713592529297" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="204.73388671875" cy="72.50497436523438" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="186.42417907714844" y="57.278900146484375" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="186.42767333984375" y="74.56002044677734" width="36" height="10.106643676757812" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="261.5034484863281" y="-4.928533554077148" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="185.56192016601562" y="-7.05555534362793" width="36" height="6.094149589538574" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="185.56192016601562" y="9.416278839111328" width="37.164398193359375" height="7.0555572509765625" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="110.55044555664062" y="-8.36331844329834" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="38.99324035644531" cy="71.10305786132812" rx="24.221080780029297" ry="24.221080780029297" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="20.44550323486328" y="12.011846542358398" width="37.78327941894531" height="9.570388793945312" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="185.75503540039062" y="0.4716944694519043" width="36.806304931640625" height="6.921177864074707" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="186.42767333984375" y="-58.73137664794922" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="186.9722137451172" y="-47.33888626098633" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<rect x="185.4722137451172" y="-36.23332977294922" width="39" height="10.0111083984375" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<path d="M204.42767333984375 -109.3611068725586L222.42767333984375 -99.3611068725586L204.42767333984375 -89.3611068725586L186.42767333984375 -99.3611068725586Z" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="131.06430053710938" y="-103.7833251953125" width="36" height="10.0111083984375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<ellipse cx="282.22222900390625" cy="72.50497436523438" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="264.58331298828125" y="55.35847473144531" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<rect x="264.58331298828125" y="67.31330871582031" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<rect x="264.58331298828125" y="79.20588684082031" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<ellipse cx="282.4222412109375" cy="134.9193878173828" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<rect x="264.4222412109375" y="129.80833435058594" width="36" height="10.383331298828125" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<rect x="110.48568725585938" y="57.72798824310303" width="36" height="8.526689529418945" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="110.48568725585938" y="78.85387325286865" width="36" height="8.42808723449707" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="110.48568725585938" y="68.47610473632812" width="36" height="8.156341552734375" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="185.71298217773438" y="17.803879737854004" width="37.07403564453125" height="8.068151473999023" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="225.77777481079102" y="95.25" width="41.71874237060547" height="9.504837036132812" rx="4.752418518066406" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<ellipse cx="38.99324035644531" cy="134.9193878173828" rx="24.694442749023438" ry="24.694442749023438" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="22.937685012817383" y="121.80833435058594" width="32.11111068725586" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<rect x="20.115516662597656" y="-2" width="38.27825927734375" height="11.416278839111328" rx="0" fill="white" stroke="#263238" stroke-width=".4"/>
+<rect x="23.597654342651367" y="58.30833435058594" width="32.11111068725586" height="10.383331298828125" rx="0" fill="white" stroke="#9c6513" stroke-width=".4"/>
+<rect x="22.097654342651367" y="73.1649398803711" width="35.11111068725586" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<rect x="22.937685012817383" y="136.84657287597656" width="32.11111068725586" height="10.383331298828125" rx="0" fill="white" stroke="#85538f" stroke-width=".4" stroke-dasharray="1.5 .8"/>
+<g stroke="#263238" stroke-width=".28" fill="none" marker-end="url(#arrow)"><path d="M225.78 100H204.43V84.66"/><path d="M193.63 129.58V140.8"/><path d="M175.63 145.99H158"/><path d="M137.14 142.04V129.58"/></g>
+<text x="204.42767333984375" y="-65.55000305175781" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42767333984375" dy="0">Ageing</tspan></text>
+<text x="128.55044555664062" y="8.497651100158691" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.55044555664062" dy="0">Partnership</tspan></text>
+<text x="128.55044555664062" y="20.192028045654297" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.55044555664062" dy="0">Fertility</tspan></text>
+<text x="151.49444580078125" y="-53.725826263427734" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="151.49444580078125" dy="0">t+1</tspan></text>
+<text x="88.19444274902344" y="-8.227777671813964" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="88.19444274902344" dy="0">Household</tspan><tspan x="88.19444274902344" dy="4.7">composition</tspan><tspan x="88.19444274902344" dy="4.7">module</tspan></text>
+<text x="162.8383331298828" y="-71.35430297851562" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="162.8383331298828" dy="0">Demographic</tspan><tspan x="162.8383331298828" dy="4.7">module</tspan></text>
+<text x="279.5034484863281" y="13.888119125366211" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="279.5034484863281" dy="0">Educational</tspan><tspan x="279.5034484863281" dy="4.7">achievement</tspan></text>
+<text x="313.3258361816406" y="-5.61464557647705" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="313.3258361816406" dy="0">Education</tspan><tspan x="313.3258361816406" dy="4.7">module</tspan></text>
+<text x="137.14404296875" y="124.38880157470703" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="137.14404296875" dy="0">Hours supplied</tspan></text>
+<text x="193.6321258544922" y="145.99253845214844" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="193.6321258544922" dy="0">Taxes &amp; Benefits</tspan></text>
+<text x="137.14404296875" y="145.99253845214844" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="137.14404296875" dy="0">Potential income</tspan></text>
+<text x="92.08761596679688" y="113.18034973144532" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="92.08761596679688" dy="0">Labour supply</tspan><tspan x="92.08761596679688" dy="4.7">module</tspan></text>
+<text x="193.6321258544922" y="124.38880157470703" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="193.6321258544922" dy="0">Wages</tspan></text>
+<text x="204.42417907714844" y="62.47056579589844" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42417907714844" dy="0">Retirement</tspan></text>
+<text x="204.42767333984375" y="79.61334228515625" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42767333984375" dy="0">Public pensions</tspan></text>
+<text x="279.5034484863281" y="0.26313209533691406" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="279.5034484863281" dy="0">Student status</tspan></text>
+<text x="165.15956115722656" y="-5.61464557647705" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="165.15956115722656" dy="0">Health</tspan><tspan x="165.15956115722656" dy="4.7">module</tspan></text>
+<text x="203.56192016601562" y="-4.008480548858643" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="203.56192016601562" dy="0">Physical health</tspan></text>
+<text x="204.1441192626953" y="12.94405746459961" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.1441192626953" dy="0">Disability</tspan></text>
+<text x="236.36109924316406" y="49.388885498046875" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="236.36109924316406" dy="0">Retirement</tspan></text>
+<text x="128.55044555664062" y="-5.521652793884277" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.55044555664062" dy="0">Leaving parental</tspan><tspan x="128.55044555664062" dy="4.7">home</tspan></text>
+<text x="39.33714294433594" y="16.797040939331055" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="39.33714294433594" dy="0">Consumption</tspan></text>
+<text x="-3.527777671813965" y="-11.755555343627929" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="-3.527777671813965" dy="0">Income and</tspan><tspan x="-3.527777671813965" dy="4.7">consumption</tspan><tspan x="-3.527777671813965" dy="4.7">module</tspan></text>
+<text x="204.15818786621094" y="3.932283401489258" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.15818786621094" dy="0">Mental health</tspan></text>
+<text x="204.42767333984375" y="-53.72582244873047" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42767333984375" dy="0">Death</tspan></text>
+<text x="204.9722137451172" y="-42.33333206176758" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.9722137451172" dy="0">Internal mobility</tspan></text>
+<text x="204.9722137451172" y="-31.22777557373047" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.9722137451172" dy="0">External migration</tspan></text>
+<text x="204.42767333984375" y="-99.3611068725586" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.42767333984375" dy="0">Start</tspan></text>
+<text x="149.06430053710938" y="-101.12777099609374" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="149.06430053710938" dy="0">Past income</tspan><tspan x="149.06430053710938" dy="4.7">trajectories</tspan></text>
+<text x="317.5000305175781" y="49.206671142578124" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="317.5000305175781" dy="0">Wealth</tspan><tspan x="317.5000305175781" dy="4.7">module</tspan></text>
+<text x="282.58331298828125" y="60.550140380859375" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.58331298828125" dy="0">Housing</tspan></text>
+<text x="282.58331298828125" y="72.50497436523438" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.58331298828125" dy="0">Private pensions</tspan></text>
+<text x="282.58331298828125" y="84.39755249023438" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.58331298828125" dy="0">Other assets</tspan></text>
+<text x="317.70001220703125" y="112.9810775756836" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="317.70001220703125" dy="0">Wage-growth</tspan><tspan x="317.70001220703125" dy="4.7">assumptions</tspan></text>
+<text x="282.4222412109375" y="135" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="282.4222412109375" dy="0">Wage growth</tspan></text>
+<text x="88.19444274902344" y="50.566664123535155" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="88.19444274902344" dy="0">Care</tspan><tspan x="88.19444274902344" dy="4.7">module</tspan></text>
+<text x="128.48568725585938" y="61.9913330078125" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.48568725585938" dy="0">Demand for care</tspan></text>
+<text x="128.48568725585938" y="83.06791687011719" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.48568725585938" dy="0">Informal care</tspan></text>
+<text x="128.48568725585938" y="72.55427551269531" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="128.48568725585938" dy="0">Social care</tspan></text>
+<text x="204.25" y="21.837955474853516" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="204.25" dy="0">Life satisfaction</tspan></text>
+<text x="246.63714599609375" y="100.0024185180664" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="246.63714599609375" dy="0">Pension rules</tspan></text>
+<text x="38.99324035644531" y="124.65" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="38.99324035644531" dy="0">Inter-vivos</tspan><tspan x="38.99324035644531" dy="4.7">transfers</tspan></text>
+<text x="39.25464630126953" y="3.708139419555664" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="39.25464630126953" dy="0">Disposable income</tspan></text>
+<text x="39.6532096862793" y="63.5" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="39.6532096862793" dy="0">Childcare costs</tspan></text>
+<text x="39.6532096862793" y="78.35660552978516" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="39.6532096862793" dy="0">Home production</tspan></text>
+<text x="38.99324035644531" y="142.03823852539062" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.4" font-weight="400" fill="#18252b"><tspan x="38.99324035644531" dy="0">Bequests</tspan></text>
+<text x="-3.527777671813965" y="54.094442749023436" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="-3.527777671813965" dy="0">Time transfers</tspan><tspan x="-3.527777671813965" dy="4.7">module</tspan></text>
+<text x="-3.527777671813965" y="114.06666412353516" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="4.5" font-weight="700" fill="#18252b"><tspan x="-3.527777671813965" dy="0">Private monetary</tspan><tspan x="-3.527777671813965" dy="4.7">transfers module</tspan></text>
+<g font-family="Arial,sans-serif" fill="#18252b"><text x="-18" y="-102" font-size="5.4" font-weight="700">SimPaths UK</text><text x="-18" y="-95" font-size="4">Main implementation · b649c6967</text>
+<path d="M-18 -87H-10" stroke="#263238" stroke-width=".7" /><text x="-7" y="-85.9" font-size="4">Implemented process</text>
+<path d="M-18 -81H-10" stroke="#9c6513" stroke-width=".7" /><text x="-7" y="-79.9" font-size="4">Alignment, assumptions and costs</text>
+<path d="M-18 -75H-10" stroke="#85538f" stroke-width=".7" stroke-dasharray="1.5 .8"/><text x="-7" y="-73.9" font-size="4">Extension not implemented</text>
+</g></svg>

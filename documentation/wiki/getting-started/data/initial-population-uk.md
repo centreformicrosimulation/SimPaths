@@ -1,8 +1,13 @@
 # Initial Population (UK)
 
-In addition to training data, the model comes supplied with a set of Stata do files that have been written to extract input data from the UKHLS. These do files can be found in the model directory: `SimPaths/input/InitialPopulations/compile/`. 
+UK research populations are compiled from licensed survey data. The repository supplies the Stata pipeline and de-identified training data, but not the underlying restricted records.
 
-1. Obtain the most recent version of the UKHLS survey [UK data service](https://ukdataservice.ac.uk/) (SN6614, in STATA's tab format). Further to this, you need to obtain the most recent version of the Wealth and Assets Survey (WAS) (SN7215, in STATA's tab format).
-2. Use Stata to open file 00_master.do, and edit global variables at the top of the file, save and run.
-3. Copy the csv files generated following (2) to model directory: `SimPaths/input/InitialPopulations/`.
-4. Run SimPathsStart, and select option "Load new input data for starting populations" from the Start-up Options window.
+1. Obtain the UKHLS release supported by the checked compilation scripts from the [UK Data Service](https://ukdataservice.ac.uk/) (study 6614), plus the Wealth and Assets Survey inputs used by that revision (study 7215).
+2. Open `input/InitialPopulations/compile/00_master.do`, review its data-release assumptions and set the local paths without committing them.
+3. Run the master pipeline in Stata and review its validation and consistency checks.
+4. Place the generated `population_initial_UK_<year>.csv` files in the initial-population input directory expected by the run configuration.
+5. Rebuild the population database using the intended country and start year.
+
+Do not treat “most recent survey release” as automatically compatible with the current scripts. Record the data release, build revision, start year and weighting choices with the analysis. Never commit licensed input records or generated research populations.
+
+For the sequence of compilation stages and regression-estimation inputs, see the [Repository Guide](../../developer-guide/repository-guide.md#data-pipeline-reference). For an installation check without restricted data, use the [bundled training workflow](../first-simulation.md).

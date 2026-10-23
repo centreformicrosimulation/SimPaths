@@ -1,38 +1,23 @@
 # The Start Class
 
-In a JAS-mine project, the *Start* class serves to initialize and run the JAS-mine simulation engine and to define the list of models to be used. The *Start* class is designed to handle two types of situations:
+A JAS-mine experiment builder defines which managers participate in a simulation. It creates the model and its supporting collector and observer, then registers them with the simulation engine.
 
-* performing a single run of the simulation in **interactive mode**, through the creation of a Model and related *Collectors* and *Observers*, with their GUIs;
-* performing a single run of the simulation in **batch mode**, through the creation of the *Model* and possibly the *Collectors*; this involves managing parameter setup, model creation and execution directly, and is aimed at capturing only the simulation's numerical output;
+In SimPaths this role belongs to `simpaths.experiment.SimPathsStart`. It supports interactive and headless single runs and coordinates the input-setup choices before model construction.
 
-Note that in order to run the simulation many times, it is necessary to use the the MultiRun class instead of the Start class. For more information, see this tutorial.
+## Engine setup
 
-The *Start* class must implement the *ExperimentBuilder* interface, which defines the *buildExperiment*() method. This method should create managers and add them to the JAS-mine engine. In the example below, a model called *DemoModel* is created and run in interactive mode:
+The current entry point uses an experiment-builder instance:
 
 ```java
-public static void main(String[] args) {   
-  
-    boolean showGui = true;   
-    SimulationEngine engine = SimulationEngine.getInstance();   
-    MicrosimShell gui = null;   
-    if (showGui) {   
-        gui = new MicrosimShell(engine);   
-        gui.setVisible(true);   
-    }   
-    engine.setBuilderClass(StartDemo.class);   
-    engine.setup();   
-  
-}   
-  
-@Override   
-public void buildExperiment(SimulationEngine engine) {  
-   
-    DemoModel model = new DemoModel();   
-    PersonsCollector collector = new PersonsCollector(model);   
-    PersonsObserver observer = new PersonsObserver(model, collector);
-    engine.addSimulationManager(model);
-    engine.addSimulationManager(collector);
-    engine.addSimulationManager(observer);   
-  
-}
+SimPathsStart experimentBuilder = new SimPathsStart();
+engine.setExperimentBuilder(experimentBuilder);
+engine.setup();
 ```
+
+This is an excerpt from [SimPathsStart](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/experiment/SimPathsStart.java). It assumes the engine and input configuration have already been prepared; it is not a complete replacement `main()` method.
+
+## Interactive and headless use
+
+Interactive use creates the JAS-mine shell and lets the user build and start the model. Headless use starts the engine directly and waits for completion. Supporting charts are not required for batch execution, but collector outputs can still be written.
+
+Use [Single Runs](../../user-guide/single-runs.md) for commands and [Start Class Implementation](../internals/start-class-implementation.md) for the full startup sequence. For repeated experiments use the existing [MultiRun class](multirun-class.md), not a new demo entry point.

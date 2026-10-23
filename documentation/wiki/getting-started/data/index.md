@@ -1,35 +1,35 @@
+---
+reading_navigation:
+  previous:
+    title: Environment Setup
+    url: getting-started/environment-setup/
+  next:
+    title: Running Your First Simulation
+    url: getting-started/first-simulation/
+---
+
 # Input Data
 
-SimPaths uses three types of data as input: 
+SimPaths needs a starting population, tax-benefit donor data, and model parameters. These serve different purposes and should be versioned together for each research application.
 
-1. The initial population to be evolved over time. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input/InitialPopulations/training)
-2. Donor populations used to impute the effects of tax and benefit policy. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training)
-3. Estimated parameters governing transition probabilities assumed by the model. [Available here](https://github.com/simpaths/SimPaths/tree/develop/input)
+| Input | Purpose | Where to start |
+| --- | --- | --- |
+| Initial population | Individuals, benefit units and households at the simulation's start year | [Initial Population (UK)](initial-population-uk.md) |
+| Tax-benefit donors | Precomputed UKMOD outcomes used to impute taxes and benefits | [Tax-Benefit Donors (UK)](tax-benefit-donors-uk.md) |
+| Parameters and targets | Regression coefficients, alignment targets, projections and scenario assumptions | [Model Parameterisation](../../overview/parameterisation.md) |
 
-Training data are provided for the first two of these data sets, while 'release' data are provided for the third data set.
+## Training and research data
 
-The model has been designed to draw the initial population from data reported by the UK Household Longitudinal Study (UKHLS). The UKHLS, (sometimes referred to as Understanding Society), is the successor to the British Household Panel Survey, and is the principal general-purpose panel survey administered in the UK. Multiple initial populations are derived from the UKHLS, corresponding to different years of data reported by the survey (from 2011 to 2017), and used for model validation. The donor populations for tax and benefit imputations are derived from UKMOD and are based on data reported by the Family Resources Survey (FRS). These data include a wide range of benefit unit characteristics in addition to tax and benefit payments. SimPaths imputes tax and benefit payments from these data by matching simulated individuals to individuals described by donor populations. Parameters for the UK have been estimated on UKHLS data, Waves 1 to 8, and FRS (labour supply and social care, various years). 
+The repository includes [initial-population training data](https://github.com/simpaths/SimPaths/tree/develop/input/InitialPopulations/training) and [donor training data](https://github.com/simpaths/SimPaths/tree/develop/input/EUROMODoutput/training). Use these with the [first-simulation guide](../first-simulation.md) to check the installation. Training results are not suitable for substantive analysis.
 
-Training data are provided for the initial population (1) and the donor populations (2) because these data sources are drawn from publicly available sources that are subject to limitations by the respective data providers. The following sections describe how to generate 'release' data for these two data sets.
+UK research populations are derived from Understanding Society (UKHLS), with additional sources including the Wealth and Assets Survey. Tax-benefit donors are produced with UKMOD using licensed survey inputs. Access conditions apply to the underlying data and derived records; do not upload restricted data or outputs to the public repository.
 
+Use data releases supported by the compilation scripts for your code revision. A newer survey release is not automatically compatible with an older pipeline.
 
-# 2. Obtain data for the initial population (for the UK) 
+## Obtain data for the initial population {#2-obtain-data-for-the-initial-population}
 
-In addition to training data, the model comes supplied with a set of Stata do files that have been written to extract input data from the UKHLS. These do files can be found in the model directory: `SimPaths/input/InitialPopulations/compile/`. 
+Follow [Initial Population (UK)](initial-population-uk.md) for access, compilation and setup. The [Repository Guide](../../developer-guide/repository-guide.md#data-pipeline-reference) explains the pipeline stages and estimation inputs.
 
-1. Obtain the most recent version of the UKHLS survey [UK data service](https://ukdataservice.ac.uk/) (SN6614, in STATA's tab format). Further to this, you need to obtain the most recent version of the Wealth and Assets Survey (WAS) (SN7215, in STATA's tab format).
-2. Use Stata to open file 00_master.do, and edit global variables at the top of the file, save and run.
-3. Copy the csv files generated following (2) to model directory: `SimPaths/input/InitialPopulations/`.
-4. Run SimPathsStart, and select option "Load new input data for starting populations" from the Start-up Options window.
+## Obtain data for tax-benefit donors {#3-obtain-data-for-tax-benefit-donors}
 
-
-
-# 3. Obtain data for tax-benefit donors (for the UK)
-
-SimPaths is designed to read in data describing tax-benefit payments generated by UKMOD.
-
-1. Obtain a copy of the most recent version of UKMOD from the [CeMPA website](https://www.microsimulation.ac.uk/ukmod/access/).
-2. Obtain the most recently available **Pooled 3-year FRS datasets for regional analysis ('b' datasets)** of input data provided for UKMOD using the FRS/LCF-based input data request form as described on the CeMPA website.
-3. Run desired system years described by (1) UKMOD, using the (2) "b" series dataset - note that the same input data set should be used for all system years. System runs can be performed directly in UKMOD or calling UKMOD from STATA, R, or Python using the respective connectors.
-4. Copy the files generated following (3) to model directory: `SimPaths/input/EUROMODoutput/`. Please note that it is required to provide UKMOD output files which include the base price year used by SimPaths (currently 2015). If no UKMOD output file is provided for the base price year, the initial database setup will fail.
-5. Run SimPathsStart, and selection option "Load new input data for tax and benefit systems" from the Start-up Options window.
+Follow [Tax-Benefit Donors (UK)](tax-benefit-donors-uk.md) to prepare compatible policy-year outputs. Running UKMOD requires Windows; SimPaths can read the resulting precomputed files on other supported platforms.
