@@ -74,9 +74,9 @@ Consequently, overlap between two separate outcome intervals is not a test of th
 
 ### Check coefficient resampling in your version
 
-In the [development revision checked for this guide](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/data/Parameters.java), `Parameters.bootstrapAll` is a `static final boolean` set to `true`. The parameter-loading routine resamples the coefficient maps covered by its bootstrap block before constructing the regression objects.
+Coefficient resampling is controlled by `Parameters.bootstrapAll`, a source-level constant currently set to `false`. When enabled, the parameter-loading routine resamples the coefficient maps covered by its bootstrap block before constructing the regression objects.
 
-This is a source-level setting in that revision, not a supported run-time YAML or command-line toggle. Adding `bootstrapAll: false` to a configuration file does not provide a reliable way to disable it. A fixed-coefficient comparison requires a separately built and checked version with the setting changed, or a later version that explicitly exposes this control.
+This setting is not exposed through YAML or the command line. Enabling coefficient resampling requires changing the constant and rebuilding the model. Check this setting in the executable used for the analysis before interpreting variation across runs.
 
 Not every input parameter is necessarily covered by that bootstrap block. Inspect the loader for the processes used in your analysis.
 
@@ -88,7 +88,9 @@ Not every input parameter is necessarily covered by that bootstrap block. Inspec
 4. Hold other scenario and innovation settings fixed unless varying them is part of the design.
 5. Check the effective settings and output files for each run, then summarise the distribution of the outcomes and policy differences you actually need.
 
-In the checked implementation, the model seeds its random generator before loading parameters. With coefficient resampling enabled, changing the seed can change both coefficients and simulation draws. Such runs should not be labelled as measuring only Monte Carlo variation.
+With coefficient resampling disabled, changing the seed does not resample the regression coefficients. Repeated runs with fixed inputs, coefficients and scenario settings can therefore be used to assess Monte Carlo variation.
+
+If coefficient resampling is enabled, changing the seed can change both coefficients and simulation draws, because the model seeds its random generator before loading parameters. Those runs combine parameter uncertainty with Monte Carlo variation. Separating the two requires an experiment that holds each coefficient draw fixed across multiple stochastic replications; changing the run seed alone does not provide that separation.
 
 For scenario comparisons, using matched seeds can help comparisons, but does not guarantee identical random events if scenarios change the order or number of draws. Verify the comparison design and document what is paired.
 
