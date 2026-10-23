@@ -72,7 +72,6 @@ plugins:
       lang: en
 
 hooks:
-  - documentation/scripts/site_version.py
   - documentation/scripts/code_highlighting.py
 
 markdown_extensions:
