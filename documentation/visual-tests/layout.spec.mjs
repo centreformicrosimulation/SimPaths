@@ -210,8 +210,8 @@ test("audited guides expose the checked specifications and usable examples", asy
   await expect(page.locator("article pre")).not.toHaveCount(0);
 
   await page.goto("/user-guide/uncertainty-analysis/");
-  await expect(page.locator("article")).toContainText("static final boolean");
-  await expect(page.locator("article")).toContainText("not a supported run-time YAML");
+  await expect(page.locator("article")).toContainText("source-level constant currently set to false");
+  await expect(page.locator("article")).toContainText("not exposed through YAML or the command line");
 
   await page.goto("/jasmine-reference/querying-database/");
   await expect(page.locator("article table tbody tr")).toHaveCount(3);
