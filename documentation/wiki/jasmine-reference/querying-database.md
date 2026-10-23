@@ -1,72 +1,51 @@
 # Querying the Database
 
-# 1. Querying the database at run-time
+SimPaths uses JAS-mine and Hibernate to map Java entities to database records. Distinguish the input and donor databases from the optional databases written by a simulation.
 
-The database can be queried at runtime to provide inputs for the simulation. The representation of the sample population is fully adherent to the standards used in IT systems to store entities and relations between entities. Consequently, population modelling can be performed according to standard strategies for modelling object classes and their persistence on database. In particular, ORM requires relationships between objects to be implicitly modelled. The ORM engine translates these relationships into foreign keys in the relational model.
+## Querying relationships at run time {#1-querying-the-database-at-run-time}
 
-erDiagram
-    FIRM ||--o{ WORKER : employs
-    
-    FIRM {
-        int firm_id PK
-        string name
-        string address
-        string industry
-        date founded_date
-        int employee_count
-    }
-    
-    WORKER {
-        int worker_id PK
-        int firm_id FK
-        string first_name
-        string last_name
-        date birth_date
-        string position
-        decimal salary
-        date hire_date
-    }
+The model's population hierarchy is:
 
-For instance, in the Entity/Relationship (E/R) diagram above, only the firm_id field containing the primary key of the firm table requires specification. In case all records concerning workers related to one firm need to be obtained, without using ORM a specific SQL query should be created, then run, to extract and insert data in an object intended to represent the connected entity. When using ORM the persistence engine is simply requested to get object of the *Firm* class corresponding to the desired identifier and the object's relational graph is loaded automatically, including related workers (objects of the *Worker* class). For example using the notation `worker.getFirm().getName()` will read from the database the name of the company where a worker is employed without the need of defining any SQL query, not differently from what one would do for reading the same information from the *Firm* object itself, accessed through a specific pointer in the Worker class.
+| Entity | Relationship |
+| --- | --- |
+| `Household` | Contains benefit units |
+| `BenefitUnit` | Belongs to a household and contains persons |
+| `Person` | Belongs to a benefit unit |
 
-Since Java 5 annotations were introduced to represent attributes/adjectives assigned to specific parts of code as classes or properties. Annotations decorate the elements they are associated to, in the sense that they attribute meanings that can be used to add collateral information to objects.
-
-Annotations make the definition and the use of coefficients tables more powerful and flexible. For example, a table is created to represent and manage the mapping of two characteristics –minimum retirement age and expected residual lifetime– for each sex-age group of the simulated population. The table contains four fields: age, sex, retirementAge and residualLifeTime. These fields have in fact different semantics: the first two correspond to research keys in a key-value dictionary, while the last two represent specific values.
-
-ORM allows the construction of a Java class, for example called CoefficientA, that contains the four properties corresponding to the table fields; their values can then be read by the ORM engine. In order to populate the dictionary automatically the properties of the CoefficientA class can be "decorated" using the JAS-mine ad-hoc CoefficientMapping annotation.
+For an existing `Person person`, navigation through the mapped relationships looks like this:
 
 ```java
-@Entity   
-@CoefficientMapping(keys={"age", "sex"},values={"retirementAge", "residualLifetime"})   
-public class CoefficientA {   
-    private Integer age;   
-    private Sex sex;   
-    private Integer retirementAge;   
-    private Double residualLifeTime;   
-    […]   
-}
+BenefitUnit benefitUnit = person.getBenefitUnit();
+Household household = benefitUnit.getHousehold();
 ```
 
-The Entity annotation informs the ORM engine that the CoefficientA class corresponds to a table in the database which bears the same name as the class and contains the fields corresponding to the object's properties. A JAS-mine library will then request the ORM engine to read the data contained in the table and to include them in a key-value structure that can be easily queried using an instruction like the following:
+See [Person](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/model/Person.java), [BenefitUnit](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/model/BenefitUnit.java) and [Household](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/model/Household.java) for the mappings.
+
+Do not assume that traversing an object graph always loads every related record. Fetch behaviour depends on the relationship annotation and persistence-session state. In-memory simulation state can also differ from the last persisted snapshot.
+
+The entity classes use `PanelEntityKey` composite keys. When writing queries, inspect the actual schema and time/run keys instead of assuming that a single numeric ID uniquely identifies a record across all snapshots.
+
+## Reading coefficients
+
+Most regression parameters are read from Excel rather than queried from a population table. For example, the parameter loader uses:
 
 ```java
-MultiKeyCoefficientMap coefficientA = DatabaseUtils.loadCoefficientMap(CoefficientA.class);   
-int retirementAge = coefficientA.get(30, Sex.Female, "retirementAge");   
-double residualLifetime = coefficientA.get(30, Sex.Female, "residualLifetime");
+ExcelAssistant.loadCoefficientMap(
+    Parameters.getInputDirectory() + "reg_health.xlsx",
+    "H1",
+    1
+);
 ```
 
-where the first two parameters of the get function are the two keys and the last two (retirementAge, residualLifetime) represent the name of the value variable.
+The workbook and worksheet names are part of the interface between estimation and simulation. See [Model Parameterisation](../overview/parameterisation.md) and [Regression Library](regression-library.md) before changing their structure.
 
-This method for accessing parameter tables may appear convoluted and cumbersome. The same result can be achieved more rapidly by placing the map values in an excel sheet.
+## Inspecting a saved database {#2-inspecting-the-database-before-or-after-a-simulation-has-completed}
 
-The parameters are then loaded using a specific JAS-mine interface:
+1. Identify the database from the run configuration and logs. `input/input.mv.db` holds prepared initial-population and tax-benefit donor tables; output databases depend on persistence and collector settings.
+2. Stop the process using the database before opening it separately. Work on a copy for inspection so that research inputs and saved outputs remain intact.
+3. Use an H2-compatible client and driver matching the project's dependency. Inspect the available tables and columns before running queries.
+4. Use read-only queries. Do not edit IDs, relationships or categories to bypass a setup error.
 
-```java
-MultiKeyCoefficientMap coefficientA = ExcelAssistant.loadCoefficientMap("input/coeffA.xls", "Sheet1", 2, 2);
-```
+A database may contain confidential microdata even when the model code is public. Do not upload it to a public issue or third-party query service.
 
-Only the number of key columns and "value" columns need to be specified. Clearly this process is much easier but it does not allow for significant parameter typification (since Excel is not as rigid as a database). Moreover, it is more error prone as accidental modifications to the Excel sheet might lead to incorrect parameter loading.
-
-# 2. Inspecting the database before or after a simulation has completed
-
-The user may wish to access the input database before or simulation has been executed or afterwards to view the output database. A simple way to inspect the database is via the 'Database explorer', which can be opened via the 'Tools' tab in menu of the JAS-mine Graphical User Interface (GUI). Another slightly more complicated way involves downloading and installing Hibernate's H2 Console and specifying the full location of the database to be inspected. Both methods open a web browser interface that allows the data from the database to be accessed via SQL-style commands.
+[Multiple Runs](../user-guide/multiple-runs.md) explains population-persistence options. [Saving outputs](saving-outputs.md) describes the separate collector output facilities.

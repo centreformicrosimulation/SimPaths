@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{# One classification source for the first paint and instant navigation. #}
+{% macro page_classes(page) -%}
+  {%- set state = namespace(classes=[]) -%}
+  {%- if page -%}
+    {%- if page.is_homepage %}{% set state.classes = state.classes + ["sp-page-home"] %}{% endif -%}
+    {%- if page.url == "documentation/" %}{% set state.classes = state.classes + ["sp-page-docs-index"] %}{% endif -%}
+    {%- if page.meta.layout == "directory" or page.url == "documentation/" %}{% set state.classes = state.classes + ["sp-page-directory"] %}{% endif -%}
+    {%- if page.url == "funding/" %}{% set state.classes = state.classes + ["sp-page-funding"] %}{% endif -%}
+    {%- if page.url == "overview/roadmap/" %}{% set state.classes = state.classes + ["sp-page-roadmap"] %}{% endif -%}
+    {%- if page.url == "validation/" %}{% set state.classes = state.classes + ["sp-page-validation"] %}{% endif -%}
+    {%- if page.url in ["research/", "funding/", "validation/"] %}{% set state.classes = state.classes + ["sp-no-section-nav"] %}{% endif -%}
+    {%- set visible_toc = page.toc -%}
+    {%- set first_heading = visible_toc | first -%}
+    {%- if first_heading and first_heading.level == 1 %}{% set visible_toc = first_heading.children %}{% endif -%}
+    {%- if not visible_toc or (page.meta.hide and "toc" in page.meta.hide) %}{% set state.classes = state.classes + ["sp-no-toc"] %}{% endif -%}
+    {%- if page.url.startswith("overview/") %}{% set state.classes = state.classes + ["sp-tab-model"] %}{% endif -%}
+    {%- if page.url.startswith(("documentation/", "getting-started/", "user-guide/", "developer-guide/", "jasmine-reference/")) %}{% set state.classes = state.classes + ["sp-tab-documentation"] %}{% endif -%}
+  {%- endif -%}
+  {{- state.classes | join(" ") -}}
+{%- endmacro %}
+
+{# Main navigation lives inside the header. #}
+{% block tabs %}{% endblock %}
+
+{% block content %}
+  {% include "partials/version-selector.html" %}
+  <span data-sp-page-classes="{{ page_classes(page) }}" hidden></span>
+  {% set trail = namespace(items=[]) %}
+  {% if page and not page.is_homepage %}
+    {% for ancestor in page.ancestors | reverse %}
+      {% set first = ancestor.children | first %}
+      {% if first and first.is_page and first.file.name == "index" %}
+        {% if first.url != page.url %}
+          {% set trail.items = trail.items + [{"title": ancestor.title, "url": first.url}] %}
+        {% endif %}
+      {% else %}
+        {% set trail.items = trail.items + [{"title": ancestor.title, "url": none}] %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  {% if trail.items %}
+    <nav class="sp-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="sp-breadcrumbs__list">
+        {% for item in trail.items %}
+          <li>{% if item.url is not none %}<a href="{{ item.url | url }}">{{ item.title }}</a>{% else %}<span>{{ item.title }}</span>{% endif %}</li>
+        {% endfor %}
+      </ol>
+    </nav>
+  {% endif %}
+  {{ super() }}
+  {% if page and page.url == 'developer-guide/internals/api/' %}<p><a href="{{ 'api/index.html' | url }}">Open the API for {{ config.extra.docs_version.channel }}</a></p>{% endif %}
+  {% include "partials/page-navigation.html" %}
+{% endblock %}
+
+{% block extrahead %}
+  <script src="{{ 'assets/js/version-selector.js' | url }}"></script>
+  {{ super() }}
+  {% if config.extra.docs_version.channel == 'develop' %}<meta name="robots" content="noindex, nofollow">{% endif %}
+  <meta property="og:site_name" content="{{ config.site_name | e }}">
+  {% if page and page.is_homepage %}
+  <script type="application/ld+json">
+    {{ {"@context": "https://schema.org", "@type": "WebSite", "name": config.site_name, "url": config.site_url} | tojson }}
+  </script>
+  {% endif %}
+  <link rel="preload" href="{{ 'assets/fonts/Inter.woff2' | url }}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ 'assets/images/homepage-hero-logo.svg' | url }}" as="image" type="image/svg+xml">
+  <script>
+    (() => {
+      const classes = {{ page_classes(page) | string | tojson }}.split(/\s+/).filter(Boolean);
+      document.documentElement.classList.add(...classes);
+    })();
+  </script>
+{% endblock %}

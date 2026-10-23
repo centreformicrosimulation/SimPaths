@@ -1,0 +1,18 @@
+<footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      {% include "partials/copyright.html" %}
+      <label class="sp-theme-control" hidden>
+        <span>Theme</span>
+        <select aria-label="Colour theme">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+      {% if config.extra.social %}
+        {% include "partials/social.html" %}
+      {% endif %}
+    </div>
+  </div>
+</footer>

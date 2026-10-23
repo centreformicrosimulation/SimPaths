@@ -1,0 +1,38 @@
+name: Documentation checks
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: pip install -r documentation/requirements.txt
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Build selected branch and matching API
+        env:
+          TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
+        run: bash documentation/scripts/build-version.sh "$TARGET_BRANCH" "$RUNNER_TEMP/site"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser regression checks
+        working-directory: documentation/visual-tests
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm test

@@ -1,12 +1,41 @@
+---
+layout: directory
+hide:
+  - toc
+---
+
 # Developer Guide
 
-SimPaths is a Java project based on the JAS-mine simulation libraries.
+<div class="dev-guide-intro">
+  <div class="dev-guide-intro__copy">
+    <p>SimPaths is a Java project based on the JAS-mine simulation libraries.</p>
+    <p>JAS-mine extends Java functionalities and provides an architectural template for dynamic microsimulation and agent-based models, aimed at improving the clarity and transparency of the model structure.</p>
 
-![JAS-mine logo](https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png)
+  </div>
+</div>
 
-JAS-mine extends Java functionalities and provide an architectural template for dynamic microsimulation and agent-based models, aimed at improving the clarity and transparency of the model structure.
+<nav class="sp-section-routes" aria-label="Developer guide routes">
+  <a href="repository-guide/"><strong>Repository Guide</strong><span>Locate the implementation, input files and estimation pipeline.</span></a>
+  <a href="jasmine/"><strong>JAS-mine Architecture</strong><span>Understand the project structure, event schedule and simulation entry points.</span></a>
+  <a href="internals/"><strong>SimPaths Internals</strong><span>Explore the key classes and their implementation in SimPaths.</span></a>
+  <a href="how-to/"><strong>How-To Guides</strong><span>Introduce variables, expose GUI parameters and run batch simulations.</span></a>
+</nav>
 
-New developers of SimPaths are strongly recommended to familiarise themselves with the JAS-mine architecture, and in particular:
+## Start here
+
+1. Follow [Environment Setup](../getting-started/environment-setup.md) and run the [training example](../getting-started/first-simulation.md).
+2. Use the [Repository Guide](repository-guide.md) to locate the implementation, input files and estimation pipeline.
+3. Read [The Model and the Schedule](jasmine/model-and-schedule.md) before changing a process or its timing.
+4. Follow [Introduce a New Variable](how-to/new-variable.md) for changes to agent state, or [Add Parameters to the GUI](how-to/add-gui-parameters.md) for interactive controls.
+5. Use [Working in GitHub](working-in-github.md) to prepare a tested, reviewable contribution.
+
+The principles below explain the underlying JAS-mine architecture. For library-level reference material, consult:
+
+<div class="dev-guide-intro__brand">
+  <span class="dev-guide-intro__eyebrow">Built on</span>
+  <img src="https://www.microsimulation.ac.uk/wp-content/uploads/2026/01/LOGO_NEW_TEXT.png" alt="JAS-mine logo" loading="lazy" decoding="async">
+</div>
+
 * [JAS-mine GitHub repository](https://github.com/jasmineRepo)
 * [JAS-mine core API](https://raw.githack.com/jasmineRepo/JAS-mine-core/master/microsim-core/doc/index.html)
 * [JAS-mine GUI API](https://raw.githack.com/jasmineRepo/JAS-mine-gui/master/microsim-gui/doc/index.html)
@@ -16,28 +45,28 @@ New developers of SimPaths are strongly recommended to familiarise themselves wi
 ***
 
 ## 1. Guiding principles
-<details markdown>
-  <summary><b>Clarity</b></summary>  
+<details class="dev-guide-panel" markdown="1">
+  <summary>Clarity</summary>
 A clear distinction is made in JAS-mine between objects with a modelling content, which specify the structure of the simulation, and objects which perform useful but auxiliary tasks, from enumerating categorical variables to building graphical widgets, from creating filters for the collection of agents to computing aggregate statistics to be saved in the output database.
 
 JAS-mine extends the _Model-Observer_ paradigm introduced by the [Swarm](http://www.swarm.org/wiki/Main_Page) experience and introduces a new layer in simulation modelling, the _Collector_.
 
 * The **Model** deals mainly with specification issues, creating objects, relations between objects, and defining the order of events that take place in the simulation.
-* The **Collector **collects the data and compute the statistics both for use by the simulation objects and for post-mortem analysis of the model outcome, after the simulation has completed.
+* The **Collector** collects the data and compute the statistics both for use by the simulation objects and for post-mortem analysis of the model outcome, after the simulation has completed.
 * The **Observer** allows the user to inspect the simulation in real time and monitor some pre-defined outcome variables as the simulation unfolds.
 This three-layer methodological protocol allows for extensive re-use of code and facilitates model building, debugging and communication.
 
 Moreover, JAS-mine envisages **strict separation between the code and the data**, with all parameters and input tables stored either in an input database or in specific MS Excel files. The regression package provides tools for simulating outcomes from standard regression models (OLS, probit/logit, multinomial, ordered and generalised ordered models): in particular, there is no need to specify the variables that enter a regression model, as they are directly read from the data files. This greatly facilitates exploration of the parameter space, testing different econometric specifications, and scenario analysis.
 </details>
 
-<details markdown>
-  <summary><b>Transparency</b></summary>  
+<details class="dev-guide-panel" markdown="1">
+  <summary>Transparency</summary>
 
 Transparent coding for transparent modelling is achieved by
 
 1. enforcing a strict adherence to the **open source** paradigm, which makes it less of a black-box with respect to proprietary software and encourages cooperative development of the platform by the community of users: all functions can be inspected and, if necessary, modified or extended.
 
-2. allowing the user to choose from a wide range of classes and interfaces which **extend the standard Java language**, rather than providing an ad-hoc grammar and syntax. but  The JAS-mine libraries therefore provide open tools to “manufacture” a simulation model, making use whenever possible of solutions already available in the software development community (external functions can also be easily added as plug-ins). This also ensures a maximum amount of flexibility in model building. 
+2. allowing the user to choose from a wide range of classes and interfaces which **extend the standard Java language**. The libraries use Java rather than a separate modelling language, so model developers can also draw on the wider Java ecosystem.
 </details>
 
 ***
@@ -45,8 +74,8 @@ Transparent coding for transparent modelling is achieved by
 ## 2. Architecture
 SimPaths shares with all JAS-mine projects some architectural choices.
 
-<details markdown>
-  <summary><b> Model-Collector-Observer</b></summary> 
+<details class="dev-guide-panel" markdown="1">
+  <summary>Model-Collector-Observer</summary>
 
 The [Swarm protocol](https://www.swarm.org/wiki/Swarm_main_page) for agent-based platforms architecture recommends splitting the simulation into an internal *Model* and an external *Observer*. These two aspects of the artificial world should remain markedly separate.
 
@@ -66,15 +95,15 @@ JAS-mine allows multiple *Models* (and multiple *Collectors* and *Observers*) to
 </details>
 
 
-<details markdown>
-  <summary><b> The JAS-mine engine</b></summary> 
+<details class="dev-guide-panel" markdown="1">
+  <summary>The JAS-mine engine</summary>
 
 The core of the JAS-mine toolkit is represented by the simulation engine. It is based on the standard discrete-event simulation paradigm, which allows to manage the time with high flexibility and multi-scale perspective.
 
 The JAS-mine engine is based on the scheduler, which handles all the events in the simulation. The scheduler is a “singleton” (in software engineering, the singleton pattern is a design pattern that restricts the instantiation of a class to one object), which means that all the agents in the simulation share the same scheduler. Events can be scheduled in advance (for instance once every simulation period) or dynamically, by the agents themselves (for instance, job termination is scheduled upon hiring). This allows to implement both continuous-time and discrete-time simulations.
 
-<details markdown>
-<summary><b>🔴 FOCUS: Time in simulation</b></summary>
+<details class="dev-guide-focus" markdown="1">
+<summary>Focus: Time in simulation</summary>
 
 The abstract representation of a continuous phenomenon in a simulation model requires that all events be presented in discrete terms.
 
@@ -89,15 +118,15 @@ The event list orders the events and the simulation is performed by extracting t
 
 </details>
 
-<details markdown>
-  <summary><b> Input-Output communication</b></summary> 
+<details class="dev-guide-panel" markdown="1">
+  <summary>Input-Output communication</summary>
 
 Data management is a major factor to be weighed in for the creation of a simulation tool. Building on the vast number of software solutions available, JAS-mine allows the user to separate data representation and management from the implementation of processes and behavioral algorithms.
 
 One distinguishing feature of the platform lies in the integration with relational database management systems (RDBMS) through ad-hoc Java libraries. The management of input data persistence layers and simulation results in JAS-mine is performed using standard database management tools, and the platform takes care of the automatic translation of the relational model of the database into the object-oriented simulation framework thanks to an ORM layer.
 
-<details markdown>
-<summary><b>🔴 FOCUS: Object-Relational Mapping (ORM)</b></summary>
+<details class="dev-guide-focus" markdown="1">
+<summary>Focus: Object-Relational Mapping (ORM)</summary>
 
 The software paradigm that is best suited to represent and manipulate population data is object-oriented programming (OOP). On the other hand, input and output data (especially in complex projects) are best stored in a relational database. Unfortunately, database relational modelling is less intuitive than OOP and requires a specific language (SQL) to retrieve and modify data.
 
@@ -122,5 +151,3 @@ On the other hand, the power of modern RDBMS make it feasible to keep track of a
 
 Finally, keeping data analysis conceptually distinct from data production further enhances the brevity, transparency and clarity of the code.
 </details>
-
-

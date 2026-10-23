@@ -1,54 +1,33 @@
 # Collection Filters
 
-The most basic way to filter a collection (say, a list of workers) is by iterating over its elements and check whether the filtering condition (say, whether they are employed) applies:
+Filters select the agents that a process or statistic should consider. SimPaths uses Java collections and streams alongside reusable filters in [simpaths.data.filters](https://github.com/simpaths/SimPaths/blob/b223738b9cdf1d814cc3c6f09b04bc4930d3c667/src/main/java/simpaths/data/filters).
+
+## Filtering a SimPaths population
+
+For a `SimPathsModel model`, this example selects people aged 65 or over from the current population:
+
 ```java
-List<Worker> employedWorkerList = new ArrayList<Worker>(); 
-for (Worker w : workerList)
-    if ( w.getEmployed() ) employedWorkerList.add(w);
+List<Person> olderPeople = model.getPersons().stream()
+    .filter(person -> person.getDemAge() >= 65)
+    .collect(Collectors.toList());
 ```
 
-Collections can also be filtered without the iteration, by using the Apache [CollectionUtils](https://commons.apache.org/proper/commons-collections/javadocs/api-3.2.1/index.html?org/apache/commons/collections/CollectionUtils.html) and [Predicate](https://commons.apache.org/proper/commons-collections/javadocs/api-3.2.1/index.html?org/apache/commons/collections/Predicate.html) libraries:
-```java
-import org.apache.commons.collections.CollectionUtils;
-```
-```java
-import org.apache.commons.collections.Predicate;
-```
+The example requires imports for `Person`, `List` and `Collectors`. Age 65 is an example selection criterion, not a universal threshold for SimPaths processes. Use the eligibility rule defined by the relevant module.
 
-and applying a JAS-mine filtering class implementing the `ICollectionFilter` interface, as follows:
-```java
-List<Worker> employedWorkerList = new ArrayList<Worker>(); 
-CollectionUtils.select(
-    workerList, filter, employedWorkerList
-);
-```
+The list contains references to the selected agents, not copies. Changing an agent through the list changes the same object held by the model. Membership, however, is fixed when the stream is collected.
 
-where the filter is implemented with the following *Closure:*
-```java
-new Predicate() {
-    public boolean evaluate(Object obj) {
-        Worker w = (Worker) obj;
-        return (w.getEmployed());
-    }
-}
-```
+## Keeping filters current
 
-**RMK:** At present, it is not possible to schedule an event for a filtered collection with an automatic evaluation of the filter at each scheduled time. That is,
-```java
-EventGroup eventGroup = new EventGroup();
-eventGroup.addCollectionEvent(CollectionUtils.select(workerList, new Predicate(){...}), 
-    Agent.Process.DoSomething);
-```
+A list built at startup does not automatically gain people when they become eligible, or lose them when they leave the population. Recompute a selection when it is needed, or update the existing collection before the scheduled process that uses it.
 
-filters the list at t=0 -when the schedule is built- based on the characteristics of the objects in the list at t=0. If the filter has to be reevaluated at each time the call for the event is broadcasted, this must be done as a separate process, as with
-```java
-eventGroup.addEvent(this, Processes.UpdateEmployedWorkerList);
-eventGroup.addCollectionEvent(employedWorkerList, Agent.Processes.DoSomething);
-```
+This distinction matters when scheduling collection events: a scheduled event may retain the collection object it was given. Reassigning a Java variable to a new list does not necessarily update that event's target.
 
-Starting with Java 8 (which requires Eclipse version Luna or later), it is possible to simplify further by using a Stream. A Stream is a data structure that is computed on-demand. A Stream doesn't store data, it operates on the source data structure (collection and array) and produce pipelined data that we can use and perform specific operations. As such, we can create a Stream from the list and filter it based on a condition:
-```java
-List<Worker> employedWorkerList = workerList.stream().filter(
-    w -> w.getEmployed()).collect(Collectors.toList()
-);
-```
+Before adding a filter, check:
+
+1. Which agent level the process uses: person, benefit unit or household.
+2. Whether eligibility depends on current or lagged state.
+3. How missing values and sample exits are handled.
+4. Whether the statistic needs survey weights as well as selection.
+5. When the selection is refreshed relative to the process and output schedule.
+
+See [The Model and the Schedule](../developer-guide/jasmine/model-and-schedule.md) and [Statistical Package](statistical-package.md) for the surrounding lifecycle.
