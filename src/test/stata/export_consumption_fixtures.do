@@ -2,6 +2,7 @@
 * Export Stata predictions for a deterministic synthetic consumption test grid.
 * No observed LCFS rows are read or exported by this script.
 * Arguments: saved m4 estimates (.ster), then destination fixture CSV.
+* See validation/consumption/README.md for the shared Drive estimation workflow.
 ********************************************************************************
 args estimates_file output_file
 if (`"`estimates_file'"'=="" | `"`output_file'"'=="") {
