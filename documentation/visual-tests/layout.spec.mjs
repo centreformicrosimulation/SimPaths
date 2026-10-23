@@ -222,7 +222,7 @@ test("audited guides expose the checked specifications and usable examples", asy
   await expect(page.locator("article")).not.toContainText("CeMPA WP");
 
   await page.goto("/overview/");
-  await expect(page.locator('.model-overview__components a[href*="/modules/"]')).toHaveCount(10);
+  await expect(page.locator('.model-overview__components a[href*="/modules/"]')).toHaveCount(11);
   await expect(page.locator('article a[href$="/modules/statistical-display/"]')).toHaveCount(1);
   await expect(page.locator('a[href*="overview/simulated-modules/"]')).toHaveCount(0);
 });
@@ -840,7 +840,7 @@ test("homepage keeps its explanation together and model overview links directly 
   }
   await page.goto('/overview/');
   await expect(page.locator('article h1')).toHaveText(/^Model overview(?:¶)?$/);
-  await expect(page.locator('.model-overview__components a[href*="/modules/"]')).toHaveCount(10);
+  await expect(page.locator('.model-overview__components a[href*="/modules/"]')).toHaveCount(11);
   await expect(page.locator('article')).not.toContainText('These pages document the UK model');
   await expect(page.locator('.model-overview__topics')).toHaveCount(0);
   await expect(page.locator('body')).toHaveClass(/sp-tab-model/);
